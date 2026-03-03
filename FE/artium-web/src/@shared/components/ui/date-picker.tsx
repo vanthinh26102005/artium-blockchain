@@ -1,0 +1,93 @@
+import { useMemo } from 'react'
+import { CalendarIcon, XIcon } from 'lucide-react'
+import _ from 'lodash'
+
+// @shared - lib
+import { cn } from '@shared/lib/utils'
+// @shared - constants
+import { HUMAN_READABLE_DATE_FORMAT } from '@shared/constants/dateTime'
+// @shared - utils
+import { dateFormat } from '@shared/utils/datetime'
+
+// local
+import { Calendar } from './calendar'
+import { Popover, PopoverContent, PopoverTrigger } from './popover'
+
+export function DatePicker({
+  className,
+  mode = 'single',
+  value,
+  onChange,
+  clearable = false,
+  ...props
+}: {
+  className?: string
+  mode: string
+  value: any
+  onChange: (newValue?: any) => void
+  clearable?: boolean
+}) {
+  // -- display value --
+  const displayValue = useMemo(() => {
+    if (!value) return value
+
+    if (mode === 'single') return dateFormat(value, HUMAN_READABLE_DATE_FORMAT)
+    if (mode === 'multiple')
+      return _.map(_.take(value || [], 2), (date: Date) =>
+        dateFormat(date, HUMAN_READABLE_DATE_FORMAT),
+      ).join(', ')
+    if (mode === 'range')
+      return `${dateFormat(value.from, HUMAN_READABLE_DATE_FORMAT)} - ${dateFormat(
+        value.to,
+        HUMAN_READABLE_DATE_FORMAT,
+      )}`
+
+    throw new Error('Unhandled mode')
+  }, [mode, value])
+
+  // -- placeholder --
+  const placeholder = useMemo(() => {
+    if (mode === 'single') return 'Pick a date'
+    if (mode === 'multiple') return 'Pick date(s)'
+    if (mode === 'range') return 'Pick a range'
+
+    throw new Error('Unhandled mode')
+  }, [mode])
+
+  return (
+    <Popover modal={true}>
+      <PopoverTrigger asChild>
+        <div
+          className={cn(
+            'focus:ring-ring flex w-full items-center justify-between rounded-md border px-[15px] py-[11px] text-sm font-medium shadow-sm transition-colors focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+            className,
+          )}
+        >
+          <div className="flex items-center gap-2 truncate text-left">
+            <CalendarIcon className="text-muted-foreground h-4 w-4 shrink-0" />
+            {displayValue ? (
+              <span className="truncate">{displayValue}</span>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+          </div>
+
+          {clearable && value && (
+            <XIcon
+              className="text-muted-foreground hover:text-foreground ml-2 h-4 w-4 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation()
+                onChange(undefined)
+              }}
+            />
+          )}
+        </div>
+      </PopoverTrigger>
+
+      <PopoverContent className="w-auto p-2" align="start">
+        {/* @ts-ignore */}
+        <Calendar {...props} mode={mode} selected={value} onSelect={onChange} />
+      </PopoverContent>
+    </Popover>
+  )
+}

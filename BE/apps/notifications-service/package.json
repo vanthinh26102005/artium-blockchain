@@ -1,0 +1,27 @@
+{
+  "name": "@backend/notifications-service",
+  "version": "1.0.0",
+  "main": "src/main.ts",
+  "private": true,
+  "scripts": {
+    "start": "nest start --webpack --webpackPath webpack-hmr.config.js --watch",
+    "start:dev": "nest start --watch",
+    "build": "nest build"
+  },
+  "dependencies": {
+    "@nestjs-modules/mailer": "^1.11.0",
+    "@nestjs/apollo": "^12.1.0",
+    "@nestjs/common": "^11.1.0",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/cqrs": "^11.0.1",
+    "@nestjs/graphql": "^12.1.0",
+    "@nestjs/typeorm": "^11.0.0",
+    "@nestjs/core": "^11.1.0",
+    "@nestjs/swagger": "^11.2.3",
+    "@nestjs/schedule": "^4.0.0",
+    "@golevelup/nestjs-rabbitmq": "^4.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "uuid": "^9.0.0"
+  }
+}

@@ -1,0 +1,85 @@
+// internal - components
+import { Metadata } from '@/components/SEO/Metadata'
+
+// @domains - profile
+import { ProfileMomentsMasonry } from '@domains/profile/components/ProfileMomentsMasonry'
+import { ProfileHero } from '@domains/profile/components/ProfileHero'
+import { ProfileTabs } from '@domains/profile/components/ProfileTabs'
+import { PROFILE_TABS } from '@domains/profile/constants/profileTabs'
+import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
+import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
+import { mapProfileMomentToMomentCard } from '@domains/profile/utils/profileApiMapper'
+import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+
+type ProfileMomentsPageViewProps = {
+  username?: string | string[]
+}
+
+export const ProfileMomentsPageView = ({ username: _username }: ProfileMomentsPageViewProps) => {
+  const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
+  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+    username: usernameFromRoute,
+  })
+  const profileData = useProfileDraftData(baseData)
+  const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Moments`
+  const baseHref = `/profile/${resolvedUsername}`
+  const useProfileBaseHref = profileData.moments.length > 0
+  const moments = profileData.moments.map((moment) =>
+    mapProfileMomentToMomentCard(moment, profileData.user),
+  )
+  const authUser = useAuthStore((state) => state.user)
+  const isAuthenticated = Boolean(authUser?.id)
+  const isOwner = isAuthenticated && sellerProfile && authUser?.id === sellerProfile.userId
+
+  return (
+    <>
+      <Metadata title={pageTitle} />
+      <div className="space-y-4">
+        <div className="container">
+          {isLoading ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+              Loading profile...
+            </div>
+          ) : error ? (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-600">
+              {error}
+            </div>
+          ) : (
+            <ProfileHero
+              user={profileData.user}
+              stats={profileData.stats}
+              userId={sellerProfile?.userId}
+              isOwner={isOwner || false}
+            />
+          )}
+        </div>
+        <div className="container">
+          <ProfileTabs
+            tabs={PROFILE_TABS}
+            activeTab="moments"
+            tabHrefs={{
+              overview: baseHref,
+              artworks: `${baseHref}/artworks`,
+              moments: `${baseHref}/moments`,
+              moodboards: `${baseHref}/moodboards`,
+            }}
+          />
+        </div>
+        <div className="container py-6">
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
+                Moments
+              </h2>
+              <p className="text-sm text-slate-500">All moments by this artist</p>
+            </div>
+          </div>
+          <ProfileMomentsMasonry
+            moments={moments}
+            hrefBase={useProfileBaseHref ? `${baseHref}/moments` : undefined}
+          />
+        </div>
+      </div>
+    </>
+  )
+}

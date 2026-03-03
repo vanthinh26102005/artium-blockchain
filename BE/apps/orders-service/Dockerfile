@@ -1,0 +1,33 @@
+# Base image
+FROM node:20-slim AS base
+
+WORKDIR /app
+
+
+
+# Builder stage
+FROM base AS builder
+
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
+COPY apps/orders-service ./apps/orders-service
+COPY libs ./libs
+
+RUN yarn run build:orders
+
+
+
+# Production stage
+FROM node:20-slim AS production
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist/apps/orders-service ./dist/apps/orders-service
+
+
+
+EXPOSE 3006
+CMD ["node", "dist/apps/orders-service/main.js"]

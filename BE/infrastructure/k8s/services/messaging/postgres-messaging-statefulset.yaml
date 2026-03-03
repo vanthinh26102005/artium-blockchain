@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-messaging
+  namespace: dev
+  labels:
+    app: db-messaging
+spec:
+  clusterIP: None
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
+  selector:
+    app: db-messaging
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db-messaging
+  namespace: dev
+spec:
+  serviceName: db-messaging
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-messaging
+  template:
+    metadata:
+      labels:
+        app: db-messaging
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_USER
+              value: "messaging_user"
+            - name: POSTGRES_PASSWORD
+              value: "1"
+            - name: POSTGRES_DB
+              value: "messaging_db"
+            - name: TZ
+              value: "Asia/Ho_Chi_Minh"
+          volumeMounts:
+            - name: postgres_messaging_data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command:
+                - /usr/bin/pg_isready
+                - -U
+                - messaging_user
+                - -d
+                - messaging_db
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "768Mi"
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres_messaging_data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi

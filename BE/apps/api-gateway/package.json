@@ -1,0 +1,21 @@
+{
+  "name": "@backend/api-gateway",
+  "version": "0.0.1",
+  "description": "API Gateway for Artium microservices",
+  "main": "src/main.ts",
+  "private": true,
+  "scripts": {
+    "start": "nest start --webpack --webpackPath webpack-hmr.config.js --watch",
+    "start:dev": "nest start --watch",
+    "build": "nest build"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/microservices": "^11.1.9",
+    "@nestjs/swagger": "^11.2.1",
+    "class-validator": "^0.14.2",
+    "class-transformer": "^0.5.1"
+  }
+}

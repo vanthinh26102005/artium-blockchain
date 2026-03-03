@@ -1,0 +1,35 @@
+export type FormValues = {
+  avatarUrl: string
+  username: string
+  firstName: string
+  lastName: string
+  phoneNumber: string
+  addressLine1: string
+  addressLine2: string
+  district: string
+  province: string
+  country: string
+  postalCode: string
+  headline: string
+  biography: string
+  websiteUrl: string
+  instagram: string
+  twitter: string
+  profileCategories: string[]
+  roles: string[]
+  artisticVibes: string[]
+  artisticValues: string[]
+  artisticMediums: string[]
+  connectionAffiliations: string
+  connectionSeenAt: string
+  connectionCurrently: string
+  inspireVibes: string[]
+  inspireValues: string[]
+  inspireMediums: string[]
+  bankName: string
+  bankAccountHolder: string
+  bankAccountNumber: string
+  bankBranch: string
+  bankSwiftCode: string
+  bankAddress: string
+}

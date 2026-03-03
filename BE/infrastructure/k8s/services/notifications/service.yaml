@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifications-service
+  namespace: dev
+spec:
+  type: ClusterIP
+  selector:
+    app: notifications-service
+  ports:
+    - name: http
+      port: 300
+      targetPort: 3001

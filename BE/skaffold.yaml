@@ -1,0 +1,89 @@
+apiVersion: skaffold/v2beta26
+kind: Config
+metadata:
+  name: microservices
+build:
+  tagPolicy:
+    envTemplate:
+      template: "v1"
+  artifacts:
+    - image: dgpthinh/artwork-service
+      context: .
+      docker:
+        dockerfile: apps/artwork-service/Dockerfile
+      dev:
+        sync:
+          manual:
+            - src: 'apps/artwork-service/**'
+              dest: '/app'
+    - image: dgpthinh/identity-service
+      context: .
+      docker:
+        dockerfile: apps/identity-service/Dockerfile
+      dev:
+        sync:
+          manual:
+            - src: 'apps/identity-service/**'
+              dest: '/app'
+    - image: dgpthinh/messaging-service
+      context: .
+      docker:
+        dockerfile: apps/messaging-service/Dockerfile
+      dev:
+        sync:
+          manual:
+            - src: 'apps/messaging-service/**'
+              dest: '/app'
+    - image: dgpthinh/notifications-service
+      context: .
+      docker:
+        dockerfile: apps/notifications-service/Dockerfile
+      dev:
+        sync:
+          manual:
+            - src: 'apps/notifications-service/**'
+              dest: '/app'
+    - image: dgpthinh/payments-service
+      context: .
+      docker:
+        dockerfile: apps/payments-service/Dockerfile
+      dev:
+        sync:
+          manual:
+            - src: 'apps/payments-service/**'
+              dest: '/app'
+profiles:
+  - name: dev
+    build:
+      local:
+        push: false
+    deploy:
+      kubectl:
+        flags:
+          apply:
+            - --namespace=dev
+deploy:
+  kubectl:
+    manifests:
+      - infrastructure/k8s/services/artwork/*.yaml
+      - infrastructure/k8s/services/identity/*.yaml
+      - infrastructure/k8s/services/messaging/*.yaml
+      - infrastructure/k8s/services/notifications/*.yaml
+      - infrastructure/k8s/services/payments/*.yaml
+
+---
+
+apiVersion: skaffold/v2beta26
+kind: Config
+metadata:
+  name: infras
+deploy:
+  kubectl:
+    manifests:
+      # Namespace
+      - infrastructure/k8s/namespace.yaml
+
+      # Messaging & Cache
+      - infrastructure/k8s/infras/rabbitmq-deployment.yaml
+      - infrastructure/k8s/infras/redis-deployment.yaml
+      - infrastructure/k8s/infras/mailhog-deployment.yaml

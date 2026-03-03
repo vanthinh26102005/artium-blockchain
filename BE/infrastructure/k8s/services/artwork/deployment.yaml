@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: artworks-service
+  namespace: dev
+  labels:
+    app: artworks-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: artworks-service
+  template:
+    metadata:
+      labels:
+        app: artworks-service
+    spec:
+      containers:
+        - name: artworks-service
+          image: dgpthinh/artworks-service:v1
+          command: ["yarn", "run", "dev:artworks"]
+          ports:
+            - containerPort: 3003
+          readinessProbe:
+            tcpSocket:
+              port: 3003
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 3003
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            limits:
+              cpu: "300m"
+              memory: "384Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+          volumeMounts:
+            - name: artwork-service
+              mountPath: /app
+            - name: node-modules
+              mountPath: /app/node_modules
+      volumes:
+        - name: artwork-service
+          emptyDir: {}
+        - name: artwork-node-modules
+          emptyDir: {}

@@ -1,0 +1,156 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateNotificationHistoryInput {
+  body: String!
+  channel: NotificationChannel!
+  failureReason: String
+  metadata: JSONObject
+  readAt: DateTime
+  sentAt: DateTime
+  status: NotificationStatus
+  templateContext: JSONObject
+  title: String!
+  triggerEvent: NotificationTriggerEvent!
+  userId: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""JSON custom scalar type"""
+scalar JSONObject
+
+input ListNotificationHistoriesOptionsInput {
+  channel: NotificationChannel!
+
+  """Thứ tự sắp xếp."""
+  orderBy: NotificationHistoryOrderByInput
+
+  """Bỏ qua n bản ghi đầu tiên (phân trang)."""
+  skip: Int
+  status: NotificationStatus
+
+  """Lấy tối đa n bản ghi (giới hạn)."""
+  take: Int
+
+  """Các điều kiện lọc."""
+  where: NotificationHistoryWhereInput
+}
+
+type Mutation {
+  createNotificationHistory(input: CreateNotificationHistoryInput!): NotificationHistory!
+  updateNotificationHistory(id: String!, input: UpdateNotificationHistoryInput!): NotificationHistory!
+}
+
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+  PUSH
+  SMS
+  WEBHOOK
+}
+
+type NotificationHistory {
+  """Notification body content"""
+  body: String!
+  channel: NotificationChannel!
+
+  """Failure reason"""
+  failureReason: String
+  id: ID!
+
+  """Additional metadata"""
+  metadata: JSONObject
+
+  """When user read notification"""
+  readAt: DateTime
+
+  """When notification was sent"""
+  sentAt: DateTime
+  status: NotificationStatus!
+
+  """Template context data"""
+  templateContext: JSONObject
+
+  """Notification title"""
+  title: String!
+  triggerEvent: NotificationTriggerEvent!
+  userId: String
+}
+
+input NotificationHistoryOrderByInput {
+  createdAt: SortDirection
+  id: SortDirection
+  sentAt: SortDirection
+  updatedAt: SortDirection
+}
+
+input NotificationHistoryWhereInput {
+  channel: NotificationChannel
+
+  """Lọc theo một trong các kênh"""
+  channel_in: [NotificationChannel!]
+  id: String
+
+  """Lọc theo một trong các ID"""
+  id_in: [String!]
+  status: NotificationStatus
+
+  """Lọc theo một trong các trạng thái"""
+  status_in: [NotificationStatus!]
+  triggerEvent: NotificationTriggerEvent
+  userId: String
+}
+
+enum NotificationStatus {
+  DELIVERED
+  FAILED
+  PENDING
+  READ
+  SENT
+}
+
+enum NotificationTriggerEvent {
+  EVENT_REMINDER_24H
+  GENERIC_ALERT
+  INVOICE_CREATED
+  MARKETING_CAMPAIGN_EMAIL
+  NEW_MESSAGE_RECEIVED
+  ORDER_CREATED_CONFIRMATION
+  ORDER_PAID_SUCCESS
+  ORDER_SHIPPED_UPDATE
+  PASSWORD_RESET_REQUESTED
+  RSVP_CONFIRMED
+  SELLER_PROFILE_APPROVED
+  USER_REGISTERED_WELCOME
+  USER_REGISTRATION_OTP
+}
+
+type Query {
+  notificationHistories(options: ListNotificationHistoriesOptionsInput): [NotificationHistory!]!
+  notificationHistory(id: String!): NotificationHistory!
+}
+
+"""Sort direction for queries (ASC: ascending, DESC: descending)"""
+enum SortDirection {
+  ASC
+  DESC
+}
+
+input UpdateNotificationHistoryInput {
+  body: String
+  channel: NotificationChannel
+  failureReason: String
+  metadata: JSONObject
+  readAt: DateTime
+  sentAt: DateTime
+  status: NotificationStatus
+  templateContext: JSONObject
+  title: String
+  triggerEvent: NotificationTriggerEvent
+  userId: String
+}

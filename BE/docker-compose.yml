@@ -1,0 +1,760 @@
+services:
+
+  # ---------------------------
+  # PostgreSQL Databases
+  # ---------------------------
+  db-shared:
+    image: postgres:17
+    container_name: db-shared
+    profiles: ["shared"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1"
+      POSTGRES_DB: artium_global
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5454:5432"
+    volumes:
+      - postgres_shared_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d artium_global"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - infra_network
+
+  db-identity:
+    image: postgres:17
+    container_name: db-identity
+    profiles: ["isolated"]
+    environment:
+      POSTGRES_USER: identity_user
+      POSTGRES_PASSWORD: "1"
+      POSTGRES_DB: identity_db
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_identity_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U identity_user -d identity_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "768M"
+        reservations:
+          cpus: "0.50"
+          memory: "512M"
+    networks:
+      - infra_network
+
+  db-notifications:
+    image: postgres:17
+    container_name: db-notifications
+    profiles: ["isolated"]
+    environment:
+      POSTGRES_USER: notifications_user
+      POSTGRES_PASSWORD: "1"
+      POSTGRES_DB: notifications_db
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_notifications_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notifications_user -d notifications_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "768M"
+        reservations:
+          cpus: "0.50"
+          memory: "512M"
+    networks:
+      - infra_network
+
+  db-artwork:
+    image: postgres:17
+    container_name: db-artwork
+    profiles: ["isolated"]
+    environment:
+      POSTGRES_USER: artwork_user
+      POSTGRES_PASSWORD: "1"
+      POSTGRES_DB: artwork_db
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_artwork_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U artwork_user -d artwork_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "768M"
+        reservations:
+          cpus: "0.50"
+          memory: "512M"
+    networks:
+      - infra_network
+
+  db-messaging:
+    image: postgres:17
+    container_name: db-messaging
+    profiles: ["isolated"]
+    environment:
+      POSTGRES_USER: messaging_user
+      POSTGRES_PASSWORD: "1"
+      POSTGRES_DB: messaging_db
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_messaging_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U messaging_user -d messaging_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "768M"
+        reservations:
+          cpus: "0.50"
+          memory: "512M"
+    networks:
+      - infra_network
+
+  db-payments:
+    image: postgres:17
+    container_name: db-payments
+    profiles: ["isolated"]
+    environment:
+      POSTGRES_USER: payments_user
+      POSTGRES_PASSWORD: "1"
+      POSTGRES_DB: payments_db
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_payments_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payments_user -d payments_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "768M"
+        reservations:
+          cpus: "0.50"
+          memory: "512M"
+    networks:
+      - infra_network
+
+  db-events:
+    image: postgres:17
+    container_name: db-events
+    profiles: ["isolated"]
+    environment:
+      POSTGRES_USER: events_user
+      POSTGRES_PASSWORD: "1"
+      POSTGRES_DB: events_db
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres_events_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U events_user -d events_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "768M"
+        reservations:
+          cpus: "0.50"
+          memory: "512M"
+    networks:
+      - infra_network
+
+  db-community:
+    image: postgres:17
+    container_name: db-community
+    profiles: ["isolated"]
+    environment:
+      POSTGRES_USER: community_user
+      POSTGRES_PASSWORD: "1"
+      POSTGRES_DB: community_db
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5439:5432"
+    volumes:
+      - postgres_community_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U community_user -d community_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "768M"
+        reservations:
+          cpus: "0.50"
+          memory: "512M"
+    networks:
+      - infra_network
+
+  # ---------------------------
+  # Messaging & Cache
+  # ---------------------------
+  rabbitmq:
+    image: dgpthinh/rabbitmq:v1
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: myuser
+      RABBITMQ_DEFAULT_PASS: mypassword
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "768M"
+        reservations:
+          cpus: "0.40"
+          memory: "384M"
+    networks:
+      - infra_network
+
+  redis:
+    image: redis:8.2-alpine
+    container_name: med-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "256M"
+        reservations:
+          cpus: "0.25"
+          memory: "128M"
+    networks:
+      - infra_network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: med-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: "128M"
+    networks:
+      - infra_network
+
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: .
+      dockerfile: ./apps/api-gateway/Dockerfile
+    image: dgpthinh/api-gateway:v1
+    command: yarn dev:gateway
+    ports:
+      - "8081:8081"
+    environment:
+      PORT: 8081
+      IDENTITY_SERVICE_HOST: identity-service
+      IDENTITY_SERVICE_PORT: 3101
+      ARTWORK_SERVICE_HOST: artwork-service
+      ARTWORK_SERVICE_PORT: 3102
+      PAYMENTS_SERVICE_HOST: payments-service
+      PAYMENTS_SERVICE_PORT: 3103
+      MESSAGING_SERVICE_HOST: messaging-service
+      MESSAGING_SERVICE_PORT: 3105
+      NOTIFICATIONS_SERVICE_HOST: notifications-service
+      NOTIFICATIONS_SERVICE_PORT: 3106
+      EVENTS_SERVICE_HOST: events-service
+      EVENTS_SERVICE_PORT: 3107
+      COMMUNITY_SERVICE_HOST: community-service
+      COMMUNITY_SERVICE_PORT: 3108
+      JWT_SECRET: 5c3bf5bfc210c43aa7342efcb40bc0eb6831ac38ea12de39578d09afaec6d37e
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - .:/app
+      - gateway_node_modules:/app/node_modules
+    depends_on:
+      - identity-service
+      - artwork-service
+      - payments-service
+      - messaging-service
+      - notifications-service
+      - events-service
+      - community-service
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: "384M"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+    networks:
+      - services_network
+
+  # ---------------------------
+  # Microservices
+  # ---------------------------
+  identity-service:
+    container_name: identity-service
+    build:
+      context: .
+      dockerfile: ./apps/identity-service/Dockerfile
+    image: dgpthinh/identity-service:v1
+    command: yarn dev:identity
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      MICROSERVICE_PORT: 3101
+      MICROSERVICE_HOST: 0.0.0.0
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      DB_SYNCHRONIZE: "true"
+      SHARED_DB_HOST: db-shared
+      SHARED_DB_PORT: 5432
+      SHARED_DB_USERNAME: postgres
+      SHARED_DB_PASSWORD: "1"
+      SHARED_DB_NAME: artium_global
+      DB_HOST: db-identity
+      DB_PORT: 5432
+      DB_USER: identity_user
+      DB_PASS: "1"
+      DB_NAME: identity_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: 5c3bf5bfc210c43aa7342efcb40bc0eb6831ac38ea12de39578d09afaec6d37e
+      JWT_EXPIRES_IN: 1d
+      GOOGLE_CLIENT_ID: 873456140774-gi4pt3aq0m3gpd5f10uv4ivv59lvbgej.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
+      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - .:/app
+      - identity_node_modules:/app/node_modules
+    depends_on:
+      - rabbitmq
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: "384M"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+    networks:
+      - infra_network
+      - services_network
+
+  notifications-service:
+    container_name: notifications-service
+    build:
+      context: .
+      dockerfile: ./apps/notifications-service/Dockerfile
+    image: dgpthinh/notifications-service:v1
+    command: yarn dev:notifications
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      MICROSERVICE_PORT: 3106
+      MICROSERVICE_HOST: 0.0.0.0
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      DB_SYNCHRONIZE: "true"
+      SHARED_DB_HOST: db-shared
+      SHARED_DB_PORT: 5432
+      SHARED_DB_USERNAME: postgres
+      SHARED_DB_PASSWORD: "1"
+      SHARED_DB_NAME: artium_global
+      DB_HOST: db-notifications
+      DB_PORT: 5432
+      DB_USER: notifications_user
+      DB_PASS: "1"
+      DB_NAME: notifications_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      GOOGLE_CLIENT_ID: 873456140774-gi4pt3aq0m3gpd5f10uv4ivv59lvbgej.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
+      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      SMTP_USER: ""
+      SMTP_PASS: ""
+      SMTP_FROM: noreply@artium.com
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - .:/app
+      - notifications_node_modules:/app/node_modules
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mailhog:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: "384M"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+    networks:
+      - infra_network
+      - services_network
+
+  artwork-service:
+    container_name: artwork-service
+    build:
+      context: .
+      dockerfile: ./apps/artwork-service/Dockerfile
+    image: dgpthinh/artwork-service:v1
+    command: yarn dev:artwork
+    ports:
+      - "3003:3003"
+      # TCP microservice port (internal only for API Gateway)
+    environment:
+      PORT: 3003
+      MICROSERVICE_PORT: 3102
+      MICROSERVICE_HOST: 0.0.0.0
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      DB_SYNCHRONIZE: "true"
+      SHARED_DB_HOST: db-shared
+      SHARED_DB_PORT: 5432
+      SHARED_DB_USERNAME: postgres
+      SHARED_DB_PASSWORD: "1"
+      SHARED_DB_NAME: artium_global
+      DB_HOST: db-artwork
+      DB_PORT: 5432
+      DB_USER: artwork_user
+      DB_PASS: "1"
+      DB_NAME: artwork_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
+      TZ: Asia/Ho_Chi_Minh
+      GCS_PROJECT_ID: artworkmanagement
+      GCS_BUCKET_NAME: artwork_uit
+      GCS_KEY_FILE: /app/config/gcs-service-account.json
+      MAX_FILE_SIZE_MB: 10
+      ALLOWED_IMAGE_TYPES: image/jpeg,image/png,image/webp,image/jpg
+      IMAGE_QUALITY: 85
+      IMAGE_MAX_WIDTH: 2000
+      IMAGE_MAX_HEIGHT: 2000
+    volumes:
+      - .:/app
+      - artwork_node_modules:/app/node_modules
+      - ./config/gcs-service-account.json:/app/config/gcs-service-account.json:ro
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: "384M"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+    networks:
+      - infra_network
+      - services_network
+
+  messaging-service:
+    container_name: messaging-service
+    build:
+      context: .
+      dockerfile: ./apps/messaging-service/Dockerfile
+    image: dgpthinh/messaging-service:v1
+    command: yarn dev:messaging
+    ports:
+      - "3004:3004"
+      # TCP microservice port (internal only for API Gateway)
+    environment:
+      PORT: 3004
+      MICROSERVICE_PORT: 3105
+      MICROSERVICE_HOST: 0.0.0.0
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      DB_SYNCHRONIZE: "true"
+      SHARED_DB_HOST: db-shared
+      SHARED_DB_PORT: 5432
+      SHARED_DB_USERNAME: postgres
+      SHARED_DB_PASSWORD: "1"
+      SHARED_DB_NAME: artium_global
+      DB_HOST: db-messaging
+      DB_PORT: 5432
+      DB_USER: messaging_user
+      DB_PASS: "1"
+      DB_NAME: messaging_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
+      TZ: Asia/Ho_Chi_Minh
+      GCS_PROJECT_ID: artworkmanagement
+      GCS_BUCKET_NAME: artwork_uit
+      GCS_KEY_FILE: /app/config/gcs-service-account.json
+      MAX_FILE_SIZE_MB: 10
+      ALLOWED_FILE_TYPES: image/jpeg,image/png,image/webp,image/jpg,image/gif,video/mp4,video/webm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    volumes:
+      - .:/app
+      - messaging_node_modules:/app/node_modules
+      - ./config/gcs-service-account.json:/app/config/gcs-service-account.json:ro
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: "384M"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+    networks:
+      - infra_network
+      - services_network
+
+  payments-service:
+    container_name: payments-service
+    build:
+      context: .
+      dockerfile: ./apps/payments-service/Dockerfile
+    image: dgpthinh/payments-service:v1
+    command: yarn dev:payments
+    ports:
+      - "3005:3005"
+    environment:
+      PORT: 3005
+      MICROSERVICE_PORT: 3103
+      MICROSERVICE_HOST: 0.0.0.0
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      DB_SYNCHRONIZE: "true"
+      SHARED_DB_HOST: db-shared
+      SHARED_DB_PORT: 5432
+      SHARED_DB_USERNAME: postgres
+      SHARED_DB_PASSWORD: "1"
+      SHARED_DB_NAME: artium_global
+      DB_HOST: db-payments
+      DB_PORT: 5432
+      DB_USER: payments_user
+      DB_PASS: "1"
+      DB_NAME: payments_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-sk_test_51SodCXI4FRlZsKgrH8qv6f9Qe7crzB3xCalWNc6DDEPk46Ps3EGUORTUK3TF0D31ezV2Jd7R2eXQL1JfTyzikhIC00teYO7dGE}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_example}
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - .:/app
+      - payments_node_modules:/app/node_modules
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: "384M"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+    networks:
+      - infra_network
+      - services_network
+
+  events-service:
+    container_name: events-service
+    build:
+      context: .
+      dockerfile: ./apps/events-service/Dockerfile
+    image: dgpthinh/events-service:v1
+    command: yarn dev:events
+    ports:
+      - "3006:3006"
+    environment:
+      PORT: 3006
+      MICROSERVICE_PORT: 3107
+      MICROSERVICE_HOST: 0.0.0.0
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      DB_SYNCHRONIZE: "true"
+      SHARED_DB_HOST: db-shared
+      SHARED_DB_PORT: 5432
+      SHARED_DB_USERNAME: postgres
+      SHARED_DB_PASSWORD: "1"
+      SHARED_DB_NAME: artium_global
+      DB_HOST: db-events
+      DB_PORT: 5432
+      DB_USER: events_user
+      DB_PASS: "1"
+      DB_NAME: events_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - .:/app
+      - events_node_modules:/app/node_modules
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: "384M"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+    networks:
+      - infra_network
+      - services_network
+
+  community-service:
+    container_name: community-service
+    build:
+      context: .
+      dockerfile: ./apps/community-service/Dockerfile
+    image: dgpthinh/community-service:v1
+    command: yarn dev:community
+    ports:
+      - "3007:3007"
+    environment:
+      PORT: 3007
+      MICROSERVICE_PORT: 3108
+      MICROSERVICE_HOST: 0.0.0.0
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      DB_SYNCHRONIZE: "true"
+      SHARED_DB_HOST: db-shared
+      SHARED_DB_PORT: 5432
+      SHARED_DB_USERNAME: postgres
+      SHARED_DB_PASSWORD: "1"
+      SHARED_DB_NAME: artium_global
+      DB_HOST: db-community
+      DB_PORT: 5432
+      DB_USER: community_user
+      DB_PASS: "1"
+      DB_NAME: community_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - .:/app
+      - community_node_modules:/app/node_modules
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: "384M"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+    networks:
+      - infra_network
+      - services_network
+
+volumes:
+  postgres_shared_data:
+  postgres_identity_data:
+  postgres_notifications_data:
+  postgres_artwork_data:
+  postgres_messaging_data:
+  postgres_payments_data:
+  postgres_events_data:
+  postgres_community_data:
+
+  gateway_node_modules:
+  identity_node_modules:
+  notifications_node_modules:
+  artwork_node_modules:
+  messaging_node_modules:
+  payments_node_modules:
+  events_node_modules:
+  community_node_modules:
+
+  rabbitmq_data:
+  redis_data:
+
+# ===========================
+# Networks
+# ===========================
+networks:
+  infra_network:
+    driver: bridge
+
+  services_network:
+    driver: bridge

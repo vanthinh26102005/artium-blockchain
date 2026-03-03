@@ -1,0 +1,24 @@
+{
+  "name": "@backend/messaging-service",
+  "version": "1.0.0",
+  "main": "src/main.ts",
+  "private": true,
+  "scripts": {
+    "start": "nest start --webpack --webpackPath webpack-hmr.config.js --watch",
+    "start:dev": "nest start --watch",
+    "build": "nest build",
+    "seed": "ts-node -r tsconfig-paths/register src/db/seeds/run-seeds.ts"
+  },
+  "dependencies": {
+    "@nestjs/axios": "^4.0.1",
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/cqrs": "^11.0.3",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/platform-express": "^11.1.6",
+    "@nestjs/websockets": "^11.1.8",
+    "multer": "^2.0.2",
+    "socket.io": "^4.7.2",
+    "rxjs": "^7.8.2"
+  }
+}

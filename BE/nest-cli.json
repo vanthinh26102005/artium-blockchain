@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "monorepo": true,
+  "root": "apps",
+  "projects": {
+    "api-gateway": {
+      "type": "application",
+      "root": "apps/api-gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/api-gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api-gateway/tsconfig.app.json",
+        "webpack": true
+      }
+    },
+    "artwork-service": {
+      "type": "application",
+      "root": "apps/artwork-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/artwork-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/artwork-service/tsconfig.app.json",
+        "webpack": true
+      }
+    },
+    "api-clients": {
+      "type": "library",
+      "root": "libs/api-clients",
+      "entryFile": "index",
+      "sourceRoot": "libs/api-clients/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/api-clients/tsconfig.lib.json"
+      }
+    },
+    "community-service": {
+      "type": "application",
+      "root": "apps/community-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/community-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/community-service/tsconfig.app.json",
+        "webpack": true
+      }
+    },
+    "crm-service": {
+      "type": "application",
+      "root": "apps/crm-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/crm-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/crm-service/tsconfig.app.json",
+        "webpack": true
+      }
+    },
+    "events-service": {
+      "type": "application",
+      "root": "apps/events-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/events-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/events-service/tsconfig.app.json",
+        "webpack": true
+      }
+    },
+    "identity-service": {
+      "type": "application",
+      "root": "apps/identity-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/identity-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/identity-service/tsconfig.app.json",
+        "webpack": true
+      }
+    },
+    "messaging-service": {
+      "type": "application",
+      "root": "apps/messaging-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/messaging-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/messaging-service/tsconfig.app.json",
+        "webpack": true
+      }
+    },
+    "notifications-service": {
+      "type": "application",
+      "root": "apps/notifications-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/notifications-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/notifications-service/tsconfig.app.json",
+        "webpack": true
+      }
+    },
+    "orders-service": {
+      "type": "application",
+      "root": "apps/orders-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/orders-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/orders-service/tsconfig.app.json",
+        "webpack": true
+      }
+    },
+    "payments-service": {
+      "type": "application",
+      "root": "apps/payments-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/payments-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/payments-service/tsconfig.app.json",
+        "webpack": true
+      }
+    },
+    "rabbitmq": {
+      "type": "library",
+      "root": "libs/rabbitmq",
+      "entryFile": "index",
+      "sourceRoot": "libs/rabbitmq/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/rabbitmq/tsconfig.lib.json"
+      }
+    },
+    "metrics": {
+      "type": "library",
+      "root": "libs/metrics",
+      "entryFile": "index",
+      "sourceRoot": "libs/metrics/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/metrics/tsconfig.lib.json"
+      }
+    },
+    "common": {
+      "type": "library",
+      "root": "libs/common",
+      "entryFile": "index",
+      "sourceRoot": "libs/common/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/common/tsconfig.lib.json"
+      }
+    },
+    "outbox": {
+      "type": "library",
+      "root": "libs/outbox",
+      "entryFile": "index",
+      "sourceRoot": "libs/outbox/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/outbox/tsconfig.lib.json"
+      }
+    },
+    "auth": {
+      "type": "library",
+      "root": "libs/auth",
+      "entryFile": "index",
+      "sourceRoot": "libs/auth/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/auth/tsconfig.lib.json"
+      }
+    }
+  }
+}

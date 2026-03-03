@@ -1,0 +1,23 @@
+{
+  "name": "@backend/payments-service",
+  "version": "1.0.0",
+  "main": "src/main.ts",
+  "private": true,
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "build": "nest build"
+  },
+  "dependencies": {
+    "@nestjs/apollo": "^13.2.1",
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/cqrs": "^11.0.3",
+    "@nestjs/graphql": "^13.2.0",
+    "@nestjs/typeorm": "^11.0.0",
+    "typeorm": "^0.3.27",
+    "stripe": "^20.1.2",
+    "@nestjs/swagger": "^11.2.4"
+  }
+}

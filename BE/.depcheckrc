@@ -1,0 +1,4 @@
+{
+  "ignoreDirs": ["dist", "node_modules", "libs"],
+  "ignoreMatches": ["^@app/", "^apps$"]
+}

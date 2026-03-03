@@ -1,0 +1,24 @@
+{
+  "name": "@backend/artwork-service",
+  "version": "1.0.0",
+  "main": "src/main.ts",
+  "private": true,
+  "scripts": {
+    "start": "nest start --webpack --webpackPath webpack-hmr.config.js --watch",
+    "start:dev": "nest start --watch",
+    "build": "nest build"
+  },
+  "dependencies": {
+    "@nestjs/apollo": "^13.2.1",
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/cqrs": "^11.0.3",
+    "@nestjs/graphql": "^13.2.0",
+    "@nestjs/swagger": "^11.2.1",
+    "@nestjs/typeorm": "^11.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "uuid": "^13.0.0"
+  }
+}

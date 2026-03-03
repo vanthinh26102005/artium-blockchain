@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Message - Artium</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f9fc;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      padding: 30px;
+    }
+    h1 {
+      color: #007bff;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .message-box {
+      background-color: #f0f4f8;
+      border-left: 4px solid #007bff;
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .message-sender {
+      font-weight: bold;
+      color: #007bff;
+      margin-bottom: 8px;
+    }
+    .message-content {
+      color: #555;
+      font-style: italic;
+    }
+    .action-button {
+      display: inline-block;
+      background-color: #007bff;
+      color: #fff;
+      padding: 12px 30px;
+      border-radius: 6px;
+      text-decoration: none;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .action-button:hover {
+      background-color: #0056b3;
+    }
+    .footer {
+      font-size: 14px;
+      color: #666;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>New Message</h1>
+
+    <p>You have received a new message on Artium:</p>
+
+    <div class="message-box">
+      <div class="message-sender">From: {{senderName}}</div>
+      <div class="message-content">"{{messageContent}}"</div>
+    </div>
+
+    <p>Click the button below to view and reply:</p>
+
+    <a href="https://artium.com/messages/{{conversationId}}" class="action-button">View Message</a>
+
+    <p style="margin-top: 30px; font-size: 14px; color: #666;">
+      You're receiving this email because you have notifications enabled for messages on Artium. 
+      <a href="https://artium.com/settings/notifications">Manage your notification preferences</a>
+    </p>
+
+    <div class="footer">
+      <p>Artium Team</p>
+      <p><a href="https://artium.com">https://artium.com</a></p>
+    </div>
+  </div>
+</body>
+</html>

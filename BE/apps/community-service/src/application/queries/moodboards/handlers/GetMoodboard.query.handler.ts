@@ -1,0 +1,30 @@
+import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
+import { Inject, Logger } from '@nestjs/common';
+import { GetMoodboardQuery } from '../GetMoodboard.query';
+import { IMoodboardRepository, Moodboard } from '../../../../domain';
+
+@QueryHandler(GetMoodboardQuery)
+export class GetMoodboardHandler implements IQueryHandler<
+  GetMoodboardQuery,
+  Moodboard | null
+> {
+  private readonly logger = new Logger(GetMoodboardHandler.name);
+
+  constructor(
+    @Inject(IMoodboardRepository)
+    private readonly moodboardRepository: IMoodboardRepository,
+  ) {}
+
+  async execute(query: GetMoodboardQuery): Promise<Moodboard | null> {
+    this.logger.debug(`Getting moodboard by ID: ${query.id}`);
+
+    const moodboard = await this.moodboardRepository.findById(query.id);
+
+    if (!moodboard) {
+      this.logger.debug(`Moodboard not found: ${query.id}`);
+      return null;
+    }
+
+    return moodboard;
+  }
+}

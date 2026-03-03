@@ -1,0 +1,170 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { CqrsModule } from '@nestjs/cqrs';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import {
+  DynamicDatabaseModule,
+  ITransactionService,
+  TransactionService,
+} from '@app/common';
+import { OutboxEntity, OutboxModule } from '@app/outbox';
+import { AppRabbitMQModule } from '@app/rabbitmq';
+
+import {
+  Moment,
+  MomentView,
+  MomentTaggedArtwork,
+  Moodboard,
+  MoodboardArtwork,
+  MoodboardCollaborator,
+  Follower,
+  Comment,
+  Like,
+  Testimonial,
+  ActivityFeed,
+  IMomentRepository,
+  IMoodboardRepository,
+  IMoodboardArtworkRepository,
+  IFollowerRepository,
+  ICommentRepository,
+  ILikeRepository,
+} from './domain';
+
+import {
+  MomentRepository,
+  MoodboardRepository,
+  MoodboardArtworkRepository,
+  FollowerRepository,
+  CommentRepository,
+  LikeRepository,
+} from './infrastructure';
+
+import {
+  CreateMomentHandler,
+  UpdateMomentHandler,
+  DeleteMomentHandler,
+  CreateMoodboardHandler,
+  UpdateMoodboardHandler,
+  DeleteMoodboardHandler,
+  AddArtworkToMoodboardHandler,
+  RemoveArtworkFromMoodboardHandler,
+  FollowUserHandler,
+  UnfollowUserHandler,
+  CreateCommentHandler,
+  SetLikeStatusHandler,
+} from './application';
+
+import {
+  GetMomentHandler,
+  ListUserMomentsHandler,
+  GetMoodboardHandler,
+  ListUserMoodboardsHandler,
+  GetFollowersHandler,
+  GetFollowingHandler,
+  ListCommentsByEntityHandler,
+  IsLikedHandler,
+} from './application';
+
+import {
+  MomentsMicroserviceController,
+  MoodboardsMicroserviceController,
+  FollowersMicroserviceController,
+  CommentsMicroserviceController,
+  LikesMicroserviceController,
+  HealthController,
+} from './presentation';
+
+export const CommandHandlers = [
+  CreateMomentHandler,
+  UpdateMomentHandler,
+  DeleteMomentHandler,
+
+  CreateMoodboardHandler,
+  UpdateMoodboardHandler,
+  DeleteMoodboardHandler,
+  AddArtworkToMoodboardHandler,
+  RemoveArtworkFromMoodboardHandler,
+
+  FollowUserHandler,
+  UnfollowUserHandler,
+
+  CreateCommentHandler,
+  SetLikeStatusHandler,
+];
+
+export const QueryHandlers = [
+  GetMomentHandler,
+  ListUserMomentsHandler,
+
+  GetMoodboardHandler,
+  ListUserMoodboardsHandler,
+
+  GetFollowersHandler,
+  GetFollowingHandler,
+
+  ListCommentsByEntityHandler,
+  IsLikedHandler,
+];
+
+export const Repositories = [
+  { provide: IMomentRepository, useClass: MomentRepository },
+  { provide: IMoodboardRepository, useClass: MoodboardRepository },
+  {
+    provide: IMoodboardArtworkRepository,
+    useClass: MoodboardArtworkRepository,
+  },
+  { provide: IFollowerRepository, useClass: FollowerRepository },
+  { provide: ICommentRepository, useClass: CommentRepository },
+  { provide: ILikeRepository, useClass: LikeRepository },
+];
+
+export const Services = [
+  { provide: ITransactionService, useClass: TransactionService },
+];
+
+export const Controllers = [
+  HealthController,
+  MomentsMicroserviceController,
+  MoodboardsMicroserviceController,
+  FollowersMicroserviceController,
+  CommentsMicroserviceController,
+  LikesMicroserviceController,
+];
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: './apps/community-service/.env.local',
+    }),
+
+    DynamicDatabaseModule.forRoot('community'),
+    TypeOrmModule.forFeature([
+      Moment,
+      MomentView,
+      MomentTaggedArtwork,
+      Moodboard,
+      MoodboardArtwork,
+      MoodboardCollaborator,
+      Follower,
+      Comment,
+      Like,
+      Testimonial,
+      ActivityFeed,
+      OutboxEntity,
+    ]),
+
+    OutboxModule,
+    AppRabbitMQModule,
+    CqrsModule,
+  ],
+  controllers: [...Controllers],
+  providers: [
+    ...CommandHandlers,
+    ...QueryHandlers,
+    ...Repositories,
+    ...Services,
+  ],
+  exports: [ConfigModule],
+})
+export class CommunityServiceModule {}

@@ -1,0 +1,35 @@
+services:
+  identity-service:
+    depends_on:
+      db-identity:
+        condition: service_healthy
+
+  notifications-service:
+    depends_on:
+      db-notifications:
+        condition: service_healthy
+
+  artwork-service:
+    depends_on:
+      db-artwork:
+        condition: service_healthy
+
+  messaging-service:
+    depends_on:
+      db-messaging:
+        condition: service_healthy
+
+  payments-service:
+    depends_on:
+      db-payments:
+        condition: service_healthy
+
+  events-service:
+    depends_on:
+      db-events:
+        condition: service_healthy
+
+  community-service:
+    depends_on:
+      db-community:
+        condition: service_healthy

@@ -1,0 +1,15 @@
+import { useRouter } from 'next/router'
+import { ProfileMomentsPageView } from '@domains/profile/views/ProfileMomentsPage'
+import { SidebarLayout } from '@shared/components/layout/SidebarLayout'
+import type { NextPageWithLayout } from '@shared/types/next'
+
+const ProfileMomentsPage: NextPageWithLayout = () => {
+  const router = useRouter()
+  const { username } = router.query
+
+  return <ProfileMomentsPageView username={username} />
+}
+
+ProfileMomentsPage.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>
+
+export default ProfileMomentsPage

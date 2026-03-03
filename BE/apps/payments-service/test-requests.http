@@ -1,0 +1,273 @@
+### Payment Service API Testing
+### Use with REST Client extension in VS Code
+### Replace placeholder values (marked with xxx) with actual values
+
+@baseUrl = http://localhost:3001
+@userId = user_123
+@stripeCustomerId = cus_xxxxx
+@paymentIntentId = pi_xxxxx
+@transactionId = txn_xxxxx
+
+### ========================================
+### Customer Management
+### ========================================
+
+### 1. Create Stripe Customer
+POST {{baseUrl}}/stripe/customers
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "email": "test@example.com",
+  "name": "Test User",
+  "phone": "+1234567890"
+}
+
+### ========================================
+### Payment Intents
+### ========================================
+
+### 2. Create Payment Intent
+POST {{baseUrl}}/stripe/payment-intents
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "amount": 99.99,
+  "currency": "usd",
+  "stripeCustomerId": "{{stripeCustomerId}}",
+  "orderId": "order_456",
+  "description": "Test payment for order #456",
+  "metadata": {
+    "productId": "prod_123",
+    "quantity": 2
+  }
+}
+
+### 3. Confirm Payment Intent (Success)
+POST {{baseUrl}}/stripe/payment-intents/confirm
+Content-Type: application/json
+
+{
+  "paymentIntentId": "{{paymentIntentId}}",
+  "paymentMethodId": "pm_card_visa"
+}
+
+### 4. Confirm Payment Intent (Decline)
+POST {{baseUrl}}/stripe/payment-intents/confirm
+Content-Type: application/json
+
+{
+  "paymentIntentId": "{{paymentIntentId}}",
+  "paymentMethodId": "pm_card_chargeDeclined"
+}
+
+### 5. Confirm Payment Intent (Insufficient Funds)
+POST {{baseUrl}}/stripe/payment-intents/confirm
+Content-Type: application/json
+
+{
+  "paymentIntentId": "{{paymentIntentId}}",
+  "paymentMethodId": "pm_card_chargeDeclinedInsufficientFunds"
+}
+
+### ========================================
+### Payment Methods
+### ========================================
+
+### 6. Attach Payment Method (Visa)
+POST {{baseUrl}}/stripe/payment-methods/attach
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "paymentMethodId": "pm_card_visa",
+  "stripeCustomerId": "{{stripeCustomerId}}"
+}
+
+### 7. Attach Payment Method (Mastercard)
+POST {{baseUrl}}/stripe/payment-methods/attach
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "paymentMethodId": "pm_card_mastercard",
+  "stripeCustomerId": "{{stripeCustomerId}}"
+}
+
+### ========================================
+### Refunds
+### ========================================
+
+### 8. Create Full Refund
+POST {{baseUrl}}/stripe/refunds
+Content-Type: application/json
+
+{
+  "transactionId": "{{transactionId}}",
+  "paymentIntentId": "{{paymentIntentId}}",
+  "reason": "requested_by_customer",
+  "metadata": {
+    "refundedBy": "admin_123",
+    "reason": "Customer request"
+  }
+}
+
+### 9. Create Partial Refund
+POST {{baseUrl}}/stripe/refunds
+Content-Type: application/json
+
+{
+  "transactionId": "{{transactionId}}",
+  "paymentIntentId": "{{paymentIntentId}}",
+  "amount": 50.00,
+  "reason": "requested_by_customer",
+  "metadata": {
+    "refundedBy": "admin_123",
+    "reason": "Partial refund - damaged item"
+  }
+}
+
+### ========================================
+### Complete Test Flow
+### ========================================
+
+### Flow 1: Create customer
+POST {{baseUrl}}/stripe/customers
+Content-Type: application/json
+
+{
+  "userId": "flow_test_001",
+  "email": "flowtest@example.com",
+  "name": "Flow Test User"
+}
+
+### Flow 2: Create payment intent (copy stripeCustomerId from previous response)
+POST {{baseUrl}}/stripe/payment-intents
+Content-Type: application/json
+
+{
+  "userId": "flow_test_001",
+  "amount": 50.00,
+  "currency": "usd",
+  "stripeCustomerId": "cus_xxxxx",
+  "orderId": "order_flow_001",
+  "description": "Test flow payment"
+}
+
+### Flow 3: Confirm payment (copy paymentIntentId from previous response)
+POST {{baseUrl}}/stripe/payment-intents/confirm
+Content-Type: application/json
+
+{
+  "paymentIntentId": "pi_xxxxx",
+  "paymentMethodId": "pm_card_visa"
+}
+
+### Flow 4: Create refund (copy transactionId and paymentIntentId from previous responses)
+POST {{baseUrl}}/stripe/refunds
+Content-Type: application/json
+
+{
+  "transactionId": "txn_xxxxx",
+  "paymentIntentId": "pi_xxxxx",
+  "reason": "requested_by_customer"
+}
+
+### ========================================
+### Webhook Testing (Manual)
+### ========================================
+
+### Webhook: Payment Intent Succeeded
+POST {{baseUrl}}/stripe/webhooks
+Content-Type: application/json
+stripe-signature: test_signature
+
+{
+  "id": "evt_test_001",
+  "object": "event",
+  "type": "payment_intent.succeeded",
+  "data": {
+    "object": {
+      "id": "{{paymentIntentId}}",
+      "amount": 9999,
+      "currency": "usd",
+      "status": "succeeded",
+      "latest_charge": "ch_test_001"
+    }
+  }
+}
+
+### Webhook: Payment Intent Failed
+POST {{baseUrl}}/stripe/webhooks
+Content-Type: application/json
+stripe-signature: test_signature
+
+{
+  "id": "evt_test_002",
+  "object": "event",
+  "type": "payment_intent.payment_failed",
+  "data": {
+    "object": {
+      "id": "{{paymentIntentId}}",
+      "amount": 9999,
+      "currency": "usd",
+      "status": "requires_payment_method",
+      "last_payment_error": {
+        "message": "Your card was declined",
+        "code": "card_declined"
+      }
+    }
+  }
+}
+
+### ========================================
+### Error Testing
+### ========================================
+
+### Error 1: Invalid Amount (Too Low)
+POST {{baseUrl}}/stripe/payment-intents
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "amount": 0.25,
+  "currency": "usd",
+  "stripeCustomerId": "{{stripeCustomerId}}"
+}
+
+### Error 2: Missing Required Fields
+POST {{baseUrl}}/stripe/payment-intents
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}"
+}
+
+### Error 3: Invalid Customer ID
+POST {{baseUrl}}/stripe/payment-intents
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "amount": 99.99,
+  "currency": "usd",
+  "stripeCustomerId": "cus_invalid"
+}
+
+### Error 4: Refund Non-Existent Transaction
+POST {{baseUrl}}/stripe/refunds
+Content-Type: application/json
+
+{
+  "transactionId": "txn_nonexistent",
+  "paymentIntentId": "pi_nonexistent",
+  "reason": "requested_by_customer"
+}
+
+### ========================================
+### Health Check
+### ========================================
+
+### Health Check
+GET http://localhost:3001/health

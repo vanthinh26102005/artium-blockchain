@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Invitation</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f5f6f8;
+      font-family: Arial, sans-serif;
+      color: #191414;
+    }
+    .wrapper {
+      padding: 32px 16px 48px;
+    }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 24px;
+      border: 1px solid #ededed;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+    .header {
+      padding: 28px 32px 20px;
+      background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .eyebrow {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #989898;
+      margin: 0 0 10px;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .subtitle {
+      margin: 0 0 18px;
+      color: #595959;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .cta {
+      display: inline-block;
+      background: #0066ff;
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .section {
+      padding: 24px 32px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .section:last-child {
+      border-bottom: none;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #989898;
+      margin-bottom: 16px;
+    }
+    .note {
+      background: #f5f5f5;
+      padding: 14px 16px;
+      border-radius: 16px;
+      color: #595959;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .label {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #989898;
+      margin-bottom: 6px;
+    }
+    .value {
+      font-size: 13px;
+      font-weight: bold;
+      color: #191414;
+    }
+    .muted {
+      font-size: 12px;
+      color: #595959;
+      line-height: 1.6;
+    }
+    .cover {
+      width: 100%;
+      border-radius: 16px;
+      margin-top: 12px;
+    }
+    .footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: #989898;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <p class="eyebrow">Event Invitation</p>
+        <h1 class="title">You&apos;re invited to {{eventTitle}}</h1>
+        <p class="subtitle">
+          {{#if eventDate}}{{eventDate}}{{/if}}
+          {{#if eventTime}} • {{eventTime}}{{/if}}
+          {{#if timeZone}} • {{timeZone}}{{/if}}
+        </p>
+        {{#if eventUrl}}
+        <a class="cta" href="{{eventUrl}}">View Event</a>
+        {{/if}}
+      </div>
+
+      {{#if messageHtml}}
+      <div class="section">
+        <div class="section-title">Message from Host</div>
+        <div class="note">{{{messageHtml}}}</div>
+      </div>
+      {{/if}}
+
+      <div class="section">
+        <div class="section-title">Event Details</div>
+        <div class="grid">
+          <div>
+            <div class="label">Date</div>
+            <div class="value">{{#if eventDate}}{{eventDate}}{{else}}-{{/if}}</div>
+          </div>
+          <div>
+            <div class="label">Time</div>
+            <div class="value">{{#if eventTime}}{{eventTime}}{{else}}-{{/if}}</div>
+          </div>
+          <div>
+            <div class="label">Location</div>
+            <div class="value">{{#if locationLabel}}{{locationLabel}}{{else}}-{{/if}}</div>
+          </div>
+          <div>
+            <div class="label">Host</div>
+            <div class="value">{{#if hostName}}{{hostName}}{{else}}Artium{{/if}}</div>
+          </div>
+        </div>
+        {{#if locationDetail}}
+        <p class="muted" style="margin-top: 12px;">{{locationDetail}}</p>
+        {{/if}}
+        {{#if coverImageUrl}}
+        <img class="cover" src="{{coverImageUrl}}" alt="Event cover" />
+        {{/if}}
+      </div>
+
+      <div class="section">
+        <div class="section-title">RSVP</div>
+        <p class="muted">
+          Let the host know if you can attend. You can update your RSVP status anytime from the event page.
+        </p>
+      </div>
+
+      <div class="footer">
+        Powered by <strong>Artium</strong>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

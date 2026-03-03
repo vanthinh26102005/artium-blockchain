@@ -1,0 +1,407 @@
+// react
+import { useEffect, useMemo, useState } from "react";
+
+// next
+import Link from "next/link";
+import { useRouter } from "next/router";
+
+// @shared - metadata
+import { Metadata } from "@/components/SEO/Metadata";
+
+// @shared - components
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@shared/components/ui/breadcrumb";
+
+// @domains - events
+import { EventDetailHero } from "@domains/events/components/detail/EventDetailHero";
+import { EventOverviewCard } from "@domains/events/components/detail/EventOverviewCard";
+import { EventGuestsCard } from "@domains/events/components/detail/EventGuestsCard";
+import { InviteEventModal } from "@domains/events/modals/InviteEventModal";
+import { ShareEventModal } from "@domains/events/modals/ShareEventModal";
+import { CreateEventModal } from "@domains/events/modals/CreateEventModal";
+import { DeleteEventModal } from "@domains/events/modals/DeleteEventModal";
+import { useHostingEventsStore } from "@domains/events/state/useHostingEventsStore";
+import { useEventsStore } from "@domains/events/state/useEventsStore";
+import { useEventDetailStore } from "@domains/events/state/useEventDetailStore";
+import { type HostingEvent } from "@domains/events/mock/mockHostingEvents";
+import { mockHomeEvents } from "@domains/home/mock/mockHomeEvents";
+import { type EventStatus, type Event } from "@domains/events/components/cards/EventCard";
+import { ToastPortal } from "@domains/events/components/ui/ToastPortal";
+import eventsApis from "@shared/apis/eventsApis";
+import { mapApiEventToHostingEvent } from "@domains/events/utils/eventMappers";
+
+type EventDetailModel = HostingEvent & { sourceRsvp?: EventStatus };
+
+const normalizeEventToDetail = (
+  item: HostingEvent | Event,
+  isHosting: boolean,
+): EventDetailModel => {
+  if ("locationType" in item) {
+    return {
+      ...(item as HostingEvent),
+      sourceRsvp: "rsvpStatus" in item ? (item as any).rsvpStatus : undefined,
+    };
+  }
+
+  const base = item as Event;
+  const inferredLocationType =
+    base.location?.toLowerCase().includes("online") ? "online" : "in-person";
+  return {
+    id: base.id,
+    title: base.title,
+    location: base.location,
+    locationType: inferredLocationType,
+    address: base.location,
+    venueDetails: undefined,
+    onlineUrl: undefined,
+    startDateTime: base.startDateTime,
+    endDateTime: base.endDateTime,
+    timeZone: base.timeZone,
+    types: base.types,
+    visibility: base.visibility,
+    description: "",
+    attendees: base.attendees,
+    coverImageUrl: base.coverImageUrl,
+    createdAt: base.startDateTime,
+    sourceRsvp: base.rsvpStatus,
+  };
+};
+
+export const EventDetailPage = () => {
+  const router = useRouter();
+  const eventId = router.query.id;
+  const source = router.query.source as string | undefined;
+  const isHomePageContext = router.pathname.startsWith("/homepage");
+
+  const hostingEvents = useHostingEventsStore((state) => state.events);
+  const hostingLoaded = useHostingEventsStore((state) => state.hasLoaded);
+  const hostingLoading = useHostingEventsStore((state) => state.isLoading);
+  const loadHostingEvents = useHostingEventsStore((state) => state.loadEvents);
+  const discoverEvents = useEventsStore((state) => state.allEvents);
+  const discoverLoaded = useEventsStore((state) => state.hasLoaded);
+  const discoverLoading = useEventsStore((state) => state.isLoading);
+  const loadDiscoverEvents = useEventsStore((state) => state.loadDiscoverEvents);
+  const invitations = useHostingEventsStore((state) => state.invitations);
+  const copyLink = useHostingEventsStore((state) => state.copyLink);
+  const deleteEvent = useHostingEventsStore((state) => state.deleteEvent);
+  const updateEventFromForm = useHostingEventsStore((state) => state.updateEventFromForm);
+  const updateGlobalRsvp = useEventsStore((state) => state.updateRsvpStatus);
+
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; variant: "success" | "error" } | null>(null);
+  const [fetchedEvent, setFetchedEvent] = useState<HostingEvent | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  const initializeStats = useEventDetailStore((state) => state.initializeStats);
+  const setInvitedCount = useEventDetailStore((state) => state.setInvitedCount);
+  const setRsvpStatus = useEventDetailStore((state) => state.setRsvpStatus);
+  const guestStatsMap = useEventDetailStore((state) => state.guestStats);
+
+  const eventRaw = useMemo(() => {
+    const id = Array.isArray(eventId) ? eventId[0] : eventId;
+    if (!id) return null;
+    return (
+      hostingEvents.find((item) => item.id === id) ||
+      discoverEvents.find((item) => item.id === id) ||
+      mockHomeEvents.find((item) => item.id === id) ||
+      fetchedEvent ||
+      null
+    );
+  }, [eventId, hostingEvents, discoverEvents, fetchedEvent]);
+
+  const isHostingEvent = useMemo(() => {
+    const id = Array.isArray(eventId) ? eventId[0] : eventId;
+    if (!id) return false;
+    return hostingEvents.some((item) => item.id === id);
+  }, [eventId, hostingEvents]);
+
+  const editingHostingEvent = useMemo(
+    () => (isHostingEvent ? hostingEvents.find((item) => item.id === (Array.isArray(eventId) ? eventId[0] : eventId)) ?? null : null),
+    [isHostingEvent, hostingEvents, eventId],
+  );
+
+  const event = useMemo<EventDetailModel | null>(
+    () => (eventRaw ? normalizeEventToDetail(eventRaw, isHostingEvent) : null),
+    [eventRaw, isHostingEvent],
+  );
+
+  const stats = event ? guestStatsMap[event.id] : undefined;
+  const goingCount = stats?.going ?? 0;
+  const maybeCount = stats?.maybe ?? 0;
+  const invitedCount = stats?.invited ?? 0;
+  const sourceRsvp: EventStatus = event?.sourceRsvp ?? "rsvp";
+  const currentRsvp: EventStatus = stats?.rsvpStatus ?? sourceRsvp ?? "rsvp";
+
+  useEffect(() => {
+    if (!hostingLoaded) {
+      void loadHostingEvents();
+    }
+    if (!discoverLoaded) {
+      void loadDiscoverEvents();
+    }
+  }, [hostingLoaded, loadHostingEvents, discoverLoaded, loadDiscoverEvents]);
+
+  useEffect(() => {
+    setFetchedEvent(null);
+    setFetchError(null);
+  }, [eventId]);
+
+  useEffect(() => {
+    const id = Array.isArray(eventId) ? eventId[0] : eventId;
+    if (!id || fetchedEvent || fetchError) return;
+    if (hostingLoading || discoverLoading) return;
+    if (eventRaw) return;
+
+    const loadEvent = async () => {
+      try {
+        const apiEvent = await eventsApis.getEventById(id);
+        setFetchedEvent(mapApiEventToHostingEvent(apiEvent));
+      } catch (error) {
+        setFetchError(error instanceof Error ? error.message : "Event not found");
+      }
+    };
+
+    void loadEvent();
+  }, [
+    eventId,
+    fetchedEvent,
+    fetchError,
+    hostingLoading,
+    discoverLoading,
+    eventRaw,
+  ]);
+
+  useEffect(() => {
+    if (!event) return;
+    const invited = invitations.filter((inv) => inv.eventId === event.id).length;
+    const baselineGoing = event.attendees > 0 ? Math.max(1, Math.round(event.attendees * 0.6)) : 8;
+    const baselineMaybe = event.attendees > 0 ? Math.max(0, Math.round(event.attendees * 0.2)) : 3;
+    initializeStats(event.id, {
+      going: baselineGoing,
+      maybe: baselineMaybe,
+      invited,
+      rsvpStatus: sourceRsvp,
+    });
+  }, [event, invitations, initializeStats, sourceRsvp]);
+
+  useEffect(() => {
+    if (!event) return;
+    const invited = invitations.filter((inv) => inv.eventId === event.id).length;
+    setInvitedCount(event.id, invited);
+  }, [event, invitations, setInvitedCount]);
+
+
+  const handleRsvpChange = (status: EventStatus) => {
+    if (!event) return;
+    setRsvpStatus(event.id, status);
+    updateGlobalRsvp(event.id, status);
+    setToast({ message: "Your response updated", variant: "success" });
+    window.setTimeout(() => setToast(null), 2400);
+  };
+
+  if (!event && (hostingLoading || discoverLoading)) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 lg:px-0">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-base font-semibold text-slate-900">Loading event...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!event && fetchError) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 lg:px-0">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-base font-semibold text-slate-900">{fetchError}</p>
+          <Link
+            href="/events"
+            className="mt-4 inline-flex h-10 items-center justify-center rounded-full bg-blue-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+          >
+            Back to events
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 lg:px-0">
+        <Breadcrumb className="text-sm">
+          <BreadcrumbList className="text-slate-500">
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild className="text-slate-500 font-medium hover:text-slate-700">
+                <Link href="/events">Events</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="text-slate-400" />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="font-semibold text-slate-900">Event not found</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-base font-semibold text-slate-900">Event not found</p>
+          <p className="mt-2 text-sm text-slate-600">
+            The event you are looking for does not exist. Please return to events and try again.
+          </p>
+          <Link
+            href="/events"
+            className="mt-4 inline-flex h-10 items-center justify-center rounded-full bg-blue-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+          >
+            Back to events
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Metadata title={`${event.title} | Artium`} />
+      <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 pb-10 pt-6 sm:px-6 lg:px-0">
+        {toast ? (
+          <ToastPortal
+            message={toast.message}
+            variant={toast.variant}
+            onClose={() => setToast(null)}
+          />
+        ) : null}
+
+        <Breadcrumb className="text-sm">
+          <BreadcrumbList>
+            {isHomePageContext ? (
+              <BreadcrumbItem>
+                <BreadcrumbLink
+                  asChild
+                  className="text-slate-500 font-medium hover:text-slate-700"
+                >
+                  <Link href="/homepage">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            ) : source === "events" ? (
+              <BreadcrumbItem>
+                <BreadcrumbLink
+                  asChild
+                  className="text-slate-500 font-medium hover:text-slate-700"
+                >
+                  <Link href="/events">Events</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            ) : event.id.startsWith("home-ev-") ? (
+              <BreadcrumbItem>
+                <BreadcrumbLink
+                  asChild
+                  className="text-slate-500 font-medium hover:text-slate-700"
+                >
+                  <Link href="/homepage">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            ) : (
+              <BreadcrumbItem>
+                <BreadcrumbLink
+                  asChild
+                  className="text-slate-500 font-medium hover:text-slate-700"
+                >
+                  <Link href="/events">Events</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            )}
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="font-semibold text-slate-900">
+                {event.title}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <EventDetailHero
+          event={event}
+          rsvpStatus={currentRsvp}
+          onRsvpChange={handleRsvpChange}
+          onInvite={() => setInviteOpen(true)}
+          onShare={() => setShareOpen(true)}
+          onCopyLink={() => copyLink?.(event.id)}
+          isHosting={isHostingEvent}
+          onDeleteHosting={() => setDeleteOpen(true)}
+          onEditHosting={() => setEditOpen(true)}
+        />
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr] lg:items-start">
+          <EventOverviewCard event={event} />
+          <EventGuestsCard
+            going={goingCount}
+            maybe={maybeCount}
+            invited={invitedCount}
+            onSeeAll={() => {
+              const baseRoute = isHomePageContext ? "/homepage/events" : "/events";
+              router.push({
+                pathname: `${baseRoute}/${event.id}/guests`,
+                query: {
+                  tab: "going",
+                  ...(source ? { source } : {}),
+                },
+              });
+            }}
+          />
+        </div>
+      </div>
+
+      <InviteEventModal
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+        event={event}
+        onInviteSuccess={(_recipientEmails) => {
+          const invited = invitations.filter((inv) => inv.eventId === event.id).length;
+          setInvitedCount(event.id, invited);
+        }}
+      />
+
+      <ShareEventModal open={shareOpen} onOpenChange={setShareOpen} event={event} />
+
+      {isHostingEvent && editingHostingEvent ? (
+        <CreateEventModal
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          editingEvent={editingHostingEvent}
+          onUpdate={async (id, values) => {
+            try {
+              await updateEventFromForm(id, values);
+              setToast({ message: "Event updated successfully", variant: "success" });
+              setEditOpen(false);
+            } catch (error) {
+              console.error(error);
+              setToast({ message: "Failed to update event", variant: "error" });
+            } finally {
+              window.setTimeout(() => setToast(null), 2400);
+            }
+          }}
+        />
+      ) : null}
+
+      {isHostingEvent && event ? (
+        <DeleteEventModal
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          eventTitle={event.title}
+          onConfirm={async () => {
+            await deleteEvent(event.id);
+            router.push("/events");
+          }}
+          onCancel={() => setDeleteOpen(false)}
+        />
+      ) : null}
+    </>
+  );
+};

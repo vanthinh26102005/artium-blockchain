@@ -1,0 +1,12 @@
+{
+  "name": "@backend/orders-service",
+  "version": "1.0.0",
+  "main": "src/main.ts",
+  "private": true,
+  "scripts": {
+    "start": "nest start --webpack --webpackPath webpack-hmr.config.js --watch",
+    "start:dev": "nest start --watch",
+    "build": "nest build"
+  },
+  "dependencies": {}
+}
