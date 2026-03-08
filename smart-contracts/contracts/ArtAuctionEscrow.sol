@@ -18,11 +18,8 @@ contract ArtAuctionEscrow is ReentrancyGuard {
         State state;
     }
 
-    // Mapping from an order ID (provided by the off-chain Backend) to its Auction.
     mapping(string => Auction) public auctions;
 
-    // Mapping to keep track of pending returns for outbid users.
-    // bidders address => amount to withdraw
     mapping(address => uint256) public pendingReturns;
 
     // Events
