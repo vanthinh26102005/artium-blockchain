@@ -32,25 +32,23 @@ contract ArtAuctionEscrow is ReentrancyGuard {
     /**
      * @dev Initializes a new auction.
      * @param orderId The unique string identifier for the order from the off-chain backend.
-     * @param seller The address of the art seller.
      * @param duration The duration of the auction in seconds from the time of creation.
      */
-    function createAuction(string memory orderId, address payable seller, uint256 duration) external {
-        require(seller != address(0), "Auction: Invalid seller address");
+    function createAuction(string memory orderId, uint256 duration) external {
         require(auctions[orderId].seller == address(0), "Auction: Order ID already exists");
         
         uint256 endTime = block.timestamp + duration;
         require(endTime > block.timestamp, "Auction: End time must be in the future");
 
         auctions[orderId] = Auction({
-            seller: seller,
+            seller: payable(msg.sender),
             highestBidder: payable(address(0)),
             highestBid: 0,
             endTime: endTime,
             state: State.Started
         });
 
-        emit AuctionStarted(orderId, seller, endTime);
+        emit AuctionStarted(orderId, msg.sender, endTime);
     }
 
     /**
@@ -64,6 +62,7 @@ contract ArtAuctionEscrow is ReentrancyGuard {
         require(auction.seller != address(0), "Auction: Order does not exist");
         require(auction.state == State.Started, "Auction: Not in Started state");
         require(block.timestamp < auction.endTime, "Auction: Already ended");
+        require(msg.sender != auction.seller, "Auction: Seller cannot bid");
         require(msg.value > auction.highestBid, "Auction: Bid too low");
 
         if (auction.highestBid != 0) {
