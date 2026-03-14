@@ -1,0 +1,17 @@
+{
+  "name": "artium-smart-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for Artium Blockchain",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0",
+    "chai": "^4.2.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2"
+  }
+}
