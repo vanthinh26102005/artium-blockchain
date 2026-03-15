@@ -1,5 +1,8 @@
 
 # Ignore custom review files
+smart_contract_review.md
 todo-list.md
 project_review.md
-
+S2_contract-test-plan.md
+S2_auction-edge-cases-and-drawbacks.md
+node_modules/
