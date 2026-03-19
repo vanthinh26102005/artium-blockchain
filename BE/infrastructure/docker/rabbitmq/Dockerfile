@@ -6,4 +6,4 @@ RUN apt-get update && apt-get install -y curl && \
 
 RUN echo '[rabbitmq_management, rabbitmq_delayed_message_exchange].' > /etc/rabbitmq/enabled_plugins
 
-COPY rabbitmq.conf /etc/rabbitmq/
+COPY infrastructure/docker/rabbitmq/rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
