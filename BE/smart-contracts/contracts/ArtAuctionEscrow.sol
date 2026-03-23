@@ -27,19 +27,32 @@ contract ArtAuctionEscrow is ReentrancyGuard {
         State state;
     }
 
-    address public arbiter;
-    uint256 public platformFeeBps;
-    address payable public platformWallet;
+    // --- Errors ---
 
-    mapping(string => Auction) internal _auctions;
-    mapping(address => uint256) public pendingReturns;
+    error ZeroAddress();
+    error FeeExceedsMaximum(uint256 fee, uint256 max);
+    error AuctionAlreadyExists(string orderId);
+    error AuctionNotFound(string orderId);
+    error InvalidDuration();
+    error InvalidMinBidIncrement();
+    error NotSeller();
+    error NotBuyer();
+    error NotArbiter();
+    error InvalidState(State current, State expected);
+    error AuctionNotExpired();
+    error SellerCannotBid();
+    error BidBelowMinimum(uint256 sent, uint256 required);
+    error BidIncrementTooLow(uint256 sent, uint256 required);
+    error ShippingDeadlinePassed();
+    error ShippingDeadlineNotPassed();
+    error DeliveryDeadlinePassed();
+    error DeliveryDeadlineNotPassed();
+    error DisputeDeadlineNotPassed();
+    error HasExistingBids();
+    error NoFundsToWithdraw();
+    error TransferFailed();
 
-    uint256 public constant ANTI_SNIPE_WINDOW = 10 minutes;
-    uint256 public constant ANTI_SNIPE_EXTENSION = 10 minutes;
-    uint256 public constant SHIPPING_WINDOW = 3 days;
-    uint256 public constant DELIVERY_WINDOW = 14 days;
-    uint256 public constant DISPUTE_WINDOW = 30 days;
-    uint256 public constant MAX_FEE_BPS = 1000;
+    // --- Events ---
 
     event AuctionStarted(string orderId, address indexed seller, uint256 endTime);
     event NewBid(string orderId, address indexed bidder, uint256 amount);
@@ -54,15 +67,65 @@ contract ArtAuctionEscrow is ReentrancyGuard {
     event ShippingTimeout(string orderId, address indexed buyer);
     event DeliveryTimeout(string orderId, address indexed seller);
 
+    // --- State variables ---
+
+    address public arbiter;
+    uint256 public platformFeeBps;
+    address payable public platformWallet;
+
+    mapping(string => Auction) internal _auctions;
+    mapping(address => uint256) public pendingReturns;
+
+    // --- Constants ---
+
+    uint256 public constant ANTI_SNIPE_WINDOW = 10 minutes;
+    uint256 public constant ANTI_SNIPE_EXTENSION = 10 minutes;
+    uint256 public constant SHIPPING_WINDOW = 5 days;
+    uint256 public constant DELIVERY_WINDOW = 14 days;
+    uint256 public constant DISPUTE_WINDOW = 30 days;
+    uint256 public constant MAX_FEE_BPS = 1000;
+
+    // --- Modifiers ---
+
+    modifier auctionExists(string calldata orderId) {
+        if (_auctions[orderId].seller == address(0)) revert AuctionNotFound(orderId);
+        _;
+    }
+
+    modifier onlySeller(string calldata orderId) {
+        if (msg.sender != _auctions[orderId].seller) revert NotSeller();
+        _;
+    }
+
+    modifier onlyBuyer(string calldata orderId) {
+        if (msg.sender != _auctions[orderId].highestBidder) revert NotBuyer();
+        _;
+    }
+
+    modifier onlyArbiter() {
+        if (msg.sender != arbiter) revert NotArbiter();
+        _;
+    }
+
+    modifier inState(string calldata orderId, State expected) {
+        State current = _auctions[orderId].state;
+        if (current != expected) revert InvalidState(current, expected);
+        _;
+    }
+
+    // --- Constructor ---
+
     constructor(address _arbiter, address payable _platformWallet, uint256 _platformFeeBps) {
-        require(_arbiter != address(0), "Auction: Invalid arbiter address");
-        require(_platformWallet != address(0), "Auction: Invalid platform wallet");
-        require(_platformFeeBps <= MAX_FEE_BPS, "Auction: Fee exceeds maximum");
+        if (_arbiter == address(0)) revert ZeroAddress();
+        if (_platformWallet == address(0)) revert ZeroAddress();
+        if (_platformFeeBps > MAX_FEE_BPS) revert FeeExceedsMaximum(_platformFeeBps, MAX_FEE_BPS);
 
         arbiter = _arbiter;
         platformWallet = _platformWallet;
         platformFeeBps = _platformFeeBps;
     }
+
+    // --- External functions ---
 
     /// @notice Creates a new auction for a physical art piece.
     /// @param orderId Unique identifier from the off-chain backend.
@@ -71,15 +134,15 @@ contract ArtAuctionEscrow is ReentrancyGuard {
     /// @param minBidIncrement Minimum increment between bids.
     /// @param ipfsHash IPFS hash for art metadata and provenance.
     function createAuction(
-        string memory orderId,
+        string calldata orderId,
         uint256 duration,
         uint256 reservePrice,
         uint256 minBidIncrement,
-        string memory ipfsHash
+        string calldata ipfsHash
     ) external {
-        require(_auctions[orderId].seller == address(0), "Auction: Order ID already exists");
-        require(duration > 0, "Auction: Duration must be greater than zero");
-        require(minBidIncrement > 0, "Auction: Min bid increment must be greater than zero");
+        if (_auctions[orderId].seller != address(0)) revert AuctionAlreadyExists(orderId);
+        if (duration == 0) revert InvalidDuration();
+        if (minBidIncrement == 0) revert InvalidMinBidIncrement();
 
         uint256 endTime = block.timestamp + duration;
 
@@ -104,21 +167,27 @@ contract ArtAuctionEscrow is ReentrancyGuard {
 
     /// @notice Places a bid on an active auction. Implements anti-snipe extension.
     /// @param orderId The auction to bid on.
-    function bid(string memory orderId) external payable nonReentrant {
+    function bid(string calldata orderId)
+        external
+        payable
+        nonReentrant
+        auctionExists(orderId)
+        inState(orderId, State.Started)
+    {
         Auction storage auction = _auctions[orderId];
 
-        require(auction.seller != address(0), "Auction: Order does not exist");
-        require(auction.state == State.Started, "Auction: Not in Started state");
-        require(block.timestamp < auction.endTime, "Auction: Already ended");
-        require(msg.sender != auction.seller, "Auction: Seller cannot bid");
+        if (block.timestamp >= auction.endTime) revert AuctionNotExpired();
+        if (msg.sender == auction.seller) revert SellerCannotBid();
 
         if (auction.highestBidder == address(0)) {
-            require(msg.value >= auction.minBidIncrement, "Auction: Bid below minimum");
+            if (msg.value < auction.minBidIncrement) {
+                revert BidBelowMinimum(msg.value, auction.minBidIncrement);
+            }
         } else {
-            require(
-                msg.value >= auction.highestBid + auction.minBidIncrement,
-                "Auction: Bid increment too low"
-            );
+            uint256 required = auction.highestBid + auction.minBidIncrement;
+            if (msg.value < required) {
+                revert BidIncrementTooLow(msg.value, required);
+            }
         }
 
         if (auction.highestBid != 0) {
@@ -138,13 +207,15 @@ contract ArtAuctionEscrow is ReentrancyGuard {
 
     /// @notice Ends the auction. Moves to Ended if reserve met, Cancelled otherwise.
     /// @param orderId The auction to end.
-    function endAuction(string memory orderId) external {
+    function endAuction(string calldata orderId)
+        external
+        auctionExists(orderId)
+        onlySeller(orderId)
+        inState(orderId, State.Started)
+    {
         Auction storage auction = _auctions[orderId];
 
-        require(auction.seller != address(0), "Auction: Order does not exist");
-        require(msg.sender == auction.seller, "Auction: Only seller can end");
-        require(auction.state == State.Started, "Auction: Not in Started state");
-        require(block.timestamp >= auction.endTime, "Auction: Auction time has not expired");
+        if (block.timestamp < auction.endTime) revert AuctionNotExpired();
 
         if (auction.highestBid >= auction.reservePrice && auction.highestBidder != address(0)) {
             auction.state = State.Ended;
@@ -161,12 +232,14 @@ contract ArtAuctionEscrow is ReentrancyGuard {
 
     /// @notice Cancels an auction that has received no bids.
     /// @param orderId The auction to cancel.
-    function cancelAuction(string memory orderId) external {
+    function cancelAuction(string calldata orderId)
+        external
+        onlySeller(orderId)
+        inState(orderId, State.Started)
+    {
         Auction storage auction = _auctions[orderId];
 
-        require(msg.sender == auction.seller, "Auction: Only seller can cancel");
-        require(auction.state == State.Started, "Auction: Not in Started state");
-        require(auction.highestBidder == address(0), "Auction: Cannot cancel with bids");
+        if (auction.highestBidder != address(0)) revert HasExistingBids();
 
         auction.state = State.Cancelled;
         emit AuctionCancelled(orderId, "Cancelled by seller");
@@ -175,12 +248,14 @@ contract ArtAuctionEscrow is ReentrancyGuard {
     /// @notice Seller marks the art as shipped with tracking proof.
     /// @param orderId The auction order.
     /// @param _trackingHash Proof of shipment (e.g., IPFS hash of tracking info).
-    function markShipped(string memory orderId, string memory _trackingHash) external {
+    function markShipped(string calldata orderId, string calldata _trackingHash)
+        external
+        onlySeller(orderId)
+        inState(orderId, State.Ended)
+    {
         Auction storage auction = _auctions[orderId];
 
-        require(msg.sender == auction.seller, "Auction: Only seller can ship");
-        require(auction.state == State.Ended, "Auction: Not in Ended state");
-        require(block.timestamp <= auction.shippingDeadline, "Auction: Shipping deadline passed");
+        if (block.timestamp > auction.shippingDeadline) revert ShippingDeadlinePassed();
 
         auction.trackingHash = _trackingHash;
         auction.deliveryDeadline = block.timestamp + DELIVERY_WINDOW;
@@ -191,11 +266,13 @@ contract ArtAuctionEscrow is ReentrancyGuard {
 
     /// @notice Buyer confirms delivery, releasing funds to the seller.
     /// @param orderId The auction order.
-    function confirmDelivery(string memory orderId) external nonReentrant {
+    function confirmDelivery(string calldata orderId)
+        external
+        nonReentrant
+        onlyBuyer(orderId)
+        inState(orderId, State.Shipped)
+    {
         Auction storage auction = _auctions[orderId];
-
-        require(msg.sender == auction.highestBidder, "Auction: Only winner can confirm");
-        require(auction.state == State.Shipped, "Auction: Not in Shipped state");
 
         _paySellerWithFee(auction);
         auction.state = State.Completed;
@@ -205,11 +282,13 @@ contract ArtAuctionEscrow is ReentrancyGuard {
 
     /// @notice Claims refund when seller fails to ship within the deadline.
     /// @param orderId The auction order.
-    function claimShippingTimeout(string memory orderId) external {
+    function claimShippingTimeout(string calldata orderId)
+        external
+        inState(orderId, State.Ended)
+    {
         Auction storage auction = _auctions[orderId];
 
-        require(auction.state == State.Ended, "Auction: Not in Ended state");
-        require(block.timestamp > auction.shippingDeadline, "Auction: Shipping deadline not passed");
+        if (block.timestamp <= auction.shippingDeadline) revert ShippingDeadlineNotPassed();
 
         pendingReturns[auction.highestBidder] += auction.highestBid;
         auction.state = State.Cancelled;
@@ -220,12 +299,14 @@ contract ArtAuctionEscrow is ReentrancyGuard {
     /// @notice Buyer opens a dispute during the delivery window.
     /// @param orderId The auction order.
     /// @param reason Description of the dispute.
-    function openDispute(string memory orderId, string memory reason) external {
+    function openDispute(string calldata orderId, string calldata reason)
+        external
+        onlyBuyer(orderId)
+        inState(orderId, State.Shipped)
+    {
         Auction storage auction = _auctions[orderId];
 
-        require(msg.sender == auction.highestBidder, "Auction: Only buyer can dispute");
-        require(auction.state == State.Shipped, "Auction: Not in Shipped state");
-        require(block.timestamp <= auction.deliveryDeadline, "Auction: Delivery deadline passed");
+        if (block.timestamp > auction.deliveryDeadline) revert DeliveryDeadlinePassed();
 
         auction.disputeDeadline = block.timestamp + DISPUTE_WINDOW;
         auction.state = State.Disputed;
@@ -236,11 +317,13 @@ contract ArtAuctionEscrow is ReentrancyGuard {
     /// @notice Arbiter resolves a dispute in favor of buyer or seller.
     /// @param orderId The auction order.
     /// @param favorBuyer True to refund buyer, false to pay seller.
-    function resolveDispute(string memory orderId, bool favorBuyer) external nonReentrant {
+    function resolveDispute(string calldata orderId, bool favorBuyer)
+        external
+        nonReentrant
+        onlyArbiter
+        inState(orderId, State.Disputed)
+    {
         Auction storage auction = _auctions[orderId];
-
-        require(msg.sender == arbiter, "Auction: Only arbiter can resolve");
-        require(auction.state == State.Disputed, "Auction: Not in Disputed state");
 
         if (favorBuyer) {
             pendingReturns[auction.highestBidder] += auction.highestBid;
@@ -255,12 +338,15 @@ contract ArtAuctionEscrow is ReentrancyGuard {
 
     /// @notice Seller claims funds when buyer does not confirm or dispute within the delivery window.
     /// @param orderId The auction order.
-    function claimDeliveryTimeout(string memory orderId) external nonReentrant {
+    function claimDeliveryTimeout(string calldata orderId)
+        external
+        nonReentrant
+        onlySeller(orderId)
+        inState(orderId, State.Shipped)
+    {
         Auction storage auction = _auctions[orderId];
 
-        require(msg.sender == auction.seller, "Auction: Only seller can claim");
-        require(auction.state == State.Shipped, "Auction: Not in Shipped state");
-        require(block.timestamp > auction.deliveryDeadline, "Auction: Delivery deadline not passed");
+        if (block.timestamp <= auction.deliveryDeadline) revert DeliveryDeadlineNotPassed();
 
         _paySellerWithFee(auction);
         auction.state = State.Completed;
@@ -270,12 +356,14 @@ contract ArtAuctionEscrow is ReentrancyGuard {
 
     /// @notice Buyer claims refund when arbiter does not resolve a dispute in time.
     /// @param orderId The auction order.
-    function claimDisputeTimeout(string memory orderId) external {
+    function claimDisputeTimeout(string calldata orderId)
+        external
+        onlyBuyer(orderId)
+        inState(orderId, State.Disputed)
+    {
         Auction storage auction = _auctions[orderId];
 
-        require(msg.sender == auction.highestBidder, "Auction: Only buyer can claim");
-        require(auction.state == State.Disputed, "Auction: Not in Disputed state");
-        require(block.timestamp > auction.disputeDeadline, "Auction: Dispute deadline not passed");
+        if (block.timestamp <= auction.disputeDeadline) revert DisputeDeadlineNotPassed();
 
         pendingReturns[auction.highestBidder] += auction.highestBid;
         auction.state = State.Cancelled;
@@ -284,7 +372,7 @@ contract ArtAuctionEscrow is ReentrancyGuard {
     }
 
     /// @notice Returns core auction data (participants and bid info).
-    function getAuction(string memory orderId)
+    function getAuction(string calldata orderId)
         external
         view
         returns (
@@ -312,7 +400,7 @@ contract ArtAuctionEscrow is ReentrancyGuard {
     }
 
     /// @notice Returns timeline and shipping details for an auction.
-    function getAuctionTimeline(string memory orderId)
+    function getAuctionTimeline(string calldata orderId)
         external
         view
         returns (
@@ -336,15 +424,17 @@ contract ArtAuctionEscrow is ReentrancyGuard {
     /// @notice Withdraw accumulated pending returns from outbid or refunded amounts.
     function withdraw() external nonReentrant {
         uint256 amount = pendingReturns[msg.sender];
-        require(amount > 0, "Auction: No funds to withdraw");
+        if (amount == 0) revert NoFundsToWithdraw();
 
         pendingReturns[msg.sender] = 0;
 
         (bool success, ) = payable(msg.sender).call{value: amount}("");
-        require(success, "Auction: Transfer failed");
+        if (!success) revert TransferFailed();
 
         emit Withdrawn(msg.sender, amount);
     }
+
+    // --- Internal functions ---
 
     /// @dev Splits payment between platform (fee) and seller (remainder).
     function _paySellerWithFee(Auction storage auction) internal {
@@ -354,10 +444,10 @@ contract ArtAuctionEscrow is ReentrancyGuard {
 
         if (fee > 0) {
             (bool feeSuccess, ) = platformWallet.call{value: fee}("");
-            require(feeSuccess, "Auction: Platform fee transfer failed");
+            if (!feeSuccess) revert TransferFailed();
         }
 
         (bool sellerSuccess, ) = auction.seller.call{value: sellerAmount}("");
-        require(sellerSuccess, "Auction: Seller transfer failed");
+        if (!sellerSuccess) revert TransferFailed();
     }
 }

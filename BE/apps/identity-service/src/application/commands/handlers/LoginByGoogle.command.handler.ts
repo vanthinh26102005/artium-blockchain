@@ -92,6 +92,7 @@ export class LoginByGoogleHandler implements ICommandHandler<
           avatarUrl: avatarUrl ?? null,
           fullName: fullName ?? null,
           googleId,
+          walletAddress: null,
           password: randomPassword,
           isEmailVerified: true,
           roles: [UserRole.COLLECTOR],

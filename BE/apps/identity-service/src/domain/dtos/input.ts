@@ -98,6 +98,18 @@ export class EmailLoginInput {
   @MinLength(6)
   password: string;
 }
+export class WalletLoginInput {
+  @ApiProperty({ description: 'SIWE message signed by the wallet' })
+  @IsString()
+  @IsNotEmpty()
+  message: string;
+
+  @ApiProperty({ description: 'Signature produced by the wallet' })
+  @IsString()
+  @IsNotEmpty()
+  signature: string;
+}
+
 export class BusinessAddressInput {
   @ApiProperty({ required: false })
   @IsOptional()

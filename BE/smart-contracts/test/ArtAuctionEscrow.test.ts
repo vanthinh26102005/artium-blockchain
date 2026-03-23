@@ -7,39 +7,67 @@ describe("ArtAuctionEscrow", function () {
   let seller: any;
   let bidder1: any;
   let bidder2: any;
+  let arbiter: any;
+  let platformWallet: any;
 
   const orderId = "ORDER_12345";
   const duration = 60 * 60; // 1 hour
+  const reservePrice = ethers.parseEther("0.5");
+  const minBidIncrement = ethers.parseEther("0.1");
+  const ipfsHash = "QmTestHash123";
+  const platformFeeBps = 250n; // 2.5%
+
+  async function createDefaultAuction(signer: any, id: string = orderId) {
+    return artAuction
+      .connect(signer)
+      .createAuction(id, duration, reservePrice, minBidIncrement, ipfsHash);
+  }
+
+  async function fastForwardPastAuction() {
+    await ethers.provider.send("evm_increaseTime", [duration + 10]);
+    await ethers.provider.send("evm_mine", []);
+  }
+
+  async function endAndShip(id: string = orderId) {
+    await artAuction.connect(seller).endAuction(id);
+    await artAuction.connect(seller).markShipped(id, "QmTrackingHash");
+  }
 
   beforeEach(async function () {
-    [owner, seller, bidder1, bidder2] = await ethers.getSigners();
+    [owner, seller, bidder1, bidder2, arbiter, platformWallet] =
+      await ethers.getSigners();
     const ArtAuctionEscrowFactory =
       await ethers.getContractFactory("ArtAuctionEscrow");
-    artAuction = await ArtAuctionEscrowFactory.deploy();
+    artAuction = await ArtAuctionEscrowFactory.deploy(
+      arbiter.address,
+      platformWallet.address,
+      platformFeeBps,
+    );
   });
 
   describe("createAuction", function () {
     it("should initialize auction properly", async function () {
-      await expect(
-        artAuction.connect(seller).createAuction(orderId, duration),
-      ).to.emit(artAuction, "AuctionStarted");
+      await expect(createDefaultAuction(seller)).to.emit(
+        artAuction,
+        "AuctionStarted",
+      );
 
-      const auction = await artAuction.auctions(orderId);
+      const auction = await artAuction.getAuction(orderId);
       expect(auction.seller).to.equal(seller.address);
       expect(auction.state).to.equal(0); // State.Started
     });
 
     it("should revert if auction already exists", async function () {
-      await artAuction.connect(seller).createAuction(orderId, duration);
-      await expect(
-        artAuction.connect(seller).createAuction(orderId, duration),
-      ).to.be.revertedWith("Auction: Order ID already exists");
+      await createDefaultAuction(seller);
+      await expect(createDefaultAuction(seller))
+        .to.be.revertedWithCustomError(artAuction, "AuctionAlreadyExists")
+        .withArgs(orderId);
     });
   });
 
   describe("bid", function () {
     beforeEach(async function () {
-      await artAuction.connect(seller).createAuction(orderId, duration);
+      await createDefaultAuction(seller);
     });
 
     it("should accept a new higher bid and emit event", async function () {
@@ -51,19 +79,19 @@ describe("ArtAuctionEscrow", function () {
         .to.emit(artAuction, "NewBid")
         .withArgs(orderId, bidder1.address, bidAmount);
 
-      const auction = await artAuction.auctions(orderId);
+      const auction = await artAuction.getAuction(orderId);
       expect(auction.highestBidder).to.equal(bidder1.address);
       expect(auction.highestBid).to.equal(bidAmount);
     });
 
-    it("should fail if bid is lower than highest bid", async function () {
+    it("should fail if bid increment is too low", async function () {
       const bidAmount1 = ethers.parseEther("2.0");
       await artAuction.connect(bidder1).bid(orderId, { value: bidAmount1 });
 
       const bidAmount2 = ethers.parseEther("1.0");
       await expect(
         artAuction.connect(bidder2).bid(orderId, { value: bidAmount2 }),
-      ).to.be.revertedWith("Auction: Bid too low");
+      ).to.be.revertedWithCustomError(artAuction, "BidIncrementTooLow");
     });
 
     it("should accurately track pending returns for outbid users", async function () {
@@ -77,57 +105,55 @@ describe("ArtAuctionEscrow", function () {
       expect(pendingBalance).to.equal(bidAmount1);
     });
 
-    it("should revert bid when auction already ended (TC-09)", async function () {
-      await ethers.provider.send("evm_increaseTime", [duration + 10]);
-      await ethers.provider.send("evm_mine", []);
+    it("should revert bid when auction time has expired", async function () {
+      await fastForwardPastAuction();
 
       const bidAmount = ethers.parseEther("1.0");
       await expect(
         artAuction.connect(bidder1).bid(orderId, { value: bidAmount }),
-      ).to.be.revertedWith("Auction: Already ended");
+      ).to.be.revertedWithCustomError(artAuction, "AuctionNotExpired");
     });
 
-    it("should revert bid when auction not in Started state (TC-10)", async function () {
-      await ethers.provider.send("evm_increaseTime", [duration + 10]);
-      await ethers.provider.send("evm_mine", []);
-      await artAuction.endAuction(orderId);
+    it("should revert bid when auction not in Started state", async function () {
+      await fastForwardPastAuction();
+      await artAuction.connect(seller).endAuction(orderId);
 
       const bidAmount = ethers.parseEther("1.0");
       await expect(
         artAuction.connect(bidder1).bid(orderId, { value: bidAmount }),
-      ).to.be.revertedWith("Auction: Not in Started state");
+      ).to.be.revertedWithCustomError(artAuction, "InvalidState");
     });
 
-    it("should allow sniping at the last second (TC-11)", async function () {
+    it("should extend auction via anti-snipe when bid is placed near end", async function () {
       const bidAmount1 = ethers.parseEther("1.0");
       await artAuction.connect(bidder1).bid(orderId, { value: bidAmount1 });
 
-      // Fast forward to exactly 5 seconds before end
-      await ethers.provider.send("evm_increaseTime", [duration - 5]); // -5 + 1 sec execution time
+      await ethers.provider.send("evm_increaseTime", [duration - 5]);
       await ethers.provider.send("evm_mine", []);
 
       const bidAmount2 = ethers.parseEther("2.0");
       await expect(
         artAuction.connect(bidder2).bid(orderId, { value: bidAmount2 }),
-      ).to.emit(artAuction, "NewBid");
+      )
+        .to.emit(artAuction, "AuctionExtended")
+        .and.to.emit(artAuction, "NewBid");
 
-      const auction = await artAuction.auctions(orderId);
+      const auction = await artAuction.getAuction(orderId);
       expect(auction.highestBidder).to.equal(bidder2.address);
     });
 
-    it("should revert if seller tries to self-bid (TC-12)", async function () {
+    it("should revert if seller tries to self-bid", async function () {
       const bidAmount = ethers.parseEther("1.0");
       await expect(
         artAuction.connect(seller).bid(orderId, { value: bidAmount }),
-      ).to.be.revertedWith("Auction: Seller cannot bid");
+      ).to.be.revertedWithCustomError(artAuction, "SellerCannotBid");
     });
   });
 
   describe("withdraw", function () {
     beforeEach(async function () {
-      await artAuction.connect(seller).createAuction(orderId, duration);
+      await createDefaultAuction(seller);
 
-      // bidder1 outbid by bidder2
       await artAuction
         .connect(bidder1)
         .bid(orderId, { value: ethers.parseEther("1.0") });
@@ -144,101 +170,190 @@ describe("ArtAuctionEscrow", function () {
       const gasUsed = receipt.gasUsed * receipt.gasPrice;
 
       const finalBalance = await ethers.provider.getBalance(bidder1.address);
-
-      // Final balance should be (Initial + 1 ETH) - Gas
       const expectedBalance =
         initialBalance + ethers.parseEther("1.0") - BigInt(gasUsed);
 
       expect(finalBalance).to.equal(expectedBalance);
     });
 
-    it("should revert withdraw if no funds exist (TC-14)", async function () {
+    it("should revert withdraw if no funds exist", async function () {
       await expect(
-        artAuction.connect(owner).withdraw(), // owner never bid
-      ).to.be.revertedWith("Auction: No funds to withdraw");
+        artAuction.connect(owner).withdraw(),
+      ).to.be.revertedWithCustomError(artAuction, "NoFundsToWithdraw");
     });
 
-    it("should prevent re-entrancy attack on withdraw (TC-15)", async function () {
+    it("should prevent re-entrancy by zeroing balance before transfer", async function () {
       const tx = await artAuction.connect(bidder1).withdraw();
       await tx.wait();
 
       const pendingBalance = await artAuction.pendingReturns(bidder1.address);
-      expect(pendingBalance).to.equal(0);   
+      expect(pendingBalance).to.equal(0);
     });
   });
 
-  describe("endAuction & confirmDelivery", function () {
-    beforeEach(async function () {
-      await artAuction.connect(seller).createAuction(orderId, duration);
+  describe("endAuction", function () {
+    it("should end auction with reserve met and emit AuctionEnded", async function () {
+      await createDefaultAuction(seller);
       await artAuction
         .connect(bidder1)
         .bid(orderId, { value: ethers.parseEther("3.0") });
-    });
 
-    it("should end auction securely after time expires", async function () {
-      // Fast forward time
-      await ethers.provider.send("evm_increaseTime", [duration + 10]);
-      await ethers.provider.send("evm_mine", []);
+      await fastForwardPastAuction();
 
-      await expect(artAuction.endAuction(orderId))
+      await expect(artAuction.connect(seller).endAuction(orderId))
         .to.emit(artAuction, "AuctionEnded")
         .withArgs(orderId, bidder1.address, ethers.parseEther("3.0"));
 
-      const auction = await artAuction.auctions(orderId);
+      const auction = await artAuction.getAuction(orderId);
       expect(auction.state).to.equal(1); // State.Ended
     });
 
-    it("should revert endAuction if time has not expired (TC-17)", async function () {
-      await expect(artAuction.endAuction(orderId)).to.be.revertedWith(
-        "Auction: Auction time has not expired",
-      );
+    it("should cancel auction when reserve price is not met", async function () {
+      await createDefaultAuction(seller);
+      await artAuction
+        .connect(bidder1)
+        .bid(orderId, { value: ethers.parseEther("0.1") });
+
+      await fastForwardPastAuction();
+
+      await expect(artAuction.connect(seller).endAuction(orderId))
+        .to.emit(artAuction, "AuctionCancelled")
+        .withArgs(orderId, "Reserve price not met");
+
+      const auction = await artAuction.getAuction(orderId);
+      expect(auction.state).to.equal(5); // State.Cancelled
+
+      const pendingBalance = await artAuction.pendingReturns(bidder1.address);
+      expect(pendingBalance).to.equal(ethers.parseEther("0.1"));
     });
 
-    it("should revert endAuction for non-existent order (TC-18)", async function () {
-      await expect(artAuction.endAuction("INVALID_ORDER")).to.be.revertedWith(
-        "Auction: Order does not exist",
-      );
+    it("should revert endAuction if time has not expired", async function () {
+      await createDefaultAuction(seller);
+      await expect(
+        artAuction.connect(seller).endAuction(orderId),
+      ).to.be.revertedWithCustomError(artAuction, "AuctionNotExpired");
     });
 
-    it("should revert endAuction if already ended (TC-19)", async function () {
-      await ethers.provider.send("evm_increaseTime", [duration + 10]);
-      await ethers.provider.send("evm_mine", []);
-      
-      await artAuction.endAuction(orderId);
-
-      // Call again
-      await expect(artAuction.endAuction(orderId)).to.be.revertedWith(
-        "Auction: Already ended or not started",
-      );
+    it("should revert endAuction for non-existent order", async function () {
+      await expect(
+        artAuction.connect(seller).endAuction("INVALID_ORDER"),
+      ).to.be.revertedWithCustomError(artAuction, "AuctionNotFound");
     });
 
-    it("should end auction even with no bids (TC-20)", async function () {
+    it("should revert endAuction if already ended", async function () {
+      await createDefaultAuction(seller);
+      await artAuction
+        .connect(bidder1)
+        .bid(orderId, { value: ethers.parseEther("3.0") });
+
+      await fastForwardPastAuction();
+      await artAuction.connect(seller).endAuction(orderId);
+
+      await expect(
+        artAuction.connect(seller).endAuction(orderId),
+      ).to.be.revertedWithCustomError(artAuction, "InvalidState");
+    });
+
+    it("should cancel auction with no bids since reserve is not met", async function () {
       const emptyOrderId = "EMPTY_ORDER";
-      await artAuction.connect(seller).createAuction(emptyOrderId, duration);
+      await createDefaultAuction(seller, emptyOrderId);
 
-      await ethers.provider.send("evm_increaseTime", [duration + 10]);
-      await ethers.provider.send("evm_mine", []);
+      await fastForwardPastAuction();
 
-      await expect(artAuction.endAuction(emptyOrderId))
-        .to.emit(artAuction, "AuctionEnded")
-        .withArgs(emptyOrderId, ethers.ZeroAddress, 0);
+      await expect(artAuction.connect(seller).endAuction(emptyOrderId))
+        .to.emit(artAuction, "AuctionCancelled")
+        .withArgs(emptyOrderId, "Reserve price not met");
 
-      const auction = await artAuction.auctions(emptyOrderId);
-      expect(auction.state).to.equal(1); // Ended
+      const auction = await artAuction.getAuction(emptyOrderId);
+      expect(auction.state).to.equal(5); // State.Cancelled
       expect(auction.highestBidder).to.equal(ethers.ZeroAddress);
     });
+  });
 
-    it("should revert confirmDelivery if auction not ended", async function () {
-      await expect(
-        artAuction.connect(bidder1).confirmDelivery(orderId),
-      ).to.be.revertedWith("Auction: Not in Ended state");
+  describe("confirmDelivery", function () {
+    beforeEach(async function () {
+      await createDefaultAuction(seller);
+      await artAuction
+        .connect(bidder1)
+        .bid(orderId, { value: ethers.parseEther("3.0") });
+
+      await fastForwardPastAuction();
     });
 
-    it("should confirm delivery, transfer funds, and complete state", async function () {
-      // Simulate ended auction
-      await ethers.provider.send("evm_increaseTime", [duration + 10]);
-      await ethers.provider.send("evm_mine", []);
-      await artAuction.endAuction(orderId);
+    it("should revert confirmDelivery if auction is not in Shipped state", async function () {
+      await expect(
+        artAuction.connect(bidder1).confirmDelivery(orderId),
+      ).to.be.revertedWithCustomError(artAuction, "InvalidState");
+    });
+
+    it("should confirm delivery, deduct platform fee, and transfer funds to seller", async function () {
+      await endAndShip();
+
+      const initialSellerBalance = await ethers.provider.getBalance(
+        seller.address,
+      );
+      const initialPlatformBalance = await ethers.provider.getBalance(
+        platformWallet.address,
+      );
+
+      await expect(artAuction.connect(bidder1).confirmDelivery(orderId))
+        .to.emit(artAuction, "DeliveryConfirmed")
+        .withArgs(orderId, bidder1.address);
+
+      const auction = await artAuction.getAuction(orderId);
+      expect(auction.state).to.equal(4); // State.Completed
+
+      const totalBid = ethers.parseEther("3.0");
+      const expectedFee = (totalBid * platformFeeBps) / 10000n;
+      const expectedSellerAmount = totalBid - expectedFee;
+
+      const finalSellerBalance = await ethers.provider.getBalance(
+        seller.address,
+      );
+      expect(finalSellerBalance).to.equal(
+        initialSellerBalance + expectedSellerAmount,
+      );
+
+      const finalPlatformBalance = await ethers.provider.getBalance(
+        platformWallet.address,
+      );
+      expect(finalPlatformBalance).to.equal(
+        initialPlatformBalance + expectedFee,
+      );
+    });
+
+    it("should only allow highest bidder to confirm delivery", async function () {
+      await endAndShip();
+
+      await expect(
+        artAuction.connect(owner).confirmDelivery(orderId),
+      ).to.be.revertedWithCustomError(artAuction, "NotBuyer");
+    });
+  });
+
+  describe("Full lifecycle", function () {
+    it("should complete create → bid → end → ship → confirm delivery", async function () {
+      await expect(createDefaultAuction(seller)).to.emit(
+        artAuction,
+        "AuctionStarted",
+      );
+
+      const bidAmount = ethers.parseEther("3.0");
+      await expect(
+        artAuction.connect(bidder1).bid(orderId, { value: bidAmount }),
+      ).to.emit(artAuction, "NewBid");
+
+      await fastForwardPastAuction();
+
+      await expect(artAuction.connect(seller).endAuction(orderId))
+        .to.emit(artAuction, "AuctionEnded")
+        .withArgs(orderId, bidder1.address, bidAmount);
+
+      await expect(
+        artAuction
+          .connect(seller)
+          .markShipped(orderId, "QmTrackingHash"),
+      ).to.emit(artAuction, "ArtShipped");
 
       const initialSellerBalance = await ethers.provider.getBalance(
         seller.address,
@@ -248,25 +363,18 @@ describe("ArtAuctionEscrow", function () {
         .to.emit(artAuction, "DeliveryConfirmed")
         .withArgs(orderId, bidder1.address);
 
-      const auction = await artAuction.auctions(orderId);
-      expect(auction.state).to.equal(2); // State.Completed
+      const auction = await artAuction.getAuction(orderId);
+      expect(auction.state).to.equal(4); // State.Completed
+
+      const expectedFee = (bidAmount * platformFeeBps) / 10000n;
+      const expectedSellerAmount = bidAmount - expectedFee;
 
       const finalSellerBalance = await ethers.provider.getBalance(
         seller.address,
       );
       expect(finalSellerBalance).to.equal(
-        initialSellerBalance + ethers.parseEther("3.0"),
+        initialSellerBalance + expectedSellerAmount,
       );
-    });
-
-    it("should only allow highest bidder to confirm delivery", async function () {
-      await ethers.provider.send("evm_increaseTime", [duration + 10]);
-      await ethers.provider.send("evm_mine", []);
-      await artAuction.endAuction(orderId);
-
-      await expect(
-        artAuction.connect(owner).confirmDelivery(orderId),
-      ).to.be.revertedWith("Auction: Only winner can confirm");
     });
   });
 });

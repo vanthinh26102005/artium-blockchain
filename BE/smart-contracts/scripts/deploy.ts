@@ -3,6 +3,16 @@ import * as fs from "fs";
 import * as path from "path";
 
 async function main() {
+  const arbiter = process.env.ARBITER_ADDRESS;
+  const platformWallet = process.env.PLATFORM_WALLET_ADDRESS;
+  const feeBps = process.env.PLATFORM_FEE_BPS;
+
+  if (!arbiter || !platformWallet || !feeBps) {
+    throw new Error(
+      "Missing required env vars: ARBITER_ADDRESS, PLATFORM_WALLET_ADDRESS, PLATFORM_FEE_BPS"
+    );
+  }
+
   const [deployer] = await ethers.getSigners();
   const balance = await ethers.provider.getBalance(deployer.address);
 
@@ -12,7 +22,11 @@ async function main() {
   console.log("Balance:", ethers.formatEther(balance), "ETH");
   console.log("==========================================");
 
-  const contract = await ethers.deployContract("ArtAuctionEscrow");
+  const contract = await ethers.deployContract("ArtAuctionEscrow", [
+    arbiter,
+    platformWallet,
+    feeBps,
+  ]);
   await contract.waitForDeployment();
 
   const contractAddress = await contract.getAddress();
@@ -50,16 +64,13 @@ async function main() {
   );
   console.log(`\nDeployment info saved to deployments/${network.name}.json`);
 
-  // Optional: Etherscan verification
-  // Requires ETHERSCAN_API_KEY in .env
-  // ArtAuctionEscrow has no constructor arguments, so args array is empty
   if (process.env.ETHERSCAN_API_KEY) {
     console.log("\nWaiting 5 blocks before verification...");
     await new Promise((r) => setTimeout(r, 60_000)); // ~60s for blocks to index
     try {
       await run("verify:verify", {
         address: contractAddress,
-        constructorArguments: [],
+        constructorArguments: [arbiter, platformWallet, feeBps],
       });
       console.log("✅ Contract verified on Etherscan");
     } catch (e: any) {

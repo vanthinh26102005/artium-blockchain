@@ -22,6 +22,7 @@ export * from './dtos/artworks/tags/update-tag.input';
 export * from './dtos/identity/get-user-profile.dto';
 export * from './dtos/identity/login-email.dto';
 export * from './dtos/identity/login-google.dto';
+export * from './dtos/identity/login-wallet.dto';
 export * from './dtos/identity/password-reset-confirm.dto';
 export * from './dtos/identity/password-reset-request.dto';
 export * from './dtos/identity/password-reset-verify.dto';

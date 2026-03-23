@@ -17,9 +17,16 @@ async function main() {
   const balance = await ethers.provider.getBalance(deployer.address);
   console.log("Account balance:", ethers.formatEther(balance), "ETH");
 
-  // Deploy ArtAuctionEscrow
+  const arbiter = deployer.address;
+  const platformWallet = signers[1]?.address ?? deployer.address;
+  const feeBps = 250;
+
   console.log("\n⏳ Đang deploy ArtAuctionEscrow...");
-  const artAuctionEscrow = await ethers.deployContract("ArtAuctionEscrow");
+  const artAuctionEscrow = await ethers.deployContract("ArtAuctionEscrow", [
+    arbiter,
+    platformWallet,
+    feeBps,
+  ]);
   await artAuctionEscrow.waitForDeployment();
 
   const contractAddress = await artAuctionEscrow.getAddress();

@@ -1,5 +1,6 @@
 export * from './login-email.dto';
 export * from './login-google.dto';
+export * from './login-wallet.dto';
 export * from './register-initiate.dto';
 export * from './register-complete.dto';
 export * from './password-reset-request.dto';
