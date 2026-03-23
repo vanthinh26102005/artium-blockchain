@@ -1,4 +1,5 @@
 export * from './artwork-status.enum';
+export * from './escrow-state.enum';
 export * from './discount-type.enum';
 export * from './event.enum';
 export * from './invoice-status.enum';

@@ -60,6 +60,7 @@ export * from './dtos/users/user.payload';
 export * from './entities/abstract.entity';
 export * from './enums/artwork-status.enum';
 export * from './enums/discount-type.enum';
+export * from './enums/escrow-state.enum';
 export * from './enums/event.enum';
 export * from './enums/invoice-status.enum';
 export * from './enums/media-type.enum';
