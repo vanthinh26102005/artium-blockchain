@@ -1,4 +1,4 @@
-import { DynamicModule, Global, Logger, Module } from '@nestjs/common';
+import { DynamicModule, Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import { OutboxModule } from '@app/outbox';
@@ -13,12 +13,12 @@ import { EscrowContractService } from './services/escrow-contract.service';
 import { BlockchainEventListenerService } from './services/blockchain-event-listener.service';
 import * as ABI from './abi/ArtAuctionEscrow.json';
 
-@Global()
 @Module({})
 export class BlockchainModule {
   static forRoot(): DynamicModule {
     return {
       module: BlockchainModule,
+      global: true,
       imports: [ConfigModule, OutboxModule],
       providers: [
         {
