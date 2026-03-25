@@ -45,7 +45,7 @@ Cancelled  Cancelled  Disputed → Completed
 
 | Action | Who | Next State | Condition |
 |--------|-----|------------|-----------|
-| `markShipped()` | Seller | **Shipped** | Before `shippingDeadline` (3 days). Must provide tracking hash |
+| `markShipped()` | Seller | **Shipped** | Before `shippingDeadline` (5 days). Must provide tracking hash |
 | `claimShippingTimeout()` | Anyone | **Cancelled** | After `shippingDeadline`. Refunds buyer |
 
 ### Shipped
@@ -69,7 +69,7 @@ Cancelled  Cancelled  Disputed → Completed
 | Window | Duration | Starts After |
 |--------|----------|-------------|
 | Anti-snipe | 10 min extension | Bid within last 10 min of auction |
-| Shipping | 3 days | `endAuction()` (reserve met) |
+| Shipping | 5 days | `endAuction()` (reserve met) |
 | Delivery | 14 days | `markShipped()` |
 | Dispute resolution | 30 days | `openDispute()` |
 

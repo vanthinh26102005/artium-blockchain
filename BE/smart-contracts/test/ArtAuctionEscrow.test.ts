@@ -55,6 +55,21 @@ describe("ArtAuctionEscrow", function () {
     return base;
   }
 
+  /** Fixture: Buyer đã mở dispute -> State Disputed */
+  async function auctionDisputedFixture() {
+    const base = await auctionShippedFixture();
+    await base.artAuction.connect(base.bidder1).openDispute(ORDER_ID, "Tranh bị rách");
+    return base;
+  }
+
+  /** Fixture: Deploy với platform fee = 0 */
+  async function deployZeroFeeFixture() {
+    const [owner, seller, bidder1, bidder2, arbiter, platformWallet] = await ethers.getSigners();
+    const Factory = await ethers.getContractFactory("ArtAuctionEscrow");
+    const artAuction = await Factory.deploy(arbiter.address, platformWallet.address, 0);
+    return { artAuction, owner, seller, bidder1, bidder2, arbiter, platformWallet };
+  }
+
   // ============================================================
   // 1. Constructor
   // ============================================================
@@ -235,6 +250,37 @@ describe("ArtAuctionEscrow", function () {
       const auctionAfter = await artAuction.getAuction(ORDER_ID);
       expect(auctionAfter.endTime).to.equal(auctionBefore.endTime);
     });
+
+    it("Revert InvalidState nếu bid khi auction đã Cancelled", async function () {
+      const { artAuction, seller, bidder1 } = await loadFixture(auctionCreatedFixture);
+      await artAuction.connect(seller).cancelAuction(ORDER_ID);
+
+      await expect(
+        artAuction.connect(bidder1).bid(ORDER_ID, { value: ethers.parseEther("1.0") })
+      ).to.be.revertedWithCustomError(artAuction, "InvalidState");
+    });
+
+    it("Boundary: bid tại đúng endTime phải revert", async function () {
+      const { artAuction, bidder1 } = await loadFixture(auctionCreatedFixture);
+      const auction = await artAuction.getAuction(ORDER_ID);
+      await time.setNextBlockTimestamp(auction.endTime);
+
+      await expect(
+        artAuction.connect(bidder1).bid(ORDER_ID, { value: ethers.parseEther("1.0") })
+      ).to.be.revertedWithCustomError(artAuction, "AuctionNotExpired");
+    });
+
+    it("Boundary anti-snipe: bid khi còn đúng 10 phút thì không gia hạn", async function () {
+      const { artAuction, bidder1 } = await loadFixture(auctionCreatedFixture);
+      const auctionBefore = await artAuction.getAuction(ORDER_ID);
+      const bidTs = auctionBefore.endTime - BigInt(ANTI_SNIPE_WINDOW);
+      await time.setNextBlockTimestamp(bidTs);
+
+      await artAuction.connect(bidder1).bid(ORDER_ID, { value: ethers.parseEther("1.0") });
+
+      const auctionAfter = await artAuction.getAuction(ORDER_ID);
+      expect(auctionAfter.endTime).to.equal(auctionBefore.endTime);
+    });
   });
 
   // ============================================================
@@ -295,6 +341,33 @@ describe("ArtAuctionEscrow", function () {
         artAuction.connect(bidder1).endAuction(ORDER_ID)
       ).to.be.revertedWithCustomError(artAuction, "NotSeller");
     });
+
+    it("Revert nếu orderId không tồn tại", async function () {
+      const { artAuction, seller } = await loadFixture(deployFixture);
+      await expect(
+        artAuction.connect(seller).endAuction("fake-id")
+      ).to.be.revertedWithCustomError(artAuction, "AuctionNotFound");
+    });
+
+    it("Revert InvalidState nếu endAuction lần 2", async function () {
+      const { artAuction, seller, bidder1 } = await loadFixture(auctionEndedFixture);
+      await expect(
+        artAuction.connect(seller).endAuction(ORDER_ID)
+      ).to.be.revertedWithCustomError(artAuction, "InvalidState");
+    });
+
+    it("Boundary: endAuction tại đúng endTime phải thành công", async function () {
+      const { artAuction, seller, bidder1 } = await loadFixture(auctionCreatedFixture);
+      const bidAmount = ethers.parseEther("2.0");
+      await artAuction.connect(bidder1).bid(ORDER_ID, { value: bidAmount });
+
+      const auction = await artAuction.getAuction(ORDER_ID);
+      await time.setNextBlockTimestamp(auction.endTime);
+
+      await expect(artAuction.connect(seller).endAuction(ORDER_ID))
+        .to.emit(artAuction, "AuctionEnded")
+        .withArgs(ORDER_ID, bidder1.address, bidAmount);
+    });
   });
 
   // ============================================================
@@ -326,6 +399,13 @@ describe("ArtAuctionEscrow", function () {
       await expect(
         artAuction.connect(bidder1).cancelAuction(ORDER_ID)
       ).to.be.revertedWithCustomError(artAuction, "NotSeller");
+    });
+
+    it("Revert InvalidState nếu auction đã Ended", async function () {
+      const { artAuction, seller } = await loadFixture(auctionEndedFixture);
+      await expect(
+        artAuction.connect(seller).cancelAuction(ORDER_ID)
+      ).to.be.revertedWithCustomError(artAuction, "InvalidState");
     });
   });
 
@@ -367,6 +447,16 @@ describe("ArtAuctionEscrow", function () {
       await expect(
         artAuction.connect(seller).markShipped(ORDER_ID, TRACKING_HASH)
       ).to.be.revertedWithCustomError(artAuction, "InvalidState");
+    });
+
+    it("Boundary: markShipped tại đúng shippingDeadline vẫn thành công", async function () {
+      const { artAuction, seller } = await loadFixture(auctionEndedFixture);
+      const timeline = await artAuction.getAuctionTimeline(ORDER_ID);
+      await time.setNextBlockTimestamp(timeline.shippingDeadline);
+
+      await expect(artAuction.connect(seller).markShipped(ORDER_ID, TRACKING_HASH))
+        .to.emit(artAuction, "ArtShipped")
+        .withArgs(ORDER_ID, seller.address, TRACKING_HASH);
     });
   });
 
@@ -438,6 +528,27 @@ describe("ArtAuctionEscrow", function () {
         artAuction.connect(bidder1).claimShippingTimeout(ORDER_ID)
       ).to.be.revertedWithCustomError(artAuction, "InvalidState");
     });
+
+    it("Boundary: claimShippingTimeout tại đúng shippingDeadline phải revert", async function () {
+      const { artAuction, bidder1 } = await loadFixture(auctionEndedFixture);
+      const timeline = await artAuction.getAuctionTimeline(ORDER_ID);
+      await time.setNextBlockTimestamp(timeline.shippingDeadline);
+
+      await expect(
+        artAuction.connect(bidder1).claimShippingTimeout(ORDER_ID)
+      ).to.be.revertedWithCustomError(artAuction, "ShippingDeadlineNotPassed");
+    });
+
+    it("Cho phép anyone gọi claimShippingTimeout nhưng tiền vẫn về buyer", async function () {
+      const { artAuction, bidder1, bidder2 } = await loadFixture(auctionEndedFixture);
+      await time.increase(SHIPPING_WINDOW + 1);
+
+      await expect(artAuction.connect(bidder2).claimShippingTimeout(ORDER_ID))
+        .to.emit(artAuction, "ShippingTimeout")
+        .withArgs(ORDER_ID, bidder1.address);
+
+      expect(await artAuction.pendingReturns(bidder1.address)).to.equal(ethers.parseEther("2.0"));
+    });
   });
 
   // ============================================================
@@ -468,6 +579,23 @@ describe("ArtAuctionEscrow", function () {
       await expect(
         artAuction.connect(bidder1).openDispute(ORDER_ID, "lý do")
       ).to.be.revertedWithCustomError(artAuction, "DeliveryDeadlinePassed");
+    });
+
+    it("Revert InvalidState nếu mở dispute khi chưa ship", async function () {
+      const { artAuction, bidder1 } = await loadFixture(auctionEndedFixture);
+      await expect(
+        artAuction.connect(bidder1).openDispute(ORDER_ID, "lý do")
+      ).to.be.revertedWithCustomError(artAuction, "InvalidState");
+    });
+
+    it("Boundary: openDispute tại đúng deliveryDeadline vẫn thành công", async function () {
+      const { artAuction, bidder1 } = await loadFixture(auctionShippedFixture);
+      const timeline = await artAuction.getAuctionTimeline(ORDER_ID);
+      await time.setNextBlockTimestamp(timeline.deliveryDeadline);
+
+      await expect(artAuction.connect(bidder1).openDispute(ORDER_ID, "lý do"))
+        .to.emit(artAuction, "DisputeOpened")
+        .withArgs(ORDER_ID, bidder1.address, "lý do");
     });
   });
 
@@ -566,6 +694,24 @@ describe("ArtAuctionEscrow", function () {
         artAuction.connect(bidder1).claimDeliveryTimeout(ORDER_ID)
       ).to.be.revertedWithCustomError(artAuction, "NotSeller");
     });
+
+    it("Revert InvalidState nếu auction đang Disputed", async function () {
+      const { artAuction, seller } = await loadFixture(auctionDisputedFixture);
+      await time.increase(DELIVERY_WINDOW + 1);
+      await expect(
+        artAuction.connect(seller).claimDeliveryTimeout(ORDER_ID)
+      ).to.be.revertedWithCustomError(artAuction, "InvalidState");
+    });
+
+    it("Boundary: claimDeliveryTimeout tại đúng deliveryDeadline phải revert", async function () {
+      const { artAuction, seller } = await loadFixture(auctionShippedFixture);
+      const timeline = await artAuction.getAuctionTimeline(ORDER_ID);
+      await time.setNextBlockTimestamp(timeline.deliveryDeadline);
+
+      await expect(
+        artAuction.connect(seller).claimDeliveryTimeout(ORDER_ID)
+      ).to.be.revertedWithCustomError(artAuction, "DeliveryDeadlineNotPassed");
+    });
   });
 
   // ============================================================
@@ -604,6 +750,24 @@ describe("ArtAuctionEscrow", function () {
       await expect(
         artAuction.connect(seller).claimDisputeTimeout(ORDER_ID)
       ).to.be.revertedWithCustomError(artAuction, "NotBuyer");
+    });
+
+    it("Revert InvalidState nếu state không phải Disputed", async function () {
+      const { artAuction, bidder1 } = await loadFixture(auctionShippedFixture);
+      await time.increase(DISPUTE_WINDOW + 1);
+      await expect(
+        artAuction.connect(bidder1).claimDisputeTimeout(ORDER_ID)
+      ).to.be.revertedWithCustomError(artAuction, "InvalidState");
+    });
+
+    it("Boundary: claimDisputeTimeout tại đúng disputeDeadline phải revert", async function () {
+      const { artAuction, bidder1 } = await loadFixture(auctionDisputedFixture);
+      const timeline = await artAuction.getAuctionTimeline(ORDER_ID);
+      await time.setNextBlockTimestamp(timeline.disputeDeadline);
+
+      await expect(
+        artAuction.connect(bidder1).claimDisputeTimeout(ORDER_ID)
+      ).to.be.revertedWithCustomError(artAuction, "DisputeDeadlineNotPassed");
     });
   });
 
@@ -660,7 +824,144 @@ describe("ArtAuctionEscrow", function () {
   });
 
   // ============================================================
-  // 15. Full Flow — Integration Tests
+  // 15. Additional Edge Cases
+  // ============================================================
+  describe("Additional Edge Cases", function () {
+    it("Multi-auction isolation: dữ liệu của 2 orderId không ảnh hưởng chéo", async function () {
+      const { artAuction, seller, bidder1 } = await loadFixture(deployFixture);
+
+      await artAuction.connect(seller).createAuction(ORDER_ID, DURATION, RESERVE_PRICE, MIN_BID_INCREMENT, IPFS_HASH);
+      await artAuction.connect(seller).createAuction(
+        ORDER_ID_2,
+        DURATION,
+        ethers.parseEther("3.0"),
+        ethers.parseEther("0.2"),
+        "QmAnotherHash"
+      );
+
+      await artAuction.connect(bidder1).bid(ORDER_ID, { value: ethers.parseEther("1.2") });
+
+      const auction1 = await artAuction.getAuction(ORDER_ID);
+      const auction2 = await artAuction.getAuction(ORDER_ID_2);
+      const timeline1 = await artAuction.getAuctionTimeline(ORDER_ID);
+      const timeline2 = await artAuction.getAuctionTimeline(ORDER_ID_2);
+
+      expect(auction1.highestBid).to.equal(ethers.parseEther("1.2"));
+      expect(auction2.highestBid).to.equal(0);
+      expect(auction2.highestBidder).to.equal(ethers.ZeroAddress);
+      expect(timeline1.shippingDeadline).to.equal(0);
+      expect(timeline2.shippingDeadline).to.equal(0);
+    });
+
+    it("Fee = 0: confirmDelivery phải chuyển toàn bộ tiền cho seller", async function () {
+      const { artAuction, seller, bidder1, platformWallet } = await loadFixture(deployZeroFeeFixture);
+      const bidAmount = ethers.parseEther("2.0");
+
+      await artAuction.connect(seller).createAuction(ORDER_ID, DURATION, RESERVE_PRICE, MIN_BID_INCREMENT, IPFS_HASH);
+      await artAuction.connect(bidder1).bid(ORDER_ID, { value: bidAmount });
+      await time.increase(DURATION + 1);
+      await artAuction.connect(seller).endAuction(ORDER_ID);
+      await artAuction.connect(seller).markShipped(ORDER_ID, TRACKING_HASH);
+
+      const tx = artAuction.connect(bidder1).confirmDelivery(ORDER_ID);
+      await expect(tx).to.changeEtherBalances(
+        [artAuction, seller, platformWallet],
+        [-bidAmount, bidAmount, 0]
+      );
+
+      const auction = await artAuction.getAuction(ORDER_ID);
+      expect(auction.state).to.equal(State.Completed);
+    });
+  });
+
+  // ============================================================
+  // 16. TransferFailed Adversarial
+  // ============================================================
+  describe("TransferFailed (Adversarial)", function () {
+    it("withdraw revert TransferFailed khi receiver từ chối nhận ETH", async function () {
+      const { artAuction, seller, bidder2 } = await loadFixture(deployFixture);
+      const bidAmount = ethers.parseEther("1.0");
+      const higherBid = ethers.parseEther("2.0");
+
+      await artAuction.connect(seller).createAuction(ORDER_ID, DURATION, RESERVE_PRICE, MIN_BID_INCREMENT, IPFS_HASH);
+
+      const RevertingBidderFactory = await ethers.getContractFactory("RevertingBidder");
+      const revertingBidder = await RevertingBidderFactory.deploy(await artAuction.getAddress());
+      const revertingBidderAddress = await revertingBidder.getAddress();
+
+      await revertingBidder.placeBid(ORDER_ID, { value: bidAmount });
+      await artAuction.connect(bidder2).bid(ORDER_ID, { value: higherBid });
+      expect(await artAuction.pendingReturns(revertingBidderAddress)).to.equal(bidAmount);
+
+      await expect(
+        revertingBidder.withdrawFromEscrow()
+      ).to.be.revertedWithCustomError(artAuction, "TransferFailed");
+
+      // Revert phải rollback pendingReturns
+      expect(await artAuction.pendingReturns(revertingBidderAddress)).to.equal(bidAmount);
+    });
+
+    it("confirmDelivery revert TransferFailed nếu platformWallet từ chối ETH", async function () {
+      const [, seller, bidder1, , arbiter] = await ethers.getSigners();
+      const RejectEtherReceiverFactory = await ethers.getContractFactory("RejectEtherReceiver");
+      const rejectingPlatformWallet = await RejectEtherReceiverFactory.deploy();
+
+      const EscrowFactory = await ethers.getContractFactory("ArtAuctionEscrow");
+      const artAuction = await EscrowFactory.deploy(
+        arbiter.address,
+        await rejectingPlatformWallet.getAddress(),
+        PLATFORM_FEE_BPS
+      );
+
+      const bidAmount = ethers.parseEther("2.0");
+      await artAuction.connect(seller).createAuction(ORDER_ID, DURATION, RESERVE_PRICE, MIN_BID_INCREMENT, IPFS_HASH);
+      await artAuction.connect(bidder1).bid(ORDER_ID, { value: bidAmount });
+      await time.increase(DURATION + 1);
+      await artAuction.connect(seller).endAuction(ORDER_ID);
+      await artAuction.connect(seller).markShipped(ORDER_ID, TRACKING_HASH);
+
+      await expect(
+        artAuction.connect(bidder1).confirmDelivery(ORDER_ID)
+      ).to.be.revertedWithCustomError(artAuction, "TransferFailed");
+
+      const auction = await artAuction.getAuction(ORDER_ID);
+      expect(auction.state).to.equal(State.Shipped);
+      expect(await ethers.provider.getBalance(await artAuction.getAddress())).to.equal(bidAmount);
+    });
+
+    it("confirmDelivery revert TransferFailed nếu seller từ chối ETH", async function () {
+      const [deployer, , bidder1, , arbiter, platformWallet] = await ethers.getSigners();
+      const EscrowFactory = await ethers.getContractFactory("ArtAuctionEscrow");
+      const artAuction = await EscrowFactory.deploy(arbiter.address, platformWallet.address, 0);
+
+      const RevertingSellerAgentFactory = await ethers.getContractFactory("RevertingSellerAgent");
+      const revertingSeller = await RevertingSellerAgentFactory.deploy(await artAuction.getAddress());
+
+      const bidAmount = ethers.parseEther("2.0");
+      await revertingSeller.connect(deployer).createAuction(
+        ORDER_ID,
+        DURATION,
+        RESERVE_PRICE,
+        MIN_BID_INCREMENT,
+        IPFS_HASH
+      );
+      await artAuction.connect(bidder1).bid(ORDER_ID, { value: bidAmount });
+      await time.increase(DURATION + 1);
+      await revertingSeller.connect(deployer).endAuction(ORDER_ID);
+      await revertingSeller.connect(deployer).markShipped(ORDER_ID, TRACKING_HASH);
+
+      await expect(
+        artAuction.connect(bidder1).confirmDelivery(ORDER_ID)
+      ).to.be.revertedWithCustomError(artAuction, "TransferFailed");
+
+      const auction = await artAuction.getAuction(ORDER_ID);
+      expect(auction.state).to.equal(State.Shipped);
+      expect(await ethers.provider.getBalance(await artAuction.getAddress())).to.equal(bidAmount);
+    });
+  });
+
+  // ============================================================
+  // 17. Full Flow — Integration Tests
   // ============================================================
   describe("Full Flow (Integration)", function () {
     it("Happy path: tạo → bid → end → ship → confirm → tiền chia đúng", async function () {

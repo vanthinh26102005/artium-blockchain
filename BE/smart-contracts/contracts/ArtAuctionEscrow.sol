@@ -69,9 +69,9 @@ contract ArtAuctionEscrow is ReentrancyGuard {
 
     // --- State variables ---
 
-    address public arbiter;
-    uint256 public platformFeeBps;
-    address payable public platformWallet;
+    address public immutable arbiter;
+    uint256 public immutable platformFeeBps;
+    address payable public immutable platformWallet;
 
     mapping(string => Auction) internal _auctions;
     mapping(address => uint256) public pendingReturns;
