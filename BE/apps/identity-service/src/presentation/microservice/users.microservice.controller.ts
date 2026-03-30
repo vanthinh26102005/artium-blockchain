@@ -14,13 +14,20 @@ import {
   CompleteUserRegistrationCommand,
   ConfirmNewPasswordCommand,
   GetUserByIdQuery,
+  GetWalletNonceQuery,
   InitiateUserRegistrationCommand,
   LoginByEmailCommand,
   LoginByGoogleCommand,
+  LoginByWalletCommand,
   RequestPasswordResetCommand,
   VerifyPasswordResetCommand,
 } from '../../application';
-import { EmailLoginInput, LoginResponse, UserPayload } from '../../domain';
+import {
+  EmailLoginInput,
+  LoginResponse,
+  UserPayload,
+  WalletLoginInput,
+} from '../../domain';
 
 @Controller()
 export class UsersMicroserviceController {
@@ -104,5 +111,19 @@ export class UsersMicroserviceController {
     @Payload() input: PasswordResetConfirmDto,
   ): Promise<LoginResponse> {
     return this.commandBus.execute(new ConfirmNewPasswordCommand(input));
+  }
+
+  @MessagePattern({ cmd: 'login_wallet' })
+  async loginWallet(
+    @Payload() input: WalletLoginInput,
+  ): Promise<LoginResponse> {
+    return this.commandBus.execute(new LoginByWalletCommand(input));
+  }
+
+  @MessagePattern({ cmd: 'get_wallet_nonce' })
+  async getWalletNonce(
+    @Payload() data: { address: string },
+  ): Promise<{ nonce: string }> {
+    return this.queryBus.execute(new GetWalletNonceQuery(data.address));
   }
 }

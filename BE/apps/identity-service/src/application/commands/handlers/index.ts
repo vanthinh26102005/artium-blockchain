@@ -5,6 +5,7 @@ export * from './DeleteSellerProfile.command.handler';
 export * from './InitiateUserRegistration.command.handler';
 export * from './LoginByEmail.command.handler';
 export * from './LoginByGoogle.command.handler';
+export * from './LoginByWallet.command.handler';
 export * from './RequestPasswordReset.command.handler';
 export * from './UpdatePaymentOnboarding.command.handler';
 export * from './UpdateProfileVisibility.command.handler';

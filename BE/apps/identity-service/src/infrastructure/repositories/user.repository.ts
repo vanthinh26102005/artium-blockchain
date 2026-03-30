@@ -89,6 +89,15 @@ export class UserRepository implements IUserRepository {
     });
   }
 
+  async findByWalletAddress(
+    walletAddress: string,
+    transactionManager?: EntityManager,
+  ): Promise<User | null> {
+    return this.getRepo(transactionManager).findOneBy({
+      walletAddress: walletAddress.toLowerCase(),
+    });
+  }
+
   async findByStripeCustomerId(
     stripeCustomerId: string,
     transactionManager?: EntityManager,

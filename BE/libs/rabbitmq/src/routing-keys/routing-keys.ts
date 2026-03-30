@@ -7,4 +7,17 @@ export const RoutingKey = {
   PAYMENT_FAILED: 'payment.failed',
   PAYMENT_REFUNDED: 'payment.refunded',
   PAYMENT_METHOD_ATTACHED: 'payment.method.attached',
+
+  BLOCKCHAIN_AUCTION_STARTED: 'blockchain.auction.started',
+  BLOCKCHAIN_AUCTION_ENDED: 'blockchain.auction.ended',
+  BLOCKCHAIN_BID_NEW: 'blockchain.bid.new',
+  BLOCKCHAIN_AUCTION_SHIPPED: 'blockchain.auction.shipped',
+  BLOCKCHAIN_AUCTION_DELIVERY_CONFIRMED: 'blockchain.auction.delivery_confirmed',
+  BLOCKCHAIN_DISPUTE_OPENED: 'blockchain.dispute.opened',
+  BLOCKCHAIN_DISPUTE_RESOLVED: 'blockchain.dispute.resolved',
+  BLOCKCHAIN_AUCTION_CANCELLED: 'blockchain.auction.cancelled',
+  BLOCKCHAIN_AUCTION_SHIPPING_TIMEOUT: 'blockchain.auction.shipping_timeout',
+  BLOCKCHAIN_AUCTION_DELIVERY_TIMEOUT: 'blockchain.auction.delivery_timeout',
+  BLOCKCHAIN_AUCTION_EXTENDED: 'blockchain.auction.extended',
+  BLOCKCHAIN_FUNDS_WITHDRAWN: 'blockchain.funds.withdrawn',
 };

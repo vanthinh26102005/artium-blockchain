@@ -36,6 +36,13 @@ export class UserPayload {
   googleId: string | null;
 
   @ApiProperty({
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+    required: false,
+    description: 'Ethereum wallet address if user logged in with MetaMask',
+  })
+  walletAddress: string | null;
+
+  @ApiProperty({
     example: true,
     description: 'Whether the user has verified their email',
   })

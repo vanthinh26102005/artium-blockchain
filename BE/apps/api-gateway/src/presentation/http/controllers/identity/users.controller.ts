@@ -8,6 +8,7 @@ import {
   LoginEmailDto,
   LoginGoogleDto,
   LoginResponse,
+  LoginWalletDto,
   PasswordResetConfirmDto,
   PasswordResetRequestDto,
   PasswordResetVerifyDto,
@@ -31,6 +32,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -40,6 +42,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -175,6 +178,38 @@ export class UserController {
       this.identityClient,
       { cmd: 'login_google' },
       loginInput,
+    );
+  }
+
+  @Post('auth/wallet')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with Ethereum wallet (SIWE)' })
+  @ApiBody({ type: LoginWalletDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful - Returns user data and access tokens',
+    type: LoginResponse,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid SIWE message format' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired nonce / signature' })
+  async loginWallet(@Body() input: LoginWalletDto) {
+    return sendRpc<LoginResponse>(
+      this.identityClient,
+      { cmd: 'login_wallet' },
+      input,
+    );
+  }
+
+  @Get('auth/wallet/nonce')
+  @ApiOperation({ summary: 'Get nonce for wallet login' })
+  @ApiQuery({ name: 'address', required: true, type: String })
+  @ApiResponse({ status: 200, description: 'Nonce generated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid Ethereum address format' })
+  async getWalletNonce(@Query('address') address: string) {
+    return sendRpc<{ nonce: string }>(
+      this.identityClient,
+      { cmd: 'get_wallet_nonce' },
+      { address },
     );
   }
 

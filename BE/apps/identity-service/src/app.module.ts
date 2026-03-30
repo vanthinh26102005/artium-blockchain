@@ -23,10 +23,12 @@ import {
   GetSellerProfileBySlugHandler,
   GetSellerProfileByUserIdHandler,
   GetUserByIdHandler,
+  GetWalletNonceHandler,
   InitiateUserRegistrationHandler,
   ListSellerProfilesHandler,
   LoginByEmailHandler,
   LoginByGoogleHandler,
+  LoginByWalletHandler,
   RequestPasswordResetHandler,
   StripeCustomerCreatedEventHandler,
   UpdatePaymentOnboardingHandler,
@@ -41,6 +43,7 @@ import {
   IRefreshTokenRepository,
   ISellerProfileRepository,
   IUserRepository,
+  NonceService,
   OtpService,
   RefreshToken,
   RegistrationService,
@@ -68,6 +71,7 @@ export const CommandHandlers = [
 
   LoginByEmailHandler,
   LoginByGoogleHandler,
+  LoginByWalletHandler,
 
   ConfirmNewPasswordHandler,
   RequestPasswordResetHandler,
@@ -83,6 +87,7 @@ export const CommandHandlers = [
 
 export const QueryHandlers = [
   GetUserByIdHandler,
+  GetWalletNonceHandler,
 
   GetSellerProfileByIdHandler,
   GetSellerProfileByUserIdHandler,
@@ -102,6 +107,7 @@ export const InfrastructureServices = [
   OtpService,
   TokenService,
   RegistrationService,
+  NonceService,
 ];
 export const Controllers = [
   UsersController,

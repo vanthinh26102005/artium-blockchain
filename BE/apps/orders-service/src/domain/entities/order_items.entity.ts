@@ -1,4 +1,4 @@
-import { AbstractEntity } from '@app/common';
+import { AbstractEntity, PayoutStatus } from '@app/common';
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'order_items' })
@@ -70,7 +70,7 @@ export class OrderItem extends AbstractEntity {
     length: 50,
     default: 'PENDING',
   })
-  payoutStatus!: string;
+  payoutStatus!: PayoutStatus;
 
   @Column({ name: 'payout_at', type: 'timestamp', nullable: true })
   payoutAt?: Date | null;
