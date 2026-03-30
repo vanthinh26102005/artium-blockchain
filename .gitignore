@@ -6,3 +6,7 @@ project_review.md
 S2_contract-test-plan.md
 S2_auction-edge-cases-and-drawbacks.md
 node_modules/
+
+# Ignore local Stitch tooling/scripts and skill packs
+scripts/stitch/
+skills/
