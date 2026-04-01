@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Bell, Camera, DollarSign, FileText, ImagePlus, Plus, Search, Video, User } from 'lucide-react'
+import { Bell, DollarSign, FileText, ImagePlus, Plus, Search, Video, User } from 'lucide-react'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ const navLinks = [
   { href: '/discover', label: 'Discover' },
   { href: '/editorial', label: 'Editorial' },
   { href: '/pricing', label: 'Pricing' },
+  { href: '/auction', label: 'Live Auctions' },
 ]
 
 type SiteHeaderProps = {
@@ -58,10 +59,10 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   // Check if current route is a moment detail page
   const isMomentDetailPage = router.pathname === '/profile/[username]/moments/[id]'
   const authRoutes = ['/login', '/sign-up', '/forgot-password', '/reset-password']
-  const marketingRoutes = ['/', '/discover', '/editorial', '/pricing']
+  const marketingRoutes = ['/', '/discover', '/editorial', '/pricing', '/auction']
   const isAuthRoute = authRoutes.includes(router.pathname) || router.pathname.startsWith('/auth')
   const isMarketingRoute = marketingRoutes.includes(router.pathname)
-  const borderedHeaderRoutes = ['/discover']
+  const borderedHeaderRoutes = ['/discover', '/auction']
   const shouldForceHeaderBorder = borderedHeaderRoutes.includes(router.pathname)
   const isEditorialPage = router.pathname === '/editorial'
   const isPricingPage = router.pathname === '/pricing'
@@ -125,7 +126,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
         const response = await profileApis.searchSellerProfiles(searchQuery.trim(), { take: 5 })
         setSearchResults(response?.items || [])
         setShowResults(true)
-      } catch (error) {
+      } catch {
         setSearchResults([])
         setShowResults(false)
       } finally {
