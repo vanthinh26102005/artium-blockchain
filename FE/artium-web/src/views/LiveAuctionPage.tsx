@@ -2,7 +2,7 @@ import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import Link from 'next/link'
 import { ChevronDown, Grid2X2, LayoutList, ShieldCheck } from 'lucide-react'
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Metadata } from '@/components/SEO/Metadata'
 
 type AuctionLot = {
@@ -20,7 +20,7 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 const headlineFont = {
-  fontFamily: '"ABC Monument Grotesk", "Segoe UI", Tahoma, sans-serif',
+  fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
 
 const bodyFont = {
@@ -28,10 +28,12 @@ const bodyFont = {
 } satisfies CSSProperties
 
 const filterGroups = [
-  { label: 'Category', value: 'All Works' },
-  { label: 'Status', value: 'Active Bidding' },
-  { label: 'Price Range', value: '0.5 ETH - 50+ ETH' },
+  { label: 'Category', value: 'ALL WORKS' },
+  { label: 'Status', value: 'ACTIVE BIDDING' },
 ] as const
+
+const MIN_ETH = 0.5
+const MAX_ETH = 50
 
 const lots: AuctionLot[] = [
   { title: 'Oblique Horizon I', bid: '12.40 ETH', status: '2h 45m remaining', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB4LUsBjOdeImAsFI1KCdzWOWCNiN9RdiTO9kZNn5WRRx7NbOcMR-sm6Z4L3hvLyoQLu_Zg-dz_fki4K4v0WJ49IZyfKB0YIWMYRqYgJAhIkr71fi38x5r5fcjyPVikYRMhovtEMNmoKmGL0JqgcVJD7fNTeXE7uZm1l2iyZA_IOFWYGQxUaUkTOeazmgoTVyp1acthU5gs6LJqblekH4hHLj82qCUz6LD5IH6kCjvlNdy--ssZ67Tv47EB-0ijv8EYXaArzUx3ya95', imageAlt: 'Abstract architectural rendering with flowing monochromatic white curves and deep dramatic shadows in a minimalist digital space' },
@@ -46,8 +48,61 @@ const lots: AuctionLot[] = [
 
 const statusToneClass = { live: 'bg-[#ba1a1a]', muted: 'bg-[#747777]' } as const
 
+const clampEthValue = (value: number) => {
+  if (Number.isNaN(value)) {
+    return MIN_ETH
+  }
+
+  return Math.min(MAX_ETH, Math.max(MIN_ETH, Number(value.toFixed(1))))
+}
+
+const parseEthInput = (value: string, fallback: number) => {
+  const normalized = value.replace('+', '').trim()
+  const parsed = Number.parseFloat(normalized)
+
+  if (Number.isNaN(parsed)) {
+    return fallback
+  }
+
+  return clampEthValue(parsed)
+}
+
+const formatEthDisplay = (value: number) => {
+  if (value >= MAX_ETH) {
+    return '50+'
+  }
+
+  return Number.isInteger(value) ? `${value}` : value.toFixed(1)
+}
+
 const LiveAuctionPage = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [appliedMinPrice, setAppliedMinPrice] = useState(MIN_ETH)
+  const [appliedMaxPrice, setAppliedMaxPrice] = useState(MAX_ETH)
+  const [draftMinPrice, setDraftMinPrice] = useState(MIN_ETH)
+  const [draftMaxPrice, setDraftMaxPrice] = useState(MAX_ETH)
+  const [minInputValue, setMinInputValue] = useState(`${MIN_ETH}`)
+  const [maxInputValue, setMaxInputValue] = useState(`${MAX_ETH}`)
+  const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false)
+  const priceRangeRef = useRef<HTMLDivElement>(null)
+  const minPercent = ((draftMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
+  const maxPercent = ((draftMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!priceRangeRef.current?.contains(event.target as Node)) {
+        setIsPriceRangeOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const visibleLots = lots.filter((lot) => {
+    const bidValue = Number.parseFloat(lot.bid.replace(' ETH', ''))
+    return bidValue >= appliedMinPrice && bidValue <= appliedMaxPrice
+  })
 
   return (
     <>
@@ -84,7 +139,7 @@ const LiveAuctionPage = () => {
                     {group.label}
                   </span>
                   <span
-                    className="flex items-center gap-2 text-sm font-medium text-black transition-colors group-hover:text-black/70"
+                    className="flex items-center gap-2 text-sm font-bold text-black transition-colors group-hover:text-black/70"
                     style={headlineFont}
                   >
                     {group.value}
@@ -92,6 +147,147 @@ const LiveAuctionPage = () => {
                   </span>
                 </button>
               ))}
+              <div ref={priceRangeRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!isPriceRangeOpen) {
+                      setDraftMinPrice(appliedMinPrice)
+                      setDraftMaxPrice(appliedMaxPrice)
+                      setMinInputValue(`${appliedMinPrice}`)
+                      setMaxInputValue(`${appliedMaxPrice}`)
+                    }
+
+                    setIsPriceRangeOpen((prev) => !prev)
+                  }}
+                  className="group text-left"
+                  aria-expanded={isPriceRangeOpen}
+                  aria-haspopup="dialog"
+                >
+                  <span className="mb-2 block text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                    Price Range
+                  </span>
+                  <span
+                    className="flex items-center gap-2 text-sm font-bold text-black transition-colors group-hover:text-black/70"
+                    style={headlineFont}
+                  >
+                    {formatEthDisplay(appliedMinPrice)} ETH - {formatEthDisplay(appliedMaxPrice)} ETH
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${isPriceRangeOpen ? 'rotate-180' : ''}`}
+                    />
+                  </span>
+                </button>
+
+                {isPriceRangeOpen ? (
+                  <div className="absolute top-full left-0 z-20 mt-4 w-[min(92vw,360px)] border-2 border-black/70 bg-white px-4 py-5 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.25)] sm:px-5 sm:py-5">
+                    <div className="mb-5 flex items-center justify-between gap-3">
+                      <span className="text-[12px] font-extrabold tracking-[0.2em] text-[#8a8a8a] uppercase">
+                        Range (ETH)
+                      </span>
+                      <span className="text-lg font-black text-black" style={bodyFont}>
+                        {formatEthDisplay(draftMinPrice)} - {formatEthDisplay(draftMaxPrice)}
+                      </span>
+                    </div>
+
+                    <div className="relative mb-6 px-2">
+                      <div className="h-1 bg-black" />
+                      <div
+                        className="absolute top-1/2 h-6 w-6 -translate-y-1/2 border-2 border-[#d9d9d9] bg-black shadow-[0_0_0_2px_white]"
+                        style={{ left: `calc(${minPercent}% - 12px)` }}
+                      />
+                      <div
+                        className="absolute top-1/2 h-6 w-6 -translate-y-1/2 border-2 border-[#d9d9d9] bg-black shadow-[0_0_0_2px_white]"
+                        style={{ left: `calc(${maxPercent}% - 12px)` }}
+                      />
+                      <input
+                        type="range"
+                        min={MIN_ETH}
+                        max={MAX_ETH}
+                        step={0.1}
+                        value={draftMinPrice}
+                        onChange={(event) => {
+                          const nextValue = Math.min(Number(event.target.value), draftMaxPrice)
+                          setDraftMinPrice(nextValue)
+                          setMinInputValue(`${nextValue}`)
+                        }}
+                        className="absolute inset-x-0 top-1/2 z-10 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                        aria-label="Minimum ETH range"
+                      />
+                      <input
+                        type="range"
+                        min={MIN_ETH}
+                        max={MAX_ETH}
+                        step={0.1}
+                        value={draftMaxPrice}
+                        onChange={(event) => {
+                          const nextValue = Math.max(Number(event.target.value), draftMinPrice)
+                          setDraftMaxPrice(nextValue)
+                          setMaxInputValue(`${nextValue}`)
+                        }}
+                        className="absolute inset-x-0 top-1/2 z-20 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                        aria-label="Maximum ETH range"
+                      />
+                    </div>
+
+                    <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                      <label className="block">
+                        <span className="mb-2 block text-[10px] tracking-[0.16em] text-[#8a8a8a] uppercase">
+                          Min
+                        </span>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={minInputValue}
+                          onChange={(event) => setMinInputValue(event.target.value)}
+                          onBlur={() => {
+                            const nextValue = Math.min(parseEthInput(minInputValue, draftMinPrice), draftMaxPrice)
+                            setDraftMinPrice(nextValue)
+                            setMinInputValue(`${nextValue}`)
+                          }}
+                          className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.55rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="mb-2 block text-[10px] tracking-[0.16em] text-[#8a8a8a] uppercase">
+                          Max
+                        </span>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={maxInputValue}
+                          onChange={(event) => setMaxInputValue(event.target.value)}
+                          onBlur={() => {
+                            const nextValue = Math.max(parseEthInput(maxInputValue, draftMaxPrice), draftMinPrice)
+                            setDraftMaxPrice(nextValue)
+                            setMaxInputValue(`${nextValue}`)
+                          }}
+                          className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.55rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                        />
+                      </label>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextMin = Math.min(parseEthInput(minInputValue, draftMinPrice), draftMaxPrice)
+                        const nextMax = Math.max(parseEthInput(maxInputValue, draftMaxPrice), nextMin)
+
+                        setDraftMinPrice(nextMin)
+                        setDraftMaxPrice(nextMax)
+                        setMinInputValue(`${nextMin}`)
+                        setMaxInputValue(`${nextMax}`)
+                        setAppliedMinPrice(nextMin)
+                        setAppliedMaxPrice(nextMax)
+                        setIsPriceRangeOpen(false)
+                      }}
+                      className="w-full bg-black px-5 py-3.5 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90"
+                      style={headlineFont}
+                    >
+                      Apply Range
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex border border-[#c4c7c7]/30 bg-[#f7f7f7] p-1">
@@ -135,7 +331,7 @@ const LiveAuctionPage = () => {
                 : 'grid grid-cols-1 gap-6'
             }
           >
-            {lots.map((lot) => (
+            {visibleLots.map((lot) => (
               <article
                 key={lot.title}
                 className={`group border border-[#e5e7eb] bg-white p-4 transition-all duration-300 hover:border-black hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.1)] ${
@@ -230,6 +426,14 @@ const LiveAuctionPage = () => {
               </article>
             ))}
           </section>
+
+          {visibleLots.length === 0 ? (
+            <section className="mt-12 border border-[#c4c7c7]/30 bg-[#fafafa] px-6 py-10 text-center">
+              <p className="text-sm tracking-[0.14em] text-[#747777] uppercase" style={headlineFont}>
+                No auctions found in this price range
+              </p>
+            </section>
+          ) : null}
 
           <section className="mt-24 flex flex-col items-center gap-8">
             <button
