@@ -107,24 +107,46 @@ const formatEthDisplay = (value: number) => {
 
 const LiveAuctionPage = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [selectedStatus, setSelectedStatus] = useState<AuctionStatusKey>('active')
+  const [selectedCategory, setSelectedCategory] = useState<AuctionCategoryKey>('all')
+  const [selectedStatus, setSelectedStatus] = useState<AuctionStatusKey>('all')
   const [appliedMinPrice, setAppliedMinPrice] = useState(MIN_ETH)
   const [appliedMaxPrice, setAppliedMaxPrice] = useState(MAX_ETH)
+  const [mobileSelectedCategory, setMobileSelectedCategory] = useState<AuctionCategoryKey>('all')
+  const [mobileSelectedStatus, setMobileSelectedStatus] = useState<AuctionStatusKey>('all')
+  const [mobileAppliedMinPrice, setMobileAppliedMinPrice] = useState(MIN_ETH)
+  const [mobileAppliedMaxPrice, setMobileAppliedMaxPrice] = useState(MAX_ETH)
+  const [mobileMinInputValue, setMobileMinInputValue] = useState(`${MIN_ETH}`)
+  const [mobileMaxInputValue, setMobileMaxInputValue] = useState(`${MAX_ETH}`)
   const [draftMinPrice, setDraftMinPrice] = useState(MIN_ETH)
   const [draftMaxPrice, setDraftMaxPrice] = useState(MAX_ETH)
   const [minInputValue, setMinInputValue] = useState(`${MIN_ETH}`)
   const [maxInputValue, setMaxInputValue] = useState(`${MAX_ETH}`)
   const [isStatusOpen, setIsStatusOpen] = useState(false)
   const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false)
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false)
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
+  const categoryRef = useRef<HTMLDivElement>(null)
   const statusRef = useRef<HTMLDivElement>(null)
   const priceRangeRef = useRef<HTMLDivElement>(null)
+  const selectedCategoryOption =
+    categoryOptions.find((option) => option.key === selectedCategory) ?? categoryOptions[0]
   const selectedStatusOption =
     statusOptions.find((option) => option.key === selectedStatus) ?? statusOptions[0]
+  const mobileSelectedCategoryOption =
+    categoryOptions.find((option) => option.key === mobileSelectedCategory) ?? categoryOptions[0]
+  const mobileSelectedStatusOption =
+    statusOptions.find((option) => option.key === mobileSelectedStatus) ?? statusOptions[0]
   const minPercent = ((draftMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const maxPercent = ((draftMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
+  const mobileMinPercent = ((mobileAppliedMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
+  const mobileMaxPercent = ((mobileAppliedMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (!categoryRef.current?.contains(event.target as Node)) {
+        setIsCategoryOpen(false)
+      }
+
       if (!statusRef.current?.contains(event.target as Node)) {
         setIsStatusOpen(false)
       }
@@ -138,13 +160,77 @@ const LiveAuctionPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  useEffect(() => {
+    if (!isMobileFiltersOpen) {
+      return
+    }
+
+    const { overflow } = document.body.style
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = overflow
+    }
+  }, [isMobileFiltersOpen])
+
+  const syncMobileFiltersWithApplied = () => {
+    setMobileSelectedCategory(selectedCategory)
+    setMobileSelectedStatus(selectedStatus)
+    setMobileAppliedMinPrice(appliedMinPrice)
+    setMobileAppliedMaxPrice(appliedMaxPrice)
+    setMobileMinInputValue(`${appliedMinPrice}`)
+    setMobileMaxInputValue(`${appliedMaxPrice}`)
+  }
+
+  const applyDesktopPriceRange = () => {
+    const nextMin = Math.min(parseEthInput(minInputValue, draftMinPrice), draftMaxPrice)
+    const nextMax = Math.max(parseEthInput(maxInputValue, draftMaxPrice), nextMin)
+
+    setDraftMinPrice(nextMin)
+    setDraftMaxPrice(nextMax)
+    setMinInputValue(`${nextMin}`)
+    setMaxInputValue(`${nextMax}`)
+    setAppliedMinPrice(nextMin)
+    setAppliedMaxPrice(nextMax)
+    setIsPriceRangeOpen(false)
+  }
+
+  const openMobileFilters = () => {
+    syncMobileFiltersWithApplied()
+    setIsMobileFiltersOpen(true)
+  }
+
+  const applyMobileFilters = () => {
+    const nextMin = Math.min(
+      parseEthInput(mobileMinInputValue, mobileAppliedMinPrice),
+      mobileAppliedMaxPrice,
+    )
+    const nextMax = Math.max(
+      parseEthInput(mobileMaxInputValue, mobileAppliedMaxPrice),
+      nextMin,
+    )
+
+    setMobileAppliedMinPrice(nextMin)
+    setMobileAppliedMaxPrice(nextMax)
+    setMobileMinInputValue(`${nextMin}`)
+    setMobileMaxInputValue(`${nextMax}`)
+    setSelectedCategory(mobileSelectedCategory)
+    setSelectedStatus(mobileSelectedStatus)
+    setAppliedMinPrice(nextMin)
+    setAppliedMaxPrice(nextMax)
+    setIsMobileFiltersOpen(false)
+  }
+
   const visibleLots = lots.filter((lot) => {
     const bidValue = Number.parseFloat(lot.bid.replace(' ETH', ''))
+    const matchesCategory = selectedCategory === 'all' ? true : lot.categoryKey === selectedCategory
     const matchesPrice = bidValue >= appliedMinPrice && bidValue <= appliedMaxPrice
     const matchesStatus = selectedStatus === 'all' ? true : lot.statusKey === selectedStatus
 
-    return matchesPrice && matchesStatus
+    return matchesCategory && matchesPrice && matchesStatus
   })
+
+  const resultsLabel = `${visibleLots.length} result${visibleLots.length === 1 ? '' : 's'}`
 
   return (
     <>
@@ -174,25 +260,71 @@ const LiveAuctionPage = () => {
           </header>
 
           <section className="mb-12 flex flex-wrap items-center justify-between gap-8 border-y border-[#c4c7c7]/30 py-8">
-            <div className="flex flex-wrap items-center gap-10">
-              {filterGroups.map((group) => (
-                <button key={group.label} type="button" className="group text-left">
+            <div className="hidden flex-wrap items-center gap-10 md:flex">
+              <div ref={categoryRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsStatusOpen(false)
+                    setIsPriceRangeOpen(false)
+                    setIsCategoryOpen((prev) => !prev)
+                  }}
+                  className="group text-left"
+                  aria-expanded={isCategoryOpen}
+                  aria-haspopup="listbox"
+                >
                   <span className="mb-2 block text-[10px] tracking-[0.25em] text-[#747777] uppercase">
-                    {group.label}
+                    Category
                   </span>
                   <span
                     className="flex items-center gap-2 text-sm font-bold text-black transition-colors group-hover:text-black/70"
                     style={headlineFont}
                   >
-                    {group.value}
-                    <ChevronDown className="h-4 w-4" />
+                    {selectedCategoryOption.label}
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
+                    />
                   </span>
                 </button>
-              ))}
+
+                {isCategoryOpen ? (
+                  <div className="absolute top-full left-0 z-20 mt-4 min-w-[280px] border border-[#c4c7c7]/40 bg-white p-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.18)]">
+                    <div className="space-y-1" role="listbox" aria-label="Category options">
+                      {categoryOptions.map((option) => (
+                        <button
+                          key={option.key}
+                          type="button"
+                          onClick={() => {
+                            setSelectedCategory(option.key)
+                            setIsCategoryOpen(false)
+                          }}
+                          className={`block w-full px-3 py-3 text-left transition-colors ${
+                            option.key === selectedCategory
+                              ? 'bg-black text-white'
+                              : 'text-black hover:bg-[#f5f5f5]'
+                          }`}
+                        >
+                          <span className="block text-sm font-bold uppercase" style={headlineFont}>
+                            {option.label}
+                          </span>
+                          <span
+                            className={`mt-1 block text-[11px] tracking-[0.08em] uppercase ${
+                              option.key === selectedCategory ? 'text-white/70' : 'text-[#747777]'
+                            }`}
+                          >
+                            {option.helper}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
               <div ref={statusRef} className="relative">
                 <button
                   type="button"
                   onClick={() => {
+                    setIsCategoryOpen(false)
                     setIsPriceRangeOpen(false)
                     setIsStatusOpen((prev) => !prev)
                   }}
@@ -251,6 +383,7 @@ const LiveAuctionPage = () => {
                 <button
                   type="button"
                   onClick={() => {
+                    setIsCategoryOpen(false)
                     setIsStatusOpen(false)
                     if (!isPriceRangeOpen) {
                       setDraftMinPrice(appliedMinPrice)
@@ -369,18 +502,7 @@ const LiveAuctionPage = () => {
 
                     <button
                       type="button"
-                      onClick={() => {
-                        const nextMin = Math.min(parseEthInput(minInputValue, draftMinPrice), draftMaxPrice)
-                        const nextMax = Math.max(parseEthInput(maxInputValue, draftMaxPrice), nextMin)
-
-                        setDraftMinPrice(nextMin)
-                        setDraftMaxPrice(nextMax)
-                        setMinInputValue(`${nextMin}`)
-                        setMaxInputValue(`${nextMax}`)
-                        setAppliedMinPrice(nextMin)
-                        setAppliedMaxPrice(nextMax)
-                        setIsPriceRangeOpen(false)
-                      }}
+                      onClick={applyDesktopPriceRange}
                       className="w-full bg-black px-5 py-3.5 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90"
                       style={headlineFont}
                     >
@@ -390,7 +512,7 @@ const LiveAuctionPage = () => {
                 ) : null}
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-normal">
               <div className="flex border border-[#c4c7c7]/30 bg-[#f7f7f7] p-1">
                 <button
                   type="button"
@@ -415,12 +537,19 @@ const LiveAuctionPage = () => {
                   <LayoutList className="h-4 w-4" />
                 </button>
               </div>
-              <button
-                type="button"
-                className="border border-black px-6 py-2 text-xs tracking-[0.22em] text-black uppercase transition hover:bg-black hover:text-white"
+              <p
+                className="hidden text-xs tracking-[0.22em] text-[#747777] uppercase md:block"
                 style={headlineFont}
               >
-                Filter Results
+                Showing {resultsLabel}
+              </p>
+              <button
+                type="button"
+                onClick={openMobileFilters}
+                className="border border-black px-4 py-2 text-xs tracking-[0.22em] text-black uppercase transition hover:bg-black hover:text-white md:hidden"
+                style={headlineFont}
+              >
+                Filter Results ({visibleLots.length})
               </button>
             </div>
           </section>
@@ -549,10 +678,220 @@ const LiveAuctionPage = () => {
               <span className="h-px w-12 bg-black transition-all group-hover:w-24" />
             </button>
             <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
-              Displaying 8 of 142 Active Auctions
+              Displaying {visibleLots.length} of {lots.length} Active Auctions
             </p>
           </section>
         </main>
+
+        {isMobileFiltersOpen ? (
+          <div
+            className="fixed inset-0 z-50 bg-black/45 md:hidden"
+            onClick={() => setIsMobileFiltersOpen(false)}
+          >
+            <div
+              className="ml-auto flex h-full w-full max-w-md flex-col bg-white"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-[#c4c7c7]/30 px-6 py-5">
+                <div>
+                  <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                    Filter Auctions
+                  </p>
+                  <p className="mt-1 text-lg font-bold text-black uppercase" style={headlineFont}>
+                    {resultsLabel}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileFiltersOpen(false)}
+                  className="text-xs tracking-[0.24em] text-black uppercase"
+                  style={headlineFont}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="flex-1 space-y-8 overflow-y-auto px-6 py-6">
+                <section>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                      Category
+                    </span>
+                    <span className="text-[11px] tracking-[0.14em] text-black uppercase" style={headlineFont}>
+                      {mobileSelectedCategoryOption.label}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {categoryOptions.map((option) => (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => setMobileSelectedCategory(option.key)}
+                        className={`block w-full border px-4 py-3 text-left transition-colors ${
+                          option.key === mobileSelectedCategory
+                            ? 'border-black bg-black text-white'
+                            : 'border-[#d7dada] text-black hover:border-black'
+                        }`}
+                      >
+                        <span className="block text-sm font-bold uppercase" style={headlineFont}>
+                          {option.label}
+                        </span>
+                        <span
+                          className={`mt-1 block text-[11px] tracking-[0.08em] uppercase ${
+                            option.key === mobileSelectedCategory ? 'text-white/70' : 'text-[#747777]'
+                          }`}
+                        >
+                          {option.helper}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                      Status
+                    </span>
+                    <span className="text-[11px] tracking-[0.14em] text-black uppercase" style={headlineFont}>
+                      {mobileSelectedStatusOption.label}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {statusOptions.map((option) => (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => setMobileSelectedStatus(option.key)}
+                        className={`block w-full border px-4 py-3 text-left transition-colors ${
+                          option.key === mobileSelectedStatus
+                            ? 'border-black bg-black text-white'
+                            : 'border-[#d7dada] text-black hover:border-black'
+                        }`}
+                      >
+                        <span className="block text-sm font-bold uppercase" style={headlineFont}>
+                          {option.label}
+                        </span>
+                        <span
+                          className={`mt-1 block text-[11px] tracking-[0.08em] uppercase ${
+                            option.key === mobileSelectedStatus ? 'text-white/70' : 'text-[#747777]'
+                          }`}
+                        >
+                          {option.helper}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <div className="mb-5 flex items-center justify-between gap-3">
+                    <span className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                      Price Range
+                    </span>
+                    <span className="text-lg font-black text-black" style={bodyFont}>
+                      {formatEthDisplay(mobileAppliedMinPrice)} - {formatEthDisplay(mobileAppliedMaxPrice)} ETH
+                    </span>
+                  </div>
+
+                  <div className="relative mb-6 px-2">
+                    <div className="h-1 bg-black" />
+                    <div
+                      className="absolute top-1/2 h-6 w-6 -translate-y-1/2 border-2 border-[#d9d9d9] bg-black shadow-[0_0_0_2px_white]"
+                      style={{ left: `calc(${mobileMinPercent}% - 12px)` }}
+                    />
+                    <div
+                      className="absolute top-1/2 h-6 w-6 -translate-y-1/2 border-2 border-[#d9d9d9] bg-black shadow-[0_0_0_2px_white]"
+                      style={{ left: `calc(${mobileMaxPercent}% - 12px)` }}
+                    />
+                    <input
+                      type="range"
+                      min={MIN_ETH}
+                      max={MAX_ETH}
+                      step={0.1}
+                      value={mobileAppliedMinPrice}
+                      onChange={(event) => {
+                        const nextValue = Math.min(Number(event.target.value), mobileAppliedMaxPrice)
+                        setMobileAppliedMinPrice(nextValue)
+                        setMobileMinInputValue(`${nextValue}`)
+                      }}
+                      className="absolute inset-x-0 top-1/2 z-10 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                      aria-label="Mobile minimum ETH range"
+                    />
+                    <input
+                      type="range"
+                      min={MIN_ETH}
+                      max={MAX_ETH}
+                      step={0.1}
+                      value={mobileAppliedMaxPrice}
+                      onChange={(event) => {
+                        const nextValue = Math.max(Number(event.target.value), mobileAppliedMinPrice)
+                        setMobileAppliedMaxPrice(nextValue)
+                        setMobileMaxInputValue(`${nextValue}`)
+                      }}
+                      className="absolute inset-x-0 top-1/2 z-20 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                      aria-label="Mobile maximum ETH range"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="block">
+                      <span className="mb-2 block text-[10px] tracking-[0.16em] text-[#8a8a8a] uppercase">
+                        Min
+                      </span>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={mobileMinInputValue}
+                        onChange={(event) => setMobileMinInputValue(event.target.value)}
+                        onBlur={() => {
+                          const nextValue = Math.min(
+                            parseEthInput(mobileMinInputValue, mobileAppliedMinPrice),
+                            mobileAppliedMaxPrice,
+                          )
+                          setMobileAppliedMinPrice(nextValue)
+                          setMobileMinInputValue(`${nextValue}`)
+                        }}
+                        className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.35rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="mb-2 block text-[10px] tracking-[0.16em] text-[#8a8a8a] uppercase">
+                        Max
+                      </span>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={mobileMaxInputValue}
+                        onChange={(event) => setMobileMaxInputValue(event.target.value)}
+                        onBlur={() => {
+                          const nextValue = Math.max(
+                            parseEthInput(mobileMaxInputValue, mobileAppliedMaxPrice),
+                            mobileAppliedMinPrice,
+                          )
+                          setMobileAppliedMaxPrice(nextValue)
+                          setMobileMaxInputValue(`${nextValue}`)
+                        }}
+                        className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.35rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                      />
+                    </label>
+                  </div>
+                </section>
+              </div>
+
+              <div className="border-t border-[#c4c7c7]/30 px-6 py-5">
+                <button
+                  type="button"
+                  onClick={applyMobileFilters}
+                  className="w-full bg-black px-5 py-4 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90"
+                  style={headlineFont}
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <footer className="border-t border-[#c4c7c7]/30 bg-white px-6 py-10 md:px-12">
           <div className="mx-auto flex max-w-[1600px] flex-col items-center justify-between gap-6 md:flex-row">
