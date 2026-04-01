@@ -8,11 +8,23 @@ import { Metadata } from '@/components/SEO/Metadata'
 type AuctionLot = {
   title: string
   bid: string
+  categoryKey: AuctionCategoryKey
   status: string
+  statusKey: AuctionStatusKey
   statusTone: 'live' | 'muted'
   imageSrc: string
   imageAlt: string
 }
+
+type AuctionCategoryKey = 'all' | 'architectural' | 'sculpture' | 'digital' | 'installation'
+
+type AuctionStatusKey =
+  | 'all'
+  | 'active'
+  | 'ending-soon'
+  | 'closed'
+  | 'newly-listed'
+  | 'paused'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -27,26 +39,44 @@ const bodyFont = {
   fontFamily: 'Inter, "Segoe UI", Tahoma, sans-serif',
 } satisfies CSSProperties
 
-const filterGroups = [
-  { label: 'Category', value: 'ALL WORKS' },
-  { label: 'Status', value: 'ACTIVE BIDDING' },
-] as const
+const categoryOptions: Array<{ key: AuctionCategoryKey; label: string; helper: string }> = [
+  { key: 'all', label: 'ALL WORKS', helper: 'Show every category' },
+  { key: 'architectural', label: 'ARCHITECTURAL', helper: 'Built-form studies and facades' },
+  { key: 'sculpture', label: 'SCULPTURE', helper: 'Objects, forms, and physical studies' },
+  { key: 'digital', label: 'DIGITAL', helper: 'Synthetic and virtual compositions' },
+  { key: 'installation', label: 'INSTALLATION', helper: 'Spatial and large-scale works' },
+]
+
+const statusOptions: Array<{ key: AuctionStatusKey; label: string; helper: string }> = [
+  { key: 'all', label: 'ALL STATUSES', helper: 'Show every auction state' },
+  { key: 'active', label: 'ACTIVE BIDDING', helper: 'Lots currently accepting bids' },
+  { key: 'ending-soon', label: 'ENDING SOON', helper: 'Auctions closing shortly' },
+  { key: 'closed', label: 'CLOSED', helper: 'Completed auctions' },
+  { key: 'newly-listed', label: 'NEWLY LISTED', helper: 'Freshly opened lots' },
+  { key: 'paused', label: 'PAUSED / RESERVE', helper: 'Paused or reserve not met' },
+]
 
 const MIN_ETH = 0.5
 const MAX_ETH = 50
 
 const lots: AuctionLot[] = [
-  { title: 'Oblique Horizon I', bid: '12.40 ETH', status: '2h 45m remaining', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB4LUsBjOdeImAsFI1KCdzWOWCNiN9RdiTO9kZNn5WRRx7NbOcMR-sm6Z4L3hvLyoQLu_Zg-dz_fki4K4v0WJ49IZyfKB0YIWMYRqYgJAhIkr71fi38x5r5fcjyPVikYRMhovtEMNmoKmGL0JqgcVJD7fNTeXE7uZm1l2iyZA_IOFWYGQxUaUkTOeazmgoTVyp1acthU5gs6LJqblekH4hHLj82qCUz6LD5IH6kCjvlNdy--ssZ67Tv47EB-0ijv8EYXaArzUx3ya95', imageAlt: 'Abstract architectural rendering with flowing monochromatic white curves and deep dramatic shadows in a minimalist digital space' },
-  { title: 'Monolith Study', bid: '8.15 ETH', status: 'Ending Soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCeXixWF66Us8MGeMQeRT9iEL3O015Au3KTSxVxv_z_SNHcl1yyQOCxTq5cCnbNPtN354N7lCSBDZJezyZrtJnr0jqED2a5BzC-edgEpCiOE1aXTIQsTnTz5k6zi-ad7q055W0BmXx5GjEoO-he7LJBF58NzUQDR41KUVeIObhUpKN6SV3BVVVKwuyCe2sRHS3275U4PxHDEQd1hnmlZ4A6VVBMHGL5qcNqrGYKVAygRhLbet_1tD4uUeytP35B02fS8A_hYdtsD_ol', imageAlt: 'Brutalist concrete sculpture floating in a void with sharp geometric angles and soft ambient lighting from top' },
-  { title: 'Virtual Synthesis', bid: '45.00 ETH', status: '12h 10m remaining', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAc9nIm6vN3Dfikh8FWImfOaOI2qoahNXwv_yBbU5_NlM0qjl-hSJKSTsUtVFarOlG7_AAjq5dGz2LMDuPSLnUNxOT0P61EqRyq__AoUA_Lr8-HOCTcktHDXq_TGCtODh68yUnLAECwKULlrDnZqgHMLy-en3DEI3nl-oi_Kaj3555r9tiizj0NMqpQ0dg__X3OBsMcZULbb-CyGjUSQPUAKHP4rWR5Fqrv5dAGlup7iHxNFaDhAZeIgeA6IQCkj9waonEChbWc5jUo', imageAlt: 'Digital landscape featuring iridescent crystalline structures in a dark misty environment with neon accents' },
-  { title: 'Prism Lattice', bid: '2.30 ETH', status: '1d 04h remaining', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB2jDG1D1O4mYjmjtusMkXpJm9rQlQM3Sm6QeaIiYouNnqdVcp4lYf5EmHfY7ItpAJJ9TwyDEotVxPYH-Fo5HrGBLFe_xsztfR2TwE8PjFd4Sa1kWyT3cmidc2q9ETD0IuCRXj0g9TDPG7UuMAeryhPfY76jQfjJ6bXKwviXnnjVhBiVoglepYCR5HptyLutQibzNcjf-ehx8Zj0CRp1Ee0K2bg_e4qbGC3QtVwUy3k6vIoc5oWgp3uRFhEFX9isc1pRvrqlA9PYAq', imageAlt: 'Ethereal glass sculpture in a dark room with light refracting through it creating colorful caustic patterns on the ground' },
-  { title: 'Void Ascension', bid: '19.20 ETH', status: 'Ending Soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCSl9w8w8gEjK9hRcXgi0S1hgC6JRckMCA1PqXCxFkF0_BTDFB345F4TNLGd8kfnotAVvBXk2VL3LeYdi62qWrprS9PLJdBbvxjONo4NLqQhAPik8WcCtd11W-FhnnFtjHlPhbBN0xPmcDBYXs-4yFP5avluQg5eu0E5DCLiKAbq4D8_WHL-h67oVbAI18pIpMH_zoDFDbv05GEJXgplvqbIJWXz6LMPokqHPljTJPXhSskKZvF70ZNPWkZzFmzGUurRim2fDksHhI4', imageAlt: 'Architectural detail of a minimalist staircase with sharp black and white contrast and dramatic long shadows' },
-  { title: 'Static Equilibrium', bid: '5.50 ETH', status: '3d 12h remaining', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGhTZmgIha98yjZvCUb07F428ovbUplYWpAo9wx7CWVm2LeVGZp2Wgeb7l4aQPCEClfuawWUgJkSlqBYD0wMShZkq4AO3-zyZRkWTHwZSjZqpH_2vxLN0TRY4GEaCyVqv-nqWq4Bs04P-CdlezTAST5aftAXWERdc0KtzUNeZkUmkRRP7NarB9sHUPGtq_INXlnANVly4N9Nw9qZSiFdPWU6sJ2VMTu4y-wea3lSDZtVPjMXy3Mz7ga1nfcwk_6LGVN4Ftz26_ATZD', imageAlt: 'A singular black smooth stone balancing perfectly on top of a jagged white marble piece in a white studio setting' },
-  { title: 'Aeolian Drift', bid: '14.75 ETH', status: '5d 1h remaining', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBI883ZEyJpZhSo1T2TcfdHEyH5T66ULRiLGzfbTDkHLdWHQuNAKXVrOVFIeMOltaWtAaAg0b0ufm5Nfc8jgfTTAJgU2VIfSkxLLh6Oo-aul9XUH7j5njUa1ucu_pD3azBltgOgZjY8b6h5qSKPRi1neqom2hiQKWU4xrYUN4E_HiQpe4dqhxgXNnN_G-buWe06qjEb1Wo5yklUj3m_Za9_Ua7sDzYln9F-T9bCb_Ed0LHkyHfbmYUJGcjCPOehbJRlLJIard2bo0gN', imageAlt: 'Large scale installation with white fabric sheets floating in a dark industrial space caught in motion' },
-  { title: 'Order Fragment', bid: '2.10 ETH', status: '15m remaining', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD_MWjOy-6Bl-PbpoLht4XyW4NgdEYQocuUbIFnKgN6XrNDFk2PdnobFU4UXtXle3wfd5mrGpfecvlIQwGGyLDvwL06kJvBFXUMtBUdVYMS00PhRJDgczzJB2j-tFfGyc-QT56jW1ol5pJIaTnTRXNC8092WHetRhivlcYEv1davJgkcTBVzRTM1kvuAI9eLqoLXC2NKaC9Hc2Yb4TbPXFDEozApR8h2JWLyr746uHZ49zZw7DuZN3kvyc7bo58M6vjmMkbRzcU2zku', imageAlt: 'Detail of a modern museum facade with repeating white panels and deep shadow lines under a clear sky' },
+  { title: 'Oblique Horizon I', bid: '12.40 ETH', categoryKey: 'architectural', status: '2h 45m remaining', statusKey: 'active', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB4LUsBjOdeImAsFI1KCdzWOWCNiN9RdiTO9kZNn5WRRx7NbOcMR-sm6Z4L3hvLyoQLu_Zg-dz_fki4K4v0WJ49IZyfKB0YIWMYRqYgJAhIkr71fi38x5r5fcjyPVikYRMhovtEMNmoKmGL0JqgcVJD7fNTeXE7uZm1l2iyZA_IOFWYGQxUaUkTOeazmgoTVyp1acthU5gs6LJqblekH4hHLj82qCUz6LD5IH6kCjvlNdy--ssZ67Tv47EB-0ijv8EYXaArzUx3ya95', imageAlt: 'Abstract architectural rendering with flowing monochromatic white curves and deep dramatic shadows in a minimalist digital space' },
+  { title: 'Monolith Study', bid: '8.15 ETH', categoryKey: 'sculpture', status: 'Ending Soon', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCeXixWF66Us8MGeMQeRT9iEL3O015Au3KTSxVxv_z_SNHcl1yyQOCxTq5cCnbNPtN354N7lCSBDZJezyZrtJnr0jqED2a5BzC-edgEpCiOE1aXTIQsTnTz5k6zi-ad7q055W0BmXx5GjEoO-he7LJBF58NzUQDR41KUVeIObhUpKN6SV3BVVVKwuyCe2sRHS3275U4PxHDEQd1hnmlZ4A6VVBMHGL5qcNqrGYKVAygRhLbet_1tD4uUeytP35B02fS8A_hYdtsD_ol', imageAlt: 'Brutalist concrete sculpture floating in a void with sharp geometric angles and soft ambient lighting from top' },
+  { title: 'Virtual Synthesis', bid: '45.00 ETH', categoryKey: 'digital', status: '12h 10m remaining', statusKey: 'active', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAc9nIm6vN3Dfikh8FWImfOaOI2qoahNXwv_yBbU5_NlM0qjl-hSJKSTsUtVFarOlG7_AAjq5dGz2LMDuPSLnUNxOT0P61EqRyq__AoUA_Lr8-HOCTcktHDXq_TGCtODh68yUnLAECwKULlrDnZqgHMLy-en3DEI3nl-oi_Kaj3555r9tiizj0NMqpQ0dg__X3OBsMcZULbb-CyGjUSQPUAKHP4rWR5Fqrv5dAGlup7iHxNFaDhAZeIgeA6IQCkj9waonEChbWc5jUo', imageAlt: 'Digital landscape featuring iridescent crystalline structures in a dark misty environment with neon accents' },
+  { title: 'Prism Lattice', bid: '2.30 ETH', categoryKey: 'sculpture', status: 'Just Listed', statusKey: 'newly-listed', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB2jDG1D1O4mYjmjtusMkXpJm9rQlQM3Sm6QeaIiYouNnqdVcp4lYf5EmHfY7ItpAJJ9TwyDEotVxPYH-Fo5HrGBLFe_xsztfR2TwE8PjFd4Sa1kWyT3cmidc2q9ETD0IuCRXj0g9TDPG7UuMAeryhPfY76jQfjJ6bXKwviXnnjVhBiVoglepYCR5HptyLutQibzNcjf-ehx8Zj0CRp1Ee0K2bg_e4qbGC3QtVwUy3k6vIoc5oWgp3uRFhEFX9isc1pRvrqlA9PYAq', imageAlt: 'Ethereal glass sculpture in a dark room with light refracting through it creating colorful caustic patterns on the ground' },
+  { title: 'Void Ascension', bid: '19.20 ETH', categoryKey: 'architectural', status: 'Ending Soon', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCSl9w8w8gEjK9hRcXgi0S1hgC6JRckMCA1PqXCxFkF0_BTDFB345F4TNLGd8kfnotAVvBXk2VL3LeYdi62qWrprS9PLJdBbvxjONo4NLqQhAPik8WcCtd11W-FhnnFtjHlPhbBN0xPmcDBYXs-4yFP5avluQg5eu0E5DCLiKAbq4D8_WHL-h67oVbAI18pIpMH_zoDFDbv05GEJXgplvqbIJWXz6LMPokqHPljTJPXhSskKZvF70ZNPWkZzFmzGUurRim2fDksHhI4', imageAlt: 'Architectural detail of a minimalist staircase with sharp black and white contrast and dramatic long shadows' },
+  { title: 'Static Equilibrium', bid: '5.50 ETH', categoryKey: 'sculpture', status: 'Reserve Not Met', statusKey: 'paused', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGhTZmgIha98yjZvCUb07F428ovbUplYWpAo9wx7CWVm2LeVGZp2Wgeb7l4aQPCEClfuawWUgJkSlqBYD0wMShZkq4AO3-zyZRkWTHwZSjZqpH_2vxLN0TRY4GEaCyVqv-nqWq4Bs04P-CdlezTAST5aftAXWERdc0KtzUNeZkUmkRRP7NarB9sHUPGtq_INXlnANVly4N9Nw9qZSiFdPWU6sJ2VMTu4y-wea3lSDZtVPjMXy3Mz7ga1nfcwk_6LGVN4Ftz26_ATZD', imageAlt: 'A singular black smooth stone balancing perfectly on top of a jagged white marble piece in a white studio setting' },
+  { title: 'Aeolian Drift', bid: '14.75 ETH', categoryKey: 'installation', status: 'Closed', statusKey: 'closed', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBI883ZEyJpZhSo1T2TcfdHEyH5T66ULRiLGzfbTDkHLdWHQuNAKXVrOVFIeMOltaWtAaAg0b0ufm5Nfc8jgfTTAJgU2VIfSkxLLh6Oo-aul9XUH7j5njUa1ucu_pD3azBltgOgZjY8b6h5qSKPRi1neqom2hiQKWU4xrYUN4E_HiQpe4dqhxgXNnN_G-buWe06qjEb1Wo5yklUj3m_Za9_Ua7sDzYln9F-T9bCb_Ed0LHkyHfbmYUJGcjCPOehbJRlLJIard2bo0gN', imageAlt: 'Large scale installation with white fabric sheets floating in a dark industrial space caught in motion' },
+  { title: 'Order Fragment', bid: '2.10 ETH', categoryKey: 'architectural', status: '15m remaining', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD_MWjOy-6Bl-PbpoLht4XyW4NgdEYQocuUbIFnKgN6XrNDFk2PdnobFU4UXtXle3wfd5mrGpfecvlIQwGGyLDvwL06kJvBFXUMtBUdVYMS00PhRJDgczzJB2j-tFfGyc-QT56jW1ol5pJIaTnTRXNC8092WHetRhivlcYEv1davJgkcTBVzRTM1kvuAI9eLqoLXC2NKaC9Hc2Yb4TbPXFDEozApR8h2JWLyr746uHZ49zZw7DuZN3kvyc7bo58M6vjmMkbRzcU2zku', imageAlt: 'Detail of a modern museum facade with repeating white panels and deep shadow lines under a clear sky' },
 ]
 
-const statusToneClass = { live: 'bg-[#ba1a1a]', muted: 'bg-[#747777]' } as const
+const statusBadgeClass: Record<Exclude<AuctionStatusKey, 'all'>, string> = {
+  active: 'bg-[#16a34a]',
+  'ending-soon': 'bg-[#dc2626]',
+  closed: 'bg-[#9ca3af]',
+  'newly-listed': 'bg-[#2563eb]',
+  paused: 'bg-[#eab308]',
+}
 
 const clampEthValue = (value: number) => {
   if (Number.isNaN(value)) {
@@ -77,19 +107,28 @@ const formatEthDisplay = (value: number) => {
 
 const LiveAuctionPage = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [selectedStatus, setSelectedStatus] = useState<AuctionStatusKey>('active')
   const [appliedMinPrice, setAppliedMinPrice] = useState(MIN_ETH)
   const [appliedMaxPrice, setAppliedMaxPrice] = useState(MAX_ETH)
   const [draftMinPrice, setDraftMinPrice] = useState(MIN_ETH)
   const [draftMaxPrice, setDraftMaxPrice] = useState(MAX_ETH)
   const [minInputValue, setMinInputValue] = useState(`${MIN_ETH}`)
   const [maxInputValue, setMaxInputValue] = useState(`${MAX_ETH}`)
+  const [isStatusOpen, setIsStatusOpen] = useState(false)
   const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false)
+  const statusRef = useRef<HTMLDivElement>(null)
   const priceRangeRef = useRef<HTMLDivElement>(null)
+  const selectedStatusOption =
+    statusOptions.find((option) => option.key === selectedStatus) ?? statusOptions[0]
   const minPercent = ((draftMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const maxPercent = ((draftMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (!statusRef.current?.contains(event.target as Node)) {
+        setIsStatusOpen(false)
+      }
+
       if (!priceRangeRef.current?.contains(event.target as Node)) {
         setIsPriceRangeOpen(false)
       }
@@ -101,7 +140,10 @@ const LiveAuctionPage = () => {
 
   const visibleLots = lots.filter((lot) => {
     const bidValue = Number.parseFloat(lot.bid.replace(' ETH', ''))
-    return bidValue >= appliedMinPrice && bidValue <= appliedMaxPrice
+    const matchesPrice = bidValue >= appliedMinPrice && bidValue <= appliedMaxPrice
+    const matchesStatus = selectedStatus === 'all' ? true : lot.statusKey === selectedStatus
+
+    return matchesPrice && matchesStatus
   })
 
   return (
@@ -147,10 +189,69 @@ const LiveAuctionPage = () => {
                   </span>
                 </button>
               ))}
+              <div ref={statusRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPriceRangeOpen(false)
+                    setIsStatusOpen((prev) => !prev)
+                  }}
+                  className="group text-left"
+                  aria-expanded={isStatusOpen}
+                  aria-haspopup="listbox"
+                >
+                  <span className="mb-2 block text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                    Status
+                  </span>
+                  <span
+                    className="flex items-center gap-2 text-sm font-bold text-black transition-colors group-hover:text-black/70"
+                    style={headlineFont}
+                  >
+                    {selectedStatusOption.label}
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${isStatusOpen ? 'rotate-180' : ''}`}
+                    />
+                  </span>
+                </button>
+
+                {isStatusOpen ? (
+                  <div className="absolute top-full left-0 z-20 mt-4 min-w-[280px] border border-[#c4c7c7]/40 bg-white p-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.18)]">
+                    <div className="space-y-1" role="listbox" aria-label="Status options">
+                      {statusOptions.map((option) => (
+                        <button
+                          key={option.key}
+                          type="button"
+                          onClick={() => {
+                            setSelectedStatus(option.key)
+                            setIsStatusOpen(false)
+                          }}
+                          className={`block w-full px-3 py-3 text-left transition-colors ${
+                            option.key === selectedStatus
+                              ? 'bg-black text-white'
+                              : 'text-black hover:bg-[#f5f5f5]'
+                          }`}
+                        >
+                          <span className="block text-sm font-bold uppercase" style={headlineFont}>
+                            {option.label}
+                          </span>
+                          <span
+                            className={`mt-1 block text-[11px] tracking-[0.08em] uppercase ${
+                              option.key === selectedStatus ? 'text-white/70' : 'text-[#747777]'
+                            }`}
+                          >
+                            {option.helper}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
               <div ref={priceRangeRef} className="relative">
                 <button
                   type="button"
                   onClick={() => {
+                    setIsStatusOpen(false)
                     if (!isPriceRangeOpen) {
                       setDraftMinPrice(appliedMinPrice)
                       setDraftMaxPrice(appliedMaxPrice)
@@ -356,8 +457,10 @@ const LiveAuctionPage = () => {
                   />
                   <div className="absolute top-4 left-4 flex items-center gap-2 border border-[#c4c7c7]/30 bg-white/90 px-3 py-1 backdrop-blur-md">
                     <span
-                      className={`h-1.5 w-1.5 rounded-full ${statusToneClass[lot.statusTone]} ${
-                        lot.statusTone === 'live' ? 'animate-pulse' : ''
+                      className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[lot.statusKey]} ${
+                        lot.statusKey === 'active' || lot.statusKey === 'ending-soon'
+                          ? 'animate-pulse'
+                          : ''
                       }`}
                     />
                     <span className="text-[10px] tracking-[0.08em] text-black uppercase">
