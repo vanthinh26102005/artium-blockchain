@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Metadata } from '@/components/SEO/Metadata'
 
 type AuctionLot = {
+  artworkId: string
   title: string
   bid: string
   categoryKey: AuctionCategoryKey
@@ -58,16 +59,17 @@ const statusOptions: Array<{ key: AuctionStatusKey; label: string; helper: strin
 
 const MIN_ETH = 0.5
 const MAX_ETH = 50
+const LOAD_MORE_STEP = 4
 
 const lots: AuctionLot[] = [
-  { title: 'Oblique Horizon I', bid: '12.40 ETH', categoryKey: 'architectural', status: '2h 45m remaining', statusKey: 'active', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB4LUsBjOdeImAsFI1KCdzWOWCNiN9RdiTO9kZNn5WRRx7NbOcMR-sm6Z4L3hvLyoQLu_Zg-dz_fki4K4v0WJ49IZyfKB0YIWMYRqYgJAhIkr71fi38x5r5fcjyPVikYRMhovtEMNmoKmGL0JqgcVJD7fNTeXE7uZm1l2iyZA_IOFWYGQxUaUkTOeazmgoTVyp1acthU5gs6LJqblekH4hHLj82qCUz6LD5IH6kCjvlNdy--ssZ67Tv47EB-0ijv8EYXaArzUx3ya95', imageAlt: 'Abstract architectural rendering with flowing monochromatic white curves and deep dramatic shadows in a minimalist digital space' },
-  { title: 'Monolith Study', bid: '8.15 ETH', categoryKey: 'sculpture', status: 'Ending Soon', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCeXixWF66Us8MGeMQeRT9iEL3O015Au3KTSxVxv_z_SNHcl1yyQOCxTq5cCnbNPtN354N7lCSBDZJezyZrtJnr0jqED2a5BzC-edgEpCiOE1aXTIQsTnTz5k6zi-ad7q055W0BmXx5GjEoO-he7LJBF58NzUQDR41KUVeIObhUpKN6SV3BVVVKwuyCe2sRHS3275U4PxHDEQd1hnmlZ4A6VVBMHGL5qcNqrGYKVAygRhLbet_1tD4uUeytP35B02fS8A_hYdtsD_ol', imageAlt: 'Brutalist concrete sculpture floating in a void with sharp geometric angles and soft ambient lighting from top' },
-  { title: 'Virtual Synthesis', bid: '45.00 ETH', categoryKey: 'digital', status: '12h 10m remaining', statusKey: 'active', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAc9nIm6vN3Dfikh8FWImfOaOI2qoahNXwv_yBbU5_NlM0qjl-hSJKSTsUtVFarOlG7_AAjq5dGz2LMDuPSLnUNxOT0P61EqRyq__AoUA_Lr8-HOCTcktHDXq_TGCtODh68yUnLAECwKULlrDnZqgHMLy-en3DEI3nl-oi_Kaj3555r9tiizj0NMqpQ0dg__X3OBsMcZULbb-CyGjUSQPUAKHP4rWR5Fqrv5dAGlup7iHxNFaDhAZeIgeA6IQCkj9waonEChbWc5jUo', imageAlt: 'Digital landscape featuring iridescent crystalline structures in a dark misty environment with neon accents' },
-  { title: 'Prism Lattice', bid: '2.30 ETH', categoryKey: 'sculpture', status: 'Just Listed', statusKey: 'newly-listed', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB2jDG1D1O4mYjmjtusMkXpJm9rQlQM3Sm6QeaIiYouNnqdVcp4lYf5EmHfY7ItpAJJ9TwyDEotVxPYH-Fo5HrGBLFe_xsztfR2TwE8PjFd4Sa1kWyT3cmidc2q9ETD0IuCRXj0g9TDPG7UuMAeryhPfY76jQfjJ6bXKwviXnnjVhBiVoglepYCR5HptyLutQibzNcjf-ehx8Zj0CRp1Ee0K2bg_e4qbGC3QtVwUy3k6vIoc5oWgp3uRFhEFX9isc1pRvrqlA9PYAq', imageAlt: 'Ethereal glass sculpture in a dark room with light refracting through it creating colorful caustic patterns on the ground' },
-  { title: 'Void Ascension', bid: '19.20 ETH', categoryKey: 'architectural', status: 'Ending Soon', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCSl9w8w8gEjK9hRcXgi0S1hgC6JRckMCA1PqXCxFkF0_BTDFB345F4TNLGd8kfnotAVvBXk2VL3LeYdi62qWrprS9PLJdBbvxjONo4NLqQhAPik8WcCtd11W-FhnnFtjHlPhbBN0xPmcDBYXs-4yFP5avluQg5eu0E5DCLiKAbq4D8_WHL-h67oVbAI18pIpMH_zoDFDbv05GEJXgplvqbIJWXz6LMPokqHPljTJPXhSskKZvF70ZNPWkZzFmzGUurRim2fDksHhI4', imageAlt: 'Architectural detail of a minimalist staircase with sharp black and white contrast and dramatic long shadows' },
-  { title: 'Static Equilibrium', bid: '5.50 ETH', categoryKey: 'sculpture', status: 'Reserve Not Met', statusKey: 'paused', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGhTZmgIha98yjZvCUb07F428ovbUplYWpAo9wx7CWVm2LeVGZp2Wgeb7l4aQPCEClfuawWUgJkSlqBYD0wMShZkq4AO3-zyZRkWTHwZSjZqpH_2vxLN0TRY4GEaCyVqv-nqWq4Bs04P-CdlezTAST5aftAXWERdc0KtzUNeZkUmkRRP7NarB9sHUPGtq_INXlnANVly4N9Nw9qZSiFdPWU6sJ2VMTu4y-wea3lSDZtVPjMXy3Mz7ga1nfcwk_6LGVN4Ftz26_ATZD', imageAlt: 'A singular black smooth stone balancing perfectly on top of a jagged white marble piece in a white studio setting' },
-  { title: 'Aeolian Drift', bid: '14.75 ETH', categoryKey: 'installation', status: 'Closed', statusKey: 'closed', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBI883ZEyJpZhSo1T2TcfdHEyH5T66ULRiLGzfbTDkHLdWHQuNAKXVrOVFIeMOltaWtAaAg0b0ufm5Nfc8jgfTTAJgU2VIfSkxLLh6Oo-aul9XUH7j5njUa1ucu_pD3azBltgOgZjY8b6h5qSKPRi1neqom2hiQKWU4xrYUN4E_HiQpe4dqhxgXNnN_G-buWe06qjEb1Wo5yklUj3m_Za9_Ua7sDzYln9F-T9bCb_Ed0LHkyHfbmYUJGcjCPOehbJRlLJIard2bo0gN', imageAlt: 'Large scale installation with white fabric sheets floating in a dark industrial space caught in motion' },
-  { title: 'Order Fragment', bid: '2.10 ETH', categoryKey: 'architectural', status: '15m remaining', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD_MWjOy-6Bl-PbpoLht4XyW4NgdEYQocuUbIFnKgN6XrNDFk2PdnobFU4UXtXle3wfd5mrGpfecvlIQwGGyLDvwL06kJvBFXUMtBUdVYMS00PhRJDgczzJB2j-tFfGyc-QT56jW1ol5pJIaTnTRXNC8092WHetRhivlcYEv1davJgkcTBVzRTM1kvuAI9eLqoLXC2NKaC9Hc2Yb4TbPXFDEozApR8h2JWLyr746uHZ49zZw7DuZN3kvyc7bo58M6vjmMkbRzcU2zku', imageAlt: 'Detail of a modern museum facade with repeating white panels and deep shadow lines under a clear sky' },
+  { artworkId: 'aw-001', title: 'Oblique Horizon I', bid: '12.40 ETH', categoryKey: 'architectural', status: '2h 45m remaining', statusKey: 'active', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB4LUsBjOdeImAsFI1KCdzWOWCNiN9RdiTO9kZNn5WRRx7NbOcMR-sm6Z4L3hvLyoQLu_Zg-dz_fki4K4v0WJ49IZyfKB0YIWMYRqYgJAhIkr71fi38x5r5fcjyPVikYRMhovtEMNmoKmGL0JqgcVJD7fNTeXE7uZm1l2iyZA_IOFWYGQxUaUkTOeazmgoTVyp1acthU5gs6LJqblekH4hHLj82qCUz6LD5IH6kCjvlNdy--ssZ67Tv47EB-0ijv8EYXaArzUx3ya95', imageAlt: 'Abstract architectural rendering with flowing monochromatic white curves and deep dramatic shadows in a minimalist digital space' },
+  { artworkId: 'aw-002', title: 'Monolith Study', bid: '8.15 ETH', categoryKey: 'sculpture', status: 'Ending Soon', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCeXixWF66Us8MGeMQeRT9iEL3O015Au3KTSxVxv_z_SNHcl1yyQOCxTq5cCnbNPtN354N7lCSBDZJezyZrtJnr0jqED2a5BzC-edgEpCiOE1aXTIQsTnTz5k6zi-ad7q055W0BmXx5GjEoO-he7LJBF58NzUQDR41KUVeIObhUpKN6SV3BVVVKwuyCe2sRHS3275U4PxHDEQd1hnmlZ4A6VVBMHGL5qcNqrGYKVAygRhLbet_1tD4uUeytP35B02fS8A_hYdtsD_ol', imageAlt: 'Brutalist concrete sculpture floating in a void with sharp geometric angles and soft ambient lighting from top' },
+  { artworkId: 'aw-003', title: 'Virtual Synthesis', bid: '45.00 ETH', categoryKey: 'digital', status: '12h 10m remaining', statusKey: 'active', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAc9nIm6vN3Dfikh8FWImfOaOI2qoahNXwv_yBbU5_NlM0qjl-hSJKSTsUtVFarOlG7_AAjq5dGz2LMDuPSLnUNxOT0P61EqRyq__AoUA_Lr8-HOCTcktHDXq_TGCtODh68yUnLAECwKULlrDnZqgHMLy-en3DEI3nl-oi_Kaj3555r9tiizj0NMqpQ0dg__X3OBsMcZULbb-CyGjUSQPUAKHP4rWR5Fqrv5dAGlup7iHxNFaDhAZeIgeA6IQCkj9waonEChbWc5jUo', imageAlt: 'Digital landscape featuring iridescent crystalline structures in a dark misty environment with neon accents' },
+  { artworkId: 'aw-004', title: 'Prism Lattice', bid: '2.30 ETH', categoryKey: 'sculpture', status: 'Just Listed', statusKey: 'newly-listed', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB2jDG1D1O4mYjmjtusMkXpJm9rQlQM3Sm6QeaIiYouNnqdVcp4lYf5EmHfY7ItpAJJ9TwyDEotVxPYH-Fo5HrGBLFe_xsztfR2TwE8PjFd4Sa1kWyT3cmidc2q9ETD0IuCRXj0g9TDPG7UuMAeryhPfY76jQfjJ6bXKwviXnnjVhBiVoglepYCR5HptyLutQibzNcjf-ehx8Zj0CRp1Ee0K2bg_e4qbGC3QtVwUy3k6vIoc5oWgp3uRFhEFX9isc1pRvrqlA9PYAq', imageAlt: 'Ethereal glass sculpture in a dark room with light refracting through it creating colorful caustic patterns on the ground' },
+  { artworkId: 'aw-005', title: 'Void Ascension', bid: '19.20 ETH', categoryKey: 'architectural', status: 'Ending Soon', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCSl9w8w8gEjK9hRcXgi0S1hgC6JRckMCA1PqXCxFkF0_BTDFB345F4TNLGd8kfnotAVvBXk2VL3LeYdi62qWrprS9PLJdBbvxjONo4NLqQhAPik8WcCtd11W-FhnnFtjHlPhbBN0xPmcDBYXs-4yFP5avluQg5eu0E5DCLiKAbq4D8_WHL-h67oVbAI18pIpMH_zoDFDbv05GEJXgplvqbIJWXz6LMPokqHPljTJPXhSskKZvF70ZNPWkZzFmzGUurRim2fDksHhI4', imageAlt: 'Architectural detail of a minimalist staircase with sharp black and white contrast and dramatic long shadows' },
+  { artworkId: 'aw-006', title: 'Static Equilibrium', bid: '5.50 ETH', categoryKey: 'sculpture', status: 'Reserve Not Met', statusKey: 'paused', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGhTZmgIha98yjZvCUb07F428ovbUplYWpAo9wx7CWVm2LeVGZp2Wgeb7l4aQPCEClfuawWUgJkSlqBYD0wMShZkq4AO3-zyZRkWTHwZSjZqpH_2vxLN0TRY4GEaCyVqv-nqWq4Bs04P-CdlezTAST5aftAXWERdc0KtzUNeZkUmkRRP7NarB9sHUPGtq_INXlnANVly4N9Nw9qZSiFdPWU6sJ2VMTu4y-wea3lSDZtVPjMXy3Mz7ga1nfcwk_6LGVN4Ftz26_ATZD', imageAlt: 'A singular black smooth stone balancing perfectly on top of a jagged white marble piece in a white studio setting' },
+  { artworkId: 'aw-007', title: 'Aeolian Drift', bid: '14.75 ETH', categoryKey: 'installation', status: 'Closed', statusKey: 'closed', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBI883ZEyJpZhSo1T2TcfdHEyH5T66ULRiLGzfbTDkHLdWHQuNAKXVrOVFIeMOltaWtAaAg0b0ufm5Nfc8jgfTTAJgU2VIfSkxLLh6Oo-aul9XUH7j5njUa1ucu_pD3azBltgOgZjY8b6h5qSKPRi1neqom2hiQKWU4xrYUN4E_HiQpe4dqhxgXNnN_G-buWe06qjEb1Wo5yklUj3m_Za9_Ua7sDzYln9F-T9bCb_Ed0LHkyHfbmYUJGcjCPOehbJRlLJIard2bo0gN', imageAlt: 'Large scale installation with white fabric sheets floating in a dark industrial space caught in motion' },
+  { artworkId: 'aw-008', title: 'Order Fragment', bid: '2.10 ETH', categoryKey: 'architectural', status: '15m remaining', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD_MWjOy-6Bl-PbpoLht4XyW4NgdEYQocuUbIFnKgN6XrNDFk2PdnobFU4UXtXle3wfd5mrGpfecvlIQwGGyLDvwL06kJvBFXUMtBUdVYMS00PhRJDgczzJB2j-tFfGyc-QT56jW1ol5pJIaTnTRXNC8092WHetRhivlcYEv1davJgkcTBVzRTM1kvuAI9eLqoLXC2NKaC9Hc2Yb4TbPXFDEozApR8h2JWLyr746uHZ49zZw7DuZN3kvyc7bo58M6vjmMkbRzcU2zku', imageAlt: 'Detail of a modern museum facade with repeating white panels and deep shadow lines under a clear sky' },
 ]
 
 const statusBadgeClass: Record<Exclude<AuctionStatusKey, 'all'>, string> = {
@@ -125,9 +127,12 @@ const LiveAuctionPage = () => {
   const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false)
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(LOAD_MORE_STEP)
   const categoryRef = useRef<HTMLDivElement>(null)
   const statusRef = useRef<HTMLDivElement>(null)
   const priceRangeRef = useRef<HTMLDivElement>(null)
+  const mobileFilterButtonRef = useRef<HTMLButtonElement>(null)
+  const mobileFilterCloseButtonRef = useRef<HTMLButtonElement>(null)
   const selectedCategoryOption =
     categoryOptions.find((option) => option.key === selectedCategory) ?? categoryOptions[0]
   const selectedStatusOption =
@@ -173,6 +178,31 @@ const LiveAuctionPage = () => {
     }
   }, [isMobileFiltersOpen])
 
+  useEffect(() => {
+    if (!isMobileFiltersOpen) {
+      return
+    }
+
+    mobileFilterCloseButtonRef.current?.focus()
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMobileFiltersOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscapeKey)
+    return () => document.removeEventListener('keydown', handleEscapeKey)
+  }, [isMobileFiltersOpen])
+
+  useEffect(() => {
+    if (isMobileFiltersOpen) {
+      return
+    }
+
+    mobileFilterButtonRef.current?.focus()
+  }, [isMobileFiltersOpen])
+
   const syncMobileFiltersWithApplied = () => {
     setMobileSelectedCategory(selectedCategory)
     setMobileSelectedStatus(selectedStatus)
@@ -186,6 +216,7 @@ const LiveAuctionPage = () => {
     const nextMin = Math.min(parseEthInput(minInputValue, draftMinPrice), draftMaxPrice)
     const nextMax = Math.max(parseEthInput(maxInputValue, draftMaxPrice), nextMin)
 
+    setVisibleCount(LOAD_MORE_STEP)
     setDraftMinPrice(nextMin)
     setDraftMaxPrice(nextMax)
     setMinInputValue(`${nextMin}`)
@@ -198,6 +229,30 @@ const LiveAuctionPage = () => {
   const openMobileFilters = () => {
     syncMobileFiltersWithApplied()
     setIsMobileFiltersOpen(true)
+  }
+
+  const resetDesktopFilters = () => {
+    setVisibleCount(LOAD_MORE_STEP)
+    setSelectedCategory('all')
+    setSelectedStatus('all')
+    setAppliedMinPrice(MIN_ETH)
+    setAppliedMaxPrice(MAX_ETH)
+    setDraftMinPrice(MIN_ETH)
+    setDraftMaxPrice(MAX_ETH)
+    setMinInputValue(`${MIN_ETH}`)
+    setMaxInputValue(`${MAX_ETH}`)
+    setIsCategoryOpen(false)
+    setIsStatusOpen(false)
+    setIsPriceRangeOpen(false)
+  }
+
+  const resetMobileFilters = () => {
+    setMobileSelectedCategory('all')
+    setMobileSelectedStatus('all')
+    setMobileAppliedMinPrice(MIN_ETH)
+    setMobileAppliedMaxPrice(MAX_ETH)
+    setMobileMinInputValue(`${MIN_ETH}`)
+    setMobileMaxInputValue(`${MAX_ETH}`)
   }
 
   const applyMobileFilters = () => {
@@ -214,6 +269,7 @@ const LiveAuctionPage = () => {
     setMobileAppliedMaxPrice(nextMax)
     setMobileMinInputValue(`${nextMin}`)
     setMobileMaxInputValue(`${nextMax}`)
+    setVisibleCount(LOAD_MORE_STEP)
     setSelectedCategory(mobileSelectedCategory)
     setSelectedStatus(mobileSelectedStatus)
     setAppliedMinPrice(nextMin)
@@ -221,16 +277,49 @@ const LiveAuctionPage = () => {
     setIsMobileFiltersOpen(false)
   }
 
-  const visibleLots = lots.filter((lot) => {
-    const bidValue = Number.parseFloat(lot.bid.replace(' ETH', ''))
-    const matchesCategory = selectedCategory === 'all' ? true : lot.categoryKey === selectedCategory
-    const matchesPrice = bidValue >= appliedMinPrice && bidValue <= appliedMaxPrice
-    const matchesStatus = selectedStatus === 'all' ? true : lot.statusKey === selectedStatus
+  const filterLots = (
+    category: AuctionCategoryKey,
+    status: AuctionStatusKey,
+    minPrice: number,
+    maxPrice: number,
+  ) =>
+    lots.filter((lot) => {
+      const bidValue = Number.parseFloat(lot.bid.replace(' ETH', ''))
+      const matchesCategory = category === 'all' ? true : lot.categoryKey === category
+      const matchesPrice = bidValue >= minPrice && bidValue <= maxPrice
+      const matchesStatus = status === 'all' ? true : lot.statusKey === status
 
-    return matchesCategory && matchesPrice && matchesStatus
-  })
+      return matchesCategory && matchesPrice && matchesStatus
+    })
+
+  const visibleLots = filterLots(
+    selectedCategory,
+    selectedStatus,
+    appliedMinPrice,
+    appliedMaxPrice,
+  )
+  const mobilePreviewLots = filterLots(
+    mobileSelectedCategory,
+    mobileSelectedStatus,
+    mobileAppliedMinPrice,
+    mobileAppliedMaxPrice,
+  )
+  const displayedLots = visibleLots.slice(0, visibleCount)
+  const hasMoreLots = displayedLots.length < visibleLots.length
 
   const resultsLabel = `${visibleLots.length} result${visibleLots.length === 1 ? '' : 's'}`
+  const mobilePreviewLabel = `${mobilePreviewLots.length} result${mobilePreviewLots.length === 1 ? '' : 's'}`
+  const hasActiveFilters =
+    selectedCategory !== 'all' ||
+    selectedStatus !== 'all' ||
+    appliedMinPrice !== MIN_ETH ||
+    appliedMaxPrice !== MAX_ETH
+  const footerLabel = hasActiveFilters
+    ? `Displaying ${displayedLots.length} of ${visibleLots.length} matching lots`
+    : `Displaying ${displayedLots.length} of ${lots.length} total lots`
+  const emptyStateMessage = hasActiveFilters
+    ? 'No auctions match the selected filters.'
+    : 'No live auctions are available right now.'
 
   return (
     <>
@@ -295,6 +384,7 @@ const LiveAuctionPage = () => {
                           key={option.key}
                           type="button"
                           onClick={() => {
+                            setVisibleCount(LOAD_MORE_STEP)
                             setSelectedCategory(option.key)
                             setIsCategoryOpen(false)
                           }}
@@ -354,6 +444,7 @@ const LiveAuctionPage = () => {
                           key={option.key}
                           type="button"
                           onClick={() => {
+                            setVisibleCount(LOAD_MORE_STEP)
                             setSelectedStatus(option.key)
                             setIsStatusOpen(false)
                           }}
@@ -545,6 +636,20 @@ const LiveAuctionPage = () => {
               </p>
               <button
                 type="button"
+                onClick={resetDesktopFilters}
+                disabled={!hasActiveFilters}
+                className={`hidden text-xs tracking-[0.22em] uppercase transition md:block ${
+                  hasActiveFilters
+                    ? 'cursor-pointer text-black hover:text-black/60'
+                    : 'cursor-not-allowed text-black/30'
+                }`}
+                style={headlineFont}
+              >
+                Clear Filters
+              </button>
+              <button
+                ref={mobileFilterButtonRef}
+                type="button"
                 onClick={openMobileFilters}
                 className="border border-black px-4 py-2 text-xs tracking-[0.22em] text-black uppercase transition hover:bg-black hover:text-white md:hidden"
                 style={headlineFont}
@@ -561,7 +666,7 @@ const LiveAuctionPage = () => {
                 : 'grid grid-cols-1 gap-6'
             }
           >
-            {visibleLots.map((lot) => (
+            {displayedLots.map((lot) => (
               <article
                 key={lot.title}
                 className={`group border border-[#e5e7eb] bg-white p-4 transition-all duration-300 hover:border-black hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.1)] ${
@@ -615,9 +720,16 @@ const LiveAuctionPage = () => {
                             : 'text-2xl tracking-[0.02em] md:text-3xl'
                         }`}
                         style={headlineFont}
+                    >
+                      {lot.title}
+                    </h2>
+                      <Link
+                        href={`/artworks/${lot.artworkId}`}
+                        className="mt-3 inline-block text-[11px] tracking-[0.2em] text-black/55 uppercase transition hover:text-black"
+                        style={headlineFont}
                       >
-                        {lot.title}
-                      </h2>
+                        View artwork details
+                      </Link>
                       {viewMode === 'list' ? (
                         <p className="mt-3 max-w-2xl text-sm leading-7 text-[#747777]">
                           Verified collectible with on-chain provenance, active bidding, and a
@@ -647,12 +759,12 @@ const LiveAuctionPage = () => {
                         {lot.bid}
                       </p>
                     </div>
-                    <button
-                      type="button"
+                    <Link
+                      href={`/artworks/${lot.artworkId}`}
                       className="bg-black px-4 py-2 text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
                     >
                       Place Bid
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </article>
@@ -662,23 +774,26 @@ const LiveAuctionPage = () => {
           {visibleLots.length === 0 ? (
             <section className="mt-12 border border-[#c4c7c7]/30 bg-[#fafafa] px-6 py-10 text-center">
               <p className="text-sm tracking-[0.14em] text-[#747777] uppercase" style={headlineFont}>
-                No auctions found in this price range
+                {emptyStateMessage}
               </p>
             </section>
           ) : null}
 
           <section className="mt-24 flex flex-col items-center gap-8">
-            <button
-              type="button"
-              className="group flex items-center gap-6 text-sm tracking-[0.3em] text-black uppercase transition-all"
-              style={headlineFont}
-            >
-              <span className="h-px w-12 bg-black transition-all group-hover:w-24" />
-              <span>Load More Archives</span>
-              <span className="h-px w-12 bg-black transition-all group-hover:w-24" />
-            </button>
+            {hasMoreLots ? (
+              <button
+                type="button"
+                onClick={() => setVisibleCount((current) => Math.min(current + LOAD_MORE_STEP, visibleLots.length))}
+                className="group flex items-center gap-6 text-sm tracking-[0.3em] text-black uppercase transition-all"
+                style={headlineFont}
+              >
+                <span className="h-px w-12 bg-black transition-all group-hover:w-24" />
+                <span>Load More Results</span>
+                <span className="h-px w-12 bg-black transition-all group-hover:w-24" />
+              </button>
+            ) : null}
             <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
-              Displaying {visibleLots.length} of {lots.length} Active Auctions
+              {footerLabel}
             </p>
           </section>
         </main>
@@ -689,6 +804,9 @@ const LiveAuctionPage = () => {
             onClick={() => setIsMobileFiltersOpen(false)}
           >
             <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="mobile-auction-filters-title"
               className="ml-auto flex h-full w-full max-w-md flex-col bg-white"
               onClick={(event) => event.stopPropagation()}
             >
@@ -697,18 +815,33 @@ const LiveAuctionPage = () => {
                   <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
                     Filter Auctions
                   </p>
-                  <p className="mt-1 text-lg font-bold text-black uppercase" style={headlineFont}>
-                    {resultsLabel}
+                  <p
+                    id="mobile-auction-filters-title"
+                    className="mt-1 text-lg font-bold text-black uppercase"
+                    style={headlineFont}
+                  >
+                    Previewing {mobilePreviewLabel}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileFiltersOpen(false)}
-                  className="text-xs tracking-[0.24em] text-black uppercase"
-                  style={headlineFont}
-                >
-                  Close
-                </button>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={resetMobileFilters}
+                    className="text-xs tracking-[0.22em] text-black uppercase transition hover:text-black/60"
+                    style={headlineFont}
+                  >
+                    Clear
+                  </button>
+                  <button
+                    ref={mobileFilterCloseButtonRef}
+                    type="button"
+                    onClick={() => setIsMobileFiltersOpen(false)}
+                    className="text-xs tracking-[0.24em] text-black uppercase"
+                    style={headlineFont}
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
 
               <div className="flex-1 space-y-8 overflow-y-auto px-6 py-6">
@@ -886,7 +1019,7 @@ const LiveAuctionPage = () => {
                   className="w-full bg-black px-5 py-4 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90"
                   style={headlineFont}
                 >
-                  Apply Filters
+                  Apply Filters ({mobilePreviewLots.length})
                 </button>
               </div>
             </div>
