@@ -709,12 +709,16 @@ const LiveAuctionPage = () => {
               <article
                 key={lot.title}
                 className={`group border border-[#e5e7eb] bg-white p-4 transition-all duration-300 hover:border-black hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.1)] ${
-                  viewMode === 'list' ? 'md:grid md:grid-cols-[280px_minmax(0,1fr)] md:gap-6' : ''
+                  viewMode === 'list'
+                    ? 'md:grid md:grid-cols-[280px_minmax(0,1fr)] md:items-stretch md:gap-6'
+                    : ''
                 }`}
               >
                 <div
                   className={`relative overflow-hidden bg-[#f7f7f7] ${
-                    viewMode === 'grid' ? 'mb-6 aspect-[3/4]' : 'mb-5 aspect-[4/3] md:mb-0 md:h-full'
+                    viewMode === 'grid'
+                      ? 'mb-6 aspect-[3/4]'
+                      : 'mb-5 aspect-[4/3] md:mb-0 md:h-full md:w-full md:aspect-auto'
                   }`}
                 >
                   <Image
@@ -743,7 +747,7 @@ const LiveAuctionPage = () => {
                 </div>
                 <div
                   className={`space-y-4 ${
-                    viewMode === 'list' ? 'flex flex-col justify-between md:py-2' : ''
+                    viewMode === 'list' ? 'min-w-0 flex flex-col justify-between md:py-2' : ''
                   }`}
                 >
                   <div
