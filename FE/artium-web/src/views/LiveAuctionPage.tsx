@@ -168,6 +168,7 @@ const LiveAuctionPage = () => {
   const categoryRef = useRef<HTMLDivElement>(null)
   const statusRef = useRef<HTMLDivElement>(null)
   const priceRangeRef = useRef<HTMLDivElement>(null)
+  const resultsRef = useRef<HTMLElement>(null)
   const mobileFilterButtonRef = useRef<HTMLButtonElement>(null)
   const mobileFilterCloseButtonRef = useRef<HTMLButtonElement>(null)
   const selectedCategoryOption =
@@ -359,6 +360,35 @@ const LiveAuctionPage = () => {
   const emptyStateMessage = hasActiveFilters
     ? 'No auctions match the selected filters.'
     : 'No live auctions are available right now.'
+
+  const scrollResultsToTop = () => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const resultsTop = resultsRef.current?.getBoundingClientRect().top
+
+    if (typeof resultsTop !== 'number') {
+      return
+    }
+
+    const isMobile = window.matchMedia('(max-width: 767px)').matches
+    const stickyHeaderOffset = isMobile ? 96 : 128
+
+    window.scrollTo({
+      top: Math.max(0, window.scrollY + resultsTop - stickyHeaderOffset),
+      behavior: 'smooth',
+    })
+  }
+
+  const handlePageChange = (nextPage: number) => {
+    if (nextPage === safeCurrentPage) {
+      return
+    }
+
+    setCurrentPage(nextPage)
+    scrollResultsToTop()
+  }
 
   return (
     <>
@@ -699,6 +729,7 @@ const LiveAuctionPage = () => {
           </section>
 
           <section
+            ref={resultsRef}
             className={
               viewMode === 'grid'
                 ? 'grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
@@ -827,7 +858,7 @@ const LiveAuctionPage = () => {
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <button
                   type="button"
-                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                  onClick={() => handlePageChange(Math.max(1, safeCurrentPage - 1))}
                   disabled={safeCurrentPage === 1}
                   className={`border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
                     safeCurrentPage === 1
@@ -846,7 +877,7 @@ const LiveAuctionPage = () => {
                     <button
                       key={pageNumber}
                       type="button"
-                      onClick={() => setCurrentPage(pageNumber)}
+                      onClick={() => handlePageChange(pageNumber)}
                       aria-current={isActive ? 'page' : undefined}
                       className={`min-w-10 border px-3 py-2 text-[11px] tracking-[0.18em] uppercase transition ${
                         isActive
@@ -861,7 +892,7 @@ const LiveAuctionPage = () => {
                 })}
                 <button
                   type="button"
-                  onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                  onClick={() => handlePageChange(Math.min(totalPages, safeCurrentPage + 1))}
                   disabled={safeCurrentPage === totalPages}
                   className={`border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
                     safeCurrentPage === totalPages
