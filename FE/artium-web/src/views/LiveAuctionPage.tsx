@@ -3,6 +3,7 @@ import { Space_Grotesk } from 'next/font/google'
 import Link from 'next/link'
 import { ChevronDown, Grid2X2, LayoutList, ShieldCheck } from 'lucide-react'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { mockArtworks } from '@domains/discover/mock/mockArtworks'
 import { Metadata } from '@/components/SEO/Metadata'
 
 type AuctionLot = {
@@ -59,18 +60,46 @@ const statusOptions: Array<{ key: AuctionStatusKey; label: string; helper: strin
 
 const MIN_ETH = 0.5
 const MAX_ETH = 50
-const LOAD_MORE_STEP = 4
+const ITEMS_PER_PAGE = 24
 
-const lots: AuctionLot[] = [
-  { artworkId: 'aw-001', title: 'Oblique Horizon I', bid: '12.40 ETH', categoryKey: 'architectural', status: '2h 45m remaining', statusKey: 'active', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB4LUsBjOdeImAsFI1KCdzWOWCNiN9RdiTO9kZNn5WRRx7NbOcMR-sm6Z4L3hvLyoQLu_Zg-dz_fki4K4v0WJ49IZyfKB0YIWMYRqYgJAhIkr71fi38x5r5fcjyPVikYRMhovtEMNmoKmGL0JqgcVJD7fNTeXE7uZm1l2iyZA_IOFWYGQxUaUkTOeazmgoTVyp1acthU5gs6LJqblekH4hHLj82qCUz6LD5IH6kCjvlNdy--ssZ67Tv47EB-0ijv8EYXaArzUx3ya95', imageAlt: 'Abstract architectural rendering with flowing monochromatic white curves and deep dramatic shadows in a minimalist digital space' },
-  { artworkId: 'aw-002', title: 'Monolith Study', bid: '8.15 ETH', categoryKey: 'sculpture', status: 'Ending Soon', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCeXixWF66Us8MGeMQeRT9iEL3O015Au3KTSxVxv_z_SNHcl1yyQOCxTq5cCnbNPtN354N7lCSBDZJezyZrtJnr0jqED2a5BzC-edgEpCiOE1aXTIQsTnTz5k6zi-ad7q055W0BmXx5GjEoO-he7LJBF58NzUQDR41KUVeIObhUpKN6SV3BVVVKwuyCe2sRHS3275U4PxHDEQd1hnmlZ4A6VVBMHGL5qcNqrGYKVAygRhLbet_1tD4uUeytP35B02fS8A_hYdtsD_ol', imageAlt: 'Brutalist concrete sculpture floating in a void with sharp geometric angles and soft ambient lighting from top' },
-  { artworkId: 'aw-003', title: 'Virtual Synthesis', bid: '45.00 ETH', categoryKey: 'digital', status: '12h 10m remaining', statusKey: 'active', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAc9nIm6vN3Dfikh8FWImfOaOI2qoahNXwv_yBbU5_NlM0qjl-hSJKSTsUtVFarOlG7_AAjq5dGz2LMDuPSLnUNxOT0P61EqRyq__AoUA_Lr8-HOCTcktHDXq_TGCtODh68yUnLAECwKULlrDnZqgHMLy-en3DEI3nl-oi_Kaj3555r9tiizj0NMqpQ0dg__X3OBsMcZULbb-CyGjUSQPUAKHP4rWR5Fqrv5dAGlup7iHxNFaDhAZeIgeA6IQCkj9waonEChbWc5jUo', imageAlt: 'Digital landscape featuring iridescent crystalline structures in a dark misty environment with neon accents' },
-  { artworkId: 'aw-004', title: 'Prism Lattice', bid: '2.30 ETH', categoryKey: 'sculpture', status: 'Just Listed', statusKey: 'newly-listed', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB2jDG1D1O4mYjmjtusMkXpJm9rQlQM3Sm6QeaIiYouNnqdVcp4lYf5EmHfY7ItpAJJ9TwyDEotVxPYH-Fo5HrGBLFe_xsztfR2TwE8PjFd4Sa1kWyT3cmidc2q9ETD0IuCRXj0g9TDPG7UuMAeryhPfY76jQfjJ6bXKwviXnnjVhBiVoglepYCR5HptyLutQibzNcjf-ehx8Zj0CRp1Ee0K2bg_e4qbGC3QtVwUy3k6vIoc5oWgp3uRFhEFX9isc1pRvrqlA9PYAq', imageAlt: 'Ethereal glass sculpture in a dark room with light refracting through it creating colorful caustic patterns on the ground' },
-  { artworkId: 'aw-005', title: 'Void Ascension', bid: '19.20 ETH', categoryKey: 'architectural', status: 'Ending Soon', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCSl9w8w8gEjK9hRcXgi0S1hgC6JRckMCA1PqXCxFkF0_BTDFB345F4TNLGd8kfnotAVvBXk2VL3LeYdi62qWrprS9PLJdBbvxjONo4NLqQhAPik8WcCtd11W-FhnnFtjHlPhbBN0xPmcDBYXs-4yFP5avluQg5eu0E5DCLiKAbq4D8_WHL-h67oVbAI18pIpMH_zoDFDbv05GEJXgplvqbIJWXz6LMPokqHPljTJPXhSskKZvF70ZNPWkZzFmzGUurRim2fDksHhI4', imageAlt: 'Architectural detail of a minimalist staircase with sharp black and white contrast and dramatic long shadows' },
-  { artworkId: 'aw-006', title: 'Static Equilibrium', bid: '5.50 ETH', categoryKey: 'sculpture', status: 'Reserve Not Met', statusKey: 'paused', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGhTZmgIha98yjZvCUb07F428ovbUplYWpAo9wx7CWVm2LeVGZp2Wgeb7l4aQPCEClfuawWUgJkSlqBYD0wMShZkq4AO3-zyZRkWTHwZSjZqpH_2vxLN0TRY4GEaCyVqv-nqWq4Bs04P-CdlezTAST5aftAXWERdc0KtzUNeZkUmkRRP7NarB9sHUPGtq_INXlnANVly4N9Nw9qZSiFdPWU6sJ2VMTu4y-wea3lSDZtVPjMXy3Mz7ga1nfcwk_6LGVN4Ftz26_ATZD', imageAlt: 'A singular black smooth stone balancing perfectly on top of a jagged white marble piece in a white studio setting' },
-  { artworkId: 'aw-007', title: 'Aeolian Drift', bid: '14.75 ETH', categoryKey: 'installation', status: 'Closed', statusKey: 'closed', statusTone: 'muted', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBI883ZEyJpZhSo1T2TcfdHEyH5T66ULRiLGzfbTDkHLdWHQuNAKXVrOVFIeMOltaWtAaAg0b0ufm5Nfc8jgfTTAJgU2VIfSkxLLh6Oo-aul9XUH7j5njUa1ucu_pD3azBltgOgZjY8b6h5qSKPRi1neqom2hiQKWU4xrYUN4E_HiQpe4dqhxgXNnN_G-buWe06qjEb1Wo5yklUj3m_Za9_Ua7sDzYln9F-T9bCb_Ed0LHkyHfbmYUJGcjCPOehbJRlLJIard2bo0gN', imageAlt: 'Large scale installation with white fabric sheets floating in a dark industrial space caught in motion' },
-  { artworkId: 'aw-008', title: 'Order Fragment', bid: '2.10 ETH', categoryKey: 'architectural', status: '15m remaining', statusKey: 'ending-soon', statusTone: 'live', imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD_MWjOy-6Bl-PbpoLht4XyW4NgdEYQocuUbIFnKgN6XrNDFk2PdnobFU4UXtXle3wfd5mrGpfecvlIQwGGyLDvwL06kJvBFXUMtBUdVYMS00PhRJDgczzJB2j-tFfGyc-QT56jW1ol5pJIaTnTRXNC8092WHetRhivlcYEv1davJgkcTBVzRTM1kvuAI9eLqoLXC2NKaC9Hc2Yb4TbPXFDEozApR8h2JWLyr746uHZ49zZw7DuZN3kvyc7bo58M6vjmMkbRzcU2zku', imageAlt: 'Detail of a modern museum facade with repeating white panels and deep shadow lines under a clear sky' },
+const lotCategoryCycle: AuctionCategoryKey[] = [
+  'architectural',
+  'sculpture',
+  'digital',
+  'installation',
 ]
+
+const lotStatusCycle: Array<Pick<AuctionLot, 'status' | 'statusKey' | 'statusTone'>> = [
+  { status: '2h 45m remaining', statusKey: 'active', statusTone: 'live' },
+  { status: 'Ending Soon', statusKey: 'ending-soon', statusTone: 'live' },
+  { status: '12h 10m remaining', statusKey: 'active', statusTone: 'muted' },
+  { status: 'Just Listed', statusKey: 'newly-listed', statusTone: 'muted' },
+  { status: 'Reserve Not Met', statusKey: 'paused', statusTone: 'muted' },
+  { status: 'Closed', statusKey: 'closed', statusTone: 'muted' },
+  { status: '45m remaining', statusKey: 'ending-soon', statusTone: 'live' },
+  { status: '8h 30m remaining', statusKey: 'active', statusTone: 'live' },
+]
+
+const formatMockBid = (price: number) => {
+  const bidValue = Math.min(MAX_ETH, Math.max(MIN_ETH, Number((price / 100).toFixed(1))))
+  return `${Number.isInteger(bidValue) ? bidValue.toFixed(0) : bidValue.toFixed(1)} ETH`
+}
+
+const lots: AuctionLot[] = mockArtworks.map((artwork, index) => {
+  const status = lotStatusCycle[index % lotStatusCycle.length]
+
+  return {
+    artworkId: artwork.id,
+    title: artwork.title,
+    bid: formatMockBid(artwork.price),
+    categoryKey: lotCategoryCycle[index % lotCategoryCycle.length],
+    status: status.status,
+    statusKey: status.statusKey,
+    statusTone: status.statusTone,
+    imageSrc: artwork.imageMedium,
+    imageAlt: `Artwork preview of ${artwork.title} by ${artwork.creator.fullName}`,
+  }
+})
 
 const statusBadgeClass: Record<Exclude<AuctionStatusKey, 'all'>, string> = {
   active: 'bg-[#16a34a]',
@@ -78,6 +107,14 @@ const statusBadgeClass: Record<Exclude<AuctionStatusKey, 'all'>, string> = {
   closed: 'bg-[#9ca3af]',
   'newly-listed': 'bg-[#2563eb]',
   paused: 'bg-[#eab308]',
+}
+
+const lotActionLabel: Record<Exclude<AuctionStatusKey, 'all'>, string> = {
+  active: 'Place Bid',
+  'ending-soon': 'Place Bid',
+  'newly-listed': 'Enter Auction',
+  paused: 'View Artwork',
+  closed: 'View Results',
 }
 
 const clampEthValue = (value: number) => {
@@ -127,7 +164,7 @@ const LiveAuctionPage = () => {
   const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false)
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
-  const [visibleCount, setVisibleCount] = useState(LOAD_MORE_STEP)
+  const [currentPage, setCurrentPage] = useState(1)
   const categoryRef = useRef<HTMLDivElement>(null)
   const statusRef = useRef<HTMLDivElement>(null)
   const priceRangeRef = useRef<HTMLDivElement>(null)
@@ -216,7 +253,7 @@ const LiveAuctionPage = () => {
     const nextMin = Math.min(parseEthInput(minInputValue, draftMinPrice), draftMaxPrice)
     const nextMax = Math.max(parseEthInput(maxInputValue, draftMaxPrice), nextMin)
 
-    setVisibleCount(LOAD_MORE_STEP)
+    setCurrentPage(1)
     setDraftMinPrice(nextMin)
     setDraftMaxPrice(nextMax)
     setMinInputValue(`${nextMin}`)
@@ -232,7 +269,7 @@ const LiveAuctionPage = () => {
   }
 
   const resetDesktopFilters = () => {
-    setVisibleCount(LOAD_MORE_STEP)
+    setCurrentPage(1)
     setSelectedCategory('all')
     setSelectedStatus('all')
     setAppliedMinPrice(MIN_ETH)
@@ -269,7 +306,7 @@ const LiveAuctionPage = () => {
     setMobileAppliedMaxPrice(nextMax)
     setMobileMinInputValue(`${nextMin}`)
     setMobileMaxInputValue(`${nextMax}`)
-    setVisibleCount(LOAD_MORE_STEP)
+    setCurrentPage(1)
     setSelectedCategory(mobileSelectedCategory)
     setSelectedStatus(mobileSelectedStatus)
     setAppliedMinPrice(nextMin)
@@ -304,8 +341,10 @@ const LiveAuctionPage = () => {
     mobileAppliedMinPrice,
     mobileAppliedMaxPrice,
   )
-  const displayedLots = visibleLots.slice(0, visibleCount)
-  const hasMoreLots = displayedLots.length < visibleLots.length
+  const totalPages = Math.max(1, Math.ceil(visibleLots.length / ITEMS_PER_PAGE))
+  const safeCurrentPage = Math.min(currentPage, totalPages)
+  const pageStart = (safeCurrentPage - 1) * ITEMS_PER_PAGE
+  const displayedLots = visibleLots.slice(pageStart, pageStart + ITEMS_PER_PAGE)
 
   const resultsLabel = `${visibleLots.length} result${visibleLots.length === 1 ? '' : 's'}`
   const mobilePreviewLabel = `${mobilePreviewLots.length} result${mobilePreviewLots.length === 1 ? '' : 's'}`
@@ -315,8 +354,8 @@ const LiveAuctionPage = () => {
     appliedMinPrice !== MIN_ETH ||
     appliedMaxPrice !== MAX_ETH
   const footerLabel = hasActiveFilters
-    ? `Displaying ${displayedLots.length} of ${visibleLots.length} matching lots`
-    : `Displaying ${displayedLots.length} of ${lots.length} total lots`
+    ? `Page ${safeCurrentPage} of ${totalPages} • ${visibleLots.length} matching lots`
+    : `Page ${safeCurrentPage} of ${totalPages} • ${lots.length} total lots`
   const emptyStateMessage = hasActiveFilters
     ? 'No auctions match the selected filters.'
     : 'No live auctions are available right now.'
@@ -384,7 +423,7 @@ const LiveAuctionPage = () => {
                           key={option.key}
                           type="button"
                           onClick={() => {
-                            setVisibleCount(LOAD_MORE_STEP)
+                            setCurrentPage(1)
                             setSelectedCategory(option.key)
                             setIsCategoryOpen(false)
                           }}
@@ -444,7 +483,7 @@ const LiveAuctionPage = () => {
                           key={option.key}
                           type="button"
                           onClick={() => {
-                            setVisibleCount(LOAD_MORE_STEP)
+                            setCurrentPage(1)
                             setSelectedStatus(option.key)
                             setIsStatusOpen(false)
                           }}
@@ -763,7 +802,7 @@ const LiveAuctionPage = () => {
                       href={`/artworks/${lot.artworkId}`}
                       className="bg-black px-4 py-2 text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
                     >
-                      Place Bid
+                      {lotActionLabel[lot.statusKey]}
                     </Link>
                   </div>
                 </div>
@@ -780,17 +819,56 @@ const LiveAuctionPage = () => {
           ) : null}
 
           <section className="mt-24 flex flex-col items-center gap-8">
-            {hasMoreLots ? (
-              <button
-                type="button"
-                onClick={() => setVisibleCount((current) => Math.min(current + LOAD_MORE_STEP, visibleLots.length))}
-                className="group flex items-center gap-6 text-sm tracking-[0.3em] text-black uppercase transition-all"
-                style={headlineFont}
-              >
-                <span className="h-px w-12 bg-black transition-all group-hover:w-24" />
-                <span>Load More Results</span>
-                <span className="h-px w-12 bg-black transition-all group-hover:w-24" />
-              </button>
+            {totalPages > 1 ? (
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                  disabled={safeCurrentPage === 1}
+                  className={`border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
+                    safeCurrentPage === 1
+                      ? 'cursor-not-allowed border-black/15 text-black/25'
+                      : 'border-black text-black hover:bg-black hover:text-white'
+                  }`}
+                  style={headlineFont}
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, index) => {
+                  const pageNumber = index + 1
+                  const isActive = pageNumber === safeCurrentPage
+
+                  return (
+                    <button
+                      key={pageNumber}
+                      type="button"
+                      onClick={() => setCurrentPage(pageNumber)}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`min-w-10 border px-3 py-2 text-[11px] tracking-[0.18em] uppercase transition ${
+                        isActive
+                          ? 'border-black bg-black text-white'
+                          : 'border-black/25 text-black hover:border-black hover:bg-black hover:text-white'
+                      }`}
+                      style={headlineFont}
+                    >
+                      {pageNumber}
+                    </button>
+                  )
+                })}
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                  disabled={safeCurrentPage === totalPages}
+                  className={`border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
+                    safeCurrentPage === totalPages
+                      ? 'cursor-not-allowed border-black/15 text-black/25'
+                      : 'border-black text-black hover:bg-black hover:text-white'
+                  }`}
+                  style={headlineFont}
+                >
+                  Next
+                </button>
+              </div>
             ) : null}
             <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
               {footerLabel}
