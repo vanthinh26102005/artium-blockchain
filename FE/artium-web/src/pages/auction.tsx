@@ -1,4 +1,5 @@
 import type { NextPageWithLayout } from '@shared/types/next'
+import { SiteFooter } from '@shared/components/layout/SiteFooter'
 import { SiteHeader } from '@shared/components/layout/SiteHeader'
 import { LiveAuctionPage } from '@/views/LiveAuctionPage'
 
@@ -7,9 +8,10 @@ const AuctionRoute: NextPageWithLayout = () => {
 }
 
 AuctionRoute.getLayout = (page) => (
-  <div className="min-h-screen bg-white text-slate-900">
+  <div className="flex min-h-screen flex-col bg-white text-slate-900">
     <SiteHeader />
-    {page}
+    <main className="flex-1">{page}</main>
+    <SiteFooter />
   </div>
 )
 
