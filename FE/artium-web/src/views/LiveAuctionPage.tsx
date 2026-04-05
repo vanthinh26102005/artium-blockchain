@@ -12,7 +12,7 @@ type AuctionLot = {
   bid: string
   categoryKey: AuctionCategoryKey
   status: string
-  statusKey: AuctionStatusKey
+  statusKey: AuctionLotStatusKey
   statusTone: 'live' | 'muted'
   imageSrc: string
   imageAlt: string
@@ -27,6 +27,8 @@ type AuctionStatusKey =
   | 'closed'
   | 'newly-listed'
   | 'paused'
+
+type AuctionLotStatusKey = Exclude<AuctionStatusKey, 'all'>
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -101,7 +103,7 @@ const lots: AuctionLot[] = mockArtworks.map((artwork, index) => {
   }
 })
 
-const statusBadgeClass: Record<Exclude<AuctionStatusKey, 'all'>, string> = {
+const statusBadgeClass: Record<AuctionLotStatusKey, string> = {
   active: 'bg-[#16a34a]',
   'ending-soon': 'bg-[#dc2626]',
   closed: 'bg-[#9ca3af]',
@@ -109,7 +111,7 @@ const statusBadgeClass: Record<Exclude<AuctionStatusKey, 'all'>, string> = {
   paused: 'bg-[#eab308]',
 }
 
-const lotActionLabel: Record<Exclude<AuctionStatusKey, 'all'>, string> = {
+const lotActionLabel: Record<AuctionLotStatusKey, string> = {
   active: 'Place Bid',
   'ending-soon': 'Place Bid',
   'newly-listed': 'Enter Auction',
@@ -146,6 +148,7 @@ const formatEthDisplay = (value: number) => {
 
 const LiveAuctionPage = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [isMobileViewport, setIsMobileViewport] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<AuctionCategoryKey>('all')
   const [selectedStatus, setSelectedStatus] = useState<AuctionStatusKey>('all')
   const [appliedMinPrice, setAppliedMinPrice] = useState(MIN_ETH)
@@ -183,6 +186,22 @@ const LiveAuctionPage = () => {
   const maxPercent = ((draftMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMinPercent = ((mobileAppliedMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMaxPercent = ((mobileAppliedMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const mediaQuery = window.matchMedia('(max-width: 767px)')
+    const syncViewportMode = (event?: MediaQueryList | MediaQueryListEvent) => {
+      setIsMobileViewport((event ?? mediaQuery).matches)
+    }
+
+    syncViewportMode()
+    mediaQuery.addEventListener('change', syncViewportMode)
+
+    return () => mediaQuery.removeEventListener('change', syncViewportMode)
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -346,6 +365,7 @@ const LiveAuctionPage = () => {
   const safeCurrentPage = Math.min(currentPage, totalPages)
   const pageStart = (safeCurrentPage - 1) * ITEMS_PER_PAGE
   const displayedLots = visibleLots.slice(pageStart, pageStart + ITEMS_PER_PAGE)
+  const effectiveViewMode = isMobileViewport ? 'list' : viewMode
 
   const resultsLabel = `${visibleLots.length} result${visibleLots.length === 1 ? '' : 's'}`
   const mobilePreviewLabel = `${mobilePreviewLots.length} result${mobilePreviewLots.length === 1 ? '' : 's'}`
@@ -397,7 +417,7 @@ const LiveAuctionPage = () => {
         description="A curated auction showcase for architectural masterworks and digital artifacts on Artium."
       />
       <div className="min-h-screen bg-white text-[#1a1c1c]" style={bodyFont}>
-        <main className="mx-auto max-w-[1600px] px-6 pt-32 pb-20 md:px-12">
+        <main className="mx-auto max-w-[1600px] px-6 pt-24 pb-20 md:px-12 md:pt-28">
           <header className="mb-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <h1
@@ -673,14 +693,16 @@ const LiveAuctionPage = () => {
               </div>
             </div>
             <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-normal">
-              <div className="flex border border-[#c4c7c7]/30 bg-[#f7f7f7] p-1">
+              <div className="hidden border border-[#c4c7c7]/30 bg-[#f7f7f7] p-1 md:flex">
                 <button
                   type="button"
                   aria-label="Grid view"
-                  aria-pressed={viewMode === 'grid'}
+                  aria-pressed={effectiveViewMode === 'grid'}
                   onClick={() => setViewMode('grid')}
                   className={`px-3 py-2 transition-colors ${
-                    viewMode === 'grid' ? 'bg-black text-white' : 'text-black/40 hover:text-black'
+                    effectiveViewMode === 'grid'
+                      ? 'bg-black text-white'
+                      : 'text-black/40 hover:text-black'
                   }`}
                 >
                   <Grid2X2 className="h-4 w-4" />
@@ -688,10 +710,12 @@ const LiveAuctionPage = () => {
                 <button
                   type="button"
                   aria-label="List view"
-                  aria-pressed={viewMode === 'list'}
+                  aria-pressed={effectiveViewMode === 'list'}
                   onClick={() => setViewMode('list')}
                   className={`px-3 py-2 transition-colors ${
-                    viewMode === 'list' ? 'bg-black text-white' : 'text-black/40 hover:text-black'
+                    effectiveViewMode === 'list'
+                      ? 'bg-black text-white'
+                      : 'text-black/40 hover:text-black'
                   }`}
                 >
                   <LayoutList className="h-4 w-4" />
@@ -716,6 +740,12 @@ const LiveAuctionPage = () => {
               >
                 Clear Filters
               </button>
+              <p
+                className="text-[11px] tracking-[0.2em] text-[#747777] uppercase md:hidden"
+                style={headlineFont}
+              >
+                {resultsLabel}
+              </p>
               <button
                 ref={mobileFilterButtonRef}
                 type="button"
@@ -723,7 +753,7 @@ const LiveAuctionPage = () => {
                 className="border border-black px-4 py-2 text-xs tracking-[0.22em] text-black uppercase transition hover:bg-black hover:text-white md:hidden"
                 style={headlineFont}
               >
-                Filter Results ({visibleLots.length})
+                Open Filters
               </button>
             </div>
           </section>
@@ -731,25 +761,25 @@ const LiveAuctionPage = () => {
           <section
             ref={resultsRef}
             className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-                : 'grid grid-cols-1 gap-6'
+              effectiveViewMode === 'grid'
+                ? 'grid grid-cols-1 gap-x-6 gap-y-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                : 'grid grid-cols-1 gap-5'
             }
           >
             {displayedLots.map((lot) => (
               <article
                 key={lot.title}
-                className={`group border border-[#e5e7eb] bg-white p-4 transition-all duration-300 hover:border-black hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.1)] ${
-                  viewMode === 'list'
-                    ? 'md:grid md:grid-cols-[280px_minmax(0,1fr)] md:items-stretch md:gap-6'
+                className={`group border border-[#e5e7eb] bg-white p-3 transition-all duration-300 hover:border-black hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.1)] md:p-4 ${
+                  effectiveViewMode === 'list'
+                    ? 'md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-stretch md:gap-5'
                     : ''
                 }`}
               >
                 <div
                   className={`relative overflow-hidden bg-[#f7f7f7] ${
-                    viewMode === 'grid'
-                      ? 'mb-6 aspect-[3/4]'
-                      : 'mb-5 aspect-[4/3] md:mb-0 md:h-full md:w-full md:aspect-auto'
+                    effectiveViewMode === 'grid'
+                      ? 'mb-5 aspect-[4/5] md:mb-6 md:aspect-[3/4]'
+                      : 'mb-4 aspect-[5/4] md:mb-0 md:h-full md:w-full md:aspect-auto'
                   }`}
                 >
                   <Image
@@ -757,7 +787,7 @@ const LiveAuctionPage = () => {
                     alt={lot.imageAlt}
                     fill
                     sizes={
-                      viewMode === 'grid'
+                      effectiveViewMode === 'grid'
                         ? '(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 44vw, 92vw'
                         : '(min-width: 768px) 280px, 92vw'
                     }
@@ -778,18 +808,20 @@ const LiveAuctionPage = () => {
                 </div>
                 <div
                   className={`space-y-4 ${
-                    viewMode === 'list' ? 'min-w-0 flex flex-col justify-between md:py-2' : ''
+                    effectiveViewMode === 'list'
+                      ? 'min-w-0 flex flex-col justify-between md:py-2'
+                      : ''
                   }`}
                 >
                   <div
                     className={`flex items-start justify-between gap-3 ${
-                      viewMode === 'list' ? 'border-b border-[#c4c7c7]/30 pb-4' : ''
+                      effectiveViewMode === 'list' ? 'border-b border-[#c4c7c7]/30 pb-4' : ''
                     }`}
                   >
                     <div>
                       <h2
                         className={`font-bold uppercase text-black ${
-                          viewMode === 'grid'
+                          effectiveViewMode === 'grid'
                             ? 'text-lg tracking-[-0.04em]'
                             : 'text-2xl tracking-[0.02em] md:text-3xl'
                         }`}
@@ -804,7 +836,7 @@ const LiveAuctionPage = () => {
                       >
                         View artwork details
                       </Link>
-                      {viewMode === 'list' ? (
+                      {effectiveViewMode === 'list' ? (
                         <p className="mt-3 max-w-2xl text-sm leading-7 text-[#747777]">
                           Verified collectible with on-chain provenance, active bidding, and a
                           curator-selected presentation format designed for quick comparison.
@@ -815,9 +847,9 @@ const LiveAuctionPage = () => {
                   </div>
                   <div
                     className={`flex gap-4 border-[#c4c7c7]/30 ${
-                      viewMode === 'grid'
+                      effectiveViewMode === 'grid'
                         ? 'items-end justify-between border-t pt-4'
-                        : 'flex-col pt-2 sm:flex-row sm:items-end sm:justify-between'
+                        : 'items-end justify-between pt-2'
                     }`}
                   >
                     <div>
@@ -826,7 +858,7 @@ const LiveAuctionPage = () => {
                       </p>
                       <p
                         className={`font-bold text-black uppercase ${
-                          viewMode === 'grid' ? 'text-lg' : 'text-2xl md:text-3xl'
+                          effectiveViewMode === 'grid' ? 'text-lg' : 'text-2xl md:text-3xl'
                         }`}
                         style={headlineFont}
                       >
@@ -835,7 +867,7 @@ const LiveAuctionPage = () => {
                     </div>
                     <Link
                       href={`/artworks/${lot.artworkId}`}
-                      className="bg-black px-4 py-2 text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
+                      className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
                     >
                       {lotActionLabel[lot.statusKey]}
                     </Link>
@@ -940,7 +972,7 @@ const LiveAuctionPage = () => {
                   <button
                     type="button"
                     onClick={resetMobileFilters}
-                    className="text-xs tracking-[0.22em] text-black uppercase transition hover:text-black/60"
+                    className="border border-black/15 px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-black uppercase transition hover:border-black hover:bg-black hover:text-white"
                     style={headlineFont}
                   >
                     Clear
@@ -949,7 +981,7 @@ const LiveAuctionPage = () => {
                     ref={mobileFilterCloseButtonRef}
                     type="button"
                     onClick={() => setIsMobileFiltersOpen(false)}
-                    className="text-xs tracking-[0.24em] text-black uppercase"
+                    className="border border-black bg-black px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800"
                     style={headlineFont}
                   >
                     Close
@@ -1139,27 +1171,6 @@ const LiveAuctionPage = () => {
           </div>
         ) : null}
 
-        <footer className="border-t border-[#c4c7c7]/30 bg-white px-6 py-10 md:px-12">
-          <div className="mx-auto flex max-w-[1600px] flex-col items-center justify-between gap-6 md:flex-row">
-            <Link href="/" className="text-lg font-bold text-black uppercase" style={headlineFont}>
-              Artium
-            </Link>
-            <div className="flex flex-wrap items-center justify-center gap-8">
-              {['Privacy', 'Terms', 'Provenance', 'Contact'].map((item) => (
-                <Link
-                  key={item}
-                  href="#"
-                  className="text-xs tracking-[0.22em] text-[#747777] uppercase transition-colors hover:text-black"
-                >
-                  {item}
-                </Link>
-              ))}
-            </div>
-            <p className="text-center text-[10px] tracking-[0.22em] text-[#747777] uppercase">
-              © 2026 Artium. Architectural curation on-chain.
-            </p>
-          </div>
-        </footer>
       </div>
     </>
   )
