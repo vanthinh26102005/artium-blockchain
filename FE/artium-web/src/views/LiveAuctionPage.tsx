@@ -417,7 +417,7 @@ const LiveAuctionPage = () => {
         description="A curated auction showcase for architectural masterworks and digital artifacts on Artium."
       />
       <div className="min-h-screen bg-white text-[#1a1c1c]" style={bodyFont}>
-        <main className="mx-auto max-w-[1600px] px-6 pt-24 pb-20 md:px-12 md:pt-28">
+        <main className="mx-auto max-w-[1600px] px-6 pt-12 pb-20 md:px-12 md:pt-16">
           <header className="mb-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <h1
