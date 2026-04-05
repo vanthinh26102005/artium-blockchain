@@ -1,3 +1,16 @@
+export type DiscoverArtworkAuctionStatusKey =
+  | 'active'
+  | 'ending-soon'
+  | 'closed'
+  | 'newly-listed'
+  | 'paused'
+
+export interface DiscoverArtworkAuction {
+  statusKey: DiscoverArtworkAuctionStatusKey
+  statusLabel: string
+  currentBidEth: number
+}
+
 export interface DiscoverArtwork {
   id: string
   title: string
@@ -14,9 +27,10 @@ export interface DiscoverArtwork {
     fullName: string
     coverImage?: string
   }
+  auction?: DiscoverArtworkAuction
 }
 
-export const mockArtworks: DiscoverArtwork[] = [
+const baseMockArtworks: DiscoverArtwork[] = [
   {
     id: 'aw-001',
     title: 'Space Blossom',
@@ -797,3 +811,37 @@ export const mockArtworks: DiscoverArtwork[] = [
     },
   },
 ]
+
+const mockArtworkAuctionById: Partial<Record<DiscoverArtwork['id'], DiscoverArtworkAuction>> = {
+  'aw-001': { statusKey: 'active', statusLabel: '2h 45m remaining', currentBidEth: 12.4 },
+  'aw-002': { statusKey: 'ending-soon', statusLabel: 'Ending Soon', currentBidEth: 8.1 },
+  'aw-003': { statusKey: 'active', statusLabel: '12h 10m remaining', currentBidEth: 24.6 },
+  'aw-005': { statusKey: 'closed', statusLabel: 'Closed', currentBidEth: 19.8 },
+  'aw-006': { statusKey: 'newly-listed', statusLabel: 'Just Listed', currentBidEth: 6.2 },
+  'aw-007': { statusKey: 'active', statusLabel: '8h 30m remaining', currentBidEth: 17.5 },
+  'aw-009': { statusKey: 'paused', statusLabel: 'Reserve Not Met', currentBidEth: 9.4 },
+  'aw-010': { statusKey: 'ending-soon', statusLabel: '45m remaining', currentBidEth: 14.2 },
+  'aw-011': { statusKey: 'active', statusLabel: '5h 20m remaining', currentBidEth: 11.6 },
+  'aw-012': { statusKey: 'newly-listed', statusLabel: 'Just Listed', currentBidEth: 4.8 },
+  'aw-013': { statusKey: 'active', statusLabel: '9h remaining', currentBidEth: 31.5 },
+  'aw-015': { statusKey: 'ending-soon', statusLabel: 'Ending Soon', currentBidEth: 16.9 },
+  'aw-016': { statusKey: 'active', statusLabel: '6h 10m remaining', currentBidEth: 13.7 },
+  'aw-017': { statusKey: 'closed', statusLabel: 'Closed', currentBidEth: 15.4 },
+  'aw-018': { statusKey: 'active', statusLabel: '11h 40m remaining', currentBidEth: 22.3 },
+  'aw-019': { statusKey: 'paused', statusLabel: 'Reserve Not Met', currentBidEth: 18.1 },
+  'aw-020': { statusKey: 'newly-listed', statusLabel: 'Just Listed', currentBidEth: 7.5 },
+  'aw-022': { statusKey: 'active', statusLabel: '7h 15m remaining', currentBidEth: 10.8 },
+  'aw-023': { statusKey: 'ending-soon', statusLabel: '30m remaining', currentBidEth: 9.9 },
+  'aw-024': { statusKey: 'active', statusLabel: '4h 05m remaining', currentBidEth: 14.6 },
+  'aw-025': { statusKey: 'active', statusLabel: '13h remaining', currentBidEth: 27.2 },
+  'aw-026': { statusKey: 'closed', statusLabel: 'Closed', currentBidEth: 12.1 },
+  'aw-027': { statusKey: 'ending-soon', statusLabel: 'Ending Soon', currentBidEth: 21.4 },
+  'aw-028': { statusKey: 'newly-listed', statusLabel: 'Just Listed', currentBidEth: 5.1 },
+  'aw-029': { statusKey: 'active', statusLabel: '10h 25m remaining', currentBidEth: 18.9 },
+  'aw-031': { statusKey: 'active', statusLabel: '3h 50m remaining', currentBidEth: 13.3 },
+}
+
+export const mockArtworks: DiscoverArtwork[] = baseMockArtworks.map((artwork) => ({
+  ...artwork,
+  auction: mockArtworkAuctionById[artwork.id],
+}))

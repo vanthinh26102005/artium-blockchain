@@ -3,13 +3,17 @@ import { Space_Grotesk } from 'next/font/google'
 import Link from 'next/link'
 import { ChevronDown, Grid2X2, LayoutList, ShieldCheck } from 'lucide-react'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { mockArtworks } from '@domains/discover/mock/mockArtworks'
+import {
+  mockArtworks,
+  type DiscoverArtwork,
+  type DiscoverArtworkAuctionStatusKey,
+} from '@domains/discover/mock/mockArtworks'
 import { Metadata } from '@/components/SEO/Metadata'
 
 type AuctionLot = {
   artworkId: string
   title: string
-  bid: string
+  bidValue: number
   categoryKey: AuctionCategoryKey
   status: string
   statusKey: AuctionLotStatusKey
@@ -28,7 +32,7 @@ type AuctionStatusKey =
   | 'newly-listed'
   | 'paused'
 
-type AuctionLotStatusKey = Exclude<AuctionStatusKey, 'all'>
+type AuctionLotStatusKey = DiscoverArtworkAuctionStatusKey
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -71,37 +75,58 @@ const lotCategoryCycle: AuctionCategoryKey[] = [
   'installation',
 ]
 
-const lotStatusCycle: Array<Pick<AuctionLot, 'status' | 'statusKey' | 'statusTone'>> = [
-  { status: '2h 45m remaining', statusKey: 'active', statusTone: 'live' },
-  { status: 'Ending Soon', statusKey: 'ending-soon', statusTone: 'live' },
-  { status: '12h 10m remaining', statusKey: 'active', statusTone: 'muted' },
-  { status: 'Just Listed', statusKey: 'newly-listed', statusTone: 'muted' },
-  { status: 'Reserve Not Met', statusKey: 'paused', statusTone: 'muted' },
-  { status: 'Closed', statusKey: 'closed', statusTone: 'muted' },
-  { status: '45m remaining', statusKey: 'ending-soon', statusTone: 'live' },
-  { status: '8h 30m remaining', statusKey: 'active', statusTone: 'live' },
-]
-
-const formatMockBid = (price: number) => {
-  const bidValue = Math.min(MAX_ETH, Math.max(MIN_ETH, Number((price / 100).toFixed(1))))
-  return `${Number.isInteger(bidValue) ? bidValue.toFixed(0) : bidValue.toFixed(1)} ETH`
+const auctionStatusTone: Record<AuctionLotStatusKey, AuctionLot['statusTone']> = {
+  active: 'live',
+  'ending-soon': 'live',
+  closed: 'muted',
+  'newly-listed': 'muted',
+  paused: 'muted',
 }
 
-const lots: AuctionLot[] = mockArtworks.map((artwork, index) => {
-  const status = lotStatusCycle[index % lotStatusCycle.length]
+const auctionStatusPriority: Record<AuctionLotStatusKey, number> = {
+  active: 0,
+  'ending-soon': 1,
+  'newly-listed': 2,
+  paused: 3,
+  closed: 4,
+}
 
-  return {
-    artworkId: artwork.id,
-    title: artwork.title,
-    bid: formatMockBid(artwork.price),
-    categoryKey: lotCategoryCycle[index % lotCategoryCycle.length],
-    status: status.status,
-    statusKey: status.statusKey,
-    statusTone: status.statusTone,
-    imageSrc: artwork.imageMedium,
-    imageAlt: `Artwork preview of ${artwork.title} by ${artwork.creator.fullName}`,
-  }
-})
+const formatBidDisplay = (value: number) => {
+  const normalizedValue = Math.min(MAX_ETH, Math.max(MIN_ETH, Number(value.toFixed(1))))
+  return `${Number.isInteger(normalizedValue) ? normalizedValue.toFixed(0) : normalizedValue.toFixed(1)} ETH`
+}
+
+const hasAuction = (
+  artwork: DiscoverArtwork,
+): artwork is DiscoverArtwork & { auction: NonNullable<DiscoverArtwork['auction']> } =>
+  Boolean(artwork.auction)
+
+const lots: AuctionLot[] = mockArtworks
+  .filter(hasAuction)
+  .sort((leftArtwork, rightArtwork) => {
+    const priorityDelta =
+      auctionStatusPriority[leftArtwork.auction.statusKey] -
+      auctionStatusPriority[rightArtwork.auction.statusKey]
+
+    if (priorityDelta !== 0) {
+      return priorityDelta
+    }
+
+    return rightArtwork.auction.currentBidEth - leftArtwork.auction.currentBidEth
+  })
+  .map((artwork, index) => {
+    return {
+      artworkId: artwork.id,
+      title: artwork.title,
+      bidValue: artwork.auction.currentBidEth,
+      categoryKey: lotCategoryCycle[index % lotCategoryCycle.length],
+      status: artwork.auction.statusLabel,
+      statusKey: artwork.auction.statusKey,
+      statusTone: auctionStatusTone[artwork.auction.statusKey],
+      imageSrc: artwork.imageMedium,
+      imageAlt: `Artwork preview of ${artwork.title} by ${artwork.creator.fullName}`,
+    }
+  })
 
 const statusBadgeClass: Record<AuctionLotStatusKey, string> = {
   active: 'bg-[#16a34a]',
@@ -341,9 +366,8 @@ const LiveAuctionPage = () => {
     maxPrice: number,
   ) =>
     lots.filter((lot) => {
-      const bidValue = Number.parseFloat(lot.bid.replace(' ETH', ''))
       const matchesCategory = category === 'all' ? true : lot.categoryKey === category
-      const matchesPrice = bidValue >= minPrice && bidValue <= maxPrice
+      const matchesPrice = lot.bidValue >= minPrice && lot.bidValue <= maxPrice
       const matchesStatus = status === 'all' ? true : lot.statusKey === status
 
       return matchesCategory && matchesPrice && matchesStatus
@@ -862,7 +886,7 @@ const LiveAuctionPage = () => {
                         }`}
                         style={headlineFont}
                       >
-                        {lot.bid}
+                        {formatBidDisplay(lot.bidValue)}
                       </p>
                     </div>
                     <Link

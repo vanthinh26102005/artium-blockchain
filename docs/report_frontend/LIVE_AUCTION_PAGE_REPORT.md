@@ -62,7 +62,9 @@ Thiết kế này giúp người dùng dễ định vị vị trí của mình t
 ## 3. Dữ liệu hiển thị trên trang
 
 ### 3.1. Nguồn dữ liệu sử dụng
-Trang hiện sử dụng dữ liệu từ `mockArtworks` tại domain `discover`. Đây là nguồn dữ liệu mock dùng chung, thay vì khai báo cứng một mảng `lots` riêng ngay trong file giao diện như trước. Việc dùng chung dữ liệu giúp tránh lặp dữ liệu và giữ tính nhất quán giữa các màn hình.
+Trang hiện sử dụng dữ liệu từ `mockArtworks` tại domain `discover`, nhưng không lấy toàn bộ danh sách để hiển thị như trước. Thay vào đó, mỗi artwork có thể được gắn thêm metadata `auction` để xác định tác phẩm nào thực sự thuộc miền đấu giá. `Live Auction` chỉ render những artwork có dữ liệu `auction`, trong khi `Discover` vẫn tiếp tục dùng toàn bộ dataset artwork chung.
+
+Cách tổ chức này cho phép tái sử dụng nguồn dữ liệu artwork dùng chung mà vẫn tách được ngữ nghĩa nghiệp vụ của trang đấu giá.
 
 ### 3.2. Cấu trúc dữ liệu của mỗi auction lot
 Tại tầng giao diện, mỗi lot được ánh xạ về kiểu `AuctionLot` với các trường chính sau:
@@ -71,7 +73,7 @@ Tại tầng giao diện, mỗi lot được ánh xạ về kiểu `AuctionLot` 
 | --- | --- |
 | `artworkId` | Mã định danh tác phẩm, dùng để điều hướng sang trang chi tiết |
 | `title` | Tên tác phẩm |
-| `bid` | Giá hiển thị hiện tại theo định dạng ETH |
+| `bidValue` | Giá hiện tại của phiên đấu giá dưới dạng số |
 | `categoryKey` | Nhóm phân loại dùng cho bộ lọc |
 | `status` | Chuỗi trạng thái hiển thị trên UI |
 | `statusKey` | Mã trạng thái logic để lọc và ánh xạ hành động |
@@ -79,15 +81,25 @@ Tại tầng giao diện, mỗi lot được ánh xạ về kiểu `AuctionLot` 
 | `imageSrc` | Ảnh đại diện dùng để render card |
 | `imageAlt` | Nội dung mô tả ảnh phục vụ accessibility |
 
+Ngoài kiểu `AuctionLot` phục vụ render giao diện, dữ liệu gốc trong `mockArtworks` hiện còn có thêm lớp metadata `auction`, ví dụ:
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| `auction.statusKey` | Trạng thái của phiên đấu giá |
+| `auction.statusLabel` | Nhãn hiển thị của trạng thái |
+| `auction.currentBidEth` | Mức giá hiện tại của phiên đấu giá |
+
 ### 3.3. Cách tổ chức và ánh xạ dữ liệu lên giao diện
 Quy trình tổ chức dữ liệu hiện tại gồm các bước:
 
 1. Lấy danh sách `mockArtworks`.
-2. Ánh xạ từng phần tử sang `AuctionLot`.
-3. Sinh `categoryKey` theo chu kỳ danh mục định sẵn.
-4. Sinh `status`, `statusKey`, `statusTone` theo chu kỳ trạng thái định sẵn.
-5. Chuyển đổi `price` của artwork sang định dạng `ETH` bằng hàm `formatMockBid`.
-6. Đưa dữ liệu sau ánh xạ vào danh sách `lots` để phục vụ lọc, hiển thị và phân trang.
+2. Lọc ra những artwork có metadata `auction`.
+3. Sắp xếp dữ liệu theo mức độ ưu tiên trạng thái, trong đó các auction đang hoạt động được đưa lên trước.
+4. Ánh xạ từng phần tử sang `AuctionLot`.
+5. Sinh `categoryKey` theo chu kỳ danh mục định sẵn.
+6. Lấy `status`, `statusKey`, `statusTone` từ metadata `auction`.
+7. Dùng `currentBidEth` làm nguồn giá hiện tại và định dạng lại sang chuỗi ETH khi render.
+8. Đưa dữ liệu sau ánh xạ vào danh sách `lots` để phục vụ lọc, hiển thị và phân trang.
 
 Điều này cho thấy trang đã được thiết kế theo hướng tách nguồn dữ liệu gốc và dữ liệu trình bày giao diện.
 
@@ -97,12 +109,13 @@ Việc tái sử dụng `mockArtworks` mang lại các lợi ích sau:
 - Giảm trùng lặp dữ liệu giữa trang `Discover` và `Live Auction`.
 - Dễ bảo trì khi thay đổi cấu trúc dữ liệu chung.
 - Tăng tính nhất quán của thông tin tác phẩm trên toàn hệ thống.
+- Giữ được ranh giới nghiệp vụ nhờ lớp metadata `auction`, tránh việc mọi artwork của `Discover` đều bị hiểu là auction.
 - Tạo tiền đề để thay dữ liệu mock bằng API thật trong tương lai với ít thay đổi ở tầng UI hơn.
 
 ## 4. Các chức năng chính của trang
 
 ### 4.1. Hiển thị danh sách phiên đấu giá
-Trang hiển thị một tập hợp các lot được ánh xạ từ dữ liệu artwork. Người dùng có thể xem nhanh trạng thái từng lot, giá hiện tại và hình ảnh đại diện của tác phẩm.
+Trang hiển thị một tập hợp các lot được ánh xạ từ những artwork có metadata `auction`. Người dùng có thể xem nhanh trạng thái từng lot, giá hiện tại và hình ảnh đại diện của tác phẩm. Các auction đang hoạt động được ưu tiên hiển thị trước các trạng thái như `paused` hoặc `closed`.
 
 ### 4.2. Lọc dữ liệu theo tiêu chí
 Trang hỗ trợ lọc theo ba nhóm tiêu chí chính:
@@ -182,7 +195,7 @@ Khi bấm `View artwork details`, người dùng được chuyển đến trang 
 ## 6. Thay đổi và cải tiến đã thực hiện
 
 ### 6.1. Chuyển từ dữ liệu mock cứng sang nguồn dữ liệu dùng chung
-Ban đầu, trang sử dụng một danh sách `lots` hardcode ngay trong file giao diện. Cách làm này nhanh cho giai đoạn demo nhưng khó bảo trì. Phiên bản hiện tại đã chuyển sang lấy dữ liệu từ `mockArtworks` và ánh xạ lại thành `AuctionLot`. Đây là cải tiến quan trọng về tính tái sử dụng và khả năng đồng bộ dữ liệu.
+Ban đầu, trang sử dụng một danh sách `lots` hardcode ngay trong file giao diện. Cách làm này nhanh cho giai đoạn demo nhưng khó bảo trì. Phiên bản hiện tại đã chuyển sang lấy dữ liệu từ `mockArtworks`, sau đó chỉ chọn những artwork có metadata `auction` để ánh xạ lại thành `AuctionLot`. Đây là cải tiến quan trọng về tính tái sử dụng và khả năng đồng bộ dữ liệu, đồng thời tránh việc toàn bộ artwork của `Discover` bị hiển thị nhầm như auction.
 
 ### 6.2. Chuyển từ cơ chế Load More sang Pagination
 Phiên bản trước dùng biến `visibleCount` và nút `Load More Results` để tăng dần số lượng phần tử hiển thị. Phiên bản hiện tại thay bằng `currentPage` và hệ thống phân trang đầy đủ. Cải tiến này giúp:
@@ -200,6 +213,7 @@ Những thay đổi gần đây giúp trang:
 
 - Đồng bộ hơn với kiến trúc giao diện chung.
 - Dễ chuyển từ mock data sang API thật.
+- Phân tách rõ hơn giữa dữ liệu artwork chung và dữ liệu nghiệp vụ auction.
 - Dễ bảo trì khi thay đổi số lượng lot hoặc tiêu chí lọc.
 - Giảm việc lặp lại dữ liệu và logic trình bày.
 
@@ -212,6 +226,7 @@ Thiết kế hiện tại có các ưu điểm nổi bật:
 - Có đầy đủ các thao tác frontend quan trọng: lọc, đổi chế độ xem, phân trang, điều hướng.
 - Trải nghiệm phân trang rõ ràng hơn vì người dùng thấy ngay item đầu của page mới sau khi chuyển trang.
 - Tái sử dụng được dữ liệu từ domain khác thay vì hardcode riêng.
+- Chỉ những artwork có metadata `auction` mới xuất hiện trên trang, nên logic dữ liệu hợp lý hơn.
 - Có hỗ trợ responsive với luồng bộ lọc riêng cho mobile.
 - Bố cục đã đồng bộ hơn với hệ thống nhờ `SiteHeader` và `SiteFooter`.
 
@@ -219,7 +234,7 @@ Thiết kế hiện tại có các ưu điểm nổi bật:
 Một số hạn chế hiện tại gồm:
 
 - Dữ liệu vẫn là mock data, chưa lấy từ API hoặc dữ liệu blockchain thật.
-- Trạng thái đấu giá đang được gán theo chu kỳ giả lập, chưa phản ánh nghiệp vụ thực.
+- Metadata `auction` vẫn đang là dữ liệu giả lập ở frontend, chưa lấy từ service đấu giá thật.
 - Nút `Place Bid` chưa mở luồng bid riêng mà vẫn dẫn đến trang chi tiết tác phẩm.
 - Chưa có realtime update cho giá đấu hoặc thời gian còn lại.
 - Chưa có cơ chế đồng bộ trực tiếp với hợp đồng thông minh hoặc backend auction service.
