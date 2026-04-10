@@ -5,6 +5,7 @@ import {
   Inject,
   Param,
   Post,
+  Query,
   Put,
   UseGuards,
 } from '@nestjs/common';
@@ -19,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { MICROSERVICES } from '../../../config';
 import { JwtAuthGuard } from '@app/auth';
-import { CreateOrderDto, UpdateOrderDto } from '@app/common';
+import { CreateOrderDto, GetOrdersDto, UpdateOrderDto } from '@app/common';
 import { sendRpc } from '../utils';
 
 @ApiTags('Orders')
@@ -46,8 +47,23 @@ export class OrdersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all orders' })
   @ApiResponse({ status: 200, description: 'Orders retrieved successfully' })
-  async getOrders() {
-    return sendRpc(this.ordersClient, { cmd: 'get_orders' }, {});
+  async getOrders(@Query() filters: GetOrdersDto) {
+    return sendRpc(this.ordersClient, { cmd: 'get_orders' }, filters);
+  }
+
+  @Get('on-chain/:onChainOrderId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get order by on-chain order ID' })
+  @ApiParam({
+    name: 'onChainOrderId',
+    type: 'string',
+    description: 'On-chain order ID from smart contract',
+  })
+  @ApiResponse({ status: 200, description: 'Order retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async getOrderByOnChainId(@Param('onChainOrderId') onChainOrderId: string) {
+    return sendRpc(this.ordersClient, { cmd: 'get_order_by_onchain_id' }, { onChainOrderId });
   }
 
   @Get(':id')

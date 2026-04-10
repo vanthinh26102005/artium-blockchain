@@ -25,6 +25,9 @@ export class GetOrdersHandler implements IQueryHandler<GetOrdersQuery> {
       const where: Record<string, any> = {};
       if (filters.buyerId) where.collectorId = filters.buyerId;
       if (filters.status) where.status = filters.status;
+      if (filters.onChainOrderId) where.onChainOrderId = filters.onChainOrderId;
+      if (filters.escrowState !== undefined) where.escrowState = filters.escrowState;
+      if (filters.paymentMethod) where.paymentMethod = filters.paymentMethod;
 
       return this.orderRepo.find({
         where,

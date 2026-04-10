@@ -1,4 +1,4 @@
-import { OrderStatus } from '@app/common/enums';
+import { EscrowState, OrderPaymentMethod, OrderStatus } from '@app/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
@@ -22,6 +22,15 @@ export class GetOrdersDto {
   sellerId?: string;
 
   @ApiProperty({
+    description: 'Filter by on-chain order ID',
+    example: 'ORDER-0001',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  onChainOrderId?: string;
+
+  @ApiProperty({
     description: 'Filter by order status',
     enum: OrderStatus,
     example: OrderStatus.PENDING,
@@ -30,6 +39,26 @@ export class GetOrdersDto {
   @IsOptional()
   @IsEnum(OrderStatus)
   status?: OrderStatus;
+
+  @ApiProperty({
+    description: 'Filter by escrow state',
+    enum: EscrowState,
+    example: EscrowState.ENDED,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(EscrowState)
+  escrowState?: EscrowState;
+
+  @ApiProperty({
+    description: 'Filter by payment method',
+    enum: OrderPaymentMethod,
+    example: OrderPaymentMethod.BLOCKCHAIN,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(OrderPaymentMethod)
+  paymentMethod?: OrderPaymentMethod;
 
   @ApiProperty({
     description: 'Number of records to skip for pagination',

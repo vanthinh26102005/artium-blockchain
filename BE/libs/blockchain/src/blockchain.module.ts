@@ -1,5 +1,6 @@
 import { DynamicModule, Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ethers } from 'ethers';
 import { OutboxModule } from '@app/outbox';
 import {
@@ -12,6 +13,8 @@ import {
 import { EscrowContractService } from './services/escrow-contract.service';
 import { BlockchainEventListenerService } from './services/blockchain-event-listener.service';
 import * as ABI from './abi/ArtAuctionEscrow.json';
+import { BlockchainEventCursor } from './entities/blockchain-event-cursor.entity';
+import { BlockchainProcessedEvent } from './entities/blockchain-processed-event.entity';
 
 @Module({})
 export class BlockchainModule {
@@ -19,7 +22,11 @@ export class BlockchainModule {
     return {
       module: BlockchainModule,
       global: true,
-      imports: [ConfigModule, OutboxModule],
+      imports: [
+        ConfigModule,
+        OutboxModule,
+        TypeOrmModule.forFeature([BlockchainEventCursor, BlockchainProcessedEvent]),
+      ],
       providers: [
         {
           provide: BLOCKCHAIN_CONFIG,

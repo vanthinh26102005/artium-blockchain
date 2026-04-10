@@ -34,6 +34,7 @@ import {
   CancelOrderHandler,
   GetOrdersHandler,
   GetOrderByIdHandler,
+  GetOrderByOnChainIdHandler,
 } from './application';
 
 import { BlockchainEventHandler } from './application/event-handlers';
@@ -49,6 +50,7 @@ export const CommandHandlers = [
 export const QueryHandlers = [
   GetOrdersHandler,
   GetOrderByIdHandler,
+  GetOrderByOnChainIdHandler,
 ];
 
 export const Repositories = [
