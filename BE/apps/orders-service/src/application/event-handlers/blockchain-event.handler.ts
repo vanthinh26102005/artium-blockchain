@@ -18,6 +18,118 @@ export class BlockchainEventHandler {
     private readonly orderRepo: IOrderRepository,
   ) {}
 
+  private generateOrderNumber(prefix = 'AUC') {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  }
+
+  private parseUnixSecondsToDate(value?: string): Date | null {
+    const seconds = Number(value);
+    if (!Number.isFinite(seconds) || seconds <= 0) {
+      return null;
+    }
+    return new Date(seconds * 1000);
+  }
+
+  @RabbitSubscribe({
+    exchange: ExchangeName.BLOCKCHAIN_EVENTS,
+    routingKey: RoutingKey.BLOCKCHAIN_AUCTION_STARTED,
+    queue: 'orders-service.blockchain.auction-started',
+    queueOptions: { durable: true },
+  })
+  async handleAuctionStarted(message: {
+    orderId: string;
+    seller: string;
+    endTime: string;
+  }) {
+    this.logger.log(`Auction started: ${message.orderId}`);
+
+    try {
+      const existing = await this.orderRepo.findByOnChainOrderId(message.orderId);
+      const estimatedDeliveryDate = this.parseUnixSecondsToDate(message.endTime);
+
+      if (existing) {
+        await this.orderRepo.update(existing.id, {
+          status: OrderStatus.AUCTION_ACTIVE,
+          paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+          paymentStatus: OrderPaymentStatus.UNPAID,
+          sellerWallet: message.seller,
+          escrowState: EscrowState.STARTED,
+          estimatedDeliveryDate,
+        });
+        return;
+      }
+
+      await this.orderRepo.create({
+        collectorId: null,
+        orderNumber: this.generateOrderNumber('AUC'),
+        status: OrderStatus.AUCTION_ACTIVE,
+        subtotal: 0,
+        totalAmount: 0,
+        shippingCost: 0,
+        taxAmount: 0,
+        currency: 'ETH',
+        paymentStatus: OrderPaymentStatus.UNPAID,
+        paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+        onChainOrderId: message.orderId,
+        sellerWallet: message.seller,
+        escrowState: EscrowState.STARTED,
+        estimatedDeliveryDate,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to handle AuctionStarted: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @RabbitSubscribe({
+    exchange: ExchangeName.BLOCKCHAIN_EVENTS,
+    routingKey: RoutingKey.BLOCKCHAIN_BID_NEW,
+    queue: 'orders-service.blockchain.bid-new',
+    queueOptions: { durable: true },
+  })
+  async handleNewBid(message: {
+    orderId: string;
+    bidder: string;
+    amount: string;
+  }) {
+    this.logger.log(`New bid: ${message.orderId} by ${message.bidder}`);
+
+    try {
+      const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
+      if (!order) {
+        await this.orderRepo.create({
+          collectorId: null,
+          orderNumber: this.generateOrderNumber('AUC'),
+          status: OrderStatus.AUCTION_ACTIVE,
+          subtotal: 0,
+          totalAmount: 0,
+          shippingCost: 0,
+          taxAmount: 0,
+          currency: 'ETH',
+          paymentStatus: OrderPaymentStatus.UNPAID,
+          paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+          onChainOrderId: message.orderId,
+          buyerWallet: message.bidder,
+          bidAmountWei: message.amount,
+          escrowState: EscrowState.STARTED,
+        });
+        return;
+      }
+
+      await this.orderRepo.update(order.id, {
+        status: OrderStatus.AUCTION_ACTIVE,
+        buyerWallet: message.bidder,
+        bidAmountWei: message.amount,
+        paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+        paymentStatus: OrderPaymentStatus.UNPAID,
+        escrowState: order.escrowState ?? EscrowState.STARTED,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to handle NewBid: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
   @RabbitSubscribe({
     exchange: ExchangeName.BLOCKCHAIN_EVENTS,
     routingKey: RoutingKey.BLOCKCHAIN_AUCTION_ENDED,
@@ -33,15 +145,20 @@ export class BlockchainEventHandler {
     try {
       const existing = await this.orderRepo.findByOnChainOrderId(message.orderId);
       if (existing) {
-        this.logger.warn(`Order already exists for on-chain ID: ${message.orderId}`);
+        await this.orderRepo.update(existing.id, {
+          status: OrderStatus.ESCROW_HELD,
+          paymentStatus: OrderPaymentStatus.ESCROW,
+          paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+          buyerWallet: message.winner,
+          bidAmountWei: message.amount,
+          escrowState: EscrowState.ENDED,
+        });
         return;
       }
 
-      const orderNumber = `AUC-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-
       await this.orderRepo.create({
         collectorId: null,
-        orderNumber,
+        orderNumber: this.generateOrderNumber('AUC'),
         status: OrderStatus.ESCROW_HELD,
         subtotal: 0,
         totalAmount: 0,
@@ -59,6 +176,49 @@ export class BlockchainEventHandler {
       this.logger.log(`Order created for auction: ${message.orderId}`);
     } catch (error) {
       this.logger.error(`Failed to handle AuctionEnded: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @RabbitSubscribe({
+    exchange: ExchangeName.BLOCKCHAIN_EVENTS,
+    routingKey: RoutingKey.BLOCKCHAIN_AUCTION_EXTENDED,
+    queue: 'orders-service.blockchain.auction-extended',
+    queueOptions: { durable: true },
+  })
+  async handleAuctionExtended(message: {
+    orderId: string;
+    newEndTime: string;
+  }) {
+    this.logger.log(`Auction extended: ${message.orderId} -> ${message.newEndTime}`);
+
+    try {
+      const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
+      if (!order) {
+        await this.orderRepo.create({
+          collectorId: null,
+          orderNumber: this.generateOrderNumber('AUC'),
+          status: OrderStatus.AUCTION_ACTIVE,
+          subtotal: 0,
+          totalAmount: 0,
+          shippingCost: 0,
+          taxAmount: 0,
+          currency: 'ETH',
+          paymentStatus: OrderPaymentStatus.UNPAID,
+          paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+          onChainOrderId: message.orderId,
+          escrowState: EscrowState.STARTED,
+          estimatedDeliveryDate: this.parseUnixSecondsToDate(message.newEndTime),
+        });
+        return;
+      }
+
+      await this.orderRepo.update(order.id, {
+        status: OrderStatus.AUCTION_ACTIVE,
+        estimatedDeliveryDate: this.parseUnixSecondsToDate(message.newEndTime),
+      });
+    } catch (error) {
+      this.logger.error(`Failed to handle AuctionExtended: ${error.message}`, error.stack);
       throw error;
     }
   }
@@ -213,6 +373,100 @@ export class BlockchainEventHandler {
       });
     } catch (error) {
       this.logger.error(`Failed to handle AuctionCancelled: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @RabbitSubscribe({
+    exchange: ExchangeName.BLOCKCHAIN_EVENTS,
+    routingKey: RoutingKey.BLOCKCHAIN_AUCTION_SHIPPING_TIMEOUT,
+    queue: 'orders-service.blockchain.shipping-timeout',
+    queueOptions: { durable: true },
+  })
+  async handleShippingTimeout(message: {
+    orderId: string;
+    buyer: string;
+  }) {
+    this.logger.log(`Shipping timeout: ${message.orderId}`);
+    try {
+      const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
+      if (!order) {
+        await this.orderRepo.create({
+          collectorId: null,
+          orderNumber: this.generateOrderNumber('AUC'),
+          status: OrderStatus.REFUNDED,
+          subtotal: 0,
+          totalAmount: 0,
+          shippingCost: 0,
+          taxAmount: 0,
+          currency: 'ETH',
+          paymentStatus: OrderPaymentStatus.REFUNDED,
+          paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+          onChainOrderId: message.orderId,
+          buyerWallet: message.buyer,
+          escrowState: EscrowState.CANCELLED,
+          cancelledAt: new Date(),
+          cancelledReason: 'Shipping timeout',
+        });
+        return;
+      }
+
+      await this.orderRepo.update(order.id, {
+        status: OrderStatus.REFUNDED,
+        paymentStatus: OrderPaymentStatus.REFUNDED,
+        buyerWallet: message.buyer,
+        escrowState: EscrowState.CANCELLED,
+        cancelledAt: new Date(),
+        cancelledReason: 'Shipping timeout',
+      });
+    } catch (error) {
+      this.logger.error(`Failed to handle ShippingTimeout: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @RabbitSubscribe({
+    exchange: ExchangeName.BLOCKCHAIN_EVENTS,
+    routingKey: RoutingKey.BLOCKCHAIN_AUCTION_DELIVERY_TIMEOUT,
+    queue: 'orders-service.blockchain.delivery-timeout',
+    queueOptions: { durable: true },
+  })
+  async handleDeliveryTimeout(message: {
+    orderId: string;
+    seller: string;
+  }) {
+    this.logger.log(`Delivery timeout: ${message.orderId}`);
+    try {
+      const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
+      if (!order) {
+        await this.orderRepo.create({
+          collectorId: null,
+          orderNumber: this.generateOrderNumber('AUC'),
+          status: OrderStatus.DELIVERED,
+          subtotal: 0,
+          totalAmount: 0,
+          shippingCost: 0,
+          taxAmount: 0,
+          currency: 'ETH',
+          paymentStatus: OrderPaymentStatus.RELEASED,
+          paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+          onChainOrderId: message.orderId,
+          sellerWallet: message.seller,
+          escrowState: EscrowState.COMPLETED,
+          deliveredAt: new Date(),
+        });
+        return;
+      }
+
+      await this.orderRepo.update(order.id, {
+        status: OrderStatus.DELIVERED,
+        paymentStatus: OrderPaymentStatus.RELEASED,
+        sellerWallet: message.seller,
+        escrowState: EscrowState.COMPLETED,
+        deliveredAt: new Date(),
+      });
+    } catch (error) {
+      this.logger.error(`Failed to handle DeliveryTimeout: ${error.message}`, error.stack);
       throw error;
     }
   }

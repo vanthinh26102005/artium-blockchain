@@ -14,6 +14,7 @@ import {
   CancelOrderCommand,
   GetOrdersQuery,
   GetOrderByIdQuery,
+  GetOrderByOnChainIdQuery,
 } from '../../application';
 
 @Controller()
@@ -41,6 +42,12 @@ export class OrdersMicroserviceController {
   async getOrderById(@Payload() data: { id: string }) {
     this.logger.debug(`Getting order: ${data.id}`);
     return this.queryBus.execute(new GetOrderByIdQuery(data.id));
+  }
+
+  @MessagePattern({ cmd: 'get_order_by_onchain_id' })
+  async getOrderByOnChainId(@Payload() data: { onChainOrderId: string }) {
+    this.logger.debug(`Getting order by on-chain id: ${data.onChainOrderId}`);
+    return this.queryBus.execute(new GetOrderByOnChainIdQuery(data.onChainOrderId));
   }
 
   @MessagePattern({ cmd: 'update_order' })

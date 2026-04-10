@@ -3,28 +3,23 @@ import { ethers, Contract, TransactionResponse } from 'ethers';
 import { EscrowState } from '@app/common';
 import { ESCROW_CONTRACT, PLATFORM_SIGNER } from '../interfaces/blockchain-config.interface';
 
-export interface AuctionDto {
+export interface AuctionCoreDto {
   seller: string;
   highestBidder: string;
   highestBid: bigint;
   startTime: bigint;
   endTime: bigint;
-  reservePrice: bigint;
   minBidIncrement: bigint;
   ipfsHash: string;
-  trackingHash: string;
-  shippingDeadline: bigint;
-  deliveryDeadline: bigint;
-  disputeDeadline: bigint;
   state: EscrowState;
 }
 
 export interface AuctionTimelineDto {
-  startTime: bigint;
-  endTime: bigint;
+  trackingHash: string;
   shippingDeadline: bigint;
   deliveryDeadline: bigint;
   disputeDeadline: bigint;
+  reservePrice: bigint;
 }
 
 @Injectable()
@@ -38,7 +33,7 @@ export class EscrowContractService {
     private readonly signer: ethers.Wallet,
   ) {}
 
-  async getAuction(orderId: string): Promise<AuctionDto> {
+  async getAuction(orderId: string): Promise<AuctionCoreDto> {
     this.logger.debug(`Fetching auction: ${orderId}`);
     const result = await this.contract.getAuction(orderId);
 
@@ -48,13 +43,8 @@ export class EscrowContractService {
       highestBid: result.highestBid,
       startTime: result.startTime,
       endTime: result.endTime,
-      reservePrice: result.reservePrice,
       minBidIncrement: result.minBidIncrement,
       ipfsHash: result.ipfsHash,
-      trackingHash: result.trackingHash,
-      shippingDeadline: result.shippingDeadline,
-      deliveryDeadline: result.deliveryDeadline,
-      disputeDeadline: result.disputeDeadline,
       state: Number(result.state) as EscrowState,
     };
   }
@@ -64,11 +54,11 @@ export class EscrowContractService {
     const result = await this.contract.getAuctionTimeline(orderId);
 
     return {
-      startTime: result.startTime,
-      endTime: result.endTime,
+      trackingHash: result.trackingHash,
       shippingDeadline: result.shippingDeadline,
       deliveryDeadline: result.deliveryDeadline,
       disputeDeadline: result.disputeDeadline,
+      reservePrice: result.reservePrice,
     };
   }
 
