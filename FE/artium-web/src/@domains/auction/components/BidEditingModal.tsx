@@ -6,6 +6,7 @@ import { AlertTriangle, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
 import { type DiscoverArtworkAuctionStatusKey } from '@domains/discover/mock/mockArtworks'
 import { getAuctionTimeRemainingDisplay } from '@domains/auction/utils'
+import { ConfirmedBidState } from './ConfirmedBidState'
 import { PendingBidState } from './PendingBidState'
 import { SubmittingBidState } from './SubmittingBidState'
 import {
@@ -92,9 +93,9 @@ const getMockTransactionHash = (artworkId: string, bidValue: number) => {
 }
 
 export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) => {
-  const [viewState, setViewState] = useState<'editing' | 'submitting' | 'pending' | 'failed'>(
-    'editing'
-  )
+  const [viewState, setViewState] = useState<
+    'editing' | 'submitting' | 'pending' | 'confirmed' | 'failed'
+  >('editing')
   const [currentBidValue, setCurrentBidValue] = useState(() => lot?.bidValue ?? 0)
   const minimumNextBid = getMinimumNextBid(currentBidValue)
   const [bidAmount, setBidAmount] = useState(() => minimumNextBid.toFixed(2))
@@ -146,6 +147,26 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
 
     return () => window.clearTimeout(timeoutId)
   }, [committedBidValue, isOpen, lotStatusKey, viewState])
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      viewState !== 'pending' ||
+      committedBidValue === null ||
+      transactionHash === null ||
+      lotStatusKey === 'ending-soon'
+    ) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setCurrentBidValue(committedBidValue)
+      setBidAmount(getMinimumNextBid(committedBidValue).toFixed(2))
+      setViewState('confirmed')
+    }, 2400)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [committedBidValue, isOpen, lotStatusKey, transactionHash, viewState])
 
   if (!lot) {
     return null
@@ -217,6 +238,17 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
   if (viewState === 'pending' && committedBidValue !== null && transactionHash) {
     return (
       <PendingBidState
+        isOpen={isOpen}
+        committedBidValue={committedBidValue}
+        transactionHash={transactionHash}
+        onClose={handleCloseModal}
+      />
+    )
+  }
+
+  if (viewState === 'confirmed' && committedBidValue !== null && transactionHash) {
+    return (
+      <ConfirmedBidState
         isOpen={isOpen}
         committedBidValue={committedBidValue}
         transactionHash={transactionHash}
