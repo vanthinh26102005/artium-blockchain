@@ -143,10 +143,10 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white/92 text-black transition hover:border-black hover:bg-white"
+              className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/70 transition hover:text-black"
               aria-label="Close bid panel"
             >
-              <X className="h-5 w-5" />
+              <X className="h-7 w-7" strokeWidth={1.8} />
             </button>
 
             <div className="relative min-h-[260px] w-full bg-[#f3f3f3] md:min-h-full md:w-5/12">
@@ -291,9 +291,10 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                     </div>
                     <div>
                       <p className="text-[11px] tracking-[0.14em] text-black/40 uppercase" style={headlineFont}>
-                        Estimate At Your Bid
+                        Approx. USD Value
                       </p>
                       <p className="mt-2 text-base text-black" style={headlineFont}>
+                        ≈{' '}
                         {isBidValid
                           ? formatUsdEstimate(bidAmountValue)
                           : formatUsdEstimate(minimumNextBid)}
@@ -315,11 +316,17 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                         : `Minimum next bid is ${formatPreciseEthDisplay(minimumNextBid)}.`}
                     </p>
                   </div>
-                  <p className="shrink-0 text-base text-black" style={headlineFont}>
-                    {isBidValid
-                      ? formatUsdEstimate(bidAmountValue)
-                      : formatUsdEstimate(minimumNextBid)}
-                  </p>
+                  <div className="shrink-0 text-right">
+                    <p className="text-[10px] tracking-[0.16em] text-black/40 uppercase" style={headlineFont}>
+                      Approx. USD Value
+                    </p>
+                    <p className="mt-1 text-base text-black" style={headlineFont}>
+                      ≈{' '}
+                      {isBidValid
+                        ? formatUsdEstimate(bidAmountValue)
+                        : formatUsdEstimate(minimumNextBid)}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex flex-col gap-3 md:flex-row md:items-center">
                   <button
