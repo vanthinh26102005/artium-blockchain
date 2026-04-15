@@ -7,6 +7,7 @@ import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react
 import { type DiscoverArtworkAuctionStatusKey } from '@domains/discover/mock/mockArtworks'
 import { getAuctionTimeRemainingDisplay } from '@domains/auction/utils'
 import { PendingBidState } from './PendingBidState'
+import { SubmittingBidState } from './SubmittingBidState'
 import {
   Dialog,
   DialogOverlay,
@@ -91,7 +92,9 @@ const getMockTransactionHash = (artworkId: string, bidValue: number) => {
 }
 
 export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) => {
-  const [viewState, setViewState] = useState<'editing' | 'pending' | 'failed'>('editing')
+  const [viewState, setViewState] = useState<'editing' | 'submitting' | 'pending' | 'failed'>(
+    'editing'
+  )
   const [currentBidValue, setCurrentBidValue] = useState(() => lot?.bidValue ?? 0)
   const minimumNextBid = getMinimumNextBid(currentBidValue)
   const [bidAmount, setBidAmount] = useState(() => minimumNextBid.toFixed(2))
@@ -99,6 +102,9 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
   const [committedBidValue, setCommittedBidValue] = useState<number | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const [failedBidValue, setFailedBidValue] = useState<number | null>(null)
+  const lotStatusKey = lot?.statusKey
+  const lotArtworkId = lot?.artworkId
+  const lotBidValue = lot?.bidValue ?? 0
 
   useEffect(() => {
     if (!isOpen) {
@@ -113,12 +119,20 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
   }, [isOpen])
 
   useEffect(() => {
-    if (
-      !isOpen ||
-      viewState !== 'pending' ||
-      committedBidValue === null ||
-      lot?.statusKey !== 'ending-soon'
-    ) {
+    if (!isOpen || viewState !== 'submitting' || committedBidValue === null || !lotArtworkId) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setTransactionHash(getMockTransactionHash(lotArtworkId, committedBidValue))
+      setViewState('pending')
+    }, 1400)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [committedBidValue, isOpen, lotArtworkId, viewState])
+
+  useEffect(() => {
+    if (!isOpen || viewState !== 'pending' || committedBidValue === null || lotStatusKey !== 'ending-soon') {
       return
     }
 
@@ -131,7 +145,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
     }, 3200)
 
     return () => window.clearTimeout(timeoutId)
-  }, [committedBidValue, isOpen, lot?.statusKey, viewState])
+  }, [committedBidValue, isOpen, lotStatusKey, viewState])
 
   if (!lot) {
     return null
@@ -171,12 +185,33 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
     }
 
     setCommittedBidValue(bidAmountValue)
-    setTransactionHash(getMockTransactionHash(lot.artworkId, bidAmountValue))
-    setViewState('pending')
+    setTransactionHash(null)
+    setViewState('submitting')
   }
 
   const handleTryAgain = () => {
     setViewState('editing')
+  }
+
+  const handleCloseModal = () => {
+    setViewState('editing')
+    setCurrentBidValue(lotBidValue)
+    setBidAmount(getMinimumNextBid(lotBidValue).toFixed(2))
+    setElapsedSeconds(0)
+    setCommittedBidValue(null)
+    setTransactionHash(null)
+    setFailedBidValue(null)
+    onClose()
+  }
+
+  if (viewState === 'submitting' && committedBidValue !== null) {
+    return (
+      <SubmittingBidState
+        isOpen={isOpen}
+        committedBidValue={committedBidValue}
+        onClose={handleCloseModal}
+      />
+    )
   }
 
   if (viewState === 'pending' && committedBidValue !== null && transactionHash) {
@@ -185,14 +220,14 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
         isOpen={isOpen}
         committedBidValue={committedBidValue}
         transactionHash={transactionHash}
-        onClose={onClose}
+        onClose={handleCloseModal}
       />
     )
   }
 
   if (viewState === 'failed' && failedBidValue !== null) {
     return (
-      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && handleCloseModal()}>
         <DialogPortal>
           <DialogOverlay className="bg-black/35 backdrop-blur-sm" />
           <DialogPrimitive.Content
@@ -203,7 +238,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
             <div className="relative w-full max-w-lg overflow-hidden border border-black/10 bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)]">
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleCloseModal}
                 className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/70 transition hover:text-black"
                 aria-label="Close failed bid panel"
               >
@@ -288,7 +323,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                   </button>
                   <button
                     type="button"
-                    onClick={onClose}
+                    onClick={handleCloseModal}
                     className="inline-flex min-h-[56px] items-center justify-center border border-black/15 px-6 text-center text-[12px] tracking-[0.2em] text-black uppercase transition hover:border-black/30 hover:bg-black/[0.03]"
                     style={headlineFont}
                   >
@@ -316,7 +351,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleCloseModal()}>
       <DialogPortal>
         <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
         <DialogPrimitive.Content
@@ -327,7 +362,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
           <div className="relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden border border-black/10 bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.18)] md:max-h-[86vh] md:flex-row">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleCloseModal}
               className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/70 transition hover:text-black"
               aria-label="Close bid panel"
             >
@@ -525,7 +560,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                   </button>
                   <button
                     type="button"
-                    onClick={onClose}
+                    onClick={handleCloseModal}
                     className="order-2 inline-flex min-h-[56px] items-center justify-center border border-black/15 px-6 text-center text-[12px] tracking-[0.2em] text-black uppercase transition hover:border-black/30 hover:bg-black/[0.03] md:order-1 md:w-[180px]"
                     style={headlineFont}
                   >
