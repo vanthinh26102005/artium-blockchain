@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { LoaderCircle, X } from 'lucide-react'
 import { type CSSProperties } from 'react'
@@ -12,8 +13,11 @@ import {
 
 type SubmittingBidStateProps = {
   isOpen: boolean
+  title: string
+  imageSrc: string
+  imageAlt: string
   committedBidValue: number
-  onClose: () => void
+  currentBidValue: number
 }
 
 const spaceGrotesk = Space_Grotesk({
@@ -25,109 +29,169 @@ const headlineFont = {
   fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
 
+const formatEthDisplay = (value: number) => `${value.toFixed(2)} ETH`
+
+const getEstimatedGasFee = (bidValue: number) =>
+  Math.max(0.0018, Math.min(0.0048, bidValue * 0.00017)).toFixed(4)
+
 export const SubmittingBidState = ({
   isOpen,
+  title,
+  imageSrc,
+  imageAlt,
   committedBidValue,
-  onClose,
+  currentBidValue,
 }: SubmittingBidStateProps) => {
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen}>
       <DialogPortal>
-        <DialogOverlay className="bg-white/40 backdrop-blur-xl" />
+        <DialogOverlay className="bg-black/5 backdrop-blur-md" />
         <DialogPrimitive.Content
           aria-labelledby="auction-bid-submitting-title"
           className="fixed inset-0 z-[210] flex items-center justify-center p-4 outline-none md:p-8"
           onOpenAutoFocus={(event) => event.preventDefault()}
+          onEscapeKeyDown={(event) => event.preventDefault()}
+          onPointerDownOutside={(event) => event.preventDefault()}
+          onInteractOutside={(event) => event.preventDefault()}
         >
-          <div className="relative w-full max-w-2xl overflow-hidden bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)]">
+          <div className="relative flex w-full max-w-4xl flex-col overflow-hidden bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.18)] md:flex-row">
             <button
               type="button"
-              onClick={onClose}
-              className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/70 transition hover:text-black"
+              disabled
+              className="absolute top-6 right-6 z-10 inline-flex h-10 w-10 items-center justify-center text-black/20"
               aria-label="Close submitting bid panel"
             >
-              <X className="h-7 w-7" strokeWidth={1.8} />
+              <X className="h-6 w-6" strokeWidth={1.8} />
             </button>
 
-            <div className="absolute top-0 right-0 h-56 w-56 -translate-y-1/3 translate-x-1/3 rounded-full bg-black/[0.04] blur-[80px]" />
-
-            <div className="px-8 py-12 text-center md:px-16 md:py-16">
-              <div className="relative mx-auto mb-10 flex h-24 w-24 items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-2 border-black/10" />
-                <div className="absolute inset-0 rounded-full border-t-2 border-black animate-spin" />
-                <LoaderCircle className="h-9 w-9 text-black/70 animate-spin" strokeWidth={1.8} />
-              </div>
-
-              <div className="mb-12 space-y-4">
-                <span
-                  className="inline-block border-b border-black/15 pb-2 text-[11px] tracking-[0.28em] text-black/45 uppercase"
+            <div className="relative min-h-[260px] w-full overflow-hidden bg-[#eeeeee] md:w-5/12">
+              <Image
+                src={imageSrc}
+                alt={imageAlt}
+                fill
+                sizes="(min-width: 768px) 34vw, 100vw"
+                className="object-cover grayscale opacity-80"
+              />
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="absolute right-5 bottom-5 left-5">
+                <p
+                  className="text-[10px] tracking-[0.14em] text-white/78 uppercase"
                   style={headlineFont}
                 >
-                  Status: Submitting
-                </span>
-                <h2
-                  id="auction-bid-submitting-title"
-                  className="text-4xl font-bold tracking-tight text-black md:text-5xl"
-                  style={headlineFont}
-                >
-                  Submitting Your Bid
-                </h2>
-                <p className="mx-auto max-w-md text-sm leading-7 text-black/58">
-                  We&apos;re sending your bid request and preparing the on-chain transaction. Keep
-                  this window open while submission completes.
+                  {title}
                 </p>
               </div>
+            </div>
 
-              <div className="mb-12 flex flex-col justify-between gap-8 bg-[#f3f3f3] px-6 py-8 text-left md:flex-row md:items-center md:px-8">
-                <div>
+            <div className="flex w-full flex-col justify-center gap-10 px-8 py-10 md:w-7/12 md:px-14 md:py-16">
+              <div className="space-y-8">
+                <div className="space-y-2">
                   <span
-                    className="mb-2 block text-[10px] tracking-[0.2em] text-black/42 uppercase"
+                    className="block text-[10px] font-bold tracking-[0.2em] text-black/48 uppercase"
+                    style={headlineFont}
+                  >
+                    Blockchain Transaction
+                  </span>
+                  <h2
+                    id="auction-bid-submitting-title"
+                    className="text-2xl tracking-[0.05em] text-black uppercase"
+                    style={headlineFont}
+                  >
+                    Submitting Your Bid...
+                  </h2>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="relative h-px w-full overflow-hidden bg-black/10">
+                    <div
+                      className="absolute top-0 h-full w-2/5 bg-black"
+                      style={{ animation: 'submittingProgress 1.5s infinite ease-in-out' }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span
+                      className="text-[11px] tracking-[0.1em] text-black/40 uppercase"
+                      style={headlineFont}
+                    >
+                      Verifying Wallet
+                    </span>
+                    <span
+                      className="text-[11px] font-bold tracking-[0.1em] text-black uppercase"
+                      style={headlineFont}
+                    >
+                      Pending
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#f3f3f3] px-6 py-7 md:px-8">
+                <div className="flex items-center justify-between gap-4 border-b border-black/10 pb-4">
+                  <span
+                    className="text-[11px] tracking-[0.1em] text-black/48 uppercase"
+                    style={headlineFont}
+                  >
+                    Current Bid
+                  </span>
+                  <span className="text-sm tracking-[0.08em] text-black/60 uppercase" style={headlineFont}>
+                    {formatEthDisplay(currentBidValue)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-4 border-b border-black/10 py-4">
+                  <span
+                    className="text-[11px] tracking-[0.1em] text-black/48 uppercase"
                     style={headlineFont}
                   >
                     Bid Amount
                   </span>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-black" style={headlineFont}>
-                      {committedBidValue.toFixed(2)}
-                    </span>
-                    <span className="text-lg font-light text-black/55" style={headlineFont}>
-                      ETH
-                    </span>
-                  </div>
+                  <span className="text-xl text-black" style={headlineFont}>
+                    {formatEthDisplay(committedBidValue)}
+                  </span>
                 </div>
-
-                <div className="md:text-right">
+                <div className="flex items-center justify-between gap-4 pt-4">
                   <span
-                    className="mb-2 block text-[10px] tracking-[0.2em] text-black/42 uppercase"
+                    className="text-[11px] tracking-[0.1em] text-black/48 uppercase"
                     style={headlineFont}
                   >
-                    Submission Step
+                    Est. Gas Fee
                   </span>
-                  <div className="inline-flex items-center gap-2 border border-black/5 bg-white px-3 py-2">
-                    <LoaderCircle className="h-4 w-4 text-black/45 animate-spin" />
-                    <span className="text-xs text-black/72">Sending transaction request</span>
-                  </div>
+                  <span
+                    className="text-sm tracking-[0.08em] text-black/45 uppercase"
+                    style={headlineFont}
+                  >
+                    {getEstimatedGasFee(committedBidValue)} ETH
+                  </span>
                 </div>
               </div>
 
               <button
                 type="button"
-                onClick={onClose}
-                className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] tracking-[0.2em] text-white uppercase transition hover:bg-black/90"
+                disabled
+                className="inline-flex min-h-[60px] w-full cursor-wait items-center justify-center gap-3 bg-[#5f5e5e] px-8 text-center text-[12px] tracking-[0.15em] text-white uppercase"
                 style={headlineFont}
               >
-                Close Modal
+                <LoaderCircle className="h-4 w-4 animate-spin" strokeWidth={1.8} />
+                <span>Processing...</span>
               </button>
-              <p
-                className="mt-6 text-[10px] tracking-[0.16em] text-black/38 uppercase"
-                style={headlineFont}
-              >
-                Secure transaction powered by Ethereum Mainnet
+
+              <p className="mx-auto max-w-[280px] text-center text-[12px] leading-6 text-black/58">
+                Please keep this window open while the transaction is being indexed on the
+                network.
               </p>
             </div>
           </div>
         </DialogPrimitive.Content>
       </DialogPortal>
+      <style jsx>{`
+        @keyframes submittingProgress {
+          0% {
+            left: -40%;
+          }
+          100% {
+            left: 100%;
+          }
+        }
+      `}</style>
     </Dialog>
   )
 }

@@ -229,8 +229,11 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
     return (
       <SubmittingBidState
         isOpen={isOpen}
+        title={lot.title}
+        imageSrc={lot.imageSrc}
+        imageAlt={lot.imageAlt}
         committedBidValue={committedBidValue}
-        onClose={handleCloseModal}
+        currentBidValue={currentBidValue}
       />
     )
   }
