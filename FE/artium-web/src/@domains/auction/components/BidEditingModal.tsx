@@ -251,7 +251,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                   <button
                     type="button"
                     onClick={onClose}
-                    className="inline-flex min-h-[56px] items-center justify-center border border-black/15 px-6 text-center text-[12px] tracking-[0.2em] text-black uppercase transition hover:border-black hover:bg-black hover:text-white"
+                    className="inline-flex min-h-[56px] items-center justify-center border border-black/15 px-6 text-center text-[12px] tracking-[0.2em] text-black uppercase transition hover:border-black/30 hover:bg-black/[0.03]"
                     style={headlineFont}
                   >
                     Cancel Transaction
@@ -488,7 +488,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                   <button
                     type="button"
                     onClick={onClose}
-                    className="order-2 inline-flex min-h-[56px] items-center justify-center border border-black/15 px-6 text-center text-[12px] tracking-[0.2em] text-black uppercase transition hover:border-black hover:bg-black hover:text-white md:order-1 md:w-[180px]"
+                    className="order-2 inline-flex min-h-[56px] items-center justify-center border border-black/15 px-6 text-center text-[12px] tracking-[0.2em] text-black uppercase transition hover:border-black/30 hover:bg-black/[0.03] md:order-1 md:w-[180px]"
                     style={headlineFont}
                   >
                     Cancel
