@@ -6,6 +6,7 @@ import { AlertTriangle, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
 import { type DiscoverArtworkAuctionStatusKey } from '@domains/discover/mock/mockArtworks'
 import { getAuctionTimeRemainingDisplay } from '@domains/auction/utils'
+import { PendingBidState } from './PendingBidState'
 import {
   Dialog,
   DialogOverlay,
@@ -84,12 +85,19 @@ const getBidModalStatusLabel = (statusKey: DiscoverArtworkAuctionStatusKey) => {
   }
 }
 
+const getMockTransactionHash = (artworkId: string, bidValue: number) => {
+  const compactBidValue = bidValue.toFixed(2).replace('.', '')
+  return `0x${artworkId.replace(/[^a-zA-Z0-9]/g, '').slice(-4)}${compactBidValue}f89c`
+}
+
 export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) => {
-  const [viewState, setViewState] = useState<'editing' | 'failed'>('editing')
+  const [viewState, setViewState] = useState<'editing' | 'pending' | 'failed'>('editing')
   const [currentBidValue, setCurrentBidValue] = useState(() => lot?.bidValue ?? 0)
   const minimumNextBid = getMinimumNextBid(currentBidValue)
   const [bidAmount, setBidAmount] = useState(() => minimumNextBid.toFixed(2))
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [committedBidValue, setCommittedBidValue] = useState<number | null>(null)
+  const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const [failedBidValue, setFailedBidValue] = useState<number | null>(null)
 
   useEffect(() => {
@@ -103,6 +111,27 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
 
     return () => window.clearInterval(intervalId)
   }, [isOpen])
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      viewState !== 'pending' ||
+      committedBidValue === null ||
+      lot?.statusKey !== 'ending-soon'
+    ) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const nextTopBid = getCompetingBid(committedBidValue)
+      setFailedBidValue(committedBidValue)
+      setCurrentBidValue(nextTopBid)
+      setBidAmount(getMinimumNextBid(nextTopBid).toFixed(2))
+      setViewState('failed')
+    }, 3200)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [committedBidValue, isOpen, lot?.statusKey, viewState])
 
   if (!lot) {
     return null
@@ -141,15 +170,24 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
       return
     }
 
-    const nextTopBid = getCompetingBid(bidAmountValue)
-    setFailedBidValue(bidAmountValue)
-    setCurrentBidValue(nextTopBid)
-    setBidAmount(getMinimumNextBid(nextTopBid).toFixed(2))
-    setViewState('failed')
+    setCommittedBidValue(bidAmountValue)
+    setTransactionHash(getMockTransactionHash(lot.artworkId, bidAmountValue))
+    setViewState('pending')
   }
 
   const handleTryAgain = () => {
     setViewState('editing')
+  }
+
+  if (viewState === 'pending' && committedBidValue !== null && transactionHash) {
+    return (
+      <PendingBidState
+        isOpen={isOpen}
+        committedBidValue={committedBidValue}
+        transactionHash={transactionHash}
+        onClose={onClose}
+      />
+    )
   }
 
   if (viewState === 'failed' && failedBidValue !== null) {
