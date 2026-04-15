@@ -43,10 +43,6 @@ const headlineFont = {
   fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
 
-const bodyFont = {
-  fontFamily: 'Inter, "Segoe UI", Tahoma, sans-serif',
-} satisfies CSSProperties
-
 const statusBadgeClass: Record<DiscoverArtworkAuctionStatusKey, string> = {
   active: 'bg-[#16a34a]',
   'ending-soon': 'bg-[#dc2626]',
@@ -184,8 +180,8 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
               </div>
             </div>
 
-            <div className="flex w-full flex-col justify-between overflow-y-auto p-6 md:w-7/12 md:p-10">
-              <div>
+            <div className="flex w-full flex-col overflow-hidden md:w-7/12">
+              <div className="flex-1 overflow-y-auto px-6 pt-6 md:px-10 md:pt-10">
                 <header className="mb-10 border-b border-black/10 pb-8">
                   <p className="text-[11px] tracking-[0.28em] text-black/45 uppercase" style={headlineFont}>
                     Place a Bid
@@ -197,10 +193,6 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                   >
                     {lot.title}
                   </h2>
-                  <p className="mt-3 max-w-xl text-sm leading-7 text-[#5f5e5e]" style={bodyFont}>
-                    Review the current auction position, enter a valid bid amount, and prepare the
-                    form state for transaction handling in the next implementation step.
-                  </p>
                 </header>
 
                 <section className="grid grid-cols-1 gap-6 border-b border-black/10 pb-8 md:grid-cols-2 md:gap-10">
@@ -229,7 +221,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                   </div>
                 </section>
 
-                <section className="pt-8">
+                <section className="pt-8 pb-8">
                   <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                     <label
                       htmlFor="bid-amount"
@@ -311,26 +303,43 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                 </section>
               </div>
 
-              <footer className="mt-10 border-t border-black/10 pt-8">
-                <div className="flex flex-col gap-3 md:flex-row">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="inline-flex min-h-[56px] items-center justify-center border border-black/15 px-6 text-center text-[12px] tracking-[0.2em] text-black uppercase transition hover:border-black hover:bg-black hover:text-white md:w-[180px]"
-                    style={headlineFont}
-                  >
-                    Cancel
-                  </button>
+              <footer className="border-t border-black/10 bg-white px-6 pt-5 pb-6 shadow-[0_-18px_32px_-24px_rgba(0,0,0,0.16)] md:px-10 md:pt-6">
+                <div className="mb-4 flex items-center justify-between gap-4 border-b border-black/10 pb-4">
+                  <div className="min-w-0">
+                    <p className="text-[11px] tracking-[0.16em] text-black/42 uppercase" style={headlineFont}>
+                      Ready to Bid
+                    </p>
+                    <p className="mt-2 text-sm text-black/60">
+                      {isBidValid
+                        ? `Submitting ${formatPreciseEthDisplay(bidAmountValue)} for this lot.`
+                        : `Minimum next bid is ${formatPreciseEthDisplay(minimumNextBid)}.`}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-base text-black" style={headlineFont}>
+                    {isBidValid
+                      ? formatUsdEstimate(bidAmountValue)
+                      : formatUsdEstimate(minimumNextBid)}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3 md:flex-row md:items-center">
                   <button
                     type="button"
                     disabled={!isBidValid}
-                    className="inline-flex min-h-[56px] flex-1 items-center justify-center bg-black px-6 text-center text-[12px] tracking-[0.2em] text-white uppercase transition hover:bg-black/90 disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/45"
+                    className="order-1 inline-flex min-h-[56px] flex-1 items-center justify-center bg-black px-6 text-center text-[12px] tracking-[0.2em] text-white uppercase transition hover:bg-black/90 disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/45 md:order-2"
                     style={headlineFont}
                   >
                     Place Bid
                   </button>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="order-2 inline-flex min-h-[56px] items-center justify-center border border-black/15 px-6 text-center text-[12px] tracking-[0.2em] text-black uppercase transition hover:border-black hover:bg-black hover:text-white md:order-1 md:w-[180px]"
+                    style={headlineFont}
+                  >
+                    Cancel
+                  </button>
                 </div>
-                <p className="mt-5 text-center text-[11px] leading-5 text-black/45">
+                <p className="mt-4 text-center text-[11px] leading-5 text-black/45">
                   By placing a bid, you agree to Artium&apos;s live-auction terms. Confirmation,
                   pending, and failure states can be layered onto this layout next without changing
                   the form structure.
