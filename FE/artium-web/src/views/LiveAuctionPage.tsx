@@ -116,6 +116,7 @@ const lots: AuctionLot[] = mockArtworks
       categoryKey: lotCategoryCycle[index % lotCategoryCycle.length],
       status: artwork.auction.statusLabel,
       statusKey: artwork.auction.statusKey,
+      endsAt: artwork.auction.endsAt,
       statusTone: auctionStatusTone[artwork.auction.statusKey],
       imageSrc: artwork.imageMedium,
       imageAlt: `Artwork preview of ${artwork.title} by ${artwork.creator.fullName}`,

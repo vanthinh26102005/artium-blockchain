@@ -141,6 +141,20 @@ Trong các trường hợp không thể đặt giá:
 - CTA phụ: `Cancel` hoặc `Close`
 - Ghi chú nhỏ nếu cần, ví dụ điều khoản hoặc note về việc bid là hành vi cam kết
 
+### 7.4. Quy tắc hiển thị time remaining
+Để tối ưu khả năng đọc và tạo cảm giác khẩn trương đúng lúc, phần `Time remaining` nên hiển thị theo các mốc sau:
+
+- Nếu thời gian còn lại lớn hơn `24 giờ`, hiển thị dạng rút gọn như `2d remaining`.
+- Nếu thời gian còn lại lớn hơn `60 phút` và nhỏ hơn hoặc bằng `24 giờ`, hiển thị dạng `12h remaining`.
+- Nếu thời gian còn lại nhỏ hơn hoặc bằng `60 phút`, chuyển sang countdown realtime dạng `HH:MM:SS`.
+- Nếu thời gian còn lại nhỏ hơn hoặc bằng `10 phút`, countdown cần được nhấn mạnh bằng màu đỏ hoặc hiệu ứng pulse.
+- Nếu thời gian còn lại nhỏ hơn hoặc bằng `1 phút`, vẫn giữ countdown nhưng tăng mức nhấn mạnh cao nhất trong giao diện.
+
+Ý nghĩa:
+
+- Giai đoạn còn nhiều thời gian ưu tiên đọc nhanh.
+- Giai đoạn cuối ưu tiên cảm giác khẩn trương và hỗ trợ ra quyết định nhanh.
+
 ---
 
 ## 8. Quy tắc nghiệp vụ cơ bản
@@ -201,12 +215,15 @@ Yêu cầu hiển thị:
 - Hiển thị đầy đủ thông tin auction.
 - Hiển thị input nhập bid.
 - Hiển thị `current bid` và `minimum next bid`.
+- Hiển thị `time remaining` theo đúng rule phân tầng ngày, giờ và countdown realtime.
 - Hiển thị helper text để hướng dẫn người dùng.
 - CTA `Place Bid` chỉ bật khi giá trị hợp lệ.
 
 Yêu cầu UX:
 
 - Nếu nhập giá không hợp lệ, hiển thị lỗi inline ngay dưới input.
+- Với auction `ending-soon`, countdown cần được cập nhật realtime.
+- Với mốc `10 phút` và `1 phút`, UI cần tăng nhấn mạnh thị giác cho vùng thời gian.
 - Có thể bổ sung các shortcut như `Use minimum`, `+0.1 ETH`, `+0.5 ETH` nếu team thiết kế muốn tăng tốc thao tác.
 
 ### 10.2. Trạng thái `submitting`

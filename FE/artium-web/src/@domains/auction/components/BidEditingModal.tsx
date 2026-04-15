@@ -3,8 +3,9 @@
 import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { X } from 'lucide-react'
-import { useState, type ChangeEvent, type CSSProperties } from 'react'
+import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
 import { type DiscoverArtworkAuctionStatusKey } from '@domains/discover/mock/mockArtworks'
+import { getAuctionTimeRemainingDisplay } from '@domains/auction/utils'
 import {
   Dialog,
   DialogOverlay,
@@ -18,6 +19,7 @@ export type AuctionBidLot = {
   bidValue: number
   status: string
   statusKey: DiscoverArtworkAuctionStatusKey
+  endsAt?: string
   imageSrc: string
   imageAlt: string
 }
@@ -83,37 +85,22 @@ const getBidModalStatusLabel = (statusKey: DiscoverArtworkAuctionStatusKey) => {
   }
 }
 
-const getTimeRemainingLabel = (lot: AuctionBidLot) => {
-  if (lot.status.includes('remaining')) {
-    return lot.status
-  }
-
-  if (lot.statusKey === 'ending-soon') {
-    return 'Closing shortly'
-  }
-
-  if (lot.statusKey === 'active') {
-    return 'Live now'
-  }
-
-  return lot.status
-}
-
-const getAuctionEndNote = (statusKey: DiscoverArtworkAuctionStatusKey) => {
-  if (statusKey === 'ending-soon') {
-    return 'Auction closes soon. Review your bid carefully.'
-  }
-
-  if (statusKey === 'active') {
-    return 'Auction window is currently open for live bidding.'
-  }
-
-  return 'Auction availability may change while this panel is open.'
-}
-
 export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) => {
   const minimumNextBid = lot ? getMinimumNextBid(lot.bidValue) : 0
   const [bidAmount, setBidAmount] = useState(() => minimumNextBid.toFixed(2))
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const intervalId = window.setInterval(() => {
+      setElapsedSeconds((currentSeconds) => currentSeconds + 1)
+    }, 1000)
+
+    return () => window.clearInterval(intervalId)
+  }, [isOpen])
 
   if (!lot) {
     return null
@@ -132,6 +119,12 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
         : `Ready to submit above the minimum bid threshold of ${formatPreciseEthDisplay(minimumNextBid)}.`
   const isBidValid = !isBidAmountEmpty && !isBidAmountInvalid && !isBidBelowMinimum
   const bidSpread = isBidValid ? Math.max(0, bidAmountValue - minimumNextBid) : 0
+  const timeRemainingDisplay = getAuctionTimeRemainingDisplay({
+    status: lot.status,
+    statusKey: lot.statusKey,
+    endsAt: lot.endsAt,
+    elapsedSeconds,
+  })
 
   const handleBidAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value
@@ -224,10 +217,15 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                     <p className="text-[11px] tracking-[0.14em] text-black/45 uppercase" style={headlineFont}>
                       Time Remaining
                     </p>
-                    <p className="text-2xl font-semibold text-black md:text-3xl" style={headlineFont}>
-                      {getTimeRemainingLabel(lot)}
+                    <p
+                      className={`text-2xl font-semibold md:text-3xl ${timeRemainingDisplay.tone.className}`}
+                      style={headlineFont}
+                    >
+                      {timeRemainingDisplay.label}
                     </p>
-                    <p className="text-xs text-black/45">{getAuctionEndNote(lot.statusKey)}</p>
+                    <p className={`text-xs ${timeRemainingDisplay.tone.helperClassName}`}>
+                      {timeRemainingDisplay.note}
+                    </p>
                   </div>
                 </section>
 

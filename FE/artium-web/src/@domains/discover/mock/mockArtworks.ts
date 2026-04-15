@@ -9,6 +9,7 @@ export interface DiscoverArtworkAuction {
   statusKey: DiscoverArtworkAuctionStatusKey
   statusLabel: string
   currentBidEth: number
+  endsAt?: string
 }
 
 export interface DiscoverArtwork {
@@ -812,33 +813,48 @@ const baseMockArtworks: DiscoverArtwork[] = [
   },
 ]
 
+const createEndsAt = (offsetInSeconds: number) =>
+  new Date(Date.now() + offsetInSeconds * 1000).toISOString()
+
+const createAuction = (
+  statusKey: DiscoverArtworkAuctionStatusKey,
+  statusLabel: string,
+  currentBidEth: number,
+  offsetInSeconds?: number,
+): DiscoverArtworkAuction => ({
+  statusKey,
+  statusLabel,
+  currentBidEth,
+  endsAt: typeof offsetInSeconds === 'number' ? createEndsAt(offsetInSeconds) : undefined,
+})
+
 const mockArtworkAuctionById: Partial<Record<DiscoverArtwork['id'], DiscoverArtworkAuction>> = {
-  'aw-001': { statusKey: 'active', statusLabel: '2h 45m remaining', currentBidEth: 12.4 },
-  'aw-002': { statusKey: 'ending-soon', statusLabel: 'Ending Soon', currentBidEth: 8.1 },
-  'aw-003': { statusKey: 'active', statusLabel: '12h 10m remaining', currentBidEth: 24.6 },
-  'aw-005': { statusKey: 'closed', statusLabel: 'Closed', currentBidEth: 19.8 },
-  'aw-006': { statusKey: 'newly-listed', statusLabel: 'Just Listed', currentBidEth: 6.2 },
-  'aw-007': { statusKey: 'active', statusLabel: '8h 30m remaining', currentBidEth: 17.5 },
-  'aw-009': { statusKey: 'paused', statusLabel: 'Reserve Not Met', currentBidEth: 9.4 },
-  'aw-010': { statusKey: 'ending-soon', statusLabel: '45m remaining', currentBidEth: 14.2 },
-  'aw-011': { statusKey: 'active', statusLabel: '5h 20m remaining', currentBidEth: 11.6 },
-  'aw-012': { statusKey: 'newly-listed', statusLabel: 'Just Listed', currentBidEth: 4.8 },
-  'aw-013': { statusKey: 'active', statusLabel: '9h remaining', currentBidEth: 31.5 },
-  'aw-015': { statusKey: 'ending-soon', statusLabel: 'Ending Soon', currentBidEth: 16.9 },
-  'aw-016': { statusKey: 'active', statusLabel: '6h 10m remaining', currentBidEth: 13.7 },
-  'aw-017': { statusKey: 'closed', statusLabel: 'Closed', currentBidEth: 15.4 },
-  'aw-018': { statusKey: 'active', statusLabel: '11h 40m remaining', currentBidEth: 22.3 },
-  'aw-019': { statusKey: 'paused', statusLabel: 'Reserve Not Met', currentBidEth: 18.1 },
-  'aw-020': { statusKey: 'newly-listed', statusLabel: 'Just Listed', currentBidEth: 7.5 },
-  'aw-022': { statusKey: 'active', statusLabel: '7h 15m remaining', currentBidEth: 10.8 },
-  'aw-023': { statusKey: 'ending-soon', statusLabel: '30m remaining', currentBidEth: 9.9 },
-  'aw-024': { statusKey: 'active', statusLabel: '4h 05m remaining', currentBidEth: 14.6 },
-  'aw-025': { statusKey: 'active', statusLabel: '13h remaining', currentBidEth: 27.2 },
-  'aw-026': { statusKey: 'closed', statusLabel: 'Closed', currentBidEth: 12.1 },
-  'aw-027': { statusKey: 'ending-soon', statusLabel: 'Ending Soon', currentBidEth: 21.4 },
-  'aw-028': { statusKey: 'newly-listed', statusLabel: 'Just Listed', currentBidEth: 5.1 },
-  'aw-029': { statusKey: 'active', statusLabel: '10h 25m remaining', currentBidEth: 18.9 },
-  'aw-031': { statusKey: 'active', statusLabel: '3h 50m remaining', currentBidEth: 13.3 },
+  'aw-001': createAuction('active', '2h 45m remaining', 12.4, 2 * 60 * 60 + 45 * 60),
+  'aw-002': createAuction('ending-soon', 'Ending Soon', 8.1, 14 * 60 + 35),
+  'aw-003': createAuction('active', '12h 10m remaining', 24.6, 12 * 60 * 60 + 10 * 60),
+  'aw-005': createAuction('closed', 'Closed', 19.8),
+  'aw-006': createAuction('newly-listed', 'Just Listed', 6.2),
+  'aw-007': createAuction('active', '8h 30m remaining', 17.5, 8 * 60 * 60 + 30 * 60),
+  'aw-009': createAuction('paused', 'Reserve Not Met', 9.4),
+  'aw-010': createAuction('ending-soon', '45m remaining', 14.2, 45 * 60),
+  'aw-011': createAuction('active', '5h 20m remaining', 11.6, 5 * 60 * 60 + 20 * 60),
+  'aw-012': createAuction('newly-listed', 'Just Listed', 4.8),
+  'aw-013': createAuction('active', '9h remaining', 31.5, 9 * 60 * 60),
+  'aw-015': createAuction('ending-soon', 'Ending Soon', 16.9, 8 * 60 + 50),
+  'aw-016': createAuction('active', '6h 10m remaining', 13.7, 6 * 60 * 60 + 10 * 60),
+  'aw-017': createAuction('closed', 'Closed', 15.4),
+  'aw-018': createAuction('active', '11h 40m remaining', 22.3, 11 * 60 * 60 + 40 * 60),
+  'aw-019': createAuction('paused', 'Reserve Not Met', 18.1),
+  'aw-020': createAuction('newly-listed', 'Just Listed', 7.5),
+  'aw-022': createAuction('active', '7h 15m remaining', 10.8, 7 * 60 * 60 + 15 * 60),
+  'aw-023': createAuction('ending-soon', '30m remaining', 9.9, 30 * 60),
+  'aw-024': createAuction('active', '4h 05m remaining', 14.6, 4 * 60 * 60 + 5 * 60),
+  'aw-025': createAuction('active', '13h remaining', 27.2, 13 * 60 * 60),
+  'aw-026': createAuction('closed', 'Closed', 12.1),
+  'aw-027': createAuction('ending-soon', 'Ending Soon', 21.4, 58),
+  'aw-028': createAuction('newly-listed', 'Just Listed', 5.1),
+  'aw-029': createAuction('active', '10h 25m remaining', 18.9, 10 * 60 * 60 + 25 * 60),
+  'aw-031': createAuction('active', '3h 50m remaining', 13.3, 3 * 60 * 60 + 50 * 60),
 }
 
 export const mockArtworks: DiscoverArtwork[] = baseMockArtworks.map((artwork) => ({
