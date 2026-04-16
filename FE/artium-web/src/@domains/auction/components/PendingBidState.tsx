@@ -1,7 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
-import { Clock3, LoaderCircle, X } from 'lucide-react'
+import { Clock3, X } from 'lucide-react'
 import { type CSSProperties } from 'react'
 import {
   Dialog,
@@ -12,6 +13,9 @@ import {
 
 type PendingBidStateProps = {
   isOpen: boolean
+  title: string
+  imageSrc: string
+  imageAlt: string
   committedBidValue: number
   transactionHash: string
   onClose: () => void
@@ -28,8 +32,16 @@ const headlineFont = {
 
 const formatTransactionHash = (value: string) => `${value.slice(0, 7)}...${value.slice(-4)}`
 
+const formatEthDisplay = (value: number) => `${value.toFixed(2)} ETH`
+
+const getTransactionUrl = (transactionHash: string) =>
+  `https://etherscan.io/tx/${encodeURIComponent(transactionHash)}`
+
 export const PendingBidState = ({
   isOpen,
+  title,
+  imageSrc,
+  imageAlt,
   committedBidValue,
   transactionHash,
   onClose,
@@ -37,99 +49,130 @@ export const PendingBidState = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogPortal>
-        <DialogOverlay className="bg-white/40 backdrop-blur-xl" />
+        <DialogOverlay className="bg-black/10 backdrop-blur-sm" />
         <DialogPrimitive.Content
           aria-labelledby="auction-bid-pending-title"
           className="fixed inset-0 z-[210] flex items-center justify-center p-4 outline-none md:p-8"
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
-          <div className="relative w-full max-w-2xl overflow-hidden bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)]">
+          <div className="relative w-full max-w-xl overflow-hidden bg-white shadow-[0_40px_100px_rgba(0,0,0,0.08)]">
+            <div className="absolute top-0 left-0 h-1 w-full bg-black" />
+
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/70 transition hover:text-black"
+              className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/60 transition hover:text-black md:top-6 md:right-6"
               aria-label="Close pending bid panel"
             >
-              <X className="h-7 w-7" strokeWidth={1.8} />
+              <X className="h-6 w-6" strokeWidth={1.8} />
             </button>
 
-            <div className="absolute top-0 right-0 h-56 w-56 -translate-y-1/3 translate-x-1/3 rounded-full bg-black/[0.04] blur-[80px]" />
-
-            <div className="px-8 py-12 text-center md:px-16 md:py-16">
-              <div className="relative mx-auto mb-10 flex h-24 w-24 items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-2 border-black/10" />
-                <div className="absolute inset-0 rounded-full border-t-2 border-black animate-spin" />
-                <Clock3 className="h-9 w-9 text-black animate-pulse" strokeWidth={1.8} />
+            <div className="relative p-8 text-center md:p-14">
+              <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center bg-[#eeeeee] text-black">
+                <Clock3 className="h-8 w-8 animate-pulse" strokeWidth={1.8} />
               </div>
 
-              <div className="mb-12 space-y-4">
-                <span
-                  className="inline-block border-b border-black/15 pb-2 text-[11px] tracking-[0.28em] text-black/45 uppercase"
-                  style={headlineFont}
-                >
-                  Status: Processing
-                </span>
+              <div className="mb-10">
                 <h2
                   id="auction-bid-pending-title"
-                  className="text-4xl font-bold tracking-tight text-black md:text-5xl"
+                  className="text-3xl font-bold tracking-[0.1em] text-black uppercase md:text-4xl"
                   style={headlineFont}
                 >
                   Pending Confirmation
                 </h2>
-                <p className="mx-auto max-w-md text-sm leading-7 text-black/58">
-                  Your bid is being recorded on the blockchain. This usually takes a few moments
-                  depending on network congestion.
+                <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-black/58 md:text-base">
+                  Your bid has been submitted and is awaiting on-chain confirmation from the
+                  network.
                 </p>
               </div>
 
-              <div className="mb-12 flex flex-col justify-between gap-8 bg-[#f3f3f3] px-6 py-8 text-left md:flex-row md:items-center md:px-8">
-                <div>
+              <div className="mb-10 bg-[#f3f3f3] px-6 py-7 md:px-8">
+                <div className="flex items-center justify-between gap-4 border-b border-black/10 pb-4">
                   <span
-                    className="mb-2 block text-[10px] tracking-[0.2em] text-black/42 uppercase"
+                    className="text-[11px] tracking-[0.1em] text-black/48 uppercase"
+                    style={headlineFont}
+                  >
+                    Status
+                  </span>
+                  <span
+                    className="text-[11px] font-bold tracking-[0.14em] text-black uppercase"
+                    style={headlineFont}
+                  >
+                    Transaction Submitted
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-4 border-b border-black/10 py-4">
+                  <span
+                    className="text-[11px] tracking-[0.1em] text-black/48 uppercase"
                     style={headlineFont}
                   >
                     Committed Amount
                   </span>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-black" style={headlineFont}>
-                      {committedBidValue.toFixed(2)}
-                    </span>
-                    <span className="text-lg font-light text-black/55" style={headlineFont}>
-                      ETH
-                    </span>
-                  </div>
+                  <span className="text-xl text-black" style={headlineFont}>
+                    {formatEthDisplay(committedBidValue)}
+                  </span>
                 </div>
-
-                <div className="md:text-right">
+                <div className="flex items-center justify-between gap-4 pt-4">
                   <span
-                    className="mb-2 block text-[10px] tracking-[0.2em] text-black/42 uppercase"
+                    className="text-[11px] tracking-[0.1em] text-black/48 uppercase"
                     style={headlineFont}
                   >
                     Transaction Hash
                   </span>
-                  <div className="inline-flex items-center gap-2 border border-black/5 bg-white px-3 py-2">
-                    <span className="font-mono text-xs text-black">
-                      {formatTransactionHash(transactionHash)}
-                    </span>
-                    <LoaderCircle className="h-4 w-4 text-black/45 animate-spin" />
-                  </div>
+                  <span className="font-mono text-xs text-black/72">
+                    {formatTransactionHash(transactionHash)}
+                  </span>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] tracking-[0.2em] text-white uppercase transition hover:bg-black/90"
-                style={headlineFont}
-              >
-                Close Modal &amp; Track in Activity
-              </button>
-              <p
-                className="mt-6 text-[10px] tracking-[0.16em] text-black/38 uppercase"
-                style={headlineFont}
-              >
-                Secure transaction powered by Ethereum Mainnet
-              </p>
+              <div className="mb-10 flex items-center justify-center gap-4 border-y border-black/8 py-6">
+                <div className="relative h-12 w-12 overflow-hidden bg-neutral-200">
+                  <Image
+                    src={imageSrc}
+                    alt={imageAlt}
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="min-w-0 text-left">
+                  <span
+                    className="text-[11px] tracking-[0.1em] text-black/48 uppercase"
+                    style={headlineFont}
+                  >
+                    Artwork
+                  </span>
+                  <p
+                    className="mt-1 truncate text-sm font-bold tracking-[0.12em] text-black uppercase"
+                    style={headlineFont}
+                    title={title}
+                  >
+                    {title}
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-full space-y-4">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-[#5f5e5e]"
+                  style={headlineFont}
+                >
+                  Close
+                </button>
+                <a
+                  href={getTransactionUrl(transactionHash)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex w-full items-center justify-center py-2 text-[11px] font-bold tracking-[0.15em] text-black/58 uppercase transition hover:text-black"
+                  style={headlineFont}
+                >
+                  View Transaction
+                </a>
+              </div>
+
+              <div className="pointer-events-none absolute right-0 bottom-0 h-8 w-8 border-r border-b border-black/15 opacity-30" />
             </div>
           </div>
         </DialogPrimitive.Content>
