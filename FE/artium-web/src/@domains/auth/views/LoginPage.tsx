@@ -19,6 +19,7 @@ import { Button } from '@shared/components/ui/button'
 
 // @domains - auth
 import { useGoogleLoginBridge } from '@domains/auth/hooks/useGoogleLoginBridge'
+import { useWalletAuth } from '@domains/auth/hooks/useWalletAuth'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import {
   AuthDivider,
@@ -38,6 +39,11 @@ export const LoginPage = () => {
   // -- state --
   const setAuth = useAuthStore((state) => state.setAuth)
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
+  const {
+    error: walletError,
+    isLoading: isWalletLoading,
+    login: loginWithWallet,
+  } = useWalletAuth()
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -63,6 +69,7 @@ export const LoginPage = () => {
   const showPasswordError = (hasSubmitted || password.length > 0) && !isPasswordValid
   const isSubmitDisabled = isSubmitting || !isFormValid
   const shouldShowError = formErrorMessage.length > 0
+  const socialAuthError = walletError || googleError
   // -- handlers --
   const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value)
@@ -118,6 +125,18 @@ export const LoginPage = () => {
     }
   }
 
+  const handleWalletSignIn = async () => {
+    const nextPath =
+      typeof router.query.next === 'string' ? router.query.next : '/discover?tab=top-picks'
+
+    try {
+      await loginWithWallet()
+      await router.push(nextPath)
+    } catch {
+      // Error state is handled inside useWalletAuth.
+    }
+  }
+
   // -- render --
   return (
     <AuthShell>
@@ -132,9 +151,13 @@ export const LoginPage = () => {
         <SocialAuthButtons
           onGoogleClick={handleGoogleSignIn}
           isGoogleLoading={isGoogleSubmitting || isGoogleBridgeLoading}
+          onWalletClick={handleWalletSignIn}
+          isWalletLoading={isWalletLoading}
         />
 
-        {googleError ? <FormErrorMessage id="google-error" message={googleError} /> : null}
+        {socialAuthError ? (
+          <FormErrorMessage id="social-auth-error" message={socialAuthError} />
+        ) : null}
 
         <AuthDivider text="Or sign in with" />
 
