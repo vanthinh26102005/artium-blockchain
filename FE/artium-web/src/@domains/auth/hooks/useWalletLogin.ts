@@ -41,6 +41,8 @@ const LOADING_STATUSES: WalletLoginStatus[] = [
   'logging_in',
 ]
 
+const WALLET_LOGIN_TOAST_KEY = 'wallet-login'
+
 const getProvider = (): EthereumProvider | null => {
   if (typeof window === 'undefined') {
     return null
@@ -150,11 +152,15 @@ export const useWalletLogin = () => {
           title: 'MetaMask login',
           message,
           durationMs: undefined,
+          toastKey: WALLET_LOGIN_TOAST_KEY,
         })
         return
       }
 
-      walletToastRef.current = toast.loading(message, { title: 'MetaMask login' })
+      walletToastRef.current = toast.loading(message, {
+        title: 'MetaMask login',
+        toastKey: WALLET_LOGIN_TOAST_KEY,
+      })
     },
     [toast],
   )
@@ -170,12 +176,17 @@ export const useWalletLogin = () => {
           title,
           message,
           durationMs,
+          toastKey: WALLET_LOGIN_TOAST_KEY,
         })
         walletToastRef.current = null
         return
       }
 
-      toast[variant](message, { title, durationMs })
+      toast[variant](message, {
+        title,
+        durationMs,
+        toastKey: WALLET_LOGIN_TOAST_KEY,
+      })
     },
     [toast],
   )

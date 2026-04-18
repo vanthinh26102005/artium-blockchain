@@ -6,6 +6,7 @@ export type ToastInput = {
   title?: string
   message: string
   durationMs?: number
+  toastKey?: string
 }
 
 export type ToastUpdateInput = Partial<ToastInput> & {

@@ -101,16 +101,50 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 
   const addToast = useCallback(
     (variant: ToastVariant, message: string, options?: ToastOptions) => {
+      let nextToast: ToastItem | null = null
+
       const toast: ToastItem = {
         id: createToastId(),
         variant,
         message,
         title: options?.title,
         durationMs: options?.durationMs,
+        toastKey: options?.toastKey,
       }
 
-      setToasts((currentToasts) => [toast, ...currentToasts].slice(0, MAX_VISIBLE_TOASTS))
-      scheduleDismiss(toast)
+      setToasts((currentToasts) => {
+        if (!toast.toastKey) {
+          nextToast = toast
+          return [toast, ...currentToasts].slice(0, MAX_VISIBLE_TOASTS)
+        }
+
+        const existingToast = currentToasts.find(
+          (currentToast) => currentToast.toastKey === toast.toastKey,
+        )
+
+        if (!existingToast) {
+          nextToast = toast
+          return [toast, ...currentToasts].slice(0, MAX_VISIBLE_TOASTS)
+        }
+
+        nextToast = {
+          ...existingToast,
+          variant,
+          message,
+          title: options?.title,
+          durationMs: options?.durationMs,
+          toastKey: toast.toastKey,
+        }
+
+        return [
+          nextToast,
+          ...currentToasts.filter((currentToast) => currentToast.id !== existingToast.id),
+        ].slice(0, MAX_VISIBLE_TOASTS)
+      })
+
+      if (nextToast) {
+        scheduleDismiss(nextToast)
+      }
 
       return toast.id
     },
@@ -132,6 +166,7 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
             ...nextToast,
             message: nextToast.message ?? toast.message,
             variant: nextToast.variant ?? toast.variant,
+            toastKey: nextToast.toastKey ?? toast.toastKey,
           }
 
           return updatedToast
