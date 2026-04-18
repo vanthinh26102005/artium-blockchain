@@ -1,4 +1,4 @@
-import { AbstractEntity } from '@app/common';
+import { AbstractEntity, EscrowState } from '@app/common';
 import {
   PaymentProvider,
   TransactionStatus,
@@ -161,4 +161,33 @@ export class PaymentTransaction extends AbstractEntity {
 
   @Column({ name: 'completed_at', type: 'timestamp', nullable: true })
   completedAt?: Date | null;
+
+  // ── Blockchain/escrow fields ──
+
+  @Column({
+    name: 'escrow_state',
+    type: 'enum',
+    enum: EscrowState,
+    nullable: true,
+    comment: 'On-chain escrow state for blockchain transactions',
+  })
+  escrowState?: EscrowState | null;
+
+  @Column({
+    name: 'tx_hash',
+    type: 'varchar',
+    length: 66,
+    nullable: true,
+    comment: 'Blockchain transaction hash',
+  })
+  txHash?: string | null;
+
+  @Column({
+    name: 'wallet_address',
+    type: 'varchar',
+    length: 42,
+    nullable: true,
+    comment: 'Ethereum wallet address',
+  })
+  walletAddress?: string | null;
 }
