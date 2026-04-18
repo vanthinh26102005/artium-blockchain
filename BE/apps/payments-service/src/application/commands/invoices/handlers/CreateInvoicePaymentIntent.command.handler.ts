@@ -8,6 +8,7 @@ import {
   TransactionStatus,
   TransactionType,
   ITransactionService,
+  PLATFORM_FEE_RATE,
 } from '@app/common';
 import { OutboxService } from '@app/outbox';
 import { ExchangeName, RoutingKey } from '@app/rabbitmq';
@@ -151,7 +152,7 @@ export class CreateInvoicePaymentIntentHandler
         );
       }
 
-      const platformFee = amount * 0.05;
+      const platformFee = amount * PLATFORM_FEE_RATE;
       const netAmount = amount - platformFee;
 
       const transaction = await this.transactionService.execute(

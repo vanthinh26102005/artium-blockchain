@@ -1,4 +1,5 @@
 export * from './app.module';
+export * from './constants';
 export * from './database/database.helper';
 export * from './database/dynamic-database.module';
 export * from './dtos/artworks/artwork-folder/artwork-folder.object';
