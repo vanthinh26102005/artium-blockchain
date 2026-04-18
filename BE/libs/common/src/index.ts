@@ -47,6 +47,8 @@ export * from './dtos/orders/update-order.dto';
 export * from './dtos/orders/order.object';
 export * from './dtos/orders/mark-shipped.dto';
 export * from './dtos/orders/confirm-delivery.dto';
+export * from './dtos/orders/open-dispute.dto';
+export * from './dtos/orders/resolve-dispute.dto';
 export * from './dtos/payments/create-payment-intent.dto';
 export * from './dtos/payments/get-transactions.dto';
 export * from './dtos/payments/invoices/create-invoice.dto';

@@ -28,6 +28,8 @@ import {
   UpdateOrderDto,
   MarkShippedDto,
   ConfirmDeliveryDto,
+  OpenDisputeDto,
+  ResolveDisputeDto,
 } from '@app/common';
 import { sendRpc } from '../utils';
 
@@ -132,6 +134,32 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: 'Order not found' })
   async confirmDelivery(@Param('id') id: string, @Body() data: ConfirmDeliveryDto) {
     return sendRpc(this.ordersClient, { cmd: 'confirm_delivery' }, { id, ...data });
+  }
+
+  @Patch(':id/dispute')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Open a dispute (buyer action, within 14 days of shipment)' })
+  @ApiParam({ name: 'id', type: 'string', description: 'Order ID' })
+  @ApiBody({ type: OpenDisputeDto })
+  @ApiResponse({ status: 200, description: 'Dispute opened', type: OrderObject })
+  @ApiResponse({ status: 400, description: 'Invalid status transition or dispute window expired' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async openDispute(@Param('id') id: string, @Body() data: OpenDisputeDto) {
+    return sendRpc(this.ordersClient, { cmd: 'open_dispute' }, { id, ...data });
+  }
+
+  @Patch(':id/resolve-dispute')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Resolve a dispute (arbiter action)' })
+  @ApiParam({ name: 'id', type: 'string', description: 'Order ID' })
+  @ApiBody({ type: ResolveDisputeDto })
+  @ApiResponse({ status: 200, description: 'Dispute resolved', type: OrderObject })
+  @ApiResponse({ status: 400, description: 'Invalid status transition' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async resolveDispute(@Param('id') id: string, @Body() data: ResolveDisputeDto) {
+    return sendRpc(this.ordersClient, { cmd: 'resolve_dispute' }, { id, ...data });
   }
 
   @Put(':id')

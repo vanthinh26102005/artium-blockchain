@@ -141,6 +141,28 @@ export class OrderObject {
   })
   bidAmountWei?: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Reason the buyer opened a dispute',
+    example: 'Artwork arrived damaged — scratches on the frame',
+  })
+  disputeReason?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Timestamp when the dispute was opened',
+  })
+  disputeOpenedAt?: Date | null;
+
+  @ApiPropertyOptional({
+    description: 'Timestamp when the dispute was resolved',
+  })
+  disputeResolvedAt?: Date | null;
+
+  @ApiPropertyOptional({
+    description: 'Arbiter notes on dispute resolution',
+    example: 'Evidence confirms artwork was damaged during shipping',
+  })
+  disputeResolutionNotes?: string | null;
+
   @ApiProperty({ description: 'Record creation timestamp' })
   createdAt: Date;
 }

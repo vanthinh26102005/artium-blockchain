@@ -14,6 +14,8 @@ import {
   CancelOrderCommand,
   MarkShippedCommand,
   ConfirmDeliveryCommand,
+  OpenDisputeCommand,
+  ResolveDisputeCommand,
   GetOrdersQuery,
   GetOrderByIdQuery,
   GetOrderByOnChainIdQuery,
@@ -102,5 +104,19 @@ export class OrdersMicroserviceController {
     this.logger.debug(`Confirming delivery for order: ${data.id}`);
     const { id, ...dto } = data;
     return this.commandBus.execute(new ConfirmDeliveryCommand(id, dto));
+  }
+
+  @MessagePattern({ cmd: 'open_dispute' })
+  async openDispute(@Payload() data: { id: string; reason: string }) {
+    this.logger.debug(`Opening dispute for order: ${data.id}`);
+    const { id, ...dto } = data;
+    return this.commandBus.execute(new OpenDisputeCommand(id, dto));
+  }
+
+  @MessagePattern({ cmd: 'resolve_dispute' })
+  async resolveDispute(@Payload() data: { id: string; favorBuyer: boolean; resolutionNotes?: string }) {
+    this.logger.debug(`Resolving dispute for order: ${data.id}`);
+    const { id, ...dto } = data;
+    return this.commandBus.execute(new ResolveDisputeCommand(id, dto));
   }
 }

@@ -4,3 +4,5 @@ export * from './get-orders.dto';
 export * from './order.object';
 export * from './mark-shipped.dto';
 export * from './confirm-delivery.dto';
+export * from './open-dispute.dto';
+export * from './resolve-dispute.dto';

@@ -34,6 +34,8 @@ import {
   CancelOrderHandler,
   MarkShippedHandler,
   ConfirmDeliveryHandler,
+  OpenDisputeHandler,
+  ResolveDisputeHandler,
   GetOrdersHandler,
   GetOrderByIdHandler,
   GetOrderByOnChainIdHandler,
@@ -50,6 +52,8 @@ export const CommandHandlers = [
   CancelOrderHandler,
   MarkShippedHandler,
   ConfirmDeliveryHandler,
+  OpenDisputeHandler,
+  ResolveDisputeHandler,
 ];
 
 export const QueryHandlers = [
