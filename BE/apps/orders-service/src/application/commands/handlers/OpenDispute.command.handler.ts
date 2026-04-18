@@ -21,12 +21,19 @@ export class OpenDisputeHandler implements ICommandHandler<OpenDisputeCommand> {
 
   async execute(command: OpenDisputeCommand): Promise<Order | null> {
     try {
-      const { orderId, dto } = command;
-      this.logger.log(`Opening dispute for order: ${orderId}`);
+      const { orderId, userId, dto } = command;
+      this.logger.log(`Opening dispute for order: ${orderId} by user: ${userId}`);
 
       const order = await this.orderRepo.findById(orderId);
       if (!order) {
         throw RpcExceptionHelper.notFound(`Order ${orderId} not found`);
+      }
+
+      // Only the buyer (collector) can open a dispute
+      if (order.collectorId !== userId) {
+        throw RpcExceptionHelper.forbidden(
+          'Only the buyer of this order can open a dispute.',
+        );
       }
 
       if (!isValidTransition(order.status, OrderStatus.DISPUTE_OPEN)) {

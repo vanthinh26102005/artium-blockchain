@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Put,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -20,7 +21,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MICROSERVICES } from '../../../config';
-import { JwtAuthGuard } from '@app/auth';
+import { JwtAuthGuard, Roles, RolesGuard } from '@app/auth';
 import {
   CreateOrderDto,
   GetOrdersDto,
@@ -30,6 +31,7 @@ import {
   ConfirmDeliveryDto,
   OpenDisputeDto,
   ResolveDisputeDto,
+  UserRole,
 } from '@app/common';
 import { sendRpc } from '../utils';
 
@@ -106,8 +108,8 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'Order cancelled', type: OrderObject })
   @ApiResponse({ status: 400, description: 'Invalid status transition' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async cancelOrder(@Param('id') id: string, @Body() data: { reason?: string }) {
-    return sendRpc(this.ordersClient, { cmd: 'cancel_order' }, { id, ...data });
+  async cancelOrder(@Param('id') id: string, @Body() data: { reason?: string }, @Req() req: any) {
+    return sendRpc(this.ordersClient, { cmd: 'cancel_order' }, { id, userId: req.user?.id, ...data });
   }
 
   @Patch(':id/ship')
@@ -119,8 +121,8 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'Order marked as shipped', type: OrderObject })
   @ApiResponse({ status: 400, description: 'Invalid status transition' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async markShipped(@Param('id') id: string, @Body() data: MarkShippedDto) {
-    return sendRpc(this.ordersClient, { cmd: 'mark_shipped' }, { id, ...data });
+  async markShipped(@Param('id') id: string, @Body() data: MarkShippedDto, @Req() req: any) {
+    return sendRpc(this.ordersClient, { cmd: 'mark_shipped' }, { id, userId: req.user?.id, ...data });
   }
 
   @Patch(':id/confirm-delivery')
@@ -132,8 +134,8 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'Delivery confirmed', type: OrderObject })
   @ApiResponse({ status: 400, description: 'Invalid status transition' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async confirmDelivery(@Param('id') id: string, @Body() data: ConfirmDeliveryDto) {
-    return sendRpc(this.ordersClient, { cmd: 'confirm_delivery' }, { id, ...data });
+  async confirmDelivery(@Param('id') id: string, @Body() data: ConfirmDeliveryDto, @Req() req: any) {
+    return sendRpc(this.ordersClient, { cmd: 'confirm_delivery' }, { id, userId: req.user?.id, ...data });
   }
 
   @Patch(':id/dispute')
@@ -145,12 +147,13 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'Dispute opened', type: OrderObject })
   @ApiResponse({ status: 400, description: 'Invalid status transition or dispute window expired' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async openDispute(@Param('id') id: string, @Body() data: OpenDisputeDto) {
-    return sendRpc(this.ordersClient, { cmd: 'open_dispute' }, { id, ...data });
+  async openDispute(@Param('id') id: string, @Body() data: OpenDisputeDto, @Req() req: any) {
+    return sendRpc(this.ordersClient, { cmd: 'open_dispute' }, { id, userId: req.user?.id, ...data });
   }
 
   @Patch(':id/resolve-dispute')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ARBITER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Resolve a dispute (arbiter action)' })
   @ApiParam({ name: 'id', type: 'string', description: 'Order ID' })

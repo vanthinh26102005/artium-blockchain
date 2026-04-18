@@ -22,12 +22,20 @@ export class MarkShippedHandler implements ICommandHandler<MarkShippedCommand> {
 
   async execute(command: MarkShippedCommand): Promise<Order | null> {
     try {
-      const { orderId, data } = command;
-      this.logger.log(`Marking order as shipped: ${orderId}`);
+      const { orderId, userId, data } = command;
+      this.logger.log(`Marking order as shipped: ${orderId} by user: ${userId}`);
 
-      const order = await this.orderRepo.findById(orderId);
+      const order = await this.orderRepo.findWithItems(orderId);
       if (!order) {
         throw RpcExceptionHelper.notFound(`Order ${orderId} not found`);
+      }
+
+      // Only the seller can mark as shipped
+      const isSeller = order.items?.some((item) => item.sellerId === userId) ?? false;
+      if (!isSeller) {
+        throw RpcExceptionHelper.forbidden(
+          'Only the seller of this order can mark it as shipped.',
+        );
       }
 
       if (!isValidTransition(order.status, OrderStatus.SHIPPED)) {

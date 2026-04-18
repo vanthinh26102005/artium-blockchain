@@ -18,12 +18,21 @@ export class CancelOrderHandler implements ICommandHandler<CancelOrderCommand> {
 
   async execute(command: CancelOrderCommand): Promise<Order | null> {
     try {
-      const { orderId, reason } = command;
-      this.logger.log(`Cancelling order: ${orderId}`);
+      const { orderId, userId, reason } = command;
+      this.logger.log(`Cancelling order: ${orderId} by user: ${userId}`);
 
-      const order = await this.orderRepo.findById(orderId);
+      const order = await this.orderRepo.findWithItems(orderId);
       if (!order) {
         throw RpcExceptionHelper.notFound(`Order ${orderId} not found`);
+      }
+
+      // Buyer (collectorId) or seller (via items) can cancel
+      const isBuyer = order.collectorId === userId;
+      const isSeller = order.items?.some((item) => item.sellerId === userId) ?? false;
+      if (!isBuyer && !isSeller) {
+        throw RpcExceptionHelper.forbidden(
+          'Only the buyer or seller of this order can cancel it.',
+        );
       }
 
       if (!isValidTransition(order.status, OrderStatus.CANCELLED)) {

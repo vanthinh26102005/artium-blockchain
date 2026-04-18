@@ -23,12 +23,19 @@ export class ConfirmDeliveryHandler implements ICommandHandler<ConfirmDeliveryCo
 
   async execute(command: ConfirmDeliveryCommand): Promise<Order | null> {
     try {
-      const { orderId, data } = command;
-      this.logger.log(`Confirming delivery for order: ${orderId}`);
+      const { orderId, userId, data } = command;
+      this.logger.log(`Confirming delivery for order: ${orderId} by user: ${userId}`);
 
       const order = await this.orderRepo.findById(orderId);
       if (!order) {
         throw RpcExceptionHelper.notFound(`Order ${orderId} not found`);
+      }
+
+      // Only the buyer (collector) can confirm delivery
+      if (order.collectorId !== userId) {
+        throw RpcExceptionHelper.forbidden(
+          'Only the buyer of this order can confirm delivery.',
+        );
       }
 
       if (!isValidTransition(order.status, OrderStatus.DELIVERED)) {
