@@ -20,7 +20,12 @@ import {
 } from '@nestjs/swagger';
 import { MICROSERVICES } from '../../../config';
 import { JwtAuthGuard } from '@app/auth';
-import { CreateOrderDto, GetOrdersDto, UpdateOrderDto } from '@app/common';
+import {
+  CreateOrderDto,
+  GetOrdersDto,
+  OrderObject,
+  UpdateOrderDto,
+} from '@app/common';
 import { sendRpc } from '../utils';
 
 @ApiTags('Orders')
@@ -36,7 +41,7 @@ export class OrdersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create new order' })
   @ApiBody({ type: CreateOrderDto })
-  @ApiResponse({ status: 201, description: 'Order created successfully' })
+  @ApiResponse({ status: 201, description: 'Order created successfully', type: OrderObject })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   async createOrder(@Body() data: CreateOrderDto) {
     return sendRpc(this.ordersClient, { cmd: 'create_order' }, data);
@@ -46,7 +51,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all orders' })
-  @ApiResponse({ status: 200, description: 'Orders retrieved successfully' })
+  @ApiResponse({ status: 200, description: 'Orders retrieved successfully', type: [OrderObject] })
   async getOrders(@Query() filters: GetOrdersDto) {
     return sendRpc(this.ordersClient, { cmd: 'get_orders' }, filters);
   }
@@ -60,7 +65,7 @@ export class OrdersController {
     type: 'string',
     description: 'On-chain order ID from smart contract',
   })
-  @ApiResponse({ status: 200, description: 'Order retrieved successfully' })
+  @ApiResponse({ status: 200, description: 'Order retrieved successfully', type: OrderObject })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async getOrderByOnChainId(@Param('onChainOrderId') onChainOrderId: string) {
     return sendRpc(this.ordersClient, { cmd: 'get_order_by_onchain_id' }, { onChainOrderId });
@@ -71,7 +76,7 @@ export class OrdersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get order by ID' })
   @ApiParam({ name: 'id', type: 'string', description: 'Order ID' })
-  @ApiResponse({ status: 200, description: 'Order retrieved successfully' })
+  @ApiResponse({ status: 200, description: 'Order retrieved successfully', type: OrderObject })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async getOrderById(@Param('id') id: string) {
     return sendRpc(this.ordersClient, { cmd: 'get_order_by_id' }, { id });
@@ -83,7 +88,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Update order' })
   @ApiParam({ name: 'id', type: 'string', description: 'Order ID' })
   @ApiBody({ type: UpdateOrderDto })
-  @ApiResponse({ status: 200, description: 'Order updated successfully' })
+  @ApiResponse({ status: 200, description: 'Order updated successfully', type: OrderObject })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async updateOrder(@Param('id') id: string, @Body() data: UpdateOrderDto) {
     return sendRpc(this.ordersClient, { cmd: 'update_order' }, { id, ...data });

@@ -22,6 +22,8 @@ export enum NotificationChannel {
 export enum NotificationTriggerEvent {
   /** Identity Service - User registered, send welcome email */
   USER_REGISTERED_WELCOME = 'USER_REGISTERED_WELCOME',
+  /** Identity Service - OTP sent during registration */
+  USER_REGISTRATION_OTP = 'USER_REGISTRATION_OTP',
   /** Identity Service - Password reset requested */
   PASSWORD_RESET_REQUESTED = 'PASSWORD_RESET_REQUESTED',
 
