@@ -477,4 +477,17 @@ export class BlockchainEventHandler {
       throw error;
     }
   }
+
+  @RabbitSubscribe({
+    exchange: ExchangeName.BLOCKCHAIN_EVENTS,
+    routingKey: RoutingKey.BLOCKCHAIN_FUNDS_WITHDRAWN,
+    queue: 'orders-service.blockchain.funds-withdrawn',
+    queueOptions: { durable: true },
+  })
+  async handleFundsWithdrawn(message: {
+    user: string;
+    amount: string;
+  }) {
+    this.logger.log(`Funds withdrawn by ${message.user}: ${message.amount} wei`);
+  }
 }
