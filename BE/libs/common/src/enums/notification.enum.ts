@@ -49,6 +49,28 @@ export enum NotificationTriggerEvent {
   /** Marketing Service - Marketing campaign email */
   MARKETING_CAMPAIGN_EMAIL = 'MARKETING_CAMPAIGN_EMAIL',
 
+  // Blockchain Auction Events
+  /** Auction started — notify followers/watchers */
+  AUCTION_STARTED = 'AUCTION_STARTED',
+  /** New bid placed — notify seller and previous highest bidder (outbid) */
+  AUCTION_BID_PLACED = 'AUCTION_BID_PLACED',
+  /** Auction ended — notify winner and seller */
+  AUCTION_ENDED = 'AUCTION_ENDED',
+  /** Artwork shipped by seller — notify buyer */
+  AUCTION_SHIPPED = 'AUCTION_SHIPPED',
+  /** Delivery confirmed by buyer — notify seller */
+  AUCTION_DELIVERY_CONFIRMED = 'AUCTION_DELIVERY_CONFIRMED',
+  /** Dispute opened by buyer — notify seller and arbiter */
+  AUCTION_DISPUTE_OPENED = 'AUCTION_DISPUTE_OPENED',
+  /** Dispute resolved by arbiter — notify buyer and seller */
+  AUCTION_DISPUTE_RESOLVED = 'AUCTION_DISPUTE_RESOLVED',
+  /** Auction cancelled — notify relevant parties */
+  AUCTION_CANCELLED = 'AUCTION_CANCELLED',
+  /** Shipping timeout — notify buyer (eligible for refund) */
+  AUCTION_SHIPPING_TIMEOUT = 'AUCTION_SHIPPING_TIMEOUT',
+  /** Delivery timeout — notify seller (eligible for payment) */
+  AUCTION_DELIVERY_TIMEOUT = 'AUCTION_DELIVERY_TIMEOUT',
+
   /** Generic alert notification */
   GENERIC_ALERT = 'GENERIC_ALERT',
 }
