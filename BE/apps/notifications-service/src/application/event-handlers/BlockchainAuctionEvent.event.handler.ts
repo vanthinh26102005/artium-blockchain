@@ -60,6 +60,7 @@ export class BlockchainAuctionEventHandler {
       );
     } catch (error) {
       this.logger.error(`Failed to handle AuctionStarted notification: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
@@ -85,6 +86,7 @@ export class BlockchainAuctionEventHandler {
       );
     } catch (error) {
       this.logger.error(`Failed to handle NewBid notification: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
@@ -110,6 +112,7 @@ export class BlockchainAuctionEventHandler {
       );
     } catch (error) {
       this.logger.error(`Failed to handle AuctionEnded notification: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
@@ -135,6 +138,7 @@ export class BlockchainAuctionEventHandler {
       );
     } catch (error) {
       this.logger.error(`Failed to handle ArtShipped notification: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
@@ -159,6 +163,7 @@ export class BlockchainAuctionEventHandler {
       );
     } catch (error) {
       this.logger.error(`Failed to handle DeliveryConfirmed notification: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
@@ -184,6 +189,7 @@ export class BlockchainAuctionEventHandler {
       );
     } catch (error) {
       this.logger.error(`Failed to handle DisputeOpened notification: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
@@ -210,6 +216,7 @@ export class BlockchainAuctionEventHandler {
       );
     } catch (error) {
       this.logger.error(`Failed to handle DisputeResolved notification: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
@@ -234,6 +241,7 @@ export class BlockchainAuctionEventHandler {
       );
     } catch (error) {
       this.logger.error(`Failed to handle AuctionCancelled notification: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
@@ -258,6 +266,7 @@ export class BlockchainAuctionEventHandler {
       );
     } catch (error) {
       this.logger.error(`Failed to handle ShippingTimeout notification: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
@@ -282,6 +291,7 @@ export class BlockchainAuctionEventHandler {
       );
     } catch (error) {
       this.logger.error(`Failed to handle DeliveryTimeout notification: ${error.message}`, error.stack);
+      throw error;
     }
   }
 }
