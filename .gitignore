@@ -10,3 +10,9 @@ node_modules/
 # Ignore local Stitch tooling/scripts and skill packs
 scripts/stitch/
 skills/
+
+.env
+.env.local
+**/.env
+**/.env.local
+FE/package-lock.json
