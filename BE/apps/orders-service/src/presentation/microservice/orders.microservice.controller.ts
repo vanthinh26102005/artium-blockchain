@@ -12,6 +12,8 @@ import {
   CreateOrderCommand,
   UpdateOrderStatusCommand,
   CancelOrderCommand,
+  MarkShippedCommand,
+  ConfirmDeliveryCommand,
   GetOrdersQuery,
   GetOrderByIdQuery,
   GetOrderByOnChainIdQuery,
@@ -86,5 +88,19 @@ export class OrdersMicroserviceController {
   async getOrderItems(@Payload() data: { orderId: string }) {
     this.logger.debug(`Getting items for order: ${data.orderId}`);
     return this.queryBus.execute(new GetOrderItemsQuery(data.orderId));
+  }
+
+  @MessagePattern({ cmd: 'mark_shipped' })
+  async markShipped(@Payload() data: { id: string; carrier: string; trackingNumber: string; shippingMethod?: string }) {
+    this.logger.debug(`Marking order as shipped: ${data.id}`);
+    const { id, ...dto } = data;
+    return this.commandBus.execute(new MarkShippedCommand(id, dto));
+  }
+
+  @MessagePattern({ cmd: 'confirm_delivery' })
+  async confirmDelivery(@Payload() data: { id: string; notes?: string }) {
+    this.logger.debug(`Confirming delivery for order: ${data.id}`);
+    const { id, ...dto } = data;
+    return this.commandBus.execute(new ConfirmDeliveryCommand(id, dto));
   }
 }

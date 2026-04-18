@@ -5,6 +5,7 @@ import { RpcExceptionHelper, OrderStatus } from '@app/common';
 import { CancelOrderCommand } from '../CancelOrder.command';
 import { Order } from '../../../domain/entities';
 import { IOrderRepository } from '../../../domain/interfaces';
+import { isValidTransition } from '../../../domain/constants';
 
 @CommandHandler(CancelOrderCommand)
 export class CancelOrderHandler implements ICommandHandler<CancelOrderCommand> {
@@ -25,12 +26,10 @@ export class CancelOrderHandler implements ICommandHandler<CancelOrderCommand> {
         throw RpcExceptionHelper.notFound(`Order ${orderId} not found`);
       }
 
-      if (order.status === OrderStatus.DELIVERED) {
-        throw RpcExceptionHelper.badRequest('Cannot cancel a delivered order');
-      }
-
-      if (order.status === OrderStatus.CANCELLED) {
-        throw RpcExceptionHelper.badRequest('Order is already cancelled');
+      if (!isValidTransition(order.status, OrderStatus.CANCELLED)) {
+        throw RpcExceptionHelper.badRequest(
+          `Cannot cancel order in status '${order.status}'.`,
+        );
       }
 
       return this.orderRepo.update(orderId, {
