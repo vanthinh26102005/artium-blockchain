@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   Post,
   Query,
   Put,
@@ -71,6 +72,17 @@ export class OrdersController {
     return sendRpc(this.ordersClient, { cmd: 'get_order_by_onchain_id' }, { onChainOrderId });
   }
 
+  @Get(':id/items')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get order items' })
+  @ApiParam({ name: 'id', type: 'string', description: 'Order ID' })
+  @ApiResponse({ status: 200, description: 'Order items retrieved' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async getOrderItems(@Param('id') id: string) {
+    return sendRpc(this.ordersClient, { cmd: 'get_order_items' }, { orderId: id });
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -80,6 +92,18 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: 'Order not found' })
   async getOrderById(@Param('id') id: string) {
     return sendRpc(this.ordersClient, { cmd: 'get_order_by_id' }, { id });
+  }
+
+  @Patch(':id/cancel')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cancel an order' })
+  @ApiParam({ name: 'id', type: 'string', description: 'Order ID' })
+  @ApiResponse({ status: 200, description: 'Order cancelled', type: OrderObject })
+  @ApiResponse({ status: 400, description: 'Invalid status transition' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async cancelOrder(@Param('id') id: string, @Body() data: { reason?: string }) {
+    return sendRpc(this.ordersClient, { cmd: 'cancel_order' }, { id, ...data });
   }
 
   @Put(':id')

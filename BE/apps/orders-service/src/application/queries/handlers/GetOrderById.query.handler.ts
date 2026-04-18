@@ -20,7 +20,7 @@ export class GetOrderByIdHandler implements IQueryHandler<GetOrderByIdQuery> {
       const { orderId } = query;
       this.logger.log(`Getting order: ${orderId}`);
 
-      const order = await this.orderRepo.findById(orderId);
+      const order = await this.orderRepo.findWithItems(orderId);
       if (!order) {
         throw RpcExceptionHelper.notFound(`Order ${orderId} not found`);
       }

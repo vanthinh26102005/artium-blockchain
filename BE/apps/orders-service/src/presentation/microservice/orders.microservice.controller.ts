@@ -15,6 +15,7 @@ import {
   GetOrdersQuery,
   GetOrderByIdQuery,
   GetOrderByOnChainIdQuery,
+  GetOrderItemsQuery,
 } from '../../application';
 
 @Controller()
@@ -73,5 +74,17 @@ export class OrdersMicroserviceController {
         notes: data.notes,
       }),
     );
+  }
+
+  @MessagePattern({ cmd: 'cancel_order' })
+  async cancelOrder(@Payload() data: { id: string; reason?: string }) {
+    this.logger.debug(`Cancelling order: ${data.id}`);
+    return this.commandBus.execute(new CancelOrderCommand(data.id, data.reason));
+  }
+
+  @MessagePattern({ cmd: 'get_order_items' })
+  async getOrderItems(@Payload() data: { orderId: string }) {
+    this.logger.debug(`Getting items for order: ${data.orderId}`);
+    return this.queryBus.execute(new GetOrderItemsQuery(data.orderId));
   }
 }

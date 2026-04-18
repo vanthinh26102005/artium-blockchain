@@ -15,12 +15,20 @@ export class GetOrdersHandler implements IQueryHandler<GetOrdersQuery> {
     private readonly orderRepo: IOrderRepository,
   ) {}
 
-  async execute(query: GetOrdersQuery): Promise<Order[]> {
+  async execute(query: GetOrdersQuery): Promise<{ data: Order[]; total: number }> {
     try {
       const { filters } = query;
       this.logger.log(
         `Getting orders with filters: ${JSON.stringify(filters)}`,
       );
+
+      // sellerId requires a join through order_items
+      if (filters.sellerId) {
+        return this.orderRepo.findBySellerIdViaItems(
+          filters.sellerId,
+          { skip: filters.skip, take: filters.take ?? 20 },
+        );
+      }
 
       const where: Record<string, any> = {};
       if (filters.buyerId) where.collectorId = filters.buyerId;
@@ -29,12 +37,18 @@ export class GetOrdersHandler implements IQueryHandler<GetOrdersQuery> {
       if (filters.escrowState !== undefined) where.escrowState = filters.escrowState;
       if (filters.paymentMethod) where.paymentMethod = filters.paymentMethod;
 
-      return this.orderRepo.find({
-        where,
-        skip: filters.skip,
-        take: filters.take ?? 20,
-        orderBy: { createdAt: 'desc' },
-      });
+      const take = filters.take ?? 20;
+      const [data, total] = await Promise.all([
+        this.orderRepo.find({
+          where,
+          skip: filters.skip,
+          take,
+          orderBy: { createdAt: 'desc' },
+        }),
+        this.orderRepo.count(where),
+      ]);
+
+      return { data, total };
     } catch (error) {
       this.logger.error(`Failed to get orders`, error.stack);
       if (error instanceof RpcException) {
