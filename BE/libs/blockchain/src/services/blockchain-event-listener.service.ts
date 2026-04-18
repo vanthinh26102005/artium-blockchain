@@ -19,7 +19,11 @@ import {
 import { BlockchainEventCursor } from '../entities/blockchain-event-cursor.entity';
 import { BlockchainProcessedEvent } from '../entities/blockchain-processed-event.entity';
 
-const EVENT_ROUTING_KEYS: Record<string, string> = {
+// ────────────────────────────────────────────────────
+// Event mapping tables
+// ────────────────────────────────────────────────────
+
+const EVENT_ROUTING_KEYS: Readonly<Record<string, string>> = {
   AuctionStarted: RoutingKey.BLOCKCHAIN_AUCTION_STARTED,
   AuctionEnded: RoutingKey.BLOCKCHAIN_AUCTION_ENDED,
   NewBid: RoutingKey.BLOCKCHAIN_BID_NEW,
@@ -36,7 +40,7 @@ const EVENT_ROUTING_KEYS: Record<string, string> = {
 
 type EventPayloadExtractor = (...args: any[]) => Record<string, any>;
 
-const EVENT_EXTRACTORS: Record<string, EventPayloadExtractor> = {
+const EVENT_EXTRACTORS: Readonly<Record<string, EventPayloadExtractor>> = {
   AuctionStarted: (orderId, seller, endTime) => ({
     orderId,
     seller,
@@ -93,29 +97,44 @@ const EVENT_EXTRACTORS: Record<string, EventPayloadExtractor> = {
   }),
 };
 
-type BlockchainEventMeta = {
-  txHash: string;
-  logIndex: number;
-  blockNumber: number;
-};
+const SUPPORTED_EVENT_NAMES = Object.keys(EVENT_ROUTING_KEYS);
+
+// ────────────────────────────────────────────────────
+// Types
+// ────────────────────────────────────────────────────
+
+interface BlockchainEventMeta {
+  readonly txHash: string;
+  readonly logIndex: number;
+  readonly blockNumber: number;
+}
+
+interface CollectedEvent {
+  readonly eventName: string;
+  readonly args: any[];
+  readonly meta: BlockchainEventMeta;
+}
+
+// Postgres unique-violation error code
+const PG_UNIQUE_VIOLATION = '23505';
 
 const LISTENER_ID = 'art-auction-escrow-listener';
 const DEFAULT_BACKFILL_CHUNK_SIZE = 500;
+
+// ────────────────────────────────────────────────────
+// Service
+// ────────────────────────────────────────────────────
 
 @Injectable()
 export class BlockchainEventListenerService
   implements OnModuleInit, OnModuleDestroy
 {
   private readonly logger = new Logger(BlockchainEventListenerService.name);
-  private readonly backfillChunkSize = (() => {
-    const configured = Number(
-      process.env.BLOCKCHAIN_BACKFILL_CHUNK_SIZE ?? DEFAULT_BACKFILL_CHUNK_SIZE,
-    );
-    return Number.isFinite(configured) && configured > 0
-      ? configured
-      : DEFAULT_BACKFILL_CHUNK_SIZE;
-  })();
-  private readonly listeners = new Map<string, (...args: any[]) => Promise<void>>();
+  private readonly backfillChunkSize: number;
+  private readonly listeners = new Map<
+    string,
+    (...args: any[]) => Promise<void>
+  >();
   private chainId = 'unknown';
 
   constructor(
@@ -129,10 +148,21 @@ export class BlockchainEventListenerService
     private readonly dataSource: DataSource,
     @InjectRepository(BlockchainEventCursor)
     private readonly cursorRepository: Repository<BlockchainEventCursor>,
-  ) {}
+  ) {
+    const configured = Number(
+      process.env.BLOCKCHAIN_BACKFILL_CHUNK_SIZE ?? DEFAULT_BACKFILL_CHUNK_SIZE,
+    );
+    this.backfillChunkSize =
+      Number.isFinite(configured) && configured > 0
+        ? configured
+        : DEFAULT_BACKFILL_CHUNK_SIZE;
+  }
+
+  // ── Lifecycle ──────────────────────────────────────
 
   async onModuleInit() {
     this.logger.log('Starting blockchain event listeners...');
+
     const network = await this.provider.getNetwork();
     this.chainId = network.chainId.toString();
     this.logger.log(`Connected chainId=${this.chainId}`);
@@ -140,6 +170,7 @@ export class BlockchainEventListenerService
     await this.ensureCursorExists();
     await this.catchUpToLatestBlock();
     this.registerLiveListeners();
+    // Re-run to catch events that arrived during listener registration
     await this.catchUpToLatestBlock();
 
     this.logger.log('Blockchain listeners ready (backfill + live)');
@@ -156,12 +187,16 @@ export class BlockchainEventListenerService
     await this.contract.removeAllListeners();
   }
 
+  // ── Live listener registration ─────────────────────
+
   private registerLiveListeners() {
-    for (const eventName of Object.keys(EVENT_ROUTING_KEYS)) {
+    for (const eventName of SUPPORTED_EVENT_NAMES) {
       const listener = async (...args: any[]) => {
         const { eventArgs, meta } = this.extractLiveEventMeta(args);
         if (!meta) {
-          this.logger.warn(`Skip ${eventName}: missing tx metadata from live payload`);
+          this.logger.warn(
+            `Skip ${eventName}: missing tx metadata from live payload`,
+          );
           return;
         }
 
@@ -174,6 +209,12 @@ export class BlockchainEventListenerService
     }
   }
 
+  /**
+   * Extract transaction metadata from the ethers.js event callback args.
+   *
+   * ethers v6 appends either an `EventLog` (with `.log`) or a raw log
+   * object as the last argument. We handle both shapes.
+   */
   private extractLiveEventMeta(args: any[]): {
     eventArgs: any[];
     meta: BlockchainEventMeta | null;
@@ -182,10 +223,9 @@ export class BlockchainEventListenerService
       return { eventArgs: [], meta: null };
     }
 
-    const maybePayload = args[args.length - 1] as
-      | { log?: any }
-      | { transactionHash?: string; index?: number; blockNumber?: number };
-    const eventLog = 'log' in (maybePayload ?? {}) ? maybePayload.log : maybePayload;
+    const lastArg = args[args.length - 1] as Record<string, any> | undefined;
+    const eventLog =
+      lastArg && 'log' in lastArg ? lastArg.log : lastArg;
 
     if (
       !eventLog ||
@@ -197,7 +237,8 @@ export class BlockchainEventListenerService
     }
 
     return {
-      eventArgs: 'log' in (maybePayload ?? {}) ? args.slice(0, -1) : args,
+      eventArgs:
+        lastArg && 'log' in lastArg ? args.slice(0, -1) : args,
       meta: {
         txHash: eventLog.transactionHash,
         logIndex: eventLog.index,
@@ -206,7 +247,9 @@ export class BlockchainEventListenerService
     };
   }
 
-  private async ensureCursorExists() {
+  // ── Cursor management ──────────────────────────────
+
+  private async ensureCursorExists(): Promise<void> {
     const existing = await this.cursorRepository.findOne({
       where: { listenerId: LISTENER_ID },
     });
@@ -228,7 +271,21 @@ export class BlockchainEventListenerService
     );
   }
 
-  private async catchUpToLatestBlock() {
+  private async updateCursorBlock(blockNumber: number): Promise<void> {
+    await this.cursorRepository
+      .createQueryBuilder()
+      .update()
+      .set({ lastProcessedBlock: String(blockNumber) })
+      .where('listenerId = :id AND CAST(lastProcessedBlock AS BIGINT) < :block', {
+        id: LISTENER_ID,
+        block: blockNumber,
+      })
+      .execute();
+  }
+
+  // ── Backfill / catch-up ────────────────────────────
+
+  private async catchUpToLatestBlock(): Promise<void> {
     const cursor = await this.cursorRepository.findOne({
       where: { listenerId: LISTENER_ID },
     });
@@ -256,15 +313,19 @@ export class BlockchainEventListenerService
     }
   }
 
-  private async backfillBlockRange(fromBlock: number, toBlock: number) {
-    const collected: Array<{
-      eventName: string;
-      args: any[];
-      meta: BlockchainEventMeta;
-    }> = [];
+  private async backfillBlockRange(
+    fromBlock: number,
+    toBlock: number,
+  ): Promise<void> {
+    const collected: CollectedEvent[] = [];
 
-    for (const eventName of Object.keys(EVENT_ROUTING_KEYS)) {
-      const logs = await this.contract.queryFilter(eventName, fromBlock, toBlock);
+    for (const eventName of SUPPORTED_EVENT_NAMES) {
+      const logs = await this.contract.queryFilter(
+        eventName,
+        fromBlock,
+        toBlock,
+      );
+
       for (const log of logs) {
         if (
           typeof log.transactionHash !== 'string' ||
@@ -274,9 +335,12 @@ export class BlockchainEventListenerService
           continue;
         }
 
+        const args =
+          'args' in log ? Array.from(log.args ?? []) : [];
+
         collected.push({
           eventName,
-          args: Array.from(log.args ?? []),
+          args,
           meta: {
             txHash: log.transactionHash,
             logIndex: log.index,
@@ -286,23 +350,25 @@ export class BlockchainEventListenerService
       }
     }
 
-    collected.sort((left, right) => {
-      if (left.meta.blockNumber !== right.meta.blockNumber) {
-        return left.meta.blockNumber - right.meta.blockNumber;
-      }
-      return left.meta.logIndex - right.meta.logIndex;
-    });
+    // Process events in on-chain order
+    collected.sort((a, b) =>
+      a.meta.blockNumber !== b.meta.blockNumber
+        ? a.meta.blockNumber - b.meta.blockNumber
+        : a.meta.logIndex - b.meta.logIndex,
+    );
 
     for (const item of collected) {
       await this.processEvent(item.eventName, item.args, item.meta);
     }
   }
 
+  // ── Core event processing ──────────────────────────
+
   private async processEvent(
     eventName: string,
     eventArgs: any[],
     meta: BlockchainEventMeta,
-  ) {
+  ): Promise<void> {
     const routingKey = EVENT_ROUTING_KEYS[eventName];
     const extractor = EVENT_EXTRACTORS[eventName];
 
@@ -326,7 +392,6 @@ export class BlockchainEventListenerService
     try {
       const published = await this.dataSource.transaction(async (manager) => {
         const processedRepo = manager.getRepository(BlockchainProcessedEvent);
-        const cursorRepo = manager.getRepository(BlockchainEventCursor);
 
         const alreadyProcessed = await processedRepo.exist({
           where: { txHash: meta.txHash, logIndex: meta.logIndex },
@@ -356,34 +421,20 @@ export class BlockchainEventListenerService
           }),
         );
 
-        const cursor = await cursorRepo.findOne({
-          where: { listenerId: LISTENER_ID },
-        });
-        const currentCursor = Number(cursor?.lastProcessedBlock ?? 0);
-        if (!cursor) {
-          await cursorRepo.save(
-            cursorRepo.create({
-              listenerId: LISTENER_ID,
-              lastProcessedBlock: String(meta.blockNumber),
-            }),
-          );
-        } else if (meta.blockNumber > currentCursor) {
-          cursor.lastProcessedBlock = String(meta.blockNumber);
-          await cursorRepo.save(cursor);
-        }
-
         return true;
       });
 
       if (published) {
-        this.logger.log(`Processed on-chain event ${eventName} (${aggregateId})`);
+        this.logger.log(
+          `Processed on-chain event ${eventName} (${aggregateId})`,
+        );
       } else {
         this.logger.debug(
           `Skipped duplicate on-chain event ${eventName} (${meta.txHash}:${meta.logIndex})`,
         );
       }
     } catch (error: any) {
-      if (error?.code === '23505') {
+      if (error?.code === PG_UNIQUE_VIOLATION) {
         this.logger.debug(
           `Duplicate event race ignored: ${eventName} (${meta.txHash}:${meta.logIndex})`,
         );
@@ -396,29 +447,5 @@ export class BlockchainEventListenerService
       );
       throw error;
     }
-  }
-
-  private async updateCursorBlock(blockNumber: number) {
-    const cursor = await this.cursorRepository.findOne({
-      where: { listenerId: LISTENER_ID },
-    });
-
-    if (!cursor) {
-      await this.cursorRepository.save(
-        this.cursorRepository.create({
-          listenerId: LISTENER_ID,
-          lastProcessedBlock: String(blockNumber),
-        }),
-      );
-      return;
-    }
-
-    const current = Number(cursor.lastProcessedBlock);
-    if (blockNumber <= current) {
-      return;
-    }
-
-    cursor.lastProcessedBlock = String(blockNumber);
-    await this.cursorRepository.save(cursor);
   }
 }
