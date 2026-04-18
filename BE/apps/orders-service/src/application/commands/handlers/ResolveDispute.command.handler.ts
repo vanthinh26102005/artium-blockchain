@@ -41,8 +41,8 @@ export class ResolveDisputeHandler implements ICommandHandler<ResolveDisputeComm
       }
 
       const escrowState = dto.favorBuyer
-        ? EscrowState.REFUNDED
-        : EscrowState.RELEASED;
+        ? EscrowState.CANCELLED
+        : EscrowState.COMPLETED;
 
       return this.orderRepo.update(orderId, {
         status: targetStatus,
