@@ -70,6 +70,8 @@ export enum NotificationTriggerEvent {
   AUCTION_SHIPPING_TIMEOUT = 'AUCTION_SHIPPING_TIMEOUT',
   /** Delivery timeout — notify seller (eligible for payment) */
   AUCTION_DELIVERY_TIMEOUT = 'AUCTION_DELIVERY_TIMEOUT',
+  /** Funds withdrawn from escrow contract — notify bidder */
+  AUCTION_FUNDS_WITHDRAWN = 'AUCTION_FUNDS_WITHDRAWN',
 
   /** Generic alert notification */
   GENERIC_ALERT = 'GENERIC_ALERT',

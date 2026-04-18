@@ -380,4 +380,45 @@ export class BlockchainAuctionEventHandler {
       throw error;
     }
   }
+
+  @RabbitSubscribe({
+    exchange: ExchangeName.BLOCKCHAIN_EVENTS,
+    routingKey: RoutingKey.BLOCKCHAIN_FUNDS_WITHDRAWN,
+    queue: 'notification.blockchain.funds-withdrawn',
+    queueOptions: DLX_QUEUE_OPTIONS,
+    errorHandler,
+  })
+  async handleFundsWithdrawn(event: {
+    bidder: string;
+    amount: string;
+    txHash: string;
+    blockNumber: string;
+  }) {
+    this.logger.log(
+      `Funds withdrawn notification: bidder=${event.bidder} amount=${event.amount} wei`,
+    );
+    try {
+      await this.transactionService.execute(async (manager) => {
+        await this.createNotificationWithOutbox(
+          NotificationTriggerEvent.AUCTION_FUNDS_WITHDRAWN,
+          'Funds Withdrawn Successfully',
+          `You have successfully withdrawn ${event.amount} wei from the escrow contract.`,
+          {
+            bidder: event.bidder,
+            amount: event.amount,
+            txHash: event.txHash,
+            blockNumber: event.blockNumber,
+          },
+          'auction-funds-withdrawn',
+          manager,
+        );
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to handle FundsWithdrawn notification: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
 }

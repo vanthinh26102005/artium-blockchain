@@ -485,9 +485,28 @@ export class BlockchainEventHandler {
     queueOptions: { durable: true },
   })
   async handleFundsWithdrawn(message: {
-    user: string;
+    bidder: string;
     amount: string;
+    txHash: string;
+    blockNumber: string;
   }) {
-    this.logger.log(`Funds withdrawn by ${message.user}: ${message.amount} wei`);
+    this.logger.log(
+      `Funds withdrawn: bidder=${message.bidder} amount=${message.amount} wei tx=${message.txHash}`,
+    );
+
+    try {
+      // Notification-only per spec — no order state change.
+      // The Withdrawn event is wallet-level (no orderId) and covers
+      // aggregated pendingReturns from outbids, cancellations, and refunds.
+      this.logger.debug(
+        `Withdrawal confirmed on-chain at block ${message.blockNumber}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to handle FundsWithdrawn: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
   }
 }
