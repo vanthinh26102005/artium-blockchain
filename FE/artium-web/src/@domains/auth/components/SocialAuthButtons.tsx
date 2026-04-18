@@ -1,6 +1,9 @@
 // next
 import Image from 'next/image'
 
+// @domains - auth
+import { AuthProviderButton } from './AuthProviderButton'
+
 type SocialAuthButtonsProps = {
   onGoogleClick?: () => void
   isGoogleLoading?: boolean
@@ -13,30 +16,34 @@ export const SocialAuthButtons = ({
   // -- render --
   return (
     <div className="inline-flex w-full flex-col gap-3 sm:flex-row sm:gap-4">
-      {/* google */}
-      <button
-        type="button"
+      <AuthProviderButton
+        icon={
+          <Image
+            src="/images/auth/google-icon-logo-svgrepo-com.svg"
+            alt=""
+            width={24}
+            height={24}
+            className="shrink-0"
+          />
+        }
+        label="Google"
+        loadingLabel="Connecting..."
         onClick={onGoogleClick}
-        disabled={isGoogleLoading}
-        className="flex flex-1 items-center justify-center gap-3 rounded-[32px] border border-black/10 px-5 py-3 text-sm font-semibold text-[#191414] transition hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <Image
-          src="/images/auth/google-icon-logo-svgrepo-com.svg"
-          alt="Google"
-          width={24}
-          height={24}
-        />
-        <span>{isGoogleLoading ? 'Connecting...' : 'Google'}</span>
-      </button>
+        isLoading={isGoogleLoading}
+      />
 
-      {/* apple */}
-      <button
-        type="button"
-        className="flex flex-1 items-center justify-center gap-3 rounded-[32px] border border-black/10 px-5 py-3 text-sm font-semibold text-[#191414] transition hover:bg-black/5"
-      >
-        <Image src="/images/auth/apple-svgrepo-com.svg" alt="Apple" width={24} height={24} />
-        <span className="pt-1">Apple</span>
-      </button>
+      <AuthProviderButton
+        icon={
+          <Image
+            src="/images/auth/apple-svgrepo-com.svg"
+            alt=""
+            width={24}
+            height={24}
+            className="shrink-0"
+          />
+        }
+        label="Apple"
+      />
     </div>
   )
 }

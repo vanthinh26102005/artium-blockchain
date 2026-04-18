@@ -4,8 +4,15 @@ export type UserPayload = {
   email: string
   username?: string | null
   displayName?: string | null
+  fullName?: string | null
   roles: string[]
   avatarUrl?: string | null
+  googleId?: string | null
+  walletAddress?: string | null
+  isEmailVerified?: boolean
+  stripeCustomerId?: string | null
+  lastLogin?: string | null
+  isActive?: boolean
 }
 
 export type LoginResponse = {
@@ -54,4 +61,13 @@ export type RequestPasswordResetResponse = {
 export type VerifyPasswordResetResponse = {
   resetToken: string
   success: boolean
+}
+
+export type WalletNonceResponse = {
+  nonce: string
+}
+
+export type LoginByWalletPayload = {
+  message: string
+  signature: string
 }

@@ -399,11 +399,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.30"
-          memory: "384M"
+          cpus: "1.00"
+          memory: "1536M"
         reservations:
-          cpus: "0.25"
-          memory: "256M"
+          cpus: "0.50"
+          memory: "768M"
     networks:
       - infra_network
       - services_network

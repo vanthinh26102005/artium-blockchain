@@ -64,10 +64,22 @@ export interface DialogContentProps
     VariantProps<typeof dialogContentVariants> {}
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  DialogContentProps & { disableCloseOnOutsideClick?: boolean; overlayClassName?: string }
+  DialogContentProps & {
+    closeButtonClassName?: string
+    disableCloseOnOutsideClick?: boolean
+    overlayClassName?: string
+  }
 >(
   (
-    { className, overlayClassName, size, disableCloseOnOutsideClick = false, children, ...props },
+    {
+      className,
+      closeButtonClassName,
+      overlayClassName,
+      size,
+      disableCloseOnOutsideClick = false,
+      children,
+      ...props
+    },
     ref,
   ) => {
     // -- is animating --
@@ -94,7 +106,12 @@ const DialogContent = React.forwardRef<
           {...props}
         >
           {children}
-          <DialogPrimitive.Close className="absolute top-4 right-5 rounded-full p-1 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:pointer-events-none">
+          <DialogPrimitive.Close
+            className={cn(
+              'absolute top-4 right-5 flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:pointer-events-none',
+              closeButtonClassName,
+            )}
+          >
             <X className="h-5 w-5" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>

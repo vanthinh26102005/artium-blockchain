@@ -1,5 +1,7 @@
 services:
   identity-service:
+    environment:
+      DB_STRATEGY: ISOLATED
     depends_on:
       db-identity:
         condition: service_healthy
