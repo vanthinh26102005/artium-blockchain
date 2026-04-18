@@ -8,9 +8,12 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsEnum,
+  IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   IsArray,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -149,4 +152,47 @@ export class CreateArtworkInput {
   @ValidateNested({ each: true })
   @Type(() => ArtworkImageInput)
   images?: ArtworkImageInput[];
+
+  // ── Auction fields (on-chain integration) ──
+
+  @ApiPropertyOptional({
+    description: 'IPFS hash of artwork metadata for on-chain reference',
+    example: 'QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ',
+  })
+  @IsOptional()
+  @IsString()
+  ipfsMetadataHash?: string;
+
+  @ApiPropertyOptional({
+    description: 'Reserve price in wei (minimum acceptable bid)',
+    example: '1000000000000000000',
+  })
+  @IsOptional()
+  @IsString()
+  reservePrice?: string;
+
+  @ApiPropertyOptional({
+    description: 'Minimum bid increment in wei',
+    example: '100000000000000000',
+  })
+  @IsOptional()
+  @IsString()
+  minBidIncrement?: string;
+
+  @ApiPropertyOptional({
+    description: 'Auction duration in seconds',
+    example: 86400,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(60)
+  auctionDuration?: number;
+
+  @ApiPropertyOptional({
+    description: 'On-chain auction ID from the smart contract',
+    example: '0x...',
+  })
+  @IsOptional()
+  @IsString()
+  onChainAuctionId?: string;
 }
