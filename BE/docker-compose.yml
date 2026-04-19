@@ -115,35 +115,35 @@ services:
     networks:
       - infra_network
 
-  db-messaging:
-    image: postgres:17
-    container_name: db-messaging
-    profiles: ["isolated"]
-    environment:
-      POSTGRES_USER: messaging_user
-      POSTGRES_PASSWORD: "1"
-      POSTGRES_DB: messaging_db
-      TZ: Asia/Ho_Chi_Minh
-    ports:
-      - "5435:5432"
-    volumes:
-      - postgres_messaging_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U messaging_user -d messaging_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: "768M"
-        reservations:
-          cpus: "0.50"
-          memory: "512M"
-    networks:
-      - infra_network
+  # db-messaging:
+  #   image: postgres:17
+  #   container_name: db-messaging
+  #   profiles: ["isolated"]
+  #   environment:
+  #     POSTGRES_USER: messaging_user
+  #     POSTGRES_PASSWORD: "1"
+  #     POSTGRES_DB: messaging_db
+  #     TZ: Asia/Ho_Chi_Minh
+  #   ports:
+  #     - "5435:5432"
+  #   volumes:
+  #     - postgres_messaging_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U messaging_user -d messaging_db"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: unless-stopped
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "0.50"
+  #         memory: "768M"
+  #       reservations:
+  #         cpus: "0.50"
+  #         memory: "512M"
+  #   networks:
+  #     - infra_network
 
   db-payments:
     image: postgres:17
@@ -239,7 +239,9 @@ services:
   # Messaging & Cache
   # ---------------------------
   rabbitmq:
-    image: dgpthinh/rabbitmq:v1
+    build:
+      context: .
+      dockerfile: ./infrastructure/docker/rabbitmq/Dockerfile
     container_name: rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: myuser
@@ -307,7 +309,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/api-gateway/Dockerfile
-    image: dgpthinh/api-gateway:v1
     command: yarn dev:gateway
     ports:
       - "8081:8081"
@@ -359,7 +360,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/identity-service/Dockerfile
-    image: dgpthinh/identity-service:v1
     command: yarn dev:identity
     ports:
       - "3001:3001"
@@ -410,7 +410,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/notifications-service/Dockerfile
-    image: dgpthinh/notifications-service:v1
     command: yarn dev:notifications
     ports:
       - "3002:3002"
@@ -468,7 +467,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/artwork-service/Dockerfile
-    image: dgpthinh/artwork-service:v1
     command: yarn dev:artwork
     ports:
       - "3003:3003"
@@ -522,68 +520,66 @@ services:
       - infra_network
       - services_network
 
-  messaging-service:
-    container_name: messaging-service
-    build:
-      context: .
-      dockerfile: ./apps/messaging-service/Dockerfile
-    image: dgpthinh/messaging-service:v1
-    command: yarn dev:messaging
-    ports:
-      - "3004:3004"
-      # TCP microservice port (internal only for API Gateway)
-    environment:
-      PORT: 3004
-      MICROSERVICE_PORT: 3105
-      MICROSERVICE_HOST: 0.0.0.0
-      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
-      DB_SYNCHRONIZE: "true"
-      SHARED_DB_HOST: db-shared
-      SHARED_DB_PORT: 5432
-      SHARED_DB_USERNAME: postgres
-      SHARED_DB_PASSWORD: "1"
-      SHARED_DB_NAME: artium_global
-      DB_HOST: db-messaging
-      DB_PORT: 5432
-      DB_USER: messaging_user
-      DB_PASS: "1"
-      DB_NAME: messaging_db
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
-      TZ: Asia/Ho_Chi_Minh
-      GCS_PROJECT_ID: artworkmanagement
-      GCS_BUCKET_NAME: artwork_uit
-      GCS_KEY_FILE: /app/config/gcs-service-account.json
-      MAX_FILE_SIZE_MB: 10
-      ALLOWED_FILE_TYPES: image/jpeg,image/png,image/webp,image/jpg,image/gif,video/mp4,video/webm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document
-    volumes:
-      - .:/app
-      - messaging_node_modules:/app/node_modules
-      - ./config/gcs-service-account.json:/app/config/gcs-service-account.json:ro
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    deploy:
-      resources:
-        limits:
-          cpus: "0.30"
-          memory: "384M"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
-    networks:
-      - infra_network
-      - services_network
+  # messaging-service:
+  #   container_name: messaging-service
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/messaging-service/Dockerfile
+  #   command: yarn dev:messaging
+  #   ports:
+  #     - "3004:3004"
+  #     # TCP microservice port (internal only for API Gateway)
+  #   environment:
+  #     PORT: 3004
+  #     MICROSERVICE_PORT: 3105
+  #     MICROSERVICE_HOST: 0.0.0.0
+  #     DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+  #     DB_SYNCHRONIZE: "true"
+  #     SHARED_DB_HOST: db-shared
+  #     SHARED_DB_PORT: 5432
+  #     SHARED_DB_USERNAME: postgres
+  #     SHARED_DB_PASSWORD: "1"
+  #     SHARED_DB_NAME: artium_global
+  #     DB_HOST: db-messaging
+  #     DB_PORT: 5432
+  #     DB_USER: messaging_user
+  #     DB_PASS: "1"
+  #     DB_NAME: messaging_db
+  #     REDIS_HOST: redis
+  #     REDIS_PORT: 6379
+  #     RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
+  #     TZ: Asia/Ho_Chi_Minh
+  #     GCS_PROJECT_ID: artworkmanagement
+  #     GCS_BUCKET_NAME: artwork_uit
+  #     GCS_KEY_FILE: /app/config/gcs-service-account.json
+  #     MAX_FILE_SIZE_MB: 10
+  #     ALLOWED_FILE_TYPES: image/jpeg,image/png,image/webp,image/jpg,image/gif,video/mp4,video/webm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document
+  #   volumes:
+  #     - .:/app
+  #     - messaging_node_modules:/app/node_modules
+  #     - ./config/gcs-service-account.json:/app/config/gcs-service-account.json:ro
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_started
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "0.30"
+  #         memory: "384M"
+  #       reservations:
+  #         cpus: "0.25"
+  #         memory: "256M"
+  #   networks:
+  #     - infra_network
+  #     - services_network
 
   payments-service:
     container_name: payments-service
     build:
       context: .
       dockerfile: ./apps/payments-service/Dockerfile
-    image: dgpthinh/payments-service:v1
     command: yarn dev:payments
     ports:
       - "3005:3005"
@@ -634,7 +630,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/events-service/Dockerfile
-    image: dgpthinh/events-service:v1
     command: yarn dev:events
     ports:
       - "3006:3006"
@@ -683,7 +678,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/community-service/Dockerfile
-    image: dgpthinh/community-service:v1
     command: yarn dev:community
     ports:
       - "3007:3007"

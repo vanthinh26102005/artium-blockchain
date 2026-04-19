@@ -15,7 +15,7 @@ COPY libs ./libs
 RUN yarn install --frozen-lockfile
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
-COPY apps/messaging-service/tsconfig.app.json ./apps/messaging-service/tsconfig.json
+COPY apps/messaging-service/tsconfig.json ./apps/messaging-service/tsconfig.json
 COPY apps/messaging-service ./apps/messaging-service
 
 RUN yarn workspace @backend/messaging-service build

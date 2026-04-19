@@ -15,7 +15,7 @@ COPY libs ./libs
 RUN yarn install --frozen-lockfile
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
-COPY apps/notifications-service/tsconfig.app.json ./apps/notifications-service/tsconfig.json
+COPY apps/notifications-service/tsconfig.json ./apps/notifications-service/tsconfig.json
 COPY apps/notifications-service ./apps/notifications-service
 
 RUN yarn workspace @backend/notifications-service build
