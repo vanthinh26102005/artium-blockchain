@@ -302,10 +302,20 @@ export class ArtworkSeeder {
     const getUnsplashUrl = (photoId: string, w = 800, h = 600) =>
       `https://images.unsplash.com/photo-${photoId}?w=${w}&h=${h}&fit=crop&q=80`;
 
+    // Each seller gets a distinct starting offset in the photo pool
+    const getSellerPhotoIndex = (sellerIdx: number, artworkOffset: number) => {
+      const start = sellerIdx * 2; // sellers start 2 photos apart
+      return (start + artworkOffset) % unsplashArtPhotos.length;
+    };
+
     const artworks: Artwork[] = [];
+    const sellerArtworkCounters: Record<string, number> = {};
 
     for (let i = 0; i < 200; i++) {
       const sellerId = sellerIds[i % sellerIds.length];
+      const sellerIdx = i % sellerIds.length;
+      sellerArtworkCounters[sellerId] = (sellerArtworkCounters[sellerId] || 0) + 1;
+      const artworkOffset = sellerArtworkCounters[sellerId] - 1;
       const title = `${artworkTitles[i % artworkTitles.length]}${i >= artworkTitles.length ? ` ${Math.floor(i / artworkTitles.length) + 1}` : ''}`;
       const material = materials[i % materials.length];
 
@@ -361,8 +371,8 @@ export class ArtworkSeeder {
             {
               id: `img_${i}_1`,
               publicId: `artworks/${sellerId}/${title.toLowerCase().replace(/\s+/g, '-')}-1`,
-              url: getUnsplashUrl(unsplashArtPhotos[i % unsplashArtPhotos.length]),
-              secureUrl: getUnsplashUrl(unsplashArtPhotos[i % unsplashArtPhotos.length]),
+              url: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset)]),
+              secureUrl: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset)]),
               format: 'jpg',
               width: 800,
               height: 600,
@@ -377,8 +387,8 @@ export class ArtworkSeeder {
                   {
                     id: `img_${i}_2`,
                     publicId: `artworks/${sellerId}/${title.toLowerCase().replace(/\s+/g, '-')}-2`,
-                    url: getUnsplashUrl(unsplashArtPhotos[(i + 1) % unsplashArtPhotos.length]),
-                    secureUrl: getUnsplashUrl(unsplashArtPhotos[(i + 1) % unsplashArtPhotos.length]),
+                    url: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset + 1)]),
+                    secureUrl: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset + 1)]),
                     format: 'jpg',
                     width: 800,
                     height: 600,

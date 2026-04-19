@@ -167,6 +167,43 @@ export class IdentitySeeder {
       'Reyes',
     ];
 
+    // Curated Unsplash portrait photo IDs for user avatars
+    const portraitPhotos = [
+      '1500648767791-00dcc994a43e',
+      '1507003211169-0a1dd7228f2d',
+      '1531750026848-8ada78f641c2',
+      '1542909168-82c3e7fdca5c',
+      '1543949806-2c9935e6aa78',
+      '1549473448-b0acc73629dc',
+      '1580489944761-15a19d654956',
+      '1588178454780-441fa5b99fa5',
+      '1595211877493-41a4e5f236b3',
+      '1609436132311-e4b0c9370469',
+      '1642736468842-c6bdcfbbcd28',
+      '1656074520589-bd325dc7aa4f',
+      '1664536392896-cd1743f9c02c',
+      '1688740375397-34605b6abe48',
+      '1689539137236-b68e436248de',
+      '1690394943834-8f9491b750f9',
+      '1486413869840-a99ac0a4c031',
+      '1541519230324-f6779f9f4a48',
+      '1551180452-45cc5da51c3a',
+      '1570158268183-d296b2892211',
+      '1584661156681-540e80a161d3',
+      '1602806271931-07e449a819bd',
+      '1614204424926-196a80bf0be8',
+      '1625682115702-3a561cd465fd',
+      '1633887091273-a3bd71efddde',
+      '1650783756107-739513b38177',
+      '1658048223386-e1117ffc8298',
+      '1658314756268-3552b9ba2784',
+      '1672860872885-d26afe731608',
+      '1674643925879-d457c6e93801',
+    ];
+
+    const getPortraitUrl = (idx: number) =>
+      `https://images.unsplash.com/photo-${portraitPhotos[idx % portraitPhotos.length]}?w=300&h=300&fit=crop&q=80`;
+
     const users: User[] = [];
 
     // Admin user
@@ -175,7 +212,7 @@ export class IdentitySeeder {
         email: 'admin@artium.com',
         password: hashedPassword,
         fullName: 'Admin User',
-        avatarUrl: 'https://i.pravatar.cc/300?img=1',
+        avatarUrl: getPortraitUrl(0),
         roles: [UserRole.ADMIN, UserRole.SELLER, UserRole.COLLECTOR],
         isEmailVerified: true,
         isActive: true,
@@ -196,7 +233,7 @@ export class IdentitySeeder {
           email: `seller${i + 1}@artium.com`,
           password: hashedPassword,
           fullName: `${firstName} ${lastName}`,
-          avatarUrl: `https://i.pravatar.cc/300?img=${i + 10}`,
+          avatarUrl: getPortraitUrl(i + 1),
           roles: [UserRole.SELLER, UserRole.COLLECTOR],
           isEmailVerified: i % 5 !== 0, // 80% verified
           isActive: i % 10 !== 9, // 90% active
@@ -220,7 +257,7 @@ export class IdentitySeeder {
           email: `collector${i - 29}@artium.com`,
           password: hashedPassword,
           fullName: `${firstName} ${lastName}`,
-          avatarUrl: `https://i.pravatar.cc/300?img=${i + 20}`,
+          avatarUrl: getPortraitUrl(i),
           roles: [UserRole.COLLECTOR],
           isEmailVerified: i % 4 !== 0, // 75% verified
           isActive: true,
