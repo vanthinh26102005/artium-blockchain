@@ -10,6 +10,7 @@ import {
 import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { RpcException } from '@nestjs/microservices';
 import {
   CompleteUserRegistrationCommand,
   ConfirmNewPasswordCommand,
@@ -26,6 +27,7 @@ import {
   EmailLoginInput,
   LoginResponse,
   UserPayload,
+  VerifyPasswordResetResponse,
   WalletLoginInput,
 } from '../../domain';
 
@@ -42,12 +44,12 @@ export class UsersMicroserviceController {
   ): Promise<UserPayload> {
     const userId = data?.user?.id;
     if (!userId) {
-      return data.user;
+      throw new RpcException({ statusCode: 401, message: 'User ID is required' });
     }
 
     const user = await this.queryBus.execute(new GetUserByIdQuery(userId));
     if (!user) {
-      return data.user;
+      throw new RpcException({ statusCode: 404, message: `User with ID ${userId} not found` });
     }
 
     const { password: _password, ...safeUser } = user;
@@ -102,8 +104,8 @@ export class UsersMicroserviceController {
   @MessagePattern({ cmd: 'password_reset_verify' })
   async verifyPasswordReset(
     @Payload() input: PasswordResetVerifyDto,
-  ): Promise<{ valid: boolean }> {
-    return this.queryBus.execute(new VerifyPasswordResetCommand(input));
+  ): Promise<VerifyPasswordResetResponse> {
+    return this.commandBus.execute(new VerifyPasswordResetCommand(input));
   }
 
   @MessagePattern({ cmd: 'password_reset_confirm' })

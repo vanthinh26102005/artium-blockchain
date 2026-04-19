@@ -903,7 +903,7 @@ export class SellerProfilesController {
   ): Promise<UpdateSellerProfileResponse> {
     const requestId = uuidv4();
     const userId = req.user.id;
-    const isAdmin = req.user.role === 'ADMIN';
+    const isAdmin = req.user.roles?.includes('ADMIN');
     this.logger.log(
       `[SellerProfilesController] [ReqID: ${requestId}] - Updating profile visibility for: ${profileId}`,
     );

@@ -61,7 +61,7 @@ export class TagsMicroserviceController {
   async deleteTag(
     @Payload() data: { id: string },
   ): Promise<{ success: boolean }> {
-    await this.commandBus.execute(new DeleteTagCommand(data.id));
-    return { success: true };
+    const deleted = await this.commandBus.execute(new DeleteTagCommand(data.id));
+    return { success: !!deleted };
   }
 }
