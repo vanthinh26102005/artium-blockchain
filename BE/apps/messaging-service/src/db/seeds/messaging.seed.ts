@@ -352,7 +352,8 @@ export class MessagingSeeder {
         // 10% chance of image message
         if (Math.random() < 0.1) {
           messageType = MessageType.IMAGE;
-          mediaUrl = `https://picsum.photos/seed/msg-${conversation.id}-${i}/800/600`;
+          const artPhotoIds = ['1531056416665-266c4099c928', '1579783902915-f0b0de2c2eb3', '1541961017774-22349e4a1262', '1618331833071-ce81bd50d300', '1578926375605-eaf7559b1458', '1563301323-094e5843a962', '1572392640988-ba48d1a74457', '1584278773680-8d940a213dcf'];
+          mediaUrl = `https://images.unsplash.com/photo-${artPhotoIds[i % artPhotoIds.length]}?w=800&h=600&fit=crop&q=80`;
         }
 
         // 5% chance of file message

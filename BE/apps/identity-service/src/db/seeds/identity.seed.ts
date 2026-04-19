@@ -333,7 +333,7 @@ export class IdentitySeeder {
       profile.slug = slug;
       profile.bio = `${displayName} is ${isGallery ? 'a renowned gallery' : isInstitution ? 'a prestigious institution' : 'an artist'} specializing in contemporary art. With ${Math.floor(Math.random() * 15 + 5)} years of experience, ${isGallery || isInstitution ? 'we' : 'I'} bring unique perspectives to the art world.`;
       profile.profileImageUrl = seller.avatarUrl;
-      profile.coverImageUrl = `https://picsum.photos/seed/${slug}/1200/400`;
+      profile.coverImageUrl = `https://images.unsplash.com/photo-${['1507643179773-3e975d7ac515', '1518998053901-5348d3961a04', '1565799515768-2dcfd834625c', '1569783721854-33a99b4c0bae', '1582555172866-f73bb12a2ab3', '1605429523419-d828acb941d9', '1541961017774-22349e4a1262', '1618331835717-801e976710b2', '1579783902915-f0b0de2c2eb3', '1572392640988-ba48d1a74457'][i % 10]}?w=1200&h=400&fit=crop&q=80`;
       profile.websiteUrl = i % 3 === 0 ? `https://${slug}.art` : null;
       profile.location = locations[i % locations.length];
       profile.stripeAccountId =
