@@ -12,7 +12,7 @@ import {
   GetArtworkQuery,
   ListArtworksQuery,
 } from '../../application';
-import { GetArtworksQueryDto, UserPayload, ArtworkImageInput } from '@app/common';
+import { GetArtworksQueryDto, UserPayload, ArtworkImageInput, ArtworkStatus } from '@app/common';
 import { CreateArtworkInput } from '../../domain/dtos/artworks/create-artwork.input';
 import { UpdateArtworkInput } from '../../domain/dtos/artworks/update-artwork.input';
 import {
@@ -89,7 +89,7 @@ export class ArtworkMicroserviceController {
     return this.commandBus.execute(
       new BulkUpdateArtworkStatusCommand(
         data.artworkIds,
-        data.status as any,
+        data.status as ArtworkStatus,
         data.sellerId,
       ),
     );

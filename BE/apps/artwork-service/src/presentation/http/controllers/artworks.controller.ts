@@ -84,7 +84,7 @@ export class ArtworksController {
   @ApiNotFoundResponse({
     description: 'Artwork not found',
   })
-  async getArtworkById(@Param('id') id: string): Promise<ArtworkObject | null> {
+  async getArtworkById(@Param('id') id: string): Promise<ArtworkObject> {
     const requestId = uuidv4();
     this.logger.log(
       `[ArtworksController] [ReqID: ${requestId}] - Getting artwork by ID: ${id}`,
@@ -105,7 +105,7 @@ export class ArtworksController {
         this.logger.warn(
           `[ArtworksController] [ReqID: ${requestId}] - Artwork not found: ${id}`,
         );
-        return null;
+        throw new NotFoundException(`Artwork with ID "${id}" not found`);
       }
 
       this.logger.log(

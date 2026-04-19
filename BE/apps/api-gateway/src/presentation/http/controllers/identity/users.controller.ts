@@ -328,7 +328,7 @@ export class UserController {
     description: 'Invalid or expired reset token',
   })
   async verifyPasswordReset(@Body() input: PasswordResetVerifyDto) {
-    return sendRpc<{ valid: boolean }>(
+    return sendRpc<{ success: boolean; resetToken: string }>(
       this.identityClient,
       { cmd: 'password_reset_verify' },
       input,
