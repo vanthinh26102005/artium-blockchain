@@ -76,7 +76,7 @@ export class UserController {
     return sendRpc<UserPayload>(
       this.identityClient,
       { cmd: 'get_user_profile' },
-      { user: req.user },
+      { user: { id: req.user.id } },
     );
   }
 

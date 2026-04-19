@@ -62,7 +62,7 @@ export class ArtworkMicroserviceController {
   @MessagePattern({ cmd: 'bulk_move_artworks' })
   async bulkMoveArtworks(
     @Payload()
-    data: BulkMoveArtworksInput,
+    data: BulkMoveArtworksInput & { user?: UserPayload },
   ) {
     return this.commandBus.execute(
       new BulkMoveArtworksCommand(
@@ -75,7 +75,7 @@ export class ArtworkMicroserviceController {
 
   @MessagePattern({ cmd: 'bulk_delete_artworks' })
   async bulkDeleteArtworks(
-    @Payload() data: BulkDeleteArtworksInput,
+    @Payload() data: BulkDeleteArtworksInput & { user?: UserPayload },
   ) {
     return this.commandBus.execute(
       new BulkDeleteArtworksCommand(data.artworkIds, data.sellerId),
@@ -84,10 +84,8 @@ export class ArtworkMicroserviceController {
 
   @MessagePattern({ cmd: 'bulk_update_artwork_status' })
   async bulkUpdateArtworkStatus(
-    @Payload() data: BulkUpdateArtworkStatusInput,
+    @Payload() data: BulkUpdateArtworkStatusInput & { user?: UserPayload },
   ) {
-    // Cast string status to enum type expected by Command if necessary,
-    // but command likely takes string or similar enum.
     return this.commandBus.execute(
       new BulkUpdateArtworkStatusCommand(
         data.artworkIds,
@@ -99,7 +97,7 @@ export class ArtworkMicroserviceController {
 
   @MessagePattern({ cmd: 'add_images_to_artwork' })
   async addImagesToArtwork(
-    @Payload() data: { id: string; images: ArtworkImageInput[] },
+    @Payload() data: { id: string; images: ArtworkImageInput[]; user?: UserPayload },
   ) {
     return this.commandBus.execute(
       new AddImagesToArtworkCommand(data.id, data.images),
