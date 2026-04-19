@@ -230,6 +230,78 @@ export class ArtworkSeeder {
       'Sydney',
     ];
 
+    // Curated Unsplash art photo IDs by category
+    const unsplashArtPhotos = [
+      // Abstract & Contemporary Painting
+      '1531056416665-266c4099c928',
+      '1541961017774-22349e4a1262',
+      '1552250575-e508473b090f',
+      '1602464729960-f95937746b68',
+      '1605721911519-3dfeb3be25e7',
+      '1615184697985-c9bde1b07da7',
+      '1618331833071-ce81bd50d300',
+      '1618331835717-801e976710b2',
+      '1622542796254-5b9c46ab0d2f',
+      '1664013263421-91e3a8101259',
+      '1673288397715-12c2fbb9f52b',
+      '1675378165346-5f6c3959f0d2',
+      '1675607288022-51e1f6f43c17',
+      '1541512416146-3cf58d6b27cc',
+      '1541542509806-6371b7b0a265',
+      '1533158388470-9a56699990c6',
+      '1533208087231-c3618eab623c',
+      '1531489956451-20957fab52f2',
+      // Art Gallery & Museum
+      '1507643179773-3e975d7ac515',
+      '1518998053901-5348d3961a04',
+      '1522878308970-972ec5eedc0d',
+      '1535385793343-27dff1413c5a',
+      '1554907984-15263bfd63bd',
+      '1564399580075-5dfe19c205f3',
+      '1565799515768-2dcfd834625c',
+      '1565876427310-0695a4ff03b7',
+      '1569084024058-1632922a4e1d',
+      '1569783721854-33a99b4c0bae',
+      '1582555172866-f73bb12a2ab3',
+      '1605429523419-d828acb941d9',
+      '1605999081451-4436bf1d0d88',
+      '1606819717115-9159c900370b',
+      '1661893375334-e2603ce341d7',
+      // Sculpture & Installation
+      '1447758902204-48010b87c24d',
+      '1558708369-4d0568d01adb',
+      '1563301323-094e5843a962',
+      '1578583556149-18b1a60eaf48',
+      '1616787877319-57efeee47581',
+      '1657134158394-1cd2869b0feb',
+      '1666714049946-7e7afdb95f5a',
+      '1683917067889-c88599491d5c',
+      '1687978879251-d4b6d88d7a7c',
+      '1709035347321-1af386b38330',
+      // Oil Painting & Fine Art
+      '1572392640988-ba48d1a74457',
+      '1578301978693-85fa9c0320b9',
+      '1578301996581-bf7caec556c0',
+      '1578926375605-eaf7559b1458',
+      '1579009420909-b837eefa4274',
+      '1579168133409-34acb719c8b6',
+      '1579783900882-c0d3dad7b119',
+      '1579783902915-f0b0de2c2eb3',
+      '1581592487771-132f53bd2b48',
+      '1582561424760-0321d75e81fa',
+      '1584278773680-8d940a213dcf',
+      '1586537049236-b212dc756931',
+      '1614189647266-8fbdad9c72de',
+      '1617103901487-3f2714ec9692',
+      '1669392157870-18a592a0876f',
+      '1669749216793-040be16ade1d',
+      '1688588426729-dc4f7bdb8fbe',
+      '1545989253-02cc26577f88',
+    ];
+
+    const getUnsplashUrl = (photoId: string, w = 800, h = 600) =>
+      `https://images.unsplash.com/photo-${photoId}?w=${w}&h=${h}&fit=crop&q=80`;
+
     const artworks: Artwork[] = [];
 
     for (let i = 0; i < 200; i++) {
@@ -289,8 +361,8 @@ export class ArtworkSeeder {
             {
               id: `img_${i}_1`,
               publicId: `artworks/${sellerId}/${title.toLowerCase().replace(/\s+/g, '-')}-1`,
-              url: `https://picsum.photos/seed/${title.replace(/\s+/g, '')}/800/600`,
-              secureUrl: `https://picsum.photos/seed/${title.replace(/\s+/g, '')}/800/600`,
+              url: getUnsplashUrl(unsplashArtPhotos[i % unsplashArtPhotos.length]),
+              secureUrl: getUnsplashUrl(unsplashArtPhotos[i % unsplashArtPhotos.length]),
               format: 'jpg',
               width: 800,
               height: 600,
@@ -305,8 +377,8 @@ export class ArtworkSeeder {
                   {
                     id: `img_${i}_2`,
                     publicId: `artworks/${sellerId}/${title.toLowerCase().replace(/\s+/g, '-')}-2`,
-                    url: `https://picsum.photos/seed/${title.replace(/\s+/g, '')}2/800/600`,
-                    secureUrl: `https://picsum.photos/seed/${title.replace(/\s+/g, '')}2/800/600`,
+                    url: getUnsplashUrl(unsplashArtPhotos[(i + 1) % unsplashArtPhotos.length]),
+                    secureUrl: getUnsplashUrl(unsplashArtPhotos[(i + 1) % unsplashArtPhotos.length]),
                     format: 'jpg',
                     width: 800,
                     height: 600,
@@ -487,7 +559,7 @@ export class ArtworkSeeder {
           content: commentText,
           mediaUrl:
             i % 10 === 0
-              ? `https://picsum.photos/seed/comment${i}/400/300`
+              ? getUnsplashUrl(unsplashArtPhotos[(i + 30) % unsplashArtPhotos.length], 400, 300)
               : null,
           mentionedUserIds:
             i % 5 === 0 ? [userIds[(i + 1) % userIds.length]] : [],
