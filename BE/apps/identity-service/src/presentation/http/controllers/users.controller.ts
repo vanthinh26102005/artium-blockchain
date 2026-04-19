@@ -65,6 +65,7 @@ export class UsersController {
   ) {}
 
   @Get('me')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get current user profile',

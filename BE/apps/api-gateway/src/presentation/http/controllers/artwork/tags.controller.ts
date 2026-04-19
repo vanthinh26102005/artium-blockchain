@@ -1,3 +1,4 @@
+import { JwtAuthGuard } from '@app/auth';
 import {
   CreateTagInput,
   FindTagsArgs,
@@ -16,9 +17,11 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -155,6 +158,8 @@ export class TagsController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Create tag',
     description: 'Creates a new tag with the provided details',
@@ -177,6 +182,8 @@ export class TagsController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Update tag',
     description: 'Updates an existing tag with new information',
@@ -215,6 +222,8 @@ export class TagsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Delete tag',

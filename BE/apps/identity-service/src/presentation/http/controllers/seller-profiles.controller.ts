@@ -487,6 +487,7 @@ export class SellerProfilesController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Create seller profile',
@@ -583,6 +584,7 @@ export class SellerProfilesController {
   }
 
   @Put(':profileId')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Update seller profile',
@@ -678,6 +680,7 @@ export class SellerProfilesController {
   }
 
   @Delete(':profileId')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -763,6 +766,7 @@ export class SellerProfilesController {
   }
 
   @Put(':profileId/verification')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Update verification status (admin only)',
@@ -856,6 +860,7 @@ export class SellerProfilesController {
   }
 
   @Put(':profileId/visibility')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Update profile visibility',
@@ -950,6 +955,7 @@ export class SellerProfilesController {
   }
 
   @Put(':profileId/payment-onboarding')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Update payment onboarding status (system/admin only)',
