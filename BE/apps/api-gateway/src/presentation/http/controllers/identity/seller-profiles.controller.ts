@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -144,6 +145,9 @@ export class SellerProfilesController {
   async getSellerProfileBySlug(
     @Param('slug') slug: string,
   ): Promise<SellerProfilePayload> {
+    if (!slug || !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(slug)) {
+      throw new BadRequestException('Invalid slug format');
+    }
     return sendRpc<SellerProfilePayload>(
       this.identityClient,
       { cmd: 'get_seller_profile_by_slug' },

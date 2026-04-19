@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
-import { UserRole } from '@app/common';
+import { UserRole, RpcExceptionHelper } from '@app/common';
 import {
   CreateSellerProfileCommand,
   DeleteSellerProfileCommand,
@@ -57,6 +57,9 @@ export class SellerProfilesMicroserviceController {
   async getSellerProfileBySlug(
     @Payload() data: { slug: string },
   ): Promise<SellerProfilePayload> {
+    if (!data.slug || !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(data.slug)) {
+      throw RpcExceptionHelper.badRequest('Invalid slug format');
+    }
     return this.queryBus.execute(new GetSellerProfileBySlugQuery(data.slug));
   }
 

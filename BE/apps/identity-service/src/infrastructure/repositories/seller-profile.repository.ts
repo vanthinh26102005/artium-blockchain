@@ -43,6 +43,9 @@ export class SellerProfileRepository implements ISellerProfileRepository {
     transactionManager?: EntityManager,
   ): Promise<SellerProfile> {
     const repo = this.getRepo(transactionManager);
+    if (data.slug) {
+      data.slug = data.slug.toLowerCase();
+    }
     this.logger.debug(`Creating seller profile for userId: ${data.userId}`);
     return repo.save(data);
   }
@@ -60,6 +63,9 @@ export class SellerProfileRepository implements ISellerProfileRepository {
       return null;
     }
 
+    if (data.slug) {
+      data.slug = data.slug.toLowerCase();
+    }
     repo.merge(entity, data);
     this.logger.debug(`Updating seller profile: ${profileId}`);
     return repo.save(entity);
@@ -310,7 +316,7 @@ export class SellerProfileRepository implements ISellerProfileRepository {
     queryBuilder.where('seller_profile.slug = :slug', { slug });
 
     if (excludeProfileId) {
-      queryBuilder.andWhere('seller_profile.profileId != :excludeProfileId', {
+      queryBuilder.andWhere('seller_profile.id != :excludeProfileId', {
         excludeProfileId,
       });
     }

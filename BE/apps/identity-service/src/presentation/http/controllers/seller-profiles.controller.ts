@@ -254,6 +254,10 @@ export class SellerProfilesController {
         throw new BadRequestException('Slug is required');
       }
 
+      if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(slug)) {
+        throw new BadRequestException('Invalid slug format');
+      }
+
       const profile = await this.queryBus.execute(
         new GetSellerProfileBySlugQuery(slug),
       );
@@ -532,9 +536,9 @@ export class SellerProfilesController {
         throw new BadRequestException('Slug is required');
       }
 
-      if (!/^[a-z0-9-]+$/.test(input.slug)) {
+      if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(input.slug)) {
         throw new BadRequestException(
-          'Slug must contain only lowercase letters, numbers, and hyphens',
+          'Slug must contain only lowercase letters, numbers, and hyphens, and must start/end with a letter or number',
         );
       }
 
@@ -640,9 +644,9 @@ export class SellerProfilesController {
         throw new BadRequestException('Update input is required');
       }
 
-      if (input.slug && !/^[a-z0-9-]+$/.test(input.slug)) {
+      if (input.slug && !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(input.slug)) {
         throw new BadRequestException(
-          'Slug must contain only lowercase letters, numbers, and hyphens',
+          'Slug must contain only lowercase letters, numbers, and hyphens, and must start/end with a letter or number',
         );
       }
 

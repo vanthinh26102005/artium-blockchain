@@ -319,8 +319,12 @@ export class IdentitySeeder {
 
       const safeDisplayName = displayName ?? 'item';
 
-      // Use email as slug for easy identification and search
-      const slug = seller.email;
+      // Generate URL-safe slug from display name
+      const slug = safeDisplayName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        || `seller-${i}`;
 
       const profile = new SellerProfile();
       profile.userId = seller.id;
