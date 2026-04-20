@@ -332,8 +332,8 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                             key={profile.id || profile.profileId}
                             type="button"
                             onClick={() => {
-                              console.log('[SiteHeader] Navigating to profile:', profile.slug, profile.displayName)
-                              router.push(`/profile/${encodeURIComponent(profile.slug)}`)
+                              console.log('[SiteHeader] Navigating to profile:', profile.userId, profile.displayName)
+                              router.push(`/profile/${encodeURIComponent(profile.userId)}`)
                               setIsSearchOpen(false)
                               setShowResults(false)
                               setSearchQuery('')
@@ -564,8 +564,8 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                         key={profile.id || profile.profileId}
                         type="button"
                         onClick={() => {
-                          console.log('[SiteHeader Mobile] Navigating to profile:', profile.slug, profile.displayName)
-                          router.push(`/profile/${profile.slug}`)
+                          console.log('[SiteHeader Mobile] Navigating to profile:', profile.userId, profile.displayName)
+                          router.push(`/profile/${profile.userId}`)
                           setIsSearchOpen(false)
                           setShowResults(false)
                           setSearchQuery('')

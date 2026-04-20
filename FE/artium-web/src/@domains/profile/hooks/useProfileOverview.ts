@@ -55,7 +55,7 @@ export const useProfileOverview = ({
         // Step 1: Fetch User
         let fetchedUser: UserPayload | null = null
 
-        if (!username || (authUser && (authUser.slug === username || authUser.username === username))) {
+        if (!username || (authUser && (authUser.slug === username || authUser.username === username || authUser.id === username))) {
           // Own profile — use /identity/users/me
           if (authUser?.id) {
             try {
@@ -65,9 +65,12 @@ export const useProfileOverview = ({
             }
           }
         } else {
-          // Other user's profile — use /identity/users/slug/:slug
+          // Other user's profile — detect UUID vs slug
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username)
           try {
-            fetchedUser = await usersApi.getUserBySlug(username)
+            fetchedUser = isUuid
+              ? await usersApi.getUserById(username)
+              : await usersApi.getUserBySlug(username)
           } catch {
             fetchedUser = null
           }

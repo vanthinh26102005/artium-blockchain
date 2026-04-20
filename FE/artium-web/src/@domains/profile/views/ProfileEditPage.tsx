@@ -307,7 +307,6 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
 
           const sellerPayload = {
             displayName: displayName || sellerProfile.displayName,
-            slug: slug || sellerProfile.slug,
             bio: data.biography?.trim() || null,
             profileImageUrl: data.avatarUrl || null,
             websiteUrl: data.websiteUrl ? normalizeUrl(data.websiteUrl) : null,
@@ -338,7 +337,7 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
       setSaveStatus('success')
 
       // If slug changed, redirect to new edit URL
-      const previousSlug = sellerProfile?.slug ?? authUser?.slug ?? authUser?.username
+      const previousSlug = authUser?.slug ?? authUser?.username
       if (slug && slug !== previousSlug) {
         window.setTimeout(() => {
           void router.replace(`/profile/${encodeURIComponent(slug)}/edit`, undefined, {

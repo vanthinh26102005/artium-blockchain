@@ -103,7 +103,7 @@ export const enrichProfileUserWithSeller = (
   seller: SellerProfilePayload,
 ): ProfileUser => ({
   ...base,
-  username: seller.slug || base.username,
+  username: base.username,
   displayName: seller.displayName || base.displayName,
   bio: ensureText(seller.bio) || base.bio,
   avatarUrl: seller.profileImageUrl || base.avatarUrl,
@@ -135,7 +135,7 @@ export const mapUserPayloadToProfileAbout = (_user: UserPayload): ProfileAbout =
 })
 
 export const mapSellerProfileToProfileUser = (sellerProfile: SellerProfilePayload): ProfileUser => ({
-  username: sellerProfile.slug,
+  username: '',
   displayName: sellerProfile.displayName,
   bio: ensureText(sellerProfile.bio),
   avatarUrl: sellerProfile.profileImageUrl || DEFAULT_AVATAR,
@@ -390,14 +390,14 @@ export const buildProfileOverviewData = ({
   }
 }
 
-export const resolveProfileUsername = (sellerProfile?: SellerProfilePayload | null, fallback?: string) =>
-  sellerProfile?.slug || fallback || ''
+export const resolveProfileUsername = (_sellerProfile?: SellerProfilePayload | null, fallback?: string) =>
+  fallback || ''
 
 export const resolveUsername = (
   user?: UserPayload | null,
-  sellerProfile?: SellerProfilePayload | null,
+  _sellerProfile?: SellerProfilePayload | null,
   fallback?: string,
-) => sellerProfile?.slug || user?.slug || user?.username || fallback || ''
+) => user?.slug || user?.username || fallback || ''
 
 const resolveCommentAuthor = (
   comment: CommentApiItem,
