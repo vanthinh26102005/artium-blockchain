@@ -74,7 +74,7 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
     sellerProfile &&
     authUser?.id === sellerProfile.userId
 
-  const profileData = baseData
+  const profileData = profileDataWithDraft
 
   const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Artium`
   const baseHref = `/profile/${encodeURIComponent(resolvedUsername)}`
