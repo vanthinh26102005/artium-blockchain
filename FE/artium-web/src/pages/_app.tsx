@@ -7,6 +7,7 @@ import type { AppProps } from 'next/app'
 import { SessionProvider } from 'next-auth/react'
 import { AuthBootstrap } from '@shared/components/auth/AuthBootstrap'
 import { AppLayout } from '@shared/components/layout/AppLayout'
+import { ToastProvider } from '@shared/components/ui/toast'
 import type { NextPageWithLayout } from '@shared/types/next'
 
 type AppPropsWithLayout = AppProps & {
@@ -20,8 +21,10 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   return (
     <SessionProvider session={pageProps.session}>
-      <AuthBootstrap />
-      {page}
+      <ToastProvider>
+        <AuthBootstrap />
+        {page}
+      </ToastProvider>
     </SessionProvider>
   )
 }

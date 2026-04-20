@@ -21,6 +21,16 @@ const navLinks = [
   { href: '/auction', label: 'Live Auctions' },
 ]
 
+const shortenWalletAddress = (address?: string | null) => {
+  if (!address) {
+    return null
+  }
+
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+
+const isWalletLocalEmail = (email?: string | null) => Boolean(email?.endsWith('@wallet.local'))
+
 type SiteHeaderProps = {
   variant?: 'default' | 'landing'
 }
@@ -220,8 +230,15 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
     isSearchVisible ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0 pointer-events-none',
     showResults ? 'overflow-visible' : 'overflow-hidden',
   ].join(' ')
-  const profileHandle = user?.username ?? user?.email ?? 'profile'
-  const profileLabel = user?.username ?? user?.email ?? 'user'
+  const walletLabel = shortenWalletAddress(user?.walletAddress)
+  const profileHandle = user?.username ?? user?.id ?? user?.email ?? 'profile'
+  const profileLabel =
+    user?.username ??
+    user?.displayName ??
+    user?.fullName ??
+    walletLabel ??
+    (isWalletLocalEmail(user?.email) ? null : user?.email) ??
+    'user'
   const avatarUrl = user?.avatarUrl ?? '/images/logo-dark-mode.png'
   const useWhiteNav = isLandingVariant || isAuthRoute || (isTransparentHeaderPage && !isScrolled)
   const logoSrc = useWhiteNav

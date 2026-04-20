@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 // third-party
+import { Wallet } from 'lucide-react'
 import { signIn } from 'next-auth/react'
 
 // internal - components
@@ -16,19 +17,23 @@ import usersApi from '@shared/apis/usersApi'
 
 // @shared - components
 import { Button } from '@shared/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/components/ui/dialog'
 
 // @domains - auth
 import { useGoogleLoginBridge } from '@domains/auth/hooks/useGoogleLoginBridge'
+import { useWalletLogin } from '@domains/auth/hooks/useWalletLogin'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import {
   AuthDivider,
   AuthFooter,
   AuthFormCard,
   AuthInput,
+  AuthProviderButton,
   AuthShell,
   FormErrorMessage,
   PasswordInput,
   SocialAuthButtons,
+  WalletLoginPanel,
 } from '@domains/auth/components'
 
 export const LoginPage = () => {
@@ -38,11 +43,13 @@ export const LoginPage = () => {
   // -- state --
   const setAuth = useAuthStore((state) => state.setAuth)
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
+  const walletLogin = useWalletLogin()
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false)
   const [serverError, setServerError] = useState('')
 
   // -- derived --
@@ -118,6 +125,14 @@ export const LoginPage = () => {
     }
   }
 
+  const handleWalletSignIn = async () => {
+    await walletLogin.loginWithWallet()
+  }
+
+  const handleSwitchWalletNetwork = async () => {
+    await walletLogin.switchToTargetChain()
+  }
+
   // -- render --
   return (
     <AuthShell>
@@ -135,6 +150,15 @@ export const LoginPage = () => {
         />
 
         {googleError ? <FormErrorMessage id="google-error" message={googleError} /> : null}
+
+        <AuthProviderButton
+          icon={<Wallet className="h-6 w-6 shrink-0 text-[#191414]" />}
+          label="Login with MetaMask"
+          loadingLabel="Opening MetaMask..."
+          isLoading={walletLogin.isLoading}
+          onClick={() => setIsWalletDialogOpen(true)}
+          className="w-full flex-none"
+        />
 
         <AuthDivider text="Or sign in with" />
 
@@ -199,6 +223,36 @@ export const LoginPage = () => {
 
         <AuthFooter />
       </AuthFormCard>
+
+      <Dialog open={isWalletDialogOpen} onOpenChange={setIsWalletDialogOpen}>
+        <DialogContent
+          size="lg"
+          closeButtonClassName="top-6 right-6 h-10 w-10 border border-black/10 bg-white text-[#6f6a67] hover:bg-[#f7f5f2] hover:text-[#191414] focus:ring-black/20 sm:top-7 sm:right-7"
+          className="max-h-[90vh] max-w-[520px] overflow-y-auto rounded-2xl bg-white p-6 text-black shadow-[0_30px_90px_rgba(0,0,0,0.28)] sm:p-7"
+        >
+          <DialogHeader className="mb-6 !px-0 pr-14 text-left sm:mb-7">
+            <div className="min-w-0">
+              <DialogTitle className="text-left text-[22px] leading-[1.15] font-bold text-[#191414] sm:text-2xl">
+                Sign in with MetaMask
+              </DialogTitle>
+              <p className="max-w-[390px] text-left text-sm leading-6 font-medium text-[#6f6a67]">
+                Connect your wallet and sign a secure message to access Artium.
+              </p>
+            </div>
+          </DialogHeader>
+
+          <WalletLoginPanel
+            buttonLabel={walletLogin.buttonLabel}
+            isLoading={walletLogin.isLoading}
+            isWrongNetwork={walletLogin.isWrongNetwork}
+            onLogin={handleWalletSignIn}
+            onSwitchNetwork={handleSwitchWalletNetwork}
+            shortenedAddress={walletLogin.shortenedAddress}
+            status={walletLogin.status}
+            targetChainName={walletLogin.targetChain.name}
+          />
+        </DialogContent>
+      </Dialog>
     </AuthShell>
   )
 }
