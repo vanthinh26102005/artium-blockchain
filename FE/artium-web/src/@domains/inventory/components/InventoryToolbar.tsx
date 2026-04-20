@@ -121,9 +121,7 @@ export const InventoryToolbar = ({
   }
 
   const handleCreatePrivateView = () => {
-    if (typeof window !== 'undefined') {
-      window.alert('Create private view (stub)')
-    }
+    // Feature not yet implemented - button shows as disabled
   }
 
   const handleDraftChange = (key: keyof DraftFilters, value: string) => {
@@ -193,9 +191,11 @@ export const InventoryToolbar = ({
           <button
             type="button"
             onClick={handleCreatePrivateView}
-            className="inline-flex cursor-pointer items-center gap-2 text-slate-400 transition hover:text-slate-500"
+            disabled
+            className="inline-flex cursor-not-allowed items-center gap-2 text-slate-300 opacity-50"
+            title="Coming soon"
           >
-            <Lock className="h-4 w-4 text-slate-400" />
+            <Lock className="h-4 w-4 text-slate-300" />
             Create private view
           </button>
         </div>

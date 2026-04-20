@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 // next
+import { useRouter } from 'next/router'
 import { Plus } from 'lucide-react'
 
 // third-party
@@ -58,6 +59,9 @@ import { InventoryArtworkGridViewItem } from '@domains/inventory/components/Inve
 type FolderWithCount = InventoryFolder & { itemCount: number }
 
 export const InventoryPage = () => {
+  // -- hooks --
+  const router = useRouter()
+
   // -- state --
   const [searchName, setSearchName] = useState('')
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
@@ -347,9 +351,7 @@ export const InventoryPage = () => {
   }
 
   const handleEditArtwork = (artwork: InventoryArtwork) => {
-    if (typeof window !== 'undefined') {
-      window.alert(`Edit "${artwork.title}" (stub)`)
-    }
+    router.push(`/artworks/${artwork.id}`)
   }
 
   const handleMoveArtwork = (artwork: InventoryArtwork) => {
