@@ -50,8 +50,8 @@ export class OrdersController {
   @ApiBody({ type: CreateOrderDto })
   @ApiResponse({ status: 201, description: 'Order created successfully', type: OrderObject })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
-  async createOrder(@Body() data: CreateOrderDto) {
-    return sendRpc(this.ordersClient, { cmd: 'create_order' }, data);
+  async createOrder(@Body() data: CreateOrderDto, @Req() req: any) {
+    return sendRpc(this.ordersClient, { cmd: 'create_order' }, { ...data, buyerId: req.user?.id });
   }
 
   @Get()
