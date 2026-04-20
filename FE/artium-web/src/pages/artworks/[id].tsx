@@ -5,6 +5,7 @@ import { ArtworkDetailPage } from '@domains/artwork-detail/views/ArtworkDetailPa
 import { ArtworkDetail } from '@domains/artwork-detail/types'
 import artworkApis, { ArtworkApiItem } from '@shared/apis/artworkApis'
 import profileApis from '@shared/apis/profileApis'
+import usersApi from '@shared/apis/usersApi'
 
 const priceFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -20,6 +21,11 @@ const mapApiToArtworkDetail = (
     profileImageUrl?: string | null
     isVerified?: boolean
     soldArtworkCount?: number
+  } | null,
+  user?: {
+    slug?: string | null
+    fullName?: string | null
+    avatarUrl?: string | null
   } | null,
 ): ArtworkDetail => {
   const price =
@@ -79,10 +85,11 @@ const mapApiToArtworkDetail = (
     savedByUser: false,
     images,
     creator: {
-      username: sellerProfile?.displayName?.toLowerCase().replace(/\s+/g, '') || 'artist',
+      slug: user?.slug ?? null,
+      username: user?.slug || sellerProfile?.displayName?.toLowerCase().replace(/\s+/g, '') || 'artist',
       displayName: creatorName,
       bio: sellerProfile?.bio || '',
-      avatarUrl: sellerProfile?.profileImageUrl || '/images/default-avatar.png',
+      avatarUrl: sellerProfile?.profileImageUrl || user?.avatarUrl || '/images/default-avatar.png',
       verified: sellerProfile?.isVerified ?? false,
       buyers: undefined,
       worksSold: sellerProfile?.soldArtworkCount ?? undefined,
@@ -111,15 +118,13 @@ export default function ArtworkDetailPageRoute() {
       const apiArtwork = await artworkApis.getArtworkById(artworkId)
       if (!apiArtwork || cancelled) return null
 
-      // Fetch seller profile for creator info
-      let sellerProfile = null
-      try {
-        sellerProfile = await profileApis.getSellerProfileByUserId(apiArtwork.sellerId)
-      } catch {
-        // Seller profile may not exist; continue without it
-      }
+      // Fetch seller profile and user data in parallel
+      const [sellerProfile, userData] = await Promise.all([
+        profileApis.getSellerProfileByUserId(apiArtwork.sellerId).catch(() => null),
+        usersApi.getUserById(apiArtwork.sellerId).catch(() => null),
+      ])
 
-      return mapApiToArtworkDetail(apiArtwork, sellerProfile)
+      return mapApiToArtworkDetail(apiArtwork, sellerProfile, userData)
     }
 
     fetchArtwork()
