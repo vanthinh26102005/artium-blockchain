@@ -15,7 +15,7 @@ COPY libs ./libs
 RUN yarn install --frozen-lockfile
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
-COPY apps/api-gateway/tsconfig.app.json ./apps/api-gateway/tsconfig.json
+COPY apps/api-gateway/tsconfig.json ./apps/api-gateway/tsconfig.app.json
 COPY apps/api-gateway ./apps/api-gateway
 
 RUN yarn workspace @backend/api-gateway build

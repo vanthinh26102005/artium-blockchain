@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -114,40 +115,6 @@ export class SellerProfilesController {
       this.identityClient,
       { cmd: 'get_seller_profile_by_user_id' },
       { userId },
-    );
-  }
-
-  @Get('slug/:slug')
-  @ApiOperation({
-    summary: 'Get seller profile by slug',
-    description:
-      'Retrieves a seller profile by its unique slug for public profile pages',
-  })
-  @ApiParam({
-    name: 'slug',
-    description: 'The unique slug of the seller profile',
-    type: 'string',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Seller profile retrieved successfully',
-    type: SellerProfilePayload,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Seller profile not found',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid slug format',
-  })
-  async getSellerProfileBySlug(
-    @Param('slug') slug: string,
-  ): Promise<SellerProfilePayload> {
-    return sendRpc<SellerProfilePayload>(
-      this.identityClient,
-      { cmd: 'get_seller_profile_by_slug' },
-      { slug },
     );
   }
 

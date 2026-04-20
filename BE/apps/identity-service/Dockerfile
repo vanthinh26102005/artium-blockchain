@@ -14,7 +14,7 @@ COPY libs ./libs
 RUN yarn install --frozen-lockfile
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
-COPY apps/identity-service/tsconfig.app.json ./apps/identity-service/tsconfig.json
+COPY apps/identity-service/tsconfig.json ./apps/identity-service/tsconfig.json
 COPY apps/identity-service ./apps/identity-service
 
 RUN yarn workspace @backend/identity-service build

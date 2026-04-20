@@ -11,6 +11,7 @@ import {
   TransactionStatus,
   TransactionType,
   RpcExceptionHelper,
+  PLATFORM_FEE_RATE,
 } from '@app/common';
 import { ITransactionService } from '@app/common';
 import { OutboxService } from '@app/outbox';
@@ -81,7 +82,7 @@ export class CreateStripePaymentIntentHandler implements ICommandHandler<CreateS
         data.description,
       );
 
-      const platformFee = data.amount * 0.05;
+      const platformFee = data.amount * PLATFORM_FEE_RATE;
       const netAmount = data.amount - platformFee;
 
       const transaction = await this.transactionService.execute(

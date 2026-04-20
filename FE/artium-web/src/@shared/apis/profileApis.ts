@@ -6,7 +6,6 @@ type SellerProfilePayload = {
   userId: string
   profileType?: string
   displayName: string
-  slug: string
   bio?: string | null
   profileImageUrl?: string | null
   coverImageUrl?: string | null
@@ -42,7 +41,6 @@ type SellerProfilePayload = {
 type UpdateSellerProfileInput = {
   profileType?: string
   displayName?: string
-  slug?: string
   bio?: string | null
   profileImageUrl?: string | null
   coverImageUrl?: string | null
@@ -175,6 +173,23 @@ type CreateMoodboardInput = {
   tags?: string[]
 }
 
+type CreateSellerProfileInput = {
+  profileType: string
+  displayName: string
+  slug: string
+  bio?: string | null
+  profileImageUrl?: string | null
+  coverImageUrl?: string | null
+  websiteUrl?: string | null
+  location?: string | null
+}
+
+type CreateSellerProfileResponse = {
+  success: boolean
+  message: string
+  sellerProfile: SellerProfilePayload
+}
+
 type SearchSellerProfilesResponse = {
   items: SellerProfilePayload[]
   total: number
@@ -194,11 +209,6 @@ const buildQuery = (params?: Record<string, string | number | boolean | null | u
 }
 
 export const profileApis = {
-  getSellerProfileBySlug: (slug: string) =>
-    apiFetch<SellerProfilePayload>(`/identity/seller-profiles/slug/${slug}`, {
-      auth: false,
-      cache: 'no-store',
-    }),
   getSellerProfileByUserId: (userId: string) =>
     apiFetch<SellerProfilePayload>(`/identity/seller-profiles/user/${userId}`, {
       auth: true,
@@ -277,12 +287,20 @@ export const profileApis = {
         cache: 'no-store',
       },
     ),
+  createSellerProfile: (input: CreateSellerProfileInput) =>
+    apiFetch<CreateSellerProfileResponse>('/identity/seller-profiles', {
+      method: 'POST',
+      body: JSON.stringify(input),
+      auth: true,
+    }),
 }
 
 export type {
   SellerProfilePayload,
   UpdateSellerProfileInput,
   UpdateSellerProfileResponse,
+  CreateSellerProfileInput,
+  CreateSellerProfileResponse,
   MomentApiItem,
   MoodboardApiItem,
   CommentApiItem,

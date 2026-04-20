@@ -11,6 +11,8 @@ type AboutCreatorProps = {
 }
 
 export const AboutCreator = ({ creator }: AboutCreatorProps) => {
+    const profileHref = creator.slug ? `/profile/${creator.slug}` : '#'
+
     const handleFollow = () => {
         // TODO: Implement follow functionality
         console.log('Follow clicked')
@@ -20,7 +22,7 @@ export const AboutCreator = ({ creator }: AboutCreatorProps) => {
         <div className="flex items-start gap-4">
             {/* Avatar */}
             <Link
-                href={`/profile/${creator.username}`}
+                href={profileHref}
                 className="relative h-12 w-12 flex-shrink-0 cursor-pointer overflow-hidden rounded-full"
             >
                 <Image
@@ -36,7 +38,7 @@ export const AboutCreator = ({ creator }: AboutCreatorProps) => {
             <div className="flex-1">
                 <div className="flex items-center gap-2">
                     <Link
-                        href={`/profile/${creator.username}`}
+                        href={profileHref}
                         className="flex cursor-pointer items-center gap-1 text-slate-900 hover:underline"
                         style={{ fontFamily: 'Inter', fontSize: '14px', lineHeight: '20px', fontWeight: 500, letterSpacing: '0%' }}
                     >

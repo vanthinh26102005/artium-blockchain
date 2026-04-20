@@ -63,18 +63,14 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
   })
 
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+  const { data: baseData, user: fetchedUser, sellerProfile, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileDataWithDraft = useProfileDraftData(baseData)
   const authUser = useAuthStore((state) => state.user)
   const isAuthenticated = Boolean(authUser?.id)
-  const isOwner =
-    isAuthenticated &&
-    sellerProfile &&
-    authUser?.id === sellerProfile.userId
 
-  const profileData = baseData
+  const profileData = profileDataWithDraft
 
   const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Artium`
   const baseHref = `/profile/${encodeURIComponent(resolvedUsername)}`
@@ -208,14 +204,15 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
   const renderTabContent = () => {
     switch (activeTab) {
       case 'artworks':
-        return <ArtworksSection artworks={profileData.artworks} showSeeAll={false} />
+        return <ArtworksSection artworks={profileData.artworks} showSeeAll={false} isOwner={isOwner} />
       case 'moments':
-        return <MomentsSection moments={moments} showSeeAll={false} />
+        return <MomentsSection moments={moments} showSeeAll={false} isOwner={isOwner} />
       case 'moodboards':
         return (
           <MoodboardsSection
             moodboards={moodboards}
             detailBaseHref={`${baseHref}/moodboards`}
+            isOwner={isOwner}
           />
         )
       case 'overview':
@@ -226,26 +223,31 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
               artworks={profileData.artworks}
               limit={5}
               seeAllHref={`${baseHref}/artworks`}
+              isOwner={isOwner}
             />
             <MomentsSection
               moments={moments}
               limit={6}
               seeAllHref={`${baseHref}/moments`}
               detailBaseHref={`${baseHref}/moments`}
+              isOwner={isOwner}
             />
             <MoodboardsSection
               moodboards={moodboards}
               seeAllHref={`${baseHref}/moodboards`}
               detailBaseHref={`${baseHref}/moodboards`}
+              isOwner={isOwner}
             />
             <ProfileAboutSection
               about={profileData.about}
               editHref={`/profile/${encodeURIComponent(resolvedUsername)}/edit`}
             />
-            <ProfileSalesStatsSection
-              displayName={profileData.user.displayName}
-              stats={profileData.salesStats}
-            />
+            {sellerProfile ? (
+              <ProfileSalesStatsSection
+                displayName={profileData.user.displayName}
+                stats={profileData.salesStats}
+              />
+            ) : null}
           </div>
         )
     }
@@ -268,8 +270,8 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
             <ProfileHero
               user={profileData.user}
               stats={profileData.stats}
-              userId={sellerProfile?.userId}
-              isOwner={isOwner || false}
+              userId={fetchedUser?.id}
+              isOwner={isOwner}
             />
           )}
         </div>

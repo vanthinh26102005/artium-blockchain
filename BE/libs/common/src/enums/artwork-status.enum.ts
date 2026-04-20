@@ -19,10 +19,12 @@ export enum ArtworkStatus {
   DELETED = 'DELETED',
   /** Submitted for platform approval */
   PENDING_REVIEW = 'PENDING_REVIEW',
+  /** Listed in an active on-chain auction */
+  IN_AUCTION = 'IN_AUCTION',
 }
 
 registerEnumType(ArtworkStatus, {
   name: 'ArtworkStatus',
   description:
-    'Artwork lifecycle status (DRAFT, ACTIVE, SOLD, RESERVED, INACTIVE, DELETED, PENDING_REVIEW)',
+    'Artwork lifecycle status (DRAFT, ACTIVE, SOLD, RESERVED, INACTIVE, DELETED, PENDING_REVIEW, IN_AUCTION)',
 });

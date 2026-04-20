@@ -5,6 +5,7 @@ import { RpcExceptionHelper, OrderStatus } from '@app/common';
 import { CancelOrderCommand } from '../CancelOrder.command';
 import { Order } from '../../../domain/entities';
 import { IOrderRepository } from '../../../domain/interfaces';
+import { isValidTransition } from '../../../domain/constants';
 
 @CommandHandler(CancelOrderCommand)
 export class CancelOrderHandler implements ICommandHandler<CancelOrderCommand> {
@@ -17,20 +18,27 @@ export class CancelOrderHandler implements ICommandHandler<CancelOrderCommand> {
 
   async execute(command: CancelOrderCommand): Promise<Order | null> {
     try {
-      const { orderId, reason } = command;
-      this.logger.log(`Cancelling order: ${orderId}`);
+      const { orderId, userId, reason } = command;
+      this.logger.log(`Cancelling order: ${orderId} by user: ${userId}`);
 
-      const order = await this.orderRepo.findById(orderId);
+      const order = await this.orderRepo.findWithItems(orderId);
       if (!order) {
         throw RpcExceptionHelper.notFound(`Order ${orderId} not found`);
       }
 
-      if (order.status === OrderStatus.DELIVERED) {
-        throw RpcExceptionHelper.badRequest('Cannot cancel a delivered order');
+      // Buyer (collectorId) or seller (via items) can cancel
+      const isBuyer = order.collectorId === userId;
+      const isSeller = order.items?.some((item) => item.sellerId === userId) ?? false;
+      if (!isBuyer && !isSeller) {
+        throw RpcExceptionHelper.forbidden(
+          'Only the buyer or seller of this order can cancel it.',
+        );
       }
 
-      if (order.status === OrderStatus.CANCELLED) {
-        throw RpcExceptionHelper.badRequest('Order is already cancelled');
+      if (!isValidTransition(order.status, OrderStatus.CANCELLED)) {
+        throw RpcExceptionHelper.badRequest(
+          `Cannot cancel order in status '${order.status}'.`,
+        );
       }
 
       return this.orderRepo.update(orderId, {

@@ -63,7 +63,7 @@ export class FindManyArtworkInput {
 
   @ApiPropertyOptional({
     description: 'Field to sort by',
-    enum: ['createdAt', 'updatedAt', 'title', 'price', 'status'],
+    enum: ['createdAt', 'updatedAt', 'title', 'price', 'status', 'likeCount'],
     example: 'createdAt',
   })
   @IsOptional()

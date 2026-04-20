@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsNotEmpty,
@@ -38,14 +38,47 @@ export class OrderItemDto {
   price: number;
 }
 
+export class ShippingAddressDto {
+  @ApiProperty({ description: 'Address line 1', example: '123 Main St' })
+  @IsString()
+  @IsNotEmpty()
+  line1: string;
+
+  @ApiPropertyOptional({ description: 'Address line 2', example: 'Apt 4B' })
+  @IsOptional()
+  @IsString()
+  line2?: string;
+
+  @ApiProperty({ description: 'City', example: 'New York' })
+  @IsString()
+  @IsNotEmpty()
+  city: string;
+
+  @ApiProperty({ description: 'State or province', example: 'NY' })
+  @IsString()
+  @IsNotEmpty()
+  state: string;
+
+  @ApiProperty({ description: 'Postal code', example: '10001' })
+  @IsString()
+  @IsNotEmpty()
+  postalCode: string;
+
+  @ApiProperty({ description: 'Country code', example: 'US' })
+  @IsString()
+  @IsNotEmpty()
+  country: string;
+}
+
 export class CreateOrderDto {
   @ApiProperty({
-    description: 'Buyer user ID',
+    description: 'Buyer user ID (auto-filled from JWT in gateway)',
     example: '123e4567-e89b-12d3-a456-426614174000',
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'Buyer ID is required' })
-  buyerId: string;
+  buyerId?: string;
 
   @ApiProperty({
     description: 'Seller user ID',
@@ -66,19 +99,18 @@ export class CreateOrderDto {
   @IsNotEmpty({ message: 'Order items are required' })
   items: OrderItemDto[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Shipping address',
-    example: '123 Main St, City, Country',
-    required: false,
+    type: ShippingAddressDto,
   })
   @IsOptional()
-  @IsString()
-  shippingAddress?: string;
+  @ValidateNested()
+  @Type(() => ShippingAddressDto)
+  shippingAddress?: ShippingAddressDto;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Additional notes',
     example: 'Please handle with care',
-    required: false,
   })
   @IsOptional()
   @IsString()

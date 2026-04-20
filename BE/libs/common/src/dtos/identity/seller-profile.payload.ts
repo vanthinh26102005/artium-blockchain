@@ -30,12 +30,6 @@ export class SellerProfilePayload {
   displayName: string;
 
   @ApiProperty({
-    example: 'artisan-gallery',
-    description: 'URL-friendly slug for the profile',
-  })
-  slug: string;
-
-  @ApiProperty({
     example: 'Contemporary artist specializing in abstract paintings',
     required: false,
     description: 'Biography or description of the seller',

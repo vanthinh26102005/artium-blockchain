@@ -5,6 +5,7 @@ import { RpcExceptionHelper, OrderStatus } from '@app/common';
 import { UpdateOrderStatusCommand } from '../UpdateOrderStatus.command';
 import { Order } from '../../../domain/entities';
 import { IOrderRepository } from '../../../domain/interfaces';
+import { isValidTransition } from '../../../domain/constants';
 
 @CommandHandler(UpdateOrderStatusCommand)
 export class UpdateOrderStatusHandler
@@ -25,6 +26,12 @@ export class UpdateOrderStatusHandler
       const order = await this.orderRepo.findById(orderId);
       if (!order) {
         throw RpcExceptionHelper.notFound(`Order ${orderId} not found`);
+      }
+
+      if (!isValidTransition(order.status, status)) {
+        throw RpcExceptionHelper.badRequest(
+          `Invalid status transition from '${order.status}' to '${status}'.`,
+        );
       }
 
       const updateData: Partial<Order> = { status };

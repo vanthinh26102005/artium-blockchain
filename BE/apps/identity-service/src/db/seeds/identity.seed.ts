@@ -167,6 +167,43 @@ export class IdentitySeeder {
       'Reyes',
     ];
 
+    // Curated Unsplash portrait photo IDs for user avatars
+    const portraitPhotos = [
+      '1500648767791-00dcc994a43e',
+      '1507003211169-0a1dd7228f2d',
+      '1531750026848-8ada78f641c2',
+      '1542909168-82c3e7fdca5c',
+      '1543949806-2c9935e6aa78',
+      '1549473448-b0acc73629dc',
+      '1580489944761-15a19d654956',
+      '1588178454780-441fa5b99fa5',
+      '1595211877493-41a4e5f236b3',
+      '1609436132311-e4b0c9370469',
+      '1642736468842-c6bdcfbbcd28',
+      '1656074520589-bd325dc7aa4f',
+      '1664536392896-cd1743f9c02c',
+      '1688740375397-34605b6abe48',
+      '1689539137236-b68e436248de',
+      '1690394943834-8f9491b750f9',
+      '1486413869840-a99ac0a4c031',
+      '1541519230324-f6779f9f4a48',
+      '1551180452-45cc5da51c3a',
+      '1570158268183-d296b2892211',
+      '1584661156681-540e80a161d3',
+      '1602806271931-07e449a819bd',
+      '1614204424926-196a80bf0be8',
+      '1625682115702-3a561cd465fd',
+      '1633887091273-a3bd71efddde',
+      '1650783756107-739513b38177',
+      '1658048223386-e1117ffc8298',
+      '1658314756268-3552b9ba2784',
+      '1672860872885-d26afe731608',
+      '1674643925879-d457c6e93801',
+    ];
+
+    const getPortraitUrl = (idx: number) =>
+      `https://images.unsplash.com/photo-${portraitPhotos[idx % portraitPhotos.length]}?w=300&h=300&fit=crop&q=80`;
+
     const users: User[] = [];
 
     // Admin user
@@ -175,7 +212,8 @@ export class IdentitySeeder {
         email: 'admin@artium.com',
         password: hashedPassword,
         fullName: 'Admin User',
-        avatarUrl: 'https://i.pravatar.cc/300?img=1',
+        slug: 'admin',
+        avatarUrl: getPortraitUrl(0),
         roles: [UserRole.ADMIN, UserRole.SELLER, UserRole.COLLECTOR],
         isEmailVerified: true,
         isActive: true,
@@ -184,6 +222,37 @@ export class IdentitySeeder {
         ),
       }),
     );
+
+    // Track used slugs for uniqueness
+    const usedUserSlugs = new Set<string>(['admin']);
+
+    /**
+     * Generates a URL-safe slug from name parts.
+     * Handles diacritics (NFD normalization), null/undefined, and length limits.
+     */
+    const createSlug = (
+      parts: (string | null | undefined)[],
+      { maxLength = 75 }: { maxLength?: number } = {},
+    ): string =>
+      parts
+        .map((s) => String(s ?? '').trim())
+        .filter(Boolean)
+        .join('-')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, maxLength);
+
+    const generateUserSlug = (firstName: string, lastName: string, index: number): string => {
+      let slug = createSlug([firstName, lastName]) || `user-${index}`;
+      if (usedUserSlugs.has(slug)) {
+        slug = `${slug}-${index}`;
+      }
+      usedUserSlugs.add(slug);
+      return slug;
+    };
 
     // 30 Sellers (with SELLER role)
     for (let i = 0; i < 30; i++) {
@@ -196,7 +265,8 @@ export class IdentitySeeder {
           email: `seller${i + 1}@artium.com`,
           password: hashedPassword,
           fullName: `${firstName} ${lastName}`,
-          avatarUrl: `https://i.pravatar.cc/300?img=${i + 10}`,
+          slug: generateUserSlug(firstName, lastName, i),
+          avatarUrl: getPortraitUrl(i + 1),
           roles: [UserRole.SELLER, UserRole.COLLECTOR],
           isEmailVerified: i % 5 !== 0, // 80% verified
           isActive: i % 10 !== 9, // 90% active
@@ -220,7 +290,8 @@ export class IdentitySeeder {
           email: `collector${i - 29}@artium.com`,
           password: hashedPassword,
           fullName: `${firstName} ${lastName}`,
-          avatarUrl: `https://i.pravatar.cc/300?img=${i + 20}`,
+          slug: generateUserSlug(firstName, lastName, i),
+          avatarUrl: getPortraitUrl(i),
           roles: [UserRole.COLLECTOR],
           isEmailVerified: i % 4 !== 0, // 75% verified
           isActive: true,
@@ -302,9 +373,23 @@ export class IdentitySeeder {
       'The Creative Space',
       'Masterpiece Gallery',
       'Art & Design Co',
-      `The Artist\\'s Way`,
+      "The Artist's Way",
       'Vision Gallery',
+      'Chromatic Studio',
+      'Horizon Arts',
+      'Ember Gallery',
+      'Blueprint Art Lab',
+      'Reverie Arts',
+      'Flux Contemporary',
+      'Prism Art Space',
+      'Nova Collective',
+      'Aureate Gallery',
+      'Catalyst Art House',
+      'Meridian Studio',
     ];
+
+    const usedSlugs = new Set<string>();
+    const profileSlugs: string[] = [];
 
     for (let i = 0; i < sellers.length; i++) {
       const seller = sellers[i];
@@ -319,17 +404,20 @@ export class IdentitySeeder {
 
       const safeDisplayName = displayName ?? 'item';
 
-      // Use email as slug for easy identification and search
-      const slug = seller.email;
+      // Generate URL-safe slug from display name, ensure uniqueness
+      let slug = createSlug([safeDisplayName]) || `seller-${i}`;
+      if (usedSlugs.has(slug)) {
+        slug = `${slug}-${i}`;
+      }
+      usedSlugs.add(slug);
 
       const profile = new SellerProfile();
       profile.userId = seller.id;
       profile.profileType = profileType;
       profile.displayName = safeDisplayName;
-      profile.slug = slug;
       profile.bio = `${displayName} is ${isGallery ? 'a renowned gallery' : isInstitution ? 'a prestigious institution' : 'an artist'} specializing in contemporary art. With ${Math.floor(Math.random() * 15 + 5)} years of experience, ${isGallery || isInstitution ? 'we' : 'I'} bring unique perspectives to the art world.`;
       profile.profileImageUrl = seller.avatarUrl;
-      profile.coverImageUrl = `https://picsum.photos/seed/${slug}/1200/400`;
+      profile.coverImageUrl = `https://images.unsplash.com/photo-${['1507643179773-3e975d7ac515', '1518998053901-5348d3961a04', '1565799515768-2dcfd834625c', '1569783721854-33a99b4c0bae', '1582555172866-f73bb12a2ab3', '1605429523419-d828acb941d9', '1541961017774-22349e4a1262', '1618331835717-801e976710b2', '1579783902915-f0b0de2c2eb3', '1572392640988-ba48d1a74457'][i % 10]}?w=1200&h=400&fit=crop&q=80`;
       profile.websiteUrl = i % 3 === 0 ? `https://${slug}.art` : null;
       profile.location = locations[i % locations.length];
       profile.stripeAccountId =
@@ -389,6 +477,7 @@ export class IdentitySeeder {
       profile.metaDescription = `${displayName} - Explore unique contemporary artworks and exhibitions.`;
       profile.tagIds = [];
 
+      profileSlugs.push(slug);
       sellerProfiles.push(profile);
     }
 
@@ -409,7 +498,7 @@ export class IdentitySeeder {
 
       for (let j = 0; j < numWebsites; j++) {
         const websiteType = websiteTypes[j % websiteTypes.length];
-        const slug = profile.slug;
+        const slug = profileSlugs[i];
 
         sellerWebsites.push(
           sellerWebsiteRepo.create({

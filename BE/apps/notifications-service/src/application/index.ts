@@ -4,6 +4,7 @@ export * from './commands/handlers/CreateNotificationHistory.command.handler';
 export * from './commands/handlers/UpdateNotificationHistory.command.handler';
 export * from './event-handlers/SendEmailEvent.event.handler';
 export * from './event-handlers/NewMessageEvent.event.handler';
+export * from './event-handlers/BlockchainAuctionEvent.event.handler';
 export * from './queries/GetNotificationHistory.query';
 export * from './queries/ListNotificationHistories.query';
 export * from './queries/handlers/GetNotificationHistory.query.handler';

@@ -12,7 +12,7 @@ import { SellerProfile } from './seller_profiles.entity';
 @Entity({ name: 'seller_websites' })
 @Index(['sellerId'])
 export class SellerWebsite extends AbstractEntity {
-  @PrimaryGeneratedColumn('uuid', { name: 'website_id' })
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column({ name: 'seller_id', type: 'varchar' })

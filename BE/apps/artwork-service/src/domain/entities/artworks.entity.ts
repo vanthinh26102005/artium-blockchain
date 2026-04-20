@@ -111,4 +111,22 @@ export class Artwork extends AbstractEntity {
 
   @Column({ name: 'moodboard_count', type: 'int', default: 0 })
   moodboardCount!: number;
+
+  // ── Auction fields (on-chain integration) ──
+
+  @Column({ name: 'ipfs_metadata_hash', type: 'varchar', length: 255, nullable: true })
+  ipfsMetadataHash: string | null;
+
+  @Column({ name: 'reserve_price', type: 'decimal', precision: 38, scale: 0, nullable: true })
+  reservePrice: string | null;
+
+  @Column({ name: 'min_bid_increment', type: 'decimal', precision: 38, scale: 0, nullable: true })
+  minBidIncrement: string | null;
+
+  @Column({ name: 'auction_duration', type: 'int', nullable: true })
+  auctionDuration: number | null;
+
+  @Column({ name: 'on_chain_auction_id', type: 'varchar', length: 66, nullable: true })
+  @Index({ unique: true, where: '"on_chain_auction_id" IS NOT NULL' })
+  onChainAuctionId: string | null;
 }

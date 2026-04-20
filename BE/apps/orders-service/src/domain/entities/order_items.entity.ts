@@ -1,5 +1,6 @@
 import { AbstractEntity, PayoutStatus } from '@app/common';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Order } from './orders.entity';
 
 @Entity({ name: 'order_items' })
 @Index(['orderId'])
@@ -11,6 +12,10 @@ export class OrderItem extends AbstractEntity {
 
   @Column({ name: 'order_id', type: 'uuid' })
   orderId!: string;
+
+  @ManyToOne(() => Order, (order) => order.items)
+  @JoinColumn({ name: 'order_id' })
+  order?: Order;
 
   @Column({ name: 'artwork_id', type: 'uuid' })
   artworkId!: string;

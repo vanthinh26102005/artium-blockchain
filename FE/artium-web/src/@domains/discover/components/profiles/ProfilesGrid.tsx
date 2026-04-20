@@ -1,32 +1,40 @@
 // react
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
 // @domains - discover
 import { ProfileCard } from '@domains/discover/components/cards/ProfileCard'
-import { mockProfiles, type DiscoverProfile } from '@domains/discover/mock/mockProfiles'
 import { ProfileSkeleton } from '@domains/discover/components/skeletons/DiscoverSkeletons'
+import { mapSellerProfileToDiscover } from '@domains/discover/utils/discoverMappers'
 
 // @shared
-import { useMockInfiniteScroll } from '@shared/hooks/useMockInfiniteScroll'
+import profileApis from '@shared/apis/profileApis'
+import { useApiInfiniteScroll } from '@shared/hooks/useApiInfiniteScroll'
 import { InfiniteScrollSentinel } from '@shared/components/ui/InfiniteScrollSentinel'
 
-const buildInitialFollowState = (profiles: DiscoverProfile[]) =>
-  profiles.reduce<Record<string, boolean>>((acc, profile) => {
-    acc[profile.id] = Boolean(profile.isFollowing)
-    return acc
-  }, {})
+type ProfilesGridProps = {
+  searchQuery?: string
+}
 
-export const ProfilesGrid = () => {
+export const ProfilesGrid = ({ searchQuery = '' }: ProfilesGridProps) => {
   // -- state --
-  const [followingById, setFollowingById] = useState(() => buildInitialFollowState(mockProfiles))
+  const [followingById, setFollowingById] = useState<Record<string, boolean>>({})
 
-  const { displayedItems, isLoading, hasMore, loadMore } = useMockInfiniteScroll({
-    allItems: mockProfiles,
-    initialCount: 6,
-    loadMoreCount: 6,
+  const fetchPage = useCallback(
+    async (skip: number, take: number) => {
+      const result = await profileApis.searchSellerProfiles(searchQuery, { skip, take })
+      return {
+        data: result.items.map(mapSellerProfileToDiscover),
+        hasMore: result.hasMore,
+      }
+    },
+    [searchQuery],
+  )
+
+  const { displayedItems, isLoading, hasMore, loadMore, error } = useApiInfiniteScroll({
+    fetchPage,
+    pageSize: 8,
+    searchQuery,
   })
-
-  // -- derived --
 
   // -- handlers --
   const handleToggleFollow = (profileId: string) => {
@@ -37,6 +45,22 @@ export const ProfilesGrid = () => {
   }
 
   // -- render --
+  if (error) {
+    return (
+      <div className="mt-10 text-center text-sm text-red-500">
+        Failed to load profiles. Please try again later.
+      </div>
+    )
+  }
+
+  if (!isLoading && displayedItems.length === 0) {
+    return (
+      <div className="mt-10 text-center text-sm text-slate-500">
+        No profiles found.
+      </div>
+    )
+  }
+
   return (
     <section className="mt-10">
       {/* grid */}

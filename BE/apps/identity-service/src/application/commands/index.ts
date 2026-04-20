@@ -26,3 +26,5 @@ export * from './handlers/UpdateProfileVisibility.command.handler';
 export * from './handlers/UpdateSellerProfile.command.handler';
 export * from './handlers/UpdateVerificationStatus.command.handler';
 export * from './handlers/VerifyPasswordReset.command.handler';
+export * from './UpdateUserProfile.command';
+export * from './handlers/UpdateUserProfile.command.handler';

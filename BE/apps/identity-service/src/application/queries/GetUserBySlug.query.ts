@@ -1,3 +1,3 @@
-export class GetSellerProfileBySlugQuery {
+export class GetUserBySlugQuery {
   constructor(public readonly slug: string) {}
 }

@@ -1,31 +1,71 @@
+// react
+import { useCallback } from 'react'
+
 // third-party
 import { Masonry } from 'masonic'
 
 // @domains - discover
 import { ArtworkThumbnailCard } from '@domains/discover/components/cards/ArtworkThumbnailCard'
-import {
-  mockTopPicksArtworks,
-  type TopPicksArtwork,
-} from '@domains/discover/mock/mockTopPicksArtworks'
+import type { TopPicksArtwork } from '@domains/discover/mock/mockTopPicksArtworks'
 import { TopPickSkeleton } from '@domains/discover/components/skeletons/DiscoverSkeletons'
+import { mapArtworkToTopPick } from '@domains/discover/utils/discoverMappers'
 
 // @shared
-import { useMockInfiniteScroll } from '@shared/hooks/useMockInfiniteScroll'
+import artworkApis from '@shared/apis/artworkApis'
+import { useApiInfiniteScroll } from '@shared/hooks/useApiInfiniteScroll'
 import { InfiniteScrollSentinel } from '@shared/components/ui/InfiniteScrollSentinel'
+
+type TopPicksMasonryProps = {
+  searchQuery?: string
+}
 
 const MasonryCard = ({ data }: { data: TopPicksArtwork }) => {
   return <ArtworkThumbnailCard artwork={data} />
 }
 
-export const TopPicksMasonry = () => {
-  // -- state --
-  const { displayedItems, isLoading, hasMore, loadMore } = useMockInfiniteScroll({
-    allItems: mockTopPicksArtworks,
-    initialCount: 18,
-    loadMoreCount: 12,
+export const TopPicksMasonry = ({ searchQuery = '' }: TopPicksMasonryProps) => {
+  // -- fetch (sorted by most liked) --
+  const fetchPage = useCallback(
+    async (skip: number, take: number) => {
+      const result = await artworkApis.listArtworksPaginated({
+        skip,
+        take,
+        q: searchQuery || undefined,
+        status: 'ACTIVE',
+        sortBy: 'likeCount',
+        sortOrder: 'desc',
+      })
+      return {
+        data: result.data.map(mapArtworkToTopPick),
+        hasMore: result.pagination.hasNext,
+      }
+    },
+    [searchQuery],
+  )
+
+  const { displayedItems, isLoading, hasMore, loadMore, error } = useApiInfiniteScroll({
+    fetchPage,
+    pageSize: 18,
+    searchQuery,
   })
 
   // -- render --
+  if (error) {
+    return (
+      <div className="mt-6 text-center text-sm text-red-500">
+        Failed to load top picks. Please try again later.
+      </div>
+    )
+  }
+
+  if (!isLoading && displayedItems.length === 0) {
+    return (
+      <div className="mt-6 text-center text-sm text-slate-500">
+        No top picks found.
+      </div>
+    )
+  }
+
   return (
     <div className="mt-6">
       {/* masonry */}
