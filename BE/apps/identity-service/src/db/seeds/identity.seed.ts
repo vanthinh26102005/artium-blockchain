@@ -226,8 +226,27 @@ export class IdentitySeeder {
     // Track used slugs for uniqueness
     const usedUserSlugs = new Set<string>(['admin']);
 
+    /**
+     * Generates a URL-safe slug from name parts.
+     * Handles diacritics (NFD normalization), null/undefined, and length limits.
+     */
+    const createSlug = (
+      parts: (string | null | undefined)[],
+      { maxLength = 75 }: { maxLength?: number } = {},
+    ): string =>
+      parts
+        .map((s) => String(s ?? '').trim())
+        .filter(Boolean)
+        .join('-')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, maxLength);
+
     const generateUserSlug = (firstName: string, lastName: string, index: number): string => {
-      let slug = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      let slug = createSlug([firstName, lastName]) || `user-${index}`;
       if (usedUserSlugs.has(slug)) {
         slug = `${slug}-${index}`;
       }
@@ -386,11 +405,7 @@ export class IdentitySeeder {
       const safeDisplayName = displayName ?? 'item';
 
       // Generate URL-safe slug from display name, ensure uniqueness
-      let slug = safeDisplayName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '')
-        || `seller-${i}`;
+      let slug = createSlug([safeDisplayName]) || `seller-${i}`;
       if (usedSlugs.has(slug)) {
         slug = `${slug}-${i}`;
       }
