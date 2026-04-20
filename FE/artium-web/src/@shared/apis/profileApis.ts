@@ -175,6 +175,23 @@ type CreateMoodboardInput = {
   tags?: string[]
 }
 
+type CreateSellerProfileInput = {
+  profileType: string
+  displayName: string
+  slug: string
+  bio?: string | null
+  profileImageUrl?: string | null
+  coverImageUrl?: string | null
+  websiteUrl?: string | null
+  location?: string | null
+}
+
+type CreateSellerProfileResponse = {
+  success: boolean
+  message: string
+  sellerProfile: SellerProfilePayload
+}
+
 type SearchSellerProfilesResponse = {
   items: SellerProfilePayload[]
   total: number
@@ -277,12 +294,20 @@ export const profileApis = {
         cache: 'no-store',
       },
     ),
+  createSellerProfile: (input: CreateSellerProfileInput) =>
+    apiFetch<CreateSellerProfileResponse>('/identity/seller-profiles', {
+      method: 'POST',
+      body: JSON.stringify(input),
+      auth: true,
+    }),
 }
 
 export type {
   SellerProfilePayload,
   UpdateSellerProfileInput,
   UpdateSellerProfileResponse,
+  CreateSellerProfileInput,
+  CreateSellerProfileResponse,
   MomentApiItem,
   MoodboardApiItem,
   CommentApiItem,

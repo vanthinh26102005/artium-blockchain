@@ -14,6 +14,7 @@ import type {
   VerifyPasswordResetPayload,
   VerifyPasswordResetResponse,
 } from '@shared/types/auth'
+import { normalizeLoginResponse, normalizeUserPayload } from '@shared/types/auth'
 
 type LoginByEmailInput = {
   email: string
@@ -25,18 +26,26 @@ type LoginByGoogleInput = {
 }
 
 const usersApi = {
-  loginByEmail: (input: LoginByEmailInput) =>
-    apiPost<LoginResponse>('/identity/auth/login', input, { auth: false }),
-  loginByGoogle: (input: LoginByGoogleInput) =>
-    apiPost<LoginResponse>('/identity/auth/google', input, { auth: false }),
-  loginWithGoogle: (input: LoginByGoogleInput) =>
-    apiPost<LoginResponse>('/identity/auth/google', input, { auth: false }),
+  loginByEmail: async (input: LoginByEmailInput) => {
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/login', input, { auth: false })
+    return normalizeLoginResponse(raw)
+  },
+  loginByGoogle: async (input: LoginByGoogleInput) => {
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, { auth: false })
+    return normalizeLoginResponse(raw)
+  },
+  loginWithGoogle: async (input: LoginByGoogleInput) => {
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, { auth: false })
+    return normalizeLoginResponse(raw)
+  },
   registerInitiate: (input: RegisterInitiatePayload) =>
     apiPost<RequestOtpResponse>('/identity/auth/register/initiate', input, {
       auth: false,
     }),
-  registerComplete: (input: RegisterCompletePayload) =>
-    apiPost<LoginResponse>('/identity/auth/register/complete', input, { auth: false }),
+  registerComplete: async (input: RegisterCompletePayload) => {
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/register/complete', input, { auth: false })
+    return normalizeLoginResponse(raw)
+  },
   requestPasswordReset: (input: RequestPasswordResetPayload) =>
     apiPost<RequestPasswordResetResponse>('/identity/auth/password/reset/request', input, {
       auth: false,
@@ -45,13 +54,32 @@ const usersApi = {
     apiPost<VerifyPasswordResetResponse>('/identity/auth/password/reset/verify', input, {
       auth: false,
     }),
-  confirmPasswordReset: (input: ConfirmPasswordResetPayload) =>
-    apiFetch<LoginResponse>('/identity/auth/password/reset/confirm', {
+  confirmPasswordReset: async (input: ConfirmPasswordResetPayload) => {
+    const raw = await apiFetch<Record<string, unknown>>('/identity/auth/password/reset/confirm', {
       auth: false,
       method: 'PUT',
       body: JSON.stringify(input),
-    }),
-  getMe: () => apiFetch<UserPayload>('/identity/users/me', { auth: true, cache: 'no-store' }),
+    })
+    return normalizeLoginResponse(raw)
+  },
+  getMe: async () => {
+    const raw = await apiFetch<Record<string, unknown>>('/identity/users/me', { auth: true, cache: 'no-store' })
+    return normalizeUserPayload(raw)
+  },
+  getUserBySlug: async (slug: string) => {
+    const raw = await apiFetch<Record<string, unknown>>(`/identity/users/slug/${encodeURIComponent(slug)}`, {
+      auth: false,
+      cache: 'no-store',
+    })
+    return normalizeUserPayload(raw)
+  },
+  getUserById: async (userId: string) => {
+    const raw = await apiFetch<Record<string, unknown>>(`/identity/users/${encodeURIComponent(userId)}`, {
+      auth: false,
+      cache: 'no-store',
+    })
+    return normalizeUserPayload(raw)
+  },
 }
 
 export default usersApi
