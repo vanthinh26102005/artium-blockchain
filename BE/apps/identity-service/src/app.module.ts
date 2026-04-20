@@ -20,7 +20,6 @@ import {
   DeleteSellerProfileHandler,
   GetFeaturedSellerProfilesHandler,
   GetSellerProfileByIdHandler,
-  GetSellerProfileBySlugHandler,
   GetSellerProfileByUserIdHandler,
   GetUserByIdHandler,
   GetUserBySlugHandler,
@@ -95,7 +94,6 @@ export const QueryHandlers = [
 
   GetSellerProfileByIdHandler,
   GetSellerProfileByUserIdHandler,
-  GetSellerProfileBySlugHandler,
   ListSellerProfilesHandler,
   GetFeaturedSellerProfilesHandler,
 ];

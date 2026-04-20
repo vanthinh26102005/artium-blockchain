@@ -2,13 +2,12 @@ import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
-import { UserRole, RpcExceptionHelper } from '@app/common';
+import { UserRole } from '@app/common';
 import {
   CreateSellerProfileCommand,
   DeleteSellerProfileCommand,
   GetFeaturedSellerProfilesQuery,
   GetSellerProfileByIdQuery,
-  GetSellerProfileBySlugQuery,
   GetSellerProfileByUserIdQuery,
   ListSellerProfilesQuery,
   UpdatePaymentOnboardingCommand,
@@ -51,16 +50,6 @@ export class SellerProfilesMicroserviceController {
     return this.queryBus.execute(
       new GetSellerProfileByUserIdQuery(data.userId),
     );
-  }
-
-  @MessagePattern({ cmd: 'get_seller_profile_by_slug' })
-  async getSellerProfileBySlug(
-    @Payload() data: { slug: string },
-  ): Promise<SellerProfilePayload> {
-    if (!data.slug || !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(data.slug)) {
-      throw RpcExceptionHelper.badRequest('Invalid slug format');
-    }
-    return this.queryBus.execute(new GetSellerProfileBySlugQuery(data.slug));
   }
 
   @MessagePattern({ cmd: 'list_seller_profiles' })

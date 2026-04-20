@@ -1,6 +1,5 @@
 export * from './GetFeaturedSellerProfiles.query';
 export * from './GetSellerProfileById.query';
-export * from './GetSellerProfileBySlug.query';
 export * from './GetSellerProfileByUserId.query';
 export * from './GetUserById.query';
 export * from './GetUserBySlug.query';
@@ -8,7 +7,6 @@ export * from './GetWalletNonce.query';
 export * from './ListSellerProfiles.query';
 export * from './handlers/GetFeaturedSellerProfiles.query.handler';
 export * from './handlers/GetSellerProfileById.query.handler';
-export * from './handlers/GetSellerProfileBySlug.query.handler';
 export * from './handlers/GetSellerProfileByUserId.query.handler';
 export * from './handlers/GetUserById.query.handler';
 export * from './handlers/GetUserBySlug.query.handler';

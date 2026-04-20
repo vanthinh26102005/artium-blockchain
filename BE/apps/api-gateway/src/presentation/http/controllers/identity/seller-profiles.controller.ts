@@ -118,43 +118,6 @@ export class SellerProfilesController {
     );
   }
 
-  @Get('slug/:slug')
-  @ApiOperation({
-    summary: 'Get seller profile by user slug',
-    description:
-      'Retrieves a seller profile by the user slug (slug belongs to the User entity)',
-  })
-  @ApiParam({
-    name: 'slug',
-    description: 'The unique slug of the user who owns the seller profile',
-    type: 'string',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Seller profile retrieved successfully',
-    type: SellerProfilePayload,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Seller profile not found',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid slug format',
-  })
-  async getSellerProfileBySlug(
-    @Param('slug') slug: string,
-  ): Promise<SellerProfilePayload> {
-    if (!slug || !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(slug)) {
-      throw new BadRequestException('Invalid slug format');
-    }
-    return sendRpc<SellerProfilePayload>(
-      this.identityClient,
-      { cmd: 'get_seller_profile_by_slug' },
-      { slug },
-    );
-  }
-
   @Get()
   @ApiOperation({
     summary: 'List seller profiles',

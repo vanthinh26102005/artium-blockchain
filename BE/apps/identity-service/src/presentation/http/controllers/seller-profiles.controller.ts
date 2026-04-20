@@ -52,7 +52,6 @@ import {
   UpdatePaymentOnboardingCommand,
   GetSellerProfileByIdQuery,
   GetSellerProfileByUserIdQuery,
-  GetSellerProfileBySlugQuery,
   ListSellerProfilesQuery,
   GetFeaturedSellerProfilesQuery,
 } from '../../../application';
@@ -207,83 +206,6 @@ export class SellerProfilesController {
         `[SellerProfilesController] [ReqID: ${requestId}] - Unexpected error: get seller profile by user ID`,
         {
           userId,
-          error: error.message,
-          stack: error.stack,
-        },
-      );
-      throw new InternalServerErrorException(
-        'Failed to retrieve seller profile',
-      );
-    }
-  }
-
-  @Get('slug/:slug')
-  @ApiOperation({
-    summary: 'Get seller profile by slug',
-    description:
-      'Retrieves a seller profile by its unique slug for public profile pages',
-  })
-  @ApiParam({
-    name: 'slug',
-    description: 'The unique slug of the seller profile',
-    type: 'string',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Seller profile retrieved successfully',
-    type: SellerProfilePayload,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Seller profile not found',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid slug format',
-  })
-  async getSellerProfileBySlug(
-    @Param('slug') slug: string,
-  ): Promise<SellerProfilePayload> {
-    const requestId = uuidv4();
-    this.logger.log(
-      `[SellerProfilesController] [ReqID: ${requestId}] - Getting seller profile by slug: ${slug}`,
-    );
-
-    try {
-      if (!slug || slug.trim() === '') {
-        throw new BadRequestException('Slug is required');
-      }
-
-      if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(slug)) {
-        throw new BadRequestException('Invalid slug format');
-      }
-
-      const profile = await this.queryBus.execute(
-        new GetSellerProfileBySlugQuery(slug),
-      );
-
-      if (!profile) {
-        this.logger.warn(
-          `[SellerProfilesController] [ReqID: ${requestId}] - Seller profile not found for slug: ${slug}`,
-        );
-        throw new NotFoundException(
-          `Seller profile with slug ${slug} not found`,
-        );
-      }
-
-      this.logger.log(
-        `[SellerProfilesController] [ReqID: ${requestId}] - Seller profile retrieved successfully for slug: ${slug}`,
-      );
-      return profile;
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-
-      this.logger.error(
-        `[SellerProfilesController] [ReqID: ${requestId}] - Unexpected error: get seller profile by slug`,
-        {
-          slug,
           error: error.message,
           stack: error.stack,
         },
