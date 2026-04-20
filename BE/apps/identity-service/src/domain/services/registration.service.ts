@@ -31,15 +31,18 @@ export class RegistrationService {
     base: string,
     transactionManager?: EntityManager,
   ): Promise<string> {
-    const candidate = base
+    const candidate = String(base ?? '')
+      .trim()
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
-      .slice(0, 200);
+      .slice(0, 75);
 
-    const slug = candidate.length >= 3 ? candidate : `user-${candidate}`;
+    const slug = candidate.length >= 3
+      ? candidate
+      : `user-${candidate || Math.floor(1000 + Math.random() * 9000)}`;
 
     const existing = await this.userRepository.findBySlug(slug, transactionManager);
     if (!existing) return slug;
