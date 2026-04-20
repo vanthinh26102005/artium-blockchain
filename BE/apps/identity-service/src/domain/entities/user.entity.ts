@@ -13,7 +13,7 @@ registerEnumType(UserRole, {
 @Index(['walletAddress'], { unique: true, sparse: true })
 @Index(['isActive', 'createdAt'])
 export class User extends AbstractEntity {
-  @PrimaryGeneratedColumn('uuid', { name: 'user_id' })
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column({ type: 'varchar', length: 320, unique: true })

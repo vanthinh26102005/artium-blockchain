@@ -10,3 +10,7 @@ node_modules/
 # Ignore local Stitch tooling/scripts and skill packs
 scripts/stitch/
 skills/
+
+.planning
+.DS_Store
+.claude

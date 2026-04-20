@@ -15,7 +15,7 @@ import { SellerWebsite } from './seller_websites.entity';
 @Index(['isActive', 'profileType', 'isVerified'])
 @Index(['isFeatured', 'isActive'])
 export class SellerProfile extends AbstractEntity {
-  @PrimaryGeneratedColumn('uuid', { name: 'profile_id' })
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column({ name: 'user_id', type: 'uuid', unique: true })
