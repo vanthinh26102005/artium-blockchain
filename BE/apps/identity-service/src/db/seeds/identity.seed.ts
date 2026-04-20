@@ -339,9 +339,22 @@ export class IdentitySeeder {
       'The Creative Space',
       'Masterpiece Gallery',
       'Art & Design Co',
-      `The Artist\\'s Way`,
+      "The Artist's Way",
       'Vision Gallery',
+      'Chromatic Studio',
+      'Horizon Arts',
+      'Ember Gallery',
+      'Blueprint Art Lab',
+      'Reverie Arts',
+      'Flux Contemporary',
+      'Prism Art Space',
+      'Nova Collective',
+      'Aureate Gallery',
+      'Catalyst Art House',
+      'Meridian Studio',
     ];
+
+    const usedSlugs = new Set<string>();
 
     for (let i = 0; i < sellers.length; i++) {
       const seller = sellers[i];
@@ -356,12 +369,16 @@ export class IdentitySeeder {
 
       const safeDisplayName = displayName ?? 'item';
 
-      // Generate URL-safe slug from display name
-      const slug = safeDisplayName
+      // Generate URL-safe slug from display name, ensure uniqueness
+      let slug = safeDisplayName
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '')
         || `seller-${i}`;
+      if (usedSlugs.has(slug)) {
+        slug = `${slug}-${i}`;
+      }
+      usedSlugs.add(slug);
 
       const profile = new SellerProfile();
       profile.userId = seller.id;
