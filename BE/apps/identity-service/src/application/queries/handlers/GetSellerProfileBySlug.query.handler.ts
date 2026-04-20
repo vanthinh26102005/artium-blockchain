@@ -3,6 +3,7 @@ import { Inject, Logger } from '@nestjs/common';
 import { RpcExceptionHelper } from '@app/common';
 import { GetSellerProfileBySlugQuery } from '../GetSellerProfileBySlug.query';
 import { ISellerProfileRepository } from '../../../domain/interfaces/seller-profile.repository.interface';
+import { IUserRepository } from '../../../domain/interfaces/user.repository.interface';
 import { SellerProfile } from '../../../domain/entities/seller_profiles.entity';
 
 @QueryHandler(GetSellerProfileBySlugQuery)
@@ -15,6 +16,8 @@ export class GetSellerProfileBySlugHandler implements IQueryHandler<
   constructor(
     @Inject(ISellerProfileRepository)
     private readonly sellerProfileRepository: ISellerProfileRepository,
+    @Inject(IUserRepository)
+    private readonly userRepository: IUserRepository,
   ) {}
 
   async execute(
@@ -26,12 +29,19 @@ export class GetSellerProfileBySlugHandler implements IQueryHandler<
       throw RpcExceptionHelper.badRequest('Slug is required');
     }
 
-    this.logger.debug(`Fetching seller profile by slug: ${slug}`);
+    this.logger.debug(`Fetching seller profile by user slug: ${slug}`);
 
-    const profile = await this.sellerProfileRepository.findBySlug(slug);
+    // Slug belongs to User entity — look up user first, then find their seller profile
+    const user = await this.userRepository.findBySlug(slug);
+    if (!user) {
+      this.logger.debug(`User not found for slug: ${slug}`);
+      return null;
+    }
+
+    const profile = await this.sellerProfileRepository.findByUserId(user.id);
 
     if (!profile) {
-      this.logger.debug(`Seller profile not found for slug: ${slug}`);
+      this.logger.debug(`Seller profile not found for user slug: ${slug}`);
     }
 
     return profile;

@@ -9,17 +9,14 @@ import {
   IsOptional,
   IsString,
   IsUrl,
-  Matches,
   MaxLength,
   Min,
-  MinLength,
 } from 'class-validator';
 
 export class CreateSellerProfileInput {
   userId?: string;
   profileType?: ProfileType;
   displayName?: string;
-  slug?: string;
   bio?: string | null;
   profileImageUrl?: string | null;
   coverImageUrl?: string | null;
@@ -48,7 +45,6 @@ export class CreateSellerProfileInput {
 export class UpdateSellerProfileInput {
   profileType?: ProfileType;
   displayName?: string;
-  slug?: string;
   bio?: string | null;
   profileImageUrl?: string | null;
   coverImageUrl?: string | null;
@@ -93,23 +89,6 @@ export class CreateSellerProfileInputType {
   @IsNotEmpty()
   @MaxLength(255)
   displayName: string;
-
-  @ApiProperty({
-    example: 'artisan-gallery',
-    description:
-      'URL-friendly slug (lowercase letters, numbers, and hyphens only, must start/end with alphanumeric)',
-    maxLength: 255,
-    minLength: 3,
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(3, { message: 'Slug must be at least 3 characters long' })
-  @MaxLength(255)
-  @Matches(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/, {
-    message:
-      'Slug must contain only lowercase letters, numbers, and hyphens, and must start/end with a letter or number',
-  })
-  slug: string;
 
   @ApiProperty({
     example:
@@ -181,23 +160,6 @@ export class UpdateSellerProfileInputType {
   @IsOptional()
   @MaxLength(255)
   displayName?: string;
-
-  @ApiProperty({
-    example: 'updated-gallery-name',
-    required: false,
-    description: 'URL-friendly slug',
-    maxLength: 255,
-    minLength: 3,
-  })
-  @IsString()
-  @IsOptional()
-  @MinLength(3, { message: 'Slug must be at least 3 characters long' })
-  @MaxLength(255)
-  @Matches(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/, {
-    message:
-      'Slug must contain only lowercase letters, numbers, and hyphens, and must start/end with a letter or number',
-  })
-  slug?: string;
 
   @ApiProperty({
     example:

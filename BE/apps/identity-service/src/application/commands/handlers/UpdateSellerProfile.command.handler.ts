@@ -14,7 +14,6 @@ import { ISellerProfileRepository } from '../../../domain/interfaces/seller-prof
  * Validation:
  * - Profile must exist
  * - User must own the profile (unless admin)
- * - If slug is being changed, new slug must be unique
  *
  * Side Effects:
  * - Updates seller profile record
@@ -58,20 +57,6 @@ export class UpdateSellerProfileHandler implements ICommandHandler<
         throw RpcExceptionHelper.forbidden(
           'You do not have permission to update this profile',
         );
-      }
-
-      // If slug is being changed, check uniqueness
-      if (input.slug && input.slug !== existingProfile.slug) {
-        const slugTaken = await this.sellerProfileRepository.isSlugTaken(
-          input.slug,
-          profileId,
-        );
-        if (slugTaken) {
-          this.logger.warn(`Slug already taken: ${input.slug}`);
-          throw RpcExceptionHelper.conflict(
-            'Slug is already taken. Please choose a different one.',
-          );
-        }
       }
 
       // Update the profile

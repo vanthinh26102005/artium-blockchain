@@ -120,13 +120,13 @@ export class SellerProfilesController {
 
   @Get('slug/:slug')
   @ApiOperation({
-    summary: 'Get seller profile by slug',
+    summary: 'Get seller profile by user slug',
     description:
-      'Retrieves a seller profile by its unique slug for public profile pages',
+      'Retrieves a seller profile by the user slug (slug belongs to the User entity)',
   })
   @ApiParam({
     name: 'slug',
-    description: 'The unique slug of the seller profile',
+    description: 'The unique slug of the user who owns the seller profile',
     type: 'string',
   })
   @ApiResponse({

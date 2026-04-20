@@ -532,16 +532,6 @@ export class SellerProfilesController {
         throw new BadRequestException('Display name is required');
       }
 
-      if (!input.slug || input.slug.trim() === '') {
-        throw new BadRequestException('Slug is required');
-      }
-
-      if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(input.slug)) {
-        throw new BadRequestException(
-          'Slug must contain only lowercase letters, numbers, and hyphens, and must start/end with a letter or number',
-        );
-      }
-
       const defaultInput = {
         ...input,
         userId,
@@ -642,12 +632,6 @@ export class SellerProfilesController {
 
       if (!input) {
         throw new BadRequestException('Update input is required');
-      }
-
-      if (input.slug && !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(input.slug)) {
-        throw new BadRequestException(
-          'Slug must contain only lowercase letters, numbers, and hyphens, and must start/end with a letter or number',
-        );
       }
 
       const result = await this.commandBus.execute(
