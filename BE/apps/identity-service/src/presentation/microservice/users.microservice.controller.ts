@@ -22,6 +22,7 @@ import {
   LoginByGoogleCommand,
   LoginByWalletCommand,
   RequestPasswordResetCommand,
+  UpdateUserProfileCommand,
   VerifyPasswordResetCommand,
 } from '../../application';
 import {
@@ -141,5 +142,19 @@ export class UsersMicroserviceController {
     @Payload() data: { address: string },
   ): Promise<{ nonce: string }> {
     return this.queryBus.execute(new GetWalletNonceQuery(data.address));
+  }
+
+  @MessagePattern({ cmd: 'update_user_profile' })
+  async updateUserProfile(
+    @Payload() data: { userId: string; input: Record<string, unknown> },
+  ): Promise<{ success: boolean; message: string; user: UserPayload }> {
+    const result = await this.commandBus.execute(
+      new UpdateUserProfileCommand(data.userId, data.input),
+    );
+    return {
+      success: true,
+      message: 'User profile updated successfully',
+      user: result.user as UserPayload,
+    };
   }
 }

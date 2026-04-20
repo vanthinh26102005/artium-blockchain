@@ -30,6 +30,7 @@ import { saveProfileDraft } from '@domains/profile/utils/profileDraftStorage'
 import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis'
 import artworkUploadApi from '@shared/apis/artworkUploadApi'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import usersApi from '@shared/apis/usersApi'
 
 type ProfileEditPageViewProps = {
   username?: string | string[]
@@ -265,17 +266,6 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
   }
 
   const handleFormSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (!sellerProfile) {
-      setSubmitError('Seller profile not found. Please reload and try again.')
-      return
-    }
-
-    const sellerProfileId = sellerProfile.profileId ?? sellerProfile.id
-    if (!sellerProfileId) {
-      setSubmitError('Seller profile ID not found. Please reload and try again.')
-      return
-    }
-
     if (!authUser?.id) {
       setSubmitError('Please log in to update your profile.')
       return
@@ -294,30 +284,45 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     try {
       const displayName = [data.firstName.trim(), data.lastName.trim()].filter(Boolean).join(' ')
       const slug = data.username.trim()
-      const businessAddress = {
-        line1: data.addressLine1?.trim() || null,
-        line2: data.addressLine2?.trim() || null,
-        city: data.district?.trim() || null,
-        state: data.province?.trim() || null,
-        postalCode: data.postalCode?.trim() || null,
-        country: data.country?.trim() || null,
+
+      // Step 1: Update basic user profile (all users)
+      await usersApi.updateMe({
+        fullName: displayName || null,
+        slug: slug || null,
+        avatarUrl: data.avatarUrl || null,
+      })
+
+      // Step 2: Update seller profile if user is a seller
+      if (sellerProfile) {
+        const sellerProfileId = sellerProfile.profileId ?? sellerProfile.id
+        if (sellerProfileId) {
+          const businessAddress = {
+            line1: data.addressLine1?.trim() || null,
+            line2: data.addressLine2?.trim() || null,
+            city: data.district?.trim() || null,
+            state: data.province?.trim() || null,
+            postalCode: data.postalCode?.trim() || null,
+            country: data.country?.trim() || null,
+          }
+
+          const sellerPayload = {
+            displayName: displayName || sellerProfile.displayName,
+            slug: slug || sellerProfile.slug,
+            bio: data.biography?.trim() || null,
+            profileImageUrl: data.avatarUrl || null,
+            websiteUrl: data.websiteUrl ? normalizeUrl(data.websiteUrl) : null,
+            instagramUrl: data.instagram ? normalizeUrl(data.instagram) : null,
+            twitterUrl: data.twitter ? normalizeUrl(data.twitter) : null,
+            location: buildLocation(data.district, data.province, data.country) ?? null,
+            businessPhone: data.phoneNumber?.trim() || null,
+            businessAddress,
+            metaDescription: data.headline?.trim() || null,
+          }
+
+          await profileApis.updateSellerProfile(sellerProfileId, sellerPayload)
+        }
       }
 
-      const payload = {
-        displayName: displayName || sellerProfile.displayName,
-        slug: slug || sellerProfile.slug,
-        bio: data.biography?.trim() || null,
-        profileImageUrl: data.avatarUrl || null,
-        websiteUrl: data.websiteUrl ? normalizeUrl(data.websiteUrl) : null,
-        instagramUrl: data.instagram ? normalizeUrl(data.instagram) : null,
-        twitterUrl: data.twitter ? normalizeUrl(data.twitter) : null,
-        location: buildLocation(data.district, data.province, data.country) ?? null,
-        businessPhone: data.phoneNumber?.trim() || null,
-        businessAddress,
-        metaDescription: data.headline?.trim() || null,
-      }
-
-      await profileApis.updateSellerProfile(sellerProfileId, payload)
       await refreshMe()
 
       reset(data, { keepSubmitCount: true })
@@ -333,7 +338,8 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
       setSaveStatus('success')
 
       // If slug changed, redirect to new edit URL
-      if (slug && slug !== sellerProfile.slug) {
+      const previousSlug = sellerProfile?.slug ?? authUser?.slug ?? authUser?.username
+      if (slug && slug !== previousSlug) {
         window.setTimeout(() => {
           void router.replace(`/profile/${encodeURIComponent(slug)}/edit`, undefined, {
             shallow: true,
@@ -458,8 +464,8 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                 onAvatarRemove={handleAvatarRemove}
                 onAvatarChange={handleAvatarChange}
               />
-              <ArtisticDirectionSection control={control} />
-              <WhatInspiresMeSection control={control} />
+              {sellerProfile ? <ArtisticDirectionSection control={control} /> : null}
+              {sellerProfile ? <WhatInspiresMeSection control={control} /> : null}
             </div>
             <div className="space-y-6">
               <AboutMeSection
@@ -468,8 +474,25 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                 errors={errors}
                 showErrors={showErrors}
               />
-              <ArtWorldConnectionSection register={register} control={control} />
-              <BankDetailsSection register={register} />
+              {sellerProfile ? <ArtWorldConnectionSection register={register} control={control} /> : null}
+              {sellerProfile ? <BankDetailsSection register={register} /> : null}
+              {!sellerProfile ? (
+                <section className="rounded-3xl border border-dashed border-slate-300 bg-slate-50/50 p-6">
+                  <h2 className="text-sm font-semibold tracking-[0.2em] text-slate-400 uppercase">
+                    Become a Seller
+                  </h2>
+                  <p className="mt-3 text-sm text-slate-600">
+                    Register as a seller to unlock advanced profile features like artistic direction, social links, bank details, and start listing your artworks.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void router.push('/seller/register')}
+                    className="mt-4 inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition"
+                  >
+                    Register as Seller
+                  </button>
+                </section>
+              ) : null}
             </div>
           </div>
         </form>

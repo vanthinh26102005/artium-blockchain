@@ -73,6 +73,14 @@ const usersApi = {
     })
     return normalizeUserPayload(raw)
   },
+  updateMe: async (input: { fullName?: string | null; slug?: string | null; avatarUrl?: string | null }) => {
+    const raw = await apiFetch<Record<string, unknown>>('/identity/users/me', {
+      method: 'PUT',
+      body: JSON.stringify(input),
+      auth: true,
+    })
+    return normalizeUserPayload((raw as { user: Record<string, unknown> }).user ?? raw)
+  },
   getUserById: async (userId: string) => {
     const raw = await apiFetch<Record<string, unknown>>(`/identity/users/${encodeURIComponent(userId)}`, {
       auth: false,

@@ -35,6 +35,7 @@ import {
   UpdatePaymentOnboardingHandler,
   UpdateProfileVisibilityHandler,
   UpdateSellerProfileHandler,
+  UpdateUserProfileHandler,
   UpdateVerificationStatusHandler,
   VerifyPasswordResetHandler,
 } from './application';
@@ -84,6 +85,7 @@ export const CommandHandlers = [
   UpdateVerificationStatusHandler,
   UpdateProfileVisibilityHandler,
   UpdatePaymentOnboardingHandler,
+  UpdateUserProfileHandler,
 ];
 
 export const QueryHandlers = [

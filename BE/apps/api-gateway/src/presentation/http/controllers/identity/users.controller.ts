@@ -5,6 +5,7 @@ import {
   EmailLoginInput,
   GetUserProfileDto,
   GoogleLoginInput,
+  UpdateUserProfileInput,
   LoginEmailDto,
   LoginGoogleDto,
   LoginResponse,
@@ -77,6 +78,40 @@ export class UserController {
       this.identityClient,
       { cmd: 'get_user_profile' },
       { user: { id: req.user.id } },
+    );
+  }
+
+  @Put('users/me')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Update current user profile',
+    description: 'Updates the profile of the currently authenticated user',
+  })
+  @ApiBody({
+    type: UpdateUserProfileInput,
+    description: 'Fields to update',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile updated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Slug already taken',
+  })
+  async updateUserProfile(
+    @Request() req: Express.Request & { user: GetUserProfileDto['user'] },
+    @Body() input: UpdateUserProfileInput,
+  ) {
+    return sendRpc(
+      this.identityClient,
+      { cmd: 'update_user_profile' },
+      { userId: req.user.id, input },
     );
   }
 
