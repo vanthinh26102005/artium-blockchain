@@ -63,16 +63,12 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
   })
 
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+  const { data: baseData, user: fetchedUser, sellerProfile, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileDataWithDraft = useProfileDraftData(baseData)
   const authUser = useAuthStore((state) => state.user)
   const isAuthenticated = Boolean(authUser?.id)
-  const isOwner =
-    isAuthenticated &&
-    sellerProfile &&
-    authUser?.id === sellerProfile.userId
 
   const profileData = profileDataWithDraft
 
@@ -242,10 +238,12 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
               about={profileData.about}
               editHref={`/profile/${encodeURIComponent(resolvedUsername)}/edit`}
             />
-            <ProfileSalesStatsSection
-              displayName={profileData.user.displayName}
-              stats={profileData.salesStats}
-            />
+            {sellerProfile ? (
+              <ProfileSalesStatsSection
+                displayName={profileData.user.displayName}
+                stats={profileData.salesStats}
+              />
+            ) : null}
           </div>
         )
     }
@@ -268,8 +266,8 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
             <ProfileHero
               user={profileData.user}
               stats={profileData.stats}
-              userId={sellerProfile?.userId}
-              isOwner={isOwner || false}
+              userId={fetchedUser?.id}
+              isOwner={isOwner}
             />
           )}
         </div>

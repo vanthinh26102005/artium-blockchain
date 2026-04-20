@@ -93,7 +93,7 @@ const buildInitialValues = (
 
 export const ProfileEditPageView = ({ username: _username }: ProfileEditPageViewProps) => {
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+  const { data: baseData, user: profileUser, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
