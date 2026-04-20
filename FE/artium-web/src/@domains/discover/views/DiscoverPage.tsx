@@ -111,13 +111,14 @@ export const DiscoverPage = () => {
         {activeTabKey === 'top-picks' ? (
           <>
             {/* top picks */}
-            <TopPicksMasonry />
+            <TopPicksMasonry searchQuery={searchQuery} />
           </>
         ) : null}
         {activeTabKey === 'artworks' ? (
           <>
             {/* artworks */}
             <ArtworksGrid
+              searchQuery={searchQuery}
               isImageSearch={isImageSearch}
               onExitImageSearch={() => setIsImageSearch(false)}
             />
@@ -126,19 +127,19 @@ export const DiscoverPage = () => {
         {activeTabKey === 'profiles' ? (
           <>
             {/* profiles */}
-            <ProfilesGrid />
+            <ProfilesGrid searchQuery={searchQuery} />
           </>
         ) : null}
         {activeTabKey === 'moments' ? (
           <>
             {/* moments */}
-            <MomentsGrid />
+            <MomentsGrid searchQuery={searchQuery} />
           </>
         ) : null}
         {activeTabKey === 'events' ? (
           <>
             {/* events */}
-            <EventsGrid />
+            <EventsGrid searchQuery={searchQuery} />
           </>
         ) : null}
         {activeTabKey === 'get-inspired' ? (
