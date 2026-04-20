@@ -84,6 +84,7 @@ export const InventoryToolbar = ({
   const selectAll = useInventorySelectionStore((state) => state.selectAll)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [draftFilters, setDraftFilters] = useState<DraftFilters>(() => buildDraftFilters(filters))
+  const [priceError, setPriceError] = useState<string | null>(null)
 
   // -- derived --
   const selectedCount = selectedIds.length
@@ -96,6 +97,7 @@ export const InventoryToolbar = ({
   useEffect(() => {
     if (isFilterOpen) {
       setDraftFilters(buildDraftFilters(filters))
+      setPriceError(null)
     }
   }, [filters, isFilterOpen])
 
@@ -126,18 +128,37 @@ export const InventoryToolbar = ({
 
   const handleDraftChange = (key: keyof DraftFilters, value: string) => {
     setDraftFilters((prev) => ({ ...prev, [key]: value }))
+    setPriceError(null)
   }
 
   const handleCloseFilter = () => {
     setIsFilterOpen(false)
     setDraftFilters(buildDraftFilters(filters))
+    setPriceError(null)
   }
 
   const handleApplyFilter = () => {
+    const minPrice = parseNumeric(draftFilters.minPrice)
+    const maxPrice = parseNumeric(draftFilters.maxPrice)
+    
+    // Validate price range
+    if (minPrice !== undefined && minPrice < 0) {
+      setPriceError('Min price cannot be negative')
+      return
+    }
+    if (maxPrice !== undefined && maxPrice < 0) {
+      setPriceError('Max price cannot be negative')
+      return
+    }
+    if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
+      setPriceError('Min price cannot be greater than max price')
+      return
+    }
+    
     onApplyFilters({
       status: draftFilters.status || undefined,
-      minPrice: parseNumeric(draftFilters.minPrice),
-      maxPrice: parseNumeric(draftFilters.maxPrice),
+      minPrice,
+      maxPrice,
     })
     setIsFilterOpen(false)
   }
@@ -311,7 +332,9 @@ export const InventoryToolbar = ({
                       placeholder="Min"
                       value={draftFilters.minPrice}
                       onChange={(event) => handleDraftChange('minPrice', event.target.value)}
-                      className="h-11 rounded-xl border border-black/10 px-3 text-base text-slate-700"
+                      className={`h-11 rounded-xl border px-3 text-base text-slate-700 ${
+                        priceError ? 'border-red-300 bg-red-50' : 'border-black/10'
+                      }`}
                     />
                     <input
                       type="number"
@@ -320,9 +343,14 @@ export const InventoryToolbar = ({
                       placeholder="Max"
                       value={draftFilters.maxPrice}
                       onChange={(event) => handleDraftChange('maxPrice', event.target.value)}
-                      className="h-11 rounded-xl border border-black/10 px-3 text-base text-slate-700"
+                      className={`h-11 rounded-xl border px-3 text-base text-slate-700 ${
+                        priceError ? 'border-red-300 bg-red-50' : 'border-black/10'
+                      }`}
                     />
                   </div>
+                  {priceError && (
+                    <p className="mt-1 text-sm text-red-600">{priceError}</p>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-2">
