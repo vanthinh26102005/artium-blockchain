@@ -204,14 +204,15 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
   const renderTabContent = () => {
     switch (activeTab) {
       case 'artworks':
-        return <ArtworksSection artworks={profileData.artworks} showSeeAll={false} />
+        return <ArtworksSection artworks={profileData.artworks} showSeeAll={false} isOwner={isOwner} />
       case 'moments':
-        return <MomentsSection moments={moments} showSeeAll={false} />
+        return <MomentsSection moments={moments} showSeeAll={false} isOwner={isOwner} />
       case 'moodboards':
         return (
           <MoodboardsSection
             moodboards={moodboards}
             detailBaseHref={`${baseHref}/moodboards`}
+            isOwner={isOwner}
           />
         )
       case 'overview':
@@ -222,17 +223,20 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
               artworks={profileData.artworks}
               limit={5}
               seeAllHref={`${baseHref}/artworks`}
+              isOwner={isOwner}
             />
             <MomentsSection
               moments={moments}
               limit={6}
               seeAllHref={`${baseHref}/moments`}
               detailBaseHref={`${baseHref}/moments`}
+              isOwner={isOwner}
             />
             <MoodboardsSection
               moodboards={moodboards}
               seeAllHref={`${baseHref}/moodboards`}
               detailBaseHref={`${baseHref}/moodboards`}
+              isOwner={isOwner}
             />
             <ProfileAboutSection
               about={profileData.about}
