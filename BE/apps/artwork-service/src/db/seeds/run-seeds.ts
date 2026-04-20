@@ -167,14 +167,14 @@ async function main() {
       await identityDs.initialize();
 
       const schemaPrefix = isShared ? '"identity".' : '';
-      const userRows: { user_id: string }[] = await identityDs.query(
-        `SELECT "user_id" FROM ${schemaPrefix}"users" WHERE "is_active" = true`,
+      const userRows: { id: string }[] = await identityDs.query(
+        `SELECT "id" FROM ${schemaPrefix}"users" WHERE "is_active" = true`,
       );
       const sellerRows: { user_id: string }[] = await identityDs.query(
         `SELECT "user_id" FROM ${schemaPrefix}"seller_profiles" WHERE "is_active" = true`,
       );
 
-      realUserIds = userRows.map((r) => r.user_id);
+      realUserIds = userRows.map((r) => r.id);
       realSellerIds = sellerRows.map((r) => r.user_id);
 
       await identityDs.destroy();
