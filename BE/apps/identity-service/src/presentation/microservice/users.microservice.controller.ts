@@ -15,6 +15,7 @@ import {
   CompleteUserRegistrationCommand,
   ConfirmNewPasswordCommand,
   GetUserByIdQuery,
+  GetUserBySlugQuery,
   GetWalletNonceQuery,
   InitiateUserRegistrationCommand,
   LoginByEmailCommand,
@@ -59,6 +60,19 @@ export class UsersMicroserviceController {
   @MessagePattern({ cmd: 'get_user_by_id' })
   async getUserById(@Payload() data: { userId: string }): Promise<UserPayload> {
     return this.queryBus.execute(new GetUserByIdQuery(data.userId));
+  }
+
+  @MessagePattern({ cmd: 'get_user_by_slug' })
+  async getUserBySlug(@Payload() data: { slug: string }): Promise<UserPayload> {
+    const user = await this.queryBus.execute(new GetUserBySlugQuery(data.slug));
+    if (!user) {
+      throw new RpcException({
+        statusCode: 404,
+        message: `User with slug '${data.slug}' not found`,
+      });
+    }
+    const { password: _password, ...safeUser } = user;
+    return safeUser as UserPayload;
   }
 
   @MessagePattern({ cmd: 'login_email' })

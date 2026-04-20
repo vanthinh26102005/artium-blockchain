@@ -23,6 +23,7 @@ import {
   GetSellerProfileBySlugHandler,
   GetSellerProfileByUserIdHandler,
   GetUserByIdHandler,
+  GetUserBySlugHandler,
   GetWalletNonceHandler,
   InitiateUserRegistrationHandler,
   ListSellerProfilesHandler,
@@ -87,6 +88,7 @@ export const CommandHandlers = [
 
 export const QueryHandlers = [
   GetUserByIdHandler,
+  GetUserBySlugHandler,
   GetWalletNonceHandler,
 
   GetSellerProfileByIdHandler,

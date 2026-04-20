@@ -80,6 +80,34 @@ export class UserController {
     );
   }
 
+  @Get('users/slug/:slug')
+  @ApiOperation({
+    summary: 'Get user by slug',
+    description: 'Retrieves public profile information for a user by their unique slug',
+  })
+  @ApiParam({
+    name: 'slug',
+    description: 'The unique URL-friendly identifier of the user',
+    type: 'string',
+    example: 'duong-phuong-thinh',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User retrieved successfully',
+    type: UserPayload,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
+  async getUserBySlug(@Param('slug') slug: string) {
+    return sendRpc<UserPayload>(
+      this.identityClient,
+      { cmd: 'get_user_by_slug' },
+      { slug },
+    );
+  }
+
   @Get('users/:userId')
   @ApiOperation({
     summary: 'Get user by ID',
