@@ -125,6 +125,7 @@ type DraggableFolderGridProps = {
   onRename: (folder: InventoryFolder) => void
   onDelete: (folder: InventoryFolder) => void
   onHide: (folder: InventoryFolder) => void
+  onError?: (message: string) => void
 }
 
 export const DraggableFolderGrid = ({
@@ -132,6 +133,7 @@ export const DraggableFolderGrid = ({
   onRename,
   onDelete,
   onHide,
+  onError,
 }: DraggableFolderGridProps) => {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [localFolders, setLocalFolders] = useState(folders)
@@ -178,9 +180,9 @@ export const DraggableFolderGrid = ({
             folderIds,
           })
         } catch (error) {
-          console.error('Failed to persist folder reorder:', error)
           setLocalFolders(folders)
           optimisticReorderFolders(folders.map((f) => f.id))
+          onError?.('Failed to reorder folders')
         }
       }
     }
