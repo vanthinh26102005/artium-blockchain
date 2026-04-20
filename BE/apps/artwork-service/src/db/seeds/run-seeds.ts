@@ -129,19 +129,67 @@ async function main() {
     await dataSource.initialize();
     console.log('✅ Database connected\n');
 
-    // For standalone execution, we need to fetch user IDs from identity service
-    console.log('📋 Fetching user IDs from identity service...');
+    // For standalone execution, try fetching real user IDs from identity database
+    console.log('📋 Fetching real user IDs from identity service database...');
 
-    // Mock user IDs - in real scenario, you should run seed:identity first or use seed script
-    // Using valid UUIDs to avoid "invalid input syntax for type uuid" errors
-    const mockUserIds = Array.from({ length: 60 }, () => uuidv4());
-    const mockSellerIds = Array.from({ length: 31 }, () => uuidv4());
+    let realUserIds: string[] = [];
+    let realSellerIds: string[] = [];
 
-    console.log(
-      '⚠️  Using mock IDs (valid UUIDs). For real data integration, use "npm run seed" instead!\n',
-    );
+    try {
+      // Connect to identity database to fetch real user/seller IDs
+      const identityStrategy = process.env.DB_STRATEGY || 'SHARED';
+      const isShared = identityStrategy === 'SHARED';
 
-    await runArtworkSeeds(dataSource, mockUserIds, mockSellerIds);
+      const identityConfig = isShared
+        ? {
+            host: process.env.SHARED_DB_HOST || 'localhost',
+            port: parseInt(process.env.SHARED_DB_PORT || '5454'),
+            username: process.env.SHARED_DB_USERNAME || 'postgres',
+            password: process.env.SHARED_DB_PASSWORD || '1',
+            database: process.env.SHARED_DB_NAME || 'artium_global',
+          }
+        : {
+            host: process.env.DB_HOST || 'localhost',
+            port: parseInt(process.env.IDENTITY_DB_PORT || '5432'),
+            username: process.env.IDENTITY_DB_USER || 'identity_user',
+            password: process.env.IDENTITY_DB_PASS || '1',
+            database: process.env.IDENTITY_DB_NAME || 'identity_db',
+          };
+
+      const identityDs = new DataSource({
+        type: 'postgres',
+        ...identityConfig,
+        schema: isShared ? 'identity' : undefined,
+        synchronize: false,
+        logging: false,
+      });
+
+      await identityDs.initialize();
+
+      const userRows = await identityDs.query(
+        `SELECT id FROM ${isShared ? '"identity".' : ''}users WHERE "isActive" = true`,
+      );
+      const sellerRows = await identityDs.query(
+        `SELECT "userId" FROM ${isShared ? '"identity".' : ''}seller_profiles WHERE "isActive" = true`,
+      );
+
+      realUserIds = userRows.map((r: any) => r.id);
+      realSellerIds = sellerRows.map((r: any) => r.userId);
+
+      await identityDs.destroy();
+      console.log(`✅ Found ${realUserIds.length} users and ${realSellerIds.length} sellers from identity DB\n`);
+    } catch (err) {
+      console.warn('⚠️  Could not connect to identity database:', (err as Error).message);
+    }
+
+    if (realSellerIds.length > 0) {
+      await runArtworkSeeds(dataSource, realUserIds, realSellerIds);
+    } else {
+      console.log('⚠️  No real sellers found. Using mock UUIDs (artworks will not reference real users).\n');
+      const mockUserIds = Array.from({ length: 60 }, () => uuidv4());
+      const mockSellerIds = Array.from({ length: 31 }, () => uuidv4());
+      await runArtworkSeeds(dataSource, mockUserIds, mockSellerIds);
+    }
 
     await dataSource.destroy();
     console.log('✅ Database connection closed\n');

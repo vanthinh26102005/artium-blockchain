@@ -16,6 +16,15 @@ export class ArtworkSeeder {
   ): Promise<void> {
     console.log('🎨 Starting Artwork Service seeding...');
 
+    if (!sellerIds.length) {
+      console.warn('⚠️  No seller IDs provided — skipping artwork seeding.');
+      return;
+    }
+    if (!userIds.length) {
+      console.warn('⚠️  No user IDs provided — using sellerIds as userIds fallback.');
+      userIds = [...sellerIds];
+    }
+
     const artworkRepo = dataSource.getRepository(Artwork);
     const folderRepo = dataSource.getRepository(ArtworkFolder);
     const tagRepo = dataSource.getRepository(Tag);
