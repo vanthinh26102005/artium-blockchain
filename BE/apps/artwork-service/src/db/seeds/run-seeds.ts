@@ -166,15 +166,16 @@ async function main() {
 
       await identityDs.initialize();
 
-      const userRows = await identityDs.query(
-        `SELECT id FROM ${isShared ? '"identity".' : ''}users WHERE "isActive" = true`,
+      const schemaPrefix = isShared ? '"identity".' : '';
+      const userRows: { user_id: string }[] = await identityDs.query(
+        `SELECT "user_id" FROM ${schemaPrefix}"users" WHERE "is_active" = true`,
       );
-      const sellerRows = await identityDs.query(
-        `SELECT "userId" FROM ${isShared ? '"identity".' : ''}seller_profiles WHERE "isActive" = true`,
+      const sellerRows: { user_id: string }[] = await identityDs.query(
+        `SELECT "user_id" FROM ${schemaPrefix}"seller_profiles" WHERE "is_active" = true`,
       );
 
-      realUserIds = userRows.map((r: any) => r.id);
-      realSellerIds = sellerRows.map((r: any) => r.userId);
+      realUserIds = userRows.map((r) => r.user_id);
+      realSellerIds = sellerRows.map((r) => r.user_id);
 
       await identityDs.destroy();
       console.log(`✅ Found ${realUserIds.length} users and ${realSellerIds.length} sellers from identity DB\n`);
