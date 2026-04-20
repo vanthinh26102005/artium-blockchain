@@ -13,24 +13,38 @@ export type ArtworkApiItem = {
   id: string
   sellerId: string
   title: string
+  description?: string | null
   creatorName?: string | null
   displayStatus?: 'Draft' | 'Hidden'
   status?: string
-  createdAt?: string
-  updatedAt?: string
+  creationYear?: number | null
+  editionRun?: string | null
+  materials?: string | null
+  location?: string | null
   price?: number | string | null
   currency?: string | null
-  materials?: string | null
+  quantity?: number
+  isPublished?: boolean
+  createdAt?: string
+  updatedAt?: string
   dimensions?: {
     width?: number
     height?: number
     depth?: number
     unit?: string
   } | null
+  weight?: {
+    value?: number
+    unit?: string
+  } | null
   thumbnailUrl?: string | null
   images?: ArtworkImage[]
   folder?: ArtworkFolderRef | null
   folderId?: string | null
+  viewCount?: number
+  likeCount?: number
+  commentCount?: number
+  moodboardCount?: number
 }
 
 export type ListArtworksParams = {
