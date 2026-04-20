@@ -203,16 +203,6 @@ export class SellerProfileRepository implements ISellerProfileRepository {
     });
   }
 
-  async findBySlug(
-    slug: string,
-    transactionManager?: EntityManager,
-  ): Promise<SellerProfile | null> {
-    return this.getRepo(transactionManager).findOne({
-      where: { slug },
-      relations: ['websites'],
-    });
-  }
-
   async findByStripeAccountId(
     stripeAccountId: string,
     transactionManager?: EntityManager,
@@ -297,26 +287,6 @@ export class SellerProfileRepository implements ISellerProfileRepository {
     const items = await queryBuilder.getMany();
 
     return { items, total };
-  }
-
-  async isSlugTaken(
-    slug: string,
-    excludeProfileId?: string,
-    transactionManager?: EntityManager,
-  ): Promise<boolean> {
-    const repo = this.getRepo(transactionManager);
-    const queryBuilder = repo.createQueryBuilder('seller_profile');
-
-    queryBuilder.where('seller_profile.slug = :slug', { slug });
-
-    if (excludeProfileId) {
-      queryBuilder.andWhere('seller_profile.profileId != :excludeProfileId', {
-        excludeProfileId,
-      });
-    }
-
-    const count = await queryBuilder.getCount();
-    return count > 0;
   }
 
   async getFeaturedProfiles(

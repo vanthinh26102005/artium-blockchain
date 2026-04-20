@@ -105,6 +105,15 @@ export class UserRepository implements IUserRepository {
     return this.getRepo(transactionManager).findOneBy({ stripeCustomerId });
   }
 
+  async findBySlug(
+    slug: string,
+    transactionManager?: EntityManager,
+  ): Promise<User | null> {
+    return this.getRepo(transactionManager).findOneBy({
+      slug: slug.toLowerCase(),
+    });
+  }
+
   async delete(
     id: string,
     transactionManager?: EntityManager,

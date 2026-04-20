@@ -11,8 +11,16 @@ node_modules/
 scripts/stitch/
 skills/
 
+# Environment files
 .env
 .env.local
 **/.env
 **/.env.local
+
+# Local development files
+.planning
+.DS_Store
+.claude
+
+# Frontend dependencies
 FE/package-lock.json

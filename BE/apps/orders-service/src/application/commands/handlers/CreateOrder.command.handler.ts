@@ -47,9 +47,7 @@ export class CreateOrderHandler implements ICommandHandler<CreateOrderCommand> {
         taxAmount: 0,
         currency: 'USD',
         paymentStatus: OrderPaymentStatus.UNPAID,
-        shippingAddress: data.shippingAddress
-          ? { line1: data.shippingAddress }
-          : null,
+        shippingAddress: data.shippingAddress || null,
         customerNotes: data.notes,
       });
 

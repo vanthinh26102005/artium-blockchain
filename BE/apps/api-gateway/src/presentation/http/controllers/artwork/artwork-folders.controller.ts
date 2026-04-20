@@ -1,3 +1,4 @@
+import { JwtAuthGuard } from '@app/auth';
 import {
   ArtworkObject,
   CreateArtworkFolderInput,
@@ -19,9 +20,11 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -41,6 +44,8 @@ export class ArtworkFoldersController {
   ) {}
 
   @Put('reorder')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Reorder folders',
     description:
@@ -245,6 +250,8 @@ export class ArtworkFoldersController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Create artwork folder',
     description: 'Creates a new artwork folder with the provided details',
@@ -273,6 +280,8 @@ export class ArtworkFoldersController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Update artwork folder',
     description: 'Updates an existing artwork folder with new information',
@@ -311,6 +320,8 @@ export class ArtworkFoldersController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Delete artwork folder',
@@ -350,6 +361,8 @@ export class ArtworkFoldersController {
   }
 
   @Put(':id/move')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Move artwork folder',
     description:
@@ -388,6 +401,8 @@ export class ArtworkFoldersController {
   }
 
   @Post('default-root/:sellerId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Create default root folder',
     description: 'Creates a default root folder for a new seller',
@@ -417,6 +432,8 @@ export class ArtworkFoldersController {
   }
 
   @Patch(':id/visibility')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Toggle folder visibility',
     description: 'Show or hide a folder from display',

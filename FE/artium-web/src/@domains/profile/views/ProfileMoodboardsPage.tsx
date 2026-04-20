@@ -8,7 +8,6 @@ import { ProfileTabs } from '@domains/profile/components/ProfileTabs'
 import { PROFILE_TABS } from '@domains/profile/constants/profileTabs'
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
-import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
 type ProfileMoodboardsPageViewProps = {
   username?: string | string[]
@@ -18,15 +17,12 @@ export const ProfileMoodboardsPageView = ({
   username: _username,
 }: ProfileMoodboardsPageViewProps) => {
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+  const { data: baseData, user: fetchedUser, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
   const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Moodboards`
   const baseHref = `/profile/${resolvedUsername}`
-  const authUser = useAuthStore((state) => state.user)
-  const isAuthenticated = Boolean(authUser?.id)
-  const isOwner = isAuthenticated && sellerProfile && authUser?.id === sellerProfile.userId
 
   return (
     <>
@@ -45,8 +41,8 @@ export const ProfileMoodboardsPageView = ({
             <ProfileHero
               user={profileData.user}
               stats={profileData.stats}
-              userId={sellerProfile?.userId}
-              isOwner={isOwner || false}
+              userId={fetchedUser?.id}
+              isOwner={isOwner}
             />
           )}
         </div>

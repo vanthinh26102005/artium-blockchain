@@ -11,10 +11,12 @@ export enum UserRole {
   SELLER = 'seller',
   /** Collector who can browse and purchase artworks */
   COLLECTOR = 'collector',
+  /** Trusted neutral party who resolves auction disputes */
+  ARBITER = 'arbiter',
 }
 
 registerEnumType(UserRole, {
   name: 'UserRole',
   description:
-    'User roles defining access permissions (ADMIN, SELLER, COLLECTOR)',
+    'User roles defining access permissions (ADMIN, SELLER, COLLECTOR, ARBITER)',
 });

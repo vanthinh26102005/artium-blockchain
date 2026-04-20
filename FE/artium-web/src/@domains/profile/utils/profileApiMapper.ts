@@ -5,6 +5,7 @@ import type {
   MoodboardApiItem,
   SellerProfilePayload,
 } from '@shared/apis/profileApis'
+import type { UserPayload } from '@shared/types/auth'
 import type {
   ProfileAbout,
   ProfileArtwork,
@@ -77,8 +78,64 @@ const formatDimensions = (artwork: ArtworkApiItem) => {
   return `${parts.join(' x ')}${unit ? ` ${unit}` : ''}`
 }
 
+/**
+ * Maps a UserPayload (from /identity/users/me or /identity/users/slug/:slug)
+ * to the profile domain's ProfileUser type.
+ * This serves as the BASE profile — seller data enriches it if available.
+ */
+export const mapUserPayloadToProfileUser = (user: UserPayload): ProfileUser => ({
+  username: user.slug ?? user.username ?? '',
+  displayName: user.fullName ?? user.displayName ?? '',
+  bio: '',
+  avatarUrl: user.avatarUrl || DEFAULT_AVATAR,
+  role: undefined,
+  location: undefined,
+  verified: false,
+  headline: undefined,
+})
+
+/**
+ * Merges seller profile data on top of a base ProfileUser.
+ * Called only when the user has a seller profile.
+ */
+export const enrichProfileUserWithSeller = (
+  base: ProfileUser,
+  seller: SellerProfilePayload,
+): ProfileUser => ({
+  ...base,
+  username: base.username,
+  displayName: seller.displayName || base.displayName,
+  bio: ensureText(seller.bio) || base.bio,
+  avatarUrl: seller.profileImageUrl || base.avatarUrl,
+  role: seller.profileType ?? base.role,
+  location: seller.location ?? base.location,
+  verified: Boolean(seller.isVerified),
+  headline: seller.metaDescription ?? base.headline,
+})
+
+/**
+ * Creates a minimal ProfileAbout from a UserPayload (non-seller users).
+ */
+export const mapUserPayloadToProfileAbout = (_user: UserPayload): ProfileAbout => ({
+  biography: '',
+  websiteUrl: '',
+  instagram: '',
+  twitter: '',
+  profileCategories: [],
+  roles: [],
+  artisticVibes: [],
+  artisticValues: [],
+  artisticMediums: [],
+  connectionAffiliations: '',
+  connectionSeenAt: '',
+  connectionCurrently: '',
+  inspireVibes: [],
+  inspireValues: [],
+  inspireMediums: [],
+})
+
 export const mapSellerProfileToProfileUser = (sellerProfile: SellerProfilePayload): ProfileUser => ({
-  username: sellerProfile.slug,
+  username: '',
   displayName: sellerProfile.displayName,
   bio: ensureText(sellerProfile.bio),
   avatarUrl: sellerProfile.profileImageUrl || DEFAULT_AVATAR,
@@ -277,8 +334,70 @@ export const mapMomentToProfileDetail = (
   shares: 0,
 })
 
-export const resolveProfileUsername = (sellerProfile?: SellerProfilePayload | null, fallback?: string) =>
-  sellerProfile?.slug || fallback || ''
+/**
+ * Builds the complete ProfileOverviewData from a User + optional SellerProfile.
+ * This is the new primary entry point, replacing the seller-only version.
+ */
+export const buildProfileOverviewData = ({
+  user,
+  sellerProfile,
+  artworks,
+  artworksTotal,
+  moments,
+  moodboards,
+}: {
+  user: UserPayload
+  sellerProfile?: SellerProfilePayload | null
+  artworks: ArtworkApiItem[]
+  artworksTotal?: number
+  moments: MomentApiItem[]
+  moodboards: MoodboardApiItem[]
+}): ProfileOverviewData => {
+  let profileUser = mapUserPayloadToProfileUser(user)
+  let about = mapUserPayloadToProfileAbout(user)
+
+  if (sellerProfile) {
+    profileUser = enrichProfileUserWithSeller(profileUser, sellerProfile)
+    about = mapSellerProfileToProfileAbout(sellerProfile)
+  }
+
+  const profileArtworks = artworks.map((artwork) =>
+    mapArtworkToProfileArtwork(artwork, profileUser.displayName),
+  )
+  const profileMoments = moments.map(mapMomentToProfileMoment)
+  const profileMoodboards = moodboards.map((board) =>
+    mapMoodboardToProfileMoodboard(board, profileUser),
+  )
+  const totalArtworksCount =
+    typeof artworksTotal === 'number' ? artworksTotal : profileArtworks.length
+
+  const stats: ProfileStats = sellerProfile
+    ? buildStats(sellerProfile, totalArtworksCount)
+    : { artworks: totalArtworksCount, followers: 0, following: 0, collectors: 0, worksSold: 0, testimonials: 0 }
+
+  const salesStats: ProfileSalesStats = sellerProfile
+    ? buildSalesStats(sellerProfile, artworks)
+    : { averagePrice: 0, medianPrice: 0, currency: 'USD', recentSales: [] }
+
+  return {
+    user: profileUser,
+    stats,
+    salesStats,
+    about,
+    artworks: profileArtworks,
+    moments: profileMoments,
+    moodboards: profileMoodboards,
+  }
+}
+
+export const resolveProfileUsername = (_sellerProfile?: SellerProfilePayload | null, fallback?: string) =>
+  fallback || ''
+
+export const resolveUsername = (
+  user?: UserPayload | null,
+  _sellerProfile?: SellerProfilePayload | null,
+  fallback?: string,
+) => user?.slug || user?.username || fallback || ''
 
 const resolveCommentAuthor = (
   comment: CommentApiItem,

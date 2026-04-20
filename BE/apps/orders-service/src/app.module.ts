@@ -32,9 +32,14 @@ import {
   CreateOrderHandler,
   UpdateOrderStatusHandler,
   CancelOrderHandler,
+  MarkShippedHandler,
+  ConfirmDeliveryHandler,
+  OpenDisputeHandler,
+  ResolveDisputeHandler,
   GetOrdersHandler,
   GetOrderByIdHandler,
   GetOrderByOnChainIdHandler,
+  GetOrderItemsHandler,
 } from './application';
 
 import { BlockchainEventHandler } from './application/event-handlers';
@@ -45,12 +50,17 @@ export const CommandHandlers = [
   CreateOrderHandler,
   UpdateOrderStatusHandler,
   CancelOrderHandler,
+  MarkShippedHandler,
+  ConfirmDeliveryHandler,
+  OpenDisputeHandler,
+  ResolveDisputeHandler,
 ];
 
 export const QueryHandlers = [
   GetOrdersHandler,
   GetOrderByIdHandler,
   GetOrderByOnChainIdHandler,
+  GetOrderItemsHandler,
 ];
 
 export const Repositories = [

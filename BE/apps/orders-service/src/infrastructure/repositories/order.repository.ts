@@ -156,4 +156,36 @@ export class OrderRepository implements IOrderRepository {
     await this.update(orderId, { status }, transactionManager);
     return this.findById(orderId, transactionManager);
   }
+
+  async findBySellerIdViaItems(
+    sellerId: string,
+    options?: { skip?: number; take?: number },
+    transactionManager?: EntityManager,
+  ): Promise<{ data: Order[]; total: number }> {
+    const repo = this.getRepo(transactionManager);
+    const qb = repo
+      .createQueryBuilder('order')
+      .innerJoin('order_items', 'item', 'item.order_id = order.order_id')
+      .where('item.seller_id = :sellerId', { sellerId })
+      .orderBy('order.created_at', 'DESC');
+
+    const total = await qb.getCount();
+
+    if (options?.skip) qb.skip(options.skip);
+    qb.take(options?.take ?? 20);
+
+    const data = await qb.getMany();
+    return { data, total };
+  }
+
+  async findWithItems(
+    orderId: string,
+    transactionManager?: EntityManager,
+  ): Promise<Order | null> {
+    const repo = this.getRepo(transactionManager);
+    return repo.findOne({
+      where: { id: orderId },
+      relations: ['items'],
+    });
+  }
 }

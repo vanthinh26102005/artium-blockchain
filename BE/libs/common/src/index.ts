@@ -1,4 +1,5 @@
 export * from './app.module';
+export * from './constants';
 export * from './database/database.helper';
 export * from './database/dynamic-database.module';
 export * from './dtos/artworks/artwork-folder/artwork-folder.object';
@@ -43,6 +44,11 @@ export * from './dtos/notifications/notification-stats.dto';
 export * from './dtos/orders/create-order.dto';
 export * from './dtos/orders/get-orders.dto';
 export * from './dtos/orders/update-order.dto';
+export * from './dtos/orders/order.object';
+export * from './dtos/orders/mark-shipped.dto';
+export * from './dtos/orders/confirm-delivery.dto';
+export * from './dtos/orders/open-dispute.dto';
+export * from './dtos/orders/resolve-dispute.dto';
 export * from './dtos/payments/create-payment-intent.dto';
 export * from './dtos/payments/get-transactions.dto';
 export * from './dtos/payments/invoices/create-invoice.dto';

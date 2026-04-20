@@ -43,6 +43,8 @@ export enum PaymentProvider {
   STRIPE = 'STRIPE',
   /** PayPal payment gateway */
   PAYPAL = 'PAYPAL',
+  /** Ethereum blockchain (on-chain escrow) */
+  ETHEREUM = 'ETHEREUM',
 }
 
 /**
@@ -56,6 +58,8 @@ export enum PaymentMethodType {
   BANK_ACCOUNT = 'BANK_ACCOUNT',
   /** PayPal account */
   PAYPAL_ACCOUNT = 'PAYPAL_ACCOUNT',
+  /** Ethereum wallet (MetaMask, etc.) */
+  CRYPTO_WALLET = 'CRYPTO_WALLET',
 }
 
 /**
@@ -99,12 +103,13 @@ registerEnumType(TransactionStatus, {
 
 registerEnumType(PaymentProvider, {
   name: 'PaymentProvider',
-  description: 'Payment service provider (STRIPE, PAYPAL)',
+  description: 'Payment service provider (STRIPE, PAYPAL, ETHEREUM)',
 });
 
 registerEnumType(PaymentMethodType, {
   name: 'PaymentMethodType',
-  description: 'Payment method type (CARD, BANK_ACCOUNT, PAYPAL_ACCOUNT)',
+  description:
+    'Payment method type (CARD, BANK_ACCOUNT, PAYPAL_ACCOUNT, CRYPTO_WALLET)',
 });
 
 registerEnumType(PayoutStatus, {

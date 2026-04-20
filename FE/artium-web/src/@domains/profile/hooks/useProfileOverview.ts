@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 
 import artworkApis from '@shared/apis/artworkApis'
 import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis'
+import usersApi from '@shared/apis/usersApi'
+import type { UserPayload } from '@shared/types/auth'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { profileOverviewData as fallbackProfile } from '@domains/profile/constants/mockProfileData'
 import {
-  mapProfileOverviewData,
-  resolveProfileUsername,
+  buildProfileOverviewData,
+  resolveUsername,
 } from '@domains/profile/utils/profileApiMapper'
 import type { ProfileOverviewData } from '@domains/profile/types'
 
@@ -16,7 +18,9 @@ type UseProfileOverviewOptions = {
 
 type UseProfileOverviewResult = {
   data: ProfileOverviewData
+  user: UserPayload | null
   sellerProfile: SellerProfilePayload | null
+  isOwner: boolean
   isLoading: boolean
   error: string | null
   resolvedUsername: string
@@ -27,9 +31,18 @@ export const useProfileOverview = ({
 }: UseProfileOverviewOptions): UseProfileOverviewResult => {
   const authUser = useAuthStore((state) => state.user)
   const [data, setData] = useState<ProfileOverviewData | null>(null)
+  const [user, setUser] = useState<UserPayload | null>(null)
   const [sellerProfile, setSellerProfile] = useState<SellerProfilePayload | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const isOwner = useMemo(() => {
+    if (!authUser?.id) return false
+    if (!username) return true
+    if (user?.id && authUser.id === user.id) return true
+    const authSlug = authUser.slug ?? authUser.username
+    return Boolean(authSlug && authSlug === username)
+  }, [authUser, username, user])
 
   useEffect(() => {
     let isActive = true
@@ -39,39 +52,59 @@ export const useProfileOverview = ({
       setError(null)
 
       try {
-        let profile: SellerProfilePayload | null = null
+        // Step 1: Fetch User
+        let fetchedUser: UserPayload | null = null
 
-        if (username) {
-          try {
-            profile = await profileApis.getSellerProfileBySlug(username)
-          } catch (err) {
-            throw err
+        if (!username || (authUser && (authUser.slug === username || authUser.username === username || authUser.id === username))) {
+          // Own profile — use /identity/users/me
+          if (authUser?.id) {
+            try {
+              fetchedUser = await usersApi.getMe()
+            } catch {
+              fetchedUser = authUser
+            }
           }
-        } else if (authUser?.id) {
+        } else {
+          // Other user's profile — detect UUID vs slug
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username)
           try {
-            profile = await profileApis.getSellerProfileByUserId(authUser.id)
-          } catch (err) {
-            throw err
+            fetchedUser = isUuid
+              ? await usersApi.getUserById(username)
+              : await usersApi.getUserBySlug(username)
+          } catch {
+            fetchedUser = null
           }
         }
 
         if (!isActive) return
-        if (!profile) {
+        if (!fetchedUser) {
+          setUser(null)
           setSellerProfile(null)
           setData(fallbackProfile)
           setError('Profile not found.')
           return
         }
-        setSellerProfile(profile)
+        setUser(fetchedUser)
 
+        // Step 2: Try to fetch seller profile (optional enrichment)
+        let seller: SellerProfilePayload | null = null
+        try {
+          seller = await profileApis.getSellerProfileByUserId(fetchedUser.id)
+        } catch {
+          seller = null
+        }
+
+        if (!isActive) return
+        setSellerProfile(seller)
+
+        // Step 3: Fetch content (artworks, moments, moodboards)
         const [artworksResponse, momentsResponse, moodboardsResponse] = await Promise.all([
           artworkApis
             .listArtworksPaginated({
-              sellerId: profile.userId,
+              sellerId: fetchedUser.id,
               take: 24,
               skip: 0,
             })
-            .then((response) => response)
             .catch(() => ({
               data: [],
               pagination: {
@@ -84,14 +117,15 @@ export const useProfileOverview = ({
                 hasPrev: false,
               },
             })),
-          profileApis.listUserMoments(profile.userId).catch(() => []),
-          profileApis.listUserMoodboards(profile.userId).catch(() => []),
+          profileApis.listUserMoments(fetchedUser.id).catch(() => []),
+          profileApis.listUserMoodboards(fetchedUser.id).catch(() => []),
         ])
 
         if (!isActive) return
 
-        const mapped = mapProfileOverviewData({
-          sellerProfile: profile,
+        const mapped = buildProfileOverviewData({
+          user: fetchedUser,
+          sellerProfile: seller,
           artworks: artworksResponse.data,
           artworksTotal: artworksResponse.pagination?.total,
           moments: momentsResponse,
@@ -103,6 +137,7 @@ export const useProfileOverview = ({
         if (!isActive) return
         setError(fetchError instanceof Error ? fetchError.message : 'Failed to load profile.')
         setData(fallbackProfile)
+        setUser(null)
         setSellerProfile(null)
       } finally {
         if (isActive) {
@@ -116,16 +151,18 @@ export const useProfileOverview = ({
     return () => {
       isActive = false
     }
-  }, [username, authUser?.id])
+  }, [username, authUser?.id, authUser?.slug, authUser?.username])
 
   const resolvedUsername = useMemo(
-    () => resolveProfileUsername(sellerProfile, username || authUser?.username!),
-    [sellerProfile, username, authUser?.username],
+    () => resolveUsername(user ?? authUser, sellerProfile, username || ''),
+    [user, authUser, sellerProfile, username],
   )
 
   return {
     data: data ?? fallbackProfile,
+    user,
     sellerProfile,
+    isOwner,
     isLoading,
     error,
     resolvedUsername,

@@ -15,7 +15,7 @@ COPY libs ./libs
 RUN yarn install --frozen-lockfile
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
-COPY apps/artwork-service/tsconfig.app.json ./apps/artwork-service/tsconfig.json
+COPY apps/artwork-service/tsconfig.json ./apps/artwork-service/tsconfig.json
 COPY apps/artwork-service ./apps/artwork-service
 
 RUN yarn workspace @backend/artwork-service build

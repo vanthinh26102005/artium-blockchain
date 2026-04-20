@@ -8,15 +8,24 @@ registerEnumType(UserRole, {
 
 @Entity({ name: 'users' })
 @Index(['email'], { unique: true })
+@Index(['slug'], { unique: true, sparse: true })
 @Index(['googleId'], { unique: true, sparse: true })
 @Index(['walletAddress'], { unique: true, sparse: true })
 @Index(['isActive', 'createdAt'])
 export class User extends AbstractEntity {
-  @PrimaryGeneratedColumn('uuid', { name: 'user_id' })
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column({ type: 'varchar', length: 320, unique: true })
   email!: string;
+
+  @Column({
+    type: 'varchar',
+    length: 255,
+    unique: true,
+    nullable: true,
+  })
+  slug: string | null;
 
   @Column({ name: 'password', type: 'varchar', nullable: true })
   password: string;
