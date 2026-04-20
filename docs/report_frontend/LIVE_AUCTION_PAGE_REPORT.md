@@ -49,6 +49,14 @@ Danh sách `auction lots` là phần nội dung trung tâm của trang. Mỗi lo
 - Giá hiện tại được hiển thị theo đơn vị ETH.
 - Nút hành động chính như `Place Bid`, `Enter Auction`, `View Artwork` hoặc `View Results`.
 
+Khi người dùng mở `Bid Modal`, phần `Time Remaining` trong modal được hiển thị theo các mốc ưu tiên UX:
+
+- Trên `24 giờ`: hiển thị dạng `Xd remaining`.
+- Từ hơn `60 phút` đến `24 giờ`: hiển thị dạng `Xh remaining`.
+- Từ `60 phút` trở xuống: chuyển sang countdown realtime `HH:MM:SS`.
+- Từ `10 phút` trở xuống: countdown được nhấn mạnh bằng màu đỏ hoặc pulse.
+- Từ `1 phút` trở xuống: vẫn là countdown realtime nhưng tăng mức nhấn mạnh cao nhất.
+
 ### 2.5. Khu vực phân trang
 Thay vì cơ chế `Load More`, trang hiện dùng `Pagination`. Mỗi trang hiển thị tối đa `24` kết quả. Phần điều hướng gồm:
 
@@ -155,7 +163,7 @@ Nút hành động của mỗi lot thay đổi theo trạng thái:
 - `paused`: hiển thị `View Artwork`.
 - `closed`: hiển thị `View Results`.
 
-Tuy nhiên, ở phiên bản hiện tại, các nút này vẫn đang cùng điều hướng tới trang chi tiết tác phẩm. Nghĩa là luồng đấu giá chuyên biệt chưa được tách riêng ở frontend, mà mới dừng ở mức điều hướng vào chi tiết để người dùng tiếp tục thao tác từ đó.
+Ở phiên bản hiện tại, các lot `active` và `ending-soon` đã bắt đầu dùng `Bid Modal` riêng ở frontend cho `editing state`, thay vì chỉ điều hướng sang trang chi tiết. Điều này giúp hệ thống tiến gần hơn tới luồng bid thực tế, đồng thời tạo nền cho các trạng thái tiếp theo như `submitting`, `pending`, `confirmed`, và `failed`.
 
 ## 5. Luồng thao tác của người dùng
 
@@ -190,7 +198,14 @@ Hệ thống tính lại vị trí bắt đầu của dữ liệu và chỉ rend
 Khi bấm `View artwork details`, người dùng được chuyển đến trang chi tiết của tác phẩm tương ứng. Từ đây, họ có thể xem thêm thông tin, hình ảnh, tác giả và các thao tác nghiệp vụ khác nếu hệ thống hỗ trợ.
 
 ### 5.6. Luồng bấm Place Bid
-Ở trạng thái hiện tại của frontend, khi người dùng bấm `Place Bid`, hệ thống vẫn điều hướng tới trang chi tiết tác phẩm thay vì mở trực tiếp màn hình đặt giá. Điều này có thể xem là một bước trung gian trước khi triển khai đầy đủ luồng bid thực tế.
+Ở trạng thái hiện tại của frontend, khi người dùng bấm `Place Bid` trên lot `active` hoặc `ending-soon`, hệ thống sẽ mở trực tiếp `Bid Modal` ở `editing state`. Trong modal này, người dùng có thể xem giá hiện tại, mức bid tối thiểu tiếp theo, thời gian còn lại, và nhập giá bid mới.
+
+Riêng phần `Time Remaining` trong modal được xử lý theo hướng ưu tiên khả năng đọc ở giai đoạn bình thường và tăng mức khẩn trương ở giai đoạn cuối:
+
+- Nếu còn trên `24 giờ`, UI hiển thị theo ngày.
+- Nếu còn trên `60 phút` nhưng chưa quá `24 giờ`, UI hiển thị theo giờ.
+- Nếu còn `60 phút` trở xuống, UI hiển thị countdown `HH:MM:SS`.
+- Nếu còn `10 phút` hoặc `1 phút`, UI nhấn mạnh bằng màu và hiệu ứng để tăng độ chú ý.
 
 ## 6. Thay đổi và cải tiến đã thực hiện
 
@@ -216,6 +231,8 @@ Những thay đổi gần đây giúp trang:
 - Phân tách rõ hơn giữa dữ liệu artwork chung và dữ liệu nghiệp vụ auction.
 - Dễ bảo trì khi thay đổi số lượng lot hoặc tiêu chí lọc.
 - Giảm việc lặp lại dữ liệu và logic trình bày.
+- Tạo được `Bid Modal` riêng theo hướng component hóa trong domain `auction`.
+- Chuẩn hóa rule hiển thị `Time Remaining` để có thể tái sử dụng cho modal và các màn hình auction khác sau này.
 
 ## 7. Đánh giá
 
@@ -235,8 +252,9 @@ Một số hạn chế hiện tại gồm:
 
 - Dữ liệu vẫn là mock data, chưa lấy từ API hoặc dữ liệu blockchain thật.
 - Metadata `auction` vẫn đang là dữ liệu giả lập ở frontend, chưa lấy từ service đấu giá thật.
-- Nút `Place Bid` chưa mở luồng bid riêng mà vẫn dẫn đến trang chi tiết tác phẩm.
-- Chưa có realtime update cho giá đấu hoặc thời gian còn lại.
+- `Bid Modal` mới đang dừng ở `editing state`, chưa hoàn thiện các trạng thái `submitting`, `pending`, `confirmed`, `failed`.
+- Countdown thời gian còn lại trong modal hiện mới là logic realtime ở frontend dựa trên dữ liệu mock, chưa đồng bộ với backend hoặc blockchain thật.
+- Chưa có realtime update cho giá đấu hiện tại giữa nhiều người dùng.
 - Chưa có cơ chế đồng bộ trực tiếp với hợp đồng thông minh hoặc backend auction service.
 
 ### 7.3. Khả năng mở rộng trong tương lai
