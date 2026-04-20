@@ -23,5 +23,5 @@ skills/
 .DS_Store
 .claude
 
-# Frontend dependencies
-FE/package-lock.json
+# Documentation files (local only)
+docs/Huonghan-Doan-New.pdf
