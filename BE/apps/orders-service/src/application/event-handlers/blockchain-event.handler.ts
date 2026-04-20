@@ -248,6 +248,7 @@ export class BlockchainEventHandler {
         sellerWallet: message.seller,
         trackingNumber: message.trackingHash,
         escrowState: EscrowState.SHIPPED,
+        paymentStatus: OrderPaymentStatus.ESCROW,
       });
     } catch (error) {
       this.logger.error(`Failed to handle ArtShipped: ${error.message}`, error.stack);
@@ -277,6 +278,7 @@ export class BlockchainEventHandler {
         status: OrderStatus.DELIVERED,
         deliveredAt: new Date(),
         escrowState: EscrowState.COMPLETED,
+        paymentStatus: OrderPaymentStatus.RELEASED,
       });
     } catch (error) {
       this.logger.error(`Failed to handle DeliveryConfirmed: ${error.message}`, error.stack);
@@ -335,10 +337,14 @@ export class BlockchainEventHandler {
 
       const status = message.favorBuyer ? OrderStatus.REFUNDED : OrderStatus.DELIVERED;
       const escrowState = message.favorBuyer ? EscrowState.CANCELLED : EscrowState.COMPLETED;
+      const paymentStatus = message.favorBuyer
+        ? OrderPaymentStatus.REFUNDED
+        : OrderPaymentStatus.RELEASED;
 
       await this.orderRepo.update(order.id, {
         status,
         escrowState,
+        paymentStatus,
         ...(status === OrderStatus.DELIVERED ? { deliveredAt: new Date() } : {}),
       });
     } catch (error) {
@@ -370,6 +376,7 @@ export class BlockchainEventHandler {
         cancelledAt: new Date(),
         cancelledReason: message.reason,
         escrowState: EscrowState.CANCELLED,
+        paymentStatus: OrderPaymentStatus.REFUNDED,
       });
     } catch (error) {
       this.logger.error(`Failed to handle AuctionCancelled: ${error.message}`, error.stack);
@@ -467,6 +474,38 @@ export class BlockchainEventHandler {
       });
     } catch (error) {
       this.logger.error(`Failed to handle DeliveryTimeout: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @RabbitSubscribe({
+    exchange: ExchangeName.BLOCKCHAIN_EVENTS,
+    routingKey: RoutingKey.BLOCKCHAIN_FUNDS_WITHDRAWN,
+    queue: 'orders-service.blockchain.funds-withdrawn',
+    queueOptions: { durable: true },
+  })
+  async handleFundsWithdrawn(message: {
+    bidder: string;
+    amount: string;
+    txHash: string;
+    blockNumber: string;
+  }) {
+    this.logger.log(
+      `Funds withdrawn: bidder=${message.bidder} amount=${message.amount} wei tx=${message.txHash}`,
+    );
+
+    try {
+      // Notification-only per spec — no order state change.
+      // The Withdrawn event is wallet-level (no orderId) and covers
+      // aggregated pendingReturns from outbids, cancellations, and refunds.
+      this.logger.debug(
+        `Withdrawal confirmed on-chain at block ${message.blockNumber}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to handle FundsWithdrawn: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }

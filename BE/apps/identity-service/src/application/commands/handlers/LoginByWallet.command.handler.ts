@@ -8,6 +8,7 @@ import {
   IUserRepository,
   LoginResponse,
   NonceService,
+  RegistrationService,
   TokenService,
 } from 'apps/identity-service/src/domain';
 
@@ -35,6 +36,7 @@ export class LoginByWalletHandler
     @Inject(IUserRepository) private readonly userRepository: IUserRepository,
     private readonly tokenService: TokenService,
     private readonly nonceService: NonceService,
+    private readonly registrationService: RegistrationService,
   ) {}
 
   private parseDateField(value: string, fieldName: string): Date {
@@ -221,10 +223,15 @@ export class LoginByWalletHandler
 
     if (!user) {
       try {
+        const slug = await this.registrationService.generateUniqueSlug(
+          normalizedAddress.slice(0, 10),
+        );
+
         user = await this.userRepository.create({
           email: `${normalizedAddress.slice(0, 10)}@wallet.local`,
           password: crypto.randomBytes(16).toString('hex'),
           fullName: null,
+          slug,
           avatarUrl: null,
           googleId: null,
           walletAddress: normalizedAddress,

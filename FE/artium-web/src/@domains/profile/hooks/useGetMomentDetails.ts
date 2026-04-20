@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import type { MomentDetail } from '@domains/profile/types'
 import profileApis from '@shared/apis/profileApis'
+import usersApi from '@shared/apis/usersApi'
 import { mapMomentToMomentDetail } from '@domains/profile/utils/profileApiMapper'
 
 type UseGetMomentDetailsResult = {
@@ -37,16 +38,31 @@ export const useGetMomentDetails = (
           throw new Error('Moment not found.')
         }
 
-        const authorProfile = options?.username
-          ? await profileApis.getSellerProfileBySlug(options.username)
-          : await profileApis.getSellerProfileByUserId(moment.userId)
+        // Resolve author: look up user (by slug or by userId), then fetch seller profile
+        let authorUserId = moment.userId
+        let authorSlug = ''
+        if (options?.username) {
+          const authorUser = await usersApi.getUserBySlug(options.username)
+          authorUserId = authorUser.id
+          authorSlug = authorUser.slug || authorUser.username || options.username
+        }
+
+        const authorProfile = await profileApis.getSellerProfileByUserId(authorUserId)
+        if (!authorSlug) {
+          try {
+            const authorUser = await usersApi.getUserById(authorUserId)
+            authorSlug = authorUser.slug || authorUser.username || ''
+          } catch {
+            authorSlug = ''
+          }
+        }
 
         if (!isActive) {
           return
         }
 
         const mapped = mapMomentToMomentDetail(moment, {
-          username: authorProfile.slug,
+          username: authorSlug,
           displayName: authorProfile.displayName,
           bio: authorProfile.bio ?? '',
           avatarUrl: authorProfile.profileImageUrl || '/images/logo-dark-mode.png',

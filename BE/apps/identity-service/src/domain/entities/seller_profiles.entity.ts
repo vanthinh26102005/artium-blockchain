@@ -10,13 +10,12 @@ import { BusinessAddress } from '../dtos/bussiness-addess.object';
 import { SellerWebsite } from './seller_websites.entity';
 
 @Entity({ name: 'seller_profiles' })
-@Index(['slug'], { unique: true })
 @Index(['userId'], { unique: true })
 @Index(['displayName'])
 @Index(['isActive', 'profileType', 'isVerified'])
 @Index(['isFeatured', 'isActive'])
 export class SellerProfile extends AbstractEntity {
-  @PrimaryGeneratedColumn('uuid', { name: 'profile_id' })
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column({ name: 'user_id', type: 'uuid', unique: true })
@@ -32,9 +31,6 @@ export class SellerProfile extends AbstractEntity {
 
   @Column({ name: 'display_name', type: 'varchar', length: 255 })
   displayName!: string;
-
-  @Column({ type: 'varchar', length: 255, unique: true })
-  slug!: string;
 
   @Column({ type: 'text', nullable: true })
   bio: string | null;

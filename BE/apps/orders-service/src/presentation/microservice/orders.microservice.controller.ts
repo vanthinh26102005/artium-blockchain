@@ -12,9 +12,14 @@ import {
   CreateOrderCommand,
   UpdateOrderStatusCommand,
   CancelOrderCommand,
+  MarkShippedCommand,
+  ConfirmDeliveryCommand,
+  OpenDisputeCommand,
+  ResolveDisputeCommand,
   GetOrdersQuery,
   GetOrderByIdQuery,
   GetOrderByOnChainIdQuery,
+  GetOrderItemsQuery,
 } from '../../application';
 
 @Controller()
@@ -73,5 +78,45 @@ export class OrdersMicroserviceController {
         notes: data.notes,
       }),
     );
+  }
+
+  @MessagePattern({ cmd: 'cancel_order' })
+  async cancelOrder(@Payload() data: { id: string; userId: string; reason?: string }) {
+    this.logger.debug(`Cancelling order: ${data.id} by user: ${data.userId}`);
+    return this.commandBus.execute(new CancelOrderCommand(data.id, data.userId, data.reason));
+  }
+
+  @MessagePattern({ cmd: 'get_order_items' })
+  async getOrderItems(@Payload() data: { orderId: string }) {
+    this.logger.debug(`Getting items for order: ${data.orderId}`);
+    return this.queryBus.execute(new GetOrderItemsQuery(data.orderId));
+  }
+
+  @MessagePattern({ cmd: 'mark_shipped' })
+  async markShipped(@Payload() data: { id: string; userId: string; carrier: string; trackingNumber: string; shippingMethod?: string }) {
+    this.logger.debug(`Marking order as shipped: ${data.id} by user: ${data.userId}`);
+    const { id, userId, ...dto } = data;
+    return this.commandBus.execute(new MarkShippedCommand(id, userId, dto));
+  }
+
+  @MessagePattern({ cmd: 'confirm_delivery' })
+  async confirmDelivery(@Payload() data: { id: string; userId: string; notes?: string }) {
+    this.logger.debug(`Confirming delivery for order: ${data.id} by user: ${data.userId}`);
+    const { id, userId, ...dto } = data;
+    return this.commandBus.execute(new ConfirmDeliveryCommand(id, userId, dto));
+  }
+
+  @MessagePattern({ cmd: 'open_dispute' })
+  async openDispute(@Payload() data: { id: string; userId: string; reason: string }) {
+    this.logger.debug(`Opening dispute for order: ${data.id} by user: ${data.userId}`);
+    const { id, userId, ...dto } = data;
+    return this.commandBus.execute(new OpenDisputeCommand(id, userId, dto));
+  }
+
+  @MessagePattern({ cmd: 'resolve_dispute' })
+  async resolveDispute(@Payload() data: { id: string; favorBuyer: boolean; resolutionNotes?: string }) {
+    this.logger.debug(`Resolving dispute for order: ${data.id}`);
+    const { id, ...dto } = data;
+    return this.commandBus.execute(new ResolveDisputeCommand(id, dto));
   }
 }

@@ -20,9 +20,9 @@ import {
   DeleteSellerProfileHandler,
   GetFeaturedSellerProfilesHandler,
   GetSellerProfileByIdHandler,
-  GetSellerProfileBySlugHandler,
   GetSellerProfileByUserIdHandler,
   GetUserByIdHandler,
+  GetUserBySlugHandler,
   GetWalletNonceHandler,
   InitiateUserRegistrationHandler,
   ListSellerProfilesHandler,
@@ -34,6 +34,7 @@ import {
   UpdatePaymentOnboardingHandler,
   UpdateProfileVisibilityHandler,
   UpdateSellerProfileHandler,
+  UpdateUserProfileHandler,
   UpdateVerificationStatusHandler,
   VerifyPasswordResetHandler,
 } from './application';
@@ -83,15 +84,16 @@ export const CommandHandlers = [
   UpdateVerificationStatusHandler,
   UpdateProfileVisibilityHandler,
   UpdatePaymentOnboardingHandler,
+  UpdateUserProfileHandler,
 ];
 
 export const QueryHandlers = [
   GetUserByIdHandler,
+  GetUserBySlugHandler,
   GetWalletNonceHandler,
 
   GetSellerProfileByIdHandler,
   GetSellerProfileByUserIdHandler,
-  GetSellerProfileBySlugHandler,
   ListSellerProfilesHandler,
   GetFeaturedSellerProfilesHandler,
 ];

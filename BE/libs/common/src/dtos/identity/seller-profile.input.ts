@@ -17,7 +17,6 @@ export class CreateSellerProfileInput {
   userId?: string;
   profileType?: ProfileType;
   displayName?: string;
-  slug?: string;
   bio?: string | null;
   profileImageUrl?: string | null;
   coverImageUrl?: string | null;
@@ -46,7 +45,6 @@ export class CreateSellerProfileInput {
 export class UpdateSellerProfileInput {
   profileType?: ProfileType;
   displayName?: string;
-  slug?: string;
   bio?: string | null;
   profileImageUrl?: string | null;
   coverImageUrl?: string | null;
@@ -91,17 +89,6 @@ export class CreateSellerProfileInputType {
   @IsNotEmpty()
   @MaxLength(255)
   displayName: string;
-
-  @ApiProperty({
-    example: 'artisan-gallery',
-    description:
-      'URL-friendly slug (lowercase letters, numbers, and hyphens only)',
-    maxLength: 255,
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  slug: string;
 
   @ApiProperty({
     example:
@@ -173,17 +160,6 @@ export class UpdateSellerProfileInputType {
   @IsOptional()
   @MaxLength(255)
   displayName?: string;
-
-  @ApiProperty({
-    example: 'updated-gallery-name',
-    required: false,
-    description: 'URL-friendly slug',
-    maxLength: 255,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(255)
-  slug?: string;
 
   @ApiProperty({
     example:

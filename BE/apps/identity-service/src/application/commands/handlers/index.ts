@@ -12,3 +12,4 @@ export * from './UpdateProfileVisibility.command.handler';
 export * from './UpdateSellerProfile.command.handler';
 export * from './UpdateVerificationStatus.command.handler';
 export * from './VerifyPasswordReset.command.handler';
+export * from './UpdateUserProfile.command.handler';

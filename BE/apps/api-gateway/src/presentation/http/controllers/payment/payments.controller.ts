@@ -52,8 +52,8 @@ export class PaymentsController {
   })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async createPaymentIntent(@Body() data: CreatePaymentIntentDto) {
-    return sendRpc(this.paymentsClient, { cmd: 'create_payment_intent' }, data);
+  async createPaymentIntent(@Body() data: CreatePaymentIntentDto, @Req() req: any) {
+    return sendRpc(this.paymentsClient, { cmd: 'create_payment_intent' }, { ...data, userId: req.user?.id });
   }
 
   @Post('stripe/payment-intent/confirm')

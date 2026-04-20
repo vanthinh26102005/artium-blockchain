@@ -9,7 +9,6 @@ import { PROFILE_TABS } from '@domains/profile/constants/profileTabs'
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
 import { mapProfileMomentToMomentCard } from '@domains/profile/utils/profileApiMapper'
-import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
 type ProfileMomentsPageViewProps = {
   username?: string | string[]
@@ -17,7 +16,7 @@ type ProfileMomentsPageViewProps = {
 
 export const ProfileMomentsPageView = ({ username: _username }: ProfileMomentsPageViewProps) => {
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+  const { data: baseData, user: fetchedUser, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
@@ -27,9 +26,6 @@ export const ProfileMomentsPageView = ({ username: _username }: ProfileMomentsPa
   const moments = profileData.moments.map((moment) =>
     mapProfileMomentToMomentCard(moment, profileData.user),
   )
-  const authUser = useAuthStore((state) => state.user)
-  const isAuthenticated = Boolean(authUser?.id)
-  const isOwner = isAuthenticated && sellerProfile && authUser?.id === sellerProfile.userId
 
   return (
     <>
@@ -48,8 +44,8 @@ export const ProfileMomentsPageView = ({ username: _username }: ProfileMomentsPa
             <ProfileHero
               user={profileData.user}
               stats={profileData.stats}
-              userId={sellerProfile?.userId}
-              isOwner={isOwner || false}
+              userId={fetchedUser?.id}
+              isOwner={isOwner}
             />
           )}
         </div>

@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@shared/components/ui/dropdown-menu'
 import { profileApis, type SellerProfilePayload } from '@shared/apis/profileApis'
+import usersApi from '@shared/apis/usersApi'
 import { PostMomentModal } from '@domains/moments/components/modals/PostMomentModal'
 
 const navLinks = [
@@ -31,6 +32,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SellerProfilePayload[]>([])
+  const [resolvedSlugs, setResolvedSlugs] = useState<Record<string, string>>({})
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [isPostMomentModalOpen, setIsPostMomentModalOpen] = useState(false)
@@ -124,8 +126,23 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
       try {
         setIsSearching(true)
         const response = await profileApis.searchSellerProfiles(searchQuery.trim(), { take: 5 })
-        setSearchResults(response?.items || [])
+        const items = response?.items || []
+        setSearchResults(items)
         setShowResults(true)
+
+        // Resolve user slugs in parallel for proper URL navigation
+        const slugMap: Record<string, string> = {}
+        await Promise.all(
+          items.map(async (item) => {
+            try {
+              const u = await usersApi.getUserById(item.userId)
+              slugMap[item.userId] = u.slug || u.username || item.userId
+            } catch {
+              slugMap[item.userId] = item.userId
+            }
+          }),
+        )
+        setResolvedSlugs(slugMap)
       } catch {
         setSearchResults([])
         setShowResults(false)
@@ -332,8 +349,9 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                             key={profile.id || profile.profileId}
                             type="button"
                             onClick={() => {
-                              console.log('[SiteHeader] Navigating to profile:', profile.slug, profile.displayName)
-                              router.push(`/profile/${encodeURIComponent(profile.slug)}`)
+                              const slug = resolvedSlugs[profile.userId] || profile.userId
+                              console.log('[SiteHeader] Navigating to profile:', slug, profile.displayName)
+                              router.push(`/profile/${encodeURIComponent(slug)}`)
                               setIsSearchOpen(false)
                               setShowResults(false)
                               setSearchQuery('')
@@ -564,8 +582,9 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                         key={profile.id || profile.profileId}
                         type="button"
                         onClick={() => {
-                          console.log('[SiteHeader Mobile] Navigating to profile:', profile.slug, profile.displayName)
-                          router.push(`/profile/${profile.slug}`)
+                          const slug = resolvedSlugs[profile.userId] || profile.userId
+                          console.log('[SiteHeader Mobile] Navigating to profile:', slug, profile.displayName)
+                          router.push(`/profile/${encodeURIComponent(slug)}`)
                           setIsSearchOpen(false)
                           setShowResults(false)
                           setSearchQuery('')

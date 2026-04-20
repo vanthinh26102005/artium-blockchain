@@ -17,6 +17,7 @@ import {
   ListNotificationHistoriesHandler,
   SendEmailEventHandler,
   NewMessageEventHandler,
+  BlockchainAuctionEventHandler,
   UpdateNotificationHistoryHandler,
 } from './application';
 import { SeederModule } from './db/seeder.module';
@@ -34,6 +35,7 @@ export const CommandHandlers = [
 
   SendEmailEventHandler,
   NewMessageEventHandler,
+  BlockchainAuctionEventHandler,
 ];
 
 export const QueryHandlers = [

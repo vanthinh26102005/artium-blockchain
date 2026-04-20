@@ -20,4 +20,15 @@ export interface IOrderRepository extends IRepository<Order, string> {
     status: OrderStatus,
     transactionManager?: EntityManager,
   ): Promise<Order | null>;
+
+  findBySellerIdViaItems(
+    sellerId: string,
+    options?: { skip?: number; take?: number },
+    transactionManager?: EntityManager,
+  ): Promise<{ data: Order[]; total: number }>;
+
+  findWithItems(
+    orderId: string,
+    transactionManager?: EntityManager,
+  ): Promise<Order | null>;
 }

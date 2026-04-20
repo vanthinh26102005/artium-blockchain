@@ -15,6 +15,13 @@ export class UserPayload {
   email: string;
 
   @ApiProperty({
+    example: 'duong-phuong-thinh',
+    required: false,
+    description: 'Unique URL-friendly identifier for the user profile',
+  })
+  slug: string | null;
+
+  @ApiProperty({
     example: 'Duong Phuong Thinh',
     required: false,
     description: 'Full name of the user',

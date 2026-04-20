@@ -40,6 +40,11 @@ export interface IUserRepository extends IRepository<User, string> {
     transactionManager?: EntityManager,
   ): Promise<User | null>;
 
+  findBySlug(
+    slug: string,
+    transactionManager?: EntityManager,
+  ): Promise<User | null>;
+
   create(
     data: CreateUserInput,
     transactionManager?: EntityManager,

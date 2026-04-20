@@ -12,7 +12,7 @@ import {
   GetArtworkQuery,
   ListArtworksQuery,
 } from '../../application';
-import { GetArtworksQueryDto, UserPayload, ArtworkImageInput } from '@app/common';
+import { GetArtworksQueryDto, UserPayload, ArtworkImageInput, ArtworkStatus } from '@app/common';
 import { CreateArtworkInput } from '../../domain/dtos/artworks/create-artwork.input';
 import { UpdateArtworkInput } from '../../domain/dtos/artworks/update-artwork.input';
 import {
@@ -62,7 +62,7 @@ export class ArtworkMicroserviceController {
   @MessagePattern({ cmd: 'bulk_move_artworks' })
   async bulkMoveArtworks(
     @Payload()
-    data: BulkMoveArtworksInput,
+    data: BulkMoveArtworksInput & { user?: UserPayload },
   ) {
     return this.commandBus.execute(
       new BulkMoveArtworksCommand(
@@ -75,7 +75,7 @@ export class ArtworkMicroserviceController {
 
   @MessagePattern({ cmd: 'bulk_delete_artworks' })
   async bulkDeleteArtworks(
-    @Payload() data: BulkDeleteArtworksInput,
+    @Payload() data: BulkDeleteArtworksInput & { user?: UserPayload },
   ) {
     return this.commandBus.execute(
       new BulkDeleteArtworksCommand(data.artworkIds, data.sellerId),
@@ -84,14 +84,12 @@ export class ArtworkMicroserviceController {
 
   @MessagePattern({ cmd: 'bulk_update_artwork_status' })
   async bulkUpdateArtworkStatus(
-    @Payload() data: BulkUpdateArtworkStatusInput,
+    @Payload() data: BulkUpdateArtworkStatusInput & { user?: UserPayload },
   ) {
-    // Cast string status to enum type expected by Command if necessary,
-    // but command likely takes string or similar enum.
     return this.commandBus.execute(
       new BulkUpdateArtworkStatusCommand(
         data.artworkIds,
-        data.status as any,
+        data.status as ArtworkStatus,
         data.sellerId,
       ),
     );
@@ -99,7 +97,7 @@ export class ArtworkMicroserviceController {
 
   @MessagePattern({ cmd: 'add_images_to_artwork' })
   async addImagesToArtwork(
-    @Payload() data: { id: string; images: ArtworkImageInput[] },
+    @Payload() data: { id: string; images: ArtworkImageInput[]; user?: UserPayload },
   ) {
     return this.commandBus.execute(
       new AddImagesToArtworkCommand(data.id, data.images),

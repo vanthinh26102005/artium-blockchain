@@ -239,7 +239,9 @@ services:
   # Messaging & Cache
   # ---------------------------
   rabbitmq:
-    image: dgpthinh/rabbitmq:v1
+    build:
+      context: .
+      dockerfile: ./infrastructure/docker/rabbitmq/Dockerfile
     container_name: rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: myuser
@@ -264,7 +266,7 @@ services:
           memory: "768M"
         reservations:
           cpus: "0.40"
-          memory: "384M"
+          memory: "512M"
     networks:
       - infra_network
 
@@ -307,7 +309,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/api-gateway/Dockerfile
-    image: dgpthinh/api-gateway:v1
     command: yarn dev:gateway
     ports:
       - "8081:8081"
@@ -340,14 +341,14 @@ services:
       - notifications-service
       - events-service
       - community-service
-    deploy:
-      resources:
-        limits:
-          cpus: "0.30"
-          memory: "384M"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.30"
+    #       memory: "384M"
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: "256M"
     networks:
       - services_network
 
@@ -359,7 +360,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/identity-service/Dockerfile
-    image: dgpthinh/identity-service:v1
     command: yarn dev:identity
     ports:
       - "3001:3001"
@@ -393,14 +393,14 @@ services:
     depends_on:
       - rabbitmq
       - redis
-    deploy:
-      resources:
-        limits:
-          cpus: "0.30"
-          memory: "384M"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.30"
+    #       memory: "384M"
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -410,7 +410,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/notifications-service/Dockerfile
-    image: dgpthinh/notifications-service:v1
     command: yarn dev:notifications
     ports:
       - "3002:3002"
@@ -451,14 +450,14 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
-    deploy:
-      resources:
-        limits:
-          cpus: "0.30"
-          memory: "384M"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.30"
+    #       memory: "384M"
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -468,7 +467,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/artwork-service/Dockerfile
-    image: dgpthinh/artwork-service:v1
     command: yarn dev:artwork
     ports:
       - "3003:3003"
@@ -510,14 +508,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    deploy:
-      resources:
-        limits:
-          cpus: "0.30"
-          memory: "384M"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.30"
+    #       memory: "384M"
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -527,7 +525,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/messaging-service/Dockerfile
-    image: dgpthinh/messaging-service:v1
     command: yarn dev:messaging
     ports:
       - "3004:3004"
@@ -566,14 +563,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    deploy:
-      resources:
-        limits:
-          cpus: "0.30"
-          memory: "384M"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.30"
+    #       memory: "384M"
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -583,7 +580,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/payments-service/Dockerfile
-    image: dgpthinh/payments-service:v1
     command: yarn dev:payments
     ports:
       - "3005:3005"
@@ -617,14 +613,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    deploy:
-      resources:
-        limits:
-          cpus: "0.30"
-          memory: "384M"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.30"
+    #       memory: "384M"
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -634,7 +630,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/events-service/Dockerfile
-    image: dgpthinh/events-service:v1
     command: yarn dev:events
     ports:
       - "3006:3006"
@@ -666,14 +661,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    deploy:
-      resources:
-        limits:
-          cpus: "0.30"
-          memory: "384M"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.30"
+    #       memory: "384M"
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -683,7 +678,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/community-service/Dockerfile
-    image: dgpthinh/community-service:v1
     command: yarn dev:community
     ports:
       - "3007:3007"
@@ -715,14 +709,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    deploy:
-      resources:
-        limits:
-          cpus: "0.30"
-          memory: "384M"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.30"
+    #       memory: "384M"
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: "256M"
     networks:
       - infra_network
       - services_network

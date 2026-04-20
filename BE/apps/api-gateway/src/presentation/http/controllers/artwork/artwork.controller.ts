@@ -250,12 +250,13 @@ export class ArtworkController {
   })
   async addImagesToArtwork(
     @Param('id') id: string,
+    @Request() req: { user: UserPayload },
     @Body() body: { images: ArtworkImageInput[] },
   ) {
     return sendRpc<ArtworkObject>(
       this.artworkClient,
       { cmd: 'add_images_to_artwork' },
-      { id, images: body.images },
+      { id, images: body.images, user: req.user },
     );
   }
 
@@ -310,12 +311,13 @@ export class ArtworkController {
     description: 'Artworks moved successfully',
   })
   async bulkMoveArtworks(
+    @Request() req: { user: UserPayload },
     @Body() body: BulkMoveArtworksInput,
   ) {
     return sendRpc<{ movedCount: number }>(
       this.artworkClient,
       { cmd: 'bulk_move_artworks' },
-      body,
+      { ...body, user: req.user },
     );
   }
 
@@ -333,12 +335,13 @@ export class ArtworkController {
     description: 'Artworks deleted successfully',
   })
   async bulkDeleteArtworks(
+    @Request() req: { user: UserPayload },
     @Body() body: BulkDeleteArtworksInput,
   ) {
     return sendRpc<{ deletedCount: number; success: boolean }>(
       this.artworkClient,
       { cmd: 'bulk_delete_artworks' },
-      body,
+      { ...body, user: req.user },
     );
   }
 
@@ -356,12 +359,13 @@ export class ArtworkController {
     description: 'Artwork statuses updated successfully',
   })
   async bulkUpdateArtworkStatus(
+    @Request() req: { user: UserPayload },
     @Body() body: BulkUpdateArtworkStatusInput,
   ) {
     return sendRpc<{ updatedCount: number }>(
       this.artworkClient,
       { cmd: 'bulk_update_artwork_status' },
-      body,
+      { ...body, user: req.user },
     );
   }
 }

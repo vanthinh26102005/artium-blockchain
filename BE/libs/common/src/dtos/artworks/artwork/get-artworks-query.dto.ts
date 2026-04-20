@@ -74,4 +74,24 @@ export class GetArtworksQueryDto {
   @IsNumber()
   @Min(1)
   take?: number;
+
+  @ApiProperty({
+    description: 'Field to sort by',
+    enum: ['createdAt', 'updatedAt', 'title', 'price', 'status', 'likeCount'],
+    example: 'createdAt',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
+
+  @ApiProperty({
+    description: 'Sort direction',
+    enum: ['ASC', 'DESC', 'asc', 'desc'],
+    example: 'DESC',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  sortOrder?: string;
 }

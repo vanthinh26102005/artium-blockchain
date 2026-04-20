@@ -123,3 +123,20 @@ export class BusinessAddressInput {
   @IsString()
   country: string | null;
 }
+
+export class UpdateUserProfileInput {
+  @ApiProperty({ required: false, example: 'Duong Phuong Thinh' })
+  @IsOptional()
+  @IsString()
+  fullName?: string | null;
+
+  @ApiProperty({ required: false, example: 'duong-phuong-thinh' })
+  @IsOptional()
+  @IsString()
+  slug?: string | null;
+
+  @ApiProperty({ required: false, example: 'https://cdn.artium.com/avatar.jpg' })
+  @IsOptional()
+  @IsString()
+  avatarUrl?: string | null;
+}

@@ -5,7 +5,8 @@ import {
   OrderPaymentStatus,
   OrderStatus,
 } from '@app/common';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { OrderItem } from './order_items.entity';
 
 @Entity({ name: 'orders' })
 @Index(['collectorId', 'status'])
@@ -175,4 +176,19 @@ export class Order extends AbstractEntity {
 
   @Column({ name: 'bid_amount_wei', type: 'varchar', length: 78, nullable: true })
   bidAmountWei?: string | null;
+
+  @Column({ name: 'dispute_reason', type: 'text', nullable: true })
+  disputeReason?: string | null;
+
+  @Column({ name: 'dispute_opened_at', type: 'timestamp', nullable: true })
+  disputeOpenedAt?: Date | null;
+
+  @Column({ name: 'dispute_resolved_at', type: 'timestamp', nullable: true })
+  disputeResolvedAt?: Date | null;
+
+  @Column({ name: 'dispute_resolution_notes', type: 'text', nullable: true })
+  disputeResolutionNotes?: string | null;
+
+  @OneToMany(() => OrderItem, (item) => item.order)
+  items?: OrderItem[];
 }

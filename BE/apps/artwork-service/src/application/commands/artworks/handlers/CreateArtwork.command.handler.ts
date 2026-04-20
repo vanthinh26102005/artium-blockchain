@@ -52,6 +52,11 @@ export class CreateArtworkHandler implements ICommandHandler<CreateArtworkComman
         likeCount: 0,
         commentCount: 0,
         moodboardCount: 0,
+        ipfsMetadataHash: command.input.ipfsMetadataHash ?? null,
+        reservePrice: command.input.reservePrice ?? null,
+        minBidIncrement: command.input.minBidIncrement ?? null,
+        auctionDuration: command.input.auctionDuration ?? null,
+        onChainAuctionId: command.input.onChainAuctionId ?? null,
       };
 
       const created = await this.repo.create(artworkData);

@@ -67,11 +67,6 @@ export interface ISellerProfileRepository extends IRepository<
     transactionManager?: EntityManager,
   ): Promise<SellerProfile | null>;
 
-  findBySlug(
-    slug: string,
-    transactionManager?: EntityManager,
-  ): Promise<SellerProfile | null>;
-
   findByStripeAccountId(
     stripeAccountId: string,
     transactionManager?: EntityManager,
@@ -92,12 +87,6 @@ export interface ISellerProfileRepository extends IRepository<
     sortOrder?: 'ASC' | 'DESC',
     transactionManager?: EntityManager,
   ): Promise<{ items: SellerProfile[]; total: number }>;
-
-  isSlugTaken(
-    slug: string,
-    excludeProfileId?: string,
-    transactionManager?: EntityManager,
-  ): Promise<boolean>;
 
   getFeaturedProfiles(
     limit?: number,

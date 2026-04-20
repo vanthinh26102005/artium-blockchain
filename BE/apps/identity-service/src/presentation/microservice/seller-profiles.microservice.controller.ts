@@ -8,7 +8,6 @@ import {
   DeleteSellerProfileCommand,
   GetFeaturedSellerProfilesQuery,
   GetSellerProfileByIdQuery,
-  GetSellerProfileBySlugQuery,
   GetSellerProfileByUserIdQuery,
   ListSellerProfilesQuery,
   UpdatePaymentOnboardingCommand,
@@ -51,13 +50,6 @@ export class SellerProfilesMicroserviceController {
     return this.queryBus.execute(
       new GetSellerProfileByUserIdQuery(data.userId),
     );
-  }
-
-  @MessagePattern({ cmd: 'get_seller_profile_by_slug' })
-  async getSellerProfileBySlug(
-    @Payload() data: { slug: string },
-  ): Promise<SellerProfilePayload> {
-    return this.queryBus.execute(new GetSellerProfileBySlugQuery(data.slug));
   }
 
   @MessagePattern({ cmd: 'list_seller_profiles' })

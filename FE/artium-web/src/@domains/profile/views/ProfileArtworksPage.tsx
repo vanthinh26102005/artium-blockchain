@@ -8,7 +8,6 @@ import { ProfileTabs } from '@domains/profile/components/ProfileTabs'
 import { PROFILE_TABS } from '@domains/profile/constants/profileTabs'
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
-import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
 type ProfileArtworksPageViewProps = {
   username?: string | string[]
@@ -17,15 +16,12 @@ type ProfileArtworksPageViewProps = {
 export const ProfileArtworksPageView = ({ username: _username }: ProfileArtworksPageViewProps) => {
   // -- derived --
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+  const { data: baseData, user: fetchedUser, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
   const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Artworks`
   const baseHref = `/profile/${resolvedUsername}`
-  const authUser = useAuthStore((state) => state.user)
-  const isAuthenticated = Boolean(authUser?.id)
-  const isOwner = isAuthenticated && sellerProfile && authUser?.id === sellerProfile.userId
 
   // -- render --
   return (
@@ -45,8 +41,8 @@ export const ProfileArtworksPageView = ({ username: _username }: ProfileArtworks
             <ProfileHero
               user={profileData.user}
               stats={profileData.stats}
-              userId={sellerProfile?.userId}
-              isOwner={isOwner || false}
+              userId={fetchedUser?.id}
+              isOwner={isOwner}
             />
           )}
         </div>
