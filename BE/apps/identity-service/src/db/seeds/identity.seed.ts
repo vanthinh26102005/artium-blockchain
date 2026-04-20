@@ -212,6 +212,7 @@ export class IdentitySeeder {
         email: 'admin@artium.com',
         password: hashedPassword,
         fullName: 'Admin User',
+        slug: 'admin',
         avatarUrl: getPortraitUrl(0),
         roles: [UserRole.ADMIN, UserRole.SELLER, UserRole.COLLECTOR],
         isEmailVerified: true,
@@ -221,6 +222,18 @@ export class IdentitySeeder {
         ),
       }),
     );
+
+    // Track used slugs for uniqueness
+    const usedUserSlugs = new Set<string>(['admin']);
+
+    const generateUserSlug = (firstName: string, lastName: string, index: number): string => {
+      let slug = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      if (usedUserSlugs.has(slug)) {
+        slug = `${slug}-${index}`;
+      }
+      usedUserSlugs.add(slug);
+      return slug;
+    };
 
     // 30 Sellers (with SELLER role)
     for (let i = 0; i < 30; i++) {
@@ -233,6 +246,7 @@ export class IdentitySeeder {
           email: `seller${i + 1}@artium.com`,
           password: hashedPassword,
           fullName: `${firstName} ${lastName}`,
+          slug: generateUserSlug(firstName, lastName, i),
           avatarUrl: getPortraitUrl(i + 1),
           roles: [UserRole.SELLER, UserRole.COLLECTOR],
           isEmailVerified: i % 5 !== 0, // 80% verified
@@ -257,6 +271,7 @@ export class IdentitySeeder {
           email: `collector${i - 29}@artium.com`,
           password: hashedPassword,
           fullName: `${firstName} ${lastName}`,
+          slug: generateUserSlug(firstName, lastName, i),
           avatarUrl: getPortraitUrl(i),
           roles: [UserRole.COLLECTOR],
           isEmailVerified: i % 4 !== 0, // 75% verified
