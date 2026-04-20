@@ -42,17 +42,9 @@ export const useProfileOverview = ({
         let profile: SellerProfilePayload | null = null
 
         if (username) {
-          try {
-            profile = await profileApis.getSellerProfileBySlug(username)
-          } catch (err) {
-            throw err
-          }
+          profile = await profileApis.getSellerProfileBySlug(username)
         } else if (authUser?.id) {
-          try {
-            profile = await profileApis.getSellerProfileByUserId(authUser.id)
-          } catch (err) {
-            throw err
-          }
+          profile = await profileApis.getSellerProfileByUserId(authUser.id)
         }
 
         if (!isActive) return
@@ -119,7 +111,7 @@ export const useProfileOverview = ({
   }, [username, authUser?.id])
 
   const resolvedUsername = useMemo(
-    () => resolveProfileUsername(sellerProfile, username || authUser?.username!),
+    () => resolveProfileUsername(sellerProfile, username || authUser?.username || ''),
     [sellerProfile, username, authUser?.username],
   )
 
