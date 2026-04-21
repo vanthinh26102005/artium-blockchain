@@ -20,7 +20,7 @@ export const SocialAuthButtons = ({
         type="button"
         onClick={onGoogleClick}
         disabled={isGoogleDisabled}
-        className="flex flex-1 items-center justify-center gap-3 rounded-[32px] border border-black/10 px-5 py-3 text-sm font-semibold text-[#191414] transition hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex flex-1 items-center justify-center gap-3 rounded-4xl border border-black/10 px-5 py-3 text-sm font-semibold text-[#191414] transition hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Image
           src="/images/auth/google-icon-logo-svgrepo-com.svg"
@@ -35,7 +35,7 @@ export const SocialAuthButtons = ({
       <button
         type="button"
         disabled
-        className="flex flex-1 items-center justify-center gap-3 rounded-[32px] border border-black/10 px-5 py-3 text-sm font-semibold text-[#191414] transition hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex flex-1 items-center justify-center gap-3 rounded-4xl border border-black/10 px-5 py-3 text-sm font-semibold text-[#191414] transition hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Image src="/images/auth/apple-svgrepo-com.svg" alt="Apple" width={24} height={24} />
         <span className="pt-1">Apple</span>

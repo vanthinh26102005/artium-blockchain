@@ -29,7 +29,7 @@ const TestimonialsSection = ({ className }: TestimonialsSectionProps) => {
           as="h2"
           size="h2"
           tone="light"
-          className="font-monument-grotes mx-auto text-center text-[24px] leading-[42px] font-medium lg:w-[700px] lg:flex-shrink-0 lg:text-[44px] lg:leading-[56px] lg:tracking-[-0.2px]"
+          className="font-monument-grotes mx-auto text-center text-[24px] leading-[42px] font-medium lg:w-[700px] lg:shrink-0 lg:text-[44px] lg:leading-[56px] lg:tracking-[-0.2px]"
         >
           Meet the Community Using Artium to Scale Their Success
         </Heading>

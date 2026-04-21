@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState, ChangeEvent, FormEvent } from 're
 import { useRouter } from 'next/router'
 
 // third-party
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useController, useForm, useWatch, SubmitHandler } from 'react-hook-form'
 
 // internal - components
@@ -25,6 +26,7 @@ import { WhatInspiresMeSection } from '@domains/profile/components/edit-profile/
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
 import { FormValues } from '@domains/profile/types/editProfile'
+import { editProfileSchema } from '@domains/profile/validations/editProfile.schema'
 import { ProfileAbout, ProfileUser } from '@domains/profile/types'
 import { saveProfileDraft } from '@domains/profile/utils/profileDraftStorage'
 import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis'
@@ -94,7 +96,7 @@ const buildInitialValues = (
 
 export const ProfileEditPageView = ({ username: _username }: ProfileEditPageViewProps) => {
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, user: profileUser, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
@@ -159,28 +161,29 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     reset,
     formState: { errors, isDirty, isSubmitting, submitCount },
   } = useForm<FormValues>({
+    resolver: zodResolver(editProfileSchema),
     defaultValues: initialValues,
     mode: 'onChange',
   })
   const { field: avatarField } = useController({
     control,
     name: 'avatarUrl',
-    rules: {
-      required: 'Profile picture is required.',
-    },
   })
   const avatarValue = useWatch({ control, name: 'avatarUrl' })
 
   useEffect(() => {
+    const saveTimer = saveTimerRef.current
+    const toastTimer = toastTimerRef.current
+
     return () => {
-      if (saveTimerRef.current) {
-        window.clearTimeout(saveTimerRef.current)
+      if (saveTimer) {
+        window.clearTimeout(saveTimer)
       }
-      if (toastTimerRef.current) {
-        window.clearTimeout(toastTimerRef.current)
+      if (toastTimer) {
+        window.clearTimeout(toastTimer)
       }
     }
-  }, [])
+  }, [saveStatus])
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {

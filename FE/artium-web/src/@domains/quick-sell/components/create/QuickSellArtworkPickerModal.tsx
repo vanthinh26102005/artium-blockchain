@@ -165,7 +165,7 @@ export const QuickSellArtworkPickerModal = ({
                             placeholder="Search by artwork title..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="h-[48px] pl-12 pr-4 rounded-full border-[#E5E5E5] bg-white text-[14px] placeholder:text-[#989898] focus:border-[#191414] focus:ring-0"
+                            className="h-12 pl-12 pr-4 rounded-full border-[#E5E5E5] bg-white text-[14px] placeholder:text-[#989898] focus:border-[#191414] focus:ring-0"
                         />
                     </div>
                 </div>
@@ -192,32 +192,32 @@ export const QuickSellArtworkPickerModal = ({
                             </tr>
                         </thead>
 
-                {/* Table Body */}
-                <tbody className="divide-y divide-[#E5E5E5]">
-                    {isLoading ? (
-                        <tr>
-                            <td colSpan={5} className="px-4 py-6 text-center text-[13px] text-[#595959]">
-                                Loading artworks...
-                            </td>
-                        </tr>
-                    ) : error ? (
-                        <tr>
-                            <td colSpan={5} className="px-4 py-6 text-center text-[13px] text-red-500">
-                                {error}
-                            </td>
-                        </tr>
-                    ) : filteredArtworks.length === 0 ? (
-                        <tr>
-                            <td colSpan={5} className="px-4 py-6 text-center text-[13px] text-[#595959]">
-                                No artworks found.
-                            </td>
-                        </tr>
-                    ) : filteredArtworks.map((artwork) => (
-                        <tr
-                            key={artwork.id}
-                            onClick={() => setSelectedArtworkId(artwork.id)}
-                            className={`cursor-pointer hover:bg-[#FAFAFA] transition ${selectedArtworkId === artwork.id ? 'bg-blue-50' : ''}`}
-                        >
+                        {/* Table Body */}
+                        <tbody className="divide-y divide-[#E5E5E5]">
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={5} className="px-4 py-6 text-center text-[13px] text-[#595959]">
+                                        Loading artworks...
+                                    </td>
+                                </tr>
+                            ) : error ? (
+                                <tr>
+                                    <td colSpan={5} className="px-4 py-6 text-center text-[13px] text-red-500">
+                                        {error}
+                                    </td>
+                                </tr>
+                            ) : filteredArtworks.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-4 py-6 text-center text-[13px] text-[#595959]">
+                                        No artworks found.
+                                    </td>
+                                </tr>
+                            ) : filteredArtworks.map((artwork) => (
+                                <tr
+                                    key={artwork.id}
+                                    onClick={() => setSelectedArtworkId(artwork.id)}
+                                    className={`cursor-pointer hover:bg-[#FAFAFA] transition ${selectedArtworkId === artwork.id ? 'bg-blue-50' : ''}`}
+                                >
                                     {/* Artwork Title with Image */}
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
@@ -265,10 +265,10 @@ export const QuickSellArtworkPickerModal = ({
                                         />
                                     </td>
                                 </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
                 {/* Footer */}
                 <div className="px-8 py-6 border-t border-[#E5E5E5]">
@@ -285,7 +285,7 @@ export const QuickSellArtworkPickerModal = ({
                             type="button"
                             variant="outline"
                             onClick={handleBack}
-                            className="h-[48px] min-w-[140px] rounded-full border-[#E5E5E5] px-8 text-[14px] font-semibold text-[#191414] hover:bg-[#F5F5F5]"
+                            className="h-12 min-w-[140px] rounded-full border-[#E5E5E5] px-8 text-[14px] font-semibold text-[#191414] hover:bg-[#F5F5F5]"
                         >
                             Back
                         </Button>
@@ -293,7 +293,7 @@ export const QuickSellArtworkPickerModal = ({
                             type="button"
                             onClick={handleDone}
                             disabled={!selectedArtworkId}
-                            className="h-[48px] min-w-[140px] rounded-full bg-blue-400 px-8 text-[14px] font-semibold text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="h-12 min-w-[140px] rounded-full bg-blue-400 px-8 text-[14px] font-semibold text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Done
                         </Button>

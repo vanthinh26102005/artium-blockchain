@@ -1,10 +1,12 @@
 // react
-import { useState, ChangeEvent, FormEvent } from 'react'
+import { useState } from 'react'
 
 // next
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { signIn } from 'next-auth/react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FormProvider, useForm } from 'react-hook-form'
 
 // internal - components
 import { Metadata } from '@/components/SEO/Metadata'
@@ -18,107 +20,83 @@ import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAut
 import { useRegister } from '@domains/auth/hooks/useRegister'
 import { buildAuthCallbackUrl } from '@domains/auth/utils/authRedirect'
 import {
-  getEmailValidationMessage,
-  getSignUpFirstNameValidationMessage,
-  getSignUpPasswordValidationMessage,
-} from '@domains/auth/utils/authValidation'
-import {
   AuthDivider,
+  AuthFormInput,
+  AuthFormOtpInput,
+  AuthFormPasswordInput,
   AuthFooter,
   AuthFormCard,
   AuthInput,
   AuthShell,
   FormErrorMessage,
-  OtpCodeInput,
-  PasswordInput,
   SocialAuthButtons,
 } from '@domains/auth/components'
+import {
+  otpOnlyFormSchema,
+  signUpDetailsFormSchema,
+  type OtpOnlyFormValues,
+  type SignUpDetailsFormValues,
+} from '@domains/auth/validations/auth.schema'
 
 export const SignUpPage = () => {
-  // -- routing --
   const router = useRouter()
   const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
-
-  // -- state --
   const { initiate, complete, isLoading, error: registerError } = useRegister()
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
   const [step, setStep] = useState<'details' | 'otp'>('details')
-  const [firstName, setFirstName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [otp, setOtp] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
-  const [hasSubmitted, setHasSubmitted] = useState(false)
-  const [touchedFirstName, setTouchedFirstName] = useState(false)
-  const [touchedEmail, setTouchedEmail] = useState(false)
-  const [touchedPassword, setTouchedPassword] = useState(false)
-  const [touchedOtp, setTouchedOtp] = useState(false)
+  const [pendingDetails, setPendingDetails] = useState<SignUpDetailsFormValues | null>(null)
+  const detailsForm = useForm<SignUpDetailsFormValues>({
+    resolver: zodResolver(signUpDetailsFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      firstName: '',
+      email: '',
+      password: '',
+    },
+  })
+  const otpForm = useForm<OtpOnlyFormValues>({
+    resolver: zodResolver(otpOnlyFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      otp: '',
+    },
+  })
 
-  // -- derived --
-  const trimmedEmail = email.trim()
-  const normalizedOtp = otp.replace(/\D/g, '').slice(0, 6)
-  const firstNameError = getSignUpFirstNameValidationMessage(firstName)
-  const emailError = getEmailValidationMessage(trimmedEmail)
-  const passwordError = getSignUpPasswordValidationMessage(password)
-  const isFirstNameValid = !firstNameError
-  const isEmailValid = !emailError
-  const isPasswordValid = !passwordError
-  const isOtpValid = /^\d{6}$/.test(otp.trim())
-  const isFormValid =
-    step === 'details' ? isFirstNameValid && isEmailValid && isPasswordValid : isOtpValid
-  const otpErrorMessage = !normalizedOtp
-    ? 'Verification code is required.'
-    : !isOtpValid
-      ? 'OTP must be 6 digits.'
-      : ''
-  const formErrorMessage = registerError ?? ''
-  const showFirstNameError = (hasSubmitted || touchedFirstName) && !isFirstNameValid
-  const showEmailError = (hasSubmitted || touchedEmail) && !isEmailValid
-  const showPasswordError = (hasSubmitted || touchedPassword) && !isPasswordValid
-  const showOtpError = step === 'otp' && (hasSubmitted || touchedOtp) && !isOtpValid
-  const isSubmitDisabled = isSubmitting || isLoading || !isFormValid
-  const shouldShowError = formErrorMessage.length > 0
+  const handleDetailsSubmit = async (values: SignUpDetailsFormValues) => {
+    detailsForm.clearErrors('root')
 
-  // -- handlers --
-  const handleFirstNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFirstName(event.target.value)
+    try {
+      await initiate({
+        firstName: values.firstName.trim(),
+        email: values.email.trim(),
+        password: values.password,
+      })
+      setPendingDetails(values)
+      setStep('otp')
+      otpForm.reset({ otp: '' })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : registerError ?? 'Registration failed.'
+      detailsForm.setError('root', { message })
+    }
   }
 
-  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value)
-  }
+  const handleOtpSubmit = async (values: OtpOnlyFormValues) => {
+    otpForm.clearErrors('root')
 
-  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value)
-  }
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setHasSubmitted(true)
-
-    if (!isFormValid) {
+    if (!pendingDetails) {
+      otpForm.setError('root', { message: 'Registration session expired. Please sign up again.' })
       return
     }
 
-    setIsSubmitting(true)
-
     try {
-      if (step === 'details') {
-        await initiate({ firstName: firstName.trim(), email: trimmedEmail, password })
-        setStep('otp')
-        setOtp('')
-        setTouchedOtp(false)
-        setHasSubmitted(false)
-        return
-      }
-
-      await complete({ email: trimmedEmail, otp: normalizedOtp })
+      await complete({ email: pendingDetails.email.trim(), otp: values.otp.trim() })
       await router.push('/login?signup=success')
-    } catch {
-      // errors are handled by hook state
-    } finally {
-      setIsSubmitting(false)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : registerError ?? 'OTP verification failed.'
+      otpForm.setError('root', { message })
     }
   }
 
@@ -162,11 +140,14 @@ export const SignUpPage = () => {
 
         <AuthDivider text="Or sign up with" />
 
-        {/* form */}
-        <form className="mt-3 space-y-4" onSubmit={handleSubmit} noValidate>
-          {step === 'details' ? (
-            <>
-              <AuthInput
+        {step === 'details' ? (
+          <FormProvider {...detailsForm}>
+            <form
+              className="mt-3 space-y-4"
+              onSubmit={detailsForm.handleSubmit(handleDetailsSubmit)}
+              noValidate
+            >
+              <AuthFormInput<SignUpDetailsFormValues>
                 id="signup-first-name"
                 name="firstName"
                 type="text"
@@ -174,16 +155,11 @@ export const SignUpPage = () => {
                 placeholder="First name"
                 label="First name"
                 required
-                value={firstName}
-                onChange={handleFirstNameChange}
-                onBlur={() => setTouchedFirstName(true)}
-                aria-invalid={showFirstNameError}
+                aria-invalid={Boolean(detailsForm.formState.errors.firstName)}
                 aria-describedby="signup-error"
-                hasError={showFirstNameError}
-                errorMessage={showFirstNameError ? firstNameError : undefined}
               />
 
-              <AuthInput
+              <AuthFormInput<SignUpDetailsFormValues>
                 id="signup-email"
                 name="email"
                 type="email"
@@ -191,39 +167,46 @@ export const SignUpPage = () => {
                 placeholder="Email address"
                 label="Email address"
                 required
-                value={email}
-                onChange={handleEmailChange}
-                onBlur={() => setTouchedEmail(true)}
-                aria-invalid={showEmailError}
+                aria-invalid={Boolean(detailsForm.formState.errors.email)}
                 aria-describedby="signup-error"
-                hasError={showEmailError}
-                errorMessage={showEmailError ? emailError : undefined}
               />
 
-              <PasswordInput
+              <AuthFormPasswordInput<SignUpDetailsFormValues>
                 id="signup-password"
                 name="password"
                 autoComplete="new-password"
                 placeholder="Password"
                 label="Password"
                 required
-                value={password}
-                onChange={handlePasswordChange}
-                onBlur={() => setTouchedPassword(true)}
-                aria-invalid={showPasswordError}
+                aria-invalid={Boolean(detailsForm.formState.errors.password)}
                 aria-describedby="signup-error"
-                hasError={showPasswordError}
-                errorMessage={showPasswordError ? passwordError : undefined}
               />
 
-              {!showPasswordError ? (
+              {!detailsForm.formState.errors.password ? (
                 <p className="text-xs text-[#6b6b6b]">
-                Use at least 8 characters with uppercase, lowercase, and a number.
+                  Use at least 8 characters with uppercase, lowercase, and a number.
                 </p>
               ) : null}
-            </>
-          ) : (
-            <>
+
+              <FormErrorMessage
+                id="signup-error"
+                message={detailsForm.formState.errors.root?.message ?? ''}
+                visible={Boolean(detailsForm.formState.errors.root?.message)}
+              />
+
+              <Button
+                className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
+                loading={detailsForm.formState.isSubmitting || isLoading}
+                disabled={detailsForm.formState.isSubmitting || isLoading}
+                type="submit"
+              >
+                {detailsForm.formState.isSubmitting || isLoading ? 'Signing up...' : 'Sign up'}
+              </Button>
+            </form>
+          </FormProvider>
+        ) : (
+          <FormProvider {...otpForm}>
+            <form className="mt-3 space-y-4" onSubmit={otpForm.handleSubmit(handleOtpSubmit)} noValidate>
               <AuthInput
                 id="signup-email-readonly"
                 name="email"
@@ -232,46 +215,34 @@ export const SignUpPage = () => {
                 placeholder="Email address"
                 label="Email address"
                 required
-                value={trimmedEmail}
+                value={pendingDetails?.email.trim() ?? ''}
                 disabled
               />
-              <OtpCodeInput
+              <AuthFormOtpInput<OtpOnlyFormValues>
                 id="signup-otp"
+                name="otp"
                 label="Verification code"
-                value={normalizedOtp}
-                onChange={(value) => {
-                  setTouchedOtp(true)
-                  setOtp(value)
-                }}
-                hasError={showOtpError}
-                errorMessage={showOtpError ? otpErrorMessage : undefined}
                 description="Enter the 6-digit code we sent to your email."
-                disabled={isSubmitting || isLoading}
+                disabled={otpForm.formState.isSubmitting || isLoading}
               />
-            </>
-          )}
 
-          <FormErrorMessage
-            id="signup-error"
-            message={formErrorMessage}
-            visible={shouldShowError}
-          />
+              <FormErrorMessage
+                id="signup-error"
+                message={otpForm.formState.errors.root?.message ?? ''}
+                visible={Boolean(otpForm.formState.errors.root?.message)}
+              />
 
-          <Button
-            className="h-[56px] w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
-            loading={isSubmitting}
-            disabled={isSubmitDisabled}
-            type="submit"
-          >
-            {step === 'details'
-              ? isSubmitting
-                ? 'Signing up...'
-                : 'Sign up'
-              : isSubmitting
-                ? 'Verifying...'
-                : 'Verify OTP'}
-          </Button>
-        </form>
+              <Button
+                className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
+                loading={otpForm.formState.isSubmitting || isLoading}
+                disabled={otpForm.formState.isSubmitting || isLoading}
+                type="submit"
+              >
+                {otpForm.formState.isSubmitting || isLoading ? 'Verifying...' : 'Verify OTP'}
+              </Button>
+            </form>
+          </FormProvider>
+        )}
 
         {/* footer links */}
         <div className="space-y-3 text-center">

@@ -67,7 +67,7 @@ export const QuickSellSendInvoiceModal = ({
                             <Input
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="h-[50px] rounded-[12px] border border-[#E5E5E5] bg-white text-[15px] font-bold text-[#191414] placeholder:font-normal placeholder:text-[#989898] focus:border-blue-600 focus:ring-0"
+                                className="h-[50px] rounded-xl border border-[#E5E5E5] bg-white text-[15px] font-bold text-[#191414] placeholder:font-normal placeholder:text-[#989898] focus:border-blue-600 focus:ring-0"
                             />
                         </div>
 
@@ -79,7 +79,7 @@ export const QuickSellSendInvoiceModal = ({
                             <Input
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="h-[50px] rounded-[12px] border border-[#E5E5E5] bg-white text-[15px] font-bold text-[#191414] placeholder:font-normal placeholder:text-[#989898] focus:border-blue-600 focus:ring-0"
+                                className="h-[50px] rounded-xl border border-[#E5E5E5] bg-white text-[15px] font-bold text-[#191414] placeholder:font-normal placeholder:text-[#989898] focus:border-blue-600 focus:ring-0"
                             />
                         </div>
 
@@ -92,7 +92,7 @@ export const QuickSellSendInvoiceModal = ({
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 placeholder="Enter your message to the buyer (optional)"
-                                className="min-h-[120px] resize-none rounded-[12px] border border-[#E5E5E5] bg-white p-4 text-[15px] font-medium text-[#191414] placeholder:font-normal placeholder:text-[#989898] focus:border-blue-600 focus:ring-0"
+                                className="min-h-[120px] resize-none rounded-xl border border-[#E5E5E5] bg-white p-4 text-[15px] font-medium text-[#191414] placeholder:font-normal placeholder:text-[#989898] focus:border-blue-600 focus:ring-0"
                                 maxLength={2000}
                             />
                             <div className="flex justify-between text-[13px] text-[#989898]">

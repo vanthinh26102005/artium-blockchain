@@ -50,7 +50,7 @@ export const PostMomentModal = ({ open, onOpenChange }: PostMomentModalProps) =>
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent size="4xl" className="overflow-hidden rounded-[32px] bg-white p-0">
+            <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">
                 <div className="border-b border-black/10 px-8 py-6">
                     <h2 className="text-[22px] font-bold text-[#191414]">Post a Moment</h2>
                 </div>

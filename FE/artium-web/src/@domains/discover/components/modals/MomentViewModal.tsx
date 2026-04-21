@@ -70,7 +70,7 @@ export const MomentViewModal = ({ moment, open, onOpenChange }: MomentViewModalP
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent size="5xl" className="overflow-hidden rounded-[32px] bg-white p-0 max-w-[1200px] w-[95vw] h-[90vh] max-h-[90vh] overflow-y-auto">
+            <DialogContent size="5xl" className="overflow-hidden rounded-4xl bg-white p-0 max-w-[1200px] w-[95vw] h-[90vh] max-h-[90vh] overflow-y-auto">
                 <div className="relative">
                     <button
                         onClick={() => onOpenChange(false)}

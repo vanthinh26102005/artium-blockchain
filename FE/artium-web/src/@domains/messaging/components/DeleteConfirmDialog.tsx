@@ -22,7 +22,7 @@ export const DeleteConfirmDialog = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 rounded-full bg-red-100 p-2">
+          <div className="shrink-0 rounded-full bg-red-100 p-2">
             <AlertCircle className="h-5 w-5 text-red-600" />
           </div>
           <div className="flex-1">

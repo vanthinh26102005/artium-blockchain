@@ -12,12 +12,12 @@ type MessageComposerProps = {
   onFileUpload?: (file: File) => Promise<
     | string
     | {
-        url: string
-        filename?: string
-        type?: string
-        isImage?: boolean
-        isVideo?: boolean
-      }
+      url: string
+      filename?: string
+      type?: string
+      isImage?: boolean
+      isVideo?: boolean
+    }
   >
   disabled?: boolean
   placeholder?: string
@@ -227,7 +227,7 @@ export const MessageComposer = ({
           type="button"
           disabled={disabled || isUploading}
           onClick={() => fileInputRef.current?.click()}
-          className="flex-shrink-0 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+          className="shrink-0 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
         >
           <Paperclip className="h-5 w-5" />
         </button>
@@ -257,7 +257,7 @@ export const MessageComposer = ({
             type="button"
             disabled={disabled}
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="flex-shrink-0 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+            className="shrink-0 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
           >
             <Smile className="h-5 w-5" />
           </button>
@@ -273,7 +273,7 @@ export const MessageComposer = ({
           onClick={handleSend}
           disabled={disabled || isUploading || (!message.trim() && !uploadedFile)}
           size="lg"
-          className="flex-shrink-0 rounded-full px-4"
+          className="shrink-0 rounded-full px-4"
         >
           {isUploading ? (
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

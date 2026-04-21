@@ -209,7 +209,7 @@ const InvoiceCard = ({
             <div className="flex items-start justify-between mb-8">
                 <div className="flex gap-4">
                     {/* Thumbnail */}
-                    <div className="h-[60px] w-[60px] overflow-hidden rounded-[12px] bg-[#F5F5F5] border border-[#E5E5E5]">
+                    <div className="h-[60px] w-[60px] overflow-hidden rounded-xl bg-[#F5F5F5] border border-[#E5E5E5]">
                         {artwork?.imageUrl ? (
                             <img src={artwork.imageUrl} alt="" className="h-full w-full object-cover" />
                         ) : (

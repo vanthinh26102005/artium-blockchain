@@ -118,13 +118,13 @@ export const MomentsSection = ({
               <div className="space-y-2 p-3">
                 <div className="flex items-center gap-3 text-slate-600">
                   <span className="inline-flex items-center gap-1">
-                    <Heart className="h-[15px] w-[15px] flex-shrink-0" />
+                    <Heart className="h-[15px] w-[15px] shrink-0" />
                     <span className="flex items-center text-[13px] leading-none tracking-wide">
                       {moment.likes}
                     </span>
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <MessageCircle className="h-[15px] w-[15px] flex-shrink-0" />
+                    <MessageCircle className="h-[15px] w-[15px] shrink-0" />
                     <span className="flex items-center text-[13px] leading-none tracking-wide">
                       {moment.comments}
                     </span>
@@ -140,7 +140,7 @@ export const MomentsSection = ({
               <Link
                 key={moment.id}
                 href={href}
-                className="group max-w-[220px] min-w-[200px] flex-shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
+                className="group max-w-[220px] min-w-[200px] shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
               >
                 {cardContent}
               </Link>
@@ -150,7 +150,7 @@ export const MomentsSection = ({
           return (
             <div
               key={moment.id}
-              className="group max-w-[220px] min-w-[200px] flex-shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
+              className="group max-w-[220px] min-w-[200px] shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
             >
               {cardContent}
             </div>

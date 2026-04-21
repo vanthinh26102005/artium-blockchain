@@ -296,7 +296,7 @@ export const InventoryArtworkList = ({
         />
 
         {/* Thumbnail */}
-        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100">
           {artwork.thumbnailUrl ? (
             <Image
               src={artwork.thumbnailUrl}
@@ -404,9 +404,9 @@ export const InventoryArtworkList = ({
             isDropTarget && 'border-green-400 bg-green-50 ring-2 ring-green-200',
             isFolderDropTarget && 'border-violet-400 bg-violet-50 ring-2 ring-violet-200',
             !isDragging && !isDragOver && !isDropTarget && !isFolderDropTarget &&
-              (nestLevel > 0
-                ? 'border-transparent bg-gradient-to-r from-orange-50 to-yellow-50 hover:from-orange-100 hover:to-yellow-100'
-                : 'border-transparent bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100'),
+            (nestLevel > 0
+              ? 'border-black bg-gradient-to-r from-orange-50 to-yellow-50 hover:from-orange-100 hover:to-yellow-100'
+              : 'border-black bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100'),
           )}
         >
           {/* Drop zone overlay for artwork/folder drops */}

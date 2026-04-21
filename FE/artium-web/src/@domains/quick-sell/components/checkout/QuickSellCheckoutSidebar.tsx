@@ -58,7 +58,7 @@ export const QuickSellCheckoutSidebar = ({
                 <div className={cardClass}>
                     <div className="flex gap-4">
                         {/* Artwork Image */}
-                        <div className="w-[100px] h-[100px] shrink-0 overflow-hidden rounded-[12px] bg-[#F5F5F5]">
+                        <div className="w-[100px] h-[100px] shrink-0 overflow-hidden rounded-xl bg-[#F5F5F5]">
                             {artworkItem.type === 'artwork' && artworkItem.artworkImageUrl ? (
                                 <img
                                     src={artworkItem.artworkImageUrl}

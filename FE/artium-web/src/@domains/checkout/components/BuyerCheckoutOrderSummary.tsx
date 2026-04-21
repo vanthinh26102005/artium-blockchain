@@ -47,7 +47,7 @@ export const BuyerCheckoutOrderSummary = ({
 
                 {/* Artwork Info */}
                 <div className="flex gap-4 mb-6">
-                    <div className="h-[80px] w-[80px] shrink-0 overflow-hidden rounded-[12px] bg-[#F5F5F5]">
+                    <div className="h-[80px] w-[80px] shrink-0 overflow-hidden rounded-xl bg-[#F5F5F5]">
                         <img
                             src={artwork.coverUrl}
                             alt={artwork.title}
@@ -85,12 +85,12 @@ export const BuyerCheckoutOrderSummary = ({
                                 value={promoCode}
                                 onChange={(e) => onPromoCodeChange(e.target.value)}
                                 placeholder="Enter code"
-                                className="h-[44px] flex-1 rounded-[12px] border border-[#E5E5E5] bg-white text-[14px] font-medium text-[#191414] placeholder:text-[#989898] focus:border-[#0066FF] focus:ring-0"
+                                className="h-[44px] flex-1 rounded-xl border border-[#E5E5E5] bg-white text-[14px] font-medium text-[#191414] placeholder:text-[#989898] focus:border-[#0066FF] focus:ring-0"
                             />
                             <Button
                                 onClick={onApplyPromo}
                                 variant="outline"
-                                className="h-[44px] rounded-[12px] border-[#E5E5E5] px-4 font-bold text-[#191414] hover:bg-[#F5F5F5]"
+                                className="h-[44px] rounded-xl border-[#E5E5E5] px-4 font-bold text-[#191414] hover:bg-[#F5F5F5]"
                             >
                                 Apply
                             </Button>

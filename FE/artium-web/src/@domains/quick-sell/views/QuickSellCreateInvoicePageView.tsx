@@ -1,5 +1,7 @@
 // react
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 // next
 import { useRouter } from 'next/router'
@@ -11,13 +13,15 @@ import { QuickSellInvoicePreview } from '../components/create/QuickSellInvoicePr
 import { useCreateQuickSellInvoice } from '../hooks/useCreateQuickSellInvoice'
 import invoiceApis from '@shared/apis/invoiceApis'
 import { defaultInvoiceDraft } from '../types/quickSellDraft'
-import type { QuickSellInvoiceDraft } from '../types/quickSellDraft'
-import { canSubmitDraft } from '../types/quickSellValidation'
 import { calculateInvoiceTotals } from '../utils/pricing'
 import { getInvoiceFromStorage, saveInvoiceToStorage } from '../utils/checkoutStorage'
 import type { CheckoutInvoice } from '../types/checkoutTypes'
 import { mapInvoiceResponseToCheckoutInvoice } from '../utils/mapInvoiceResponse'
 import { mapUpdateInvoicePayload } from '../utils/mapUpdateInvoicePayload'
+import {
+    quickSellInvoiceFormSchema,
+    type QuickSellInvoiceFormValues,
+} from '../validations/quickSellInvoice.schema'
 
 // @shared - components
 import { Dialog, DialogContent } from '@shared/components/ui/dialog'
@@ -28,7 +32,6 @@ type QuickSellCreateInvoicePageViewProps = {
 }
 
 export const QuickSellCreateInvoicePageView = ({
-    artworkId,
     invoiceCode,
 }: QuickSellCreateInvoicePageViewProps) => {
     // -- router --
@@ -38,22 +41,35 @@ export const QuickSellCreateInvoicePageView = ({
     const { createInvoice, isLoading: isCreating, error, reset } = useCreateQuickSellInvoice()
 
     // -- state --
-    const [draft, setDraft] = useState<QuickSellInvoiceDraft>(defaultInvoiceDraft)
     const [showCancelModal, setShowCancelModal] = useState(false)
     const [existingInvoice, setExistingInvoice] = useState<CheckoutInvoice | null>(null)
     const [isModelsLoading, setIsModelsLoading] = useState(!!invoiceCode)
+    const form = useForm<QuickSellInvoiceFormValues>({
+        resolver: zodResolver(quickSellInvoiceFormSchema),
+        defaultValues: defaultInvoiceDraft,
+        mode: 'onChange',
+    })
+    const watchedDraft = useWatch({ control: form.control })
+    const draft: QuickSellInvoiceFormValues = useMemo(() => ({
+        ...defaultInvoiceDraft,
+        ...watchedDraft,
+        buyer: {
+            ...defaultInvoiceDraft.buyer,
+            ...watchedDraft?.buyer,
+        },
+        items: (watchedDraft?.items as QuickSellInvoiceFormValues['items']) ?? defaultInvoiceDraft.items,
+    }), [watchedDraft])
 
     // -- derived --
     const isEditMode = !!invoiceCode
     const totals = useMemo(() => calculateInvoiceTotals(draft), [draft])
-    const isValid = useMemo(() => canSubmitDraft(draft), [draft])
     const isLoading = isCreating || isModelsLoading
 
     // -- effect: load invoice data for edit --
     useEffect(() => {
         let isMounted = true
 
-        const mapCheckoutInvoiceToDraft = (invoice: CheckoutInvoice): QuickSellInvoiceDraft => ({
+        const mapCheckoutInvoiceToDraft = (invoice: CheckoutInvoice): QuickSellInvoiceFormValues => ({
             items: invoice.items.map(item => {
                 if (item.type === 'artwork') {
                     return {
@@ -95,13 +111,13 @@ export const QuickSellCreateInvoicePageView = ({
                 const checkoutInvoice = mapInvoiceResponseToCheckoutInvoice(apiInvoice)
                 if (!isMounted) return
                 setExistingInvoice(checkoutInvoice)
-                setDraft(mapCheckoutInvoiceToDraft(checkoutInvoice))
+                form.reset(mapCheckoutInvoiceToDraft(checkoutInvoice))
                 saveInvoiceToStorage(checkoutInvoice)
-            } catch (err) {
+            } catch {
                 const invoice = getInvoiceFromStorage(invoiceCode)
                 if (invoice && isMounted) {
                     setExistingInvoice(invoice)
-                    setDraft(mapCheckoutInvoiceToDraft(invoice))
+                    form.reset(mapCheckoutInvoiceToDraft(invoice))
                 }
             } finally {
                 if (isMounted) setIsModelsLoading(false)
@@ -113,16 +129,17 @@ export const QuickSellCreateInvoicePageView = ({
         return () => {
             isMounted = false
         }
-    }, [invoiceCode])
+    }, [form, invoiceCode])
 
-    // -- handlers --
-    const handleDraftChange = useCallback((newDraft: QuickSellInvoiceDraft) => {
-        setDraft(newDraft)
-        // Clear any previous error when user makes changes
-        if (error) {
+    useEffect(() => {
+        if (!error) return
+
+        const subscription = form.watch(() => {
             reset()
-        }
-    }, [error, reset])
+        })
+
+        return () => subscription.unsubscribe()
+    }, [error, form, reset])
 
     const handleCancel = useCallback(() => {
         setShowCancelModal(true)
@@ -133,14 +150,13 @@ export const QuickSellCreateInvoicePageView = ({
         router.push('/artist/invoices')
     }, [router])
 
-    const handleSave = useCallback(async () => {
-        if (!isValid || isLoading) return
-
+    const handleSave = form.handleSubmit(async (values) => {
+        if (isLoading) return
         try {
             if (isEditMode && existingInvoice) {
                 const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(existingInvoice.id)
                 if (isUuid) {
-                    const payload = mapUpdateInvoicePayload(draft)
+                    const payload = mapUpdateInvoicePayload(values)
                     await invoiceApis.updateInvoice(existingInvoice.id, payload)
                     const resolvedCode = invoiceCode || existingInvoice.invoiceCode
                     if (resolvedCode) {
@@ -152,7 +168,7 @@ export const QuickSellCreateInvoicePageView = ({
                     // Fallback to local update if invoice id isn't a backend id
                     const updatedInvoice: CheckoutInvoice = {
                         ...existingInvoice,
-                        items: draft.items.map((item, i) => ({
+                        items: values.items.map((item, i) => ({
                             id: item.id || `item-${Date.now()}-${i}`,
                             type: item.type,
                             name: item.type === 'artwork' ? item.artworkName : item.title,
@@ -161,14 +177,14 @@ export const QuickSellCreateInvoicePageView = ({
                             discountPercent: item.discountPercent,
                             imageUrl: item.type === 'artwork' ? item.artworkImageUrl : undefined,
                         })),
-                        buyer: draft.buyer.name ? {
-                            name: draft.buyer.name,
-                            email: draft.buyer.email,
-                            message: draft.buyer.message,
+                        buyer: values.buyer.name ? {
+                            name: values.buyer.name,
+                            email: values.buyer.email,
+                            message: values.buyer.message,
                         } : undefined,
                         subtotal: totals.subtotal,
                         discountTotal: totals.discountTotal,
-                        taxPercent: draft.isApplySalesTax ? (draft.taxPercent ?? 0) : 0,
+                        taxPercent: values.isApplySalesTax ? (values.taxPercent ?? 0) : 0,
                         tax: totals.tax,
                         total: totals.total,
                     }
@@ -177,14 +193,13 @@ export const QuickSellCreateInvoicePageView = ({
                 }
                 router.push('/artist/invoices')
             } else {
-                // Create Logic
-                await createInvoice(draft)
+                await createInvoice(values)
                 router.push('/artist/invoices')
             }
         } catch (err) {
             console.error('Failed to save invoice:', err)
         }
-    }, [draft, isValid, isLoading, createInvoice, router, isEditMode, existingInvoice, totals, invoiceCode])
+    })
 
     // -- render --
     const leftColumn = (
@@ -209,10 +224,9 @@ export const QuickSellCreateInvoicePageView = ({
                 </div>
             )}
 
-            <QuickSellInvoiceForm
-                draft={draft}
-                onChange={handleDraftChange}
-            />
+            <FormProvider {...form}>
+                <QuickSellInvoiceForm />
+            </FormProvider>
         </>
     )
 
@@ -235,7 +249,7 @@ export const QuickSellCreateInvoicePageView = ({
             />
 
             <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
-                <DialogContent size="4xl" className="overflow-hidden rounded-[32px] bg-white p-0">
+                <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">
                     <div className="px-8 py-6">
                         <h2 className="text-[22px] font-bold text-[#191414] uppercase">Discard Changes?</h2>
                         <p className="mt-4 text-[18px] text-[#191414]">

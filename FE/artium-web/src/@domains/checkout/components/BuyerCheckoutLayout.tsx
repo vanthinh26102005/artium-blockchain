@@ -88,7 +88,7 @@ export const BuyerCheckoutLayout = ({
 
             {/* Reservation Timer - Full Width */}
             <div className="fixed top-[60px] left-0 right-0 z-20 border-b border-black/5 bg-[#F5F5F5] lg:top-[80px]">
-                <div className="flex h-[40px] w-full items-center justify-center px-4 lg:h-[48px]">
+                <div className="flex h-[40px] w-full items-center justify-center px-4 lg:h-12">
                     <div className="flex items-center gap-2 text-[13px] text-[#595959] lg:text-[14px]">
                         <Clock className="h-4 w-4" />
                         <span>

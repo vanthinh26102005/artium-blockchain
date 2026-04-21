@@ -1,5 +1,5 @@
-// react
-import { useState, ChangeEvent, FormEvent } from 'react'
+import { useState } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 
 // next
 import Link from 'next/link'
@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 
 // third-party
 import { signIn } from 'next-auth/react'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 // internal - components
 import { Metadata } from '@/components/SEO/Metadata'
@@ -23,88 +24,52 @@ import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAut
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { buildAuthCallbackUrl, getSafeNextPath } from '@domains/auth/utils/authRedirect'
 import {
-  getEmailValidationMessage,
-  getLoginPasswordValidationMessage,
-} from '@domains/auth/utils/authValidation'
-import {
   AuthDivider,
+  AuthFormInput,
+  AuthFormPasswordInput,
   AuthFooter,
   AuthFormCard,
-  AuthInput,
   AuthShell,
   FormErrorMessage,
-  PasswordInput,
   SocialAuthButtons,
 } from '@domains/auth/components'
+import { type LoginFormValues, loginFormSchema } from '@domains/auth/validations/auth.schema'
 
 export const LoginPage = () => {
-  // -- routing --
   const router = useRouter()
   const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
-
-  // -- state --
   const setAuth = useAuthStore((state) => state.setAuth)
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [hasSubmitted, setHasSubmitted] = useState(false)
-  const [touchedEmail, setTouchedEmail] = useState(false)
-  const [touchedPassword, setTouchedPassword] = useState(false)
-  const [serverError, setServerError] = useState('')
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
+  const {
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = form
 
-  // -- derived --
-  const trimmedEmail = email.trim()
-  const emailError = getEmailValidationMessage(trimmedEmail)
-  const passwordError = getLoginPasswordValidationMessage(password)
-  const isEmailValid = !emailError
-  const isPasswordValid = !passwordError
-  const isFormValid = isEmailValid && isPasswordValid
-  const formErrorMessage = serverError
-  const showEmailError = (hasSubmitted || touchedEmail) && !isEmailValid
-  const showPasswordError = (hasSubmitted || touchedPassword) && !isPasswordValid
-  const isSubmitDisabled = isSubmitting || !isFormValid
-  const shouldShowError = formErrorMessage.length > 0
-  // -- handlers --
-  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value)
-    if (serverError) {
-      setServerError('')
-    }
-  }
-
-  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value)
-    if (serverError) {
-      setServerError('')
-    }
-  }
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setHasSubmitted(true)
-    setServerError('')
-
-    if (!isFormValid) {
-      return
-    }
-
-    setIsSubmitting(true)
+  const handleLogin = async (values: LoginFormValues) => {
+    form.clearErrors('root')
 
     try {
       const response = await usersApi.loginByEmail({
-        email: trimmedEmail,
-        password,
+        email: values.email.trim(),
+        password: values.password,
       })
       const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
       setAuth(response)
       await router.push(nextPath)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed.'
-      setServerError(message)
-    } finally {
-      setIsSubmitting(false)
+      setError('root', { message })
     }
   }
 
@@ -147,52 +112,47 @@ export const LoginPage = () => {
 
         <AuthDivider text="Or sign in with" />
 
-        {/* form */}
-        <form className="mt-3 space-y-4" onSubmit={handleSubmit} noValidate>
-          <AuthInput
-            id="login-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder="Enter email address"
-            label="Email address"
-            required
-            value={email}
-            onChange={handleEmailChange}
-            onBlur={() => setTouchedEmail(true)}
-            aria-invalid={showEmailError}
-            aria-describedby="login-error"
-            hasError={showEmailError}
-            errorMessage={showEmailError ? emailError : undefined}
-          />
+        <FormProvider {...form}>
+          <form className="mt-3 space-y-4" onSubmit={handleSubmit(handleLogin)} noValidate>
+            <AuthFormInput<LoginFormValues>
+              id="login-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="Enter email address"
+              label="Email address"
+              required
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby="login-error"
+            />
 
-          <PasswordInput
-            id="login-password"
-            name="password"
-            autoComplete="current-password"
-            placeholder="Enter password"
-            label="Password"
-            required
-            value={password}
-            onChange={handlePasswordChange}
-            onBlur={() => setTouchedPassword(true)}
-            aria-invalid={showPasswordError}
-            aria-describedby="login-error"
-            hasError={showPasswordError}
-            errorMessage={showPasswordError ? passwordError : undefined}
-          />
+            <AuthFormPasswordInput<LoginFormValues>
+              id="login-password"
+              name="password"
+              autoComplete="current-password"
+              placeholder="Enter password"
+              label="Password"
+              required
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby="login-error"
+            />
 
-          <FormErrorMessage id="login-error" message={formErrorMessage} visible={shouldShowError} />
+            <FormErrorMessage
+              id="login-error"
+              message={errors.root?.message ?? ''}
+              visible={Boolean(errors.root?.message)}
+            />
 
-          <Button
-            className="h-[56px] w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
-            loading={isSubmitting}
-            disabled={isSubmitDisabled}
-            type="submit"
-          >
-            {isSubmitting ? 'Logging in...' : 'Sign in'}
-          </Button>
-        </form>
+            <Button
+              className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+              type="submit"
+            >
+              {isSubmitting ? 'Logging in...' : 'Sign in'}
+            </Button>
+          </form>
+        </FormProvider>
 
         {/* footer links */}
         <div className="space-y-3 text-center">

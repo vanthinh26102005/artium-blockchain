@@ -1,21 +1,25 @@
 // react
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { useRouter } from 'next/router'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 // @domains - checkout
 import { BuyerCheckoutLayout } from '../components/BuyerCheckoutLayout'
 import { BuyerCheckoutContactForm } from '../components/BuyerCheckoutContactForm'
-import { BuyerCheckoutPaymentForm, type CardData } from '../components/BuyerCheckoutPaymentForm'
+import { BuyerCheckoutPaymentForm } from '../components/BuyerCheckoutPaymentForm'
 import { BuyerCheckoutOrderSummary } from '../components/BuyerCheckoutOrderSummary'
 import {
     defaultBuyerCheckoutDraft,
-    type BuyerCheckoutDraft,
-    type BuyerContactInfo,
-    type BuyerShippingAddress,
-    type DeliveryMethod,
     type ArtworkForCheckout,
     type CheckoutPricing,
 } from '../types/buyerCheckoutTypes'
+import {
+    buyerCheckoutContactStepSchema,
+    buyerCheckoutPaymentSchema,
+    type BuyerCheckoutContactStepValues,
+    type BuyerCheckoutPaymentValues,
+} from '../validations/buyerCheckout.schema'
 
 // @domains - auth
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
@@ -54,17 +58,39 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
 
     // -- state --
     const [step, setStep] = useState(1)
-    const [draft, setDraft] = useState<BuyerCheckoutDraft>(defaultBuyerCheckoutDraft)
     const [isLoading, setIsLoading] = useState(false)
     const [isFetchingArtwork, setIsFetchingArtwork] = useState(true)
     const [artwork, setArtwork] = useState<ArtworkForCheckout | null>(null)
     const [error, setError] = useState<string | null>(null)
-    const [cardData, setCardData] = useState<CardData>({
-        cardNumber: '',
-        expiryDate: '',
-        cvc: '',
+    const contactForm = useForm<BuyerCheckoutContactStepValues>({
+        resolver: zodResolver(buyerCheckoutContactStepSchema),
+        defaultValues: defaultBuyerCheckoutDraft,
+        mode: 'onChange',
     })
-    const [paymentCountry, setPaymentCountry] = useState('VN')
+    const paymentForm = useForm<BuyerCheckoutPaymentValues>({
+        resolver: zodResolver(buyerCheckoutPaymentSchema),
+        defaultValues: {
+            paymentMethod: 'card',
+            cardNumber: '',
+            expiryDate: '',
+            cvc: '',
+            country: 'VN',
+        },
+        mode: 'onChange',
+    })
+    const watchedDraft = useWatch({ control: contactForm.control })
+    const draft: BuyerCheckoutContactStepValues = {
+        ...defaultBuyerCheckoutDraft,
+        ...watchedDraft,
+        contact: {
+            ...defaultBuyerCheckoutDraft.contact,
+            ...watchedDraft?.contact,
+        },
+        shippingAddress: {
+            ...defaultBuyerCheckoutDraft.shippingAddress,
+            ...watchedDraft?.shippingAddress,
+        },
+    }
 
     // -- fetch artwork from API --
     useEffect(() => {
@@ -99,17 +125,11 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
             const firstName = nameParts[0] || ''
             const lastName = nameParts.slice(1).join(' ') || ''
 
-            setDraft((prev) => ({
-                ...prev,
-                contact: {
-                    ...prev.contact,
-                    firstName,
-                    lastName,
-                    email: user.email || '',
-                },
-            }))
+            contactForm.setValue('contact.firstName', firstName)
+            contactForm.setValue('contact.lastName', lastName)
+            contactForm.setValue('contact.email', user.email || '')
         }
-    }, [isAuthenticated, user])
+    }, [contactForm, isAuthenticated, user])
 
     // -- pricing calculation --
     const pricing: CheckoutPricing = useMemo(() => {
@@ -125,29 +145,13 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     }, [artwork, draft.deliveryMethod, draft.shippingAddress.country])
 
     // -- handlers --
-    const handleContactChange = useCallback((contact: BuyerContactInfo) => {
-        setDraft((prev) => ({ ...prev, contact }))
-    }, [])
-
-    const handleDeliveryMethodChange = useCallback((deliveryMethod: DeliveryMethod) => {
-        setDraft((prev) => ({ ...prev, deliveryMethod }))
-    }, [])
-
-    const handleShippingAddressChange = useCallback((shippingAddress: BuyerShippingAddress) => {
-        setDraft((prev) => ({ ...prev, shippingAddress }))
-    }, [])
-
     const handlePromoCodeChange = useCallback((promoCode: string) => {
-        setDraft((prev) => ({ ...prev, promoCode }))
-    }, [])
+        contactForm.setValue('promoCode', promoCode, { shouldDirty: true })
+    }, [contactForm])
 
     const handleApplyPromo = useCallback(() => {
         // TODO: Validate promo code via API
         alert('Promo code applied!')
-    }, [])
-
-    const handleCardChange = useCallback((data: CardData) => {
-        setCardData(data)
     }, [])
 
     const handleCancel = useCallback(() => {
@@ -162,44 +166,42 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
 
     const handleContinue = useCallback(async () => {
         if (step === 1) {
-            const { contact, deliveryMethod, shippingAddress } = draft
-
-            if (!contact.firstName || !contact.lastName || !contact.email || !contact.phone) {
-                alert('Please fill in all contact information fields.')
-                return
-            }
-
-            if (deliveryMethod === 'ship_by_platform') {
-                if (!shippingAddress.addressLine1 || !shippingAddress.city || !shippingAddress.state || !shippingAddress.postalCode) {
+            const isStepValid = await contactForm.trigger()
+            if (!isStepValid) {
+                if (contactForm.getValues('deliveryMethod') === 'ship_by_platform' && contactForm.formState.errors.shippingAddress) {
                     alert('Please fill in all shipping address fields.')
                     return
                 }
+
+                alert('Please fill in all contact information fields.')
+                return
             }
 
             setStep(2)
             return
         }
 
-        // Step 2: Process payment via real APIs
-        if (!cardData.cardNumber || !cardData.expiryDate || !cardData.cvc) {
+        const isStepValid = await paymentForm.trigger()
+        if (!isStepValid) {
             alert('Please fill in all card information.')
             return
         }
 
         if (!artwork) return
 
+        const checkoutValues = contactForm.getValues()
+
         setIsLoading(true)
         setError(null)
 
         try {
-            // 1. Create order
-            const shippingAddr = draft.deliveryMethod !== 'pickup' ? {
-                line1: draft.shippingAddress.addressLine1,
-                line2: draft.shippingAddress.addressLine2 || undefined,
-                city: draft.shippingAddress.city,
-                state: draft.shippingAddress.state,
-                postalCode: draft.shippingAddress.postalCode,
-                country: draft.shippingAddress.country,
+            const shippingAddr = checkoutValues.deliveryMethod !== 'pickup' ? {
+                line1: checkoutValues.shippingAddress.addressLine1,
+                line2: checkoutValues.shippingAddress.addressLine2 || undefined,
+                city: checkoutValues.shippingAddress.city,
+                state: checkoutValues.shippingAddress.state,
+                postalCode: checkoutValues.shippingAddress.postalCode,
+                country: checkoutValues.shippingAddress.country,
             } : undefined
 
             const order = await orderApis.createOrder({
@@ -231,7 +233,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         } finally {
             setIsLoading(false)
         }
-    }, [draft, step, cardData, router, artwork, pricing.total])
+    }, [artwork, contactForm, paymentForm, pricing.total, router, step])
 
     // -- loading state --
     if (isFetchingArtwork) {
@@ -265,25 +267,8 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         )
     }
 
-    // -- validation for step 1 --
-    const isStep1Valid = (() => {
-        const { contact, deliveryMethod, shippingAddress } = draft
-        const contactValid = !!(contact.firstName && contact.lastName && contact.email && contact.phone)
-
-        if (deliveryMethod === 'pickup') return contactValid
-
-        const addressValid = !!(
-            shippingAddress.addressLine1 &&
-            shippingAddress.city &&
-            shippingAddress.state &&
-            shippingAddress.postalCode
-        )
-        return contactValid && addressValid
-    })()
-
-    // -- validation for step 2 --
-    const isStep2Valid = !!(cardData.cardNumber && cardData.expiryDate && cardData.cvc)
-
+    const isStep1Valid = contactForm.formState.isValid
+    const isStep2Valid = paymentForm.formState.isValid
     const isFormValid = step === 1 ? isStep1Valid : isStep2Valid
 
     return (
@@ -307,20 +292,13 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
             }
         >
             {step === 1 ? (
-                <BuyerCheckoutContactForm
-                    contact={draft.contact}
-                    deliveryMethod={draft.deliveryMethod}
-                    shippingAddress={draft.shippingAddress}
-                    onContactChange={handleContactChange}
-                    onDeliveryMethodChange={handleDeliveryMethodChange}
-                    onShippingAddressChange={handleShippingAddressChange}
-                />
+                <FormProvider {...contactForm}>
+                    <BuyerCheckoutContactForm />
+                </FormProvider>
             ) : (
-                <BuyerCheckoutPaymentForm
-                    onCardChange={handleCardChange}
-                    selectedCountry={paymentCountry}
-                    onCountryChange={setPaymentCountry}
-                />
+                <FormProvider {...paymentForm}>
+                    <BuyerCheckoutPaymentForm />
+                </FormProvider>
             )}
         </BuyerCheckoutLayout>
     )

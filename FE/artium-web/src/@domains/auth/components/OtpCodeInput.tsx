@@ -6,6 +6,7 @@ type OtpCodeInputProps = {
   label: string
   value: string
   onChange: (value: string) => void
+  onBlur?: () => void
   length?: number
   hasError?: boolean
   disabled?: boolean
@@ -21,6 +22,7 @@ export const OtpCodeInput = ({
   label,
   value,
   onChange,
+  onBlur,
   length = 6,
   hasError = false,
   disabled = false,
@@ -116,11 +118,12 @@ export const OtpCodeInput = ({
             value={digit}
             disabled={disabled}
             aria-label={`${label} digit ${index + 1}`}
-            onChange={(event) => handleDigitChange(index, event.target.value)}
-            onKeyDown={(event) => handleKeyDown(index, event)}
-            onFocus={(event) => event.target.select()}
-            onPaste={handlePaste}
-            className={cn(
+             onChange={(event) => handleDigitChange(index, event.target.value)}
+             onBlur={onBlur}
+             onKeyDown={(event) => handleKeyDown(index, event)}
+             onFocus={(event) => event.target.select()}
+             onPaste={handlePaste}
+             className={cn(
               'h-16 w-12 rounded-2xl border border-black/10 bg-white text-center text-2xl font-semibold text-[#191414] shadow-sm outline-none transition sm:h-[72px] sm:w-14 sm:text-[28px]',
               hasError
                 ? 'border-[#FF4337] focus:border-[#FF4337] focus:ring-2 focus:ring-[#FF4337]/10'

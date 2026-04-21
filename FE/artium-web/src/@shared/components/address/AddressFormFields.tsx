@@ -20,6 +20,7 @@ type AddressFormFieldsProps = {
   onChange: (address: AddressData) => void
   disabled?: boolean
   showValidation?: boolean
+  errors?: Partial<Record<keyof AddressData, string>>
 }
 
 type ComboboxOption = {
@@ -146,7 +147,7 @@ const SearchableCombobox = ({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            'h-[48px] rounded-[12px] border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+            'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
             error ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
           )}
         />
@@ -160,7 +161,7 @@ const SearchableCombobox = ({
 
       {/* Dropdown list */}
       {isOpen && !disabled && (
-        <div className="absolute z-50 mt-1 max-h-[240px] w-full overflow-auto rounded-[12px] border border-[#E5E5E5] bg-white shadow-lg">
+        <div className="absolute z-50 mt-1 max-h-[240px] w-full overflow-auto rounded-xl border border-[#E5E5E5] bg-white shadow-lg">
           {isLoading ? (
             <div className="p-3 text-center text-sm text-[#989898]">Loading...</div>
           ) : filteredOptions.length === 0 ? (
@@ -198,6 +199,7 @@ export const AddressFormFields = ({
   onChange,
   disabled = false,
   showValidation = false,
+  errors: externalErrors = {},
 }: AddressFormFieldsProps) => {
   // --- Country options ---
   const countryOptions = useMemo<ComboboxOption[]>(() => {
@@ -236,19 +238,26 @@ export const AddressFormFields = ({
 
   // --- Validation ---
   const errors = useMemo(() => {
-    if (!showValidation) return {}
-    const errs: Record<string, string> = {}
-    if (!value.country) errs.country = 'Country is required'
-    if (!value.addressLine1) errs.addressLine1 = 'Address is required'
-    if (!value.city) errs.city = 'City is required'
-    if (!value.postalCode) {
-      errs.postalCode = 'Postal code is required'
-    } else if (!postalConfig.regex.test(value.postalCode)) {
-      errs.postalCode = `Invalid format (e.g., ${postalConfig.placeholder})`
+    const internalErrors: Partial<Record<keyof AddressData, string>> = {}
+    if (!showValidation) {
+      return {
+        ...internalErrors,
+        ...externalErrors,
+      }
     }
-    // State is optional for some countries
-    return errs
-  }, [showValidation, value, postalConfig])
+    if (!value.country) internalErrors.country = 'Country is required'
+    if (!value.addressLine1) internalErrors.addressLine1 = 'Address is required'
+    if (!value.city) internalErrors.city = 'City is required'
+    if (!value.postalCode) {
+      internalErrors.postalCode = 'Postal code is required'
+    } else if (!postalConfig.regex.test(value.postalCode)) {
+      internalErrors.postalCode = `Invalid format (e.g., ${postalConfig.placeholder})`
+    }
+    return {
+      ...internalErrors,
+      ...externalErrors,
+    }
+  }, [externalErrors, postalConfig, showValidation, value])
 
   // --- Handlers ---
   const handleCountryChange = useCallback(
@@ -336,7 +345,7 @@ export const AddressFormFields = ({
           placeholder="Street address, P.O. Box"
           disabled={disabled}
           className={cn(
-            'h-[48px] rounded-[12px] border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+            'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
             errors.addressLine1 ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
           )}
         />
@@ -353,7 +362,7 @@ export const AddressFormFields = ({
           onChange={(e) => handleFieldChange('addressLine2', e.target.value)}
           placeholder="Apartment, suite, unit, building, floor"
           disabled={disabled}
-          className="h-[48px] rounded-[12px] border border-[#E5E5E5] bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:border-[#0066FF] focus:ring-0"
+          className="h-12 rounded-xl border border-[#E5E5E5] bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:border-[#0066FF] focus:ring-0"
         />
       </div>
 
@@ -369,7 +378,7 @@ export const AddressFormFields = ({
           disabled={disabled}
           maxLength={postalConfig.maxLength}
           className={cn(
-            'h-[48px] rounded-[12px] border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+            'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
             errors.postalCode ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
           )}
         />

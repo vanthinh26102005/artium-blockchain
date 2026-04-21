@@ -1,9 +1,11 @@
 // react
-import { useEffect, useState, ChangeEvent, FormEvent } from 'react'
+import { useEffect, useState } from 'react'
 
 // next
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FormProvider, useForm } from 'react-hook-form'
 
 // internal - components
 import { Metadata } from '@/components/SEO/Metadata'
@@ -13,13 +15,13 @@ import { Button } from '@shared/components/ui/button'
 
 // @domains - auth
 import {
+  AuthFormInput,
+  AuthFormOtpInput,
+  AuthFormPasswordInput,
   AuthFooter,
   AuthFormCard,
-  AuthInput,
   AuthShell,
   FormErrorMessage,
-  OtpCodeInput,
-  PasswordInput,
 } from '@domains/auth/components'
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { useResetPassword } from '@domains/auth/hooks/useResetPassword'
@@ -30,130 +32,88 @@ import {
 } from '@domains/auth/services/browserAuthState'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import {
-  getEmailValidationMessage,
-  getSignUpPasswordValidationMessage,
-} from '@domains/auth/utils/authValidation'
+  resetPasswordConfirmFormSchema,
+  resetPasswordVerifyFormSchema,
+  type ResetPasswordConfirmFormValues,
+  type ResetPasswordVerifyFormValues,
+} from '@domains/auth/validations/auth.schema'
 
 export const ResetPasswordPage = () => {
-  // -- routing --
   const router = useRouter()
   const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
-
-  // -- state --
   const { verifyReset, confirmReset, isLoading, error: apiError } = useResetPassword()
   const setAuth = useAuthStore((state) => state.setAuth)
   const [step, setStep] = useState<'verify' | 'confirm'>('verify')
   const [email, setEmail] = useState('')
-  const [otp, setOtp] = useState('')
   const [resetToken, setResetToken] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [notice, setNotice] = useState('')
-  const [hasSubmitted, setHasSubmitted] = useState(false)
-  const [touchedEmail, setTouchedEmail] = useState(false)
-  const [touchedOtp, setTouchedOtp] = useState(false)
-  const [touchedNewPassword, setTouchedNewPassword] = useState(false)
-  const [touchedConfirmPassword, setTouchedConfirmPassword] = useState(false)
-  const [serverError, setServerError] = useState('')
+  const verifyForm = useForm<ResetPasswordVerifyFormValues>({
+    resolver: zodResolver(resetPasswordVerifyFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      email: '',
+      otp: '',
+    },
+  })
+  const confirmForm = useForm<ResetPasswordConfirmFormValues>({
+    resolver: zodResolver(resetPasswordConfirmFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      email: '',
+      resetToken: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  })
 
-  // -- derived --
-  const trimmedEmail = email.trim()
-  const normalizedOtp = otp.replace(/\D/g, '').slice(0, 6)
-  const emailError = getEmailValidationMessage(trimmedEmail)
-  const otpError = !normalizedOtp ? 'Verification code is required.' : !/^\d{6}$/.test(normalizedOtp)
-    ? 'OTP must be 6 digits.'
-    : ''
-  const newPasswordError = getSignUpPasswordValidationMessage(newPassword)
-  const confirmPasswordError = !confirmPassword
-    ? 'Confirm your new password.'
-    : confirmPassword !== newPassword
-      ? 'Passwords do not match.'
-      : ''
-  const isEmailValid = !emailError
-  const isOtpValid = !otpError
-  const isNewPasswordValid = !newPasswordError
-  const isConfirmPasswordValid = !confirmPasswordError
-  const isFormValid =
-    step === 'verify'
-      ? isEmailValid && isOtpValid
-      : isEmailValid && resetToken.length > 0 && isNewPasswordValid && isConfirmPasswordValid
-  const showEmailError = (hasSubmitted || touchedEmail) && !isEmailValid
-  const showOtpError = step === 'verify' && (hasSubmitted || touchedOtp) && !isOtpValid
-  const showNewPasswordError =
-    step === 'confirm' && (hasSubmitted || touchedNewPassword) && !isNewPasswordValid
-  const showConfirmPasswordError =
-    step === 'confirm' && (hasSubmitted || touchedConfirmPassword) && !isConfirmPasswordValid
-  const formErrorMessage = serverError || apiError || ''
-  const shouldShowError = formErrorMessage.length > 0
-  const isSubmitDisabled = isLoading || !isFormValid
-
-  // -- handlers --
-  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value)
-    if (serverError) {
-      setServerError('')
-    }
-  }
-
-  const handleOtpCodeChange = (value: string) => {
-    setOtp(value)
-    if (serverError) {
-      setServerError('')
-    }
-  }
-
-  const handleNewPasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setNewPassword(event.target.value)
-    if (serverError) {
-      setServerError('')
-    }
-  }
-
-  const handleConfirmPasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setConfirmPassword(event.target.value)
-    if (serverError) {
-      setServerError('')
-    }
-  }
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setHasSubmitted(true)
-    setServerError('')
+  const handleVerifySubmit = async (values: ResetPasswordVerifyFormValues) => {
+    verifyForm.clearErrors('root')
     setNotice('')
 
-    if (!isFormValid) {
-      return
-    }
-
     try {
-      if (step === 'verify') {
-        const response = await verifyReset({
-          email: trimmedEmail,
-          otp: normalizedOtp,
-        })
-        if (response?.resetToken) {
-          writePasswordResetSession({
-            email: trimmedEmail,
-            resetToken: response.resetToken,
-          })
-          setResetToken(response.resetToken)
-          setStep('confirm')
-          setHasSubmitted(false)
-          setTouchedNewPassword(false)
-          setTouchedConfirmPassword(false)
-          setNotice('Verification successful. Set your new password.')
-        } else {
-          setServerError('Verification failed.')
-        }
+      const response = await verifyReset({
+        email: values.email.trim(),
+        otp: values.otp.trim(),
+      })
+
+      if (!response?.resetToken) {
+        verifyForm.setError('root', { message: 'Verification failed.' })
         return
       }
 
+      const normalizedEmail = values.email.trim()
+      writePasswordResetSession({
+        email: normalizedEmail,
+        resetToken: response.resetToken,
+      })
+      setEmail(normalizedEmail)
+      setResetToken(response.resetToken)
+      setStep('confirm')
+      setNotice('Verification successful. Set your new password.')
+      confirmForm.reset({
+        email: normalizedEmail,
+        resetToken: response.resetToken,
+        newPassword: '',
+        confirmPassword: '',
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : apiError || 'Verification failed.'
+      verifyForm.setError('root', { message })
+    }
+  }
+
+  const handleConfirmSubmit = async (values: ResetPasswordConfirmFormValues) => {
+    confirmForm.clearErrors('root')
+    setNotice('')
+
+    try {
       const response = await confirmReset({
-        email: trimmedEmail,
-        resetToken,
-        newPassword,
-        confirmPassword,
+        email: values.email.trim(),
+        resetToken: values.resetToken,
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
       })
       clearPasswordResetSession()
       if (response?.accessToken && response?.refreshToken && response?.user) {
@@ -162,8 +122,9 @@ export const ResetPasswordPage = () => {
       } else {
         await router.push('/login?reset=success')
       }
-    } catch {
-      // errors are handled by hook state
+    } catch (error) {
+      const message = error instanceof Error ? error.message : apiError || 'Reset failed.'
+      confirmForm.setError('root', { message })
     }
   }
 
@@ -185,13 +146,21 @@ export const ResetPasswordPage = () => {
 
       if (!email && emailQuery) {
         setEmail(emailQuery)
+        verifyForm.reset({ email: emailQuery, otp: '' })
       } else if (!email && storedResetSession?.email) {
         setEmail(storedResetSession.email)
+        verifyForm.reset({ email: storedResetSession.email, otp: '' })
       }
 
       if (!resetToken && storedResetSession?.resetToken) {
         setResetToken(storedResetSession.resetToken)
         setStep('confirm')
+        confirmForm.reset({
+          email: storedResetSession.email || emailQuery || '',
+          resetToken: storedResetSession.resetToken,
+          newPassword: '',
+          confirmPassword: '',
+        })
       } else if (!resetToken && resetTokenQuery) {
         const nextEmail = emailQuery || storedResetSession?.email || ''
         writePasswordResetSession({
@@ -200,6 +169,12 @@ export const ResetPasswordPage = () => {
         })
         setResetToken(resetTokenQuery)
         setStep('confirm')
+        confirmForm.reset({
+          email: nextEmail,
+          resetToken: resetTokenQuery,
+          newPassword: '',
+          confirmPassword: '',
+        })
 
         await router.replace(
           {
@@ -213,7 +188,7 @@ export const ResetPasswordPage = () => {
     }
 
     void syncResetState()
-  }, [router, router.isReady, router.query, email, resetToken])
+  }, [confirmForm, email, resetToken, router, router.isReady, router.query, verifyForm])
 
   // -- render --
   if (!canRenderGuestPage) {
@@ -229,98 +204,120 @@ export const ResetPasswordPage = () => {
           Reset password
         </h1>
 
-        <form className="mt-3 space-y-4" onSubmit={handleSubmit} noValidate>
-          {notice ? <p className="text-xs font-semibold text-emerald-600">{notice}</p> : null}
+        {step === 'verify' ? (
+          <FormProvider {...verifyForm}>
+            <form
+              className="mt-3 space-y-4"
+              onSubmit={verifyForm.handleSubmit(handleVerifySubmit)}
+              noValidate
+            >
+              {notice ? <p className="text-xs font-semibold text-emerald-600">{notice}</p> : null}
 
-          <AuthInput
-            id="reset-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder="Email address"
-            label="Email address"
-            required
-            value={email}
-            onChange={handleEmailChange}
-            onBlur={() => setTouchedEmail(true)}
-            aria-invalid={showEmailError}
-            aria-describedby="reset-error"
-            hasError={showEmailError}
-            errorMessage={showEmailError ? emailError : undefined}
-            disabled={step === 'confirm' && trimmedEmail.length > 0}
-          />
+              <AuthFormInput<ResetPasswordVerifyFormValues>
+                id="reset-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="Email address"
+                label="Email address"
+                required
+                aria-invalid={Boolean(verifyForm.formState.errors.email)}
+                aria-describedby="reset-error"
+              />
 
-          {step === 'verify' ? (
-            <OtpCodeInput
-              id="reset-otp"
-              label="Verification code"
-              value={normalizedOtp}
-              onChange={(value) => {
-                setTouchedOtp(true)
-                handleOtpCodeChange(value)
-              }}
-              hasError={showOtpError}
-              errorMessage={showOtpError ? otpError : undefined}
-              description="Enter the 6-digit code we sent to your email."
-              disabled={isLoading}
-            />
-          ) : (
-            <>
-              <PasswordInput
+              <AuthFormOtpInput<ResetPasswordVerifyFormValues>
+                id="reset-otp"
+                name="otp"
+                label="Verification code"
+                description="Enter the 6-digit code we sent to your email."
+                disabled={verifyForm.formState.isSubmitting || isLoading}
+              />
+
+              <FormErrorMessage
+                id="reset-error"
+                message={verifyForm.formState.errors.root?.message ?? ''}
+                visible={Boolean(verifyForm.formState.errors.root?.message)}
+              />
+
+              <Button
+                className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
+                loading={verifyForm.formState.isSubmitting || isLoading}
+                disabled={verifyForm.formState.isSubmitting || isLoading}
+                type="submit"
+              >
+                {verifyForm.formState.isSubmitting || isLoading ? 'Verifying...' : 'Verify code'}
+              </Button>
+            </form>
+          </FormProvider>
+        ) : (
+          <FormProvider {...confirmForm}>
+            <form
+              className="mt-3 space-y-4"
+              onSubmit={confirmForm.handleSubmit(handleConfirmSubmit)}
+              noValidate
+            >
+              {notice ? <p className="text-xs font-semibold text-emerald-600">{notice}</p> : null}
+
+              <AuthFormInput<ResetPasswordConfirmFormValues>
+                id="reset-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="Email address"
+                label="Email address"
+                required
+                aria-invalid={Boolean(confirmForm.formState.errors.email)}
+                aria-describedby="reset-error"
+                disabled
+              />
+
+              <input type="hidden" {...confirmForm.register('resetToken')} />
+
+              <AuthFormPasswordInput<ResetPasswordConfirmFormValues>
                 id="reset-new-password"
                 name="newPassword"
                 autoComplete="new-password"
                 placeholder="New password"
                 label="New password"
                 required
-                value={newPassword}
-                onChange={handleNewPasswordChange}
-                onBlur={() => setTouchedNewPassword(true)}
-                aria-invalid={showNewPasswordError}
+                aria-invalid={Boolean(confirmForm.formState.errors.newPassword)}
                 aria-describedby="reset-error"
-                hasError={showNewPasswordError}
-                errorMessage={showNewPasswordError ? newPasswordError : undefined}
               />
-              {!showNewPasswordError ? (
+
+              {!confirmForm.formState.errors.newPassword ? (
                 <p className="text-xs text-[#6b6b6b]">
-                Use at least 8 characters with uppercase, lowercase, and a number.
+                  Use at least 8 characters with uppercase, lowercase, and a number.
                 </p>
               ) : null}
-              <PasswordInput
+
+              <AuthFormPasswordInput<ResetPasswordConfirmFormValues>
                 id="reset-confirm-password"
                 name="confirmPassword"
                 autoComplete="new-password"
                 placeholder="Confirm new password"
                 label="Confirm new password"
                 required
-                value={confirmPassword}
-                onChange={handleConfirmPasswordChange}
-                onBlur={() => setTouchedConfirmPassword(true)}
-                aria-invalid={showConfirmPasswordError}
+                aria-invalid={Boolean(confirmForm.formState.errors.confirmPassword)}
                 aria-describedby="reset-error"
-                hasError={showConfirmPasswordError}
-                errorMessage={showConfirmPasswordError ? confirmPasswordError : undefined}
               />
-            </>
-          )}
 
-          <FormErrorMessage id="reset-error" message={formErrorMessage} visible={shouldShowError} />
+              <FormErrorMessage
+                id="reset-error"
+                message={confirmForm.formState.errors.root?.message ?? ''}
+                visible={Boolean(confirmForm.formState.errors.root?.message)}
+              />
 
-          <Button
-            className="h-[56px] w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
-            loading={isLoading}
-            disabled={isSubmitDisabled}
-            type="submit"
-          >
-            {step === 'verify'
-              ? isLoading
-                ? 'Verifying...'
-                : 'Verify code'
-              : isLoading
-                ? 'Resetting...'
-                : 'Reset password'}
-          </Button>
-        </form>
+              <Button
+                className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
+                loading={confirmForm.formState.isSubmitting || isLoading}
+                disabled={confirmForm.formState.isSubmitting || isLoading}
+                type="submit"
+              >
+                {confirmForm.formState.isSubmitting || isLoading ? 'Resetting...' : 'Reset password'}
+              </Button>
+            </form>
+          </FormProvider>
+        )}
 
         <div className="space-y-3 text-center">
           <p className="text-sm text-[#191414]">

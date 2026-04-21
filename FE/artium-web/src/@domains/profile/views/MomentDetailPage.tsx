@@ -36,11 +36,11 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
     () =>
       isAuthenticated
         ? {
-            id: user?.id,
-            username: user?.username || 'guest',
-            displayName: user?.displayName || user?.username || 'Guest',
-            avatarUrl: user?.avatarUrl || '/images/logo-dark-mode.png',
-          }
+          id: user?.id,
+          username: user?.username || 'guest',
+          displayName: user?.displayName || user?.username || 'Guest',
+          avatarUrl: user?.avatarUrl || '/images/logo-dark-mode.png',
+        }
         : undefined,
     [isAuthenticated, user],
   )
@@ -151,13 +151,13 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
     setMoment((prev) =>
       prev
         ? {
-            ...prev,
-            isLiked: nextLiked,
-            stats: {
-              ...prev.stats,
-              likes: nextLiked ? prev.stats.likes + 1 : Math.max(prev.stats.likes - 1, 0),
-            },
-          }
+          ...prev,
+          isLiked: nextLiked,
+          stats: {
+            ...prev.stats,
+            likes: nextLiked ? prev.stats.likes + 1 : Math.max(prev.stats.likes - 1, 0),
+          },
+        }
         : prev,
     )
 
@@ -167,13 +167,13 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
       setMoment((prev) =>
         prev
           ? {
-              ...prev,
-              isLiked: previousLiked,
-              stats: {
-                ...prev.stats,
-                likes: previousLikes,
-              },
-            }
+            ...prev,
+            isLiked: previousLiked,
+            stats: {
+              ...prev.stats,
+              likes: previousLikes,
+            },
+          }
           : prev,
       )
       setLikeError('Unable to update like. Please try again.')
@@ -240,12 +240,12 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
       setMoment((prev) =>
         prev
           ? {
-              ...prev,
-              stats: {
-                ...prev.stats,
-                comments: prev.stats.comments + 1,
-              },
-            }
+            ...prev,
+            stats: {
+              ...prev.stats,
+              comments: prev.stats.comments + 1,
+            },
+          }
           : prev,
       )
     } catch {
@@ -277,7 +277,7 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
         isAuthenticated={isAuthenticated}
       />
       {likeError ? (
-        <div className="mx-auto mt-4 max-w-[1050px] px-4 text-sm text-rose-500">
+        <div className="mx-auto mt-4 max-w-262.5 px-4 text-sm text-rose-500">
           {likeError}
         </div>
       ) : null}

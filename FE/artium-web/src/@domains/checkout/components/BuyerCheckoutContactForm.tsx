@@ -35,7 +35,7 @@ export const BuyerCheckoutContactForm = () => {
                 placeholder="First name"
                 maxLength={50}
                 className={cn(
-                  'h-[48px] rounded-[12px] border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+                  'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
                   errors.contact?.firstName
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-[#E5E5E5] focus:border-[#0066FF]',
@@ -59,7 +59,7 @@ export const BuyerCheckoutContactForm = () => {
                 placeholder="Last name"
                 maxLength={50}
                 className={cn(
-                  'h-[48px] rounded-[12px] border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+                  'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
                   errors.contact?.lastName
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-[#E5E5E5] focus:border-[#0066FF]',
@@ -84,7 +84,7 @@ export const BuyerCheckoutContactForm = () => {
               {...register('contact.email')}
               placeholder="your@email.com"
               className={cn(
-                'h-[48px] rounded-[12px] border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+                'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
                 errors.contact?.email
                   ? 'border-red-500 focus:border-red-500'
                   : 'border-[#E5E5E5] focus:border-[#0066FF]',
@@ -102,7 +102,7 @@ export const BuyerCheckoutContactForm = () => {
             <div className="flex gap-2">
               <select
                 {...register('contact.phoneCountryCode')}
-                className="h-[48px] w-[100px] rounded-[12px] border border-[#E5E5E5] bg-white px-3 text-[15px] font-medium text-[#191414] focus:border-[#0066FF] focus:ring-0"
+                className="h-12 w-[100px] rounded-xl border border-[#E5E5E5] bg-white px-3 text-[15px] font-medium text-[#191414] focus:border-[#0066FF] focus:ring-0"
               >
                 <option value="+1">🇺🇸 +1</option>
                 <option value="+84">🇻🇳 +84</option>
@@ -118,7 +118,7 @@ export const BuyerCheckoutContactForm = () => {
                 {...register('contact.phone')}
                 placeholder="000-000-0000"
                 className={cn(
-                  'h-[48px] flex-1 rounded-[12px] border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+                  'h-12 flex-1 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
                   errors.contact?.phone
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-[#E5E5E5] focus:border-[#0066FF]',
@@ -145,11 +145,10 @@ export const BuyerCheckoutContactForm = () => {
           <button
             type="button"
             onClick={() => setValue('deliveryMethod', 'pickup', { shouldDirty: true, shouldValidate: true })}
-            className={`flex-1 rounded-full border-2 py-3 text-[14px] font-bold transition ${
-              deliveryMethod === 'pickup'
-                ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
-                : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]'
-            }`}
+            className={`flex-1 rounded-full border-2 py-3 text-[14px] font-bold transition ${deliveryMethod === 'pickup'
+              ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
+              : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]'
+              }`}
           >
             Pick up / Ship by seller
           </button>
@@ -158,11 +157,10 @@ export const BuyerCheckoutContactForm = () => {
             onClick={() =>
               setValue('deliveryMethod', 'ship_by_platform', { shouldDirty: true, shouldValidate: true })
             }
-            className={`flex-1 rounded-full border-2 py-3 text-[14px] font-bold transition ${
-              deliveryMethod === 'ship_by_platform'
-                ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
-                : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]'
-            }`}
+            className={`flex-1 rounded-full border-2 py-3 text-[14px] font-bold transition ${deliveryMethod === 'ship_by_platform'
+              ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
+              : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]'
+              }`}
           >
             Ship by Artium
           </button>

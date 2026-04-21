@@ -69,7 +69,7 @@ export const ArtworksSection = ({
           return (
             <div
               key={artwork.id}
-              className="group flex w-[260px] flex-shrink-0 flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
+              className="group flex w-[260px] shrink-0 flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
             >
               <Link
                 href={`/artworks/${artwork.id}`}
@@ -115,8 +115,8 @@ export const ArtworksSection = ({
                   </h4>
                   <p className="flex items-center gap-1 text-xs text-slate-600">
                     <span className="flex-shrink truncate">{artwork.medium}</span>
-                    <span className="flex-shrink-0 text-slate-400">&middot;</span>
-                    <span className="flex-shrink-0 truncate text-right">{artwork.dimensions}</span>
+                    <span className="shrink-0 text-slate-400">&middot;</span>
+                    <span className="shrink-0 truncate text-right">{artwork.dimensions}</span>
                   </p>
                 </div>
                 <div className="mt-auto pt-2">
