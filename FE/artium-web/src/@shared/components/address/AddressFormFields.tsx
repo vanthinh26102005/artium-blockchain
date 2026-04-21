@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Country, State, City, ICountry, IState, ICity } from 'country-state-city'
 
 import { Input } from '@shared/components/ui/input'
@@ -85,11 +85,6 @@ const SearchableCombobox = ({
     [options, value],
   )
 
-  // Sync search with selected value
-  useEffect(() => {
-    setSearch(selectedOption?.label || '')
-  }, [selectedOption])
-
   // Filter options based on search
   const filteredOptions = useMemo(() => {
     if (!search) return options.slice(0, 50) // Show first 50 when no search
@@ -120,18 +115,22 @@ const SearchableCombobox = ({
     }
   }, [selectedOption, onChange])
 
+  const handleFocus = useCallback(() => {
+    setSearch(selectedOption?.label || '')
+    setIsOpen(true)
+  }, [selectedOption])
+
   const handleBlur = useCallback(() => {
     // Delay to allow click on option
     setTimeout(() => {
       setIsOpen(false)
-      // Reset to selected value if search doesn't match
-      if (selectedOption) {
-        setSearch(selectedOption.label)
-      } else {
+      if (!selectedOption) {
         setSearch('')
       }
     }, 200)
   }, [selectedOption])
+
+  const inputValue = isOpen ? search : (selectedOption?.label || '')
 
   return (
     <div className="relative space-y-2">
@@ -140,9 +139,9 @@ const SearchableCombobox = ({
       </label>
       <div className="relative">
         <Input
-          value={search}
+          value={inputValue}
           onChange={handleInputChange}
-          onFocus={() => setIsOpen(true)}
+          onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled}
@@ -171,7 +170,10 @@ const SearchableCombobox = ({
               <button
                 key={option.value}
                 type="button"
-                onClick={() => handleSelect(option)}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  handleSelect(option)
+                }}
                 className={cn(
                   'w-full px-4 py-3 text-left text-[14px] hover:bg-blue-50 transition-colors',
                   option.value === value ? 'bg-blue-50 font-medium text-[#0066FF]' : 'text-[#191414]',

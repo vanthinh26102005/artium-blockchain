@@ -52,3 +52,4 @@ AGENTS.md
 
 # local settings
 .vscode/
+yarn.lock

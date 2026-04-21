@@ -19,7 +19,7 @@ const mapStatus = (status?: InvoiceResponse['status']): InvoicePaymentStatus => 
 export const mapInvoiceResponseToCheckoutInvoice = (
   invoice: InvoiceResponse,
 ): CheckoutInvoice => {
-  const items = (invoice.items || []).map((item, index) => {
+  const items: CheckoutInvoice['items'] = (invoice.items || []).map((item, index) => {
     const isArtwork = item.type === 'Artium-artwork'
     const displayName = item.artworkName || item.description || `Item ${index + 1}`
 

@@ -168,7 +168,7 @@ export const QuickSellCreateInvoicePageView = ({
                         } : undefined,
                         subtotal: totals.subtotal,
                         discountTotal: totals.discountTotal,
-                        taxPercent: draft.isApplySalesTax ? draft.taxPercent : 0,
+                        taxPercent: draft.isApplySalesTax ? (draft.taxPercent ?? 0) : 0,
                         tax: totals.tax,
                         total: totals.total,
                     }

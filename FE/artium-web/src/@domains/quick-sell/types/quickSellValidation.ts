@@ -81,7 +81,12 @@ export const validateTaxSettings = (draft: QuickSellInvoiceDraft): ValidationErr
   const errors: ValidationError[] = []
 
   if (draft.isApplySalesTax) {
-    if (draft.taxPercent < 0 || draft.taxPercent > 100) {
+    if (draft.taxPercent == null) {
+      errors.push({
+        field: 'taxPercent',
+        message: 'Tax percent is required',
+      })
+    } else if (draft.taxPercent < 0 || draft.taxPercent > 100) {
       errors.push({
         field: 'taxPercent',
         message: 'Tax percent must be between 0 and 100',

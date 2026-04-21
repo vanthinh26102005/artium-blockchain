@@ -44,7 +44,7 @@ export const MessageComposer = ({
   const [isUploading, setIsUploading] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const typingTimeoutRef = useRef<NodeJS.Timeout>()
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleChange = (value: string) => {
     setMessage(value)
