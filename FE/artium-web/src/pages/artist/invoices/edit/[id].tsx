@@ -22,7 +22,7 @@ const QuickSellCreateInvoicePageView = dynamic(
 
 const EditInvoiceRoute: NextPageWithLayout = () => {
     // -- auth --
-    useRequireAuth()
+    const { canRenderProtected } = useRequireAuth()
 
     // -- router --
     const router = useRouter()
@@ -30,6 +30,7 @@ const EditInvoiceRoute: NextPageWithLayout = () => {
     const invoiceCode = typeof id === 'string' ? id : undefined
 
     // -- render --
+    if (!canRenderProtected) return null
     if (!invoiceCode) return null
 
     return (

@@ -18,13 +18,17 @@ const InventoryPage = dynamic(
 
 const InventoryRoute: NextPageWithLayout = () => {
   // -- state --
-  useRequireAuth()
+  const { canRenderProtected } = useRequireAuth()
 
   // -- derived --
 
   // -- handlers --
 
   // -- render --
+  if (!canRenderProtected) {
+    return null
+  }
+
   return <InventoryPage />
 }
 

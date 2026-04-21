@@ -19,7 +19,13 @@ import { Button } from '@shared/components/ui/button'
 
 // @domains - auth
 import { useGoogleLoginBridge } from '@domains/auth/hooks/useGoogleLoginBridge'
+import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { buildAuthCallbackUrl, getSafeNextPath } from '@domains/auth/utils/authRedirect'
+import {
+  getEmailValidationMessage,
+  getLoginPasswordValidationMessage,
+} from '@domains/auth/utils/authValidation'
 import {
   AuthDivider,
   AuthFooter,
@@ -34,6 +40,7 @@ import {
 export const LoginPage = () => {
   // -- routing --
   const router = useRouter()
+  const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
 
   // -- state --
   const setAuth = useAuthStore((state) => state.setAuth)
@@ -43,24 +50,20 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [touchedEmail, setTouchedEmail] = useState(false)
+  const [touchedPassword, setTouchedPassword] = useState(false)
   const [serverError, setServerError] = useState('')
 
   // -- derived --
   const trimmedEmail = email.trim()
-  const isEmailValid = trimmedEmail.length > 0 && trimmedEmail.includes('@')
-  const isPasswordValid = password.length >= 6
+  const emailError = getEmailValidationMessage(trimmedEmail)
+  const passwordError = getLoginPasswordValidationMessage(password)
+  const isEmailValid = !emailError
+  const isPasswordValid = !passwordError
   const isFormValid = isEmailValid && isPasswordValid
-  const hasInput = email.length > 0 || password.length > 0
-  const shouldShowValidation = (hasSubmitted || hasInput) && !isFormValid
-  const validationMessage = !isEmailValid
-    ? 'Email is required and must include @.'
-    : !isPasswordValid
-      ? 'Password must be at least 6 characters.'
-      : ''
-  const inlineErrorMessage = shouldShowValidation ? validationMessage : ''
-  const formErrorMessage = serverError || inlineErrorMessage
-  const showEmailError = (hasSubmitted || email.length > 0) && !isEmailValid
-  const showPasswordError = (hasSubmitted || password.length > 0) && !isPasswordValid
+  const formErrorMessage = serverError
+  const showEmailError = (hasSubmitted || touchedEmail) && !isEmailValid
+  const showPasswordError = (hasSubmitted || touchedPassword) && !isPasswordValid
   const isSubmitDisabled = isSubmitting || !isFormValid
   const shouldShowError = formErrorMessage.length > 0
   // -- handlers --
@@ -94,8 +97,7 @@ export const LoginPage = () => {
         email: trimmedEmail,
         password,
       })
-      const nextPath =
-        typeof router.query.next === 'string' ? router.query.next : '/discover?tab=top-picks'
+      const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
       setAuth(response)
       await router.push(nextPath)
     } catch (error) {
@@ -108,8 +110,11 @@ export const LoginPage = () => {
 
   const handleGoogleSignIn = async () => {
     setIsGoogleSubmitting(true)
-    const nextPath = typeof router.query.next === 'string' ? router.query.next : '/'
-    const callbackUrl = `/login?next=${encodeURIComponent(nextPath)}`
+    const callbackUrl = buildAuthCallbackUrl(
+      '/login',
+      router.query.next,
+      '/discover?tab=top-picks',
+    )
 
     try {
       await signIn('google', { callbackUrl })
@@ -119,6 +124,10 @@ export const LoginPage = () => {
   }
 
   // -- render --
+  if (!canRenderGuestPage) {
+    return null
+  }
+
   return (
     <AuthShell>
       <Metadata title="Log in | Artium" />
@@ -150,9 +159,11 @@ export const LoginPage = () => {
             required
             value={email}
             onChange={handleEmailChange}
+            onBlur={() => setTouchedEmail(true)}
             aria-invalid={showEmailError}
             aria-describedby="login-error"
             hasError={showEmailError}
+            errorMessage={showEmailError ? emailError : undefined}
           />
 
           <PasswordInput
@@ -164,9 +175,11 @@ export const LoginPage = () => {
             required
             value={password}
             onChange={handlePasswordChange}
+            onBlur={() => setTouchedPassword(true)}
             aria-invalid={showPasswordError}
             aria-describedby="login-error"
             hasError={showPasswordError}
+            errorMessage={showPasswordError ? passwordError : undefined}
           />
 
           <FormErrorMessage id="login-error" message={formErrorMessage} visible={shouldShowError} />

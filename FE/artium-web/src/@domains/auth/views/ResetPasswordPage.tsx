@@ -18,14 +18,26 @@ import {
   AuthInput,
   AuthShell,
   FormErrorMessage,
+  OtpCodeInput,
   PasswordInput,
 } from '@domains/auth/components'
+import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { useResetPassword } from '@domains/auth/hooks/useResetPassword'
+import {
+  clearPasswordResetSession,
+  readPasswordResetSession,
+  writePasswordResetSession,
+} from '@domains/auth/services/browserAuthState'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import {
+  getEmailValidationMessage,
+  getSignUpPasswordValidationMessage,
+} from '@domains/auth/utils/authValidation'
 
 export const ResetPasswordPage = () => {
   // -- routing --
   const router = useRouter()
+  const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
 
   // -- state --
   const { verifyReset, confirmReset, isLoading, error: apiError } = useResetPassword()
@@ -38,41 +50,40 @@ export const ResetPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [notice, setNotice] = useState('')
   const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [touchedEmail, setTouchedEmail] = useState(false)
+  const [touchedOtp, setTouchedOtp] = useState(false)
+  const [touchedNewPassword, setTouchedNewPassword] = useState(false)
+  const [touchedConfirmPassword, setTouchedConfirmPassword] = useState(false)
   const [serverError, setServerError] = useState('')
 
   // -- derived --
   const trimmedEmail = email.trim()
-  const isEmailValid = trimmedEmail.length > 0 && trimmedEmail.includes('@')
-  const isOtpValid = /^\d{6}$/.test(otp.trim())
-  const isNewPasswordValid = newPassword.length >= 8
-  const isConfirmPasswordValid = confirmPassword.length >= 8 && confirmPassword === newPassword
+  const normalizedOtp = otp.replace(/\D/g, '').slice(0, 6)
+  const emailError = getEmailValidationMessage(trimmedEmail)
+  const otpError = !normalizedOtp ? 'Verification code is required.' : !/^\d{6}$/.test(normalizedOtp)
+    ? 'OTP must be 6 digits.'
+    : ''
+  const newPasswordError = getSignUpPasswordValidationMessage(newPassword)
+  const confirmPasswordError = !confirmPassword
+    ? 'Confirm your new password.'
+    : confirmPassword !== newPassword
+      ? 'Passwords do not match.'
+      : ''
+  const isEmailValid = !emailError
+  const isOtpValid = !otpError
+  const isNewPasswordValid = !newPasswordError
+  const isConfirmPasswordValid = !confirmPasswordError
   const isFormValid =
     step === 'verify'
       ? isEmailValid && isOtpValid
       : isEmailValid && resetToken.length > 0 && isNewPasswordValid && isConfirmPasswordValid
-  const showEmailError = (hasSubmitted || email.length > 0) && !isEmailValid
-  const showOtpError = step === 'verify' && (hasSubmitted || otp.length > 0) && !isOtpValid
+  const showEmailError = (hasSubmitted || touchedEmail) && !isEmailValid
+  const showOtpError = step === 'verify' && (hasSubmitted || touchedOtp) && !isOtpValid
   const showNewPasswordError =
-    step === 'confirm' && (hasSubmitted || newPassword.length > 0) && !isNewPasswordValid
+    step === 'confirm' && (hasSubmitted || touchedNewPassword) && !isNewPasswordValid
   const showConfirmPasswordError =
-    step === 'confirm' && (hasSubmitted || confirmPassword.length > 0) && !isConfirmPasswordValid
-  const shouldShowValidation = hasSubmitted && !isFormValid
-  const validationMessage =
-    step === 'verify'
-      ? !isEmailValid
-        ? 'Email is required and must include @.'
-        : !isOtpValid
-          ? 'OTP must be 6 digits.'
-          : ''
-      : !isEmailValid
-        ? 'Email is required and must include @.'
-        : !isNewPasswordValid
-          ? 'Password must be at least 8 characters.'
-          : !isConfirmPasswordValid
-            ? 'Passwords do not match.'
-            : ''
-  const formErrorMessage =
-    serverError || apiError || (shouldShowValidation ? validationMessage : '')
+    step === 'confirm' && (hasSubmitted || touchedConfirmPassword) && !isConfirmPasswordValid
+  const formErrorMessage = serverError || apiError || ''
   const shouldShowError = formErrorMessage.length > 0
   const isSubmitDisabled = isLoading || !isFormValid
 
@@ -84,8 +95,8 @@ export const ResetPasswordPage = () => {
     }
   }
 
-  const handleOtpChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setOtp(event.target.value)
+  const handleOtpCodeChange = (value: string) => {
+    setOtp(value)
     if (serverError) {
       setServerError('')
     }
@@ -119,12 +130,18 @@ export const ResetPasswordPage = () => {
       if (step === 'verify') {
         const response = await verifyReset({
           email: trimmedEmail,
-          otp: otp.trim(),
+          otp: normalizedOtp,
         })
         if (response?.resetToken) {
+          writePasswordResetSession({
+            email: trimmedEmail,
+            resetToken: response.resetToken,
+          })
           setResetToken(response.resetToken)
           setStep('confirm')
           setHasSubmitted(false)
+          setTouchedNewPassword(false)
+          setTouchedConfirmPassword(false)
           setNotice('Verification successful. Set your new password.')
         } else {
           setServerError('Verification failed.')
@@ -138,13 +155,14 @@ export const ResetPasswordPage = () => {
         newPassword,
         confirmPassword,
       })
+      clearPasswordResetSession()
       if (response?.accessToken && response?.refreshToken && response?.user) {
         setAuth(response)
         await router.push('/')
       } else {
         await router.push('/login?reset=success')
       }
-    } catch (error) {
+    } catch {
       // errors are handled by hook state
     }
   }
@@ -155,25 +173,53 @@ export const ResetPasswordPage = () => {
       return
     }
 
-    const emailQuery = typeof router.query.email === 'string' ? router.query.email : ''
-    const resetTokenQuery =
-      typeof router.query.resetToken === 'string'
-        ? router.query.resetToken
-        : typeof router.query.token === 'string'
-          ? router.query.token
-          : ''
+    const syncResetState = async () => {
+      const emailQuery = typeof router.query.email === 'string' ? router.query.email : ''
+      const storedResetSession = readPasswordResetSession()
+      const resetTokenQuery =
+        typeof router.query.resetToken === 'string'
+          ? router.query.resetToken
+          : typeof router.query.token === 'string'
+            ? router.query.token
+            : ''
 
-    if (!email && emailQuery) {
-      setEmail(emailQuery)
+      if (!email && emailQuery) {
+        setEmail(emailQuery)
+      } else if (!email && storedResetSession?.email) {
+        setEmail(storedResetSession.email)
+      }
+
+      if (!resetToken && storedResetSession?.resetToken) {
+        setResetToken(storedResetSession.resetToken)
+        setStep('confirm')
+      } else if (!resetToken && resetTokenQuery) {
+        const nextEmail = emailQuery || storedResetSession?.email || ''
+        writePasswordResetSession({
+          email: nextEmail,
+          resetToken: resetTokenQuery,
+        })
+        setResetToken(resetTokenQuery)
+        setStep('confirm')
+
+        await router.replace(
+          {
+            pathname: router.pathname,
+            query: nextEmail ? { email: nextEmail } : undefined,
+          },
+          undefined,
+          { shallow: true },
+        )
+      }
     }
 
-    if (!resetToken && resetTokenQuery) {
-      setResetToken(resetTokenQuery)
-      setStep('confirm')
-    }
-  }, [router.isReady, router.query, email, resetToken])
+    void syncResetState()
+  }, [router, router.isReady, router.query, email, resetToken])
 
   // -- render --
+  if (!canRenderGuestPage) {
+    return null
+  }
+
   return (
     <AuthShell>
       <Metadata title="Reset password | Artium" />
@@ -196,26 +242,27 @@ export const ResetPasswordPage = () => {
             required
             value={email}
             onChange={handleEmailChange}
+            onBlur={() => setTouchedEmail(true)}
             aria-invalid={showEmailError}
             aria-describedby="reset-error"
             hasError={showEmailError}
+            errorMessage={showEmailError ? emailError : undefined}
             disabled={step === 'confirm' && trimmedEmail.length > 0}
           />
 
           {step === 'verify' ? (
-            <AuthInput
+            <OtpCodeInput
               id="reset-otp"
-              name="otp"
-              type="text"
-              inputMode="numeric"
-              placeholder="Enter 6-digit OTP"
               label="Verification code"
-              required
-              value={otp}
-              onChange={handleOtpChange}
-              aria-invalid={showOtpError}
-              aria-describedby="reset-error"
+              value={normalizedOtp}
+              onChange={(value) => {
+                setTouchedOtp(true)
+                handleOtpCodeChange(value)
+              }}
               hasError={showOtpError}
+              errorMessage={showOtpError ? otpError : undefined}
+              description="Enter the 6-digit code we sent to your email."
+              disabled={isLoading}
             />
           ) : (
             <>
@@ -228,10 +275,17 @@ export const ResetPasswordPage = () => {
                 required
                 value={newPassword}
                 onChange={handleNewPasswordChange}
+                onBlur={() => setTouchedNewPassword(true)}
                 aria-invalid={showNewPasswordError}
                 aria-describedby="reset-error"
                 hasError={showNewPasswordError}
+                errorMessage={showNewPasswordError ? newPasswordError : undefined}
               />
+              {!showNewPasswordError ? (
+                <p className="text-xs text-[#6b6b6b]">
+                Use at least 8 characters with uppercase, lowercase, and a number.
+                </p>
+              ) : null}
               <PasswordInput
                 id="reset-confirm-password"
                 name="confirmPassword"
@@ -241,9 +295,11 @@ export const ResetPasswordPage = () => {
                 required
                 value={confirmPassword}
                 onChange={handleConfirmPasswordChange}
+                onBlur={() => setTouchedConfirmPassword(true)}
                 aria-invalid={showConfirmPasswordError}
                 aria-describedby="reset-error"
                 hasError={showConfirmPasswordError}
+                errorMessage={showConfirmPasswordError ? confirmPasswordError : undefined}
               />
             </>
           )}

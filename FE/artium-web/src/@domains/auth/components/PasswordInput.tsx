@@ -11,12 +11,14 @@ type PasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & 
   label: string
   required?: boolean
   hasError?: boolean
+  errorMessage?: string
 }
 
 export const PasswordInput = ({
   label,
   required = false,
   hasError = false,
+  errorMessage,
   id,
   className,
   ...props
@@ -40,8 +42,10 @@ export const PasswordInput = ({
       {/* input wrapper */}
       <div
         className={cn(
-          'flex h-[56px] items-center rounded-2xl border border-black/10 px-5 lg:px-7',
-          hasError && 'border-[#FF4337]',
+          'flex h-[56px] items-center rounded-2xl border border-black/10 px-5 lg:px-7 transition',
+          hasError
+            ? 'border-[#FF4337] focus-within:border-[#FF4337] focus-within:ring-2 focus-within:ring-[#FF4337]/10'
+            : 'focus-within:border-black/20',
         )}
       >
         <input

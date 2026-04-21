@@ -21,8 +21,17 @@ export const ProfileMoodboardsPageView = ({
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
+  const profileHandle = resolvedUsername || profileData.user.username || usernameFromRoute || ''
   const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Moodboards`
-  const baseHref = `/profile/${resolvedUsername}`
+  const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}` : ''
+  const tabHrefs = profileHandle
+    ? {
+        overview: baseHref,
+        artworks: `${baseHref}/artworks`,
+        moments: `${baseHref}/moments`,
+        moodboards: `${baseHref}/moodboards`,
+      }
+    : undefined
 
   return (
     <>
@@ -50,12 +59,7 @@ export const ProfileMoodboardsPageView = ({
           <ProfileTabs
             tabs={PROFILE_TABS}
             activeTab="moodboards"
-            tabHrefs={{
-              overview: baseHref,
-              artworks: `${baseHref}/artworks`,
-              moments: `${baseHref}/moments`,
-              moodboards: `${baseHref}/moodboards`,
-            }}
+            tabHrefs={tabHrefs}
           />
         </div>
         <div className="container py-6">
@@ -76,7 +80,7 @@ export const ProfileMoodboardsPageView = ({
             title=""
             subtitle=""
             size="large"
-            detailBaseHref={`${baseHref}/moodboards`}
+            detailBaseHref={profileHandle ? `${baseHref}/moodboards` : undefined}
           />
         </div>
       </div>

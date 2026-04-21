@@ -11,12 +11,14 @@ type AuthInputProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string
   required?: boolean
   hasError?: boolean
+  errorMessage?: string
 }
 
 export const AuthInput = ({
   label,
   required = false,
   hasError = false,
+  errorMessage,
   id,
   className,
   ...props
@@ -34,7 +36,7 @@ export const AuthInput = ({
         id={id}
         className={cn(
           'h-[56px] rounded-2xl! border border-black/10 px-5 text-sm text-[#191414] placeholder:text-black/20 focus-visible:ring-0 lg:px-7 lg:text-base',
-          hasError && 'border-[#FF4337]',
+          hasError && 'border-[#FF4337] focus-visible:border-[#FF4337]',
           className,
         )}
         {...props}

@@ -43,6 +43,7 @@ export const ProfileMomentDetailPageView = ({
     username: usernameFromRoute,
   })
   const profileData = baseData
+  const profileHandle = resolvedUsername || profileData.user.username || usernameFromRoute || ''
   const momentId = Array.isArray(_momentId) ? _momentId[0] : _momentId
   const [moment, setMoment] = useState<Moment | null>(null)
   const [momentLoading, setMomentLoading] = useState(false)
@@ -68,7 +69,9 @@ export const ProfileMomentDetailPageView = ({
         : undefined,
     [authUser, isAuthenticated],
   )
-  const baseHref = `/profile/${resolvedUsername}/moments`
+  const baseHref = profileHandle
+    ? `/profile/${encodeURIComponent(profileHandle)}/moments`
+    : '/'
 
   const hasArtwork = moment?.artworkPreview !== undefined
 
