@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, CreditCard, Info } from 'lucide-react'
 
 import { Input } from '@shared/components/ui/input'
 import { Label } from '@shared/components/ui/label'
+import { cn } from '@shared/lib/utils'
 
 import type { QuickSellCheckoutFormValues } from '../../validations/quickSellCheckout.schema'
 
@@ -71,7 +72,7 @@ export const QuickSellCheckoutMainContent = ({
               type="text"
               {...register('address.firstName')}
               placeholder=""
-              className={`${inputClass} ${getError('address.firstName') ? 'border-red-500' : ''}`}
+              className={cn(inputClass, getError('address.firstName') ? 'border-red-500' : '')}
             />
             <div className="mt-1.5 text-right text-[10px] font-medium text-[#989898]">
               {address?.firstName?.length ?? 0}/50 characters
@@ -87,7 +88,7 @@ export const QuickSellCheckoutMainContent = ({
               type="text"
               {...register('address.lastName')}
               placeholder="Enter last name"
-              className={`${inputClass} ${getError('address.lastName') ? 'border-red-500' : ''}`}
+              className={cn(inputClass, getError('address.lastName') ? 'border-red-500' : '')}
             />
             <div className="mt-1.5 text-right text-[10px] font-medium text-[#989898]">
               {address?.lastName?.length ?? 0}/50 characters
@@ -104,7 +105,7 @@ export const QuickSellCheckoutMainContent = ({
             type="email"
             {...register('address.email')}
             placeholder=""
-            className={`${inputClass} ${getError('address.email') ? 'border-red-500' : ''}`}
+            className={cn(inputClass, getError('address.email') ? 'border-red-500' : '')}
           />
           {getError('address.email') && (
             <p className="mt-1 text-xs text-red-500">{getError('address.email')}</p>
@@ -189,7 +190,7 @@ export const QuickSellCheckoutMainContent = ({
               type="text"
               {...register('address.addressLine1')}
               placeholder="Start typing your address..."
-              className={`${inputClass} ${getError('address.addressLine1') ? 'border-red-500' : ''}`}
+              className={cn(inputClass, getError('address.addressLine1') ? 'border-red-500' : '')}
             />
             {getError('address.addressLine1') && (
               <p className="mt-1 text-xs text-red-500">{getError('address.addressLine1')}</p>
@@ -216,7 +217,7 @@ export const QuickSellCheckoutMainContent = ({
                 type="text"
                 {...register('address.city')}
                 placeholder="Enter City"
-                className={`${inputClass} ${getError('address.city') ? 'border-red-500' : ''}`}
+                className={cn(inputClass, getError('address.city') ? 'border-red-500' : '')}
               />
               {getError('address.city') && (
                 <p className="mt-1 text-xs text-red-500">{getError('address.city')}</p>
@@ -229,7 +230,7 @@ export const QuickSellCheckoutMainContent = ({
                 type="text"
                 {...register('address.state')}
                 placeholder="Enter State/Province/Region"
-                className={`${inputClass} ${getError('address.state') ? 'border-red-500' : ''}`}
+                className={cn(inputClass, getError('address.state') ? 'border-red-500' : '')}
               />
               {getError('address.state') && (
                 <p className="mt-1 text-xs text-red-500">{getError('address.state')}</p>
@@ -243,9 +244,11 @@ export const QuickSellCheckoutMainContent = ({
               <div className="relative">
                 <select
                   {...register('address.country')}
-                  className={`w-full appearance-none ${inputClass} pr-10 ${
-                    getError('address.country') ? 'border-red-500' : ''
-                  }`}
+                  className={cn(
+                    'w-full appearance-none pr-10',
+                    inputClass,
+                    getError('address.country') ? 'border-red-500' : '',
+                  )}
                 >
                   <option value="">Enter Country</option>
                   <option value="US">United States</option>
@@ -265,7 +268,7 @@ export const QuickSellCheckoutMainContent = ({
                 type="text"
                 {...register('address.postalCode')}
                 placeholder="Enter Postal Code/ZIP"
-                className={`${inputClass} ${getError('address.postalCode') ? 'border-red-500' : ''}`}
+                className={cn(inputClass, getError('address.postalCode') ? 'border-red-500' : '')}
               />
               {getError('address.postalCode') && (
                 <p className="mt-1 text-xs text-red-500">{getError('address.postalCode')}</p>
@@ -300,7 +303,7 @@ export const QuickSellCheckoutMainContent = ({
             <Input
               type="text"
               {...register('address.postalCode')}
-              className={`${inputClass} ${getError('address.postalCode') ? 'border-red-500' : ''}`}
+              className={cn(inputClass, getError('address.postalCode') ? 'border-red-500' : '')}
             />
           </div>
 
@@ -432,9 +435,11 @@ export const QuickSellCheckoutMainContent = ({
                             shouldValidate: true,
                           })
                         }
-                        className={`w-full appearance-none ${inputClass} pr-10 ${
-                          getError('paymentCountry') ? 'border-red-500' : ''
-                        }`}
+                        className={cn(
+                          'w-full appearance-none pr-10',
+                          inputClass,
+                          getError('paymentCountry') ? 'border-red-500' : '',
+                        )}
                       >
                         <option value="VN">Việt Nam</option>
                         <option value="US">United States</option>
