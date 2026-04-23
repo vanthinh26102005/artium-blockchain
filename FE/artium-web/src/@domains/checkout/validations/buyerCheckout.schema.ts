@@ -78,25 +78,38 @@ export const buyerCheckoutContactStepSchema = z
     }
   })
 
-export const buyerCheckoutPaymentSchema = z.object({
-  paymentMethod: z.enum(['card', 'google_pay', 'klarna']),
-  cardNumber: z
-    .string()
-    .trim()
-    .min(1, 'Card number is required')
-    .refine((value) => value.replace(/\s/g, '').length >= 13, 'Card number is incomplete'),
-  expiryDate: z
-    .string()
-    .trim()
-    .min(1, 'Expiry date is required')
-    .regex(CARD_EXPIRY_REGEX, 'Use MM / YY format'),
-  cvc: z
-    .string()
-    .trim()
-    .min(1, 'Security code is required')
-    .regex(/^\d{3,4}$/, 'Use a valid security code'),
-  country: z.string().trim().min(1, 'Country is required'),
-})
+export const buyerCheckoutPaymentSchema = z.discriminatedUnion('paymentMethod', [
+  z.object({
+    paymentMethod: z.literal('card'),
+    cardNumber: z
+      .string()
+      .trim()
+      .min(1, 'Card number is required')
+      .refine((v) => v.replace(/\s/g, '').length >= 13, 'Card number is incomplete'),
+    expiryDate: z
+      .string()
+      .trim()
+      .min(1, 'Expiry date is required')
+      .regex(/^(0[1-9]|1[0-2])\s*\/\s*\d{2}$/, 'Use MM / YY format'),
+    cvc: z
+      .string()
+      .trim()
+      .min(1, 'Security code is required')
+      .regex(/^\d{3,4}$/, 'Use a valid security code'),
+    country: z.string().trim().min(1, 'Country is required'),
+  }),
+  z.object({
+    paymentMethod: z.literal('wallet'),
+    walletAddress: z
+      .string()
+      .min(1, 'Please connect your wallet')
+      .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid wallet address'),
+    txHash: z
+      .string()
+      .min(1, 'Transaction hash is required after sending ETH')
+      .regex(/^0x[a-fA-F0-9]{64}$/, 'Invalid transaction hash'),
+  }),
+])
 
 export type BuyerCheckoutContactStepValues = z.infer<typeof buyerCheckoutContactStepSchema>
 export type BuyerCheckoutPaymentValues = z.infer<typeof buyerCheckoutPaymentSchema>

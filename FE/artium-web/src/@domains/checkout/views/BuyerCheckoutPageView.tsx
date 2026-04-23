@@ -74,7 +74,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
             cardNumber: '',
             expiryDate: '',
             cvc: '',
-            country: 'VN',
+            country: '',
         },
         mode: 'onChange',
     })
@@ -297,7 +297,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                 </FormProvider>
             ) : (
                 <FormProvider {...paymentForm}>
-                    <BuyerCheckoutPaymentForm />
+                    <BuyerCheckoutPaymentForm ethAmount={undefined} />
                 </FormProvider>
             )}
         </BuyerCheckoutLayout>
