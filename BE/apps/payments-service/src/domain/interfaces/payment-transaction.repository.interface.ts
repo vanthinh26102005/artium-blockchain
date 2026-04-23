@@ -90,4 +90,6 @@ export interface IPaymentTransactionRepository extends IRepository<
     sellerId: string,
     transactionManager?: EntityManager,
   ): Promise<PaymentTransaction[]>;
+
+  findByTxHash(txHash: string): Promise<PaymentTransaction | null>;
 }

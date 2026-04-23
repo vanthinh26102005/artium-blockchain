@@ -365,4 +365,8 @@ export class PaymentTransactionRepository implements IPaymentTransactionReposito
       transactionManager,
     );
   }
+
+  async findByTxHash(txHash: string): Promise<PaymentTransaction | null> {
+    return this.ormRepository.findOne({ where: { txHash } });
+  }
 }

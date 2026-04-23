@@ -30,6 +30,7 @@ import {
   AttachPaymentMethodDto,
 } from '@app/common';
 import { sendRpc } from '../../utils';
+import { RecordEthereumPaymentDto } from './dtos/record-ethereum-payment.dto';
 
 @ApiTags('Stripe')
 @Controller('payments')
@@ -205,6 +206,28 @@ export class PaymentsController {
       this.paymentsClient,
       { cmd: 'get_payment_methods' },
       { userId: req.user?.id },
+    );
+  }
+
+  // ==================== ETHEREUM PAYMENTS ====================
+
+  @Post('ethereum')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Record Ethereum payment transaction' })
+  @ApiBody({ type: RecordEthereumPaymentDto })
+  @ApiResponse({ status: 201, description: 'Payment recorded successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 409, description: 'Transaction already recorded' })
+  async recordEthereumPayment(
+    @Body() data: RecordEthereumPaymentDto,
+    @Req() req: any,
+  ) {
+    return sendRpc(
+      this.paymentsClient,
+      { cmd: 'record_ethereum_payment' },
+      { ...data, userId: req.user?.id },
     );
   }
 }

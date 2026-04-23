@@ -7,6 +7,7 @@ export const RoutingKey = {
   PAYMENT_FAILED: 'payment.failed',
   PAYMENT_REFUNDED: 'payment.refunded',
   PAYMENT_METHOD_ATTACHED: 'payment.method.attached',
+  PAYMENT_ETHEREUM_RECORDED: 'payment.ethereum.recorded',
 
   BLOCKCHAIN_AUCTION_STARTED: 'blockchain.auction.started',
   BLOCKCHAIN_AUCTION_ENDED: 'blockchain.auction.ended',

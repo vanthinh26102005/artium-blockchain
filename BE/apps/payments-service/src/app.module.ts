@@ -58,6 +58,7 @@ import {
   SendInvoiceToBuyerHandler,
   SavePaymentMethodHandler,
   UpdateInvoiceHandler,
+  RecordEthereumPaymentHandler,
 } from './application';
 
 import {
@@ -102,6 +103,8 @@ export const CommandHandlers = [
   CreateStripeRefundHandler,
   AttachStripePaymentMethodHandler,
   HandleStripeWebhookHandler,
+
+  RecordEthereumPaymentHandler,
 ];
 
 export const QueryHandlers = [

@@ -18,6 +18,8 @@ import {
   SendInvoiceToBuyerCommand,
   // Payout Commands
   CreatePayoutCommand,
+  // Payment Commands
+  RecordEthereumPaymentCommand,
   // Payment Queries
   GetPaymentTransactionQuery,
   GetTransactionsByUserQuery,
@@ -47,6 +49,7 @@ import {
   SendInvoiceToBuyerDTO,
 } from '../../domain/dtos/invoice';
 import { CreatePayoutDTO } from '../../domain/dtos/payout';
+import { RecordEthereumPaymentDTO } from '../../domain/dtos/payment';
 
 @Controller()
 export class PaymentsMicroserviceController {
@@ -217,5 +220,13 @@ export class PaymentsMicroserviceController {
   async getPayoutsBySeller(@Payload() data: { sellerId: string }) {
     this.logger.debug(`Getting payouts for seller: ${data.sellerId}`);
     return this.queryBus.execute(new GetPayoutsBySellerQuery(data.sellerId));
+  }
+
+  // ==================== ETHEREUM PAYMENTS ====================
+
+  @MessagePattern({ cmd: 'record_ethereum_payment' })
+  async recordEthereumPayment(@Payload() data: RecordEthereumPaymentDTO) {
+    this.logger.debug(`Recording Ethereum payment for user: ${data.userId}`);
+    return this.commandBus.execute(new RecordEthereumPaymentCommand(data));
   }
 }

@@ -178,6 +178,7 @@ export class PaymentTransaction extends AbstractEntity {
     type: 'varchar',
     length: 66,
     nullable: true,
+    unique: true, // unique: true enforces idempotency at DB level
     comment: 'Blockchain transaction hash',
   })
   txHash?: string | null;
