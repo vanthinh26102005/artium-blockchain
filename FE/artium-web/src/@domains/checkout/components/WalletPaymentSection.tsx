@@ -1,143 +1,135 @@
-import { useState, useCallback } from 'react'
 import type { FieldErrors } from 'react-hook-form'
+import type { EthereumQuoteResponse } from '@shared/apis/paymentApis'
+import type { WalletErrorState } from '../hooks/useWalletCheckout'
 
-type MetaMaskError = { code?: number; message?: string }
+const DEFAULT_CHAIN_NAME = process.env.NEXT_PUBLIC_ETH_CHAIN_NAME ?? 'Sepolia'
 
-type WalletErrorState = {
-  message: string
-  canRetry: boolean
-  retryLabel: string
-}
-
-function classifyMetaMaskError(err: unknown, context: 'connect' | 'transaction'): WalletErrorState {
-  const code = (err as MetaMaskError)?.code
-  if (code === 4001 || (err instanceof Error && err.message.toLowerCase().includes('user rejected'))) {
-    return context === 'connect'
-      ? {
-          message: 'You rejected the MetaMask connection request. Retry connection when you are ready.',
-          canRetry: true,
-          retryLabel: 'Retry Connection',
-        }
-      : {
-          message: 'You rejected the transaction in MetaMask. Retry the payment when you are ready.',
-          canRetry: true,
-          retryLabel: 'Retry Transaction',
-        }
+function formatEthAmount(ethAmount: string): string {
+  const numeric = Number(ethAmount)
+  if (!Number.isFinite(numeric)) {
+    return ethAmount
   }
-  if (code === -32002) {
-    return context === 'connect'
-      ? {
-          message: 'A MetaMask connection request is already pending. Open MetaMask to approve or reject it.',
-          canRetry: false,
-          retryLabel: 'Retry Connection',
-        }
-      : {
-          message: 'A MetaMask transaction request is already pending. Open MetaMask to approve or reject it.',
-          canRetry: false,
-          retryLabel: 'Retry Transaction',
-        }
-  }
-  const fallback =
-    context === 'connect'
-      ? 'Failed to connect wallet. Retry the MetaMask connection.'
-      : 'Failed to submit the transaction. Retry the MetaMask payment.'
 
-  return {
-    message: err instanceof Error ? err.message : fallback,
-    canRetry: true,
-    retryLabel: context === 'connect' ? 'Retry Connection' : 'Retry Transaction',
-  }
+  return numeric.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 6,
+  })
 }
 
 type Props = {
-  onWalletConnected: (address: string) => void
-  onTxHashReceived: (hash: string) => void
-  onWalletDisconnected?: () => void
-  onTxHashCleared?: () => void
+  quote: EthereumQuoteResponse | null
+  quoteStatus: 'idle' | 'loading' | 'ready' | 'error'
+  quoteError: string | null
+  isQuoteExpired: boolean
+  quoteExpiresInSeconds: number | null
+  onRefreshQuote: () => void
+  walletAddress: string
+  txHash: string
+  isConnecting: boolean
+  isSubmittingPayment: boolean
+  connectError: WalletErrorState | null
+  networkError: WalletErrorState | null
+  transactionError: WalletErrorState | null
+  isOnRequiredChain: boolean
+  connectWallet: () => Promise<void>
+  disconnectWallet: () => void
+  switchToRequiredChain: () => Promise<boolean>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: FieldErrors<any>
-  ethAmount?: number
 }
 
 export const WalletPaymentSection = ({
-  onWalletConnected,
-  onTxHashReceived,
-  onWalletDisconnected,
-  onTxHashCleared,
+  quote,
+  quoteStatus,
+  quoteError,
+  isQuoteExpired,
+  quoteExpiresInSeconds,
+  onRefreshQuote,
+  walletAddress,
+  txHash,
+  isConnecting,
+  isSubmittingPayment,
+  connectError,
+  networkError,
+  transactionError,
+  isOnRequiredChain,
+  connectWallet,
+  disconnectWallet,
+  switchToRequiredChain,
   errors,
-  ethAmount,
 }: Props) => {
-  const [walletAddress, setWalletAddress] = useState('')
-  const [isConnecting, setIsConnecting] = useState(false)
-  const [connectError, setConnectError] = useState<WalletErrorState | null>(null)
-  const [txHash, setTxHash] = useState('')
-  const [isSendingTx, setIsSendingTx] = useState(false)
-  const [txError, setTxError] = useState<WalletErrorState | null>(null)
-
-  const connectWallet = useCallback(async () => {
-    if (typeof window === 'undefined' || !window.ethereum) {
-      setConnectError({
-        message: 'MetaMask not detected. Please install MetaMask to pay with ETH.',
-        canRetry: false,
-        retryLabel: 'Retry Connection',
-      })
-      return
-    }
-    setIsConnecting(true)
-    setConnectError(null)
-    try {
-      const accounts = (await window.ethereum.request({ method: 'eth_requestAccounts' })) as string[]
-      const address = accounts[0]
-      setWalletAddress(address)
-      onWalletConnected(address)
-    } catch (err: unknown) {
-      setConnectError(classifyMetaMaskError(err, 'connect'))
-    } finally {
-      setIsConnecting(false)
-    }
-  }, [onWalletConnected])
-
-  const sendEthTransaction = useCallback(async () => {
-    if (!walletAddress || ethAmount === undefined) return
-    setIsSendingTx(true)
-    setTxError(null)
-    // Clear any previous tx so the user can retry
-    setTxHash('')
-    onTxHashCleared?.()
-    try {
-      const toAddress = process.env.NEXT_PUBLIC_PLATFORM_ETH_WALLET
-      if (!toAddress) throw new Error('Platform wallet address not configured')
-
-      const amountInWei = BigInt(Math.floor(ethAmount * 1e18)).toString(16)
-      const hash = (await window.ethereum!.request({
-        method: 'eth_sendTransaction',
-        params: [{ from: walletAddress, to: toAddress, value: `0x${amountInWei}` }],
-      })) as string
-
-      setTxHash(hash)
-      onTxHashReceived(hash)
-    } catch (err: unknown) {
-      setTxError(classifyMetaMaskError(err, 'transaction'))
-    } finally {
-      setIsSendingTx(false)
-    }
-  }, [ethAmount, onTxHashCleared, onTxHashReceived, walletAddress])
-
-  const handleDisconnect = useCallback(() => {
-    setWalletAddress('')
-    setTxHash('')
-    setTxError(null)
-    setConnectError(null)
-    onWalletDisconnected?.()
-  }, [onWalletDisconnected])
-
   return (
     <div className="overflow-hidden rounded-3xl bg-white p-6 shadow-sm space-y-4">
+      <div className="rounded-2xl border border-[#E5E5E5] bg-[#FAFAFA] p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+              Sepolia Quote
+            </p>
+            <p className="mt-1 text-[13px] leading-relaxed text-[#595959]">
+              MetaMask checkout is restricted to the Sepolia testnet. Refresh the quote if it
+              expires before you click Pay Now.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onRefreshQuote}
+            disabled={quoteStatus === 'loading'}
+            className="shrink-0 rounded-full border border-[#D4D4D4] px-3 py-1 text-[12px] font-semibold text-[#191414] transition hover:border-[#191414] disabled:opacity-60"
+          >
+            {quoteStatus === 'loading' ? 'Refreshing…' : 'Refresh Quote'}
+          </button>
+        </div>
+
+        {quoteStatus === 'loading' && (
+          <p className="mt-3 text-[12px] text-[#595959]">Fetching a live ETH quote from the server…</p>
+        )}
+
+        {quoteStatus === 'error' && (
+          <p className="mt-3 text-[12px] text-red-500">
+            {quoteError ?? 'Quote unavailable. Refresh the quote to continue with MetaMask.'}
+          </p>
+        )}
+
+        {quote && quoteStatus === 'ready' && (
+          <div className="mt-3 rounded-2xl border border-[#E5E5E5] bg-white p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-[#EFF6FF] px-2.5 py-1 text-[11px] font-semibold text-[#0066FF]">
+                {quote.chainName}
+              </span>
+              <span className="rounded-full bg-[#F5F5F5] px-2.5 py-1 text-[11px] font-semibold text-[#595959]">
+                1 ETH = ${quote.usdPerEth}
+              </span>
+              <span
+                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                  isQuoteExpired ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-700'
+                }`}
+              >
+                {isQuoteExpired
+                  ? 'Quote expired'
+                  : `Expires in ${quoteExpiresInSeconds ?? 0}s`}
+              </span>
+            </div>
+            <p className="mt-3 text-[15px] font-semibold text-[#191414]">
+              Send {formatEthAmount(quote.ethAmount)} ETH
+            </p>
+            <p className="mt-1 text-[12px] text-[#595959]">
+              Quoted from ${quote.usdAmount.toFixed(2)} via {quote.provider}.
+            </p>
+            <p className="mt-3 text-[12px] font-medium text-[#595959]">
+              When you click <span className="font-semibold text-[#191414]">Pay Now</span>, checkout
+              will open MetaMask, submit the Sepolia payment, and then continue to the success
+              screen.
+            </p>
+          </div>
+        )}
+      </div>
+
       {!walletAddress ? (
         <div className="flex flex-col items-center gap-4 py-4">
           <span className="text-4xl">🦊</span>
           <p className="text-[14px] text-[#595959] text-center">
-            Connect your MetaMask wallet to pay with ETH
+            Connect MetaMask to pay with Sepolia ETH
           </p>
           <button
             type="button"
@@ -173,23 +165,51 @@ export const WalletPaymentSection = ({
             </div>
             <button
               type="button"
-              onClick={handleDisconnect}
+              onClick={disconnectWallet}
               className="text-[11px] text-[#989898] hover:text-[#595959] underline"
             >
               Disconnect
             </button>
           </div>
 
-          {!txHash && (
-            <button
-              type="button"
-              onClick={sendEthTransaction}
-              disabled={isSendingTx || ethAmount === undefined}
-              className="w-full rounded-2xl bg-[#F97316] px-6 py-4 text-[14px] font-bold text-white transition hover:bg-[#EA6C0A] disabled:opacity-60"
-            >
-              {isSendingTx ? 'Confirm in MetaMask…' : `Send ${ethAmount?.toFixed(4) ?? '…'} ETH`}
-            </button>
-          )}
+          <div
+            className={`rounded-xl border px-4 py-3 ${
+              isOnRequiredChain
+                ? 'border-emerald-200 bg-emerald-50'
+                : 'border-amber-200 bg-amber-50'
+            }`}
+          >
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#595959]">
+              Active Network
+            </p>
+            <p className="mt-1 text-[13px] text-[#191414]">
+              {isOnRequiredChain
+                ? `${quote?.chainName ?? DEFAULT_CHAIN_NAME} connected`
+                : 'MetaMask is not on Sepolia'}
+            </p>
+            {!isOnRequiredChain && (
+              <button
+                type="button"
+                onClick={() => void switchToRequiredChain()}
+                className="mt-3 text-[12px] font-semibold text-[#B45309] underline"
+              >
+                Switch to Sepolia
+              </button>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-3">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#595959]">
+              Checkout Flow
+            </p>
+            <p className="mt-1 text-[13px] text-[#191414]">
+              Use the main checkout <span className="font-semibold">Pay Now</span> button to create
+              the order and trigger the MetaMask payment.
+            </p>
+            {isSubmittingPayment && (
+              <p className="mt-2 text-[12px] text-[#0066FF]">Waiting for MetaMask confirmation…</p>
+            )}
+          </div>
 
           {txHash && (
             <div className="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3">
@@ -197,26 +217,54 @@ export const WalletPaymentSection = ({
               <p className="mt-1 text-[12px] font-mono text-[#191414] break-all">
                 {txHash.slice(0, 10)}…{txHash.slice(-8)}
               </p>
+              {quote?.blockExplorerUrl && (
+                <a
+                  href={`${quote.blockExplorerUrl}/tx/${txHash}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-block text-[12px] font-semibold text-[#0066FF] underline"
+                >
+                  View on Etherscan
+                </a>
+              )}
             </div>
           )}
 
-          {txError && (
+          {networkError && (
             <div className="flex flex-col gap-2">
-              <p className="text-[12px] text-red-500">{txError.message}</p>
-              {txError.canRetry && (
+              <p className="text-[12px] text-red-500">{networkError.message}</p>
+              {networkError.canRetry && (
                 <button
                   type="button"
-                  onClick={sendEthTransaction}
+                  onClick={() => void switchToRequiredChain()}
                   className="self-start text-[12px] font-semibold text-[#0066FF] underline"
                 >
-                  {txError.retryLabel}
+                  {networkError.retryLabel}
                 </button>
               )}
             </div>
           )}
 
-          {errors?.txHash?.message && (
-            <p className="text-[12px] text-red-500">{String(errors.txHash.message)}</p>
+          {transactionError && (
+            <div className="flex flex-col gap-2">
+              <p className="text-[12px] text-red-500">{transactionError.message}</p>
+            </div>
+          )}
+
+          {quoteStatus === 'error' && (
+            <p className="text-[12px] text-red-500">
+              {quoteError ?? 'A live quote is required before MetaMask checkout can continue.'}
+            </p>
+          )}
+
+          {isQuoteExpired && (
+            <p className="text-[12px] text-red-500">
+              This quote expired before the payment was completed. Refresh the quote to continue.
+            </p>
+          )}
+
+          {errors?.walletAddress?.message && (
+            <p className="text-[12px] text-red-500">{String(errors.walletAddress.message)}</p>
           )}
         </div>
       )}

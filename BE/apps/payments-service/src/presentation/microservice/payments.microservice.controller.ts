@@ -21,6 +21,7 @@ import {
   // Payment Commands
   RecordEthereumPaymentCommand,
   // Payment Queries
+  GetEthereumQuoteQuery,
   GetPaymentTransactionQuery,
   GetTransactionsByUserQuery,
   GetPaymentMethodsQuery,
@@ -228,5 +229,11 @@ export class PaymentsMicroserviceController {
   async recordEthereumPayment(@Payload() data: RecordEthereumPaymentDTO) {
     this.logger.debug(`Recording Ethereum payment for user: ${data.userId}`);
     return this.commandBus.execute(new RecordEthereumPaymentCommand(data));
+  }
+
+  @MessagePattern({ cmd: 'get_ethereum_quote' })
+  async getEthereumQuote(@Payload() data: { usdAmount: number }) {
+    this.logger.debug(`Generating Ethereum quote for USD amount: ${data.usdAmount}`);
+    return this.queryBus.execute(new GetEthereumQuoteQuery(data.usdAmount));
   }
 }

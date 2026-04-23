@@ -7,6 +7,8 @@ import type { StripeCardNumberElementChangeEvent, StripeElementChangeEvent } fro
 import { CreditCard } from 'lucide-react'
 
 import { cn } from '@shared/lib/utils'
+import type { EthereumQuoteResponse } from '@shared/apis/paymentApis'
+import type { UseWalletCheckoutResult } from '../hooks/useWalletCheckout'
 
 import type { BuyerCheckoutPaymentValues } from '../validations/buyerCheckout.schema'
 import { WalletPaymentSection } from './WalletPaymentSection'
@@ -158,11 +160,26 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
 }
 
 type Props = {
-  ethAmount?: number
+  walletQuote: EthereumQuoteResponse | null
+  walletQuoteStatus: 'idle' | 'loading' | 'ready' | 'error'
+  walletQuoteError: string | null
+  isWalletQuoteExpired: boolean
+  walletQuoteExpiresInSeconds: number | null
+  onRefreshWalletQuote: () => void
+  walletCheckout: UseWalletCheckoutResult
   onCardElementsChange?: (complete: boolean) => void
 }
 
-export const BuyerCheckoutPaymentForm = ({ ethAmount, onCardElementsChange }: Props) => {
+export const BuyerCheckoutPaymentForm = ({
+  walletQuote,
+  walletQuoteStatus,
+  walletQuoteError,
+  isWalletQuoteExpired,
+  walletQuoteExpiresInSeconds,
+  onRefreshWalletQuote,
+  walletCheckout,
+  onCardElementsChange,
+}: Props) => {
   const { formState: { errors }, setValue } = useFormContext<BuyerCheckoutPaymentValues>()
 
   const paymentMethod = useWatch({ name: 'paymentMethod' }) ?? 'card'
@@ -174,8 +191,6 @@ export const BuyerCheckoutPaymentForm = ({ ethAmount, onCardElementsChange }: Pr
     if (method === 'card') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setValue('walletAddress' as any, '', { shouldDirty: true, shouldValidate: false })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setValue('txHash' as any, '', { shouldDirty: true, shouldValidate: false })
     }
   }
 
@@ -213,25 +228,23 @@ export const BuyerCheckoutPaymentForm = ({ ethAmount, onCardElementsChange }: Pr
       {/* Wallet section */}
       {paymentMethod === 'wallet' && (
         <WalletPaymentSection
-          ethAmount={ethAmount}
-          onWalletConnected={(address) =>
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setValue('walletAddress' as any, address, { shouldDirty: true, shouldValidate: true })
-          }
-          onWalletDisconnected={() => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setValue('walletAddress' as any, '', { shouldDirty: true, shouldValidate: true })
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setValue('txHash' as any, '', { shouldDirty: true, shouldValidate: true })
-          }}
-          onTxHashReceived={(hash) =>
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setValue('txHash' as any, hash, { shouldDirty: true, shouldValidate: true })
-          }
-          onTxHashCleared={() =>
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setValue('txHash' as any, '', { shouldDirty: true, shouldValidate: true })
-          }
+          quote={walletQuote}
+          quoteStatus={walletQuoteStatus}
+          quoteError={walletQuoteError}
+          isQuoteExpired={isWalletQuoteExpired}
+          quoteExpiresInSeconds={walletQuoteExpiresInSeconds}
+          onRefreshQuote={onRefreshWalletQuote}
+          walletAddress={walletCheckout.walletAddress}
+          txHash={walletCheckout.txHash}
+          isConnecting={walletCheckout.isConnecting}
+          isSubmittingPayment={walletCheckout.isSubmittingPayment}
+          connectError={walletCheckout.connectError}
+          networkError={walletCheckout.networkError}
+          transactionError={walletCheckout.transactionError}
+          isOnRequiredChain={walletCheckout.isOnRequiredChain}
+          connectWallet={walletCheckout.connectWallet}
+          disconnectWallet={walletCheckout.disconnectWallet}
+          switchToRequiredChain={walletCheckout.switchToRequiredChain}
           errors={errors}
         />
       )}

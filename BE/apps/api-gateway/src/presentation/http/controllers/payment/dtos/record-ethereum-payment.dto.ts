@@ -32,15 +32,31 @@ export class RecordEthereumPaymentDto {
   })
   walletAddress!: string;
 
-  @ApiProperty({ description: 'Amount paid in ETH', example: 0.5 })
+  @ApiProperty({ description: 'Quoted checkout total in USD', example: 149.99 })
   @IsNumber()
   @IsPositive()
   amount!: number;
 
-  @ApiProperty({ description: 'Currency (ETH)', example: 'ETH' })
+  @ApiProperty({ description: 'Currency (USD)', example: 'USD' })
   @IsString()
   @IsNotEmpty()
   currency!: string;
+
+  @ApiProperty({
+    description: 'Opaque server-issued quote token for the MetaMask quote',
+    example: 'eyJxdW90ZUlkIjoiLi4uIn0.signature',
+  })
+  @IsString()
+  @IsNotEmpty()
+  quoteToken!: string;
+
+  @ApiProperty({
+    description: 'Wallet chain ID used when the transaction was submitted',
+    example: '11155111',
+  })
+  @IsString()
+  @IsNotEmpty()
+  chainId!: string;
 
   @ApiPropertyOptional({ description: 'Order ID' })
   @IsUUID()

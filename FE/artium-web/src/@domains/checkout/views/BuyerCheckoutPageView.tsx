@@ -31,6 +31,7 @@ import {
     saveCheckoutSuccessState,
     type CheckoutSuccessState,
 } from '../utils/checkoutSuccessState'
+import { useWalletCheckout } from '../hooks/useWalletCheckout'
 
 // @domains - auth
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
@@ -39,6 +40,7 @@ import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import artworkApis, { type ArtworkApiItem } from '@shared/apis/artworkApis'
 import orderApis from '@shared/apis/orderApis'
 import paymentApis from '@shared/apis/paymentApis'
+import type { EthereumQuoteResponse } from '@shared/apis/paymentApis'
 
 type BuyerCheckoutPageViewProps = {
     artworkId: string
@@ -79,6 +81,11 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     const [paymentError, setPaymentError] = useState<ClassifiedPaymentError | null>(null)
     const [cardElementsComplete, setCardElementsComplete] = useState(false)
     const [paymentFormResetKey, setPaymentFormResetKey] = useState(0)
+    const [walletQuote, setWalletQuote] = useState<EthereumQuoteResponse | null>(null)
+    const [walletQuoteStatus, setWalletQuoteStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
+    const [walletQuoteError, setWalletQuoteError] = useState<string | null>(null)
+    const [walletQuoteRefreshKey, setWalletQuoteRefreshKey] = useState(0)
+    const [walletQuoteClock, setWalletQuoteClock] = useState(() => Date.now())
 
     const contactForm = useForm<BuyerCheckoutContactStepValues>({
         resolver: zodResolver(buyerCheckoutContactStepSchema),
@@ -95,6 +102,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     })
     const watchedDraft = useWatch({ control: contactForm.control })
     const watchedPaymentValues = useWatch({ control: paymentForm.control })
+    const watchedPaymentMethod = watchedPaymentValues?.paymentMethod ?? 'card'
     const draft: BuyerCheckoutContactStepValues = {
         ...defaultBuyerCheckoutDraft,
         ...watchedDraft,
@@ -111,10 +119,18 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     // -- hydrate persisted success state for refresh/back-entry on the checkout route --
     useEffect(() => {
         const persistedSuccessState = loadCheckoutSuccessState(artworkId)
-        if (persistedSuccessState) {
-            setPaymentResult(persistedSuccessState)
+        if (!persistedSuccessState) {
+            return
         }
-    }, [artworkId])
+
+        setPaymentResult(persistedSuccessState)
+
+        if (!router.isReady || router.query.status === 'success') {
+            return
+        }
+
+        void router.replace(`/checkout/${artworkId}?status=success`, undefined, { shallow: true })
+    }, [artworkId, router])
 
     // -- fetch artwork from API --
     useEffect(() => {
@@ -168,6 +184,33 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         return { artworkPrice, shippingFee, discount, total }
     }, [artwork, draft.deliveryMethod, draft.shippingAddress.country])
 
+    const isWalletQuoteExpired =
+        walletQuote !== null && new Date(walletQuote.expiresAt).getTime() <= walletQuoteClock
+    const walletQuoteExpiresInSeconds = walletQuote
+        ? Math.max(0, Math.ceil((new Date(walletQuote.expiresAt).getTime() - walletQuoteClock) / 1000))
+        : null
+    const walletCheckout = useWalletCheckout({
+        quote: walletQuote,
+        isQuoteExpired: isWalletQuoteExpired,
+    })
+    const connectedWalletAddress = walletCheckout.walletAddress
+    const clearWalletTransactionState = walletCheckout.clearTransactionState
+    const submitWalletTransaction = walletCheckout.submitQuotedTransaction
+
+    useEffect(() => {
+        const nextWalletAddress = connectedWalletAddress
+        const currentWalletAddress = paymentForm.getValues('walletAddress')
+
+        if ((currentWalletAddress ?? '') === nextWalletAddress) {
+            return
+        }
+
+        paymentForm.setValue('walletAddress', nextWalletAddress, {
+            shouldDirty: true,
+            shouldValidate: connectedWalletAddress.length > 0,
+        })
+    }, [connectedWalletAddress, paymentForm])
+
     // -- handlers --
     const handlePromoCodeChange = useCallback((promoCode: string) => {
         contactForm.setValue('promoCode', promoCode, { shouldDirty: true })
@@ -187,16 +230,82 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         router.back()
     }, [router, step])
 
+    const showSuccessState = useCallback((nextPaymentResult: CheckoutSuccessState) => {
+        saveCheckoutSuccessState(nextPaymentResult)
+        setPaymentResult(nextPaymentResult)
+        void router.replace(`/checkout/${artworkId}?status=success`, undefined, { shallow: true })
+    }, [artworkId, router])
+
     const resetPaymentStepState = useCallback(() => {
         clearCheckoutSuccessState(artworkId)
         setPaymentError(null)
         setCardElementsComplete(false)
+        setWalletQuote(null)
+        setWalletQuoteStatus('idle')
+        setWalletQuoteError(null)
+        clearWalletTransactionState()
         setPaymentFormResetKey((current) => current + 1)
         paymentForm.reset({
             paymentMethod: 'card',
             country: paymentForm.getValues('country') || 'VN',
         })
-    }, [artworkId, paymentForm])
+    }, [artworkId, clearWalletTransactionState, paymentForm])
+
+    const refreshWalletQuote = useCallback(() => {
+        setWalletQuoteRefreshKey((current) => current + 1)
+    }, [])
+
+    useEffect(() => {
+        if (step !== 2 || watchedPaymentMethod !== 'wallet') {
+            setWalletQuoteClock(Date.now())
+            return
+        }
+
+        setWalletQuoteClock(Date.now())
+        const intervalId = window.setInterval(() => {
+            setWalletQuoteClock(Date.now())
+        }, 1000)
+
+        return () => {
+            window.clearInterval(intervalId)
+        }
+    }, [step, watchedPaymentMethod])
+
+    useEffect(() => {
+        if (step !== 2 || watchedPaymentMethod !== 'wallet') {
+            setWalletQuote(null)
+            setWalletQuoteStatus('idle')
+            setWalletQuoteError(null)
+            return
+        }
+
+        let cancelled = false
+
+        const fetchWalletQuote = async () => {
+            setWalletQuoteStatus('loading')
+            setWalletQuoteError(null)
+
+            try {
+                const quote = await paymentApis.getEthereumQuote(pricing.total)
+                if (cancelled) return
+                setWalletQuote(quote)
+                setWalletQuoteStatus('ready')
+            } catch (err) {
+                if (cancelled) return
+                setWalletQuote(null)
+                setWalletQuoteStatus('error')
+                setWalletQuoteError(
+                    err instanceof Error ? err.message : 'Unable to fetch a MetaMask quote right now.',
+                )
+            }
+        }
+
+        void fetchWalletQuote()
+
+        return () => {
+            cancelled = true
+        }
+    }, [pricing.total, step, walletQuoteRefreshKey, watchedPaymentMethod])
 
     const handleContinue = useCallback(async () => {
         setPaymentError(null)
@@ -232,6 +341,22 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                 return
             }
         } else {
+            if (!walletQuote) {
+                setPaymentError({
+                    type: 'generic',
+                    message: 'A live Sepolia quote is required before MetaMask checkout can continue.',
+                })
+                return
+            }
+
+            if (isWalletQuoteExpired) {
+                setPaymentError({
+                    type: 'generic',
+                    message: 'The Sepolia quote expired. Refresh the quote and try again.',
+                })
+                return
+            }
+
             const isStepValid = await paymentForm.trigger()
             if (!isStepValid) {
                 setPaymentError({ type: 'generic', message: 'Please complete your wallet payment details.' })
@@ -330,15 +455,26 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                     totalPaid: createdOrder.totalAmount,
                 }
 
-                saveCheckoutSuccessState(nextPaymentResult)
-                setPaymentResult(nextPaymentResult)
+                showSuccessState(nextPaymentResult)
             } else if (paymentValues.paymentMethod === 'wallet') {
+                if (!walletQuote || isWalletQuoteExpired) {
+                    throw new Error('The Sepolia quote expired. Refresh the quote and retry the payment.')
+                }
+
+                const { txHash } = await submitWalletTransaction()
+
+                if (!createdOrder || Math.round(createdOrder.totalAmount * 100) !== Math.round(walletQuote.usdAmount * 100)) {
+                    throw new Error('The checkout total changed. Refresh the Sepolia quote and try again.')
+                }
+
                 await paymentApis.recordEthereumPayment({
-                    txHash: paymentValues.txHash,
-                    walletAddress: paymentValues.walletAddress,
+                    txHash,
+                    walletAddress: connectedWalletAddress,
                     orderId: createdOrder.id,
-                    amount: pricing.total,
-                    currency: 'ETH',
+                    amount: walletQuote.usdAmount,
+                    currency: 'USD',
+                    quoteToken: walletQuote.quoteToken,
+                    chainId: walletQuote.chainId,
                     description: `Purchase: ${artwork.title}`,
                 })
 
@@ -350,8 +486,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                     totalPaid: createdOrder.totalAmount,
                 }
 
-                saveCheckoutSuccessState(nextPaymentResult)
-                setPaymentResult(nextPaymentResult)
+                showSuccessState(nextPaymentResult)
             } else {
                 throw new Error('Unsupported payment method.')
             }
@@ -364,7 +499,22 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         } finally {
             setIsLoading(false)
         }
-    }, [artwork, artworkId, cardElementsComplete, contactForm, elements, paymentForm, pricing.total, router, step, stripe])
+    }, [
+        artwork,
+        artworkId,
+        cardElementsComplete,
+        contactForm,
+        elements,
+        isWalletQuoteExpired,
+        paymentForm,
+        pricing.total,
+        showSuccessState,
+        step,
+        submitWalletTransaction,
+        stripe,
+        walletQuote,
+        connectedWalletAddress,
+    ])
 
     const handlePaymentRecovery = useCallback(() => {
         if (!paymentError?.recoveryAction) {
@@ -435,15 +585,16 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     }
 
     const isStep1Valid = contactForm.formState.isValid
-    const watchedPaymentMethod = watchedPaymentValues?.paymentMethod ?? 'card'
     const isCardReady =
         watchedPaymentValues?.paymentMethod === 'card' &&
         Boolean(watchedPaymentValues.country?.trim()) &&
         cardElementsComplete
     const isWalletReady =
         watchedPaymentValues?.paymentMethod === 'wallet' &&
-        Boolean(watchedPaymentValues.walletAddress?.trim()) &&
-        Boolean(watchedPaymentValues.txHash?.trim())
+        walletQuoteStatus === 'ready' &&
+        Boolean(walletQuote) &&
+        !isWalletQuoteExpired &&
+        Boolean(connectedWalletAddress.trim())
     const isStep2Valid =
         watchedPaymentMethod === 'card' ? isCardReady : watchedPaymentMethod === 'wallet' ? isWalletReady : false
     const isFormValid = step === 1 ? isStep1Valid : isStep2Valid
@@ -504,7 +655,13 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                     <FormProvider {...paymentForm}>
                         <BuyerCheckoutPaymentForm
                             key={paymentFormResetKey}
-                            ethAmount={pricing.total}
+                            walletQuote={walletQuote}
+                            walletQuoteStatus={walletQuoteStatus}
+                            walletQuoteError={walletQuoteError}
+                            isWalletQuoteExpired={isWalletQuoteExpired}
+                            walletQuoteExpiresInSeconds={walletQuoteExpiresInSeconds}
+                            onRefreshWalletQuote={refreshWalletQuote}
+                            walletCheckout={walletCheckout}
                             onCardElementsChange={setCardElementsComplete}
                         />
                     </FormProvider>

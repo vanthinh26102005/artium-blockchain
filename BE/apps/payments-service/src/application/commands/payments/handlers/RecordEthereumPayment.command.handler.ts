@@ -13,6 +13,7 @@ import {
 } from '@app/common';
 import { EthereumPaymentRecordedEvent } from '../../../../domain/events';
 import { PaymentTransaction } from '../../../../domain/entities';
+import { EthereumQuoteService } from '../../../../infrastructure/services/ethereum-quote.service';
 
 @CommandHandler(RecordEthereumPaymentCommand)
 export class RecordEthereumPaymentHandler
@@ -24,6 +25,7 @@ export class RecordEthereumPaymentHandler
     @Inject(IPaymentTransactionRepository)
     private readonly transactionRepo: IPaymentTransactionRepository,
     private readonly outboxService: OutboxService,
+    private readonly ethereumQuoteService: EthereumQuoteService,
   ) {}
 
   async execute(
@@ -42,6 +44,34 @@ export class RecordEthereumPaymentHandler
       );
     }
 
+    const quote = this.ethereumQuoteService.verifyQuoteToken(data.quoteToken);
+
+    if (this.ethereumQuoteService.isExpired(quote)) {
+      throw RpcExceptionHelper.badRequest(
+        'Ethereum quote expired. Refresh the quote and retry the payment.',
+      );
+    }
+
+    if (
+      this.normalizeChainId(data.chainId) !== this.normalizeChainId(quote.chainId)
+    ) {
+      throw RpcExceptionHelper.badRequest(
+        'Wallet checkout is only allowed on Sepolia testnet.',
+      );
+    }
+
+    if (data.currency.toUpperCase() !== quote.fiatCurrency) {
+      throw RpcExceptionHelper.badRequest(
+        'Ethereum payment currency must match the quoted USD checkout total.',
+      );
+    }
+
+    if (!this.usdAmountsMatch(data.amount, quote.usdAmount)) {
+      throw RpcExceptionHelper.badRequest(
+        'Ethereum payment amount does not match the active quote.',
+      );
+    }
+
     let transaction: PaymentTransaction;
     try {
       transaction = await this.transactionRepo.create({
@@ -50,13 +80,27 @@ export class RecordEthereumPaymentHandler
         provider: PaymentProvider.ETHEREUM,
         userId: data.userId,
         orderId: data.orderId ?? null,
-        amount: data.amount,
-        currency: data.currency.toUpperCase(),
+        amount: quote.usdAmount,
+        currency: quote.fiatCurrency,
         paymentMethodType: PaymentMethodType.CRYPTO_WALLET,
         walletAddress: data.walletAddress,
         txHash: data.txHash,
         description: data.description ?? null,
-      } as Omit<PaymentTransaction, 'transactionId' | 'createdAt'>);
+        metadata: {
+          quoteId: quote.quoteId,
+          provider: quote.provider,
+          fiatCurrency: quote.fiatCurrency,
+          cryptoCurrency: quote.cryptoCurrency,
+          ethAmount: quote.ethAmount,
+          weiHex: quote.weiHex,
+          usdPerEth: quote.usdPerEth,
+          chainId: quote.chainId,
+          chainName: quote.chainName,
+          blockExplorerUrl: quote.blockExplorerUrl,
+          quotedAt: quote.quotedAt,
+          expiresAt: quote.expiresAt,
+        },
+      } as unknown as Omit<PaymentTransaction, 'transactionId' | 'createdAt'>);
     } catch (error) {
       this.logger.error(
         'Failed to create Ethereum payment transaction',
@@ -70,8 +114,8 @@ export class RecordEthereumPaymentHandler
       data.userId,
       data.walletAddress,
       data.txHash,
-      data.amount,
-      data.currency,
+      quote.usdAmount,
+      quote.fiatCurrency,
       data.orderId,
     );
 
@@ -88,5 +132,23 @@ export class RecordEthereumPaymentHandler
       `EthereumPaymentRecordedEvent published for transaction: ${transaction.id}`,
     );
     return transaction;
+  }
+
+  private normalizeChainId(chainId: string): string {
+    try {
+      return BigInt(chainId).toString();
+    } catch {
+      if (chainId.startsWith('0x')) {
+        return BigInt(chainId).toString();
+      }
+
+      throw RpcExceptionHelper.badRequest(
+        'Wallet checkout is only allowed on Sepolia testnet.',
+      );
+    }
+  }
+
+  private usdAmountsMatch(left: number, right: number): boolean {
+    return Math.round(left * 100) === Math.round(right * 100);
   }
 }

@@ -47,6 +47,8 @@ export * from './queries/invoices/handlers/GetInvoicesBySeller.query.handler';
 export * from './queries/payments/GetPaymentMethods.query';
 export * from './queries/payments/GetPaymentTransaction.query';
 export * from './queries/payments/GetTransactionsByUser.query';
+export * from './queries/payments/GetEthereumQuote.query';
+export * from './queries/payments/handlers/GetEthereumQuote.query.handler';
 export * from './queries/payments/handlers/GetPaymentMethods.query.handler';
 export * from './queries/payments/handlers/GetPaymentTransaction.query.handler';
 export * from './queries/payments/handlers/GetTransactionsByUser.query.handler';

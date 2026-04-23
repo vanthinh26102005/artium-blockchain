@@ -9,6 +9,8 @@ export * from './invoices/handlers/GetInvoicesBySeller.query.handler';
 export * from './payments/GetPaymentMethods.query';
 export * from './payments/GetPaymentTransaction.query';
 export * from './payments/GetTransactionsByUser.query';
+export * from './payments/GetEthereumQuote.query';
+export * from './payments/handlers/GetEthereumQuote.query.handler';
 export * from './payments/handlers/GetPaymentMethods.query.handler';
 export * from './payments/handlers/GetPaymentTransaction.query.handler';
 export * from './payments/handlers/GetTransactionsByUser.query.handler';

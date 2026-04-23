@@ -6,6 +6,7 @@ import {
   Inject,
   Param,
   Post,
+  Query,
   RawBodyRequest,
   Req,
   UseGuards,
@@ -31,6 +32,7 @@ import {
 } from '@app/common';
 import { sendRpc } from '../../utils';
 import { RecordEthereumPaymentDto } from './dtos/record-ethereum-payment.dto';
+import { GetEthereumQuoteDto } from './dtos/get-ethereum-quote.dto';
 
 @ApiTags('Stripe')
 @Controller('payments')
@@ -228,6 +230,21 @@ export class PaymentsController {
       this.paymentsClient,
       { cmd: 'record_ethereum_payment' },
       { ...data, userId: req.user?.id },
+    );
+  }
+
+  @Get('ethereum/quote')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get a Sepolia MetaMask quote for checkout' })
+  @ApiResponse({ status: 200, description: 'Ethereum quote generated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid quote input' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getEthereumQuote(@Query() query: GetEthereumQuoteDto) {
+    return sendRpc(
+      this.paymentsClient,
+      { cmd: 'get_ethereum_quote' },
+      { usdAmount: query.usdAmount },
     );
   }
 }

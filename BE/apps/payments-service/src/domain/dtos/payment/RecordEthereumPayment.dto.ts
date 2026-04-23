@@ -6,6 +6,7 @@ import {
   IsPositive,
   Matches,
   IsOptional,
+  IsIn,
 } from 'class-validator';
 
 export class RecordEthereumPaymentDTO {
@@ -34,7 +35,16 @@ export class RecordEthereumPaymentDTO {
 
   @IsString()
   @IsNotEmpty()
+  @IsIn(['USD', 'usd'])
   currency!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  quoteToken!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  chainId!: string;
 
   @IsUUID()
   @IsOptional()

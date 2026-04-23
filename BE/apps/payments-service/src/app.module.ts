@@ -45,6 +45,7 @@ import {
   GetInvoiceHandler,
   GetInvoiceByNumberHandler,
   GetInvoicesByCollectorHandler,
+  GetEthereumQuoteHandler,
   GetInvoicesBySellerHandler,
   GetPaymentMethodsHandler,
   GetPaymentTransactionHandler,
@@ -71,6 +72,7 @@ import {
 } from './application/commands/stripe';
 
 import { StripeService } from './infrastructure/services/stripe.service';
+import { EthereumQuoteService } from './infrastructure/services/ethereum-quote.service';
 
 import { HealthController } from './presentation';
 
@@ -113,6 +115,7 @@ export const QueryHandlers = [
   GetInvoicesBySellerHandler,
   GetInvoicesByCollectorHandler,
 
+  GetEthereumQuoteHandler,
   GetPaymentTransactionHandler,
   GetPaymentMethodsHandler,
   GetTransactionsByUserHandler,
@@ -136,6 +139,7 @@ export const Repositories = [
 export const Services = [
   { provide: ITransactionService, useClass: TransactionService },
   StripeService,
+  EthereumQuoteService,
   {
     provide: 'STRIPE_API_KEY',
     useFactory: async (configService: ConfigService) =>

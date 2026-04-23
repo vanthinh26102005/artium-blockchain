@@ -63,6 +63,8 @@ export type RecordEthereumPaymentRequest = {
   orderId?: string
   amount: number
   currency: string
+  quoteToken: string
+  chainId: string
   description?: string
 }
 
@@ -77,6 +79,23 @@ export type RecordEthereumPaymentResponse = {
   currency: string
   orderId: string | null
   createdAt: string
+}
+
+export type EthereumQuoteResponse = {
+  quoteId: string
+  quoteToken: string
+  usdAmount: number
+  fiatCurrency: 'USD'
+  cryptoCurrency: 'ETH'
+  ethAmount: string
+  weiHex: string
+  usdPerEth: string
+  provider: 'coinbase'
+  chainId: string
+  chainName: string
+  blockExplorerUrl: string
+  quotedAt: string
+  expiresAt: string
 }
 
 export type PaymentTransactionResponse = {
@@ -128,6 +147,13 @@ const paymentApis = {
     data: RecordEthereumPaymentRequest,
   ): Promise<RecordEthereumPaymentResponse> => {
     return apiPost<RecordEthereumPaymentResponse>('/payments/ethereum', data)
+  },
+
+  getEthereumQuote: async (usdAmount: number): Promise<EthereumQuoteResponse> => {
+    const normalizedAmount = usdAmount.toFixed(2)
+    return apiFetch<EthereumQuoteResponse>(
+      `/payments/ethereum/quote?usdAmount=${encodeURIComponent(normalizedAmount)}`,
+    )
   },
 }
 

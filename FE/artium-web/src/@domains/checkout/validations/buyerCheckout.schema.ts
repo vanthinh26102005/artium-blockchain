@@ -89,10 +89,6 @@ export const buyerCheckoutPaymentSchema = z.discriminatedUnion('paymentMethod', 
       .string()
       .min(1, 'Please connect your wallet')
       .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid wallet address'),
-    txHash: z
-      .string()
-      .min(1, 'Transaction hash is required after sending ETH')
-      .regex(/^0x[a-fA-F0-9]{64}$/, 'Invalid transaction hash'),
   }),
 ])
 
