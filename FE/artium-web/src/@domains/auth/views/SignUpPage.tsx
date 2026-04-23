@@ -28,7 +28,6 @@ import {
   AuthFormCard,
   AuthInput,
   AuthShell,
-  FormErrorMessage,
   SocialAuthButtons,
 } from '@domains/auth/components'
 import {
@@ -37,6 +36,7 @@ import {
   type OtpOnlyFormValues,
   type SignUpDetailsFormValues,
 } from '@domains/auth/validations/auth.schema'
+import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
 
 export const SignUpPage = () => {
   const router = useRouter()

@@ -1,6 +1,10 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Country, State, City, ICountry, IState, ICity } from 'country-state-city'
 
+import {
+  BaseAutocompleteField,
+  type BaseAutocompleteOption,
+} from '@shared/components/forms'
 import { Input } from '@shared/components/ui/input'
 import { cn } from '@shared/lib/utils'
 
@@ -21,12 +25,6 @@ type AddressFormFieldsProps = {
   disabled?: boolean
   showValidation?: boolean
   errors?: Partial<Record<keyof AddressData, string>>
-}
-
-type ComboboxOption = {
-  value: string
-  label: string
-  searchTerms?: string
 }
 
 // --- Postal Code Validation Patterns ---
@@ -50,148 +48,6 @@ const getPostalConfig = (countryCode: string) => {
   return POSTAL_PATTERNS[countryCode] || { regex: /^.{3,10}$/, placeholder: 'Postal code', maxLength: 10 }
 }
 
-// --- Searchable Combobox Component ---
-
-type SearchableComboboxProps = {
-  options: ComboboxOption[]
-  value: string
-  onChange: (value: string) => void
-  placeholder?: string
-  emptyMessage?: string
-  disabled?: boolean
-  isLoading?: boolean
-  label: string
-  required?: boolean
-  error?: string
-}
-
-const SearchableCombobox = ({
-  options,
-  value,
-  onChange,
-  placeholder = 'Search...',
-  emptyMessage = 'No results found',
-  disabled = false,
-  isLoading = false,
-  label,
-  required = false,
-  error,
-}: SearchableComboboxProps) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [search, setSearch] = useState('')
-
-  // Find selected option label
-  const selectedOption = useMemo(
-    () => options.find((o) => o.value === value),
-    [options, value],
-  )
-
-  // Filter options based on search
-  const filteredOptions = useMemo(() => {
-    if (!search) return options.slice(0, 50) // Show first 50 when no search
-    const lower = search.toLowerCase()
-    return options
-      .filter((o) => {
-        const searchIn = o.searchTerms || o.label
-        return searchIn.toLowerCase().includes(lower)
-      })
-      .slice(0, 50)
-  }, [options, search])
-
-  const handleSelect = useCallback(
-    (option: ComboboxOption) => {
-      onChange(option.value)
-      setSearch(option.label)
-      setIsOpen(false)
-    },
-    [onChange],
-  )
-
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value)
-    setIsOpen(true)
-    // Clear selection if user modifies text
-    if (selectedOption && e.target.value !== selectedOption.label) {
-      onChange('')
-    }
-  }, [selectedOption, onChange])
-
-  const handleFocus = useCallback(() => {
-    setSearch(selectedOption?.label || '')
-    setIsOpen(true)
-  }, [selectedOption])
-
-  const handleBlur = useCallback(() => {
-    // Delay to allow click on option
-    setTimeout(() => {
-      setIsOpen(false)
-      if (!selectedOption) {
-        setSearch('')
-      }
-    }, 200)
-  }, [selectedOption])
-
-  const inputValue = isOpen ? search : (selectedOption?.label || '')
-
-  return (
-    <div className="relative space-y-2">
-      <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <div className="relative">
-        <Input
-          value={inputValue}
-          onChange={handleInputChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          placeholder={placeholder}
-          disabled={disabled}
-          className={cn(
-            'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
-            error ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
-          )}
-        />
-        {/* Dropdown indicator */}
-        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-          <svg className="h-4 w-4 text-[#989898]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Dropdown list */}
-      {isOpen && !disabled && (
-        <div className="absolute z-50 mt-1 max-h-[240px] w-full overflow-auto rounded-xl border border-[#E5E5E5] bg-white shadow-lg">
-          {isLoading ? (
-            <div className="p-3 text-center text-sm text-[#989898]">Loading...</div>
-          ) : filteredOptions.length === 0 ? (
-            <div className="p-3 text-center text-sm text-[#989898]">{emptyMessage}</div>
-          ) : (
-            filteredOptions.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault()
-                  handleSelect(option)
-                }}
-                className={cn(
-                  'w-full px-4 py-3 text-left text-[14px] hover:bg-blue-50 transition-colors',
-                  option.value === value ? 'bg-blue-50 font-medium text-[#0066FF]' : 'text-[#191414]',
-                )}
-              >
-                {option.label}
-              </button>
-            ))
-          )}
-        </div>
-      )}
-
-      {error && <span className="text-[11px] text-red-500">{error}</span>}
-    </div>
-  )
-}
-
 // --- Main Component ---
 
 export const AddressFormFields = ({
@@ -202,7 +58,7 @@ export const AddressFormFields = ({
   errors: externalErrors = {},
 }: AddressFormFieldsProps) => {
   // --- Country options ---
-  const countryOptions = useMemo<ComboboxOption[]>(() => {
+  const countryOptions = useMemo<BaseAutocompleteOption[]>(() => {
     return Country.getAllCountries().map((c: ICountry) => ({
       value: c.isoCode,
       label: `${c.flag} ${c.name}`,
@@ -211,7 +67,7 @@ export const AddressFormFields = ({
   }, [])
 
   // --- State options (based on selected country) ---
-  const stateOptions = useMemo<ComboboxOption[]>(() => {
+  const stateOptions = useMemo<BaseAutocompleteOption[]>(() => {
     if (!value.country) return []
     return State.getStatesOfCountry(value.country).map((s: IState) => ({
       value: s.isoCode,
@@ -221,7 +77,7 @@ export const AddressFormFields = ({
   }, [value.country])
 
   // --- City options (based on selected country + state) ---
-  const cityOptions = useMemo<ComboboxOption[]>(() => {
+  const cityOptions = useMemo<BaseAutocompleteOption[]>(() => {
     if (!value.country) return []
     const cities = value.state
       ? City.getCitiesOfState(value.country, value.state)
@@ -296,41 +152,74 @@ export const AddressFormFields = ({
   return (
     <div className="space-y-5">
       {/* Row 1: Country (full width, first!) */}
-      <SearchableCombobox
+      <BaseAutocompleteField
         label="Country"
         required
         options={countryOptions}
         value={value.country}
-        onChange={handleCountryChange}
+        onValueChange={handleCountryChange}
         placeholder="Search country..."
         emptyMessage="No countries found"
         disabled={disabled}
-        error={errors.country}
+        errorMessage={errors.country}
+        className="space-y-2"
+        labelClassName="text-[11px] font-bold uppercase tracking-wider text-[#989898]"
+        requiredMarkClassName="text-red-500"
+        inputClassName={cn(
+          'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+          errors.country ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
+        )}
+        dropdownClassName="absolute z-50 mt-1 max-h-[240px] w-full overflow-auto rounded-xl border border-[#E5E5E5] bg-white shadow-lg"
+        optionClassName="w-full px-4 py-3 text-left text-[14px] transition-colors hover:bg-blue-50 text-[#191414]"
+        selectedOptionClassName="bg-blue-50 font-medium text-[#0066FF]"
+        messageClassName="text-[11px] text-red-500"
       />
 
       {/* Row 2: State/Province + City */}
       <div className="grid grid-cols-2 gap-4">
-        <SearchableCombobox
+        <BaseAutocompleteField
           label="State / Province"
           options={stateOptions}
           value={value.state}
-          onChange={handleStateChange}
+          onValueChange={handleStateChange}
           placeholder={value.country ? 'Search state...' : 'Select country first'}
           emptyMessage="No states found"
           disabled={disabled || !value.country}
-          error={errors.state}
+          errorMessage={errors.state}
+          className="space-y-2"
+          labelClassName="text-[11px] font-bold uppercase tracking-wider text-[#989898]"
+          requiredMarkClassName="text-red-500"
+          inputClassName={cn(
+            'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+            errors.state ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
+          )}
+          dropdownClassName="absolute z-50 mt-1 max-h-[240px] w-full overflow-auto rounded-xl border border-[#E5E5E5] bg-white shadow-lg"
+          optionClassName="w-full px-4 py-3 text-left text-[14px] transition-colors hover:bg-blue-50 text-[#191414]"
+          selectedOptionClassName="bg-blue-50 font-medium text-[#0066FF]"
+          messageClassName="text-[11px] text-red-500"
         />
 
-        <SearchableCombobox
+        <BaseAutocompleteField
           label="City"
           required
           options={cityOptions}
           value={value.city}
-          onChange={(city) => handleFieldChange('city', city)}
+          onValueChange={(city) => handleFieldChange('city', city)}
           placeholder={value.country ? 'Search city...' : 'Select country first'}
           emptyMessage="No cities found"
           disabled={disabled || !value.country}
-          error={errors.city}
+          errorMessage={errors.city}
+          className="space-y-2"
+          labelClassName="text-[11px] font-bold uppercase tracking-wider text-[#989898]"
+          requiredMarkClassName="text-red-500"
+          inputClassName={cn(
+            'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+            errors.city ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
+          )}
+          dropdownClassName="absolute z-50 mt-1 max-h-[240px] w-full overflow-auto rounded-xl border border-[#E5E5E5] bg-white shadow-lg"
+          optionClassName="w-full px-4 py-3 text-left text-[14px] transition-colors hover:bg-blue-50 text-[#191414]"
+          selectedOptionClassName="bg-blue-50 font-medium text-[#0066FF]"
+          messageClassName="text-[11px] text-red-500"
         />
       </div>
 

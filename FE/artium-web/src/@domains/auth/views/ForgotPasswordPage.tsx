@@ -16,7 +16,7 @@ import { Input } from '@shared/components/ui/input'
 import { cn } from '@shared/lib/utils'
 
 // @domains - auth
-import { AuthFormOtpInput, AuthShell, FormErrorMessage } from '@domains/auth/components'
+import { AuthFormOtpInput, AuthShell } from '@domains/auth/components'
 import { useForgotPassword } from '@domains/auth/hooks/useForgotPassword'
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { writePasswordResetSession } from '@domains/auth/services/browserAuthState'
@@ -26,6 +26,7 @@ import {
   type ForgotPasswordRequestFormValues,
   type ForgotPasswordVerifyFormValues,
 } from '@domains/auth/validations/auth.schema'
+import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
 
 export const ForgotPasswordPage = () => {
   const router = useRouter()

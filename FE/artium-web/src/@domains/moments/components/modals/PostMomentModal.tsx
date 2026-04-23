@@ -38,7 +38,6 @@ export const PostMomentModal = ({ open, onOpenChange }: PostMomentModalProps) =>
         setIsSubmitting(true)
 
         // TODO: Implement actual API call
-        console.log('Posting moment:', { videoFile, caption, videoType })
 
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 1500))

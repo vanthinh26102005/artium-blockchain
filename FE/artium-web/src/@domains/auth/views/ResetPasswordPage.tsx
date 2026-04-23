@@ -21,7 +21,6 @@ import {
   AuthFooter,
   AuthFormCard,
   AuthShell,
-  FormErrorMessage,
 } from '@domains/auth/components'
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { useResetPassword } from '@domains/auth/hooks/useResetPassword'
@@ -37,6 +36,7 @@ import {
   type ResetPasswordConfirmFormValues,
   type ResetPasswordVerifyFormValues,
 } from '@domains/auth/validations/auth.schema'
+import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
 
 export const ResetPasswordPage = () => {
   const router = useRouter()

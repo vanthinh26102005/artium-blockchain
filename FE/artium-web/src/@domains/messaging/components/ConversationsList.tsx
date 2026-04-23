@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { MessageCircle, Clock } from 'lucide-react'
 import type { Conversation } from '@/types/messaging'
 import { formatDistanceToNow } from 'date-fns'
-import { UserAvatar } from './UserAvatar'
+import { UserAvatar } from '@/@shared/components/ui/user-avatar'
 
 type ConversationsListProps = {
   conversations: Conversation[]

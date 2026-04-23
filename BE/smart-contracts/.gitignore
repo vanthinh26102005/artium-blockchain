@@ -49,3 +49,4 @@ Thumbs.db
 .github/instructions/nx.instructions.md
 
 .env.local
+deployments

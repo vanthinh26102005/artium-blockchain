@@ -15,7 +15,6 @@ export const AboutCreator = ({ creator }: AboutCreatorProps) => {
 
     const handleFollow = () => {
         // TODO: Implement follow functionality
-        console.log('Follow clicked')
     }
 
     return (
