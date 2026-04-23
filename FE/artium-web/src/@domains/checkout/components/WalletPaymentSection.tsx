@@ -95,7 +95,7 @@ export const WalletPaymentSection = ({ onWalletConnected, onTxHashReceived, erro
               type="button"
               onClick={sendEthTransaction}
               disabled={isSendingTx}
-              className="w-full rounded-[16px] bg-[#F97316] px-6 py-4 text-[14px] font-bold text-white transition hover:bg-[#EA6C0A] disabled:opacity-60"
+              className="w-full rounded-2xl bg-[#F97316] px-6 py-4 text-[14px] font-bold text-white transition hover:bg-[#EA6C0A] disabled:opacity-60"
             >
               {isSendingTx ? 'Confirm in MetaMask…' : `Send ${ethAmount.toFixed(4)} ETH`}
             </button>

@@ -45,7 +45,7 @@ export const JourneyCard = ({
         <Button
           asChild
           size="lg"
-          className="h-[38px] min-w-[100px] rounded-4xl bg-[#0F6BFF] px-4 text-[12px] leading-[14px] text-white hover:bg-[#0d5edc] lg:h-12 lg:min-w-[151px] lg:px-6 lg:text-[20px] lg:leading-[18px]"
+          className="h-[38px] min-w-25 rounded-4xl bg-[#0F6BFF] px-4 text-[12px] leading-[14px] text-white hover:bg-[#0d5edc] lg:h-12 lg:min-w-[151px] lg:px-6 lg:text-[20px] lg:leading-[18px]"
         >
           <Link href={href} className="block shrink-0">
             {cta}

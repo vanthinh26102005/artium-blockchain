@@ -214,7 +214,7 @@ export const BuyerCheckoutPaymentForm = ({ ethAmount }: Props) => {
             type="button"
             onClick={() => handleMethodChange(value)}
             className={cn(
-              'flex items-center justify-center gap-3 rounded-[16px] border-2 p-4 transition',
+              'flex items-center justify-center gap-3 rounded-2xl border-2 p-4 transition',
               paymentMethod === value
                 ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
                 : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]',

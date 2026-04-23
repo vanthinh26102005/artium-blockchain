@@ -26,7 +26,7 @@ export class HandleStripeWebhookHandler implements ICommandHandler<HandleStripeW
     let event: any;
 
     try {
-      event = this.stripeService.constructWebhookEvent(
+      event = await this.stripeService.constructWebhookEvent(
         data.body,
         data.signature,
         process.env.STRIPE_WEBHOOK_SECRET!,

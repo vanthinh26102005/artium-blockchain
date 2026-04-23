@@ -35,7 +35,7 @@ export const QuickSellCheckoutMainContent = ({
   const getError = (name: FieldPath<QuickSellCheckoutFormValues>) =>
     getFieldState(name, formState).error?.message
 
-  const cardClass = 'rounded-[24px] border border-black/5 bg-white p-6 md:p-8'
+  const cardClass = 'rounded-3xl border border-black/5 bg-white p-6 md:p-8'
   const labelClass = 'mb-2 block text-[11px] font-bold uppercase tracking-wider text-[#191414]'
   const inputClass =
     'h-[52px] rounded-xl border border-[#E5E5E5] bg-[#FCFCFC] px-4 text-[15px] font-medium text-[#191414] placeholder:text-[#989898] transition-colors focus:border-[#191414] focus:bg-white focus:ring-0'
@@ -49,7 +49,7 @@ export const QuickSellCheckoutMainContent = ({
         <p className="mb-4 text-[13px] font-medium text-[#595959]">
           Use this option if the buyer is present and ready to pay using Tap to Pay.
         </p>
-        <div className="flex items-center gap-3 rounded-[16px] bg-[#F5F5F5] p-4">
+        <div className="flex items-center gap-3 rounded-2xl bg-[#F5F5F5] p-4">
           <Info className="h-4 w-4 shrink-0 text-[#989898]" />
           <p className="text-[12px] font-medium text-[#595959]">
             To use Tap to Pay, open this page in the Artium app on a mobile device{' '}
@@ -115,7 +115,7 @@ export const QuickSellCheckoutMainContent = ({
         <div className="mt-6">
           <Label className={labelClass}>PHONE NUMBER</Label>
           <div className="flex gap-3">
-            <div className="flex w-[100px] shrink-0 items-center justify-center gap-2 rounded-xl border border-[#E5E5E5] bg-[#FCFCFC]">
+            <div className="flex w-25 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#E5E5E5] bg-[#FCFCFC]">
               <span className="text-[16px]">🇺🇸</span>
               <span className="text-[14px] font-bold text-[#191414]">+1</span>
             </div>
@@ -147,19 +147,17 @@ export const QuickSellCheckoutMainContent = ({
               key={value}
               type="button"
               onClick={() => setValue('deliveryMethod', value, { shouldDirty: true, shouldValidate: true })}
-              className={`group relative h-[52px] rounded-full border transition-all ${
-                deliveryMethod === value
-                  ? 'z-10 border-blue-600 bg-blue-50/50 text-blue-600'
-                  : 'border-[#E5E5E5] bg-white text-[#595959] hover:border-[#989898]'
-              }`}
+              className={`group relative h-[52px] rounded-full border transition-all ${deliveryMethod === value
+                ? 'z-10 border-blue-600 bg-blue-50/50 text-blue-600'
+                : 'border-[#E5E5E5] bg-white text-[#595959] hover:border-[#989898]'
+                }`}
             >
               <div className="flex items-center justify-center gap-2.5">
                 <div
-                  className={`flex h-4 w-4 items-center justify-center rounded-full border transition-colors ${
-                    deliveryMethod === value
-                      ? 'border-blue-600'
-                      : 'border-[#D1D1D1] group-hover:border-[#989898]'
-                  }`}
+                  className={`flex h-4 w-4 items-center justify-center rounded-full border transition-colors ${deliveryMethod === value
+                    ? 'border-blue-600'
+                    : 'border-[#D1D1D1] group-hover:border-[#989898]'
+                    }`}
                 >
                   {deliveryMethod === value && <div className="h-2 w-2 rounded-full bg-blue-600" />}
                 </div>
@@ -169,7 +167,7 @@ export const QuickSellCheckoutMainContent = ({
           ))}
         </div>
 
-        <div className="mt-4 flex items-center gap-3 rounded-[16px] bg-[#F5F5F5] p-4">
+        <div className="mt-4 flex items-center gap-3 rounded-2xl bg-[#F5F5F5] p-4">
           <Info className="h-4 w-4 shrink-0 text-[#989898]" />
           <p className="text-[12px] font-medium text-[#595959]">
             Once your payment is processed, you will receive an email to arrange the pick up, drop
@@ -324,7 +322,7 @@ export const QuickSellCheckoutMainContent = ({
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[24px] border border-black/5 bg-white">
+      <section className="overflow-hidden rounded-3xl border border-black/5 bg-white">
         <h3 className="p-6 pb-4 text-[11px] font-bold uppercase tracking-wider text-[#989898] md:p-8 md:pb-4">
           PAYMENT METHOD
         </h3>
@@ -358,11 +356,10 @@ export const QuickSellCheckoutMainContent = ({
                     key={value}
                     type="button"
                     onClick={() => setPaymentTab(value)}
-                    className={`flex h-[64px] flex-col items-center justify-center gap-1 rounded-xl border-2 transition-all ${
-                      paymentTab === value
-                        ? 'border-blue-600 bg-blue-50/50'
-                        : 'border-[#E5E5E5] bg-white hover:border-[#989898]'
-                    }`}
+                    className={`flex h-[64px] flex-col items-center justify-center gap-1 rounded-xl border-2 transition-all ${paymentTab === value
+                      ? 'border-blue-600 bg-blue-50/50'
+                      : 'border-[#E5E5E5] bg-white hover:border-[#989898]'
+                      }`}
                   >
                     {value === 'card' ? (
                       <CreditCard
@@ -378,9 +375,8 @@ export const QuickSellCheckoutMainContent = ({
                       <span className="text-[16px] font-bold leading-none text-pink-500">K.</span>
                     )}
                     <span
-                      className={`text-[12px] font-medium ${
-                        paymentTab === value ? 'text-blue-600' : 'text-[#595959]'
-                      }`}
+                      className={`text-[12px] font-medium ${paymentTab === value ? 'text-blue-600' : 'text-[#595959]'
+                        }`}
                     >
                       {label}
                     </span>

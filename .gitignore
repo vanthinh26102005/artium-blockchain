@@ -14,3 +14,5 @@ skills/
 .planning
 .DS_Store
 .claude
+.github
+yarn.lock

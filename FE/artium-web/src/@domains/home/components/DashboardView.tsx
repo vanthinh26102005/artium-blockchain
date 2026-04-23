@@ -322,9 +322,7 @@ export const DashboardView = () => {
                     open={inviteModalOpen}
                     onOpenChange={setInviteModalOpen}
                     event={inviteModalEvent}
-                    onInviteSuccess={(recipientIds) => {
-                        console.log(`Invitations sent to ${recipientIds.length} people`)
-                    }}
+                    onInviteSuccess={() => {}}
                 />
             )}
 

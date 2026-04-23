@@ -47,7 +47,7 @@ export function EmailTemplatePreview({
   recipientEmails: _recipientEmails,
 }: EmailTemplatePreviewProps) {
   return (
-    <div className="mx-auto max-w-[640px] bg-slate-50 font-inter text-slate-900">
+    <div className="mx-auto max-w-160 bg-slate-50 font-inter text-slate-900">
       <div className="rounded-3xl border border-slate-200 bg-white shadow-lg">
         <div className="border-b border-slate-200 bg-gradient-to-b from-white to-slate-50 px-8 py-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">

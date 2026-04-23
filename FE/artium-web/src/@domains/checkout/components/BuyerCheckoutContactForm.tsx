@@ -19,7 +19,7 @@ export const BuyerCheckoutContactForm = () => {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[24px] bg-white p-6 shadow-sm">
+      <section className="rounded-3xl bg-white p-6 shadow-sm">
         <h2 className="mb-6 text-[13px] font-bold uppercase tracking-wider text-[#191414]">
           Contact Information
         </h2>
@@ -102,7 +102,7 @@ export const BuyerCheckoutContactForm = () => {
             <div className="flex gap-2">
               <select
                 {...register('contact.phoneCountryCode')}
-                className="h-12 w-[100px] rounded-xl border border-[#E5E5E5] bg-white px-3 text-[15px] font-medium text-[#191414] focus:border-[#0066FF] focus:ring-0"
+                className="h-12 w-25 rounded-xl border border-[#E5E5E5] bg-white px-3 text-[15px] font-medium text-[#191414] focus:border-[#0066FF] focus:ring-0"
               >
                 <option value="+1">🇺🇸 +1</option>
                 <option value="+84">🇻🇳 +84</option>
@@ -136,7 +136,7 @@ export const BuyerCheckoutContactForm = () => {
         </div>
       </section>
 
-      <section className="rounded-[24px] bg-white p-6 shadow-sm">
+      <section className="rounded-3xl bg-white p-6 shadow-sm">
         <h2 className="mb-6 text-[13px] font-bold uppercase tracking-wider text-[#191414]">
           Delivery Method
         </h2>
@@ -168,7 +168,7 @@ export const BuyerCheckoutContactForm = () => {
       </section>
 
       {deliveryMethod === 'ship_by_platform' && (
-        <section className="rounded-[24px] bg-white p-6 shadow-sm">
+        <section className="rounded-3xl bg-white p-6 shadow-sm">
           <h2 className="mb-6 text-[13px] font-bold uppercase tracking-wider text-[#191414]">
             Shipping Address
           </h2>

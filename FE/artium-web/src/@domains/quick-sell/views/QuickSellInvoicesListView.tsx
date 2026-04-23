@@ -204,7 +204,7 @@ const InvoiceCard = ({
     const isPaid = invoice.status === 'PAID'
 
     return (
-        <div className="rounded-[24px] bg-white p-6 shadow-sm border border-black/5 hover:border-black/10 transition group">
+        <div className="rounded-3xl bg-white p-6 shadow-sm border border-black/5 hover:border-black/10 transition group">
             {/* Top Row */}
             <div className="flex items-start justify-between mb-8">
                 <div className="flex gap-4">

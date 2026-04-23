@@ -42,7 +42,7 @@ export const TestimonialVideoCard = ({
 }: TestimonialVideoCardProps) => {
   return (
     <Card
-      className="flex h-[273px] w-[183px] flex-col space-y-[20px] rounded-[16px] border-none p-4 lg:!h-[415px] lg:!w-[219px] lg:space-y-[15px] lg:!rounded-[16.7px] lg:p-[10px] lg:pt-[20px]"
+      className="flex h-[273px] w-[183px] flex-col space-y-[20px] rounded-2xl border-none p-4 lg:!h-[415px] lg:!w-[219px] lg:space-y-[15px] lg:!rounded-[16.7px] lg:p-[10px] lg:pt-[20px]"
       style={{ backgroundColor }}
     >
       {/* -- info -- */}
@@ -88,7 +88,7 @@ export const ArtistQuoteCard = ({
 }: ArtistQuoteCardProps) => {
   return (
     <Card
-      className="font-inter lg:font-monument-grotes flex h-[273px] w-[275px] flex-col space-y-[20px] rounded-[16px] border-none px-4 py-8 lg:!h-[415px] lg:!w-[350px] lg:space-y-[16.7px] lg:!rounded-[16.7px] lg:p-[33.4px]"
+      className="font-inter lg:font-monument-grotes flex h-[273px] w-[275px] flex-col space-y-[20px] rounded-2xl border-none px-4 py-8 lg:!h-[415px] lg:!w-[350px] lg:space-y-[16.7px] lg:!rounded-[16.7px] lg:p-[33.4px]"
       style={{ backgroundColor }}
     >
       {/* -- quote -- */}

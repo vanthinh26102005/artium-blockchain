@@ -45,7 +45,7 @@ export const QuickSellSendInvoiceModal = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-[500px] overflow-hidden rounded-[24px] bg-white p-0 sm:max-w-[600px]">
+            <DialogContent className="max-w-[500px] overflow-hidden rounded-3xl bg-white p-0 sm:max-w-[600px]">
                 {/* Header */}
                 <div className="relative pt-12 text-center">
 

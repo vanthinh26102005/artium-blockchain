@@ -113,9 +113,9 @@ export const ForgotPasswordPage = () => {
       <Metadata title="Forgot password | Artium" />
 
       {/* card */}
-      <div className="shadow-artium-xl flex w-[88vw] max-w-[640px] flex-col gap-6 rounded-4xl bg-white px-10 py-10 text-black sm:px-12 lg:px-14 lg:py-12">
+      <div className="shadow-artium-xl flex w-[88vw] max-w-160 flex-col gap-6 rounded-4xl bg-white px-10 py-10 text-black sm:px-12 lg:px-14 lg:py-12">
         {/* main content */}
-        <div className="rounded-[16px] border border-black/10 px-7 py-9">
+        <div className="rounded-2xl border border-black/10 px-7 py-9">
           {/* header */}
           <div className="space-y-2">
             <h1 className="text-3xl font-semibold text-[#191414]">Forgot password</h1>
@@ -220,7 +220,7 @@ export const ForgotPasswordPage = () => {
         </div>
 
         {/* sign up link */}
-        <div className="rounded-[16px] border border-black/10 px-8 py-6 text-center">
+        <div className="rounded-2xl border border-black/10 px-8 py-6 text-center">
           <p className="text-base text-[#191414]">
             Not yet on Artium?{' '}
             <Link href="/sign-up" className="text-primary font-semibold">

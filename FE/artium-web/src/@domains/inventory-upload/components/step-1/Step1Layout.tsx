@@ -302,7 +302,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
   const inputBaseClassName = 'h-[52px] text-[15px] lg:h-14 lg:text-[16px]'
   const textareaBaseClassName = 'min-h-[140px] text-[15px] lg:min-h-[160px] lg:text-[16px]'
   const labelClassName =
-    'text-[11px] font-semibold uppercase tracking-[0.2em] text-black/50 lg:text-[12px] rounded-[16px]!'
+    'text-[11px] font-semibold uppercase tracking-[0.2em] text-black/50 lg:text-[12px] rounded-2xl!'
   const sectionTitleClassName =
     'text-[13px] font-extrabold uppercase tracking-[0.05em] text-black/50 lg:text-[17px]'
   const selectedLocation = locations.find((location) => location.id === details.locationId)

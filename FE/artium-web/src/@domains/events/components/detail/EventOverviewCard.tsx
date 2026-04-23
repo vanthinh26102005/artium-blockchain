@@ -63,7 +63,7 @@ export const EventOverviewCard = ({ event, className }: EventOverviewCardProps) 
   };
 
   return (
-    <div className={cn("rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm md:p-6", className)}>
+    <div className={cn("rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6", className)}>
       <div className="space-y-6 font-inter">
         <h2 className="text-lg font-semibold text-slate-900">Overview</h2>
 

@@ -26,7 +26,7 @@ export const EventGuestsCard = ({
   ];
 
   return (
-    <div className={cn("rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm md:p-6", className)}>
+    <div className={cn("rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6", className)}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700">

@@ -40,7 +40,7 @@ export const BuyerCheckoutOrderSummary = ({
     return (
         <div className="space-y-6">
             {/* Order Summary Card */}
-            <div className="rounded-[24px] bg-white p-6 shadow-sm">
+            <div className="rounded-3xl bg-white p-6 shadow-sm">
                 <h2 className="mb-6 text-[13px] font-bold uppercase tracking-wider text-[#191414]">
                     Order Summary
                 </h2>
@@ -125,7 +125,7 @@ export const BuyerCheckoutOrderSummary = ({
             </div>
 
             {/* Trust Badges */}
-            <div className="space-y-4 rounded-[24px] bg-white p-6 shadow-sm">
+            <div className="space-y-4 rounded-3xl bg-white p-6 shadow-sm">
                 {/* Money Back Guarantee */}
                 <div className="flex gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50">
