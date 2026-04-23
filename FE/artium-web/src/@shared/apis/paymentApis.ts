@@ -56,6 +56,28 @@ export type StripeCustomerResponse = {
   email: string
 }
 
+export type RecordEthereumPaymentRequest = {
+  txHash: string
+  walletAddress: string
+  orderId?: string
+  amount: number
+  currency: string
+  description?: string
+}
+
+export type RecordEthereumPaymentResponse = {
+  id: string
+  type: string
+  status: string
+  provider: string
+  txHash: string
+  walletAddress: string
+  amount: number
+  currency: string
+  orderId: string | null
+  createdAt: string
+}
+
 export type PaymentTransactionResponse = {
   id: string
   type: string
@@ -99,6 +121,12 @@ const paymentApis = {
     id: string,
   ): Promise<PaymentTransactionResponse> => {
     return apiFetch<PaymentTransactionResponse>(`/payments/transactions/${id}`)
+  },
+
+  recordEthereumPayment: async (
+    data: RecordEthereumPaymentRequest,
+  ): Promise<RecordEthereumPaymentResponse> => {
+    return apiPost<RecordEthereumPaymentResponse>('/payments/ethereum', data)
   },
 }
 

@@ -89,11 +89,11 @@ export class PaymentsController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 409, description: 'Customer already exists' })
-  async createStripeCustomer(@Body() data: CreateStripeCustomerDto) {
+  async createStripeCustomer(@Body() data: CreateStripeCustomerDto, @Req() req: any) {
     return sendRpc(
       this.paymentsClient,
       { cmd: 'create_stripe_customer' },
-      data,
+      { ...data, userId: req.user?.id },
     );
   }
 

@@ -35,7 +35,7 @@ export class StripeService {
   ): Promise<Stripe.PaymentIntent> {
     try {
       const params: Stripe.PaymentIntentCreateParams = {
-        amount: Math.round(amount * 100),
+        amount: Math.round(amount),
         currency: currency.toLowerCase(),
         automatic_payment_methods: {
           enabled: true,

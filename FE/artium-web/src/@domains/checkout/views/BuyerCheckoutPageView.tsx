@@ -20,6 +20,7 @@ import {
     type BuyerCheckoutContactStepValues,
     type BuyerCheckoutPaymentValues,
 } from '../validations/buyerCheckout.schema'
+import { createStripePaymentMethod } from '../hooks/useStripeCardToken'
 
 // @domains - auth
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
@@ -151,7 +152,6 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
 
     const handleApplyPromo = useCallback(() => {
         // TODO: Validate promo code via API
-        alert('Promo code applied!')
     }, [])
 
     const handleCancel = useCallback(() => {
@@ -159,21 +159,23 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
             setStep(1)
             return
         }
-        if (confirm('Are you sure you want to cancel? Your order will not be saved.')) {
-            router.back()
-        }
+        router.back()
     }, [router, step])
 
     const handleContinue = useCallback(async () => {
+        setError(null)
+
         if (step === 1) {
             const isStepValid = await contactForm.trigger()
             if (!isStepValid) {
-                if (contactForm.getValues('deliveryMethod') === 'ship_by_platform' && contactForm.formState.errors.shippingAddress) {
-                    alert('Please fill in all shipping address fields.')
+                if (
+                    contactForm.getValues('deliveryMethod') === 'ship_by_platform' &&
+                    contactForm.formState.errors.shippingAddress
+                ) {
+                    setError('Please fill in all shipping address fields.')
                     return
                 }
-
-                alert('Please fill in all contact information fields.')
+                setError('Please fill in all contact information fields.')
                 return
             }
 
@@ -183,16 +185,16 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
 
         const isStepValid = await paymentForm.trigger()
         if (!isStepValid) {
-            alert('Please fill in all card information.')
+            setError('Please fill in all payment information.')
             return
         }
 
         if (!artwork) return
 
         const checkoutValues = contactForm.getValues()
+        const paymentValues = paymentForm.getValues()
 
         setIsLoading(true)
-        setError(null)
 
         try {
             const shippingAddr = checkoutValues.deliveryMethod !== 'pickup' ? {
@@ -211,25 +213,61 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                 notes: undefined,
             })
 
-            // 2. Create payment intent (amount in cents for Stripe)
-            const amountInCents = Math.round(pricing.total * 100)
-            await paymentApis.createPaymentIntent({
-                amount: amountInCents,
-                currency: 'usd',
-                orderId: order.id,
-                sellerId: artwork.artistId || undefined,
-                description: `Purchase: ${artwork.title}`,
-            })
+            if (paymentValues.paymentMethod === 'card') {
+                // Ensure Stripe customer exists (409 = already exists, ignore)
+                try {
+                    await paymentApis.createStripeCustomer({ email: checkoutValues.contact.email })
+                } catch (err: unknown) {
+                    const status =
+                        (err as { statusCode?: number; response?: { status?: number } })?.statusCode ??
+                        (err as { statusCode?: number; response?: { status?: number } })?.response?.status
+                    if (status !== 409) {
+                        throw new Error('Failed to set up payment account. Please try again.')
+                    }
+                }
 
-            // 3. Payment created successfully — redirect to confirmation
-            // In production this would use Stripe Elements / 3D Secure;
-            // for now we confirm the order was placed
-            alert(`Order ${order.orderNumber} placed successfully! Payment processing.`)
-            router.push('/discover')
+                // Create payment intent (amount in cents)
+                const amountInCents = Math.round(pricing.total * 100)
+                const intent = await paymentApis.createPaymentIntent({
+                    amount: amountInCents,
+                    currency: 'usd',
+                    orderId: order.id,
+                    sellerId: artwork.artistId || undefined,
+                    description: `Purchase: ${artwork.title}`,
+                })
+
+                // Tokenize raw card inputs via Stripe.js
+                const expiryParts = paymentValues.expiryDate.split('/')
+                const expMonth = parseInt(expiryParts[0]?.trim() ?? '0', 10)
+                const expYear = parseInt(expiryParts[1]?.trim() ?? '0', 10)
+                const pmId = await createStripePaymentMethod({
+                    number: paymentValues.cardNumber,
+                    exp_month: expMonth,
+                    exp_year: expYear,
+                    cvc: paymentValues.cvc,
+                })
+
+                // Confirm payment intent with tokenized payment method
+                await paymentApis.confirmPaymentIntent({
+                    paymentIntentId: intent.stripePaymentIntentId,
+                    stripePaymentMethodId: pmId,
+                })
+            } else if (paymentValues.paymentMethod === 'wallet') {
+                await paymentApis.recordEthereumPayment({
+                    txHash: paymentValues.txHash,
+                    walletAddress: paymentValues.walletAddress,
+                    orderId: order.id,
+                    amount: pricing.total,
+                    currency: 'ETH',
+                    description: `Purchase: ${artwork.title}`,
+                })
+            }
+
+            // Success: redirect to discover with success query param
+            void router.push(`/discover?checkout=success&orderNumber=${order.orderNumber}`)
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Payment failed. Please try again.'
             setError(message)
-            alert(message)
         } finally {
             setIsLoading(false)
         }
@@ -296,10 +334,18 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                     <BuyerCheckoutContactForm />
                 </FormProvider>
             ) : (
-                <FormProvider {...paymentForm}>
-                    <BuyerCheckoutPaymentForm ethAmount={undefined} />
-                </FormProvider>
+                <>
+                    <FormProvider {...paymentForm}>
+                        <BuyerCheckoutPaymentForm ethAmount={pricing.total} />
+                    </FormProvider>
+                    {error && (
+                        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                            <p className="text-[13px] text-red-700">{error}</p>
+                        </div>
+                    )}
+                </>
             )}
         </BuyerCheckoutLayout>
     )
 }
+
