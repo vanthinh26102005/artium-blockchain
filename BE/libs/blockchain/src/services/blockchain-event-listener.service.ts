@@ -168,10 +168,25 @@ export class BlockchainEventListenerService
     this.logger.log(`Connected chainId=${this.chainId}`);
 
     await this.ensureCursorExists();
-    await this.catchUpToLatestBlock();
+
+    try {
+      await this.catchUpToLatestBlock();
+    } catch (err) {
+      this.logger.error(
+        `Initial backfill failed (RPC error – restart service to retry): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
+      );
+    }
+
     this.registerLiveListeners();
+
     // Re-run to catch events that arrived during listener registration
-    await this.catchUpToLatestBlock();
+    try {
+      await this.catchUpToLatestBlock();
+    } catch (err) {
+      this.logger.error(
+        `Post-registration backfill failed (RPC error): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
+      );
+    }
 
     this.logger.log('Blockchain listeners ready (backfill + live)');
   }
