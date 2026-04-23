@@ -1,13 +1,15 @@
 import { useRef } from 'react'
 import { cn } from '@shared/lib/utils'
+import { BaseFormField } from '@shared/components/forms'
 
-type OtpCodeInputProps = {
+type AuthOtpCodeInputProps = {
   id: string
   label: string
   value: string
   onChange: (value: string) => void
   onBlur?: () => void
   length?: number
+  required?: boolean
   hasError?: boolean
   disabled?: boolean
   description?: string
@@ -17,18 +19,19 @@ type OtpCodeInputProps = {
 const buildOtpDigits = (value: string, length: number) =>
   Array.from({ length }, (_, index) => value[index] ?? '')
 
-export const OtpCodeInput = ({
+export const AuthOtpCodeInput = ({
   id,
   label,
   value,
   onChange,
   onBlur,
   length = 6,
+  required = false,
   hasError = false,
   disabled = false,
   description,
   errorMessage,
-}: OtpCodeInputProps) => {
+}: AuthOtpCodeInputProps) => {
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])
   const digits = buildOtpDigits(value.replace(/\D/g, '').slice(0, length), length)
 
@@ -91,18 +94,18 @@ export const OtpCodeInput = ({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="space-y-1">
-        <label htmlFor={`${id}-0`} className="text-xs font-bold tracking-[0.2em] text-[#6b6b6b] uppercase">
-          {label} <span className="text-[#FF4337]">*</span>
-        </label>
-        {errorMessage ? (
-          <p className="text-sm font-medium text-[#FF4337]">{errorMessage}</p>
-        ) : description ? (
-          <p className="text-sm text-[#6b6b6b]">{description}</p>
-        ) : null}
-      </div>
-
+    <BaseFormField
+      id={`${id}-0`}
+      label={label}
+      required={required}
+      errorMessage={errorMessage}
+      description={description}
+      className="space-y-3"
+      labelClassName="text-xs font-bold tracking-[0.2em] text-auth-label uppercase"
+      requiredMarkClassName="text-auth-error"
+      messageClassName="text-sm font-medium text-auth-error"
+      descriptionClassName="text-sm text-auth-label"
+    >
       <div className="flex items-center justify-center gap-2 sm:gap-3">
         {digits.map((digit, index) => (
           <input
@@ -118,21 +121,21 @@ export const OtpCodeInput = ({
             value={digit}
             disabled={disabled}
             aria-label={`${label} digit ${index + 1}`}
-             onChange={(event) => handleDigitChange(index, event.target.value)}
-             onBlur={onBlur}
-             onKeyDown={(event) => handleKeyDown(index, event)}
-             onFocus={(event) => event.target.select()}
-             onPaste={handlePaste}
-             className={cn(
-              'h-16 w-12 rounded-2xl border border-black/10 bg-white text-center text-2xl font-semibold text-[#191414] shadow-sm outline-none transition sm:h-[72px] sm:w-14 sm:text-[28px]',
+            onChange={(event) => handleDigitChange(index, event.target.value)}
+            onBlur={onBlur}
+            onKeyDown={(event) => handleKeyDown(index, event)}
+            onFocus={(event) => event.target.select()}
+            onPaste={handlePaste}
+            className={cn(
+              'h-16 w-12 rounded-2xl border border-black/10 bg-white text-center text-2xl font-semibold text-kokushoku-black shadow-sm outline-none transition sm:h-[72px] sm:w-14 sm:text-[28px]',
               hasError
-                ? 'border-[#FF4337] focus:border-[#FF4337] focus:ring-2 focus:ring-[#FF4337]/10'
+                ? 'border-auth-error focus:border-auth-error focus:ring-2 focus:ring-auth-error/10'
                 : 'focus:border-black',
               disabled && 'cursor-not-allowed opacity-60',
             )}
           />
         ))}
       </div>
-    </div>
+    </BaseFormField>
   )
 }

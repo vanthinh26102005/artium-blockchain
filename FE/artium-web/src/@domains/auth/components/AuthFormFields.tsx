@@ -2,8 +2,8 @@ import type { ComponentProps } from 'react'
 import { Controller, type FieldPath, type FieldValues, useFormContext } from 'react-hook-form'
 
 import { AuthInput } from './AuthInput'
-import { OtpCodeInput } from './OtpCodeInput'
-import { PasswordInput } from './PasswordInput'
+import { AuthOtpCodeInput } from './AuthOtpCodeInput'
+import { AuthPasswordInput } from './AuthPasswordInput'
 
 type AuthFormInputProps<TFieldValues extends FieldValues> = Omit<
   ComponentProps<typeof AuthInput>,
@@ -14,7 +14,7 @@ type AuthFormInputProps<TFieldValues extends FieldValues> = Omit<
 }
 
 type AuthFormPasswordInputProps<TFieldValues extends FieldValues> = Omit<
-  ComponentProps<typeof PasswordInput>,
+  ComponentProps<typeof AuthPasswordInput>,
   'name' | 'hasError' | 'errorMessage'
 > & {
   name: FieldPath<TFieldValues>
@@ -22,7 +22,7 @@ type AuthFormPasswordInputProps<TFieldValues extends FieldValues> = Omit<
 }
 
 type AuthFormOtpInputProps<TFieldValues extends FieldValues> = Omit<
-  ComponentProps<typeof OtpCodeInput>,
+  ComponentProps<typeof AuthOtpCodeInput>,
   'value' | 'onChange' | 'onBlur' | 'hasError' | 'errorMessage'
 > & {
   name: FieldPath<TFieldValues>
@@ -89,7 +89,7 @@ export const AuthFormPasswordInput = <TFieldValues extends FieldValues>({
   } = register(name)
 
   return (
-    <PasswordInput
+    <AuthPasswordInput
       {...props}
       {...field}
       ref={ref}
@@ -123,7 +123,7 @@ export const AuthFormOtpInput = <TFieldValues extends FieldValues>({
       name={name}
       control={control}
       render={({ field }) => (
-        <OtpCodeInput
+        <AuthOtpCodeInput
           {...props}
           value={typeof field.value === 'string' ? field.value : ''}
           onBlur={field.onBlur}

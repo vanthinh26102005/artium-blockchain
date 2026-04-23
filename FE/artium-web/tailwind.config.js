@@ -119,6 +119,8 @@ module.exports = {
         background: 'hsl(var(--background))',
         'text-gray': '#808080',
         'kokushoku-black': '#191414',
+        'auth-error': '#FF4337',
+        'auth-label': '#6b6b6b',
         error: '#FF0000',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
