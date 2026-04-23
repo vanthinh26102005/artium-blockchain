@@ -219,8 +219,9 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                     await paymentApis.createStripeCustomer({ email: checkoutValues.contact.email })
                 } catch (err: unknown) {
                     const status =
-                        (err as { statusCode?: number; response?: { status?: number } })?.statusCode ??
-                        (err as { statusCode?: number; response?: { status?: number } })?.response?.status
+                        (err as { status?: number })?.status ??
+                        (err as { statusCode?: number })?.statusCode ??
+                        (err as { response?: { status?: number } })?.response?.status
                     if (status !== 409) {
                         throw new Error('Failed to set up payment account. Please try again.')
                     }
