@@ -5,12 +5,20 @@ todo-list.md
 project_review.md
 S2_contract-test-plan.md
 S2_auction-edge-cases-and-drawbacks.md
+CLAUDE.md
 node_modules/
 
 # Ignore local Stitch tooling/scripts and skill packs
 scripts/stitch/
 skills/
 
+# Environment files
+.env
+.env.local
+**/.env
+**/.env.local
+
+# Local development files
 .planning
 .DS_Store
 .claude
@@ -18,3 +26,6 @@ skills/
 yarn.lock
 .codex
 
+
+# Documentation files (local only)
+docs/Huonghan-Doan-New.pdf

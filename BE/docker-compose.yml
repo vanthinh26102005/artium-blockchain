@@ -379,6 +379,9 @@ services:
       JWT_EXPIRES_IN: 1d
       GOOGLE_CLIENT_ID: 873456140774-gi4pt3aq0m3gpd5f10uv4ivv59lvbgej.apps.googleusercontent.com
       GOOGLE_CLIENT_SECRET: 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
+      SIWE_ALLOWED_CHAIN_IDS: 11155111
+      SIWE_DOMAIN: localhost:3000
+      SIWE_URI: http://localhost:3000
       RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
       TZ: Asia/Ho_Chi_Minh
     volumes:
