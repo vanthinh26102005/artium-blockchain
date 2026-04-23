@@ -30,14 +30,19 @@ export class CreateStripeCustomerHandler implements ICommandHandler<CreateStripe
     );
 
     try {
-      // Check if customer already exists
+      // Check if customer already exists — return it (idempotent)
       const existingCustomer = await this.stripeCustomerRepo.findByUserId(
         data.userId,
       );
       if (existingCustomer) {
-        throw RpcExceptionHelper.conflict(
-          `Stripe customer already exists for user: ${data.userId}`,
+        this.logger.log(
+          `Stripe customer already exists for user: ${data.userId}, returning existing: ${existingCustomer.stripeId}`,
         );
+        return {
+          stripeCustomerId: existingCustomer.stripeId,
+          email: existingCustomer.email,
+          name: existingCustomer.name || undefined,
+        };
       }
 
       const metadata: Record<string, string> = {
