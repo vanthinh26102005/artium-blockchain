@@ -4,6 +4,7 @@ import {
   Logger,
   BadRequestException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import Stripe from 'stripe';
 
@@ -152,15 +153,36 @@ export class StripeService {
 
   async retrieveCustomer(customerId: string): Promise<Stripe.Customer> {
     try {
-      const customer = (await this.stripe.customers.retrieve(
+      const customer = await this.stripe.customers.retrieve(
         customerId,
-      )) as Stripe.Customer;
-      return customer;
+      );
+
+      if ('deleted' in customer && customer.deleted) {
+        throw new NotFoundException(
+          `Stripe customer retrieval failed: Customer ${customerId} does not exist`,
+        );
+      }
+
+      return customer as Stripe.Customer;
     } catch (error) {
       this.logger.error(
         `Failed to retrieve customer: ${customerId}`,
         error.stack,
       );
+
+      if (
+        error instanceof Stripe.errors.StripeInvalidRequestError &&
+        error.code === 'resource_missing'
+      ) {
+        throw new NotFoundException(
+          `Stripe customer retrieval failed: ${error.message}`,
+        );
+      }
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       throw new InternalServerErrorException(
         `Stripe customer retrieval failed: ${error.message}`,
       );
