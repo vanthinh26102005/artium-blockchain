@@ -66,6 +66,7 @@ import {
   CreateStripeCustomerHandler,
   CreateStripePaymentIntentHandler,
   CreateStripeRefundHandler,
+  HandleStripeWebhookHandler,
 } from './application/commands/stripe';
 
 import { StripeService } from './infrastructure/services/stripe.service';
@@ -100,6 +101,7 @@ export const CommandHandlers = [
   CreateStripeCustomerHandler,
   CreateStripeRefundHandler,
   AttachStripePaymentMethodHandler,
+  HandleStripeWebhookHandler,
 ];
 
 export const QueryHandlers = [

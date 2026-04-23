@@ -8,6 +8,7 @@ import {
   CreateStripeCustomerCommand,
   CreateStripeRefundCommand,
   AttachStripePaymentMethodCommand,
+  HandleStripeWebhookCommand,
   // Invoice Commands
   CreateInvoiceCommand,
   UpdateInvoiceCommand,
@@ -97,7 +98,7 @@ export class PaymentsMicroserviceController {
     @Payload() data: StripeWebhookDto,
   ): Promise<{ received: boolean }> {
     this.logger.debug('Processing Stripe webhook');
-    return { received: true };
+    return this.commandBus.execute(new HandleStripeWebhookCommand(data));
   }
 
   // ==================== PAYMENT TRANSACTIONS ====================
