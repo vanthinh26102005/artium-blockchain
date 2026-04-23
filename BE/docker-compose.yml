@@ -320,6 +320,8 @@ services:
       ARTWORK_SERVICE_PORT: 3102
       PAYMENTS_SERVICE_HOST: payments-service
       PAYMENTS_SERVICE_PORT: 3103
+      ORDERS_SERVICE_HOST: orders-service
+      ORDERS_SERVICE_PORT: 3104
       MESSAGING_SERVICE_HOST: messaging-service
       MESSAGING_SERVICE_PORT: 3105
       NOTIFICATIONS_SERVICE_HOST: notifications-service
@@ -327,7 +329,7 @@ services:
       EVENTS_SERVICE_HOST: events-service
       EVENTS_SERVICE_PORT: 3107
       COMMUNITY_SERVICE_HOST: community-service
-      COMMUNITY_SERVICE_PORT: 3108
+      COMMUNITY_SERVICE_PORT: 3109
       JWT_SECRET: 5c3bf5bfc210c43aa7342efcb40bc0eb6831ac38ea12de39578d09afaec6d37e
       TZ: Asia/Ho_Chi_Minh
     volumes:
@@ -341,14 +343,6 @@ services:
       - notifications-service
       - events-service
       - community-service
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.30"
-    #       memory: "384M"
-    #     reservations:
-    #       cpus: "0.25"
-    #       memory: "256M"
     networks:
       - services_network
 
@@ -393,14 +387,6 @@ services:
     depends_on:
       - rabbitmq
       - redis
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.30"
-    #       memory: "384M"
-    #     reservations:
-    #       cpus: "0.25"
-    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -412,9 +398,9 @@ services:
       dockerfile: ./apps/notifications-service/Dockerfile
     command: yarn dev:notifications
     ports:
-      - "3002:3002"
+      - "3006:3006"
     environment:
-      PORT: 3002
+      PORT: 3006
       MICROSERVICE_PORT: 3106
       MICROSERVICE_HOST: 0.0.0.0
       DB_STRATEGY: ${DB_STRATEGY:-SHARED}
@@ -450,14 +436,6 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.30"
-    #       memory: "384M"
-    #     reservations:
-    #       cpus: "0.25"
-    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -469,10 +447,10 @@ services:
       dockerfile: ./apps/artwork-service/Dockerfile
     command: yarn dev:artwork
     ports:
-      - "3003:3003"
+      - "3002:3002"
       # TCP microservice port (internal only for API Gateway)
     environment:
-      PORT: 3003
+      PORT: 3002
       MICROSERVICE_PORT: 3102
       MICROSERVICE_HOST: 0.0.0.0
       DB_STRATEGY: ${DB_STRATEGY:-SHARED}
@@ -508,14 +486,44 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.30"
-    #       memory: "384M"
-    #     reservations:
-    #       cpus: "0.25"
-    #       memory: "256M"
+    networks:
+      - infra_network
+      - services_network
+
+  orders-service:
+    container_name: orders-service
+    build:
+      context: .
+      dockerfile: ./apps/orders-service/Dockerfile
+    command: yarn dev:orders
+    ports:
+      - "3004:3004"
+    environment:
+      PORT: 3004
+      MICROSERVICE_PORT: 3104
+      MICROSERVICE_HOST: 0.0.0.0
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      DB_SYNCHRONIZE: "true"
+      SHARED_DB_HOST: db-shared
+      SHARED_DB_PORT: 5432
+      SHARED_DB_USERNAME: postgres
+      SHARED_DB_PASSWORD: "1"
+      SHARED_DB_NAME: artium_global
+      DB_HOST: db-orders
+      DB_PORT: 5432
+      DB_USER: orders_user
+      DB_PASS: "1"
+      DB_NAME: orders_db
+      PLATFORM_PRIVATE_KEY: ${PLATFORM_PRIVATE_KEY:-0x1b4b5319b42ea0c0cb9c1d040452efbd90b4c4d7cecf639db41348aac043d780}
+      CONTRACT_ADDRESS: ${CONTRACT_ADDRESS:-0x77a2Ac8226Cdbb13aD77859B204405ABb0AE2E89}
+      BLOCKCHAIN_RPC_URL: ${BLOCKCHAIN_RPC_URL:-https://sepolia.infura.io/v3/b73ae055f50e418893fadecd159bc616}
+      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - .:/app
+      - orders_node_modules:/app/node_modules
+    depends_on:
+      - rabbitmq
     networks:
       - infra_network
       - services_network
@@ -527,10 +535,10 @@ services:
       dockerfile: ./apps/messaging-service/Dockerfile
     command: yarn dev:messaging
     ports:
-      - "3004:3004"
+      - "3005:3005"
       # TCP microservice port (internal only for API Gateway)
     environment:
-      PORT: 3004
+      PORT: 3005
       MICROSERVICE_PORT: 3105
       MICROSERVICE_HOST: 0.0.0.0
       DB_STRATEGY: ${DB_STRATEGY:-SHARED}
@@ -563,14 +571,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.30"
-    #       memory: "384M"
-    #     reservations:
-    #       cpus: "0.25"
-    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -582,9 +582,9 @@ services:
       dockerfile: ./apps/payments-service/Dockerfile
     command: yarn dev:payments
     ports:
-      - "3005:3005"
+      - "3003:3003"
     environment:
-      PORT: 3005
+      PORT: 3003
       MICROSERVICE_PORT: 3103
       MICROSERVICE_HOST: 0.0.0.0
       DB_STRATEGY: ${DB_STRATEGY:-SHARED}
@@ -602,8 +602,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
-      STRIPE_API_KEY: ${STRIPE_API_KEY:-sk_test_51SodCXI4FRlZsKgrH8qv6f9Qe7crzB3xCalWNc6DDEPk46Ps3EGUORTUK3TF0D31ezV2Jd7R2eXQL1JfTyzikhIC00teYO7dGE}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_example}
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-sk_test_51Soh8gRDpKThXbxEj7jOIXEQ8pDSCrIUkMXsPeVs4ChFcVfP7YwPxw7yJh4OTkLWU5zMe0Pq0SF1NDitQa7WYnHV006398hDVl}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_9bd3a32e9a38185ed4645cb41f4dfab380b832da491fe2db1baf0ef92d7cb124}
       TZ: Asia/Ho_Chi_Minh
     volumes:
       - .:/app
@@ -613,14 +613,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.30"
-    #       memory: "384M"
-    #     reservations:
-    #       cpus: "0.25"
-    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -632,9 +624,9 @@ services:
       dockerfile: ./apps/events-service/Dockerfile
     command: yarn dev:events
     ports:
-      - "3006:3006"
+      - "3007:3007"
     environment:
-      PORT: 3006
+      PORT: 3007
       MICROSERVICE_PORT: 3107
       MICROSERVICE_HOST: 0.0.0.0
       DB_STRATEGY: ${DB_STRATEGY:-SHARED}
@@ -661,14 +653,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.30"
-    #       memory: "384M"
-    #     reservations:
-    #       cpus: "0.25"
-    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -680,10 +664,10 @@ services:
       dockerfile: ./apps/community-service/Dockerfile
     command: yarn dev:community
     ports:
-      - "3007:3007"
+      - "3009:3009"
     environment:
-      PORT: 3007
-      MICROSERVICE_PORT: 3108
+      PORT: 3009
+      MICROSERVICE_PORT: 3109
       MICROSERVICE_HOST: 0.0.0.0
       DB_STRATEGY: ${DB_STRATEGY:-SHARED}
       DB_SYNCHRONIZE: "true"
@@ -709,14 +693,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.30"
-    #       memory: "384M"
-    #     reservations:
-    #       cpus: "0.25"
-    #       memory: "256M"
     networks:
       - infra_network
       - services_network
@@ -729,11 +705,13 @@ volumes:
   postgres_messaging_data:
   postgres_payments_data:
   postgres_events_data:
+  postgres_orders_data:
   postgres_community_data:
 
   gateway_node_modules:
   identity_node_modules:
   notifications_node_modules:
+  orders_node_modules:
   artwork_node_modules:
   messaging_node_modules:
   payments_node_modules:

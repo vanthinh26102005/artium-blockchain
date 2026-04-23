@@ -1,181 +1,155 @@
+import { useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
-import type { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form'
+import type { UseFormSetValue } from 'react-hook-form'
 
+import { CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js'
+import type { StripeCardNumberElementChangeEvent, StripeElementChangeEvent } from '@stripe/stripe-js'
 import { CreditCard } from 'lucide-react'
 
-import { Input } from '@shared/components/ui/input'
 import { cn } from '@shared/lib/utils'
 
 import type { BuyerCheckoutPaymentValues } from '../validations/buyerCheckout.schema'
 import { WalletPaymentSection } from './WalletPaymentSection'
 
-export type CardData = Pick<
-  Extract<BuyerCheckoutPaymentValues, { paymentMethod: 'card' }>,
-  'cardNumber' | 'expiryDate' | 'cvc'
->
-
-const formatCardNumber = (value: string) => {
-  const digits = value.replace(/\s+/g, '').replace(/[^0-9]/g, '').slice(0, 16)
-  return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim()
+const STRIPE_ELEMENT_STYLE = {
+  base: {
+    fontSize: '15px',
+    color: '#191414',
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    '::placeholder': { color: '#989898' },
+    fontSmoothing: 'antialiased',
+  },
+  invalid: { color: '#ef4444', iconColor: '#ef4444' },
 }
-
-const formatExpiryDate = (value: string) => {
-  const digits = value.replace(/\D/g, '').slice(0, 4)
-  if (digits.length <= 2) {
-    return digits
-  }
-
-  return `${digits.slice(0, 2)} / ${digits.slice(2)}`
-}
-
-const formatCvc = (value: string) => value.replace(/\D/g, '').slice(0, 4)
 
 const METHOD_OPTIONS = [
   { value: 'card' as const, label: 'Card', icon: <CreditCard className="h-5 w-5" /> },
   { value: 'wallet' as const, label: 'Crypto Wallet', icon: <span className="text-lg">🦊</span> },
 ]
 
-type CardSectionProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register: UseFormRegister<any>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  errors: FieldErrors<any>
+type StripeCardSectionProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: UseFormSetValue<any>
-  cardNumber: string
-  expiryDate: string
-  cvc: string
   selectedCountry: string
+  onCardElementsChange: (complete: boolean) => void
 }
 
-function CardSection({ register, errors, setValue, cardNumber, expiryDate, cvc, selectedCountry }: CardSectionProps) {
+function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: StripeCardSectionProps) {
+  const [numberState, setNumberState] = useState<{ complete: boolean; error?: string }>({ complete: false })
+  const [expiryState, setExpiryState] = useState<{ complete: boolean; error?: string }>({ complete: false })
+  const [cvcState, setCvcState] = useState<{ complete: boolean; error?: string }>({ complete: false })
+  const [focusedField, setFocusedField] = useState<string | null>(null)
+
+  const fieldBorderClass = (error?: string, fieldName?: string) =>
+    cn(
+      'h-12 flex items-center rounded-xl border px-4 bg-white transition-colors',
+      error
+        ? 'border-red-500'
+        : focusedField === fieldName
+          ? 'border-[#0066FF]'
+          : 'border-[#E5E5E5]',
+    )
+
+  const handleNumberChange = (e: StripeCardNumberElementChangeEvent) => {
+    setNumberState({ complete: e.complete, error: e.error?.message })
+    onCardElementsChange(e.complete && expiryState.complete && cvcState.complete)
+  }
+
+  const handleExpiryChange = (e: StripeElementChangeEvent) => {
+    setExpiryState({ complete: e.complete, error: e.error?.message })
+    onCardElementsChange(numberState.complete && e.complete && cvcState.complete)
+  }
+
+  const handleCvcChange = (e: StripeElementChangeEvent) => {
+    setCvcState({ complete: e.complete, error: e.error?.message })
+    onCardElementsChange(numberState.complete && expiryState.complete && e.complete)
+  }
+
   return (
     <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
       <div className="border-t border-black/5 p-6 pt-4">
         <div className="space-y-5">
+          {/* Card Number */}
           <div className="space-y-2">
             <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-              Số Thẻ
+              Card Number
             </label>
-            <div className="relative">
-              <Input
-                {...register('cardNumber')}
-                value={cardNumber}
-                onChange={(event) =>
-                  setValue('cardNumber', formatCardNumber(event.target.value), {
-                    shouldDirty: true,
-                    shouldValidate: true,
-                  })
-                }
-                placeholder="1234 1234 1234 1234"
-                maxLength={19}
-                className={cn(
-                  'h-12 rounded-xl border bg-white pr-28 text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
-                  errors.cardNumber
-                    ? 'border-red-500 focus:border-red-500'
-                    : 'border-[#E5E5E5] focus:border-[#0066FF]',
-                )}
+            <div className={fieldBorderClass(numberState.error, 'number')}>
+              <CardNumberElement
+                options={{ style: STRIPE_ELEMENT_STYLE, showIcon: true }}
+                onChange={handleNumberChange}
+                onFocus={() => setFocusedField('number')}
+                onBlur={() => setFocusedField(null)}
+                className="w-full"
               />
-              <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/100px-Visa_Inc._logo.svg.png" alt="Visa" className="h-5" />
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/100px-Mastercard-logo.svg.png" alt="Mastercard" className="h-5" />
-              </div>
             </div>
-            {errors.cardNumber?.message && (
-              <span className="text-[11px] text-red-500">{String(errors.cardNumber.message)}</span>
+            {numberState.error && (
+              <span className="text-[11px] text-red-500">{numberState.error}</span>
             )}
           </div>
 
+          {/* Expiry + CVC */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-                Ngày Hết Hạn
+                Expiry Date
               </label>
-              <Input
-                {...register('expiryDate')}
-                value={expiryDate}
-                onChange={(event) =>
-                  setValue('expiryDate', formatExpiryDate(event.target.value), {
-                    shouldDirty: true,
-                    shouldValidate: true,
-                  })
-                }
-                placeholder="MM / YY"
-                maxLength={7}
-                className={cn(
-                  'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
-                  errors.expiryDate
-                    ? 'border-red-500 focus:border-red-500'
-                    : 'border-[#E5E5E5] focus:border-[#0066FF]',
-                )}
-              />
-              {errors.expiryDate?.message && (
-                <span className="text-[11px] text-red-500">{String(errors.expiryDate.message)}</span>
+              <div className={fieldBorderClass(expiryState.error, 'expiry')}>
+                <CardExpiryElement
+                  options={{ style: STRIPE_ELEMENT_STYLE }}
+                  onChange={handleExpiryChange}
+                  onFocus={() => setFocusedField('expiry')}
+                  onBlur={() => setFocusedField(null)}
+                  className="w-full"
+                />
+              </div>
+              {expiryState.error && (
+                <span className="text-[11px] text-red-500">{expiryState.error}</span>
               )}
             </div>
 
             <div className="space-y-2">
               <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-                Mã Bảo Mật
+                Security Code
               </label>
-              <div className="relative">
-                <Input
-                  {...register('cvc')}
-                  value={cvc}
-                  onChange={(event) =>
-                    setValue('cvc', formatCvc(event.target.value), {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    })
-                  }
-                  placeholder="CVC"
-                  maxLength={4}
-                  type="password"
-                  className={cn(
-                    'h-12 rounded-xl border bg-white pr-12 text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
-                    errors.cvc
-                      ? 'border-red-500 focus:border-red-500'
-                      : 'border-[#E5E5E5] focus:border-[#0066FF]',
-                  )}
+              <div className={fieldBorderClass(cvcState.error, 'cvc')}>
+                <CardCvcElement
+                  options={{ style: STRIPE_ELEMENT_STYLE }}
+                  onChange={handleCvcChange}
+                  onFocus={() => setFocusedField('cvc')}
+                  onBlur={() => setFocusedField(null)}
+                  className="w-full"
                 />
-                <CreditCard className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#989898]" />
               </div>
-              {errors.cvc?.message && (
-                <span className="text-[11px] text-red-500">{String(errors.cvc.message)}</span>
+              {cvcState.error && (
+                <span className="text-[11px] text-red-500">{cvcState.error}</span>
               )}
             </div>
           </div>
 
+          {/* Billing country */}
           <div className="space-y-2">
             <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-              Quốc Gia
+              Country
             </label>
             <select
-              {...register('country')}
               value={selectedCountry}
-              onChange={(event) =>
-                setValue('country', event.target.value, { shouldDirty: true, shouldValidate: true })
+              onChange={(e) =>
+                setValue('country', e.target.value, { shouldDirty: true, shouldValidate: true })
               }
-              className={cn(
-                'h-12 w-full rounded-xl border bg-white px-4 text-[15px] font-medium text-[#191414] focus:ring-0',
-                errors.country
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-[#E5E5E5] focus:border-[#0066FF]',
-              )}
+              className="h-12 w-full rounded-xl border border-[#E5E5E5] bg-white px-4 text-[15px] font-medium text-[#191414] focus:border-[#0066FF] focus:outline-none focus:ring-0"
             >
-              <option value="VN">Việt Nam</option>
+              <option value="VN">Vietnam</option>
               <option value="US">United States</option>
-              <option value="UK">United Kingdom</option>
+              <option value="GB">United Kingdom</option>
               <option value="JP">Japan</option>
             </select>
-            {errors.country?.message && (
-              <span className="text-[11px] text-red-500">{String(errors.country.message)}</span>
-            )}
           </div>
 
           <p className="text-[13px] leading-relaxed text-[#595959]">
-            Khi cung cấp thông tin thẻ, bạn cho phép Artium tính phí thẻ của bạn cho các khoản
-            thanh toán trong tương lai theo các điều khoản của họ.
+            By providing your card details, you authorise Artium to charge your card for future
+            payments in accordance with their terms.
           </p>
         </div>
       </div>
@@ -185,23 +159,24 @@ function CardSection({ register, errors, setValue, cardNumber, expiryDate, cvc, 
 
 type Props = {
   ethAmount?: number
+  onCardElementsChange?: (complete: boolean) => void
 }
 
-export const BuyerCheckoutPaymentForm = ({ ethAmount }: Props) => {
-  const {
-    formState: { errors },
-    register,
-    setValue,
-  } = useFormContext<BuyerCheckoutPaymentValues>()
+export const BuyerCheckoutPaymentForm = ({ ethAmount, onCardElementsChange }: Props) => {
+  const { formState: { errors }, setValue } = useFormContext<BuyerCheckoutPaymentValues>()
 
   const paymentMethod = useWatch({ name: 'paymentMethod' }) ?? 'card'
   const selectedCountry = useWatch({ name: 'country' }) ?? 'VN'
-  const cardNumber = useWatch({ name: 'cardNumber' }) ?? ''
-  const expiryDate = useWatch({ name: 'expiryDate' }) ?? ''
-  const cvc = useWatch({ name: 'cvc' }) ?? ''
 
   const handleMethodChange = (method: 'card' | 'wallet') => {
-    setValue('paymentMethod', method, { shouldDirty: true, shouldValidate: false })
+    setValue('paymentMethod', method, { shouldDirty: true, shouldValidate: true })
+    onCardElementsChange?.(false)
+    if (method === 'card') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setValue('walletAddress' as any, '', { shouldDirty: true, shouldValidate: false })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setValue('txHash' as any, '', { shouldDirty: true, shouldValidate: false })
+    }
   }
 
   return (
@@ -226,16 +201,12 @@ export const BuyerCheckoutPaymentForm = ({ ethAmount }: Props) => {
         ))}
       </div>
 
-      {/* Card fields */}
+      {/* Stripe Card Elements */}
       {paymentMethod === 'card' && (
-        <CardSection
-          register={register}
-          errors={errors}
+        <StripeCardSection
           setValue={setValue}
-          cardNumber={cardNumber}
-          expiryDate={expiryDate}
-          cvc={cvc}
           selectedCountry={selectedCountry}
+          onCardElementsChange={onCardElementsChange ?? (() => undefined)}
         />
       )}
 
@@ -247,9 +218,19 @@ export const BuyerCheckoutPaymentForm = ({ ethAmount }: Props) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             setValue('walletAddress' as any, address, { shouldDirty: true, shouldValidate: true })
           }
+          onWalletDisconnected={() => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setValue('walletAddress' as any, '', { shouldDirty: true, shouldValidate: true })
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setValue('txHash' as any, '', { shouldDirty: true, shouldValidate: true })
+          }}
           onTxHashReceived={(hash) =>
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             setValue('txHash' as any, hash, { shouldDirty: true, shouldValidate: true })
+          }
+          onTxHashCleared={() =>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setValue('txHash' as any, '', { shouldDirty: true, shouldValidate: true })
           }
           errors={errors}
         />

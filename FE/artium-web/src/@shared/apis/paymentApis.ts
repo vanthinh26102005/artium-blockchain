@@ -38,6 +38,7 @@ export type PaymentIntentResponse = {
   platformFee: number
   netAmount: number
   stripePaymentIntentId: string
+  clientSecret: string
   description: string | null
   createdAt: string
 }

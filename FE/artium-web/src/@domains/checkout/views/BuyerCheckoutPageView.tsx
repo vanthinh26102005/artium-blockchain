@@ -4,11 +4,15 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { useRouter } from 'next/router'
 import { zodResolver } from '@hookform/resolvers/zod'
 
+// stripe
+import { useStripe, useElements, CardNumberElement } from '@stripe/react-stripe-js'
+
 // @domains - checkout
 import { BuyerCheckoutLayout } from '../components/BuyerCheckoutLayout'
 import { BuyerCheckoutContactForm } from '../components/BuyerCheckoutContactForm'
 import { BuyerCheckoutPaymentForm } from '../components/BuyerCheckoutPaymentForm'
 import { BuyerCheckoutOrderSummary } from '../components/BuyerCheckoutOrderSummary'
+import { CheckoutSuccessScreen } from '../components/CheckoutSuccessScreen'
 import {
     defaultBuyerCheckoutDraft,
     type ArtworkForCheckout,
@@ -20,7 +24,13 @@ import {
     type BuyerCheckoutContactStepValues,
     type BuyerCheckoutPaymentValues,
 } from '../validations/buyerCheckout.schema'
-import { createStripePaymentMethod } from '../hooks/useStripeCardToken'
+import { classifyPaymentError, type ClassifiedPaymentError } from '../utils/paymentErrors'
+import {
+    clearCheckoutSuccessState,
+    loadCheckoutSuccessState,
+    saveCheckoutSuccessState,
+    type CheckoutSuccessState,
+} from '../utils/checkoutSuccessState'
 
 // @domains - auth
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
@@ -56,13 +66,20 @@ const apiArtworkToCheckout = (artwork: ArtworkApiItem): ArtworkForCheckout => {
 export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps) => {
     const router = useRouter()
     const { user, isAuthenticated } = useAuthStore()
+    const stripe = useStripe()
+    const elements = useElements()
 
     // -- state --
     const [step, setStep] = useState(1)
     const [isLoading, setIsLoading] = useState(false)
     const [isFetchingArtwork, setIsFetchingArtwork] = useState(true)
     const [artwork, setArtwork] = useState<ArtworkForCheckout | null>(null)
-    const [error, setError] = useState<string | null>(null)
+    const [fetchError, setFetchError] = useState<string | null>(null)
+    const [paymentResult, setPaymentResult] = useState<CheckoutSuccessState | null>(null)
+    const [paymentError, setPaymentError] = useState<ClassifiedPaymentError | null>(null)
+    const [cardElementsComplete, setCardElementsComplete] = useState(false)
+    const [paymentFormResetKey, setPaymentFormResetKey] = useState(0)
+
     const contactForm = useForm<BuyerCheckoutContactStepValues>({
         resolver: zodResolver(buyerCheckoutContactStepSchema),
         defaultValues: defaultBuyerCheckoutDraft,
@@ -72,14 +89,12 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         resolver: zodResolver(buyerCheckoutPaymentSchema),
         defaultValues: {
             paymentMethod: 'card',
-            cardNumber: '',
-            expiryDate: '',
-            cvc: '',
-            country: '',
+            country: 'VN',
         },
         mode: 'onChange',
     })
     const watchedDraft = useWatch({ control: contactForm.control })
+    const watchedPaymentValues = useWatch({ control: paymentForm.control })
     const draft: BuyerCheckoutContactStepValues = {
         ...defaultBuyerCheckoutDraft,
         ...watchedDraft,
@@ -93,12 +108,20 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         },
     }
 
+    // -- hydrate persisted success state for refresh/back-entry on the checkout route --
+    useEffect(() => {
+        const persistedSuccessState = loadCheckoutSuccessState(artworkId)
+        if (persistedSuccessState) {
+            setPaymentResult(persistedSuccessState)
+        }
+    }, [artworkId])
+
     // -- fetch artwork from API --
     useEffect(() => {
         let cancelled = false
         const fetchArtwork = async () => {
             setIsFetchingArtwork(true)
-            setError(null)
+            setFetchError(null)
             try {
                 const apiArtwork = await artworkApis.getArtworkById(artworkId)
                 if (cancelled) return
@@ -109,7 +132,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                 }
             } catch (err) {
                 if (!cancelled) {
-                    setError(err instanceof Error ? err.message : 'Failed to load artwork')
+                    setFetchError(err instanceof Error ? err.message : 'Failed to load artwork')
                 }
             } finally {
                 if (!cancelled) setIsFetchingArtwork(false)
@@ -157,13 +180,26 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     const handleCancel = useCallback(() => {
         if (step === 2) {
             setStep(1)
+            setPaymentError(null)
+            setCardElementsComplete(false)
             return
         }
         router.back()
     }, [router, step])
 
+    const resetPaymentStepState = useCallback(() => {
+        clearCheckoutSuccessState(artworkId)
+        setPaymentError(null)
+        setCardElementsComplete(false)
+        setPaymentFormResetKey((current) => current + 1)
+        paymentForm.reset({
+            paymentMethod: 'card',
+            country: paymentForm.getValues('country') || 'VN',
+        })
+    }, [artworkId, paymentForm])
+
     const handleContinue = useCallback(async () => {
-        setError(null)
+        setPaymentError(null)
 
         if (step === 1) {
             const isStepValid = await contactForm.trigger()
@@ -172,10 +208,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                     contactForm.getValues('deliveryMethod') === 'ship_by_platform' &&
                     contactForm.formState.errors.shippingAddress
                 ) {
-                    setError('Please fill in all shipping address fields.')
+                    setPaymentError({ type: 'generic', message: 'Please fill in all shipping address fields.' })
                     return
                 }
-                setError('Please fill in all contact information fields.')
+                setPaymentError({ type: 'generic', message: 'Please fill in all contact information fields.' })
                 return
             }
 
@@ -183,18 +219,40 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
             return
         }
 
-        const isStepValid = await paymentForm.trigger()
-        if (!isStepValid) {
-            setError('Please fill in all payment information.')
-            return
+        const paymentValues = paymentForm.getValues()
+
+        if (paymentValues.paymentMethod === 'card') {
+            if (!paymentValues.country?.trim()) {
+                setPaymentError({ type: 'generic', message: 'Please select your billing country.' })
+                return
+            }
+
+            if (!cardElementsComplete) {
+                setPaymentError({ type: 'generic', message: 'Please complete your card details.' })
+                return
+            }
+        } else {
+            const isStepValid = await paymentForm.trigger()
+            if (!isStepValid) {
+                setPaymentError({ type: 'generic', message: 'Please complete your wallet payment details.' })
+                return
+            }
         }
 
         if (!artwork) return
 
         const checkoutValues = contactForm.getValues()
-        const paymentValues = paymentForm.getValues()
+        clearCheckoutSuccessState(artworkId)
+
+        // Guard: Stripe context must be ready for card payments
+        if (paymentValues.paymentMethod === 'card' && (!stripe || !elements)) {
+            setPaymentError({ type: 'generic', message: 'Payment form is not ready yet. Please wait a moment and try again.' })
+            return
+        }
 
         setIsLoading(true)
+
+        let createdOrder: Awaited<ReturnType<typeof orderApis.createOrder>> | null = null
 
         try {
             const shippingAddr = checkoutValues.deliveryMethod !== 'pickup' ? {
@@ -206,7 +264,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                 country: checkoutValues.shippingAddress.country,
             } : undefined
 
-            const order = await orderApis.createOrder({
+            createdOrder = await orderApis.createOrder({
                 sellerId: artwork.artistId || '',
                 items: [{ artworkId: artwork.id, quantity: 1, price: artwork.price }],
                 shippingAddress: shippingAddr,
@@ -232,47 +290,103 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                 const intent = await paymentApis.createPaymentIntent({
                     amount: amountInCents,
                     currency: 'usd',
-                    orderId: order.id,
+                    orderId: createdOrder.id,
                     sellerId: artwork.artistId || undefined,
                     description: `Purchase: ${artwork.title}`,
                 })
 
-                // Tokenize raw card inputs via Stripe.js
-                const expiryParts = paymentValues.expiryDate.split('/')
-                const expMonth = parseInt(expiryParts[0]?.trim() ?? '0', 10)
-                const expYear = parseInt(expiryParts[1]?.trim() ?? '0', 10)
-                const pmId = await createStripePaymentMethod({
-                    number: paymentValues.cardNumber,
-                    exp_month: expMonth,
-                    exp_year: expYear,
-                    cvc: paymentValues.cvc,
+                if (!intent.clientSecret) {
+                    throw new Error('Stripe did not return a payment confirmation token. Please try again.')
+                }
+
+                // Confirm card payment in-browser using the same Stripe account as the publishable key.
+                const cardNumberEl = elements!.getElement(CardNumberElement)
+                if (!cardNumberEl) throw new Error('Card form is not mounted. Please refresh and try again.')
+                const confirmation = await stripe!.confirmCardPayment(intent.clientSecret, {
+                    payment_method: {
+                        card: cardNumberEl,
+                        billing_details: {
+                            name: `${checkoutValues.contact.firstName} ${checkoutValues.contact.lastName}`.trim(),
+                            email: checkoutValues.contact.email,
+                            address: { country: paymentValues.country },
+                        },
+                    },
                 })
 
-                // Confirm payment intent with tokenized payment method
-                await paymentApis.confirmPaymentIntent({
-                    paymentIntentId: intent.stripePaymentIntentId,
-                    stripePaymentMethodId: pmId,
-                })
+                if (confirmation.error) {
+                    throw new Error(confirmation.error.message ?? 'Card payment failed')
+                }
+
+                const confirmedStatus = confirmation.paymentIntent?.status
+                if (confirmedStatus !== 'succeeded' && confirmedStatus !== 'processing') {
+                    throw new Error('Card payment could not be completed. Please try again.')
+                }
+
+                const nextPaymentResult: CheckoutSuccessState = {
+                    artworkId,
+                    orderNumber: createdOrder.orderNumber,
+                    paymentMethod: 'card',
+                    isProcessing: confirmedStatus === 'processing',
+                    totalPaid: createdOrder.totalAmount,
+                }
+
+                saveCheckoutSuccessState(nextPaymentResult)
+                setPaymentResult(nextPaymentResult)
             } else if (paymentValues.paymentMethod === 'wallet') {
                 await paymentApis.recordEthereumPayment({
                     txHash: paymentValues.txHash,
                     walletAddress: paymentValues.walletAddress,
-                    orderId: order.id,
+                    orderId: createdOrder.id,
                     amount: pricing.total,
                     currency: 'ETH',
                     description: `Purchase: ${artwork.title}`,
                 })
-            }
 
-            // Success: redirect to discover with success query param
-            void router.push(`/discover?checkout=success&orderNumber=${order.orderNumber}`)
+                const nextPaymentResult: CheckoutSuccessState = {
+                    artworkId,
+                    orderNumber: createdOrder.orderNumber,
+                    paymentMethod: 'wallet',
+                    isProcessing: true,
+                    totalPaid: createdOrder.totalAmount,
+                }
+
+                saveCheckoutSuccessState(nextPaymentResult)
+                setPaymentResult(nextPaymentResult)
+            } else {
+                throw new Error('Unsupported payment method.')
+            }
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Payment failed. Please try again.'
-            setError(message)
+            // Best-effort: cancel the orphan order so it doesn't remain pending
+            if (createdOrder) {
+                void orderApis.cancelOrder(createdOrder.id, 'Payment failed').catch(() => undefined)
+            }
+            setPaymentError(classifyPaymentError(err))
         } finally {
             setIsLoading(false)
         }
-    }, [artwork, contactForm, paymentForm, pricing.total, router, step])
+    }, [artwork, artworkId, cardElementsComplete, contactForm, elements, paymentForm, pricing.total, router, step, stripe])
+
+    const handlePaymentRecovery = useCallback(() => {
+        if (!paymentError?.recoveryAction) {
+            return
+        }
+
+        if (paymentError.recoveryAction === 'reset-payment') {
+            resetPaymentStepState()
+            return
+        }
+
+        if (paymentError.recoveryAction === 'retry-submit') {
+            void handleContinue()
+        }
+    }, [handleContinue, paymentError, resetPaymentStepState])
+
+    const handleContinueShopping = useCallback(() => {
+        clearCheckoutSuccessState(artworkId)
+        setPaymentResult(null)
+        setPaymentError(null)
+        void router.push('/discover')
+    }, [artworkId, router])
 
     // -- loading state --
     if (isFetchingArtwork) {
@@ -293,7 +407,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                 <div className="text-center">
                     <h1 className="text-xl font-bold text-[#191414]">Artwork Not Found</h1>
                     <p className="mt-2 text-[#595959]">
-                        {error || "The artwork you're looking for doesn't exist."}
+                        {fetchError || "The artwork you're looking for doesn't exist."}
                     </p>
                     <button
                         onClick={() => router.push('/discover')}
@@ -306,8 +420,32 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         )
     }
 
+    // -- success screen (step 3) --
+    if (paymentResult) {
+        return (
+            <CheckoutSuccessScreen
+                orderNumber={paymentResult.orderNumber}
+                artwork={artwork}
+                totalPaid={paymentResult.totalPaid}
+                paymentMethod={paymentResult.paymentMethod}
+                isProcessing={paymentResult.isProcessing}
+                onContinueShopping={handleContinueShopping}
+            />
+        )
+    }
+
     const isStep1Valid = contactForm.formState.isValid
-    const isStep2Valid = paymentForm.formState.isValid
+    const watchedPaymentMethod = watchedPaymentValues?.paymentMethod ?? 'card'
+    const isCardReady =
+        watchedPaymentValues?.paymentMethod === 'card' &&
+        Boolean(watchedPaymentValues.country?.trim()) &&
+        cardElementsComplete
+    const isWalletReady =
+        watchedPaymentValues?.paymentMethod === 'wallet' &&
+        Boolean(watchedPaymentValues.walletAddress?.trim()) &&
+        Boolean(watchedPaymentValues.txHash?.trim())
+    const isStep2Valid =
+        watchedPaymentMethod === 'card' ? isCardReady : watchedPaymentMethod === 'wallet' ? isWalletReady : false
     const isFormValid = step === 1 ? isStep1Valid : isStep2Valid
 
     return (
@@ -331,22 +469,47 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
             }
         >
             {step === 1 ? (
-                <FormProvider {...contactForm}>
-                    <BuyerCheckoutContactForm />
-                </FormProvider>
-            ) : (
                 <>
-                    <FormProvider {...paymentForm}>
-                        <BuyerCheckoutPaymentForm ethAmount={pricing.total} />
+                    <FormProvider {...contactForm}>
+                        <BuyerCheckoutContactForm />
                     </FormProvider>
-                    {error && (
+                    {paymentError && step === 1 && (
                         <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                            <p className="text-[13px] text-red-700">{error}</p>
+                            <p className="text-[13px] text-red-700">{paymentError.message}</p>
                         </div>
                     )}
+                </>
+            ) : (
+                <>
+                    {paymentError && (
+                        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                            <p className="text-[13px] font-semibold text-red-700">{paymentError.message}</p>
+                            {paymentError.recoveryAction === 'reset-payment' && (
+                                <p className="mt-1 text-[12px] text-red-600">
+                                    Your card has not been charged.
+                                </p>
+                            )}
+                            {paymentError.ctaLabel && paymentError.recoveryAction && (
+                                <button
+                                    type="button"
+                                    onClick={handlePaymentRecovery}
+                                    disabled={isLoading}
+                                    className="mt-3 text-[12px] font-semibold text-red-700 underline underline-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {paymentError.ctaLabel}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                    <FormProvider {...paymentForm}>
+                        <BuyerCheckoutPaymentForm
+                            key={paymentFormResetKey}
+                            ethAmount={pricing.total}
+                            onCardElementsChange={setCardElementsComplete}
+                        />
+                    </FormProvider>
                 </>
             )}
         </BuyerCheckoutLayout>
     )
 }
-

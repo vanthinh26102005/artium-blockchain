@@ -81,21 +81,6 @@ export const buyerCheckoutContactStepSchema = z
 export const buyerCheckoutPaymentSchema = z.discriminatedUnion('paymentMethod', [
   z.object({
     paymentMethod: z.literal('card'),
-    cardNumber: z
-      .string()
-      .trim()
-      .min(1, 'Card number is required')
-      .refine((v) => v.replace(/\s/g, '').length >= 13, 'Card number is incomplete'),
-    expiryDate: z
-      .string()
-      .trim()
-      .min(1, 'Expiry date is required')
-      .regex(/^(0[1-9]|1[0-2])\s*\/\s*\d{2}$/, 'Use MM / YY format'),
-    cvc: z
-      .string()
-      .trim()
-      .min(1, 'Security code is required')
-      .regex(/^\d{3,4}$/, 'Use a valid security code'),
     country: z.string().trim().min(1, 'Country is required'),
   }),
   z.object({

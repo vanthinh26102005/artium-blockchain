@@ -173,7 +173,7 @@ export class BlockchainEventListenerService
       await this.catchUpToLatestBlock();
     } catch (err) {
       this.logger.error(
-        `Initial backfill failed (RPC error – restart service to retry): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
+        `Initial backfill failed (RPC error - restart service to retry): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
       );
     }
 

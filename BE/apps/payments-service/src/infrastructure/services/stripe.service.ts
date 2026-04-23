@@ -69,7 +69,7 @@ export class StripeService {
   ): Promise<Stripe.PaymentIntent> {
     try {
       const params: Stripe.PaymentIntentConfirmParams = {
-        return_url: returnUrl || 'https://artium.app/payments/complete',
+        return_url: returnUrl || 'https://localhost:3000/payments/complete',
       };
       if (paymentMethodId) params.payment_method = paymentMethodId;
 
