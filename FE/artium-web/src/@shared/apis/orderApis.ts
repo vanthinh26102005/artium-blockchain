@@ -35,27 +35,63 @@ export type OrderItemResponse = {
   quantity: number
   currency: string
   artworkTitle: string
+  artworkImageUrl?: string | null
+  artworkDescription?: string | null
+  platformFee?: string | null
+  sellerPayoutAmount?: string | null
   payoutStatus: string
+  payoutAt?: string | null
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type OrderResponse = {
   id: string
-  collectorId: string
+  collectorId?: string | null
   orderNumber: string
   status: string
   subtotal: number
   shippingCost: number
   taxAmount: number
-  discountAmount: number
+  discountAmount?: number | null
   totalAmount: number
   currency: string
+  promoCode?: string | null
+  shippingMethod?: string | null
+  trackingNumber?: string | null
+  carrier?: string | null
+  estimatedDeliveryDate?: string | null
   paymentStatus: string
-  paymentIntentId: string | null
-  paymentTransactionId: string | null
-  shippingAddress: ShippingAddressRequest | null
+  paymentMethod?: string | null
+  paymentIntentId?: string | null
+  paymentTransactionId?: string | null
+  shippingAddress?: Record<string, unknown> | null
+  billingAddress?: Record<string, unknown> | null
   customerNotes: string | null
+  internalNotes?: string | null
+  cancelledReason?: string | null
+  cancelledAt?: string | null
+  confirmedAt?: string | null
+  shippedAt?: string | null
+  deliveredAt?: string | null
+  onChainOrderId?: string | null
+  contractAddress?: string | null
+  escrowState?: number | null
+  txHash?: string | null
+  sellerWallet?: string | null
+  buyerWallet?: string | null
+  bidAmountWei?: string | null
+  disputeReason?: string | null
+  disputeOpenedAt?: string | null
+  disputeResolvedAt?: string | null
+  disputeResolutionNotes?: string | null
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
+}
+
+export type OrdersListResponse = {
+  data: OrderResponse[]
+  total: number
 }
 
 // --- API Functions ---
@@ -69,8 +105,12 @@ const orderApis = {
     return apiFetch<OrderResponse>(`/orders/${id}`)
   },
 
-  getMyOrders: async (): Promise<OrderResponse[]> => {
-    return apiFetch<OrderResponse[]>('/orders')
+  getOrderByOnChainId: async (onChainOrderId: string): Promise<OrderResponse> => {
+    return apiFetch<OrderResponse>(`/orders/on-chain/${onChainOrderId}`)
+  },
+
+  getMyOrders: async (): Promise<OrdersListResponse> => {
+    return apiFetch<OrdersListResponse>('/orders')
   },
 
   getOrderItems: async (orderId: string): Promise<OrderItemResponse[]> => {

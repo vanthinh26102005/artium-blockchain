@@ -31,6 +31,7 @@ type BidEditingModalProps = {
   isOpen: boolean
   lot: AuctionBidLot | null
   onClose: () => void
+  onViewOrderStatus?: (lot: AuctionBidLot) => void
 }
 
 const MIN_BID_INCREMENT_ETH = 0.1
@@ -92,7 +93,12 @@ const getMockTransactionHash = (artworkId: string, bidValue: number) => {
   return `0x${artworkId.replace(/[^a-zA-Z0-9]/g, '').slice(-4)}${compactBidValue}f89c`
 }
 
-export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) => {
+export const BidEditingModal = ({
+  isOpen,
+  lot,
+  onClose,
+  onViewOrderStatus,
+}: BidEditingModalProps) => {
   const [viewState, setViewState] = useState<
     'editing' | 'submitting' | 'pending' | 'confirmed' | 'failed'
   >('editing')
@@ -262,6 +268,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
         committedBidValue={committedBidValue}
         transactionHash={transactionHash}
         onClose={handleCloseModal}
+        onViewOrderStatus={onViewOrderStatus ? () => onViewOrderStatus(lot) : undefined}
       />
     )
   }

@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { ChevronDown, Grid2X2, LayoutList, ShieldCheck } from 'lucide-react'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import {
@@ -169,7 +170,15 @@ const formatEthDisplay = (value: number) => {
 const isBidActionStatus = (statusKey: AuctionLotStatusKey) =>
   statusKey === 'active' || statusKey === 'ending-soon'
 
+const demoOrderIds = ['42', '314', '9001'] as const
+
+const getDemoOrderIdForLot = (lot: AuctionBidLot) => {
+  const hash = Array.from(lot.artworkId).reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  return demoOrderIds[hash % demoOrderIds.length]
+}
+
 const LiveAuctionPage = () => {
+  const router = useRouter()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isMobileViewport, setIsMobileViewport] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<AuctionCategoryKey>('all')
@@ -1219,6 +1228,9 @@ const LiveAuctionPage = () => {
           lot={selectedBidLot}
           isOpen={Boolean(selectedBidLot)}
           onClose={() => setSelectedBidLot(null)}
+          onViewOrderStatus={(lot) => {
+            void router.push(`/orders/on-chain/${getDemoOrderIdForLot(lot)}?demo=1`)
+          }}
         />
 
       </div>
