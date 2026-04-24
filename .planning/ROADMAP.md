@@ -23,6 +23,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 9: Checkout Completion & Webhook Alignment** - Canonicalize Stripe webhook handling and finish retry/success behavior across checkout outcomes
 - [ ] **Phase 10: Checkout Traceability & Validation Closure** - Restore PAY/UX traceability and create the verification evidence needed for milestone re-audit
 - [ ] **Phase 11: Wallet Checkout Pay-Now Orchestration & Success Redirect** - Move wallet order creation/send flow behind the main Pay Now action and return successful wallet checkouts to the success screen
+- [ ] **Phase 18: Seller auction access and artwork eligibility policy** - Define and enforce seller-only access plus own-inventory eligibility before auction setup
+- [ ] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
+- [ ] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers
 
 ## Phase Details
 
@@ -171,7 +174,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 19 → 20 after the buyer-facing auction read/bid flow exists.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -191,6 +194,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 14. Order detail copy actions, shipping logic alignment, and TypeScript stabilization | 1/1 | Planned | - |
 | 15. Shared text-entry form standardization and cross-domain refactor | 1/1 | Planned | - |
 | 16. Shared form field standardization and multi-domain text-entry migration | 1/1 | Planned | - |
+| 17. Auction frontend integration with blockchain-backed backend flow and live auction state sync | 3/3 | Completed | 2026-04-24 |
+| 18. Seller auction access and artwork eligibility policy | 0/TBD | Not started | - |
+| 19. Seller auction creation workspace and terms UX | 0/TBD | Not started | - |
+| 20. Auction start orchestration and seller lifecycle status | 0/TBD | Not started | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -280,3 +287,45 @@ Plans:
 - [x] 17-01 Backend auction read model and realtime gateway contract
 - [x] 17-02 Frontend auction listing API integration
 - [x] 17-03 Wallet-backed bid modal and authoritative state sync
+
+### Phase 18: Seller auction access and artwork eligibility policy
+
+**Goal:** Establish the seller-only auction creation contract and eligibility policy so only authorized sellers can select owned, auctionable artworks before any auction terms or on-chain start flow is exposed.
+**Requirements**: SAUC-01, SAUC-02, SAUC-03
+**Depends on:** Phase 17
+**Success Criteria** (what must be TRUE):
+  1. Developer can visit the planned seller auction creation route as an unauthenticated user, non-seller user, and seller user and observe access outcomes that match policy.
+  2. Developer can inspect backend guards and confirm seller authorization is enforced server-side, not only through frontend routing.
+  3. Developer can list candidate artworks for the current seller and confirm the response includes only owned inventory records.
+  4. Developer can inspect eligibility logic and confirm sold, deleted, already-auctioned, active-order, multi-quantity, missing-primary-image, and incomplete-metadata artworks are blocked with specific reason codes.
+  5. Developer can reuse the eligibility result in frontend copy without duplicating business rules in React.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 19: Seller auction creation workspace and terms UX
+
+**Goal:** Build a practical seller workspace where an eligible artwork can be picked, auction terms can be configured with clear policy constraints, and the seller can preview buyer-facing auction details before submission.
+**Requirements**: SAUC-04, SAUC-05, SAUC-06
+**Depends on:** Phase 18
+**Success Criteria** (what must be TRUE):
+  1. Developer can open a seller-only auction creation page, select an eligible artwork from inventory, and move into terms setup without using quick-sell invoice UI.
+  2. Developer can configure starting bid, optional reserve policy, minimum bid increment, duration/start/end timing, and shipping/payment disclosures with validation that prevents unsafe or ambiguous auction economics.
+  3. Developer can preview the final auction card and policy summary before submission, including artwork image/title, seller name, start/end timing, minimum bid, reserve disclosure, fees, and Sepolia/network expectations.
+  4. Developer can see clear copy that auction economics become locked once the auction is active, with `Back`, `Save Draft`, and `Start Auction` actions behaving predictably.
+  5. Developer can run frontend typecheck and targeted lint on the new auction creation workspace without introducing new form or route regressions.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 20: Auction start orchestration and seller lifecycle status
+
+**Goal:** Connect seller auction creation to the backend/on-chain start flow with idempotent orchestration, authoritative auction state persistence, and seller-visible pending/active/failed lifecycle feedback.
+**Requirements**: SAUC-07, SAUC-08, SAUC-09
+**Depends on:** Phase 19
+**Success Criteria** (what must be TRUE):
+  1. Developer can submit a valid seller auction start request and observe backend validation for seller identity, artwork ownership, eligibility, seller wallet/profile readiness, and contract/network configuration before on-chain creation.
+  2. Developer can retry a timed-out or duplicated start request without creating duplicate on-chain/off-chain auctions for the same artwork.
+  3. Developer can inspect persistence and confirm artwork status, auction/order state, on-chain auction ID, tx hash, and public auction read DTOs converge after the auction starts.
+  4. Developer can see seller lifecycle feedback for pending, active, failed, and retryable auction start states with actionable reason codes.
+  5. Developer can confirm the public `/auction` listing and seller inventory/order views reflect the new auction through backend state, not optimistic frontend-only mutation.
+**Plans**: TBD
+**UI hint**: yes

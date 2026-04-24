@@ -30,11 +30,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **SAFE-01**: Developers can verify no visual regressions during migration using deterministic before/after checks for migrated component surfaces.
 - [ ] **SAFE-02**: Developers can verify no logic regressions in migrated domains by preserving existing domain API contracts and behavior.
+- [ ] **SAFE-03**: Developers can clear known frontend TypeScript blockers in supporting order/auth/artwork flows before closing follow-up polish phases that depend on them.
 
 ### Checkout Payments
 
 - [ ] **PAY-01**: Developers can complete checkout card payments end-to-end using a Stripe PaymentIntent confirmed in the same Stripe account context that collected the card details.
-- [ ] **PAY-02**: Developers can connect MetaMask and submit wallet payments only with a verified ETH amount, never by treating the raw USD checkout total as ETH.
+- [ ] **PAY-02**: Developers can connect MetaMask and submit wallet payments only on Sepolia testnet with a verified ETH amount, never by treating the raw USD checkout total as ETH or allowing checkout on the wrong chain.
 - [ ] **PAY-03**: Developers can record Ethereum payments through `POST /payments/ethereum` with consistent amount/currency metadata and duplicate `txHash` protection.
 - [ ] **PAY-04**: Developers can process Stripe webhook terminal events through one canonical entry point that updates transactions and outbox events correctly.
 
@@ -43,6 +44,35 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **UX-01**: Developers can keep checkout users on an inline success or processing screen after Pay Now instead of redirecting away immediately.
 - [ ] **UX-02**: Developers can show retry-friendly inline error and recovery states for card, network, and wallet failures without losing checkout step-1 data.
 - [ ] **UX-03**: Developers can validate checkout payment changes with build/typecheck evidence and phase verification artifacts before the milestone is marked complete.
+
+### Order Tracking & Management
+
+- [ ] **ORD-01**: Developers can provide authenticated users with a private orders workspace that shows only the purchases or sales they are authorized to access.
+- [ ] **ORD-02**: Developers can present professional order list and detail views with lifecycle status, artwork/payment/shipping summaries, and responsive empty/loading/error states.
+- [ ] **ORD-03**: Developers can expose only status-valid order actions to the correct role, including buyer delivery/dispute flows and seller shipment flows, with server-side access enforcement.
+- [ ] **ORD-04**: Developers can present payment and shipping records on order detail with copyable identifiers and lifecycle-accurate messaging instead of generic placeholders.
+
+## v1.1 Requirements
+
+Milestone focus: seller-only auction creation from owned inventory with practical business policy enforcement.
+
+### Seller Auction Access & Eligibility
+
+- [ ] **SAUC-01**: Sellers can access a protected auction creation workspace only when authenticated and recognized as seller-capable; non-sellers are blocked by both frontend route guards and backend authorization.
+- [ ] **SAUC-02**: Sellers can choose only artworks they own from inventory, with the picker excluding sold, deleted, already-auctioned, active-order, multi-quantity, or incomplete artwork records.
+- [ ] **SAUC-03**: Sellers can see clear eligibility reasons and recovery actions when an artwork cannot be auctioned, such as completing required metadata, uploading a primary image, or resolving an active listing/order state.
+
+### Auction Terms & Policy
+
+- [ ] **SAUC-04**: Sellers can configure auction terms with validated starting bid, optional reserve policy, minimum bid increment, duration/start/end timing, and shipping/payment disclosures before starting the auction.
+- [ ] **SAUC-05**: Sellers can preview the final auction card and policy summary before submission, including fees, irreversibility after activation, Sepolia/network expectations, and buyer-facing disclosures.
+- [ ] **SAUC-06**: Sellers cannot edit unsafe auction economics after activation; only explicitly safe lifecycle actions remain available according to auction state.
+
+### Auction Start & Lifecycle Truth
+
+- [ ] **SAUC-07**: Backend can start an auction idempotently only after validating seller identity, artwork ownership, artwork eligibility, seller wallet/profile readiness, and contract/network configuration.
+- [ ] **SAUC-08**: Backend can persist the auction start across on-chain and off-chain state so public `GET /auctions` and seller inventory/order views reflect the new auction without mock data.
+- [ ] **SAUC-09**: Sellers can monitor auction start status across pending, active, failed, and retryable states with tx hash, reason codes, and recovery paths that do not duplicate auctions.
 
 ## v2 Requirements
 
@@ -76,6 +106,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FND-03 | Phase 1 | Pending |
 | SAFE-01 | Phase 1 | Pending |
 | SAFE-02 | Phase 1 | Pending |
+| SAFE-03 | Phase 14 | Pending |
 | SHR-01 | Phase 2 | Pending |
 | SHR-02 | Phase 2 | Pending |
 | SHR-03 | Phase 2 | Pending |
@@ -90,12 +121,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UX-01 | Phase 9 | Pending |
 | UX-02 | Phase 9 | Pending |
 | UX-03 | Phase 10 | Pending |
+| ORD-01 | Phase 12 | Pending |
+| ORD-02 | Phase 12 | Pending |
+| ORD-03 | Phase 12 | Pending |
+| ORD-04 | Phase 14 | Pending |
+| SAUC-01 | Phase 18 | Pending |
+| SAUC-02 | Phase 18 | Pending |
+| SAUC-03 | Phase 18 | Pending |
+| SAUC-04 | Phase 19 | Pending |
+| SAUC-05 | Phase 19 | Pending |
+| SAUC-06 | Phase 19 | Pending |
+| SAUC-07 | Phase 20 | Pending |
+| SAUC-08 | Phase 20 | Pending |
+| SAUC-09 | Phase 20 | Pending |
 
 **Coverage:**
-- v1 requirements: 19 total
-- Mapped to phases: 19 ✓
+- v1 + v1.1 requirements: 33 total
+- Mapped to phases: 33 ✓
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-21*
-*Last updated: 2026-04-23 after checkout gap-closure phase planning*
+*Last updated: 2026-04-24 after defining v1.1 seller auction creation milestone*

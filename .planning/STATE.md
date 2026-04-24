@@ -1,17 +1,24 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: milestone_complete
-stopped_at: Phase 17 execution completed
-last_updated: "2026-04-24T13:14:42.216Z"
+milestone: v1.1
+milestone_name: Seller Auction Creation
+status: Defining requirements
+stopped_at: Milestone v1.1 seller auction creation initialized
+last_updated: "2026-04-24T20:54:00.000+07:00"
 progress:
-  total_phases: 17
+  total_phases: 20
   completed_phases: 2
   total_plans: 5
   completed_plans: 13
-  percent: 12
+  percent: 10
 ---
+
+## Current Position
+
+Phase: 18 (Seller auction access and artwork eligibility policy)
+Plan: —
+Status: Ready for discussion/planning
+Last activity: 2026-04-24 — Milestone v1.1 started for seller auction creation.
 
 ## Decisions
 
@@ -22,7 +29,7 @@ progress:
 
 ## Last Session
 
-Stopped at: Phase 17 execution started
+Stopped at: Milestone v1.1 seller auction creation initialized
 
 ## Accumulated Context
 
@@ -35,5 +42,9 @@ Stopped at: Phase 17 execution started
 - Phase 15 added: Shared text-entry form standardization and cross-domain refactor
 - Phase 16 added: Shared form field standardization and multi-domain text-entry migration
 - Phase 17 added: Auction frontend integration with blockchain-backed backend flow and live auction state sync
+- Phase 18 added: Seller auction access and artwork eligibility policy
+- Phase 19 added: Seller auction creation workspace and terms UX
+- Phase 20 added: Auction start orchestration and seller lifecycle status
 
 **Planned Phase:** 17 (Auction frontend integration with blockchain-backed backend flow and live auction state sync) — 3 plans — 2026-04-24T13:05:01.032Z
+**Planned Phase:** 18 (Seller auction access and artwork eligibility policy) — TBD plans — 2026-04-24T20:54:00.000+07:00
