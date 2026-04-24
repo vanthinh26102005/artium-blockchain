@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { Check, X } from 'lucide-react'
 import { type CSSProperties } from 'react'
+import { WALLET_TARGET_CHAIN } from '@domains/auth/constants/wallet'
 import {
   Dialog,
   DialogOverlay,
@@ -35,7 +36,7 @@ const formatTransactionHash = (value: string) => `${value.slice(0, 7)}...${value
 const formatEthDisplay = (value: number) => value.toFixed(2)
 
 const getTransactionUrl = (transactionHash: string) =>
-  `https://etherscan.io/tx/${encodeURIComponent(transactionHash)}`
+  `${WALLET_TARGET_CHAIN.blockExplorerUrl}/tx/${encodeURIComponent(transactionHash)}`
 
 export const ConfirmedBidState = ({
   isOpen,
@@ -81,7 +82,7 @@ export const ConfirmedBidState = ({
                   Bid Confirmed
                 </h2>
                 <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-black/58 md:text-base">
-                  Your bid has been successfully placed and recorded on the blockchain.
+                  Backend auction state confirms your wallet is the current leading bidder.
                 </p>
               </div>
 
@@ -139,7 +140,7 @@ export const ConfirmedBidState = ({
                   className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-[#5f5e5e]"
                   style={headlineFont}
                 >
-                  Done
+                  Close
                 </button>
                 <a
                   href={getTransactionUrl(transactionHash)}

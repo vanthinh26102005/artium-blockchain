@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { Clock3, X } from 'lucide-react'
 import { type CSSProperties } from 'react'
+import { WALLET_TARGET_CHAIN } from '@domains/auth/constants/wallet'
 import {
   Dialog,
   DialogOverlay,
@@ -35,7 +36,7 @@ const formatTransactionHash = (value: string) => `${value.slice(0, 7)}...${value
 const formatEthDisplay = (value: number) => `${value.toFixed(2)} ETH`
 
 const getTransactionUrl = (transactionHash: string) =>
-  `https://etherscan.io/tx/${encodeURIComponent(transactionHash)}`
+  `${WALLET_TARGET_CHAIN.blockExplorerUrl}/tx/${encodeURIComponent(transactionHash)}`
 
 export const PendingBidState = ({
   isOpen,
@@ -81,8 +82,8 @@ export const PendingBidState = ({
                   Pending Confirmation
                 </h2>
                 <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-black/58 md:text-base">
-                  Your bid has been submitted and is awaiting on-chain confirmation from the
-                  network.
+                  Your bid has been submitted and is awaiting backend/on-chain synchronized
+                  confirmation before it is treated as the leading auction bid.
                 </p>
               </div>
 
