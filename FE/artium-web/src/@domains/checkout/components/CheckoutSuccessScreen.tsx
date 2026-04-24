@@ -2,7 +2,7 @@
 import Link from 'next/link'
 
 // icons
-import { Check, Clock, Package, ShoppingBag } from 'lucide-react'
+import { AlertCircle, Check, Clock, Package, ShoppingBag } from 'lucide-react'
 
 // @shared
 import { Button } from '@shared/components/ui/button'
@@ -16,8 +16,8 @@ type CheckoutSuccessScreenProps = {
   artwork: ArtworkForCheckout
   totalPaid: number
   paymentMethod: 'card' | 'wallet'
-  /** true for ETH/wallet — blockchain confirmation is async */
-  isProcessing: boolean
+  status: 'processing' | 'succeeded' | 'failed'
+  failureReason?: string | null
   onContinueShopping: () => void
 }
 
@@ -26,10 +26,60 @@ export const CheckoutSuccessScreen = ({
   artwork,
   totalPaid,
   paymentMethod,
-  isProcessing,
+  status,
+  failureReason,
   onContinueShopping,
 }: CheckoutSuccessScreenProps) => {
   const formattedTotal = `$${totalPaid.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+  const isProcessing = status === 'processing'
+  const isFailed = status === 'failed'
+  const badgeClassName = isProcessing
+    ? 'border-amber-200 bg-amber-50'
+    : isFailed
+      ? 'border-red-200 bg-red-50'
+      : 'border-green-200 bg-green-50'
+  const iconContainerClassName = isProcessing
+    ? 'bg-amber-100'
+    : isFailed
+      ? 'bg-red-100'
+      : 'bg-green-100'
+  const titleClassName = isProcessing
+    ? 'text-amber-900'
+    : isFailed
+      ? 'text-red-900'
+      : 'text-green-900'
+  const descriptionClassName = isProcessing
+    ? 'text-amber-800'
+    : isFailed
+      ? 'text-red-800'
+      : 'text-green-800'
+  const title = isProcessing
+    ? 'Transaction Submitted'
+    : isFailed
+      ? 'Payment Needs Attention'
+      : 'Payment Successful'
+  const description = isProcessing
+    ? 'Your Sepolia transaction was submitted. We will update this order automatically after backend confirmation.'
+    : isFailed
+      ? failureReason || 'We could not confirm the wallet payment. Please review the order in your orders workspace.'
+      : 'Thank you for your purchase!'
+  const nextSteps = isProcessing
+    ? [
+        'We are verifying the Sepolia transaction in the background.',
+        'This page will refresh automatically when the payment is confirmed.',
+        "You can also track the order from your private orders workspace.",
+      ]
+    : isFailed
+      ? [
+          'The order was created, but the wallet payment has not been confirmed.',
+          'Review the order in your workspace before retrying payment or contacting support.',
+          'Do not send a second transaction unless the order still shows unpaid.',
+        ]
+      : [
+          'The artist has been notified and will confirm your order.',
+          'Your artwork will be prepared for shipment within 3–5 business days.',
+          "You'll receive a tracking number via email once it's shipped.",
+        ]
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-start bg-[#FDFDFD] px-4 pb-16 pt-12 font-sans text-[#191414]">
@@ -45,19 +95,19 @@ export const CheckoutSuccessScreen = ({
         <div
           className={cn(
             'animate-in fade-in zoom-in rounded-2xl border p-8 text-center duration-500',
-            isProcessing
-              ? 'border-amber-200 bg-amber-50'
-              : 'border-green-200 bg-green-50',
+            badgeClassName,
           )}
         >
           <div
             className={cn(
               'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full',
-              isProcessing ? 'bg-amber-100' : 'bg-green-100',
+              iconContainerClassName,
             )}
           >
             {isProcessing ? (
               <Clock className={cn('h-8 w-8', 'text-amber-600')} />
+            ) : isFailed ? (
+              <AlertCircle className="h-8 w-8 text-red-600" strokeWidth={2.5} />
             ) : (
               <Check className="h-8 w-8 text-green-600" strokeWidth={3} />
             )}
@@ -66,16 +116,14 @@ export const CheckoutSuccessScreen = ({
           <h1
             className={cn(
               'text-2xl font-bold',
-              isProcessing ? 'text-amber-900' : 'text-green-900',
+              titleClassName,
             )}
           >
-            {isProcessing ? 'Transaction Submitted' : 'Payment Successful'}
+            {title}
           </h1>
 
-          <p className={cn('mt-2 text-sm', isProcessing ? 'text-amber-800' : 'text-green-800')}>
-            {isProcessing
-              ? 'Your transaction is awaiting blockchain confirmation. This may take a few minutes.'
-              : 'Thank you for your purchase!'}
+          <p className={cn('mt-2 text-sm', descriptionClassName)}>
+            {description}
           </p>
 
           <p className="mt-3 text-[13px] font-medium text-[#595959]">
@@ -115,11 +163,7 @@ export const CheckoutSuccessScreen = ({
             What happens next
           </h2>
           <ol className="mt-4 space-y-3">
-            {[
-              'The artist has been notified and will confirm your order.',
-              'Your artwork will be prepared for shipment within 3–5 business days.',
-              "You'll receive a tracking number via email once it's shipped.",
-            ].map((step, i) => (
+            {nextSteps.map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#0066FF]/10 text-[11px] font-bold text-[#0066FF]">
                   {i + 1}

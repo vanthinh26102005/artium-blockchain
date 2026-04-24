@@ -9,6 +9,7 @@ import {
   Query,
   RawBodyRequest,
   Req,
+  NotFoundException,
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -184,12 +185,18 @@ export class PaymentsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
-  async getTransactionById(@Param('id') id: string) {
-    return sendRpc(
+  async getTransactionById(@Param('id') id: string, @Req() req: any) {
+    const transaction = await sendRpc<{ id: string; userId?: string | null }>(
       this.paymentsClient,
       { cmd: 'get_transaction_by_id' },
       { id },
     );
+
+    if (transaction?.userId !== req.user?.id) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    return transaction;
   }
 
   // ==================== PAYMENT METHODS ====================

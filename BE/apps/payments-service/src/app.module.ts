@@ -4,6 +4,7 @@ import {
   TransactionService,
 } from '@app/common';
 import { OutboxEntity, OutboxModule } from '@app/outbox';
+import { AppRabbitMQModule } from '@app/rabbitmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -37,6 +38,7 @@ import {
 } from './infrastructure/repositories';
 
 import {
+  ConfirmEthereumPaymentHandler,
   CancelInvoiceHandler,
   CreateInvoiceHandler,
   CreateInvoicePaymentIntentHandler,
@@ -73,6 +75,7 @@ import {
 
 import { StripeService } from './infrastructure/services/stripe.service';
 import { EthereumQuoteService } from './infrastructure/services/ethereum-quote.service';
+import { EthereumTransactionConfirmationService } from './infrastructure/services/ethereum-transaction-confirmation.service';
 
 import { HealthController } from './presentation';
 
@@ -82,6 +85,10 @@ import {
 } from './presentation/http/controllers';
 
 import { PaymentsMicroserviceController } from './presentation/microservice';
+import {
+  EthereumPaymentConfirmationProcessorEventHandler,
+  RetryStuckEthereumConfirmationsWorker,
+} from './application/event-handlers';
 
 export const CommandHandlers = [
   CreateInvoiceHandler,
@@ -107,6 +114,7 @@ export const CommandHandlers = [
   HandleStripeWebhookHandler,
 
   RecordEthereumPaymentHandler,
+  ConfirmEthereumPaymentHandler,
 ];
 
 export const QueryHandlers = [
@@ -140,6 +148,9 @@ export const Services = [
   { provide: ITransactionService, useClass: TransactionService },
   StripeService,
   EthereumQuoteService,
+  EthereumTransactionConfirmationService,
+  EthereumPaymentConfirmationProcessorEventHandler,
+  RetryStuckEthereumConfirmationsWorker,
   {
     provide: 'STRIPE_API_KEY',
     useFactory: async (configService: ConfigService) =>
@@ -174,6 +185,7 @@ export const Controllers = [
     ]),
 
     OutboxModule,
+    AppRabbitMQModule,
     CqrsModule,
   ],
   controllers: [...Controllers],

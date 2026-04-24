@@ -369,4 +369,132 @@ export class PaymentTransactionRepository implements IPaymentTransactionReposito
   async findByTxHash(txHash: string): Promise<PaymentTransaction | null> {
     return this.ormRepository.findOne({ where: { txHash } });
   }
+
+  async findEthereumTransactionsReadyForConfirmation(
+    limit: number,
+    staleAfter: Date,
+    transactionManager?: EntityManager,
+  ): Promise<PaymentTransaction[]> {
+    const repo = this.getRepo(transactionManager);
+    return repo
+      .createQueryBuilder('transaction')
+      .where('transaction.provider = :provider', { provider: PaymentProvider.ETHEREUM })
+      .andWhere('transaction.status = :status', { status: TransactionStatus.PROCESSING })
+      .andWhere('transaction.next_confirmation_at IS NOT NULL')
+      .andWhere('transaction.next_confirmation_at <= :now', { now: new Date() })
+      .andWhere(
+        '(transaction.confirmation_started_at IS NULL OR transaction.confirmation_started_at < :staleAfter)',
+        { staleAfter },
+      )
+      .orderBy('transaction.next_confirmation_at', 'ASC')
+      .addOrderBy('transaction.created_at', 'ASC')
+      .limit(limit)
+      .getMany();
+  }
+
+  async tryStartConfirmationAttempt(
+    transactionId: string,
+    startedAt: Date,
+    staleAfter: Date,
+    transactionManager?: EntityManager,
+  ): Promise<boolean> {
+    const repo = this.getRepo(transactionManager);
+    const result = await repo
+      .createQueryBuilder()
+      .update(PaymentTransaction)
+      .set({
+        confirmationStartedAt: startedAt,
+        confirmationAttempts: () => '"confirmation_attempts" + 1',
+      })
+      .where('transaction_id = :transactionId', { transactionId })
+      .andWhere('provider = :provider', { provider: PaymentProvider.ETHEREUM })
+      .andWhere('status = :status', { status: TransactionStatus.PROCESSING })
+      .andWhere(
+        '(confirmation_started_at IS NULL OR confirmation_started_at < :staleAfter)',
+        { staleAfter },
+      )
+      .execute();
+
+    return (result.affected ?? 0) > 0;
+  }
+
+  async scheduleNextConfirmationAttempt(
+    transactionId: string,
+    nextConfirmationAt: Date,
+    error: string,
+    transactionManager?: EntityManager,
+  ): Promise<PaymentTransaction | null> {
+    return this.update(
+      transactionId,
+      {
+        status: TransactionStatus.PROCESSING,
+        nextConfirmationAt,
+        confirmationStartedAt: null,
+        lastConfirmationError: error,
+      },
+      transactionManager,
+    );
+  }
+
+  async markEthereumTransactionSucceeded(
+    transactionId: string,
+    confirmedBlockNumber: string,
+    transactionManager?: EntityManager,
+  ): Promise<PaymentTransaction | null> {
+    const repo = this.getRepo(transactionManager);
+    const completedAt = new Date();
+    const result = await repo
+      .createQueryBuilder()
+      .update(PaymentTransaction)
+      .set({
+        status: TransactionStatus.SUCCEEDED,
+        processedAt: completedAt,
+        completedAt,
+        confirmationStartedAt: null,
+        nextConfirmationAt: null,
+        lastConfirmationError: null,
+        confirmedBlockNumber,
+      })
+      .where('transaction_id = :transactionId', { transactionId })
+      .andWhere('provider = :provider', { provider: PaymentProvider.ETHEREUM })
+      .andWhere('status = :status', { status: TransactionStatus.PROCESSING })
+      .execute();
+
+    if ((result.affected ?? 0) === 0) {
+      return this.findById(transactionId, transactionManager);
+    }
+
+    return this.findById(transactionId, transactionManager);
+  }
+
+  async markEthereumTransactionFailed(
+    transactionId: string,
+    failureReason: string,
+    failureCode?: string,
+    transactionManager?: EntityManager,
+  ): Promise<PaymentTransaction | null> {
+    const repo = this.getRepo(transactionManager);
+    const result = await repo
+      .createQueryBuilder()
+      .update(PaymentTransaction)
+      .set({
+        status: TransactionStatus.FAILED,
+        failureReason,
+        failureCode,
+        processedAt: new Date(),
+        confirmationStartedAt: null,
+        nextConfirmationAt: null,
+        lastConfirmationError: failureReason,
+      })
+      .where('transaction_id = :transactionId', { transactionId })
+      .andWhere('provider = :provider', { provider: PaymentProvider.ETHEREUM })
+      .andWhere('status = :status', { status: TransactionStatus.PROCESSING })
+      .execute();
+
+    if ((result.affected ?? 0) === 0) {
+      return this.findById(transactionId, transactionManager);
+    }
+
+    return this.findById(transactionId, transactionManager);
+  }
 }

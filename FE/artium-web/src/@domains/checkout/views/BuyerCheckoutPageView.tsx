@@ -40,7 +40,10 @@ import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import artworkApis, { type ArtworkApiItem } from '@shared/apis/artworkApis'
 import orderApis from '@shared/apis/orderApis'
 import paymentApis from '@shared/apis/paymentApis'
-import type { EthereumQuoteResponse } from '@shared/apis/paymentApis'
+import type {
+    EthereumQuoteResponse,
+    PaymentTransactionResponse,
+} from '@shared/apis/paymentApis'
 
 type BuyerCheckoutPageViewProps = {
     artworkId: string
@@ -230,6 +233,21 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         router.back()
     }, [router, step])
 
+    const updateStoredPaymentResult = useCallback(
+        (updater: (current: CheckoutSuccessState) => CheckoutSuccessState) => {
+            setPaymentResult((current) => {
+                if (!current) {
+                    return current
+                }
+
+                const nextPaymentResult = updater(current)
+                saveCheckoutSuccessState(nextPaymentResult)
+                return nextPaymentResult
+            })
+        },
+        [],
+    )
+
     const showSuccessState = useCallback((nextPaymentResult: CheckoutSuccessState) => {
         saveCheckoutSuccessState(nextPaymentResult)
         setPaymentResult(nextPaymentResult)
@@ -306,6 +324,83 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
             cancelled = true
         }
     }, [pricing.total, step, walletQuoteRefreshKey, watchedPaymentMethod])
+
+    useEffect(() => {
+        if (
+            !paymentResult ||
+            paymentResult.paymentMethod !== 'wallet' ||
+            paymentResult.status !== 'processing' ||
+            !paymentResult.transactionId
+        ) {
+            return
+        }
+
+        let cancelled = false
+        let timeoutId: number | null = null
+
+        const scheduleNextPoll = () => {
+            timeoutId = window.setTimeout(() => {
+                void pollTransactionStatus()
+            }, 5000)
+        }
+
+        const mapTransactionToCheckoutStatus = (
+            transaction: PaymentTransactionResponse,
+        ): CheckoutSuccessState['status'] | null => {
+            if (transaction.status === 'SUCCEEDED') {
+                return 'succeeded'
+            }
+
+            if (transaction.status === 'FAILED') {
+                return 'failed'
+            }
+
+            return null
+        }
+
+        const pollTransactionStatus = async () => {
+            const transactionId = paymentResult.transactionId
+            if (!transactionId) {
+                return
+            }
+
+            try {
+                const transaction = await paymentApis.getTransactionById(transactionId)
+                if (cancelled) {
+                    return
+                }
+
+                const nextStatus = mapTransactionToCheckoutStatus(transaction)
+                if (!nextStatus) {
+                    scheduleNextPoll()
+                    return
+                }
+
+                updateStoredPaymentResult((current) => ({
+                    ...current,
+                    status: nextStatus,
+                    orderId: transaction.orderId ?? current.orderId ?? null,
+                    failureReason:
+                        nextStatus === 'failed'
+                            ? transaction.failureReason || 'We could not confirm the Sepolia transaction.'
+                            : null,
+                }))
+            } catch {
+                if (!cancelled) {
+                    scheduleNextPoll()
+                }
+            }
+        }
+
+        void pollTransactionStatus()
+
+        return () => {
+            cancelled = true
+            if (timeoutId !== null) {
+                window.clearTimeout(timeoutId)
+            }
+        }
+    }, [paymentResult, updateStoredPaymentResult])
 
     const handleContinue = useCallback(async () => {
         setPaymentError(null)
@@ -451,8 +546,11 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                     artworkId,
                     orderNumber: createdOrder.orderNumber,
                     paymentMethod: 'card',
-                    isProcessing: confirmedStatus === 'processing',
+                    status: confirmedStatus === 'processing' ? 'processing' : 'succeeded',
                     totalPaid: createdOrder.totalAmount,
+                    orderId: createdOrder.id,
+                    transactionId: intent.id,
+                    failureReason: null,
                 }
 
                 showSuccessState(nextPaymentResult)
@@ -467,7 +565,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                     throw new Error('The checkout total changed. Refresh the Sepolia quote and try again.')
                 }
 
-                await paymentApis.recordEthereumPayment({
+                const recordedTransaction = await paymentApis.recordEthereumPayment({
                     txHash,
                     walletAddress: connectedWalletAddress,
                     orderId: createdOrder.id,
@@ -482,8 +580,11 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                     artworkId,
                     orderNumber: createdOrder.orderNumber,
                     paymentMethod: 'wallet',
-                    isProcessing: true,
+                    status: 'processing',
                     totalPaid: createdOrder.totalAmount,
+                    orderId: createdOrder.id,
+                    transactionId: recordedTransaction.id,
+                    failureReason: null,
                 }
 
                 showSuccessState(nextPaymentResult)
@@ -578,7 +679,8 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
                 artwork={artwork}
                 totalPaid={paymentResult.totalPaid}
                 paymentMethod={paymentResult.paymentMethod}
-                isProcessing={paymentResult.isProcessing}
+                status={paymentResult.status}
+                failureReason={paymentResult.failureReason}
                 onContinueShopping={handleContinueShopping}
             />
         )

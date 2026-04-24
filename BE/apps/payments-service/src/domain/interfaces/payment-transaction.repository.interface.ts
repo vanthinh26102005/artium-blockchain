@@ -92,4 +92,37 @@ export interface IPaymentTransactionRepository extends IRepository<
   ): Promise<PaymentTransaction[]>;
 
   findByTxHash(txHash: string): Promise<PaymentTransaction | null>;
+
+  findEthereumTransactionsReadyForConfirmation(
+    limit: number,
+    staleAfter: Date,
+    transactionManager?: EntityManager,
+  ): Promise<PaymentTransaction[]>;
+
+  tryStartConfirmationAttempt(
+    transactionId: string,
+    startedAt: Date,
+    staleAfter: Date,
+    transactionManager?: EntityManager,
+  ): Promise<boolean>;
+
+  scheduleNextConfirmationAttempt(
+    transactionId: string,
+    nextConfirmationAt: Date,
+    error: string,
+    transactionManager?: EntityManager,
+  ): Promise<PaymentTransaction | null>;
+
+  markEthereumTransactionSucceeded(
+    transactionId: string,
+    confirmedBlockNumber: string,
+    transactionManager?: EntityManager,
+  ): Promise<PaymentTransaction | null>;
+
+  markEthereumTransactionFailed(
+    transactionId: string,
+    failureReason: string,
+    failureCode?: string,
+    transactionManager?: EntityManager,
+  ): Promise<PaymentTransaction | null>;
 }

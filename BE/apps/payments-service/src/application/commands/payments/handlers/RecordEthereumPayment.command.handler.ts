@@ -12,6 +12,7 @@ import {
   RpcExceptionHelper,
 } from '@app/common';
 import { EthereumPaymentRecordedEvent } from '../../../../domain/events';
+import { EthereumPaymentConfirmationRequestedEvent } from '../../../../domain/events';
 import { PaymentTransaction } from '../../../../domain/entities';
 import { EthereumQuoteService } from '../../../../infrastructure/services/ethereum-quote.service';
 
@@ -100,6 +101,10 @@ export class RecordEthereumPaymentHandler
           quotedAt: quote.quotedAt,
           expiresAt: quote.expiresAt,
         },
+        confirmationAttempts: 0,
+        nextConfirmationAt: new Date(),
+        confirmationStartedAt: null,
+        lastConfirmationError: null,
       } as unknown as Omit<PaymentTransaction, 'transactionId' | 'createdAt'>);
     } catch (error) {
       this.logger.error(
@@ -126,6 +131,18 @@ export class RecordEthereumPaymentHandler
       payload: event.toPayload(),
       exchange: ExchangeName.PAYMENT_EVENTS,
       routingKey: RoutingKey.PAYMENT_ETHEREUM_RECORDED,
+    });
+
+    const confirmationRequestedEvent =
+      new EthereumPaymentConfirmationRequestedEvent(transaction.id, data.txHash);
+
+    await this.outboxService.createOutboxMessage({
+      aggregateType: 'PaymentTransaction',
+      aggregateId: transaction.id,
+      eventType: EthereumPaymentConfirmationRequestedEvent.getEventType(),
+      payload: confirmationRequestedEvent.toPayload(),
+      exchange: ExchangeName.PAYMENT_EVENTS,
+      routingKey: RoutingKey.PAYMENT_ETHEREUM_CONFIRMATION_REQUESTED,
     });
 
     this.logger.log(

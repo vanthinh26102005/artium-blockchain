@@ -8,6 +8,8 @@ export const RoutingKey = {
   PAYMENT_REFUNDED: 'payment.refunded',
   PAYMENT_METHOD_ATTACHED: 'payment.method.attached',
   PAYMENT_ETHEREUM_RECORDED: 'payment.ethereum.recorded',
+  PAYMENT_ETHEREUM_CONFIRMATION_REQUESTED:
+    'payment.ethereum.confirmation.requested',
 
   BLOCKCHAIN_AUCTION_STARTED: 'blockchain.auction.started',
   BLOCKCHAIN_AUCTION_ENDED: 'blockchain.auction.ended',

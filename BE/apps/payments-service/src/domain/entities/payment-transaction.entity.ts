@@ -162,6 +162,25 @@ export class PaymentTransaction extends AbstractEntity {
   @Column({ name: 'completed_at', type: 'timestamp', nullable: true })
   completedAt?: Date | null;
 
+  @Column({
+    name: 'confirmation_attempts',
+    type: 'integer',
+    default: 0,
+  })
+  confirmationAttempts?: number | null;
+
+  @Column({ name: 'next_confirmation_at', type: 'timestamp', nullable: true })
+  nextConfirmationAt?: Date | null;
+
+  @Column({ name: 'confirmation_started_at', type: 'timestamp', nullable: true })
+  confirmationStartedAt?: Date | null;
+
+  @Column({ name: 'last_confirmation_error', type: 'text', nullable: true })
+  lastConfirmationError?: string | null;
+
+  @Column({ name: 'confirmed_block_number', type: 'varchar', length: 32, nullable: true })
+  confirmedBlockNumber?: string | null;
+
   // ── Blockchain/escrow fields ──
 
   @Column({

@@ -103,9 +103,17 @@ export type PaymentTransactionResponse = {
   type: string
   status: string
   provider: string
+  userId: string
+  orderId: string | null
   amount: number
   currency: string
   stripePaymentIntentId: string | null
+  txHash: string | null
+  walletAddress: string | null
+  failureReason: string | null
+  failureCode: string | null
+  processedAt: string | null
+  completedAt: string | null
   createdAt: string
 }
 

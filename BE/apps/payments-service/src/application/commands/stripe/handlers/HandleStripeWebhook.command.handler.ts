@@ -5,7 +5,7 @@ import { StripeService } from '../../../../infrastructure/services/stripe.servic
 import { IPaymentTransactionRepository, IInvoiceRepository } from '../../../../domain/interfaces';
 import { OutboxService } from '@app/outbox';
 import { ExchangeName, RoutingKey } from '@app/rabbitmq';
-import { RpcExceptionHelper, TransactionStatus } from '@app/common';
+import { PaymentProvider, RpcExceptionHelper, TransactionStatus } from '@app/common';
 import { PaymentSucceededEvent, PaymentFailedEvent } from '../../../../domain/events';
 
 @CommandHandler(HandleStripeWebhookCommand)
@@ -74,16 +74,17 @@ export class HandleStripeWebhookHandler implements ICommandHandler<HandleStripeW
       await this.invoiceRepo.markAsPaid(transaction.invoiceId, transaction.id);
     }
 
-    const event = new PaymentSucceededEvent(
-      transaction.id,
-      transaction.userId,
-      paymentIntent.id,
-      paymentIntent.latest_charge ?? '',
-      Number(transaction.amount),
-      transaction.currency,
-      transaction.orderId ?? undefined,
-      transaction.invoiceId ?? undefined,
-    );
+    const event = new PaymentSucceededEvent({
+      transactionId: transaction.id,
+      userId: transaction.userId,
+      amount: Number(transaction.amount),
+      currency: transaction.currency,
+      provider: PaymentProvider.STRIPE,
+      orderId: transaction.orderId ?? undefined,
+      invoiceId: transaction.invoiceId ?? undefined,
+      stripePaymentIntentId: paymentIntent.id,
+      stripeChargeId: paymentIntent.latest_charge ?? null,
+    });
 
     await this.outboxService.createOutboxMessage({
       aggregateType: 'PaymentTransaction',
@@ -113,15 +114,17 @@ export class HandleStripeWebhookHandler implements ICommandHandler<HandleStripeW
       failureCode,
     });
 
-    const event = new PaymentFailedEvent(
-      transaction.id,
-      transaction.userId,
-      paymentIntent.id,
-      Number(transaction.amount),
-      transaction.currency,
+    const event = new PaymentFailedEvent({
+      transactionId: transaction.id,
+      userId: transaction.userId,
+      amount: Number(transaction.amount),
+      currency: transaction.currency,
+      provider: PaymentProvider.STRIPE,
+      orderId: transaction.orderId ?? undefined,
+      stripePaymentIntentId: paymentIntent.id,
       failureReason,
-      failureCode ?? undefined,
-    );
+      failureCode: failureCode ?? undefined,
+    });
 
     await this.outboxService.createOutboxMessage({
       aggregateType: 'PaymentTransaction',

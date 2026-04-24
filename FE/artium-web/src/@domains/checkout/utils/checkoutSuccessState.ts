@@ -2,8 +2,11 @@ export type CheckoutSuccessState = {
   artworkId: string
   orderNumber: string
   paymentMethod: 'card' | 'wallet'
-  isProcessing: boolean
+  status: 'processing' | 'succeeded' | 'failed'
   totalPaid: number
+  orderId?: string | null
+  transactionId?: string | null
+  failureReason?: string | null
 }
 
 const STORAGE_KEY_PREFIX = 'artium.checkout.success'
@@ -11,6 +14,26 @@ const STORAGE_KEY_PREFIX = 'artium.checkout.success'
 const getStorageKey = (artworkId: string) => `${STORAGE_KEY_PREFIX}.${artworkId}`
 
 const isCheckoutSuccessState = (value: unknown): value is CheckoutSuccessState => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const candidate = value as Record<string, unknown>
+
+  return (
+    typeof candidate.artworkId === 'string' &&
+    typeof candidate.orderNumber === 'string' &&
+    (candidate.paymentMethod === 'card' || candidate.paymentMethod === 'wallet') &&
+    (candidate.status === 'processing' ||
+      candidate.status === 'succeeded' ||
+      candidate.status === 'failed') &&
+    typeof candidate.totalPaid === 'number'
+  )
+}
+
+const isLegacyCheckoutSuccessState = (
+  value: unknown,
+): value is Omit<CheckoutSuccessState, 'status'> & { isProcessing: boolean } => {
   if (!value || typeof value !== 'object') {
     return false
   }
@@ -56,11 +79,21 @@ export const loadCheckoutSuccessState = (artworkId: string) => {
 
   try {
     const parsed = JSON.parse(raw) as unknown
-    if (!isCheckoutSuccessState(parsed) || parsed.artworkId !== artworkId) {
-      return null
+    if (isCheckoutSuccessState(parsed) && parsed.artworkId === artworkId) {
+      return parsed
     }
 
-    return parsed
+    if (isLegacyCheckoutSuccessState(parsed) && parsed.artworkId === artworkId) {
+      return {
+        artworkId: parsed.artworkId,
+        orderNumber: parsed.orderNumber,
+        paymentMethod: parsed.paymentMethod,
+        status: parsed.isProcessing ? 'processing' : 'succeeded',
+        totalPaid: parsed.totalPaid,
+      } satisfies CheckoutSuccessState
+    }
+
+    return null
   } catch {
     return null
   }
