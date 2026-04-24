@@ -11,6 +11,15 @@ import {
   mapToTypeOrmWhere,
 } from '@app/common';
 
+export const ACTIVE_ARTWORK_LOCK_ORDER_STATUSES = [
+  OrderStatus.PENDING,
+  OrderStatus.CONFIRMED,
+  OrderStatus.PROCESSING,
+  OrderStatus.AUCTION_ACTIVE,
+  OrderStatus.ESCROW_HELD,
+  OrderStatus.DISPUTE_OPEN,
+];
+
 @Injectable()
 export class OrderRepository implements IOrderRepository {
   constructor(
@@ -199,6 +208,30 @@ export class OrderRepository implements IOrderRepository {
 
     const data = await qb.getMany();
     return { data, total };
+  }
+
+  async findActiveArtworkLocks(
+    sellerId: string,
+    artworkIds: string[],
+    transactionManager?: EntityManager,
+  ): Promise<string[]> {
+    if (artworkIds.length === 0) {
+      return [];
+    }
+
+    const repo = this.getRepo(transactionManager);
+    const rows = await repo
+      .createQueryBuilder('order')
+      .innerJoin('order_items', 'item', 'item.order_id = order.order_id')
+      .select('DISTINCT item.artwork_id', 'artworkId')
+      .where('item.seller_id = :sellerId', { sellerId })
+      .andWhere('item.artwork_id IN (:...artworkIds)', { artworkIds })
+      .andWhere('order.status IN (:...activeStatuses)', {
+        activeStatuses: ACTIVE_ARTWORK_LOCK_ORDER_STATUSES,
+      })
+      .getRawMany<{ artworkId: string }>();
+
+    return rows.map((row) => row.artworkId);
   }
 
   async findWithItems(

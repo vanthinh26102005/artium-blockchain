@@ -20,6 +20,7 @@ import {
   GetOrdersQuery,
   GetAuctionsQuery,
   GetAuctionByIdQuery,
+  GetArtworkOrderLocksQuery,
   GetOrderByIdQuery,
   GetOrderByOnChainIdQuery,
   GetOrderItemsQuery,
@@ -56,6 +57,16 @@ export class OrdersMicroserviceController {
   async getAuctionById(@Payload() data: { auctionId: string }) {
     this.logger.debug(`Getting auction: ${data.auctionId}`);
     return this.queryBus.execute(new GetAuctionByIdQuery(data.auctionId));
+  }
+
+  @MessagePattern({ cmd: 'get_artwork_order_locks' })
+  async getArtworkOrderLocks(
+    @Payload() data: { sellerId: string; artworkIds: string[] },
+  ) {
+    this.logger.debug(`Getting artwork order locks for seller: ${data.sellerId}`);
+    return this.queryBus.execute(
+      new GetArtworkOrderLocksQuery(data.sellerId, data.artworkIds),
+    );
   }
 
   @MessagePattern({ cmd: 'get_order_by_id' })

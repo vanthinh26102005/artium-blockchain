@@ -37,6 +37,7 @@ import {
   OpenDisputeHandler,
   ResolveDisputeHandler,
   GetAuctionByIdHandler,
+  GetArtworkOrderLocksHandler,
   GetAuctionsHandler,
   GetOrdersHandler,
   GetOrderByIdHandler,
@@ -64,6 +65,7 @@ export const CommandHandlers = [
 export const QueryHandlers = [
   GetAuctionsHandler,
   GetAuctionByIdHandler,
+  GetArtworkOrderLocksHandler,
   GetOrdersHandler,
   GetOrderByIdHandler,
   GetOrderByOnChainIdHandler,
