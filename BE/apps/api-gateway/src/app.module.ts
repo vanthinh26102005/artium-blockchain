@@ -21,6 +21,7 @@ import { QuickSellInvoicesController } from './presentation/http/controllers/pay
 import { TagsController } from './presentation/http/controllers/artwork/tags.controller';
 import { UploadController } from './presentation/http/controllers/artwork/upload.controller';
 import { MessagingGateway } from './presentation/http/gateways/messaging.gateway';
+import { AuctionGateway } from './presentation/http/gateways/auction.gateway';
 import { EventsController } from './presentation/http/controllers/events/events.controller';
 import { CommunityMomentsController } from './presentation/http/controllers/community/moments.controller';
 import { CommunityMoodboardsController } from './presentation/http/controllers/community/moodboards.controller';
@@ -92,6 +93,6 @@ import { FollowersController } from './presentation/http/controllers/community/f
     CommunityMoodboardsController,
     FollowersController,
   ],
-  providers: [MessagingGateway],
+  providers: [MessagingGateway, AuctionGateway],
 })
 export class ApiGatewayModule {}
