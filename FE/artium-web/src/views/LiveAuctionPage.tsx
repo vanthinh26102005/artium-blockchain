@@ -1241,6 +1241,7 @@ const LiveAuctionPage = () => {
           lot={selectedBidLot}
           isOpen={Boolean(selectedBidLot)}
           onClose={() => setSelectedBidLot(null)}
+          onRefreshLot={refreshAuctionById}
         />
 
       </div>
