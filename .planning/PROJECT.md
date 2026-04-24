@@ -19,6 +19,11 @@ Let artists and sellers run trustworthy auctions without bypassing ownership, el
 - Backend auction start command that validates ownership, seller profile, artwork state, wallet/network policy, and idempotent on-chain/off-chain creation.
 - Seller auction status surface for pending, active, failed, and conflict/retry states.
 
+## Current State
+
+- Phase 18 complete: seller-only auction access and own-inventory eligibility are implemented through backend guards, server-owned reason codes, active order lock merging, and `/artist/auctions/create`.
+- Next: Phase 19 should build auction terms configuration and preview on top of the eligible artwork picker without duplicating eligibility policy in React.
+
 ## Active Requirements
 
 - Seller auction creation and governance requirements live in `.planning/REQUIREMENTS.md` under `v1.1 Requirements`.
@@ -49,4 +54,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state.
 
 ---
-*Last updated: 2026-04-24 for milestone v1.1 seller auction creation*
+*Last updated: 2026-04-25 for Phase 18 completion*

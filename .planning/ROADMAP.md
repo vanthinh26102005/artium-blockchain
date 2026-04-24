@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 9: Checkout Completion & Webhook Alignment** - Canonicalize Stripe webhook handling and finish retry/success behavior across checkout outcomes
 - [ ] **Phase 10: Checkout Traceability & Validation Closure** - Restore PAY/UX traceability and create the verification evidence needed for milestone re-audit
 - [ ] **Phase 11: Wallet Checkout Pay-Now Orchestration & Success Redirect** - Move wallet order creation/send flow behind the main Pay Now action and return successful wallet checkouts to the success screen
-- [ ] **Phase 18: Seller auction access and artwork eligibility policy** - Define and enforce seller-only access plus own-inventory eligibility before auction setup
+- [x] **Phase 18: Seller auction access and artwork eligibility policy** - Define and enforce seller-only access plus own-inventory eligibility before auction setup
 - [ ] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
 - [ ] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers
 
@@ -195,7 +195,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 15. Shared text-entry form standardization and cross-domain refactor | 1/1 | Planned | - |
 | 16. Shared form field standardization and multi-domain text-entry migration | 1/1 | Planned | - |
 | 17. Auction frontend integration with blockchain-backed backend flow and live auction state sync | 3/3 | Completed | 2026-04-24 |
-| 18. Seller auction access and artwork eligibility policy | 0/TBD | Not started | - |
+| 18. Seller auction access and artwork eligibility policy | 3/3 | Completed | 2026-04-25 |
 | 19. Seller auction creation workspace and terms UX | 0/TBD | Not started | - |
 | 20. Auction start orchestration and seller lifecycle status | 0/TBD | Not started | - |
 
@@ -303,9 +303,9 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 18-01 Shared artwork eligibility DTOs and artwork-service candidate policy
-- [ ] 18-02 Seller-only gateway endpoint and active order lock merge
-- [ ] 18-03 Seller auction artwork picker frontend
+- [x] 18-01 Shared artwork eligibility DTOs and artwork-service candidate policy
+- [x] 18-02 Seller-only gateway endpoint and active order lock merge
+- [x] 18-03 Seller auction artwork picker frontend
 
 ### Phase 19: Seller auction creation workspace and terms UX
 
