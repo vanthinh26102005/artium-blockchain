@@ -22,6 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 8: Wallet Payment Correctness** - Fix USD→ETH handling, wallet transaction state wiring, and Ethereum checkout end-to-end correctness
 - [ ] **Phase 9: Checkout Completion & Webhook Alignment** - Canonicalize Stripe webhook handling and finish retry/success behavior across checkout outcomes
 - [ ] **Phase 10: Checkout Traceability & Validation Closure** - Restore PAY/UX traceability and create the verification evidence needed for milestone re-audit
+- [ ] **Phase 11: Wallet Checkout Pay-Now Orchestration & Success Redirect** - Move wallet order creation/send flow behind the main Pay Now action and return successful wallet checkouts to the success screen
 
 ## Phase Details
 
@@ -115,16 +116,17 @@ Decimal phases appear between their surrounding integers in numeric order.
 **UI hint**: yes
 
 ### Phase 8: Wallet Payment Correctness
-**Goal**: Wallet checkout uses a verified ETH amount and consistent transaction state so MetaMask payments can complete end-to-end without stale form state or currency mismatches.
+**Goal**: Wallet checkout uses a verified Sepolia ETH amount, Sepolia-only chain enforcement, and consistent transaction state so MetaMask payments can complete end-to-end without stale form state or currency mismatches.
 **Depends on**: Phase 6
 **Requirements**: PAY-02, PAY-03
 **Gap Closure**: Closes wallet amount and Ethereum checkout flow gaps from `v1.0-MILESTONE-AUDIT`
 **Success Criteria** (what must be TRUE):
-  1. Developer can send a MetaMask transaction only with an explicit ETH amount/quote — never the raw USD checkout total
-  2. Developer can disconnect, reconnect, or retry wallet payment without stale `walletAddress` / `txHash` state keeping Pay Now enabled incorrectly
-  3. Developer can record a successful wallet payment through `POST /payments/ethereum` with frontend and backend amount/currency metadata aligned
-  4. Developer can re-run duplicate txHash and wallet rejection scenarios and see correct recovery / conflict behavior
-**Plans**: TBD
+  1. Developer can send a MetaMask transaction only with an explicit ETH amount/quote for **Sepolia testnet** — never the raw USD checkout total
+  2. Developer can attempt wallet checkout on the wrong MetaMask network and see inline blocking UX or an explicit switch-to-Sepolia path before **Send ETH** / **Pay Now** can proceed
+  3. Developer can disconnect, reconnect, or retry wallet payment without stale `walletAddress` / `txHash` state keeping Pay Now enabled incorrectly
+  4. Developer can record a successful wallet payment through `POST /payments/ethereum` with frontend and backend amount/currency metadata aligned
+  5. Developer can re-run duplicate txHash and wallet rejection scenarios and see correct recovery / conflict behavior
+**Plans**: `.planning/phases/8/PLAN.md`
 **UI hint**: yes
 
 ### Phase 9: Checkout Completion & Webhook Alignment
@@ -153,10 +155,23 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: TBD
 **UI hint**: yes
 
+### Phase 11: Wallet Checkout Pay-Now Orchestration & Success Redirect
+**Goal**: Wallet checkout behaves like the card flow at the page level: the wallet panel shows quote/network details only, the main checkout `Pay Now` action owns order creation plus MetaMask submission orchestration, and a successful wallet payment returns the buyer to the checkout success screen instead of leaving them in an intermediate wallet-only state.
+**Depends on**: Phase 8
+**Requirements**: PAY-01, PAY-02, UX-01
+**Success Criteria** (what must be TRUE):
+  1. Developer can open the wallet payment step and see quote, network, and wallet details without a standalone `Send ... ETH on Sepolia` submit button inside the wallet section
+  2. Developer can click the main checkout `Pay Now` button while using wallet checkout and observe that button take responsibility for order creation, quote freshness validation, and MetaMask transaction initiation in one coordinated flow
+  3. Developer can complete a wallet checkout successfully and land on the same checkout success / processing screen used by the rest of the checkout flow
+  4. Developer can retry or back out of wallet checkout without orphaning a created order or leaving stale in-flight wallet state attached to the form
+  5. Developer can inspect the implementation and find the wallet orchestration split into clean responsibilities across page orchestration, wallet presentation, and payment API boundaries rather than burying checkout control flow inside the wallet component
+**Plans**: `.planning/phases/11-wallet-checkout-pay-now-orchestration-and-success-redirect/PLAN.md`
+**UI hint**: yes
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 after the current checkout phases.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -170,3 +185,98 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 8. Wallet Payment Correctness | 0/TBD | Not started | - |
 | 9. Checkout Completion & Webhook Alignment | 0/TBD | Not started | - |
 | 10. Checkout Traceability & Validation Closure | 0/TBD | Not started | - |
+| 11. Wallet Checkout Pay-Now Orchestration & Success Redirect | 0/TBD | Not started | - |
+| 12. Private order tracking and management for buyers and sellers | 1/1 | Planned | - |
+| 13. Wallet payment confirmation with asynchronous retryable idempotent background processor | 0/TBD | Not started | - |
+| 14. Order detail copy actions, shipping logic alignment, and TypeScript stabilization | 1/1 | Planned | - |
+| 15. Shared text-entry form standardization and cross-domain refactor | 1/1 | Planned | - |
+| 16. Shared form field standardization and multi-domain text-entry migration | 1/1 | Planned | - |
+
+### Phase 12: Private order tracking and management for buyers and sellers
+
+**Goal:** Authenticated users can review and manage their purchases or sales through a professional private orders workspace built on existing dashboard patterns, with role-aware actions and server-scoped access.
+**Requirements**: ORD-01, ORD-02, ORD-03
+**Depends on:** Phase 11
+**Success Criteria** (what must be TRUE):
+  1. Developer can visit a private orders workspace and switch between purchase and sales views without using the public profile tabs
+  2. Developer can see only orders they are authorized to access, with list cards/rows showing order number, artwork, status, total, payment method, and created date
+  3. Developer can open an order detail page and review timeline, artwork summary, payment details, shipping information, and next available action in one place
+  4. Developer can perform role-valid actions only: buyers can confirm delivery or open disputes when eligible, sellers can mark shipped when eligible, and invalid actions stay hidden or disabled with clear explanation
+  5. Developer can inspect the implementation and find the UI aligned with existing inventory/invoice/dashboard patterns rather than a new visual system
+**Plans**: `.planning/phases/12-private-order-tracking-and-management-for-buyers-and-sellers/PLAN.md`
+**UI hint**: yes
+
+### Phase 13: Wallet payment confirmation with asynchronous retryable idempotent background processor
+
+**Goal:** Wallet checkout moves from browser-assumed success to backend-confirmed success, using an asynchronous, retryable, idempotent Sepolia confirmation processor that advances recorded wallet payments and linked orders only after receipt verification succeeds.
+**Requirements**: PAY-02, PAY-03, ORD-01
+**Depends on:** Phase 12
+**Success Criteria** (what must be TRUE):
+  1. Developer can inspect wallet checkout code and find the frontend treating MetaMask submission as a pending state, not final payment success
+  2. Developer can inspect backend flow and find Ethereum payments confirmed by an asynchronous background processor rather than only browser-side receipt polling
+  3. Developer can re-run the same confirmation work item safely and see idempotent behavior with no duplicate transaction success handling or duplicate order advancement
+  4. Developer can simulate transient Sepolia RPC failure and see retryable processor behavior instead of silent confirmation loss
+  5. Developer can confirm that a wallet payment advances to a backend-confirmed success state only after receipt verification checks chain, destination wallet, sender wallet, amount, and transaction success
+  6. Developer can open orders or transaction detail after confirmation and see backend truth reflected consistently across payment and order state
+**Plans**: `.planning/phases/13-wallet-payment-confirmation-with-asynchronous-retryable-idem/PLAN.md`
+
+### Phase 14: Order detail copy actions, shipping logic alignment, and TypeScript stabilization
+
+**Goal:** Order detail surfaces become easier to trust and operate: payment and wallet identifiers are copyable with professional tooltip feedback, the shipping card reflects the real order lifecycle instead of generic placeholders, and the current frontend TypeScript blockers around orders/auth supporting code are cleared so follow-up work can ship cleanly.
+**Requirements**: ORD-02, ORD-03, ORD-04, SAFE-03
+**Depends on:** Phase 13
+**Success Criteria** (what must be TRUE):
+  1. Developer can open `/orders/[orderId]` and click to copy the payment transaction ID and wallet `txHash`, seeing immediate tooltip or state feedback instead of manual text selection
+  2. Developer can inspect the implementation and find the copy interaction encapsulated in a reusable, accessible component or helper built on the existing tooltip system rather than ad hoc inline clipboard code
+  3. Developer can open orders in `pending`, `confirmed`, `processing`, `escrow_held`, `shipped`, `delivered`, `cancelled`, `refunded`, and `dispute_open` states and see shipping messaging that matches the current business rules for that state
+  4. Developer can confirm the shipping panel no longer shows misleading generic values like `Not assigned` when shipment data is not expected yet or the order is already in a terminal/non-shippable state
+  5. Developer can run `cd FE/artium-web && npx tsc --noemit` and clear the current known blockers in `artwork-detail` and wallet-login/auth files required to support this surface cleanly
+**Plans**: `.planning/phases/14-order-detail-copy-actions-shipping-logic-and-typescript-stabilization/PLAN.md`
+**UI hint**: yes
+
+### Phase 15: Shared text-entry form standardization and cross-domain refactor
+
+**Goal:** The shared text-entry form layer becomes a clean, scalable foundation for the app: shared field primitives own semantics and accessibility, domain wrappers stay thin and style-specific, and pages currently using those text-entry surfaces are refactored onto the standardized contracts without visual or behavioral regressions.
+**Requirements**: SHR-01, SHR-02, SHR-03, MIG-01, MIG-02, MIG-03, MIG-04, SAFE-02, SAFE-03
+**Depends on:** Phase 14
+**Success Criteria** (what must be TRUE):
+  1. Developer can inspect `FE/artium-web/src/@shared/components/forms` and find a coherent text-entry family covering shared field shell, text input, password input, textarea, and autocomplete with one consistent prop contract
+  2. Developer can inspect the implementation and find accessibility/semantics handled centrally in the shared layer, while auth/checkout/other domain wrappers stay thin and domain-styled rather than re-implementing field behavior
+  3. Developer can grep the codebase and see the targeted pages and form surfaces migrated off ad hoc raw `Input` / `Textarea` / `Label` combinations where they map to the standardized text-entry primitives
+  4. Developer can submit representative auth, checkout, quick-sell, orders, and address-backed flows and see field labels, descriptions, error states, required markers, and disabled states rendered consistently
+  5. Developer can run `cd FE/artium-web && npx tsc --noemit` and targeted eslint on the refactored surfaces with no new form-contract regressions
+**Plans**: `.planning/phases/15-shared-text-entry-form-standardization-and-cross-domain-refactor/PLAN.md`
+**UI hint**: yes
+
+### Phase 16: Shared form field standardization and multi-domain text-entry migration
+
+**Goal:** `FE/artium-web/src/@shared/components/forms` becomes the single clean foundation for text-entry fields across the app, with standardized shared field semantics, thin domain wrappers, and controlled migration of page-level raw `Input` / `Textarea` / `Label` usage onto scalable shared primitives.
+**Requirements**: SHR-01, SHR-02, SHR-03, MIG-01, MIG-02, MIG-03, MIG-04, SAFE-02, SAFE-03
+**Depends on:** Phase 15
+**Success Criteria** (what must be TRUE):
+  1. Developer can inspect `FE/artium-web/src/@shared/components/forms` and find a coherent field family for field shell, text input, password input, textarea, and autocomplete with one consistent prop contract
+  2. Developer can inspect the implementation and see accessibility, descriptions, required markers, ids, and error messaging handled centrally in the shared layer instead of re-implemented per page
+  3. Developer can inspect auth, checkout, quick-sell, orders, and shared address-backed forms and see them refactored away from ad hoc raw `Input` / `Textarea` / `Label` combinations where they map to the standardized field family
+  4. Developer can confirm domain wrappers such as auth-specific fields remain thin styling adapters instead of forking shared field behavior
+  5. Developer can run `cd FE/artium-web && npx tsc --noemit` and targeted eslint on the refactored surfaces with no new form-contract regressions
+**Plans**: `.planning/phases/16-shared-form-field-standardization-and-multi-domain-text-entry-migration/PLAN.md`
+**UI hint**: yes
+
+### Phase 17: Auction frontend integration with blockchain-backed backend flow and live auction state sync
+
+**Goal:** Replace the current mock `/auction` listing and simulated bid modal with an auction-first backend read contract, backend/on-chain synchronized live auction state, and a real MetaMask bid flow where backend DTOs remain the authoritative source of auction truth.
+**Requirements**: TBD
+**Depends on:** Phase 16
+**Success Criteria** (what must be TRUE):
+  1. Developer can call `GET /auctions` and `GET /auctions/:auctionId` through `api-gateway` and receive auction-first DTOs that embed artwork display fields directly.
+  2. Developer can inspect `/auction` frontend code and confirm live lot data comes from backend auction DTOs, not `mockArtworks`.
+  3. Developer can place a bid through MetaMask on Sepolia from the bid modal and see pending state after tx hash without treating local wallet submission as final auction truth.
+  4. Developer can confirm bid modal `confirmed` and conflict states are driven by refreshed backend/on-chain synchronized auction state.
+  5. Developer can run backend gateway/orders builds and frontend typecheck/lint with no new auction integration regressions.
+**Plans**: `.planning/phases/17-auction-frontend-integration-with-blockchain-backed-backend-/17-01-PLAN.md`, `.planning/phases/17-auction-frontend-integration-with-blockchain-backed-backend-/17-02-PLAN.md`, `.planning/phases/17-auction-frontend-integration-with-blockchain-backed-backend-/17-03-PLAN.md`
+**UI hint**: yes
+
+Plans:
+- [x] 17-01 Backend auction read model and realtime gateway contract
+- [ ] 17-02 Frontend auction listing API integration
+- [ ] 17-03 Wallet-backed bid modal and authoritative state sync
