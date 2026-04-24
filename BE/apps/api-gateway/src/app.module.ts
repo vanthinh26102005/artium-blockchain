@@ -13,6 +13,7 @@ import { UserController } from './presentation/http/controllers/identity/users.c
 import { MessagingController } from './presentation/http/controllers/messaging.controller';
 import { NotificationsController } from './presentation/http/controllers/notification/notifications.controller';
 import { OrdersController } from './presentation/http/controllers/orders.controller';
+import { AuctionsController } from './presentation/http/controllers/auctions.controller';
 import { PaymentsController } from './presentation/http/controllers/payment/payments.controller';
 import { InvoicesController } from './presentation/http/controllers/payment/invoices.controller';
 import { PayoutsController } from './presentation/http/controllers/payment/payouts.controller';
@@ -82,6 +83,7 @@ import { FollowersController } from './presentation/http/controllers/community/f
     PayoutsController,
     QuickSellInvoicesController,
 
+    AuctionsController,
     OrdersController,
     MessagingController,
     NotificationsController,
