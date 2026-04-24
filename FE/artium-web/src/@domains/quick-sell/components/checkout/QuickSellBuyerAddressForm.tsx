@@ -1,7 +1,6 @@
 import { type FieldPath, useFormContext, useWatch } from 'react-hook-form'
 
-import { Input } from '@shared/components/ui/input'
-import { Label } from '@shared/components/ui/label'
+import { BaseFormField, BaseInputField } from '@shared/components/forms'
 
 import type { CheckoutBuyerAddress } from '../../types/checkoutTypes'
 import { quickSellCheckoutAddressSchema, type QuickSellCheckoutFormValues } from '../../validations/quickSellCheckout.schema'
@@ -67,6 +66,8 @@ export const QuickSellBuyerAddressForm = () => {
     register,
   } = useFormContext<QuickSellCheckoutFormValues>()
   const address = useWatch({ name: 'address' })
+  const labelClassName = 'text-sm font-medium text-slate-700'
+  const messageClassName = 'text-xs text-red-500'
 
   const getError = (name: FieldPath<QuickSellCheckoutFormValues>) =>
     getFieldState(name, formState).error?.message
@@ -82,20 +83,21 @@ export const QuickSellBuyerAddressForm = () => {
     const error = getError(name)
 
     return (
-      <div>
-        <Label htmlFor={`address-${field}`} className="text-sm font-medium text-slate-700">
-          {label} {required && <span className="text-red-500">*</span>}
-        </Label>
-        <Input
-          id={`address-${field}`}
-          type={type}
-          {...register(name)}
-          value={address?.[field] ?? ''}
-          placeholder={placeholder}
-          className={`mt-1 ${error ? 'border-red-500' : ''}`}
-        />
-        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-      </div>
+      <BaseInputField
+        id={`address-${field}`}
+        type={type}
+        label={label}
+        required={required}
+        {...register(name)}
+        value={address?.[field] ?? ''}
+        placeholder={placeholder}
+        errorMessage={error}
+        containerClassName="space-y-1"
+        labelClassName={labelClassName}
+        requiredMarkClassName="text-red-500"
+        messageClassName={messageClassName}
+        errorInputClassName="border-red-500"
+      />
     )
   }
 
@@ -121,15 +123,22 @@ export const QuickSellBuyerAddressForm = () => {
 
           <div className="grid grid-cols-2 gap-4">
             {renderField('city', 'City', 'New York', 'text', true)}
-            <div>
-              <Label htmlFor="address-state" className="text-sm font-medium text-slate-700">
-                State <span className="text-red-500">*</span>
-              </Label>
+            <BaseFormField
+              id="address-state"
+              label="State"
+              required
+              errorMessage={getError('address.state')}
+              className="space-y-1"
+              labelClassName={labelClassName}
+              requiredMarkClassName="text-red-500"
+              messageClassName={messageClassName}
+            >
               <select
                 id="address-state"
                 {...register('address.state')}
                 value={address?.state ?? ''}
-                className={`mt-1 w-full rounded-md border px-3 py-2 text-sm ${
+                aria-invalid={Boolean(getError('address.state'))}
+                className={`w-full rounded-md border px-3 py-2 text-sm ${
                   getError('address.state') ? 'border-red-500' : 'border-slate-300'
                 }`}
               >
@@ -140,23 +149,27 @@ export const QuickSellBuyerAddressForm = () => {
                   </option>
                 ))}
               </select>
-              {getError('address.state') && (
-                <p className="mt-1 text-xs text-red-500">{getError('address.state')}</p>
-              )}
-            </div>
+            </BaseFormField>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {renderField('postalCode', 'ZIP Code', '10001', 'text', true)}
-            <div>
-              <Label htmlFor="address-country" className="text-sm font-medium text-slate-700">
-                Country <span className="text-red-500">*</span>
-              </Label>
+            <BaseFormField
+              id="address-country"
+              label="Country"
+              required
+              errorMessage={getError('address.country')}
+              className="space-y-1"
+              labelClassName={labelClassName}
+              requiredMarkClassName="text-red-500"
+              messageClassName={messageClassName}
+            >
               <select
                 id="address-country"
                 {...register('address.country')}
                 value={address?.country ?? ''}
-                className={`mt-1 w-full rounded-md border px-3 py-2 text-sm ${
+                aria-invalid={Boolean(getError('address.country'))}
+                className={`w-full rounded-md border px-3 py-2 text-sm ${
                   getError('address.country') ? 'border-red-500' : 'border-slate-300'
                 }`}
               >
@@ -165,10 +178,7 @@ export const QuickSellBuyerAddressForm = () => {
                 <option value="GB">United Kingdom</option>
                 <option value="AU">Australia</option>
               </select>
-              {getError('address.country') && (
-                <p className="mt-1 text-xs text-red-500">{getError('address.country')}</p>
-              )}
-            </div>
+            </BaseFormField>
           </div>
         </div>
       </div>

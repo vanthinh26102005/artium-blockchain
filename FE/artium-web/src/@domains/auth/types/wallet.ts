@@ -1,4 +1,4 @@
-type EthereumRequestArguments = {
+export type EthereumRequestArguments = {
   method: string
   params?: unknown[] | Record<string, unknown>
 }
@@ -6,18 +6,10 @@ type EthereumRequestArguments = {
 export type EthereumProvider = {
   isMetaMask?: boolean
   request: <T = unknown>(args: EthereumRequestArguments) => Promise<T>
-  on?: (eventName: string, listener: (...args: unknown[]) => void) => void
-  removeListener?: (eventName: string, listener: (...args: unknown[]) => void) => void
+  on: (eventName: string, listener: (...args: unknown[]) => void) => void
+  removeListener: (eventName: string, listener: (...args: unknown[]) => void) => void
 }
 
 export type MetaMaskError = Error & {
   code?: number
 }
-
-declare global {
-  interface Window {
-    ethereum?: EthereumProvider
-  }
-}
-
-export {}

@@ -2,7 +2,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form'
 
 import { X } from 'lucide-react'
 
-import { Input } from '@shared/components/ui/input'
+import { BaseFormField } from '@shared/components/forms'
 
 import type { ArtworkLineItem } from '../../types/quickSellDraft'
 import type { QuickSellInvoiceFormValues } from '../../validations/quickSellInvoice.schema'
@@ -32,6 +32,10 @@ export const QuickSellArtworkItemRow = ({
       discountPercent?: { message?: string }
     }
     | undefined
+  const labelClassName = 'text-[11px] font-bold uppercase tracking-wider text-[#191414]'
+  const messageClassName = 'text-xs text-red-500'
+  const inputClassName =
+    'h-12 rounded-lg border-[#E5E5E5] bg-[#F5F5F5] px-4 text-[14px] focus:border-[#191414] focus:ring-0'
 
   return (
     <div className="overflow-hidden rounded-2xl border border-[#E5E5E5] bg-white">
@@ -76,62 +80,70 @@ export const QuickSellArtworkItemRow = ({
         </div>
 
         <div className="mt-8 grid grid-cols-2 gap-6">
-          <div>
-            <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-[#191414]">
-              SALE PRICE <span className="text-red-500">*</span>
-            </label>
+          <BaseFormField
+            id={`quick-sell-item-${index}-price`}
+            label="SALE PRICE"
+            required
+            errorMessage={itemErrors?.price?.message}
+            messageId={`quick-sell-item-${index}-price-message`}
+            className="space-y-2"
+            labelClassName={labelClassName}
+            requiredMarkClassName="text-red-500"
+            messageClassName={messageClassName}
+          >
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-[#191414]">
-                $
-              </span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-[#191414]">$</span>
               <Controller
                 name={`items.${index}.price` as const}
                 control={control}
                 render={({ field }) => (
-                  <Input
+                  <input
+                    id={`quick-sell-item-${index}-price`}
                     type="number"
                     min="0"
                     step="0.01"
+                    aria-invalid={Boolean(itemErrors?.price)}
+                    aria-describedby={`quick-sell-item-${index}-price-message`}
                     value={field.value}
                     onChange={(event) => field.onChange(parseFloat(event.target.value) || 0)}
-                    className={`h-12 rounded-lg border-[#E5E5E5] bg-[#F5F5F5] pl-8 pr-4 text-[14px] focus:border-[#191414] focus:ring-0 ${itemErrors?.price ? 'border-red-500' : ''
-                      }`}
+                    className={`${inputClassName} w-full pl-8 ${itemErrors?.price ? 'border-red-500' : ''}`}
                     placeholder="0"
                   />
                 )}
               />
             </div>
-            {itemErrors?.price?.message && (
-              <p className="mt-1 text-xs text-red-500">{itemErrors.price.message}</p>
-            )}
-          </div>
+          </BaseFormField>
 
-          <div>
-            <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-[#191414]">
-              DISCOUNT
-            </label>
+          <BaseFormField
+            id={`quick-sell-item-${index}-discount`}
+            label="DISCOUNT"
+            errorMessage={itemErrors?.discountPercent?.message}
+            messageId={`quick-sell-item-${index}-discount-message`}
+            className="space-y-2"
+            labelClassName={labelClassName}
+            messageClassName={messageClassName}
+          >
             <Controller
               name={`items.${index}.discountPercent` as const}
               control={control}
               render={({ field }) => (
-                <Input
+                <input
+                  id={`quick-sell-item-${index}-discount`}
                   type="number"
                   min="0"
                   max="100"
+                  aria-invalid={Boolean(itemErrors?.discountPercent)}
+                  aria-describedby={`quick-sell-item-${index}-discount-message`}
                   value={field.value}
                   onChange={(event) =>
                     field.onChange(Math.min(100, Math.max(0, parseFloat(event.target.value) || 0)))
                   }
-                  className={`h-12 rounded-lg border-[#E5E5E5] bg-[#F5F5F5] px-4 text-[14px] focus:border-[#191414] focus:ring-0 ${itemErrors?.discountPercent ? 'border-red-500' : ''
-                    }`}
+                  className={`${inputClassName} w-full ${itemErrors?.discountPercent ? 'border-red-500' : ''}`}
                   placeholder="0"
                 />
               )}
             />
-            {itemErrors?.discountPercent?.message && (
-              <p className="mt-1 text-xs text-red-500">{itemErrors.discountPercent.message}</p>
-            )}
-          </div>
+          </BaseFormField>
         </div>
       </div>
     </div>

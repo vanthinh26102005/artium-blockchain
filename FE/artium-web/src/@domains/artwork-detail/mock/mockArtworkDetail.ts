@@ -115,7 +115,7 @@ export const convertTopPicksToArtworkDetail = (artwork: TopPicksArtwork): Artwor
             username: artwork.username,
             displayName: displayName,
             bio: `Artist and creator of unique artworks based in Italy. His work takes inspiration from mountains and nature.`,
-            avatarUrl: artwork.avatarUrl,
+            avatarUrl: artwork.avatarUrl || `https://i.pravatar.cc/150?u=${artwork.username}`,
             verified: true,
             buyers: 5,
             worksSold: 117,

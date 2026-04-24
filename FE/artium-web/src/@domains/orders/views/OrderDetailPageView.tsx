@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, ExternalLink, MapPin, ReceiptText, Truck } from 'lucide-react'
 import { Metadata } from '@/components/SEO/Metadata'
 import orderApis, { type OrderResponse } from '@shared/apis/orderApis'
+import { CopyValueField } from '@shared/components/display/CopyValueField'
 import { Button } from '@shared/components/ui/button'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { OrderActionPanel } from '../components/OrderActionPanel'
@@ -20,6 +21,7 @@ import {
   getOrderActorRole,
   getPaymentMethodLabel,
   getPaymentStatusLabel,
+  getShippingPresentation,
 } from '../utils/orderPresentation'
 
 const formatAddress = (address?: Record<string, string | undefined> | null) => {
@@ -103,6 +105,7 @@ export const OrderDetailPageView = () => {
   const role = order && user?.id ? getOrderActorRole(order, user.id, preferredScope) : 'buyer'
   const timelineSteps = order ? buildOrderTimeline(order) : []
   const shippingLines = formatAddress(order?.shippingAddress ?? null)
+  const shippingPresentation = order ? getShippingPresentation(order) : null
 
   return (
     <>
@@ -255,6 +258,16 @@ export const OrderDetailPageView = () => {
                       <h2 className="text-xl font-semibold text-slate-900">Shipping</h2>
                     </div>
                     <div className="mt-6 space-y-4 text-sm text-slate-600">
+                      {shippingPresentation ? (
+                        <div className="rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4">
+                          <p className="text-sm font-semibold text-slate-900">
+                            {shippingPresentation.title}
+                          </p>
+                          <p className="mt-2 leading-6 text-slate-500">
+                            {shippingPresentation.description}
+                          </p>
+                        </div>
+                      ) : null}
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                           Shipping address
@@ -266,28 +279,28 @@ export const OrderDetailPageView = () => {
                             ))}
                           </div>
                         ) : (
-                          <p className="mt-2">No shipping address captured for this order yet.</p>
+                          <p className="mt-2">
+                            {shippingPresentation?.emptyAddressLabel ?? 'No shipping address captured for this order yet.'}
+                          </p>
                         )}
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                            Carrier
-                          </p>
-                          <p className="mt-2 text-slate-900">{order.carrier ?? 'Not assigned'}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                            Tracking
-                          </p>
-                          <p className="mt-2 text-slate-900">{order.trackingNumber ?? 'Not assigned'}</p>
-                        </div>
+                        {shippingPresentation?.records.slice(0, 2).map((record) => (
+                          <div key={record.label}>
+                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                              {record.label}
+                            </p>
+                            <p className="mt-2 text-slate-900">{record.value}</p>
+                          </div>
+                        ))}
                       </div>
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                          Shipping method
+                          {shippingPresentation?.records[2]?.label ?? 'Shipping method'}
                         </p>
-                        <p className="mt-2 text-slate-900">{order.shippingMethod ?? 'Not available'}</p>
+                        <p className="mt-2 text-slate-900">
+                          {shippingPresentation?.records[2]?.value ?? order.shippingMethod ?? 'Not available'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -313,18 +326,16 @@ export const OrderDetailPageView = () => {
                         </div>
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                            Transaction
-                          </p>
-                          <p className="mt-2 break-all text-slate-900">{trimHash(order.paymentTransactionId)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                            Wallet tx hash
-                          </p>
-                          <p className="mt-2 break-all text-slate-900">{trimHash(order.txHash)}</p>
-                        </div>
+                        <CopyValueField
+                          label="Transaction"
+                          value={order.paymentTransactionId}
+                          displayValue={trimHash(order.paymentTransactionId)}
+                        />
+                        <CopyValueField
+                          label="Wallet tx hash"
+                          value={order.txHash}
+                          displayValue={trimHash(order.txHash)}
+                        />
                       </div>
                       {order.onChainOrderId ? (
                         <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">

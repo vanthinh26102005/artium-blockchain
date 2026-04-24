@@ -4,6 +4,9 @@ import { useRouter } from 'next/router'
 // @domains - discover
 import { type TopPicksArtwork } from '@domains/discover/mock/mockTopPicksArtworks'
 
+// @shared
+import { UserAvatar } from '@shared/components/ui/user-avatar'
+
 type ArtworkThumbnailCardProps = {
   artwork: TopPicksArtwork
 }
@@ -59,10 +62,11 @@ export const ArtworkThumbnailCard = ({ artwork }: ArtworkThumbnailCardProps) => 
 
           {/* creator */}
           <div className="flex items-center gap-2 text-sm text-slate-600">
-            <img
+            <UserAvatar
               src={artwork.avatarUrl}
-              alt={artwork.username}
-              className="h-6 w-6 rounded-full border border-white object-cover"
+              name={artwork.username}
+              size="sm"
+              className="border border-white"
             />
             <span className="font-medium">@{artwork.username}</span>
             <img src="/images/discover/verified-icon.svg" alt="Verified" className="h-4 w-4" />

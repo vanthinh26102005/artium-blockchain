@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import orderApis, { type OrderResponse } from '@shared/apis/orderApis'
+import { BaseInputField, BaseTextareaField } from '@shared/components/forms'
 import { Button } from '@shared/components/ui/button'
-import { Input } from '@shared/components/ui/input'
-import { Textarea } from '@shared/components/ui/textarea'
 import type { OrderActorRole } from '../types/orderTypes'
 import {
   canCancelOrder,
@@ -31,6 +30,10 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
   const [shippingMethod, setShippingMethod] = useState('')
   const [deliveryNotes, setDeliveryNotes] = useState('')
   const [disputeReason, setDisputeReason] = useState('')
+  const labelClassName = 'text-sm font-medium text-slate-700'
+  const messageClassName = 'text-sm text-red-500'
+  const inputClassName = 'border-slate-200 bg-white text-slate-900'
+  const textareaClassName = 'border-slate-200 bg-white text-slate-900'
 
   const resetLocalState = () => {
     setActiveAction(null)
@@ -140,7 +143,7 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
         </div>
       ) : null}
 
-      <div className="mt-6 flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-wrap gap-3">
         {actions.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
             No order actions are available right now.
@@ -166,31 +169,40 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
       {activeAction === 'ship' ? (
         <div className="mt-6 space-y-4 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
           <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">Carrier</label>
-              <Input
-                value={shippingCarrier}
-                onChange={(event) => setShippingCarrier(event.target.value)}
-                placeholder="FedEx"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">Tracking number</label>
-              <Input
-                value={trackingNumber}
-                onChange={(event) => setTrackingNumber(event.target.value)}
-                placeholder="TRACK-123456789"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Shipping method</label>
-            <Input
-              value={shippingMethod}
-              onChange={(event) => setShippingMethod(event.target.value)}
-              placeholder="Express International"
+            <BaseInputField
+              id="order-action-shipping-carrier"
+              label="Carrier"
+              value={shippingCarrier}
+              onChange={(event) => setShippingCarrier(event.target.value)}
+              placeholder="FedEx"
+              containerClassName="space-y-2"
+              labelClassName={labelClassName}
+              messageClassName={messageClassName}
+              inputClassName={inputClassName}
+            />
+            <BaseInputField
+              id="order-action-tracking-number"
+              label="Tracking number"
+              value={trackingNumber}
+              onChange={(event) => setTrackingNumber(event.target.value)}
+              placeholder="TRACK-123456789"
+              containerClassName="space-y-2"
+              labelClassName={labelClassName}
+              messageClassName={messageClassName}
+              inputClassName={inputClassName}
             />
           </div>
+          <BaseInputField
+            id="order-action-shipping-method"
+            label="Shipping method"
+            value={shippingMethod}
+            onChange={(event) => setShippingMethod(event.target.value)}
+            placeholder="Express International"
+            containerClassName="space-y-2"
+            labelClassName={labelClassName}
+            messageClassName={messageClassName}
+            inputClassName={inputClassName}
+          />
           <div className="flex gap-3">
             <Button
               type="button"
@@ -209,16 +221,18 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
 
       {activeAction === 'confirm' ? (
         <div className="mt-6 space-y-4 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
-              Delivery notes <span className="text-slate-400">(optional)</span>
-            </label>
-            <Textarea
-              value={deliveryNotes}
-              onChange={(event) => setDeliveryNotes(event.target.value)}
-              placeholder="Artwork arrived in great condition."
-            />
-          </div>
+          <BaseTextareaField
+            id="order-action-delivery-notes"
+            label="Delivery notes"
+            value={deliveryNotes}
+            onChange={(event) => setDeliveryNotes(event.target.value)}
+            placeholder="Artwork arrived in great condition."
+            description="Optional"
+            containerClassName="space-y-2"
+            labelClassName={labelClassName}
+            descriptionClassName="text-sm text-slate-400"
+            textareaClassName={textareaClassName}
+          />
           <div className="flex gap-3">
             <Button type="button" loading={isSubmitting} onClick={() => void handleConfirmDelivery()}>
               Confirm delivery
@@ -232,14 +246,17 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
 
       {activeAction === 'dispute' ? (
         <div className="mt-6 space-y-4 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Dispute reason</label>
-            <Textarea
-              value={disputeReason}
-              onChange={(event) => setDisputeReason(event.target.value)}
-              placeholder="Describe the shipment problem and what support is needed."
-            />
-          </div>
+          <BaseTextareaField
+            id="order-action-dispute-reason"
+            label="Dispute reason"
+            value={disputeReason}
+            onChange={(event) => setDisputeReason(event.target.value)}
+            placeholder="Describe the shipment problem and what support is needed."
+            containerClassName="space-y-2"
+            labelClassName={labelClassName}
+            messageClassName={messageClassName}
+            textareaClassName={textareaClassName}
+          />
           <div className="flex gap-3">
             <Button
               type="button"
@@ -258,16 +275,18 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
 
       {activeAction === 'cancel' ? (
         <div className="mt-6 space-y-4 rounded-[24px] border border-rose-100 bg-rose-50 p-5">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-rose-900">
-              Cancellation note <span className="text-rose-500">(optional)</span>
-            </label>
-            <Textarea
-              value={cancelReason}
-              onChange={(event) => setCancelReason(event.target.value)}
-              placeholder="Share a short reason for the cancellation."
-            />
-          </div>
+          <BaseTextareaField
+            id="order-action-cancel-reason"
+            label="Cancellation note"
+            value={cancelReason}
+            onChange={(event) => setCancelReason(event.target.value)}
+            placeholder="Share a short reason for the cancellation."
+            description="Optional"
+            containerClassName="space-y-2"
+            labelClassName="text-sm font-medium text-rose-900"
+            descriptionClassName="text-sm text-rose-500"
+            textareaClassName="border-rose-200 bg-white text-rose-950"
+          />
           <div className="flex gap-3">
             <Button
               type="button"

@@ -1,6 +1,18 @@
 import type { OrderItemResponse, OrderResponse } from '@shared/apis/orderApis'
 import type { OrderActorRole, OrderTimelineStep, OrdersWorkspaceScope } from '../types/orderTypes'
 
+export type ShippingRecordValue = {
+  label: string
+  value: string
+}
+
+export type ShippingPresentation = {
+  title: string
+  description: string
+  emptyAddressLabel: string
+  records: ShippingRecordValue[]
+}
+
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
   confirmed: 'Confirmed',
@@ -209,6 +221,123 @@ export const getNextStepDescription = (order: OrderResponse, role: OrderActorRol
   }
 
   return 'No action is required right now. You can still review the full order history below.'
+}
+
+export const getShippingPresentation = (order: OrderResponse): ShippingPresentation => {
+  const hasShipmentDetails = Boolean(order.carrier || order.trackingNumber || order.shippingMethod)
+
+  switch (order.status) {
+    case 'pending':
+      return {
+        title: 'Awaiting payment confirmation',
+        description:
+          'Shipping details will appear after the order is confirmed and ready for fulfillment.',
+        emptyAddressLabel: 'No shipping address has been captured yet for this order.',
+        records: [
+          { label: 'Carrier', value: 'Assigned when the order is ready to ship' },
+          { label: 'Tracking', value: 'Tracking will appear after dispatch' },
+          { label: 'Shipping method', value: 'Selected during fulfillment' },
+        ],
+      }
+    case 'confirmed':
+    case 'processing':
+      return {
+        title: 'Preparing shipment',
+        description:
+          'The seller is preparing the artwork for dispatch. Shipment details will appear once the package leaves the studio.',
+        emptyAddressLabel: 'No shipping address has been captured yet for this order.',
+        records: [
+          { label: 'Carrier', value: order.carrier ?? 'Assigned at dispatch' },
+          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking will appear after dispatch' },
+          { label: 'Shipping method', value: order.shippingMethod ?? 'Finalized before dispatch' },
+        ],
+      }
+    case 'escrow_held':
+      return {
+        title: 'Awaiting seller shipment',
+        description:
+          'Payment is secured in escrow. The next step is for the seller to hand the artwork to a carrier and add shipment details.',
+        emptyAddressLabel: 'No shipping address has been captured yet for this order.',
+        records: [
+          { label: 'Carrier', value: order.carrier ?? 'Seller has not assigned a carrier yet' },
+          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking will appear after dispatch' },
+          { label: 'Shipping method', value: order.shippingMethod ?? 'Selected once shipment is booked' },
+        ],
+      }
+    case 'shipped':
+      return {
+        title: 'In transit',
+        description:
+          'The shipment is on its way. Use the recorded shipping details below to track the package.',
+        emptyAddressLabel: 'No shipping address was captured for this order.',
+        records: [
+          { label: 'Carrier', value: order.carrier ?? 'Carrier not provided' },
+          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not provided' },
+          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not provided' },
+        ],
+      }
+    case 'dispute_open':
+      return {
+        title: 'Shipment under review',
+        description: hasShipmentDetails
+          ? 'A dispute is open for this shipped order. The recorded shipment details are preserved below for review.'
+          : 'A dispute is open for this order. Shipment details were not recorded before the dispute was opened.',
+        emptyAddressLabel: 'No shipping address was captured for this order.',
+        records: [
+          { label: 'Carrier', value: order.carrier ?? 'Carrier not recorded' },
+          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not recorded' },
+          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not recorded' },
+        ],
+      }
+    case 'delivered':
+      return {
+        title: 'Delivery completed',
+        description:
+          'The artwork has been delivered. The recorded shipment details remain available for reference.',
+        emptyAddressLabel: 'No shipping address was captured for this order.',
+        records: [
+          { label: 'Carrier', value: order.carrier ?? 'Carrier not recorded' },
+          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not recorded' },
+          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not recorded' },
+        ],
+      }
+    case 'cancelled':
+      return {
+        title: 'Shipment closed',
+        description:
+          'This order was cancelled before completion, so no further shipment updates are expected.',
+        emptyAddressLabel: 'No shipping address was captured before the order was cancelled.',
+        records: [
+          { label: 'Carrier', value: order.carrier ?? 'No carrier will be assigned' },
+          { label: 'Tracking', value: order.trackingNumber ?? 'No tracking will be added' },
+          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping is no longer scheduled' },
+        ],
+      }
+    case 'refunded':
+      return {
+        title: 'Shipment closed',
+        description:
+          'This order has been refunded, so shipment is no longer active. Any recorded shipment details are shown for reference only.',
+        emptyAddressLabel: 'No shipping address was captured before the order was refunded.',
+        records: [
+          { label: 'Carrier', value: order.carrier ?? 'No active carrier' },
+          { label: 'Tracking', value: order.trackingNumber ?? 'No active tracking record' },
+          { label: 'Shipping method', value: order.shippingMethod ?? 'No active shipping method' },
+        ],
+      }
+    default:
+      return {
+        title: 'Shipping details',
+        description:
+          'Shipping information will update here as the order moves through fulfillment.',
+        emptyAddressLabel: 'No shipping address was captured for this order yet.',
+        records: [
+          { label: 'Carrier', value: order.carrier ?? 'Not yet available' },
+          { label: 'Tracking', value: order.trackingNumber ?? 'Not yet available' },
+          { label: 'Shipping method', value: order.shippingMethod ?? 'Not yet available' },
+        ],
+      }
+  }
 }
 
 export const buildOrderTimeline = (order: OrderResponse): OrderTimelineStep[] => {

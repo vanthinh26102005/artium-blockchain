@@ -1,5 +1,6 @@
 export { BaseFormField } from './BaseFormField'
 export { BaseInputField } from './BaseInputField'
 export { BasePasswordInputField } from './BasePasswordInputField'
+export { BaseTextareaField } from './BaseTextareaField'
 export { BaseAutocompleteField } from './BaseAutocompleteField'
 export type { BaseAutocompleteOption } from './BaseAutocompleteField'

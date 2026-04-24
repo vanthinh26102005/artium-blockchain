@@ -3,6 +3,7 @@ import { type FieldPath, useFormContext, useWatch } from 'react-hook-form'
 
 import { ChevronDown, ChevronUp, CreditCard, Info } from 'lucide-react'
 
+import { BaseFormField, BaseInputField } from '@shared/components/forms'
 import { Input } from '@shared/components/ui/input'
 import { Label } from '@shared/components/ui/label'
 import { cn } from '@shared/lib/utils'
@@ -39,6 +40,8 @@ export const QuickSellCheckoutMainContent = ({
   const labelClass = 'mb-2 block text-[11px] font-bold uppercase tracking-wider text-[#191414]'
   const inputClass =
     'h-[52px] rounded-xl border border-[#E5E5E5] bg-[#FCFCFC] px-4 text-[15px] font-medium text-[#191414] placeholder:text-[#989898] transition-colors focus:border-[#191414] focus:bg-white focus:ring-0'
+  const messageClass = 'text-xs text-red-500'
+  const helperClass = 'text-[11px] text-[#989898]'
 
   return (
     <div className="flex flex-col gap-4">
@@ -66,69 +69,87 @@ export const QuickSellCheckoutMainContent = ({
         </h3>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <Label className={labelClass}>FIRST NAME</Label>
-            <Input
+          <div className="space-y-1.5">
+            <BaseInputField
+              id="quick-sell-checkout-first-name"
               type="text"
+              label="FIRST NAME"
               {...register('address.firstName')}
-              placeholder=""
-              className={cn(inputClass, getError('address.firstName') ? 'border-red-500' : '')}
+              errorMessage={getError('address.firstName')}
+              containerClassName="space-y-2"
+              labelClassName={labelClass}
+              messageClassName={messageClass}
+              inputClassName={inputClass}
+              errorInputClassName="border-red-500"
             />
-            <div className="mt-1.5 text-right text-[10px] font-medium text-[#989898]">
+            <div className="text-right text-[10px] font-medium text-[#989898]">
               {address?.firstName?.length ?? 0}/50 characters
             </div>
-            {getError('address.firstName') && (
-              <p className="mt-1 text-xs text-red-500">{getError('address.firstName')}</p>
-            )}
           </div>
 
-          <div>
-            <Label className={labelClass}>LAST NAME</Label>
-            <Input
+          <div className="space-y-1.5">
+            <BaseInputField
+              id="quick-sell-checkout-last-name"
               type="text"
+              label="LAST NAME"
               {...register('address.lastName')}
               placeholder="Enter last name"
-              className={cn(inputClass, getError('address.lastName') ? 'border-red-500' : '')}
+              errorMessage={getError('address.lastName')}
+              containerClassName="space-y-2"
+              labelClassName={labelClass}
+              messageClassName={messageClass}
+              inputClassName={inputClass}
+              errorInputClassName="border-red-500"
             />
-            <div className="mt-1.5 text-right text-[10px] font-medium text-[#989898]">
+            <div className="text-right text-[10px] font-medium text-[#989898]">
               {address?.lastName?.length ?? 0}/50 characters
             </div>
-            {getError('address.lastName') && (
-              <p className="mt-1 text-xs text-red-500">{getError('address.lastName')}</p>
-            )}
           </div>
         </div>
 
         <div className="mt-6">
-          <Label className={labelClass}>EMAIL ADDRESS</Label>
-          <Input
+          <BaseInputField
+            id="quick-sell-checkout-email"
             type="email"
+            label="EMAIL ADDRESS"
             {...register('address.email')}
-            placeholder=""
-            className={cn(inputClass, getError('address.email') ? 'border-red-500' : '')}
+            errorMessage={getError('address.email')}
+            containerClassName="space-y-2"
+            labelClassName={labelClass}
+            messageClassName={messageClass}
+            inputClassName={inputClass}
+            errorInputClassName="border-red-500"
           />
-          {getError('address.email') && (
-            <p className="mt-1 text-xs text-red-500">{getError('address.email')}</p>
-          )}
         </div>
 
         <div className="mt-6">
-          <Label className={labelClass}>PHONE NUMBER</Label>
+          <BaseFormField
+            id="quick-sell-checkout-phone"
+            label="PHONE NUMBER"
+            description="We will only use your phone number for delivery purposes."
+            className="space-y-2"
+            labelClassName={labelClass}
+            descriptionClassName={helperClass}
+          >
           <div className="flex gap-3">
             <div className="flex w-25 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#E5E5E5] bg-[#FCFCFC]">
               <span className="text-[16px]">🇺🇸</span>
               <span className="text-[14px] font-bold text-[#191414]">+1</span>
             </div>
-            <Input
+            <BaseInputField
               type="tel"
               {...register('address.phone')}
+              id="quick-sell-checkout-phone"
+              label="PHONE NUMBER INPUT"
               placeholder="201-555-0123"
-              className={`flex-1 ${inputClass}`}
+              containerClassName="flex-1 space-y-0"
+              labelClassName="sr-only"
+              descriptionClassName="sr-only"
+              messageClassName="sr-only"
+              inputClassName={`${inputClass} flex-1`}
             />
           </div>
-          <p className="mt-2 text-[11px] text-[#989898]">
-            We will only use your phone number for delivery purposes.
-          </p>
+          </BaseFormField>
         </div>
       </section>
 
@@ -182,66 +203,77 @@ export const QuickSellCheckoutMainContent = ({
         </h3>
 
         <div className="space-y-6">
-          <div>
-            <Label className={labelClass}>ADDRESS LINE 1</Label>
-            <Input
-              type="text"
-              {...register('address.addressLine1')}
-              placeholder="Start typing your address..."
-              className={cn(inputClass, getError('address.addressLine1') ? 'border-red-500' : '')}
-            />
-            {getError('address.addressLine1') && (
-              <p className="mt-1 text-xs text-red-500">{getError('address.addressLine1')}</p>
-            )}
-          </div>
+          <BaseInputField
+            id="quick-sell-checkout-address-line-1"
+            type="text"
+            label="ADDRESS LINE 1"
+            {...register('address.addressLine1')}
+            placeholder="Start typing your address..."
+            errorMessage={getError('address.addressLine1')}
+            containerClassName="space-y-2"
+            labelClassName={labelClass}
+            messageClassName={messageClass}
+            inputClassName={inputClass}
+            errorInputClassName="border-red-500"
+          />
 
-          <div>
-            <Label className={labelClass}>
-              ADDRESS LINE 2{' '}
-              <span className="normal-case tracking-normal text-[#989898]">(optional)</span>
-            </Label>
-            <Input
+          <BaseInputField
+            id="quick-sell-checkout-address-line-2"
+            type="text"
+            label="ADDRESS LINE 2"
+            {...register('address.addressLine2')}
+            placeholder="Apartment, suite, building number"
+            description="Optional"
+            containerClassName="space-y-2"
+            labelClassName={labelClass}
+            descriptionClassName={helperClass}
+            inputClassName={inputClass}
+          />
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <BaseInputField
+              id="quick-sell-checkout-city"
               type="text"
-              {...register('address.addressLine2')}
-              placeholder="Apartment, suite, building number"
-              className={inputClass}
+              label="CITY"
+              {...register('address.city')}
+              placeholder="Enter City"
+              errorMessage={getError('address.city')}
+              containerClassName="space-y-2"
+              labelClassName={labelClass}
+              messageClassName={messageClass}
+              inputClassName={inputClass}
+              errorInputClassName="border-red-500"
+            />
+
+            <BaseInputField
+              id="quick-sell-checkout-state"
+              type="text"
+              label="STATE / DISTRICT / PROVINCE"
+              {...register('address.state')}
+              placeholder="Enter State/Province/Region"
+              errorMessage={getError('address.state')}
+              containerClassName="space-y-2"
+              labelClassName={labelClass}
+              messageClassName={messageClass}
+              inputClassName={inputClass}
+              errorInputClassName="border-red-500"
             />
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-              <Label className={labelClass}>CITY</Label>
-              <Input
-                type="text"
-                {...register('address.city')}
-                placeholder="Enter City"
-                className={cn(inputClass, getError('address.city') ? 'border-red-500' : '')}
-              />
-              {getError('address.city') && (
-                <p className="mt-1 text-xs text-red-500">{getError('address.city')}</p>
-              )}
-            </div>
-
-            <div>
-              <Label className={labelClass}>STATE / DISTRICT / PROVINCE</Label>
-              <Input
-                type="text"
-                {...register('address.state')}
-                placeholder="Enter State/Province/Region"
-                className={cn(inputClass, getError('address.state') ? 'border-red-500' : '')}
-              />
-              {getError('address.state') && (
-                <p className="mt-1 text-xs text-red-500">{getError('address.state')}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-              <Label className={labelClass}>COUNTRY</Label>
+            <BaseFormField
+              id="quick-sell-checkout-country"
+              label="COUNTRY"
+              errorMessage={getError('address.country')}
+              className="space-y-2"
+              labelClassName={labelClass}
+              messageClassName={messageClass}
+            >
               <div className="relative">
                 <select
+                  id="quick-sell-checkout-country"
                   {...register('address.country')}
+                  aria-invalid={Boolean(getError('address.country'))}
                   className={cn(
                     'w-full appearance-none pr-10',
                     inputClass,
@@ -255,23 +287,21 @@ export const QuickSellCheckoutMainContent = ({
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#989898]" />
               </div>
-              {getError('address.country') && (
-                <p className="mt-1 text-xs text-red-500">{getError('address.country')}</p>
-              )}
-            </div>
+            </BaseFormField>
 
-            <div>
-              <Label className={labelClass}>POSTAL/ZIP CODE</Label>
-              <Input
-                type="text"
-                {...register('address.postalCode')}
-                placeholder="Enter Postal Code/ZIP"
-                className={cn(inputClass, getError('address.postalCode') ? 'border-red-500' : '')}
-              />
-              {getError('address.postalCode') && (
-                <p className="mt-1 text-xs text-red-500">{getError('address.postalCode')}</p>
-              )}
-            </div>
+            <BaseInputField
+              id="quick-sell-checkout-postal-code"
+              type="text"
+              label="POSTAL/ZIP CODE"
+              {...register('address.postalCode')}
+              placeholder="Enter Postal Code/ZIP"
+              errorMessage={getError('address.postalCode')}
+              containerClassName="space-y-2"
+              labelClassName={labelClass}
+              messageClassName={messageClass}
+              inputClassName={inputClass}
+              errorInputClassName="border-red-500"
+            />
           </div>
         </div>
       </section>
@@ -291,34 +321,36 @@ export const QuickSellCheckoutMainContent = ({
         </p>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <div className="mb-2 flex items-center gap-1">
-              <Label className="text-[11px] font-bold uppercase tracking-wider text-[#191414]">
-                ZIPCODE
-              </Label>
-              <span className="text-[11px] text-red-500">*</span>
-            </div>
-            <Input
-              type="text"
-              {...register('address.postalCode')}
-              className={cn(inputClass, getError('address.postalCode') ? 'border-red-500' : '')}
-            />
-          </div>
+          <BaseInputField
+            id="quick-sell-checkout-tax-zipcode"
+            type="text"
+            label="ZIPCODE"
+            required
+            {...register('address.postalCode')}
+            errorMessage={getError('address.postalCode')}
+            containerClassName="space-y-2"
+            labelClassName={labelClass}
+            requiredMarkClassName="text-[11px] text-red-500"
+            messageClassName={messageClass}
+            inputClassName={inputClass}
+            errorInputClassName="border-red-500"
+          />
 
-          <div>
-            <div className="mb-2 flex items-center gap-1">
-              <Label className="text-[11px] font-bold uppercase tracking-wider text-[#191414]">
-                SALES TAX
-              </Label>
-              <span className="text-[11px] text-red-500">*</span>
-            </div>
+          <BaseFormField
+            id="quick-sell-checkout-tax-rate"
+            label="SALES TAX"
+            required
+            className="space-y-2"
+            labelClassName={labelClass}
+            requiredMarkClassName="text-[11px] text-red-500"
+          >
             <div className="relative">
               <Input type="text" value="6" readOnly className={inputClass} />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[15px] font-medium text-[#989898]">
                 %
               </span>
             </div>
-          </div>
+          </BaseFormField>
         </div>
       </section>
 
@@ -420,10 +452,17 @@ export const QuickSellCheckoutMainContent = ({
                     )
                   )}
 
-                  <div>
-                    <Label className={labelClass}>QUỐC GIA</Label>
+                  <BaseFormField
+                    id="quick-sell-payment-country"
+                    label="QUỐC GIA"
+                    errorMessage={getError('paymentCountry')}
+                    className="space-y-2"
+                    labelClassName={labelClass}
+                    messageClassName={messageClass}
+                  >
                     <div className="relative">
                       <select
+                        id="quick-sell-payment-country"
                         value={paymentCountry}
                         onChange={(event) =>
                           setValue('paymentCountry', event.target.value, {
@@ -431,6 +470,7 @@ export const QuickSellCheckoutMainContent = ({
                             shouldValidate: true,
                           })
                         }
+                        aria-invalid={Boolean(getError('paymentCountry'))}
                         className={cn(
                           'w-full appearance-none pr-10',
                           inputClass,
@@ -442,10 +482,7 @@ export const QuickSellCheckoutMainContent = ({
                       </select>
                       <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#989898]" />
                     </div>
-                    {getError('paymentCountry') && (
-                      <p className="mt-1 text-xs text-red-500">{getError('paymentCountry')}</p>
-                    )}
-                  </div>
+                  </BaseFormField>
 
                   <p className="text-[11px] leading-relaxed text-[#595959]">
                     Khi cung cấp thông tin thẻ, bạn cho phép Artium tính phí thẻ của bạn cho các

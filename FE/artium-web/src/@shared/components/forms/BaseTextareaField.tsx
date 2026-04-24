@@ -1,11 +1,11 @@
-import { forwardRef, type InputHTMLAttributes } from 'react'
+import { forwardRef, type TextareaHTMLAttributes } from 'react'
 
-import { Input } from '@shared/components/ui/input'
+import { Textarea } from '@shared/components/ui/textarea'
 import { cn } from '@shared/lib/utils'
 
 import { BaseFormField } from './BaseFormField'
 
-type BaseInputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
+type BaseTextareaFieldProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   label: string
   required?: boolean
   hasError?: boolean
@@ -16,11 +16,11 @@ type BaseInputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   requiredMarkClassName?: string
   messageClassName?: string
   descriptionClassName?: string
-  inputClassName?: string
-  errorInputClassName?: string
+  textareaClassName?: string
+  errorTextareaClassName?: string
 }
 
-export const BaseInputField = forwardRef<HTMLInputElement, BaseInputFieldProps>(
+export const BaseTextareaField = forwardRef<HTMLTextAreaElement, BaseTextareaFieldProps>(
   (
     {
       label,
@@ -33,8 +33,8 @@ export const BaseInputField = forwardRef<HTMLInputElement, BaseInputFieldProps>(
       requiredMarkClassName,
       messageClassName,
       descriptionClassName,
-      inputClassName,
-      errorInputClassName,
+      textareaClassName,
+      errorTextareaClassName,
       id,
       className,
       ...props
@@ -59,12 +59,12 @@ export const BaseInputField = forwardRef<HTMLInputElement, BaseInputFieldProps>(
         messageClassName={messageClassName}
         descriptionClassName={descriptionClassName}
       >
-        <Input
+        <Textarea
           ref={ref}
           id={id}
           aria-invalid={props['aria-invalid'] ?? isInvalid}
           aria-describedby={describedBy}
-          className={cn(inputClassName, isInvalid && errorInputClassName, className)}
+          className={cn(textareaClassName, isInvalid && errorTextareaClassName, className)}
           {...props}
         />
       </BaseFormField>
@@ -72,6 +72,6 @@ export const BaseInputField = forwardRef<HTMLInputElement, BaseInputFieldProps>(
   },
 )
 
-BaseInputField.displayName = 'BaseInputField'
+BaseTextareaField.displayName = 'BaseTextareaField'
 
-export type { BaseInputFieldProps }
+export type { BaseTextareaFieldProps }

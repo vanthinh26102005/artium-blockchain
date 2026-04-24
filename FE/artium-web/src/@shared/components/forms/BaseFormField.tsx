@@ -2,12 +2,13 @@ import type { ReactNode } from 'react'
 
 import { cn } from '@shared/lib/utils'
 
-type BaseFormFieldProps = {
+export type BaseFormFieldProps = {
   id?: string
   label: string
   required?: boolean
   errorMessage?: string
   description?: string
+  messageId?: string
   children: ReactNode
   className?: string
   labelClassName?: string
@@ -22,6 +23,7 @@ export const BaseFormField = ({
   required = false,
   errorMessage,
   description,
+  messageId,
   children,
   className,
   labelClassName,
@@ -38,9 +40,13 @@ export const BaseFormField = ({
       {children}
 
       {errorMessage ? (
-        <p className={messageClassName}>{errorMessage}</p>
+        <p id={messageId} className={messageClassName}>
+          {errorMessage}
+        </p>
       ) : description ? (
-        <p className={descriptionClassName}>{description}</p>
+        <p id={messageId} className={descriptionClassName}>
+          {description}
+        </p>
       ) : null}
     </div>
   )

@@ -34,9 +34,11 @@ import {
   AuthShell,
   SocialAuthButtons,
   WalletLoginPanel,
+  AuthProviderButton,
 } from '@domains/auth/components'
 import { type LoginFormValues, loginFormSchema } from '@domains/auth/validations/auth.schema'
 import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
+import { useWalletLogin } from '../hooks/useWalletLogin'
 
 export const LoginPage = () => {
   const router = useRouter()
@@ -45,6 +47,7 @@ export const LoginPage = () => {
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
   const walletLogin = useWalletLogin()
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
+  const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false)
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     mode: 'onBlur',

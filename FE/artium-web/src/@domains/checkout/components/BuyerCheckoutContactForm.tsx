@@ -1,7 +1,7 @@
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 
 import { AddressFormFields } from '@shared/components/address'
-import { Input } from '@shared/components/ui/input'
+import { BaseFormField, BaseInputField } from '@shared/components/forms'
 import { cn } from '@shared/lib/utils'
 
 import type { BuyerCheckoutContactStepValues } from '../validations/buyerCheckout.schema'
@@ -16,6 +16,14 @@ export const BuyerCheckoutContactForm = () => {
 
   const contact = useWatch({ control, name: 'contact' })
   const deliveryMethod = useWatch({ control, name: 'deliveryMethod' })
+  const labelClassName = 'text-[11px] font-bold uppercase tracking-wider text-[#989898]'
+  const requiredMarkClassName = 'text-red-500'
+  const messageClassName = 'text-[11px] text-red-500'
+  const helperClassName = 'text-[11px] text-[#989898]'
+  const inputClassName =
+    'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0'
+  const defaultInputClassName = 'border-[#E5E5E5] focus:border-[#0066FF]'
+  const errorInputClassName = 'border-red-500 focus:border-red-500'
 
   return (
     <div className="space-y-8">
@@ -26,83 +34,80 @@ export const BuyerCheckoutContactForm = () => {
 
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-                First Name <span className="text-red-500">*</span>
-              </label>
-              <Input
-                {...register('contact.firstName')}
-                placeholder="First name"
-                maxLength={50}
-                className={cn(
-                  'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
-                  errors.contact?.firstName
-                    ? 'border-red-500 focus:border-red-500'
-                    : 'border-[#E5E5E5] focus:border-[#0066FF]',
-                )}
-              />
-              <div className="flex justify-between">
-                {errors.contact?.firstName?.message ? (
-                  <span className="text-[11px] text-red-500">{errors.contact.firstName.message}</span>
-                ) : (
-                  <span className="text-[11px] text-[#989898]">{contact?.firstName?.length ?? 0}/50</span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-                Last Name <span className="text-red-500">*</span>
-              </label>
-              <Input
-                {...register('contact.lastName')}
-                placeholder="Last name"
-                maxLength={50}
-                className={cn(
-                  'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
-                  errors.contact?.lastName
-                    ? 'border-red-500 focus:border-red-500'
-                    : 'border-[#E5E5E5] focus:border-[#0066FF]',
-                )}
-              />
-              <div className="flex justify-between">
-                {errors.contact?.lastName?.message ? (
-                  <span className="text-[11px] text-red-500">{errors.contact.lastName.message}</span>
-                ) : (
-                  <span className="text-[11px] text-[#989898]">{contact?.lastName?.length ?? 0}/50</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-              Email Address <span className="text-red-500">*</span>
-            </label>
-            <Input
-              type="email"
-              {...register('contact.email')}
-              placeholder="your@email.com"
-              className={cn(
-                'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
-                errors.contact?.email
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-[#E5E5E5] focus:border-[#0066FF]',
-              )}
+            <BaseInputField
+              {...register('contact.firstName')}
+              id="checkout-contact-first-name"
+              label="First Name"
+              required
+              placeholder="First name"
+              maxLength={50}
+              errorMessage={errors.contact?.firstName?.message}
+              description={`${contact?.firstName?.length ?? 0}/50`}
+              containerClassName="space-y-2"
+              labelClassName={labelClassName}
+              requiredMarkClassName={requiredMarkClassName}
+              messageClassName={messageClassName}
+              descriptionClassName={helperClassName}
+              inputClassName={cn(inputClassName, defaultInputClassName)}
+              errorInputClassName={errorInputClassName}
             />
-            {errors.contact?.email?.message && (
-              <span className="text-[11px] text-red-500">{errors.contact.email.message}</span>
-            )}
+
+            <BaseInputField
+              {...register('contact.lastName')}
+              id="checkout-contact-last-name"
+              label="Last Name"
+              required
+              placeholder="Last name"
+              maxLength={50}
+              errorMessage={errors.contact?.lastName?.message}
+              description={`${contact?.lastName?.length ?? 0}/50`}
+              containerClassName="space-y-2"
+              labelClassName={labelClassName}
+              requiredMarkClassName={requiredMarkClassName}
+              messageClassName={messageClassName}
+              descriptionClassName={helperClassName}
+              inputClassName={cn(inputClassName, defaultInputClassName)}
+              errorInputClassName={errorInputClassName}
+            />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-              Phone Number <span className="text-red-500">*</span>
-            </label>
+          <BaseInputField
+            {...register('contact.email')}
+            id="checkout-contact-email"
+            type="email"
+            label="Email Address"
+            required
+            placeholder="your@email.com"
+            errorMessage={errors.contact?.email?.message}
+            containerClassName="space-y-2"
+            labelClassName={labelClassName}
+            requiredMarkClassName={requiredMarkClassName}
+            messageClassName={messageClassName}
+            inputClassName={cn(inputClassName, defaultInputClassName)}
+            errorInputClassName={errorInputClassName}
+          />
+
+          <BaseFormField
+            id="checkout-contact-phone"
+            label="Phone Number"
+            required
+            errorMessage={errors.contact?.phone?.message}
+            description="We will only use your phone number for delivery purposes."
+            messageId="checkout-contact-phone-message"
+            className="space-y-2"
+            labelClassName={labelClassName}
+            requiredMarkClassName={requiredMarkClassName}
+            messageClassName={messageClassName}
+            descriptionClassName={helperClassName}
+          >
             <div className="flex gap-2">
               <select
+                id="checkout-contact-phone-country-code"
                 {...register('contact.phoneCountryCode')}
-                className="h-12 w-25 rounded-xl border border-[#E5E5E5] bg-white px-3 text-[15px] font-medium text-[#191414] focus:border-[#0066FF] focus:ring-0"
+                className={cn(
+                  'h-12 w-25 rounded-xl border bg-white px-3 text-[15px] font-medium text-[#191414] focus:ring-0',
+                  defaultInputClassName,
+                )}
               >
                 <option value="+1">🇺🇸 +1</option>
                 <option value="+84">🇻🇳 +84</option>
@@ -113,26 +118,24 @@ export const BuyerCheckoutContactForm = () => {
                 <option value="+61">🇦🇺 +61</option>
                 <option value="+82">🇰🇷 +82</option>
               </select>
-              <Input
+              <BaseInputField
                 type="tel"
                 {...register('contact.phone')}
+                id="checkout-contact-phone"
+                label="Phone number input"
                 placeholder="000-000-0000"
-                className={cn(
-                  'h-12 flex-1 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
-                  errors.contact?.phone
-                    ? 'border-red-500 focus:border-red-500'
-                    : 'border-[#E5E5E5] focus:border-[#0066FF]',
-                )}
+                aria-describedby="checkout-contact-phone-message"
+                errorMessage={errors.contact?.phone?.message}
+                containerClassName="flex-1 space-y-0"
+                labelClassName="sr-only"
+                requiredMarkClassName={requiredMarkClassName}
+                messageClassName="sr-only"
+                descriptionClassName="sr-only"
+                inputClassName={cn(inputClassName, 'flex-1', defaultInputClassName)}
+                errorInputClassName={errorInputClassName}
               />
             </div>
-            {errors.contact?.phone?.message ? (
-              <span className="text-[11px] text-red-500">{errors.contact.phone.message}</span>
-            ) : (
-              <span className="text-[11px] text-[#989898]">
-                We will only use your phone number for delivery purposes.
-              </span>
-            )}
-          </div>
+          </BaseFormField>
         </div>
       </section>
 

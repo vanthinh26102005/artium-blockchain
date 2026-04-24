@@ -12,6 +12,7 @@ export type BaseAutocompleteOption = {
 }
 
 type BaseAutocompleteFieldProps = {
+  id?: string
   options: BaseAutocompleteOption[]
   value: string
   onValueChange: (value: string) => void
@@ -22,6 +23,7 @@ type BaseAutocompleteFieldProps = {
   disabled?: boolean
   isLoading?: boolean
   errorMessage?: string
+  description?: string
   className?: string
   labelClassName?: string
   requiredMarkClassName?: string
@@ -30,10 +32,12 @@ type BaseAutocompleteFieldProps = {
   optionClassName?: string
   selectedOptionClassName?: string
   messageClassName?: string
+  descriptionClassName?: string
   maxVisibleOptions?: number
 }
 
 export const BaseAutocompleteField = ({
+  id,
   options,
   value,
   onValueChange,
@@ -44,6 +48,7 @@ export const BaseAutocompleteField = ({
   disabled = false,
   isLoading = false,
   errorMessage,
+  description,
   className,
   labelClassName,
   requiredMarkClassName,
@@ -52,10 +57,12 @@ export const BaseAutocompleteField = ({
   optionClassName = 'w-full px-4 py-3 text-left text-[14px] text-[#191414] transition-colors hover:bg-blue-50',
   selectedOptionClassName = 'bg-blue-50 font-medium text-[#0066FF]',
   messageClassName,
+  descriptionClassName,
   maxVisibleOptions = 50,
 }: BaseAutocompleteFieldProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const messageId = id ? `${id}-message` : undefined
 
   const selectedOption = useMemo(() => options.find((option) => option.value === value), [options, value])
 
@@ -113,22 +120,29 @@ export const BaseAutocompleteField = ({
 
   return (
     <BaseFormField
+      id={id}
       label={label}
       required={required}
       errorMessage={errorMessage}
+      description={description}
+      messageId={messageId}
       className={cn('relative', className)}
       labelClassName={labelClassName}
       requiredMarkClassName={requiredMarkClassName}
       messageClassName={messageClassName}
+      descriptionClassName={descriptionClassName}
     >
       <div className="relative">
         <Input
+          id={id}
           value={inputValue}
           onChange={handleInputChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled}
+          aria-invalid={Boolean(errorMessage)}
+          aria-describedby={messageId}
           className={inputClassName}
         />
 

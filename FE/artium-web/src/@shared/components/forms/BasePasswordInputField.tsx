@@ -5,6 +5,8 @@ import { Eye, EyeOff } from 'lucide-react'
 import { cn } from '@shared/lib/utils'
 
 import { BaseFormField } from './BaseFormField'
+import { Button } from '../ui/button'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
 
 type BasePasswordInputFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
   label: string
@@ -49,6 +51,9 @@ export const BasePasswordInputField = forwardRef<HTMLInputElement, BasePasswordI
     ref,
   ) => {
     const [isVisible, setIsVisible] = useState(false)
+    const messageId = id ? `${id}-message` : undefined
+    const isInvalid = hasError || Boolean(errorMessage)
+    const describedBy = [props['aria-describedby'], messageId].filter(Boolean).join(' ') || undefined
 
     return (
       <BaseFormField
@@ -57,30 +62,34 @@ export const BasePasswordInputField = forwardRef<HTMLInputElement, BasePasswordI
         required={required}
         errorMessage={errorMessage}
         description={description}
+        messageId={messageId}
         className={containerClassName}
         labelClassName={labelClassName}
         requiredMarkClassName={requiredMarkClassName}
         messageClassName={messageClassName}
         descriptionClassName={descriptionClassName}
       >
-        <div className={cn(fieldContainerClassName, hasError && errorFieldContainerClassName)}>
-          <input
+        <InputGroup className={cn(fieldContainerClassName, isInvalid && errorFieldContainerClassName)}>
+          <InputGroupInput
             ref={ref}
             id={id}
             type={isVisible ? 'text' : 'password'}
+            aria-invalid={props['aria-invalid'] ?? isInvalid}
+            aria-describedby={describedBy}
             className={cn(inputClassName, className)}
             {...props}
           />
-
-          <button
-            type="button"
-            onClick={() => setIsVisible((prev) => !prev)}
-            className={toggleButtonClassName}
-            aria-label={isVisible ? 'Hide password' : 'Show password'}
-          >
-            {isVisible ? <EyeOff className={iconClassName} /> : <Eye className={iconClassName} />}
-          </button>
-        </div>
+          <InputGroupAddon className='p-0! bg-transparent' align="inline-end">
+            <Button
+              type="button"
+              onClick={() => setIsVisible((prev) => !prev)}
+              className={toggleButtonClassName}
+              aria-label={isVisible ? 'Hide password' : 'Show password'}
+            >
+              {isVisible ? <EyeOff className={iconClassName} /> : <Eye className={iconClassName} />}
+            </Button>
+          </InputGroupAddon>
+        </InputGroup>
       </BaseFormField>
     )
   },

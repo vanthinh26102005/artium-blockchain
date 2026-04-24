@@ -3,9 +3,9 @@ import { Country, State, City, ICountry, IState, ICity } from 'country-state-cit
 
 import {
   BaseAutocompleteField,
+  BaseInputField,
   type BaseAutocompleteOption,
 } from '@shared/components/forms'
-import { Input } from '@shared/components/ui/input'
 import { cn } from '@shared/lib/utils'
 
 // --- Types ---
@@ -91,6 +91,12 @@ export const AddressFormFields = ({
 
   // --- Postal config ---
   const postalConfig = useMemo(() => getPostalConfig(value.country), [value.country])
+  const labelClassName = 'text-[11px] font-bold uppercase tracking-wider text-[#989898]'
+  const requiredMarkClassName = 'text-red-500'
+  const messageClassName = 'text-[11px] text-red-500'
+  const descriptionClassName = 'text-[11px] text-[#989898]'
+  const baseInputClassName =
+    'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0'
 
   // --- Validation ---
   const errors = useMemo(() => {
@@ -163,16 +169,16 @@ export const AddressFormFields = ({
         disabled={disabled}
         errorMessage={errors.country}
         className="space-y-2"
-        labelClassName="text-[11px] font-bold uppercase tracking-wider text-[#989898]"
-        requiredMarkClassName="text-red-500"
+        labelClassName={labelClassName}
+        requiredMarkClassName={requiredMarkClassName}
         inputClassName={cn(
-          'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+          baseInputClassName,
           errors.country ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
         )}
         dropdownClassName="absolute z-50 mt-1 max-h-[240px] w-full overflow-auto rounded-xl border border-[#E5E5E5] bg-white shadow-lg"
         optionClassName="w-full px-4 py-3 text-left text-[14px] transition-colors hover:bg-blue-50 text-[#191414]"
         selectedOptionClassName="bg-blue-50 font-medium text-[#0066FF]"
-        messageClassName="text-[11px] text-red-500"
+        messageClassName={messageClassName}
       />
 
       {/* Row 2: State/Province + City */}
@@ -187,16 +193,16 @@ export const AddressFormFields = ({
           disabled={disabled || !value.country}
           errorMessage={errors.state}
           className="space-y-2"
-          labelClassName="text-[11px] font-bold uppercase tracking-wider text-[#989898]"
-          requiredMarkClassName="text-red-500"
+          labelClassName={labelClassName}
+          requiredMarkClassName={requiredMarkClassName}
           inputClassName={cn(
-            'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+            baseInputClassName,
             errors.state ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
           )}
           dropdownClassName="absolute z-50 mt-1 max-h-[240px] w-full overflow-auto rounded-xl border border-[#E5E5E5] bg-white shadow-lg"
           optionClassName="w-full px-4 py-3 text-left text-[14px] transition-colors hover:bg-blue-50 text-[#191414]"
           selectedOptionClassName="bg-blue-50 font-medium text-[#0066FF]"
-          messageClassName="text-[11px] text-red-500"
+          messageClassName={messageClassName}
         />
 
         <BaseAutocompleteField
@@ -210,69 +216,72 @@ export const AddressFormFields = ({
           disabled={disabled || !value.country}
           errorMessage={errors.city}
           className="space-y-2"
-          labelClassName="text-[11px] font-bold uppercase tracking-wider text-[#989898]"
-          requiredMarkClassName="text-red-500"
+          labelClassName={labelClassName}
+          requiredMarkClassName={requiredMarkClassName}
           inputClassName={cn(
-            'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
+            baseInputClassName,
             errors.city ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
           )}
           dropdownClassName="absolute z-50 mt-1 max-h-[240px] w-full overflow-auto rounded-xl border border-[#E5E5E5] bg-white shadow-lg"
           optionClassName="w-full px-4 py-3 text-left text-[14px] transition-colors hover:bg-blue-50 text-[#191414]"
           selectedOptionClassName="bg-blue-50 font-medium text-[#0066FF]"
-          messageClassName="text-[11px] text-red-500"
+          messageClassName={messageClassName}
         />
       </div>
 
       {/* Row 3: Address Line 1 */}
-      <div className="space-y-2">
-        <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-          Address Line 1 <span className="text-red-500">*</span>
-        </label>
-        <Input
-          value={value.addressLine1}
-          onChange={(e) => handleFieldChange('addressLine1', e.target.value)}
-          placeholder="Street address, P.O. Box"
-          disabled={disabled}
-          className={cn(
-            'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
-            errors.addressLine1 ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
-          )}
-        />
-        {errors.addressLine1 && <span className="text-[11px] text-red-500">{errors.addressLine1}</span>}
-      </div>
+      <BaseInputField
+        id="address-line-1"
+        label="Address Line 1"
+        required
+        value={value.addressLine1}
+        onChange={(event) => handleFieldChange('addressLine1', event.target.value)}
+        placeholder="Street address, P.O. Box"
+        disabled={disabled}
+        errorMessage={errors.addressLine1}
+        containerClassName="space-y-2"
+        labelClassName={labelClassName}
+        requiredMarkClassName={requiredMarkClassName}
+        messageClassName={messageClassName}
+        inputClassName={baseInputClassName}
+        errorInputClassName="border-red-500 focus:border-red-500"
+        className={cn(!errors.addressLine1 && 'border-[#E5E5E5] focus:border-[#0066FF]')}
+      />
 
       {/* Row 4: Address Line 2 */}
-      <div className="space-y-2">
-        <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-          Address Line 2 <span className="text-[#989898]">(optional)</span>
-        </label>
-        <Input
-          value={value.addressLine2}
-          onChange={(e) => handleFieldChange('addressLine2', e.target.value)}
-          placeholder="Apartment, suite, unit, building, floor"
-          disabled={disabled}
-          className="h-12 rounded-xl border border-[#E5E5E5] bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:border-[#0066FF] focus:ring-0"
-        />
-      </div>
+      <BaseInputField
+        id="address-line-2"
+        label="Address Line 2"
+        value={value.addressLine2}
+        onChange={(event) => handleFieldChange('addressLine2', event.target.value)}
+        placeholder="Apartment, suite, unit, building, floor"
+        disabled={disabled}
+        description="Optional"
+        containerClassName="space-y-2"
+        labelClassName={labelClassName}
+        descriptionClassName={descriptionClassName}
+        inputClassName={cn(baseInputClassName, 'border-[#E5E5E5] focus:border-[#0066FF]')}
+      />
 
       {/* Row 5: Postal Code */}
-      <div className="w-1/2 space-y-2 pr-2">
-        <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
-          Postal / ZIP Code <span className="text-red-500">*</span>
-        </label>
-        <Input
-          value={value.postalCode}
-          onChange={(e) => handleFieldChange('postalCode', e.target.value.slice(0, postalConfig.maxLength))}
-          placeholder={postalConfig.placeholder}
-          disabled={disabled}
-          maxLength={postalConfig.maxLength}
-          className={cn(
-            'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0',
-            errors.postalCode ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
-          )}
-        />
-        {errors.postalCode && <span className="text-[11px] text-red-500">{errors.postalCode}</span>}
-      </div>
+      <BaseInputField
+        id="address-postal-code"
+        label="Postal / ZIP Code"
+        required
+        value={value.postalCode}
+        onChange={(event) => handleFieldChange('postalCode', event.target.value.slice(0, postalConfig.maxLength))}
+        placeholder={postalConfig.placeholder}
+        disabled={disabled}
+        maxLength={postalConfig.maxLength}
+        errorMessage={errors.postalCode}
+        containerClassName="w-1/2 space-y-2 pr-2"
+        labelClassName={labelClassName}
+        requiredMarkClassName={requiredMarkClassName}
+        messageClassName={messageClassName}
+        inputClassName={baseInputClassName}
+        errorInputClassName="border-red-500 focus:border-red-500"
+        className={cn(!errors.postalCode && 'border-[#E5E5E5] focus:border-[#0066FF]')}
+      />
     </div>
   )
 }

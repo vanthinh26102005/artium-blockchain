@@ -2,7 +2,7 @@ export interface TopPicksArtwork {
   id: string
   title: string
   username: string
-  avatarUrl: string
+  avatarUrl?: string
   imageUrl: string
   height: number
   badges: {

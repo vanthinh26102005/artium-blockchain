@@ -49,7 +49,7 @@ export const mapArtworkToTopPick = (artwork: ArtworkApiItem): TopPicksArtwork =>
     id: artwork.id,
     title: artwork.title,
     username: artwork.creatorName ?? 'Artist',
-    avatarUrl: '/images/default-avatar.png',
+    avatarUrl: undefined,
     imageUrl: resolveArtworkImage(artwork),
     height: 200 + Math.floor(Math.random() * 80),
     badges: {

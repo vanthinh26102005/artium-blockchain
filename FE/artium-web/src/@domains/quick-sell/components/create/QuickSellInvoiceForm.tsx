@@ -3,10 +3,8 @@ import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-
 
 import { Check } from 'lucide-react'
 
+import { BaseFormField, BaseInputField, BaseTextareaField } from '@shared/components/forms'
 import { Button } from '@shared/components/ui/button'
-import { Input } from '@shared/components/ui/input'
-import { Label } from '@shared/components/ui/label'
-import { Textarea } from '@shared/components/ui/textarea'
 
 import type { QuickSellArtworkOption } from './QuickSellArtworkPickerModal'
 import { QuickSellArtworkItemRow } from './QuickSellArtworkItemRow'
@@ -59,6 +57,8 @@ export const QuickSellInvoiceForm = () => {
     'mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-[#191414]'
   const inputClass =
     'h-[44px] rounded border-[#E5E5E5] bg-white px-4 text-[14px] text-[#191414] placeholder:text-[#989898] focus:border-black focus:ring-0'
+  const messageClass = 'mt-1 text-xs text-red-500'
+  const helperClass = 'mt-2 text-[11px] text-[#989898]'
 
   return (
     <div className="flex flex-col gap-10 pb-10">
@@ -70,56 +70,45 @@ export const QuickSellInvoiceForm = () => {
         </p>
 
         <div className="space-y-5">
-          <div>
-            <Label htmlFor="buyer-name" className={labelClass}>
-              FULL NAME
-            </Label>
-            <Input
-              id="buyer-name"
-              type="text"
-              {...register('buyer.name')}
-              className={inputClass}
-            />
-          </div>
+          <BaseInputField
+            id="buyer-name"
+            type="text"
+            label="FULL NAME"
+            {...register('buyer.name')}
+            containerClassName="space-y-1.5"
+            labelClassName={labelClass}
+            inputClassName={inputClass}
+          />
 
-          <div>
-            <Label htmlFor="buyer-email" className={labelClass}>
-              EMAIL ADDRESS
-            </Label>
-            <Input
-              id="buyer-email"
-              type="email"
-              {...register('buyer.email')}
-              className={`${inputClass} ${errors.buyer?.email ? 'border-red-500' : ''}`}
-            />
-            {errors.buyer?.email?.message && (
-              <p className="mt-1 text-xs text-red-500">{errors.buyer.email.message}</p>
-            )}
-          </div>
+          <BaseInputField
+            id="buyer-email"
+            type="email"
+            label="EMAIL ADDRESS"
+            {...register('buyer.email')}
+            errorMessage={errors.buyer?.email?.message}
+            containerClassName="space-y-1.5"
+            labelClassName={labelClass}
+            messageClassName={messageClass}
+            inputClassName={inputClass}
+            errorInputClassName="border-red-500"
+          />
 
-          <div>
-            <Label htmlFor="buyer-message" className={labelClass}>
-              MESSAGE TO BUYER
-            </Label>
-            <div className="relative">
-              <Textarea
-                id="buyer-message"
-                {...register('buyer.message')}
-                placeholder="Enter your message to the buyer (optional)"
-                className={`min-h-[120px] resize-none rounded border-[#E5E5E5] bg-white p-4 text-[14px] text-[#191414] placeholder:text-[#989898] focus:border-black focus:ring-0 ${
-                  errors.buyer?.message ? 'border-red-500' : ''
-                }`}
-              />
-              <div className="absolute bottom-3 right-3 text-[10px] text-[#989898]">
-                {buyerMessage.length}/2000 characters
-              </div>
-            </div>
-            {errors.buyer?.message?.message && (
-              <p className="mt-1 text-xs text-red-500">{errors.buyer.message.message}</p>
-            )}
-            <p className="mt-2 text-[11px] text-[#989898]">
-              This message will be included in the email sent to the buyer with the invoice.
-            </p>
+          <BaseTextareaField
+            id="buyer-message"
+            label="MESSAGE TO BUYER"
+            {...register('buyer.message')}
+            placeholder="Enter your message to the buyer (optional)"
+            errorMessage={errors.buyer?.message?.message}
+            description="This message will be included in the email sent to the buyer with the invoice."
+            containerClassName="space-y-1.5"
+            labelClassName={labelClass}
+            messageClassName={messageClass}
+            descriptionClassName={helperClass}
+            textareaClassName="min-h-[120px] resize-none rounded border-[#E5E5E5] bg-white p-4 pr-24 text-[14px] text-[#191414] placeholder:text-[#989898] focus:border-black focus:ring-0"
+            errorTextareaClassName="border-red-500"
+          />
+          <div className="-mt-3 flex justify-end text-[10px] text-[#989898]">
+            {buyerMessage.length}/2000 characters
           </div>
         </div>
       </div>
@@ -202,52 +191,58 @@ export const QuickSellInvoiceForm = () => {
 
         <div className="mb-6 flex gap-4">
           <div className="flex-1">
-            <div className="mb-1.5 flex items-center gap-1">
-              <Label htmlFor="tax-zip" className="text-[10px] font-bold uppercase tracking-wide text-[#191414]">
-                ZIPCODE
-              </Label>
-              <span className="text-[10px] text-red-500">*</span>
-            </div>
-            <Input
+            <BaseInputField
               id="tax-zip"
               type="text"
+              label="ZIPCODE"
+              required
               {...register('taxZipCode')}
-              className={inputClass}
+              containerClassName="space-y-1.5"
+              labelClassName={labelClass}
+              requiredMarkClassName="text-[10px] text-red-500"
+              inputClassName={inputClass}
             />
           </div>
 
           <div className="w-[140px]">
-            <div className="mb-1.5 flex items-center gap-1">
-              <Label htmlFor="tax-percent" className="text-[10px] font-bold uppercase tracking-wide text-[#191414]">
-                SALES TAX
-              </Label>
-              <span className="text-[10px] text-red-500">*</span>
-            </div>
-            <div className="relative">
+            <BaseFormField
+              id="tax-percent"
+              label="SALES TAX"
+              required
+              errorMessage={errors.taxPercent?.message}
+              messageId="tax-percent-message"
+              className="space-y-1.5"
+              labelClassName={labelClass}
+              requiredMarkClassName="text-[10px] text-red-500"
+              messageClassName={messageClass}
+            >
               <Controller
                 name="taxPercent"
                 control={control}
                 render={({ field }) => (
-                  <Input
-                    id="tax-percent"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    value={field.value ?? ''}
-                    onChange={(event) => {
-                      const rawValue = event.target.value
-                      field.onChange(rawValue === '' ? undefined : Math.min(100, Math.max(0, parseFloat(rawValue) || 0)))
-                    }}
-                    className={`${inputClass} ${errors.taxPercent ? 'border-red-500' : ''}`}
-                  />
+                  <div className="relative">
+                    <input
+                      id="tax-percent"
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      aria-invalid={Boolean(errors.taxPercent)}
+                      aria-describedby="tax-percent-message"
+                      value={field.value ?? ''}
+                      onChange={(event) => {
+                        const rawValue = event.target.value
+                        field.onChange(
+                          rawValue === '' ? undefined : Math.min(100, Math.max(0, parseFloat(rawValue) || 0)),
+                        )
+                      }}
+                      className={`${inputClass} w-full pr-8 ${errors.taxPercent ? 'border-red-500' : ''}`}
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#989898]">%</div>
+                  </div>
                 )}
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#989898]">%</div>
-            </div>
-            {errors.taxPercent?.message && (
-              <p className="mt-1 text-xs text-red-500">{errors.taxPercent.message}</p>
-            )}
+            </BaseFormField>
           </div>
         </div>
 
