@@ -23,13 +23,6 @@ type LifecycleEvent = {
   timestamp?: string | null
 }
 
-const topNavItems = [
-  { href: '#transactions', label: 'Transactions', isActive: false },
-  { href: '#escrow', label: 'Escrow', isActive: true },
-  { href: '#lifecycle', label: 'Lifecycle', isActive: false },
-  { href: '#collections', label: 'Collections', isActive: false },
-]
-
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   weight: ['400', '500', '700'],
@@ -264,24 +257,6 @@ const getUserLabel = (order: OrderResponse, role: 'seller' | 'buyer') => {
   return wallet ? shortenHash(wallet, 8, 4).toUpperCase() : role === 'seller' ? 'SELLER_NODE' : 'COLLECTOR_NODE'
 }
 
-const getProfileInitial = (value?: string | null) => {
-  if (!value) {
-    return 'TC'
-  }
-
-  const cleaned = value.trim()
-
-  if (cleaned.length === 0) {
-    return 'TC'
-  }
-
-  return cleaned
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('')
-}
-
 const getEstimatedCompletion = (order: OrderResponse) =>
   order.estimatedDeliveryDate || order.deliveredAt || order.shippedAt || order.confirmedAt || order.createdAt
 
@@ -397,113 +372,11 @@ const StatePanel = ({
 
 const PageShell = ({
   children,
-  contractHref,
-  txHref,
-  avatarLabel,
-  avatarUrl,
 }: {
   children: ReactNode
-  contractHref?: string | null
-  txHref?: string | null
-  avatarLabel: string
-  avatarUrl?: string | null
 }) => (
-  <div className={`${inter.className} min-h-screen bg-[#f9f9f9] text-[#1a1c1c]`}>
-    <header className="fixed top-0 z-50 flex h-20 w-full items-center justify-between bg-[#f9f9f9]/80 px-6 backdrop-blur-xl sm:px-8 lg:px-12">
-      <Link
-        href="/"
-        className="text-xl font-bold tracking-[0.1em] text-black uppercase"
-        style={headlineFont}
-      >
-        THE CURATOR
-      </Link>
-
-      <nav className="hidden items-center gap-8 md:flex">
-        {topNavItems.map((item) => (
-          <a
-            key={item.label}
-            href={item.href}
-            className={`border-b pb-1 text-[0.6875rem] font-bold tracking-[0.05em] uppercase transition-colors duration-300 ${
-              item.isActive ? 'border-black text-black' : 'border-transparent text-[#5f5e5e] hover:text-black'
-            }`}
-            style={headlineFont}
-          >
-            {item.label}
-          </a>
-        ))}
-      </nav>
-
-      <div className="flex items-center gap-4 sm:gap-6">
-        <a
-          href={txHref ?? contractHref ?? WALLET_TARGET_CHAIN.blockExplorerUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex h-10 w-10 items-center justify-center text-black transition hover:text-[#5f5e5e]"
-          aria-label="Open block explorer"
-        >
-          <Wallet className="h-5 w-5" strokeWidth={1.6} />
-        </a>
-
-        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#e2e2e2] text-[0.6875rem] font-bold tracking-[0.08em] text-black">
-          {avatarUrl ? (
-            <>
-              {/* The profile image may come from arbitrary auth providers, so a plain img keeps the shell resilient. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={avatarUrl}
-                alt={avatarLabel}
-                className="h-full w-full object-cover"
-                onError={(event) => {
-                  event.currentTarget.onerror = null
-                  event.currentTarget.style.display = 'none'
-                }}
-              />
-              <span className="sr-only">{avatarLabel}</span>
-            </>
-          ) : (
-            avatarLabel
-          )}
-        </div>
-      </div>
-
-      <div className="absolute bottom-0 left-0 h-px w-full bg-[#eeeeee]" />
-    </header>
-
-    <main className="mx-auto max-w-7xl px-6 pt-32 pb-24 sm:px-8 lg:px-12">{children}</main>
-
-    <footer className="flex flex-col items-center justify-between gap-6 border-t border-[#c6c6c6]/20 bg-[#f9f9f9] px-6 py-12 sm:px-8 md:flex-row lg:px-12">
-      <div className="text-[0.6875rem] tracking-[0.1em] uppercase text-[#5f5e5e]">
-        © 2026 THE DIGITAL CURATOR. ALL RIGHTS RESERVED.
-      </div>
-      <div className="flex flex-wrap items-center justify-center gap-8">
-        <a
-          href={txHref ?? contractHref ?? WALLET_TARGET_CHAIN.blockExplorerUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="text-[0.6875rem] font-bold tracking-[0.1em] uppercase text-[#5f5e5e] transition hover:text-black"
-        >
-          Verify On-Chain
-        </a>
-        <Link
-          href="/discover"
-          className="text-[0.6875rem] tracking-[0.1em] uppercase text-[#5f5e5e] transition hover:text-black"
-        >
-          Terms
-        </Link>
-        <Link
-          href="/editorial"
-          className="text-[0.6875rem] tracking-[0.1em] uppercase text-[#5f5e5e] transition hover:text-black"
-        >
-          Privacy
-        </Link>
-        <Link
-          href="/pricing"
-          className="text-[0.6875rem] tracking-[0.1em] uppercase text-[#5f5e5e] transition hover:text-black"
-        >
-          Docs
-        </Link>
-      </div>
-    </footer>
+  <div className={`${inter.className} min-h-full bg-[#f9f9f9] text-[#1a1c1c]`}>
+    <div className="mx-auto max-w-7xl py-8 sm:py-10 lg:py-12">{children}</div>
   </div>
 )
 
@@ -512,7 +385,6 @@ export const OnChainOrderDetailPageView = ({
   isDemoMode = false,
 }: OnChainOrderDetailPageViewProps) => {
   const router = useRouter()
-  const user = useAuthStore((state) => state.user)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const isHydrated = useAuthStore((state) => state.isHydrated)
   const [order, setOrder] = useState<OrderResponse | null>(null)
@@ -613,20 +485,9 @@ export const OnChainOrderDetailPageView = ({
   const sellerHref = getExplorerHref('address', order?.sellerWallet)
   const buyerHref = getExplorerHref('address', order?.buyerWallet)
   const shippingAddressLines = getAddressLines(order?.shippingAddress)
-  const avatarLabel = getProfileInitial(
-    user?.displayName || user?.fullName || user?.username || user?.email || 'The Curator',
-  )
-
-  const shellProps = {
-    avatarLabel,
-    avatarUrl: user?.avatarUrl ?? null,
-    contractHref,
-    txHref,
-  }
-
   if (isLoading || (!isDemoMode && !isHydrated)) {
     return (
-      <PageShell {...shellProps}>
+      <PageShell>
         <StatePanel
           icon={<LoaderCircle className="h-7 w-7 animate-spin" strokeWidth={1.8} />}
           title="Loading Order"
@@ -638,7 +499,7 @@ export const OnChainOrderDetailPageView = ({
 
   if (!isDemoMode && !isAuthenticated) {
     return (
-      <PageShell {...shellProps}>
+      <PageShell>
         <StatePanel
           icon={<ShieldCheck className="h-7 w-7" strokeWidth={1.8} />}
           title="Sign In Required"
@@ -666,7 +527,7 @@ export const OnChainOrderDetailPageView = ({
 
   if (error) {
     return (
-      <PageShell {...shellProps}>
+      <PageShell>
         <StatePanel
           icon={<AlertCircle className="h-7 w-7" strokeWidth={1.8} />}
           title="Unable To Load"
@@ -695,7 +556,7 @@ export const OnChainOrderDetailPageView = ({
 
   if (notFound || !order) {
     return (
-      <PageShell {...shellProps}>
+      <PageShell>
         <StatePanel
           icon={<Receipt className="h-7 w-7" strokeWidth={1.8} />}
           title="Order Not Found"
@@ -727,7 +588,7 @@ export const OnChainOrderDetailPageView = ({
   const destinationLabel = shippingAddressLines.join(' | ').toUpperCase() || 'DESTINATION_PENDING'
 
   return (
-    <PageShell {...shellProps}>
+    <PageShell>
       <section className="mb-16 flex flex-col justify-between gap-8 md:flex-row md:items-end">
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-4">

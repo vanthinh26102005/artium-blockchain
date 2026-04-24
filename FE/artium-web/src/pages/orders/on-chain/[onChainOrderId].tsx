@@ -22,6 +22,4 @@ const OnChainOrderDetailRoute: NextPageWithLayout = () => {
   )
 }
 
-OnChainOrderDetailRoute.getLayout = (page) => page
-
 export default OnChainOrderDetailRoute
