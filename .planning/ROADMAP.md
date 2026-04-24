@@ -299,8 +299,13 @@ Plans:
   3. Developer can list candidate artworks for the current seller and confirm the response includes only owned inventory records.
   4. Developer can inspect eligibility logic and confirm sold, deleted, already-auctioned, active-order, multi-quantity, missing-primary-image, and incomplete-metadata artworks are blocked with specific reason codes.
   5. Developer can reuse the eligibility result in frontend copy without duplicating business rules in React.
-**Plans**: TBD
+**Plans**: `.planning/phases/18-seller-auction-access-and-artwork-eligibility-policy/18-01-PLAN.md`, `.planning/phases/18-seller-auction-access-and-artwork-eligibility-policy/18-02-PLAN.md`, `.planning/phases/18-seller-auction-access-and-artwork-eligibility-policy/18-03-PLAN.md`
 **UI hint**: yes
+
+Plans:
+- [ ] 18-01 Shared artwork eligibility DTOs and artwork-service candidate policy
+- [ ] 18-02 Seller-only gateway endpoint and active order lock merge
+- [ ] 18-03 Seller auction artwork picker frontend
 
 ### Phase 19: Seller auction creation workspace and terms UX
 
