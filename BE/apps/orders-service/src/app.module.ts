@@ -36,6 +36,8 @@ import {
   ConfirmDeliveryHandler,
   OpenDisputeHandler,
   ResolveDisputeHandler,
+  GetAuctionByIdHandler,
+  GetAuctionsHandler,
   GetOrdersHandler,
   GetOrderByIdHandler,
   GetOrderByOnChainIdHandler,
@@ -60,6 +62,8 @@ export const CommandHandlers = [
 ];
 
 export const QueryHandlers = [
+  GetAuctionsHandler,
+  GetAuctionByIdHandler,
   GetOrdersHandler,
   GetOrderByIdHandler,
   GetOrderByOnChainIdHandler,

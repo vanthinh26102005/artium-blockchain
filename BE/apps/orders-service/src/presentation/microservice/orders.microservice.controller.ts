@@ -5,6 +5,7 @@ import {
   CreateOrderDto,
   UpdateOrderDto,
   GetOrdersDto,
+  GetAuctionsDto,
   OrderStatus,
   RpcExceptionHelper,
 } from '@app/common';
@@ -17,6 +18,8 @@ import {
   OpenDisputeCommand,
   ResolveDisputeCommand,
   GetOrdersQuery,
+  GetAuctionsQuery,
+  GetAuctionByIdQuery,
   GetOrderByIdQuery,
   GetOrderByOnChainIdQuery,
   GetOrderItemsQuery,
@@ -41,6 +44,18 @@ export class OrdersMicroserviceController {
   async getOrders(@Payload() data: GetOrdersDto) {
     this.logger.debug('Getting orders');
     return this.queryBus.execute(new GetOrdersQuery(data));
+  }
+
+  @MessagePattern({ cmd: 'get_auctions' })
+  async getAuctions(@Payload() data: GetAuctionsDto) {
+    this.logger.debug('Getting auctions');
+    return this.queryBus.execute(new GetAuctionsQuery(data));
+  }
+
+  @MessagePattern({ cmd: 'get_auction_by_id' })
+  async getAuctionById(@Payload() data: { auctionId: string }) {
+    this.logger.debug(`Getting auction: ${data.auctionId}`);
+    return this.queryBus.execute(new GetAuctionByIdQuery(data.auctionId));
   }
 
   @MessagePattern({ cmd: 'get_order_by_id' })
