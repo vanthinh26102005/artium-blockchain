@@ -26,7 +26,14 @@ export class GetOrdersHandler implements IQueryHandler<GetOrdersQuery> {
       if (filters.sellerId) {
         return this.orderRepo.findBySellerIdViaItems(
           filters.sellerId,
-          { skip: filters.skip, take: filters.take ?? 20 },
+          {
+            skip: filters.skip,
+            take: filters.take ?? 20,
+            status: filters.status,
+            onChainOrderId: filters.onChainOrderId,
+            escrowState: filters.escrowState,
+            paymentMethod: filters.paymentMethod,
+          },
         );
       }
 
