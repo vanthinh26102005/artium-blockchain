@@ -27,11 +27,17 @@ export type AuctionBidLot = {
   imageAlt: string
 }
 
+export type BidOrderStatusPayload = {
+  lot: AuctionBidLot
+  committedBidValue: number
+  transactionHash: string
+}
+
 type BidEditingModalProps = {
   isOpen: boolean
   lot: AuctionBidLot | null
   onClose: () => void
-  onViewOrderStatus?: (lot: AuctionBidLot) => void
+  onViewOrderStatus?: (payload: BidOrderStatusPayload) => void
 }
 
 const MIN_BID_INCREMENT_ETH = 0.1
@@ -268,7 +274,16 @@ export const BidEditingModal = ({
         committedBidValue={committedBidValue}
         transactionHash={transactionHash}
         onClose={handleCloseModal}
-        onViewOrderStatus={onViewOrderStatus ? () => onViewOrderStatus(lot) : undefined}
+        onViewOrderStatus={
+          onViewOrderStatus
+            ? () =>
+                onViewOrderStatus({
+                  lot,
+                  committedBidValue,
+                  transactionHash,
+                })
+            : undefined
+        }
       />
     )
   }

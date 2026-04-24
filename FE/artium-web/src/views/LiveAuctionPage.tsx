@@ -9,7 +9,11 @@ import {
   type DiscoverArtwork,
   type DiscoverArtworkAuctionStatusKey,
 } from '@domains/discover/mock/mockArtworks'
-import { BidEditingModal, type AuctionBidLot } from '@domains/auction/components'
+import {
+  BidEditingModal,
+  type AuctionBidLot,
+  type BidOrderStatusPayload,
+} from '@domains/auction/components'
 import { Metadata } from '@/components/SEO/Metadata'
 
 type AuctionLot = AuctionBidLot & {
@@ -176,6 +180,15 @@ const getDemoOrderIdForLot = (lot: AuctionBidLot) => {
   const hash = Array.from(lot.artworkId).reduce((sum, char) => sum + char.charCodeAt(0), 0)
   return demoOrderIds[hash % demoOrderIds.length]
 }
+
+const buildDemoOrderQuery = ({ lot, committedBidValue, transactionHash }: BidOrderStatusPayload) => ({
+  demo: '1',
+  demoArtworkId: lot.artworkId,
+  demoArtworkTitle: lot.title,
+  demoArtworkImageUrl: lot.imageSrc,
+  demoBidEth: committedBidValue.toFixed(2),
+  demoTransactionHash: transactionHash,
+})
 
 const LiveAuctionPage = () => {
   const router = useRouter()
@@ -1228,8 +1241,11 @@ const LiveAuctionPage = () => {
           lot={selectedBidLot}
           isOpen={Boolean(selectedBidLot)}
           onClose={() => setSelectedBidLot(null)}
-          onViewOrderStatus={(lot) => {
-            void router.push(`/orders/on-chain/${getDemoOrderIdForLot(lot)}?demo=1`)
+          onViewOrderStatus={(payload) => {
+            void router.push({
+              pathname: `/orders/on-chain/${getDemoOrderIdForLot(payload.lot)}`,
+              query: buildDemoOrderQuery(payload),
+            })
           }}
         />
 

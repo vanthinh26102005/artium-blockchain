@@ -13,6 +13,11 @@ import type { ApiError } from '@shared/services/apiClient'
 type OnChainOrderDetailPageViewProps = {
   onChainOrderId: string
   isDemoMode?: boolean
+  demoArtworkId?: string
+  demoArtworkTitle?: string
+  demoArtworkImageUrl?: string
+  demoBidEth?: string
+  demoTransactionHash?: string
 }
 
 type StatusTone = 'neutral' | 'dark' | 'success' | 'warning' | 'danger'
@@ -257,6 +262,96 @@ const getUserLabel = (order: OrderResponse, role: 'seller' | 'buyer') => {
   return wallet ? shortenHash(wallet, 8, 4).toUpperCase() : role === 'seller' ? 'SELLER_NODE' : 'COLLECTOR_NODE'
 }
 
+const getTrimmedValue = (value?: string | null) => {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const normalized = value.trim()
+  return normalized.length > 0 ? normalized : null
+}
+
+const formatEthStringToWei = (value?: string | null) => {
+  const normalized = getTrimmedValue(value)
+
+  if (!normalized || !/^\d+(\.\d+)?$/.test(normalized)) {
+    return null
+  }
+
+  const [wholePart, fractionPart = ''] = normalized.split('.')
+  const whole = wholePart.replace(/^0+(?=\d)/, '') || '0'
+  const fraction = fractionPart.slice(0, 18).padEnd(18, '0')
+
+  return `${whole}${fraction}`.replace(/^0+(?=\d)/, '') || '0'
+}
+
+const applyDemoBidSnapshot = ({
+  order,
+  items,
+  demoArtworkId,
+  demoArtworkTitle,
+  demoArtworkImageUrl,
+  demoBidEth,
+  demoTransactionHash,
+}: {
+  order: OrderResponse
+  items: OrderItemResponse[]
+  demoArtworkId?: string
+  demoArtworkTitle?: string
+  demoArtworkImageUrl?: string
+  demoBidEth?: string
+  demoTransactionHash?: string
+}) => {
+  const artworkId = getTrimmedValue(demoArtworkId)
+  const artworkTitle = getTrimmedValue(demoArtworkTitle)
+  const artworkImageUrl = getTrimmedValue(demoArtworkImageUrl)
+  const bidEth = getTrimmedValue(demoBidEth)
+  const transactionHash = getTrimmedValue(demoTransactionHash)
+  const parsedBidValue = bidEth ? Number.parseFloat(bidEth) : Number.NaN
+  const hasBidValue = Number.isFinite(parsedBidValue) && parsedBidValue >= 0
+  const discountAmount = Number.isFinite(Number(order.discountAmount ?? 0))
+    ? Number(order.discountAmount ?? 0)
+    : 0
+  const totalAmount = hasBidValue
+    ? Number(
+        (parsedBidValue + order.shippingCost + order.taxAmount - discountAmount).toFixed(2),
+      )
+    : order.totalAmount
+  const bidAmountWei = formatEthStringToWei(bidEth)
+
+  return {
+    order: {
+      ...order,
+      ...(transactionHash ? { txHash: transactionHash } : {}),
+      ...(hasBidValue
+        ? {
+            subtotal: parsedBidValue,
+            totalAmount,
+          }
+        : {}),
+      ...(bidAmountWei ? { bidAmountWei } : {}),
+    },
+    items: items.map((item, index) => {
+      if (index !== 0) {
+        return item
+      }
+
+      return {
+        ...item,
+        ...(artworkId ? { artworkId } : {}),
+        ...(artworkTitle
+          ? {
+              artworkTitle,
+              artworkDescription: `A preserved artwork snapshot captured from the live auction bid flow for "${artworkTitle}".`,
+            }
+          : {}),
+        ...(artworkImageUrl ? { artworkImageUrl } : {}),
+        ...(hasBidValue ? { priceAtPurchase: parsedBidValue } : {}),
+      }
+    }),
+  }
+}
+
 const getEstimatedCompletion = (order: OrderResponse) =>
   order.estimatedDeliveryDate || order.deliveredAt || order.shippedAt || order.confirmedAt || order.createdAt
 
@@ -383,6 +478,11 @@ const PageShell = ({
 export const OnChainOrderDetailPageView = ({
   onChainOrderId,
   isDemoMode = false,
+  demoArtworkId,
+  demoArtworkTitle,
+  demoArtworkImageUrl,
+  demoBidEth,
+  demoTransactionHash,
 }: OnChainOrderDetailPageViewProps) => {
   const router = useRouter()
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
@@ -401,10 +501,30 @@ export const OnChainOrderDetailPageView = ({
 
     if (isDemoMode) {
       const mockRecord = getMockOnChainOrderRecord(onChainOrderId)
-      setOrder(mockRecord?.order ?? null)
-      setItems(mockRecord?.items ?? [])
+
+      if (!mockRecord) {
+        setOrder(null)
+        setItems([])
+        setError(null)
+        setNotFound(true)
+        setIsLoading(false)
+        return
+      }
+
+      const demoRecord = applyDemoBidSnapshot({
+        order: mockRecord.order,
+        items: mockRecord.items,
+        demoArtworkId,
+        demoArtworkTitle,
+        demoArtworkImageUrl,
+        demoBidEth,
+        demoTransactionHash,
+      })
+
+      setOrder(demoRecord.order)
+      setItems(demoRecord.items)
       setError(null)
-      setNotFound(!mockRecord)
+      setNotFound(false)
       setIsLoading(false)
       return
     }
@@ -472,7 +592,18 @@ export const OnChainOrderDetailPageView = ({
     return () => {
       cancelled = true
     }
-  }, [isAuthenticated, isDemoMode, isHydrated, onChainOrderId, retryCount])
+  }, [
+    demoArtworkId,
+    demoArtworkImageUrl,
+    demoArtworkTitle,
+    demoBidEth,
+    demoTransactionHash,
+    isAuthenticated,
+    isDemoMode,
+    isHydrated,
+    onChainOrderId,
+    retryCount,
+  ])
 
   const primaryItem = items[0]
   const artworkTitle = primaryItem?.artworkTitle || 'Artwork Snapshot Pending'
