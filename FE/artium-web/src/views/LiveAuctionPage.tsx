@@ -2,31 +2,21 @@ import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import Link from 'next/link'
 import { ChevronDown, Grid2X2, LayoutList, ShieldCheck } from 'lucide-react'
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import {
-  mockArtworks,
-  type DiscoverArtwork,
-  type DiscoverArtworkAuctionStatusKey,
-} from '@domains/discover/mock/mockArtworks'
-import { BidEditingModal, type AuctionBidLot } from '@domains/auction/components'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { BidEditingModal } from '@domains/auction/components'
+import { useAuctionLots } from '@domains/auction/hooks/useAuctionLots'
+import { useAuctionRealtime } from '@domains/auction/hooks/useAuctionRealtime'
+import type {
+  AuctionFilterCategoryKey,
+  AuctionFilterStatusKey,
+  AuctionLot,
+  AuctionLotStatusKey,
+} from '@domains/auction/types'
 import { Metadata } from '@/components/SEO/Metadata'
 
-type AuctionLot = AuctionBidLot & {
-  categoryKey: AuctionCategoryKey
-  statusTone: 'live' | 'muted'
-}
+type AuctionCategoryKey = AuctionFilterCategoryKey
 
-type AuctionCategoryKey = 'all' | 'architectural' | 'sculpture' | 'digital' | 'installation'
-
-type AuctionStatusKey =
-  | 'all'
-  | 'active'
-  | 'ending-soon'
-  | 'closed'
-  | 'newly-listed'
-  | 'paused'
-
-type AuctionLotStatusKey = DiscoverArtworkAuctionStatusKey
+type AuctionStatusKey = AuctionFilterStatusKey
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -62,66 +52,10 @@ const MIN_ETH = 0.5
 const MAX_ETH = 50
 const ITEMS_PER_PAGE = 24
 
-const lotCategoryCycle: AuctionCategoryKey[] = [
-  'architectural',
-  'sculpture',
-  'digital',
-  'installation',
-]
-
-const auctionStatusTone: Record<AuctionLotStatusKey, AuctionLot['statusTone']> = {
-  active: 'live',
-  'ending-soon': 'live',
-  closed: 'muted',
-  'newly-listed': 'muted',
-  paused: 'muted',
-}
-
-const auctionStatusPriority: Record<AuctionLotStatusKey, number> = {
-  active: 0,
-  'ending-soon': 1,
-  'newly-listed': 2,
-  paused: 3,
-  closed: 4,
-}
-
 const formatBidDisplay = (value: number) => {
   const normalizedValue = Math.min(MAX_ETH, Math.max(MIN_ETH, Number(value.toFixed(1))))
   return `${Number.isInteger(normalizedValue) ? normalizedValue.toFixed(0) : normalizedValue.toFixed(1)} ETH`
 }
-
-const hasAuction = (
-  artwork: DiscoverArtwork,
-): artwork is DiscoverArtwork & { auction: NonNullable<DiscoverArtwork['auction']> } =>
-  Boolean(artwork.auction)
-
-const lots: AuctionLot[] = mockArtworks
-  .filter(hasAuction)
-  .sort((leftArtwork, rightArtwork) => {
-    const priorityDelta =
-      auctionStatusPriority[leftArtwork.auction.statusKey] -
-      auctionStatusPriority[rightArtwork.auction.statusKey]
-
-    if (priorityDelta !== 0) {
-      return priorityDelta
-    }
-
-    return rightArtwork.auction.currentBidEth - leftArtwork.auction.currentBidEth
-  })
-  .map((artwork, index) => {
-    return {
-      artworkId: artwork.id,
-      title: artwork.title,
-      bidValue: artwork.auction.currentBidEth,
-      categoryKey: lotCategoryCycle[index % lotCategoryCycle.length],
-      status: artwork.auction.statusLabel,
-      statusKey: artwork.auction.statusKey,
-      endsAt: artwork.auction.endsAt,
-      statusTone: auctionStatusTone[artwork.auction.statusKey],
-      imageSrc: artwork.imageMedium,
-      imageAlt: `Artwork preview of ${artwork.title} by ${artwork.creator.fullName}`,
-    }
-  })
 
 const statusBadgeClass: Record<AuctionLotStatusKey, string> = {
   active: 'bg-[#16a34a]',
@@ -210,6 +144,21 @@ const LiveAuctionPage = () => {
   const maxPercent = ((draftMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMinPercent = ((mobileAppliedMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMaxPercent = ((mobileAppliedMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
+  const {
+    lots,
+    total,
+    isLoading,
+    error,
+    refresh,
+    refreshAuctionById,
+  } = useAuctionLots({
+    category: selectedCategory === 'all' ? undefined : selectedCategory,
+    status: selectedStatus === 'all' ? undefined : selectedStatus,
+    minBidEth: appliedMinPrice,
+    maxBidEth: appliedMaxPrice,
+    skip: 0,
+    take: 50,
+  })
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -359,12 +308,13 @@ const LiveAuctionPage = () => {
   }
 
   const filterLots = (
+    sourceLots: AuctionLot[],
     category: AuctionCategoryKey,
     status: AuctionStatusKey,
     minPrice: number,
     maxPrice: number,
   ) =>
-    lots.filter((lot) => {
+    sourceLots.filter((lot) => {
       const matchesCategory = category === 'all' ? true : lot.categoryKey === category
       const matchesPrice = lot.bidValue >= minPrice && lot.bidValue <= maxPrice
       const matchesStatus = status === 'all' ? true : lot.statusKey === status
@@ -372,23 +322,57 @@ const LiveAuctionPage = () => {
       return matchesCategory && matchesPrice && matchesStatus
     })
 
-  const visibleLots = filterLots(
-    selectedCategory,
-    selectedStatus,
-    appliedMinPrice,
-    appliedMaxPrice,
+  const visibleLots = useMemo(
+    () =>
+      filterLots(
+        lots,
+        selectedCategory,
+        selectedStatus,
+        appliedMinPrice,
+        appliedMaxPrice,
+      ),
+    [appliedMaxPrice, appliedMinPrice, lots, selectedCategory, selectedStatus],
   )
-  const mobilePreviewLots = filterLots(
-    mobileSelectedCategory,
-    mobileSelectedStatus,
-    mobileAppliedMinPrice,
-    mobileAppliedMaxPrice,
+  const mobilePreviewLots = useMemo(
+    () =>
+      filterLots(
+        lots,
+        mobileSelectedCategory,
+        mobileSelectedStatus,
+        mobileAppliedMinPrice,
+        mobileAppliedMaxPrice,
+      ),
+    [
+      lots,
+      mobileAppliedMaxPrice,
+      mobileAppliedMinPrice,
+      mobileSelectedCategory,
+      mobileSelectedStatus,
+    ],
   )
   const totalPages = Math.max(1, Math.ceil(visibleLots.length / ITEMS_PER_PAGE))
   const safeCurrentPage = Math.min(currentPage, totalPages)
   const pageStart = (safeCurrentPage - 1) * ITEMS_PER_PAGE
-  const displayedLots = visibleLots.slice(pageStart, pageStart + ITEMS_PER_PAGE)
+  const displayedLots = useMemo(
+    () => visibleLots.slice(pageStart, pageStart + ITEMS_PER_PAGE),
+    [pageStart, visibleLots],
+  )
   const effectiveViewMode = isMobileViewport ? 'list' : viewMode
+  const displayedAuctionIds = useMemo(
+    () => displayedLots.map((lot) => lot.auctionId),
+    [displayedLots],
+  )
+  const handleRealtimeAuctionChange = useCallback(
+    (auctionId: string) => {
+      void refreshAuctionById(auctionId).catch(() => refresh())
+    },
+    [refresh, refreshAuctionById],
+  )
+
+  useAuctionRealtime({
+    auctionIds: displayedAuctionIds,
+    onAuctionChange: handleRealtimeAuctionChange,
+  })
 
   const resultsLabel = `${visibleLots.length} result${visibleLots.length === 1 ? '' : 's'}`
   const mobilePreviewLabel = `${mobilePreviewLots.length} result${mobilePreviewLots.length === 1 ? '' : 's'}`
@@ -399,10 +383,10 @@ const LiveAuctionPage = () => {
     appliedMaxPrice !== MAX_ETH
   const footerLabel = hasActiveFilters
     ? `Page ${safeCurrentPage} of ${totalPages} • ${visibleLots.length} matching lots`
-    : `Page ${safeCurrentPage} of ${totalPages} • ${lots.length} total lots`
-  const emptyStateMessage = hasActiveFilters
-    ? 'No auctions match the selected filters.'
-    : 'No live auctions are available right now.'
+    : `Page ${safeCurrentPage} of ${totalPages} • ${total} total lots`
+  const emptyStateBody = hasActiveFilters
+    ? 'Adjust or clear your filters to view other auction lots.'
+    : 'No live auctions are available right now. Please check back soon.'
 
   const scrollResultsToTop = () => {
     if (typeof window === 'undefined') {
@@ -789,6 +773,35 @@ const LiveAuctionPage = () => {
             </div>
           </section>
 
+          {error ? (
+            <section className="mb-8 border border-[#dc2626]/30 bg-[#fff7f7] px-6 py-5">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <p className="text-sm leading-7 text-[#7f1d1d]">
+                  We could not sync the latest auction state. Refresh the lot, review the newest
+                  current bid, and try again.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void refresh()
+                  }}
+                  className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800"
+                  style={headlineFont}
+                >
+                  Refresh
+                </button>
+              </div>
+            </section>
+          ) : null}
+
+          {isLoading && lots.length === 0 ? (
+            <section className="mb-8 border border-[#c4c7c7]/30 bg-[#fafafa] px-6 py-5">
+              <p className="text-[11px] tracking-[0.2em] text-[#747777] uppercase" style={headlineFont}>
+                Syncing auction state...
+              </p>
+            </section>
+          ) : null}
+
           <section
             ref={resultsRef}
             className={
@@ -813,17 +826,23 @@ const LiveAuctionPage = () => {
                       : 'mb-4 aspect-[5/4] md:mb-0 md:h-full md:w-full md:aspect-auto'
                   }`}
                 >
-                  <Image
-                    src={lot.imageSrc}
-                    alt={lot.imageAlt}
-                    fill
-                    sizes={
-                      effectiveViewMode === 'grid'
-                        ? '(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 44vw, 92vw'
-                        : '(min-width: 768px) 280px, 92vw'
-                    }
-                    className="object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
-                  />
+                  {lot.imageSrc ? (
+                    <Image
+                      src={lot.imageSrc}
+                      alt={lot.imageAlt}
+                      fill
+                      sizes={
+                        effectiveViewMode === 'grid'
+                          ? '(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 44vw, 92vw'
+                          : '(min-width: 768px) 280px, 92vw'
+                      }
+                      className="object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
+                    />
+                  ) : (
+                    <div className="flex h-full min-h-64 items-center justify-center px-6 text-center text-[11px] tracking-[0.2em] text-[#747777] uppercase">
+                      Image syncing
+                    </div>
+                  )}
                   <div className="absolute top-4 left-4 flex items-center gap-2 border border-[#c4c7c7]/30 bg-white/90 px-3 py-1 backdrop-blur-md">
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[lot.statusKey]} ${
@@ -922,8 +941,11 @@ const LiveAuctionPage = () => {
 
           {visibleLots.length === 0 ? (
             <section className="mt-12 border border-[#c4c7c7]/30 bg-[#fafafa] px-6 py-10 text-center">
-              <p className="text-sm tracking-[0.14em] text-[#747777] uppercase" style={headlineFont}>
-                {emptyStateMessage}
+              <p className="text-sm tracking-[0.14em] text-black uppercase" style={headlineFont}>
+                No live auctions match your filters.
+              </p>
+              <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#747777]">
+                {emptyStateBody}
               </p>
             </section>
           ) : null}

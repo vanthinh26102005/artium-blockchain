@@ -16,6 +16,7 @@ const toError = (error: unknown) =>
   error instanceof Error ? error : new Error('Unable to sync auction state.')
 
 export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult => {
+  const { category, maxBidEth, minBidEth, skip, status, take } = input
   const [lots, setLots] = useState<AuctionLot[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
@@ -26,7 +27,14 @@ export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult =>
     setError(null)
 
     try {
-      const response = await auctionApis.getAuctions(input)
+      const response = await auctionApis.getAuctions({
+        category,
+        maxBidEth,
+        minBidEth,
+        skip,
+        status,
+        take,
+      })
       setLots(response.data.map(mapAuctionReadToLot))
       setTotal(response.total)
     } catch (err) {
@@ -34,14 +42,7 @@ export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult =>
     } finally {
       setIsLoading(false)
     }
-  }, [
-    input.category,
-    input.maxBidEth,
-    input.minBidEth,
-    input.skip,
-    input.status,
-    input.take,
-  ])
+  }, [category, maxBidEth, minBidEth, skip, status, take])
 
   const refreshAuctionById = useCallback(async (auctionId: string) => {
     const response = await auctionApis.getAuctionById(auctionId)
