@@ -37,6 +37,48 @@ export type PaginatedAuctionsResponse = {
   total: number
 }
 
+export type SellerAuctionArtworkEligibilityReason =
+  | 'NOT_ACTIVE'
+  | 'NOT_PUBLISHED'
+  | 'SOLD'
+  | 'DELETED'
+  | 'RESERVED'
+  | 'IN_AUCTION'
+  | 'HAS_ON_CHAIN_AUCTION'
+  | 'ACTIVE_ORDER_LOCK'
+  | 'MULTI_QUANTITY'
+  | 'MISSING_PRIMARY_IMAGE'
+  | 'MISSING_METADATA'
+
+export type SellerAuctionArtworkRecoveryAction = {
+  reasonCode: SellerAuctionArtworkEligibilityReason
+  message: string
+  actionLabel: string
+}
+
+export type SellerAuctionArtworkCandidate = {
+  artworkId: string
+  sellerId: string
+  title: string
+  creatorName: string
+  thumbnailUrl: string | null
+  status: string
+  isPublished: boolean
+  quantity: number
+  onChainAuctionId: string | null
+  isEligible: boolean
+  reasonCodes: SellerAuctionArtworkEligibilityReason[]
+  recoveryActions: SellerAuctionArtworkRecoveryAction[]
+}
+
+export type SellerAuctionArtworkCandidatesResponse = {
+  eligible: SellerAuctionArtworkCandidate[]
+  blocked: SellerAuctionArtworkCandidate[]
+  total: number
+  eligibleCount: number
+  blockedCount: number
+}
+
 export type GetAuctionsInput = {
   status?: AuctionStatusKey
   category?: AuctionCategoryKey
@@ -70,6 +112,12 @@ const auctionApis = {
   getAuctionById: async (auctionId: string): Promise<AuctionReadResponse> => {
     return apiFetch<AuctionReadResponse>(`/auctions/${encodeURIComponent(auctionId)}`, {
       auth: false,
+    })
+  },
+
+  getSellerArtworkCandidates: async (): Promise<SellerAuctionArtworkCandidatesResponse> => {
+    return apiFetch<SellerAuctionArtworkCandidatesResponse>('/auctions/seller/artwork-candidates', {
+      cache: 'no-store',
     })
   },
 }
