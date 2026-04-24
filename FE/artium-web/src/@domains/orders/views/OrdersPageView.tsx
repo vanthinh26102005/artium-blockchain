@@ -10,6 +10,7 @@ import { OrderListCard } from '../components/OrderListCard'
 import { OrdersEmptyState } from '../components/OrdersEmptyState'
 import { OrdersSegmentedControl } from '../components/OrdersSegmentedControl'
 import type { OrdersWorkspaceScope } from '../types/orderTypes'
+import { hydrateOrderItems } from '../utils/hydrateOrderItems'
 import { ORDER_STATUS_FILTERS } from '../utils/orderPresentation'
 
 const INITIAL_SCOPE: OrdersWorkspaceScope = 'buyer'
@@ -67,7 +68,8 @@ export const OrdersPageView = () => {
           response.data.map(async (order) => {
             try {
               const items = await orderApis.getOrderItems(order.id)
-              return [order.id, items] as const
+              const hydratedItems = await hydrateOrderItems(items)
+              return [order.id, hydratedItems] as const
             } catch {
               return [order.id, [] as OrderItemResponse[]] as const
             }

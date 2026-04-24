@@ -120,6 +120,10 @@ const PG_UNIQUE_VIOLATION = '23505';
 
 const LISTENER_ID = 'art-auction-escrow-listener';
 const DEFAULT_BACKFILL_CHUNK_SIZE = 500;
+const DEFAULT_POLL_INTERVAL_MS = 15_000;
+const DEFAULT_MAX_BLOCKS_PER_CYCLE = 1_000;
+const DEFAULT_RPC_RETRY_ATTEMPTS = 3;
+const DEFAULT_RPC_RETRY_BASE_DELAY_MS = 1_500;
 
 // ────────────────────────────────────────────────────
 // Service
@@ -131,11 +135,18 @@ export class BlockchainEventListenerService
 {
   private readonly logger = new Logger(BlockchainEventListenerService.name);
   private readonly backfillChunkSize: number;
+  private readonly liveListenersEnabled: boolean;
+  private readonly pollIntervalMs: number;
+  private readonly maxBlocksPerCycle: number;
+  private readonly rpcRetryAttempts: number;
+  private readonly rpcRetryBaseDelayMs: number;
   private readonly listeners = new Map<
     string,
     (...args: any[]) => Promise<void>
   >();
   private chainId = 'unknown';
+  private pollTimer: NodeJS.Timeout | null = null;
+  private isPollingCatchUp = false;
 
   constructor(
     @Inject(ESCROW_CONTRACT)
@@ -156,6 +167,42 @@ export class BlockchainEventListenerService
       Number.isFinite(configured) && configured > 0
         ? configured
         : DEFAULT_BACKFILL_CHUNK_SIZE;
+    this.liveListenersEnabled =
+      (process.env.BLOCKCHAIN_ENABLE_LIVE_FILTER_LISTENERS ?? 'false')
+        .trim()
+        .toLowerCase() === 'true';
+    const configuredPollIntervalMs = Number(
+      process.env.BLOCKCHAIN_POLL_INTERVAL_MS ?? DEFAULT_POLL_INTERVAL_MS,
+    );
+    this.pollIntervalMs =
+      Number.isFinite(configuredPollIntervalMs) && configuredPollIntervalMs > 0
+        ? configuredPollIntervalMs
+        : DEFAULT_POLL_INTERVAL_MS;
+    const configuredMaxBlocksPerCycle = Number(
+      process.env.BLOCKCHAIN_MAX_BLOCKS_PER_CYCLE ??
+        DEFAULT_MAX_BLOCKS_PER_CYCLE,
+    );
+    this.maxBlocksPerCycle =
+      Number.isFinite(configuredMaxBlocksPerCycle) &&
+      configuredMaxBlocksPerCycle > 0
+        ? configuredMaxBlocksPerCycle
+        : DEFAULT_MAX_BLOCKS_PER_CYCLE;
+    const configuredRetryAttempts = Number(
+      process.env.BLOCKCHAIN_RPC_RETRY_ATTEMPTS ?? DEFAULT_RPC_RETRY_ATTEMPTS,
+    );
+    this.rpcRetryAttempts =
+      Number.isFinite(configuredRetryAttempts) && configuredRetryAttempts > 0
+        ? configuredRetryAttempts
+        : DEFAULT_RPC_RETRY_ATTEMPTS;
+    const configuredRetryBaseDelayMs = Number(
+      process.env.BLOCKCHAIN_RPC_RETRY_BASE_DELAY_MS ??
+        DEFAULT_RPC_RETRY_BASE_DELAY_MS,
+    );
+    this.rpcRetryBaseDelayMs =
+      Number.isFinite(configuredRetryBaseDelayMs) &&
+      configuredRetryBaseDelayMs > 0
+        ? configuredRetryBaseDelayMs
+        : DEFAULT_RPC_RETRY_BASE_DELAY_MS;
   }
 
   // ── Lifecycle ──────────────────────────────────────
@@ -177,22 +224,35 @@ export class BlockchainEventListenerService
       );
     }
 
-    this.registerLiveListeners();
+    if (this.liveListenersEnabled) {
+      this.registerLiveListeners();
 
-    // Re-run to catch events that arrived during listener registration
-    try {
-      await this.catchUpToLatestBlock();
-    } catch (err) {
-      this.logger.error(
-        `Post-registration backfill failed (RPC error): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
-      );
+      // Re-run to catch events that arrived during listener registration
+      try {
+        await this.catchUpToLatestBlock();
+      } catch (err) {
+        this.logger.error(
+          `Post-registration backfill failed (RPC error): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
+        );
+      }
+
+      this.logger.log('Blockchain listeners ready (backfill + live)');
+      return;
     }
 
-    this.logger.log('Blockchain listeners ready (backfill + live)');
+    this.startPollingLoop();
+    this.logger.log(
+      `Blockchain listener running in polling mode (interval=${this.pollIntervalMs}ms, live filters disabled)`,
+    );
   }
 
   async onModuleDestroy() {
     this.logger.log('Removing blockchain event listeners...');
+
+    if (this.pollTimer) {
+      clearTimeout(this.pollTimer);
+      this.pollTimer = null;
+    }
 
     for (const [eventName, listener] of this.listeners.entries()) {
       this.contract.off(eventName, listener);
@@ -221,6 +281,68 @@ export class BlockchainEventListenerService
       this.contract.on(eventName, listener);
       this.listeners.set(eventName, listener);
       this.logger.debug(`Registered live listener for: ${eventName}`);
+    }
+  }
+
+  private startPollingLoop() {
+    const runPoll = async () => {
+      if (this.isPollingCatchUp) {
+        this.scheduleNextPoll();
+        return;
+      }
+
+      this.isPollingCatchUp = true;
+      try {
+        await this.catchUpToLatestBlock();
+      } catch (err) {
+        this.logger.error(
+          `Polling backfill failed (RPC error): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
+        );
+      } finally {
+        this.isPollingCatchUp = false;
+        this.scheduleNextPoll();
+      }
+    };
+
+    this.scheduleNextPoll(0, runPoll);
+  }
+
+  private scheduleNextPoll(
+    delayMs = this.pollIntervalMs,
+    runPoll?: () => Promise<void>,
+  ) {
+    if (this.pollTimer) {
+      clearTimeout(this.pollTimer);
+      this.pollTimer = null;
+    }
+
+    const nextPoll =
+      runPoll ??
+      (async () => {
+        await this.startSinglePollCycle();
+      });
+
+    this.pollTimer = setTimeout(() => {
+      void nextPoll();
+    }, delayMs);
+  }
+
+  private async startSinglePollCycle() {
+    if (this.isPollingCatchUp) {
+      this.scheduleNextPoll();
+      return;
+    }
+
+    this.isPollingCatchUp = true;
+    try {
+      await this.catchUpToLatestBlock();
+    } catch (err) {
+      this.logger.error(
+        `Polling backfill failed (RPC error): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
+      );
+    } finally {
+      this.isPollingCatchUp = false;
+      this.scheduleNextPoll();
     }
   }
 
@@ -305,7 +427,11 @@ export class BlockchainEventListenerService
       where: { listenerId: LISTENER_ID },
     });
     const lastProcessed = Number(cursor?.lastProcessedBlock ?? 0);
-    const latestBlock = await this.provider.getBlockNumber();
+    const chainTip = await this.provider.getBlockNumber();
+    const latestBlock = Math.min(
+      chainTip,
+      lastProcessed + this.maxBlocksPerCycle,
+    );
     let fromBlock = lastProcessed + 1;
 
     if (fromBlock > latestBlock) {
@@ -313,7 +439,7 @@ export class BlockchainEventListenerService
     }
 
     this.logger.log(
-      `Backfilling blockchain events from block=${fromBlock} to block=${latestBlock}`,
+      `Backfilling blockchain events from block=${fromBlock} to block=${latestBlock} (chainTip=${chainTip})`,
     );
 
     while (fromBlock <= latestBlock) {
@@ -333,36 +459,38 @@ export class BlockchainEventListenerService
     toBlock: number,
   ): Promise<void> {
     const collected: CollectedEvent[] = [];
+    const logs = await this.fetchLogsAdaptive(fromBlock, toBlock);
 
-    for (const eventName of SUPPORTED_EVENT_NAMES) {
-      const logs = await this.contract.queryFilter(
-        eventName,
-        fromBlock,
-        toBlock,
-      );
-
-      for (const log of logs) {
-        if (
-          typeof log.transactionHash !== 'string' ||
-          typeof log.index !== 'number' ||
-          typeof log.blockNumber !== 'number'
-        ) {
-          continue;
-        }
-
-        const args =
-          'args' in log ? Array.from(log.args ?? []) : [];
-
-        collected.push({
-          eventName,
-          args,
-          meta: {
-            txHash: log.transactionHash,
-            logIndex: log.index,
-            blockNumber: log.blockNumber,
-          },
-        });
+    for (const log of logs) {
+      if (
+        typeof log.transactionHash !== 'string' ||
+        typeof log.index !== 'number' ||
+        typeof log.blockNumber !== 'number'
+      ) {
+        continue;
       }
+
+      let parsedLog: ethers.LogDescription | null = null;
+      try {
+        parsedLog = this.contract.interface.parseLog(log);
+      } catch {
+        continue;
+      }
+
+      const eventName = parsedLog?.name;
+      if (!parsedLog || !eventName || !SUPPORTED_EVENT_NAMES.includes(eventName)) {
+        continue;
+      }
+
+      collected.push({
+        eventName,
+        args: Array.from(parsedLog.args ?? []),
+        meta: {
+          txHash: log.transactionHash,
+          logIndex: log.index,
+          blockNumber: log.blockNumber,
+        },
+      });
     }
 
     // Process events in on-chain order
@@ -375,6 +503,70 @@ export class BlockchainEventListenerService
     for (const item of collected) {
       await this.processEvent(item.eventName, item.args, item.meta);
     }
+  }
+
+  private async fetchLogsAdaptive(
+    fromBlock: number,
+    toBlock: number,
+  ): Promise<ethers.Log[]> {
+    try {
+      return await this.fetchLogsWithRetry(fromBlock, toBlock);
+    } catch (error) {
+      if (
+        fromBlock >= toBlock ||
+        !this.isRetryableRpcError(error)
+      ) {
+        throw error;
+      }
+
+      const midBlock = Math.floor((fromBlock + toBlock) / 2);
+      this.logger.warn(
+        `Splitting blockchain log fetch range ${fromBlock}-${toBlock} into ${fromBlock}-${midBlock} and ${midBlock + 1}-${toBlock}`,
+      );
+
+      const leftLogs = await this.fetchLogsAdaptive(fromBlock, midBlock);
+      const rightLogs = await this.fetchLogsAdaptive(midBlock + 1, toBlock);
+      return [...leftLogs, ...rightLogs];
+    }
+  }
+
+  private async fetchLogsWithRetry(
+    fromBlock: number,
+    toBlock: number,
+    attempt = 1,
+  ): Promise<ethers.Log[]> {
+    try {
+      return await this.provider.getLogs({
+        address: this.blockchainConfig.contractAddress,
+        fromBlock,
+        toBlock,
+      });
+    } catch (error) {
+      if (attempt >= this.rpcRetryAttempts || !this.isRetryableRpcError(error)) {
+        throw error;
+      }
+
+      const delayMs = this.rpcRetryBaseDelayMs * 2 ** (attempt - 1);
+      this.logger.warn(
+        `Retrying blockchain log fetch for blocks ${fromBlock}-${toBlock} in ${delayMs}ms (attempt ${attempt + 1}/${this.rpcRetryAttempts})`,
+      );
+      await this.sleep(delayMs);
+      return this.fetchLogsWithRetry(fromBlock, toBlock, attempt + 1);
+    }
+  }
+
+  private isRetryableRpcError(error: unknown): boolean {
+    const message = `${(error as any)?.shortMessage ?? ''} ${(error as any)?.message ?? ''}`.toLowerCase();
+    return (
+      message.includes('too many requests') ||
+      message.includes('missing response for request') ||
+      message.includes('timeout') ||
+      message.includes('429')
+    );
+  }
+
+  private async sleep(delayMs: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
   }
 
   // ── Core event processing ──────────────────────────

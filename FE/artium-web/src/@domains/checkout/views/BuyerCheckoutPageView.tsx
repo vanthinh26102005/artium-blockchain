@@ -486,7 +486,13 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
 
             createdOrder = await orderApis.createOrder({
                 sellerId: artwork.artistId || '',
-                items: [{ artworkId: artwork.id, quantity: 1, price: artwork.price }],
+                items: [{
+                    artworkId: artwork.id,
+                    quantity: 1,
+                    price: artwork.price,
+                    artworkTitle: artwork.title,
+                    artworkImageUrl: artwork.coverUrl,
+                }],
                 shippingAddress: shippingAddr,
                 notes: undefined,
             })

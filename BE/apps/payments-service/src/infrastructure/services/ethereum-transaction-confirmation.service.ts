@@ -3,6 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import { PaymentTransaction } from '../../domain/entities';
 
+const DEFAULT_CONFIRMATION_RPC_URLS = [
+  'https://rpc.sepolia.org',
+  'https://ethereum-sepolia-rpc.publicnode.com',
+];
+
 export type EthereumConfirmationResult =
   | { kind: 'confirmed'; blockNumber: string }
   | { kind: 'retryable'; reason: string; failureCode: string }
@@ -10,14 +15,13 @@ export type EthereumConfirmationResult =
 
 @Injectable()
 export class EthereumTransactionConfirmationService {
-  private readonly provider: ethers.JsonRpcProvider;
   private readonly requiredChainId: bigint;
+  private readonly requiredChainIdNumber: number;
   private readonly requiredConfirmations: number;
   private readonly platformWalletAddress: string;
+  private readonly confirmationRpcUrls: string[];
 
   constructor(private readonly configService: ConfigService) {
-    const rpcUrl =
-      this.configService.get<string>('BLOCKCHAIN_RPC_URL') ?? 'https://rpc.sepolia.org';
     const chainId = this.configService.get<string>('BLOCKCHAIN_CONFIRMATION_CHAIN_ID') ?? '11155111';
     const minConfirmations = Number(
       this.configService.get<string>('WALLET_CONFIRMATION_MIN_CONFIRMATIONS') ?? '1',
@@ -25,13 +29,14 @@ export class EthereumTransactionConfirmationService {
     const privateKey = this.configService.get<string>('PLATFORM_PRIVATE_KEY');
     const configuredWallet = this.configService.get<string>('PLATFORM_ETH_WALLET');
 
-    this.provider = new ethers.JsonRpcProvider(rpcUrl);
     this.requiredChainId = BigInt(chainId);
+    this.requiredChainIdNumber = Number(this.requiredChainId);
     this.requiredConfirmations =
       Number.isFinite(minConfirmations) && minConfirmations > 0 ? minConfirmations : 1;
     this.platformWalletAddress = (
       configuredWallet ?? (privateKey ? new ethers.Wallet(privateKey).address : '')
     ).toLowerCase();
+    this.confirmationRpcUrls = this.resolveConfirmationRpcUrls();
   }
 
   async confirmTransaction(
@@ -71,19 +76,11 @@ export class EthereumTransactionConfirmationService {
     }
 
     try {
-      const [network, chainTransaction, receipt] = await Promise.all([
-        this.provider.getNetwork(),
-        this.provider.getTransaction(transaction.txHash),
-        this.provider.getTransactionReceipt(transaction.txHash),
-      ]);
-
-      if (network.chainId !== this.requiredChainId) {
-        return {
-          kind: 'invalid',
-          reason: 'Confirmation provider is not connected to Sepolia.',
-          failureCode: 'wrong_confirmation_chain',
-        };
-      }
+      const {
+        chainTransaction,
+        receipt,
+        latestBlockNumber,
+      } = await this.loadTransactionState(transaction.txHash);
 
       if (!chainTransaction || !receipt) {
         return {
@@ -135,7 +132,6 @@ export class EthereumTransactionConfirmationService {
         };
       }
 
-      const latestBlockNumber = await this.provider.getBlockNumber();
       const confirmations = latestBlockNumber - receipt.blockNumber + 1;
       if (confirmations < this.requiredConfirmations) {
         return {
@@ -159,5 +155,61 @@ export class EthereumTransactionConfirmationService {
         failureCode: 'provider_error',
       };
     }
+  }
+
+  private resolveConfirmationRpcUrls(): string[] {
+    const configured = [
+      this.configService.get<string>('ETHEREUM_CONFIRMATION_RPC_URLS'),
+      this.configService.get<string>('ETHEREUM_CONFIRMATION_RPC_URL'),
+      this.configService.get<string>('BLOCKCHAIN_RPC_URL'),
+    ]
+      .filter((value): value is string => typeof value === 'string')
+      .flatMap((value) => value.split(','))
+      .map((value) => value.trim())
+      .filter(Boolean);
+
+    return [...new Set([...configured, ...DEFAULT_CONFIRMATION_RPC_URLS])];
+  }
+
+  private createProvider(rpcUrl: string): ethers.JsonRpcProvider {
+    return new ethers.JsonRpcProvider(
+      rpcUrl,
+      this.requiredChainIdNumber,
+      { staticNetwork: ethers.Network.from(this.requiredChainIdNumber) },
+    );
+  }
+
+  private async loadTransactionState(txHash: string): Promise<{
+    chainTransaction: ethers.TransactionResponse | null;
+    receipt: ethers.TransactionReceipt | null;
+    latestBlockNumber: number;
+  }> {
+    let lastError: unknown = null;
+
+    for (const rpcUrl of this.confirmationRpcUrls) {
+      const provider = this.createProvider(rpcUrl);
+
+      try {
+        const [chainTransaction, receipt, latestBlockNumber] = await Promise.all([
+          provider.getTransaction(txHash),
+          provider.getTransactionReceipt(txHash),
+          provider.getBlockNumber(),
+        ]);
+
+        return {
+          chainTransaction,
+          receipt,
+          latestBlockNumber,
+        };
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError instanceof Error
+      ? new Error(
+          `Failed to reach every configured Sepolia confirmation RPC: ${lastError.message}`,
+        )
+      : new Error('Failed to reach every configured Sepolia confirmation RPC.');
   }
 }

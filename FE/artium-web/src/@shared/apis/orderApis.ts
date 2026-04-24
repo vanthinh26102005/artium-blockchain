@@ -6,6 +6,8 @@ export type OrderItemRequest = {
   artworkId: string
   quantity: number
   price: number
+  artworkTitle?: string
+  artworkImageUrl?: string | null
 }
 
 export type ShippingAddressRequest = {

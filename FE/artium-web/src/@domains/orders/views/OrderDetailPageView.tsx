@@ -11,6 +11,7 @@ import { OrderActionPanel } from '../components/OrderActionPanel'
 import { OrderStatusBadge } from '../components/OrderStatusBadge'
 import { OrderTimeline } from '../components/OrderTimeline'
 import type { OrdersWorkspaceScope } from '../types/orderTypes'
+import { hydrateOrderItems } from '../utils/hydrateOrderItems'
 import {
   buildOrderTimeline,
   formatOrderDate,
@@ -68,6 +69,7 @@ export const OrderDetailPageView = () => {
     const loadOrder = async () => {
       try {
         const response = await orderApis.getOrderById(orderId)
+        const hydratedItems = await hydrateOrderItems(response.items ?? [])
 
         if (!isActive) {
           return
@@ -75,7 +77,7 @@ export const OrderDetailPageView = () => {
 
         setOrder({
           ...response,
-          items: response.items ?? [],
+          items: hydratedItems,
         })
       } catch (error) {
         if (!isActive) {

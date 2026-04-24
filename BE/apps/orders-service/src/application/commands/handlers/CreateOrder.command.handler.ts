@@ -59,7 +59,8 @@ export class CreateOrderHandler implements ICommandHandler<CreateOrderCommand> {
           priceAtPurchase: item.price,
           quantity: item.quantity,
           currency: 'USD',
-          artworkTitle: '',
+          artworkTitle: item.artworkTitle?.trim() || 'Artwork',
+          artworkImageUrl: item.artworkImageUrl?.trim() || null,
           payoutStatus: PayoutStatus.PENDING,
         });
       }

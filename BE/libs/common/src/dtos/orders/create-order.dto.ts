@@ -36,6 +36,22 @@ export class OrderItemDto {
   @IsNumber()
   @Min(0, { message: 'Price must be non-negative' })
   price: number;
+
+  @ApiPropertyOptional({
+    description: 'Artwork title snapshot at purchase time',
+    example: 'Moonlit Reverie',
+  })
+  @IsOptional()
+  @IsString()
+  artworkTitle?: string;
+
+  @ApiPropertyOptional({
+    description: 'Artwork image URL snapshot at purchase time',
+    example: 'https://cdn.example.com/artworks/moonlit-reverie.jpg',
+  })
+  @IsOptional()
+  @IsString()
+  artworkImageUrl?: string;
 }
 
 export class ShippingAddressDto {
