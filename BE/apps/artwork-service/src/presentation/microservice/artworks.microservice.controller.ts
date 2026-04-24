@@ -11,6 +11,7 @@ import {
   AddImagesToArtworkCommand,
   GetArtworkQuery,
   ListArtworksQuery,
+  ListSellerAuctionArtworkCandidatesQuery,
 } from '../../application';
 import { GetArtworksQueryDto, UserPayload, ArtworkImageInput, ArtworkStatus } from '@app/common';
 import { CreateArtworkInput } from '../../domain/dtos/artworks/create-artwork.input';
@@ -36,6 +37,15 @@ export class ArtworkMicroserviceController {
   @MessagePattern({ cmd: 'get_artwork_by_id' })
   async getArtworkById(@Payload() data: { id: string }) {
     return this.queryBus.execute(new GetArtworkQuery(data.id));
+  }
+
+  @MessagePattern({ cmd: 'list_seller_auction_artwork_candidates' })
+  async listSellerAuctionArtworkCandidates(
+    @Payload() data: { sellerId: string },
+  ) {
+    return this.queryBus.execute(
+      new ListSellerAuctionArtworkCandidatesQuery(data.sellerId),
+    );
   }
 
   @MessagePattern({ cmd: 'create_artwork' })

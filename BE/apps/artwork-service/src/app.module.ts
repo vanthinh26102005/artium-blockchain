@@ -66,6 +66,7 @@ import {
   GetTagHandler,
   ListArtworkFoldersHandler,
   ListArtworksHandler,
+  ListSellerAuctionArtworkCandidatesHandler,
   ListTagsHandler,
   MarkArtworkAsSoldHandler,
   MoveArtworkFolderHandler,
@@ -119,6 +120,7 @@ export const QueryHandlers = [
   FindArtworksByTagsHandler,
   GetArtworkHandler,
   ListArtworksHandler,
+  ListSellerAuctionArtworkCandidatesHandler,
   SearchArtworksHandler,
 
   GetTagHandler,
