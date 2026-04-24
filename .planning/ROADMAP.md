@@ -278,5 +278,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 
 Plans:
 - [x] 17-01 Backend auction read model and realtime gateway contract
-- [ ] 17-02 Frontend auction listing API integration
+- [x] 17-02 Frontend auction listing API integration
 - [ ] 17-03 Wallet-backed bid modal and authoritative state sync
