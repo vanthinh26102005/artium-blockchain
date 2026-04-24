@@ -3,9 +3,12 @@
 import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { AlertTriangle, ShieldCheck, X } from 'lucide-react'
-import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
-import { type DiscoverArtworkAuctionStatusKey } from '@domains/discover/mock/mockArtworks'
+import { useCallback, useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
 import { getAuctionTimeRemainingDisplay } from '@domains/auction/utils'
+import {
+  AuctionBidWalletError,
+  submitAuctionBid,
+} from '@domains/auction/services/auctionBidWallet'
 import { ConfirmedBidState } from './ConfirmedBidState'
 import { PendingBidState } from './PendingBidState'
 import { SubmittingBidState } from './SubmittingBidState'
@@ -16,21 +19,29 @@ import {
   DialogPrimitive,
 } from '@shared/components/ui/dialog'
 
+type AuctionBidLotStatusKey = 'active' | 'ending-soon' | 'closed' | 'newly-listed' | 'paused'
+
 export type AuctionBidLot = {
   artworkId: string
+  auctionId?: string
+  onChainOrderId?: string
   title: string
   bidValue: number
   status: string
-  statusKey: DiscoverArtworkAuctionStatusKey
+  statusKey: AuctionBidLotStatusKey
   endsAt?: string
   imageSrc: string
   imageAlt: string
+  minimumNextBidEth?: number
+  highestBidder?: string | null
+  contractAddress?: string | null
 }
 
 type BidEditingModalProps = {
   isOpen: boolean
   lot: AuctionBidLot | null
   onClose: () => void
+  onRefreshLot?: (auctionId: string) => Promise<AuctionBidLot>
 }
 
 const MIN_BID_INCREMENT_ETH = 0.1
@@ -46,7 +57,7 @@ const headlineFont = {
   fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
 
-const statusBadgeClass: Record<DiscoverArtworkAuctionStatusKey, string> = {
+const statusBadgeClass: Record<AuctionBidLotStatusKey, string> = {
   active: 'bg-[#16a34a]',
   'ending-soon': 'bg-[#dc2626]',
   closed: 'bg-[#9ca3af]',
@@ -67,10 +78,7 @@ const formatUsdEstimate = (value: number) => usdFormatter.format(value * MOCK_ET
 const getMinimumNextBid = (currentBid: number) =>
   Number((currentBid + Math.max(MIN_BID_INCREMENT_ETH, currentBid * BID_INCREMENT_RATE)).toFixed(2))
 
-const getCompetingBid = (failedBid: number) =>
-  Number((failedBid + Math.max(0.12, failedBid * 0.014)).toFixed(2))
-
-const getBidModalStatusLabel = (statusKey: DiscoverArtworkAuctionStatusKey) => {
+const getBidModalStatusLabel = (statusKey: AuctionBidLotStatusKey) => {
   switch (statusKey) {
     case 'active':
       return 'Live Auction'
@@ -87,25 +95,27 @@ const getBidModalStatusLabel = (statusKey: DiscoverArtworkAuctionStatusKey) => {
   }
 }
 
-const getMockTransactionHash = (artworkId: string, bidValue: number) => {
-  const compactBidValue = bidValue.toFixed(2).replace('.', '')
-  return `0x${artworkId.replace(/[^a-zA-Z0-9]/g, '').slice(-4)}${compactBidValue}f89c`
-}
+const normalizeWalletAddress = (value?: string | null) => value?.trim().toLowerCase() ?? null
 
-export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) => {
+export const BidEditingModal = ({ isOpen, lot, onClose, onRefreshLot }: BidEditingModalProps) => {
   const [viewState, setViewState] = useState<
     'editing' | 'submitting' | 'pending' | 'confirmed' | 'failed'
   >('editing')
   const [currentBidValue, setCurrentBidValue] = useState(() => lot?.bidValue ?? 0)
-  const minimumNextBid = getMinimumNextBid(currentBidValue)
+  const [minimumNextBid, setMinimumNextBid] = useState(() =>
+    lot?.minimumNextBidEth ?? getMinimumNextBid(lot?.bidValue ?? 0),
+  )
   const [bidAmount, setBidAmount] = useState(() => minimumNextBid.toFixed(2))
+  const [statusKey, setStatusKey] = useState<AuctionBidLotStatusKey>(() => lot?.statusKey ?? 'active')
+  const [endsAt, setEndsAt] = useState<string | undefined>(() => lot?.endsAt)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [committedBidValue, setCommittedBidValue] = useState<number | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
+  const [submittedWalletAddress, setSubmittedWalletAddress] = useState<string | null>(null)
   const [failedBidValue, setFailedBidValue] = useState<number | null>(null)
-  const lotStatusKey = lot?.statusKey
-  const lotArtworkId = lot?.artworkId
+  const [failureMessage, setFailureMessage] = useState<string | null>(null)
   const lotBidValue = lot?.bidValue ?? 0
+  const auctionId = lot?.auctionId ?? lot?.artworkId
 
   useEffect(() => {
     if (!isOpen) {
@@ -119,34 +129,52 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
     return () => window.clearInterval(intervalId)
   }, [isOpen])
 
+  const applyLotState = useCallback(
+    (nextLot: AuctionBidLot, options?: { resetBidAmount?: boolean }) => {
+      const nextMinimumBid = nextLot.minimumNextBidEth ?? getMinimumNextBid(nextLot.bidValue)
+      setCurrentBidValue(nextLot.bidValue)
+      setMinimumNextBid(nextMinimumBid)
+      setStatusKey(nextLot.statusKey)
+      setEndsAt(nextLot.endsAt)
+
+      if (options?.resetBidAmount) {
+        setBidAmount(nextMinimumBid.toFixed(2))
+      }
+    },
+    [],
+  )
+
   useEffect(() => {
-    if (!isOpen || viewState !== 'submitting' || committedBidValue === null || !lotArtworkId) {
+    if (!isOpen || !lot || viewState !== 'editing') {
       return
     }
 
-    const timeoutId = window.setTimeout(() => {
-      setTransactionHash(getMockTransactionHash(lotArtworkId, committedBidValue))
-      setViewState('pending')
-    }, 1400)
+    let cancelled = false
 
-    return () => window.clearTimeout(timeoutId)
-  }, [committedBidValue, isOpen, lotArtworkId, viewState])
+    const refreshInitialLot = async () => {
+      if (!onRefreshLot || !auctionId) {
+        applyLotState(lot, { resetBidAmount: true })
+        return
+      }
 
-  useEffect(() => {
-    if (!isOpen || viewState !== 'pending' || committedBidValue === null || lotStatusKey !== 'ending-soon') {
-      return
+      try {
+        const refreshedLot = await onRefreshLot(auctionId)
+        if (!cancelled) {
+          applyLotState(refreshedLot, { resetBidAmount: true })
+        }
+      } catch {
+        if (!cancelled) {
+          applyLotState(lot, { resetBidAmount: true })
+        }
+      }
     }
 
-    const timeoutId = window.setTimeout(() => {
-      const nextTopBid = getCompetingBid(committedBidValue)
-      setFailedBidValue(committedBidValue)
-      setCurrentBidValue(nextTopBid)
-      setBidAmount(getMinimumNextBid(nextTopBid).toFixed(2))
-      setViewState('failed')
-    }, 3200)
+    void refreshInitialLot()
 
-    return () => window.clearTimeout(timeoutId)
-  }, [committedBidValue, isOpen, lotStatusKey, viewState])
+    return () => {
+      cancelled = true
+    }
+  }, [applyLotState, auctionId, isOpen, lot, onRefreshLot, viewState])
 
   useEffect(() => {
     if (
@@ -154,19 +182,86 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
       viewState !== 'pending' ||
       committedBidValue === null ||
       transactionHash === null ||
-      lotStatusKey === 'ending-soon'
+      !auctionId ||
+      !onRefreshLot
     ) {
       return
     }
 
-    const timeoutId = window.setTimeout(() => {
-      setCurrentBidValue(committedBidValue)
-      setBidAmount(getMinimumNextBid(committedBidValue).toFixed(2))
-      setViewState('confirmed')
-    }, 2400)
+    let cancelled = false
+    let attempts = 0
 
-    return () => window.clearTimeout(timeoutId)
-  }, [committedBidValue, isOpen, lotStatusKey, transactionHash, viewState])
+    const checkBackendState = async () => {
+      attempts += 1
+
+      try {
+        const refreshedLot = await onRefreshLot(auctionId)
+        if (cancelled) {
+          return
+        }
+
+        applyLotState(refreshedLot)
+
+        const refreshedBidder = normalizeWalletAddress(refreshedLot.highestBidder)
+        const submittedBidder = normalizeWalletAddress(submittedWalletAddress)
+        const bidIsAuthoritative =
+          Boolean(refreshedBidder && submittedBidder && refreshedBidder === submittedBidder) &&
+          refreshedLot.bidValue >= committedBidValue
+
+        if (bidIsAuthoritative) {
+          setCurrentBidValue(refreshedLot.bidValue)
+          setViewState('confirmed')
+          return
+        }
+
+        const minimumNextBidMovedPastSubmission =
+          (refreshedLot.minimumNextBidEth ?? getMinimumNextBid(refreshedLot.bidValue)) >
+          committedBidValue
+        const competingBidMovedPastSubmission = refreshedLot.bidValue > committedBidValue
+
+        if (
+          (minimumNextBidMovedPastSubmission || competingBidMovedPastSubmission) &&
+          refreshedBidder !== submittedBidder
+        ) {
+          const nextMinimumBid =
+            refreshedLot.minimumNextBidEth ?? getMinimumNextBid(refreshedLot.bidValue)
+          setFailedBidValue(committedBidValue)
+          setFailureMessage(
+            'Backend auction state now requires a higher minimum bid. Review the latest current bid and try again.',
+          )
+          setBidAmount(nextMinimumBid.toFixed(2))
+          setViewState('failed')
+        }
+      } catch {
+        if (!cancelled && attempts >= 20) {
+          setFailedBidValue(committedBidValue)
+          setFailureMessage(
+            'We could not confirm this bid from backend auction state. Refresh the lot and review the newest current bid before trying again.',
+          )
+          setViewState('failed')
+        }
+      }
+    }
+
+    void checkBackendState()
+    const intervalId = window.setInterval(() => {
+      void checkBackendState()
+    }, 3500)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(intervalId)
+    }
+  }, [
+    applyLotState,
+    auctionId,
+    committedBidValue,
+    isOpen,
+    onRefreshLot,
+    submittedWalletAddress,
+    transactionHash,
+    viewState,
+  ])
 
   if (!lot) {
     return null
@@ -187,8 +282,8 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
   const bidSpread = isBidValid ? Math.max(0, bidAmountValue - minimumNextBid) : 0
   const timeRemainingDisplay = getAuctionTimeRemainingDisplay({
     status: lot.status,
-    statusKey: lot.statusKey,
-    endsAt: lot.endsAt,
+    statusKey,
+    endsAt,
     elapsedSeconds,
   })
 
@@ -200,17 +295,54 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
     }
   }
 
-  const handlePlaceBid = () => {
+  const handlePlaceBid = async () => {
     if (!isBidValid) {
+      return
+    }
+
+    if (!lot.contractAddress || !lot.onChainOrderId) {
+      setCommittedBidValue(bidAmountValue)
+      setFailedBidValue(bidAmountValue)
+      setFailureMessage('This auction is missing contract data. Refresh the lot and try again.')
+      setViewState('failed')
       return
     }
 
     setCommittedBidValue(bidAmountValue)
     setTransactionHash(null)
+    setSubmittedWalletAddress(null)
+    setFailureMessage(null)
     setViewState('submitting')
+
+    try {
+      const result = await submitAuctionBid({
+        auctionId: lot.onChainOrderId,
+        contractAddress: lot.contractAddress,
+        bidAmountEth: bidAmount,
+      })
+      setTransactionHash(result.txHash)
+      setSubmittedWalletAddress(result.walletAddress)
+      setViewState('pending')
+      if (onRefreshLot && auctionId) {
+        void onRefreshLot(auctionId)
+      }
+    } catch (error) {
+      const message =
+        error instanceof AuctionBidWalletError
+          ? error.message
+          : 'MetaMask could not submit the bid transaction.'
+      setFailedBidValue(bidAmountValue)
+      setFailureMessage(message)
+      setViewState('failed')
+    }
   }
 
   const handleTryAgain = () => {
+    setCommittedBidValue(null)
+    setTransactionHash(null)
+    setSubmittedWalletAddress(null)
+    setFailedBidValue(null)
+    setFailureMessage(null)
     setViewState('editing')
   }
 
@@ -221,7 +353,9 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
     setElapsedSeconds(0)
     setCommittedBidValue(null)
     setTransactionHash(null)
+    setSubmittedWalletAddress(null)
     setFailedBidValue(null)
+    setFailureMessage(null)
     onClose()
   }
 
@@ -305,15 +439,15 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                       Transaction Failed
                     </h2>
                     <p className="mt-2 text-[10px] tracking-[0.18em] text-black/45 uppercase" style={headlineFont}>
-                      Error Code: ERR_BID_EXCEEDED
+                      Backend state requires review
                     </p>
                   </div>
                 </header>
 
                 <div className="mb-8 bg-[#f3f3f3] px-5 py-5">
                   <p className="text-sm leading-7 text-black/72">
-                    Another bidder has placed a higher bid while your transaction was being
-                    processed. Please increase your bid amount to continue.
+                    {failureMessage ??
+                      'Another bidder has placed a higher bid while your transaction was being processed. Please increase your bid amount to continue.'}
                   </p>
                 </div>
 
@@ -339,7 +473,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                   <div className="flex items-end justify-between gap-4">
                     <div>
                       <p className="text-[10px] tracking-[0.16em] text-[#ba1a1a] uppercase" style={headlineFont}>
-                        Your Failed Bid
+                        Your Submitted Bid
                       </p>
                     </div>
                     <div className="text-right">
@@ -368,7 +502,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                     className="inline-flex min-h-[56px] items-center justify-center border border-black/15 px-6 text-center text-[12px] tracking-[0.2em] text-black uppercase transition hover:border-black/30 hover:bg-black/[0.03]"
                     style={headlineFont}
                   >
-                    Cancel Transaction
+                    Close
                   </button>
                 </div>
               </div>
@@ -428,14 +562,14 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                 </div>
                 <div className="flex items-center gap-2 border border-white/25 bg-white/10 px-3 py-1.5 backdrop-blur-sm">
                   <span
-                    className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[lot.statusKey]} ${
-                      lot.statusKey === 'active' || lot.statusKey === 'ending-soon'
+                    className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[statusKey]} ${
+                      statusKey === 'active' || statusKey === 'ending-soon'
                         ? 'animate-pulse'
                         : ''
                     }`}
                   />
                   <span className="text-[10px] tracking-[0.16em] text-white uppercase" style={headlineFont}>
-                    {getBidModalStatusLabel(lot.statusKey)}
+                    {getBidModalStatusLabel(statusKey)}
                   </span>
                 </div>
               </div>
@@ -462,9 +596,9 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                       Current Bid
                     </p>
                     <p className="text-2xl font-semibold text-black md:text-3xl" style={headlineFont}>
-                      {formatPreciseEthDisplay(lot.bidValue)}
+                      {formatPreciseEthDisplay(currentBidValue)}
                     </p>
-                    <p className="text-xs text-black/45">{formatUsdEstimate(lot.bidValue)}</p>
+                    <p className="text-xs text-black/45">{formatUsdEstimate(currentBidValue)}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[11px] tracking-[0.14em] text-black/45 uppercase" style={headlineFont}>
@@ -547,7 +681,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                         Minimum Increment
                       </p>
                       <p className="mt-2 text-base text-black" style={headlineFont}>
-                        {formatPreciseEthDisplay(minimumNextBid - lot.bidValue)}
+                        {formatPreciseEthDisplay(Math.max(0, minimumNextBid - currentBidValue))}
                       </p>
                     </div>
                     <div>
@@ -592,7 +726,9 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                 <div className="flex flex-col gap-3 md:flex-row md:items-center">
                   <button
                     type="button"
-                    onClick={handlePlaceBid}
+                    onClick={() => {
+                      void handlePlaceBid()
+                    }}
                     disabled={!isBidValid}
                     className="order-1 inline-flex min-h-[56px] flex-1 items-center justify-center bg-black px-6 text-center text-[12px] tracking-[0.2em] text-white uppercase transition hover:bg-black/90 disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/45 md:order-2"
                     style={headlineFont}
@@ -605,7 +741,7 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
                     className="order-2 inline-flex min-h-[56px] items-center justify-center border border-black/15 px-6 text-center text-[12px] tracking-[0.2em] text-black uppercase transition hover:border-black/30 hover:bg-black/[0.03] md:order-1 md:w-[180px]"
                     style={headlineFont}
                   >
-                    Cancel
+                    Back to Auction
                   </button>
                 </div>
                 <p className="mt-4 text-center text-[11px] leading-5 text-black/45">
