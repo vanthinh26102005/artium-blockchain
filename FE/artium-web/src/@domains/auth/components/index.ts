@@ -1,3 +1,4 @@
+export { AuthProviderButton } from './AuthProviderButton'
 export { AuthDivider } from './AuthDivider'
 export {
   AuthFormInput,
@@ -11,3 +12,4 @@ export { AuthOtpCodeInput } from './AuthOtpCodeInput'
 export { AuthPasswordInput } from './AuthPasswordInput'
 export { AuthShell } from './AuthShell'
 export { SocialAuthButtons } from './SocialAuthButtons'
+export { WalletLoginPanel } from './WalletLoginPanel'

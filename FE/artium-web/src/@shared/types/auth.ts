@@ -112,3 +112,12 @@ export type VerifyPasswordResetResponse = {
   resetToken: string
   success: boolean
 }
+
+export type WalletNonceResponse = {
+  nonce: string
+}
+
+export type LoginByWalletPayload = {
+  message: string
+  signature: string
+}

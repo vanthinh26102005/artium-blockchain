@@ -8,18 +8,12 @@ import {
   type DiscoverArtwork,
   type DiscoverArtworkAuctionStatusKey,
 } from '@domains/discover/mock/mockArtworks'
+import { BidEditingModal, type AuctionBidLot } from '@domains/auction/components'
 import { Metadata } from '@/components/SEO/Metadata'
 
-type AuctionLot = {
-  artworkId: string
-  title: string
-  bidValue: number
+type AuctionLot = AuctionBidLot & {
   categoryKey: AuctionCategoryKey
-  status: string
-  statusKey: AuctionLotStatusKey
   statusTone: 'live' | 'muted'
-  imageSrc: string
-  imageAlt: string
 }
 
 type AuctionCategoryKey = 'all' | 'architectural' | 'sculpture' | 'digital' | 'installation'
@@ -122,6 +116,7 @@ const lots: AuctionLot[] = mockArtworks
       categoryKey: lotCategoryCycle[index % lotCategoryCycle.length],
       status: artwork.auction.statusLabel,
       statusKey: artwork.auction.statusKey,
+      endsAt: artwork.auction.endsAt,
       statusTone: auctionStatusTone[artwork.auction.statusKey],
       imageSrc: artwork.imageMedium,
       imageAlt: `Artwork preview of ${artwork.title} by ${artwork.creator.fullName}`,
@@ -171,6 +166,9 @@ const formatEthDisplay = (value: number) => {
   return Number.isInteger(value) ? `${value}` : value.toFixed(1)
 }
 
+const isBidActionStatus = (statusKey: AuctionLotStatusKey) =>
+  statusKey === 'active' || statusKey === 'ending-soon'
+
 const LiveAuctionPage = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isMobileViewport, setIsMobileViewport] = useState(false)
@@ -192,6 +190,7 @@ const LiveAuctionPage = () => {
   const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false)
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
+  const [selectedBidLot, setSelectedBidLot] = useState<AuctionLot | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const categoryRef = useRef<HTMLDivElement>(null)
   const statusRef = useRef<HTMLDivElement>(null)
@@ -432,6 +431,14 @@ const LiveAuctionPage = () => {
 
     setCurrentPage(nextPage)
     scrollResultsToTop()
+  }
+
+  const openBidModal = (lot: AuctionLot) => {
+    if (!isBidActionStatus(lot.statusKey)) {
+      return
+    }
+
+    setSelectedBidLot(lot)
   }
 
   return (
@@ -792,7 +799,7 @@ const LiveAuctionPage = () => {
           >
             {displayedLots.map((lot) => (
               <article
-                key={lot.title}
+                key={lot.artworkId}
                 className={`group border border-[#e5e7eb] bg-white p-3 transition-all duration-300 hover:border-black hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.1)] md:p-4 ${
                   effectiveViewMode === 'list'
                     ? 'md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-stretch md:gap-5'
@@ -889,12 +896,24 @@ const LiveAuctionPage = () => {
                         {formatBidDisplay(lot.bidValue)}
                       </p>
                     </div>
-                    <Link
-                      href={`/artworks/${lot.artworkId}`}
-                      className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
-                    >
-                      {lotActionLabel[lot.statusKey]}
-                    </Link>
+                    {isBidActionStatus(lot.statusKey) ? (
+                      <button
+                        type="button"
+                        onClick={() => openBidModal(lot)}
+                        className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
+                        style={headlineFont}
+                      >
+                        {lotActionLabel[lot.statusKey]}
+                      </button>
+                    ) : (
+                      <Link
+                        href={`/artworks/${lot.artworkId}`}
+                        className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
+                        style={headlineFont}
+                      >
+                        {lotActionLabel[lot.statusKey]}
+                      </Link>
+                    )}
                   </div>
                 </div>
               </article>
@@ -1194,6 +1213,13 @@ const LiveAuctionPage = () => {
             </div>
           </div>
         ) : null}
+
+        <BidEditingModal
+          key={selectedBidLot?.artworkId ?? 'bid-modal-closed'}
+          lot={selectedBidLot}
+          isOpen={Boolean(selectedBidLot)}
+          onClose={() => setSelectedBidLot(null)}
+        />
 
       </div>
     </>

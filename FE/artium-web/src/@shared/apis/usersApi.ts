@@ -4,7 +4,7 @@ import { apiFetch, apiPost } from '@shared/services/apiClient'
 // @shared - types
 import type {
   ConfirmPasswordResetPayload,
-  LoginResponse,
+  LoginByWalletPayload,
   RegisterCompletePayload,
   RegisterInitiatePayload,
   RequestOtpResponse,
@@ -13,6 +13,7 @@ import type {
   UserPayload,
   VerifyPasswordResetPayload,
   VerifyPasswordResetResponse,
+  WalletNonceResponse,
 } from '@shared/types/auth'
 import { normalizeLoginResponse, normalizeUserPayload } from '@shared/types/auth'
 
@@ -36,6 +37,15 @@ const usersApi = {
   },
   loginWithGoogle: async (input: LoginByGoogleInput) => {
     const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, { auth: false })
+    return normalizeLoginResponse(raw)
+  },
+  getWalletNonce: (address: string) =>
+    apiFetch<WalletNonceResponse>(
+      `/identity/auth/wallet/nonce?address=${encodeURIComponent(address)}`,
+      { auth: false, cache: 'no-store' },
+    ),
+  loginByWallet: async (input: LoginByWalletPayload) => {
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet', input, { auth: false })
     return normalizeLoginResponse(raw)
   },
   registerInitiate: (input: RegisterInitiatePayload) =>
