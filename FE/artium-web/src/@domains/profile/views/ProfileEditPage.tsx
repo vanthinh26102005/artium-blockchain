@@ -96,7 +96,13 @@ const buildInitialValues = (
 
 export const ProfileEditPageView = ({ username: _username }: ProfileEditPageViewProps) => {
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+  const {
+    data: baseData,
+    sellerProfile,
+    isLoading,
+    error,
+    resolvedUsername,
+  } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
@@ -476,7 +482,9 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                 errors={errors}
                 showErrors={showErrors}
               />
-              {sellerProfile ? <ArtWorldConnectionSection register={register} control={control} /> : null}
+              {sellerProfile ? (
+                <ArtWorldConnectionSection register={register} control={control} />
+              ) : null}
               {sellerProfile ? <BankDetailsSection register={register} /> : null}
               {!sellerProfile ? (
                 <section className="rounded-3xl border border-dashed border-slate-300 bg-slate-50/50 p-6">
@@ -484,12 +492,13 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                     Become a Seller
                   </h2>
                   <p className="mt-3 text-sm text-slate-600">
-                    Register as a seller to unlock advanced profile features like artistic direction, social links, bank details, and start listing your artworks.
+                    Register as a seller to unlock advanced profile fields and seller-only auction
+                    preparation. Verification and payment onboarding remain separate policy steps.
                   </p>
                   <button
                     type="button"
                     onClick={() => void router.push('/seller/register')}
-                    className="mt-4 inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition"
+                    className="mt-4 inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
                   >
                     Register as Seller
                   </button>

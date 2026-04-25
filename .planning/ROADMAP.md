@@ -174,7 +174,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 19 → 20 after the buyer-facing auction read/bid flow exists.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 20 after the buyer-facing auction read/bid flow exists.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -196,6 +196,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 16. Shared form field standardization and multi-domain text-entry migration | 1/1 | Planned | - |
 | 17. Auction frontend integration with blockchain-backed backend flow and live auction state sync | 3/3 | Completed | 2026-04-24 |
 | 18. Seller auction access and artwork eligibility policy | 3/3 | Completed | 2026-04-25 |
+| 18.1. Seller registration and role activation gap closure | 1/1 | Completed | 2026-04-25 |
 | 19. Seller auction creation workspace and terms UX | 0/TBD | Not started | - |
 | 20. Auction start orchestration and seller lifecycle status | 0/TBD | Not started | - |
 
@@ -306,6 +307,20 @@ Plans:
 - [x] 18-01 Shared artwork eligibility DTOs and artwork-service candidate policy
 - [x] 18-02 Seller-only gateway endpoint and active order lock merge
 - [x] 18-03 Seller auction artwork picker frontend
+
+### Phase 18.1: Seller registration and role activation gap closure
+
+**Goal:** Close the practical access gap between profile settings and seller-only auction creation by giving authenticated non-sellers a validated seller registration path that creates a seller profile, activates seller role capability server-side, and preserves verification/payment onboarding as later policy gates.
+**Requirements**: SAUC-10
+**Depends on:** Phase 18
+**Success Criteria** (what must be TRUE):
+  1. Developer can open the profile edit seller CTA and land on an authenticated `/seller/register` page instead of a missing route.
+  2. Developer can submit validated seller profile details and see backend create the seller profile for the authenticated user without trusting client-supplied user IDs.
+  3. Developer can inspect identity-service seller profile creation and confirm the `seller` role is added to the user in the same transaction as profile creation.
+  4. Developer can confirm duplicate seller registration is blocked and the frontend recovers by showing the existing seller profile path.
+  5. Developer can confirm new seller profiles remain unverified with payment onboarding incomplete by default.
+**Plans**: `.planning/phases/18.1-seller-registration-and-role-activation-gap-closure/PLAN.md`
+**UI hint**: yes
 
 ### Phase 19: Seller auction creation workspace and terms UX
 

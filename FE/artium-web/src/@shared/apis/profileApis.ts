@@ -1,8 +1,8 @@
 import { apiFetch } from '@shared/services/apiClient'
 
 type SellerProfilePayload = {
-  profileId?: string  // DTO field name
-  id?: string         // Entity field name (backend returns this)
+  profileId?: string // DTO field name
+  id?: string // Entity field name (backend returns this)
   userId: string
   profileType?: string
   displayName: string
@@ -176,7 +176,6 @@ type CreateMoodboardInput = {
 type CreateSellerProfileInput = {
   profileType: string
   displayName: string
-  slug: string
   bio?: string | null
   profileImageUrl?: string | null
   coverImageUrl?: string | null
@@ -219,7 +218,10 @@ export const profileApis = {
       method: 'PUT',
       body: JSON.stringify(input),
     }),
-  listUserMoments: (userId: string, options?: { skip?: number; take?: number; includeArchived?: boolean }) =>
+  listUserMoments: (
+    userId: string,
+    options?: { skip?: number; take?: number; includeArchived?: boolean },
+  ) =>
     apiFetch<MomentApiItem[]>(`/community/moments/user/${userId}${buildQuery(options)}`, {
       auth: false,
       cache: 'no-store',
@@ -229,27 +231,27 @@ export const profileApis = {
       auth: false,
       cache: 'no-store',
     }),
-  listUserMoodboards: (userId: string, options?: { skip?: number; take?: number; includePrivate?: boolean }) =>
-    apiFetch<MoodboardApiItem[]>(
-      `/community/moodboards/user/${userId}${buildQuery(options)}`,
-      {
-        auth: false,
-        cache: 'no-store',
-      },
-    ),
+  listUserMoodboards: (
+    userId: string,
+    options?: { skip?: number; take?: number; includePrivate?: boolean },
+  ) =>
+    apiFetch<MoodboardApiItem[]>(`/community/moodboards/user/${userId}${buildQuery(options)}`, {
+      auth: false,
+      cache: 'no-store',
+    }),
   getMoodboard: (moodboardId: string) =>
     apiFetch<MoodboardApiItem | null>(`/community/moodboards/${moodboardId}`, {
       auth: false,
       cache: 'no-store',
     }),
-  listMomentComments: (momentId: string, options?: { skip?: number; take?: number; includeDeleted?: boolean }) =>
-    apiFetch<CommentApiItem[]>(
-      `/community/moments/${momentId}/comments${buildQuery(options)}`,
-      {
-        auth: false,
-        cache: 'no-store',
-      },
-    ),
+  listMomentComments: (
+    momentId: string,
+    options?: { skip?: number; take?: number; includeDeleted?: boolean },
+  ) =>
+    apiFetch<CommentApiItem[]>(`/community/moments/${momentId}/comments${buildQuery(options)}`, {
+      auth: false,
+      cache: 'no-store',
+    }),
   createMomentComment: (momentId: string, input: CreateMomentCommentInput) =>
     apiFetch<CommentApiItem>(`/community/moments/${momentId}/comments`, {
       method: 'POST',
