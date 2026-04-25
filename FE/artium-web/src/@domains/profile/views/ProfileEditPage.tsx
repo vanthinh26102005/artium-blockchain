@@ -16,19 +16,18 @@ import { Portal } from '@shared/components/ui/Portal'
 
 // @domains - profile
 import { AboutMeSection } from '@domains/profile/components/edit-profile/AboutMeSection'
-import { ArtisticDirectionSection } from '@domains/profile/components/edit-profile/ArtisticDirectionSection'
-import { ArtWorldConnectionSection } from '@domains/profile/components/edit-profile/ArtWorldConnectionSection'
-import { BankDetailsSection } from '@domains/profile/components/edit-profile/BankDetailsSection'
 import { BasicInformationSection } from '@domains/profile/components/edit-profile/BasicInformationSection'
 import { EditProfileHeader } from '@domains/profile/components/edit-profile/EditProfileHeader'
 import { SaveStatusToast } from '@domains/profile/components/edit-profile/SaveStatusToast'
-import { WhatInspiresMeSection } from '@domains/profile/components/edit-profile/WhatInspiresMeSection'
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
 import { FormValues } from '@domains/profile/types/editProfile'
-import { editProfileSchema } from '@domains/profile/validations/editProfile.schema'
+import {
+  editProfileSchema,
+  normalizeProfileSlug,
+} from '@domains/profile/validations/editProfile.schema'
 import { ProfileAbout, ProfileUser } from '@domains/profile/types'
-import { saveProfileDraft } from '@domains/profile/utils/profileDraftStorage'
+import { clearProfileDraft } from '@domains/profile/utils/profileDraftStorage'
 import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis'
 import artworkUploadApi from '@shared/apis/artworkUploadApi'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
@@ -274,6 +273,37 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     return parts.length > 0 ? parts.join(', ') : undefined
   }
 
+  const buildCanonicalSavedValues = (data: FormValues, slug: string): FormValues => ({
+    ...data,
+    avatarUrl: data.avatarUrl.trim(),
+    username: slug,
+    firstName: data.firstName.trim(),
+    lastName: data.lastName.trim(),
+    phoneNumber: sellerProfile ? data.phoneNumber.trim() : initialValues.phoneNumber,
+    addressLine1: sellerProfile ? data.addressLine1.trim() : initialValues.addressLine1,
+    addressLine2: sellerProfile ? data.addressLine2.trim() : initialValues.addressLine2,
+    district: sellerProfile ? data.district.trim() : initialValues.district,
+    province: sellerProfile ? data.province.trim() : initialValues.province,
+    country: sellerProfile ? data.country.trim() : initialValues.country,
+    postalCode: sellerProfile ? data.postalCode.trim() : initialValues.postalCode,
+    headline: sellerProfile ? data.headline.trim() : initialValues.headline,
+    biography: sellerProfile ? data.biography.trim() : initialValues.biography,
+    websiteUrl:
+      sellerProfile && data.websiteUrl ? normalizeUrl(data.websiteUrl) : initialValues.websiteUrl,
+    instagram:
+      sellerProfile && data.instagram ? normalizeUrl(data.instagram) : initialValues.instagram,
+    twitter: sellerProfile && data.twitter ? normalizeUrl(data.twitter) : initialValues.twitter,
+    profileCategories: sellerProfile ? data.profileCategories : initialValues.profileCategories,
+    roles: sellerProfile ? data.roles : initialValues.roles,
+    connectionAffiliations: sellerProfile
+      ? data.connectionAffiliations.trim()
+      : initialValues.connectionAffiliations,
+    connectionSeenAt: sellerProfile ? data.connectionSeenAt.trim() : initialValues.connectionSeenAt,
+    connectionCurrently: sellerProfile
+      ? data.connectionCurrently.trim()
+      : initialValues.connectionCurrently,
+  })
+
   const handleFormSubmit: SubmitHandler<FormValues> = async (data) => {
     if (!authUser?.id) {
       setSubmitError('Please log in to update your profile.')
@@ -292,13 +322,14 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
 
     try {
       const displayName = [data.firstName.trim(), data.lastName.trim()].filter(Boolean).join(' ')
-      const slug = data.username.trim()
+      const slug = normalizeProfileSlug(data.username)
+      const avatarUrl = data.avatarUrl.trim() || null
 
       // Step 1: Update basic user profile (all users)
       await usersApi.updateMe({
         fullName: displayName || null,
         slug: slug || null,
-        avatarUrl: data.avatarUrl || null,
+        avatarUrl,
       })
 
       // Step 2: Update seller profile if user is a seller
@@ -317,7 +348,7 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
           const sellerPayload = {
             displayName: displayName || sellerProfile.displayName,
             bio: data.biography?.trim() || null,
-            profileImageUrl: data.avatarUrl || null,
+            profileImageUrl: avatarUrl,
             websiteUrl: data.websiteUrl ? normalizeUrl(data.websiteUrl) : null,
             instagramUrl: data.instagram ? normalizeUrl(data.instagram) : null,
             twitterUrl: data.twitter ? normalizeUrl(data.twitter) : null,
@@ -333,16 +364,8 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
 
       await refreshMe()
 
-      reset(data, { keepSubmitCount: true })
-      saveProfileDraft(
-        {
-          avatarUrl: data.avatarUrl,
-          username: data.username.trim(),
-          firstName: data.firstName.trim(),
-          lastName: data.lastName.trim(),
-        },
-        { emit: false },
-      )
+      reset(buildCanonicalSavedValues(data, slug), { keepSubmitCount: true })
+      clearProfileDraft()
       setSaveStatus('success')
 
       // If slug changed, redirect to new edit URL
@@ -471,21 +494,19 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                 onAvatarPick={handleAvatarPick}
                 onAvatarRemove={handleAvatarRemove}
                 onAvatarChange={handleAvatarChange}
+                showSellerContactFields={Boolean(sellerProfile)}
               />
-              {sellerProfile ? <ArtisticDirectionSection control={control} /> : null}
-              {sellerProfile ? <WhatInspiresMeSection control={control} /> : null}
             </div>
             <div className="space-y-6">
-              <AboutMeSection
-                register={register}
-                control={control}
-                errors={errors}
-                showErrors={showErrors}
-              />
               {sellerProfile ? (
-                <ArtWorldConnectionSection register={register} control={control} />
+                <AboutMeSection
+                  register={register}
+                  control={control}
+                  errors={errors}
+                  showErrors={showErrors}
+                  showClassificationFields={false}
+                />
               ) : null}
-              {sellerProfile ? <BankDetailsSection register={register} /> : null}
               {!sellerProfile ? (
                 <section className="rounded-3xl border border-dashed border-slate-300 bg-slate-50/50 p-6">
                   <h2 className="text-sm font-semibold tracking-[0.2em] text-slate-400 uppercase">

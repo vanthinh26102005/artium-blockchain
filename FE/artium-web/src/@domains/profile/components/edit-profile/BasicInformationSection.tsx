@@ -14,6 +14,7 @@ import { cn } from '@shared/lib/utils'
 import { AvatarUpload } from '@domains/profile/components/edit-profile/AvatarUpload'
 import { getInputClasses } from '@domains/profile/components/edit-profile/editProfileStyles'
 import { FormValues } from '@domains/profile/types/editProfile'
+import { normalizeProfileSlug } from '@domains/profile/validations/editProfile.schema'
 
 type CountryOption = {
   value: string
@@ -30,6 +31,7 @@ type BasicInformationSectionProps = {
   onAvatarPick: () => void
   onAvatarRemove: () => void
   onAvatarChange: (event: ChangeEvent<HTMLInputElement>) => void
+  showSellerContactFields?: boolean
 }
 
 export const BasicInformationSection = ({
@@ -42,6 +44,7 @@ export const BasicInformationSection = ({
   onAvatarPick,
   onAvatarRemove,
   onAvatarChange,
+  showSellerContactFields = false,
 }: BasicInformationSectionProps) => {
   const username = useWatch({ control, name: 'username' }) ?? ''
   const firstName = useWatch({ control, name: 'firstName' }) ?? ''
@@ -100,8 +103,8 @@ export const BasicInformationSection = ({
             </label>
             <input
               id="username"
-              {...register('username')}
-              maxLength={30}
+              {...register('username', { setValueAs: normalizeProfileSlug })}
+              maxLength={75}
               className={getInputClasses(showErrors && !!errors.username)}
             />
             <div className="mt-1 flex min-h-[16px] items-center justify-between text-xs text-slate-400">
@@ -110,7 +113,7 @@ export const BasicInformationSection = ({
                   ? errors.username.message
                   : ''}
               </span>
-              <span>{username.length}/30 characters</span>
+              <span>{username.length}/75 characters</span>
             </div>
           </div>
 
@@ -157,118 +160,124 @@ export const BasicInformationSection = ({
         </div>
       </div>
 
-      <div className="mt-6 space-y-4">
-        <div>
-          <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
-            Phone number
-          </label>
-          <div className="mt-2">
-            <Controller
-              name="phoneNumber"
-              control={control}
-              render={({ field }) => (
-                <PhoneInput
-                  defaultCountry="vn"
-                  preferredCountries={['vn', 'us', 'jp', 'kr', 'sg']}
-                  value={field.value ?? ''}
-                  onChange={field.onChange}
-                  placeholder="901234567"
-                  className="w-full"
-                  inputClassName="w-full text-sm text-slate-900 placeholder:text-slate-400"
-                  countrySelectorStyleProps={{
-                    buttonClassName: 'rounded-l-2xl',
-                    buttonContentWrapperClassName: 'px-3',
-                    dropdownStyleProps: {
-                      className:
-                        'rounded-2xl border border-slate-200 bg-white shadow-lg overflow-hidden',
-                    },
-                  }}
-                  inputProps={{
-                    name: field.name,
-                  }}
-                  style={phoneInputStyle}
-                />
-              )}
-            />
+      {showSellerContactFields ? (
+        <div className="mt-6 space-y-4">
+          <div>
+            <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
+              Phone number
+            </label>
+            <div className="mt-2">
+              <Controller
+                name="phoneNumber"
+                control={control}
+                render={({ field }) => (
+                  <PhoneInput
+                    defaultCountry="vn"
+                    preferredCountries={['vn', 'us', 'jp', 'kr', 'sg']}
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    placeholder="901234567"
+                    className="w-full"
+                    inputClassName="w-full text-sm text-slate-900 placeholder:text-slate-400"
+                    countrySelectorStyleProps={{
+                      buttonClassName: 'rounded-l-2xl',
+                      buttonContentWrapperClassName: 'px-3',
+                      dropdownStyleProps: {
+                        className:
+                          'rounded-2xl border border-slate-200 bg-white shadow-lg overflow-hidden',
+                      },
+                    }}
+                    inputProps={{
+                      name: field.name,
+                    }}
+                    style={phoneInputStyle}
+                  />
+                )}
+              />
+            </div>
+            <p className="mt-1 text-xs text-slate-400">
+              We only use this number for delivery updates.
+            </p>
           </div>
-          <p className="mt-1 text-xs text-slate-400">
-            We only use this number for delivery updates.
-          </p>
-        </div>
 
-        <div>
-          <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
-            Address
-          </label>
-          <input
-            {...register('addressLine1')}
-            placeholder="Street, Ward/Commune"
-            className={cn(getInputClasses(), 'mt-2')}
-          />
-          <input
-            {...register('addressLine2')}
-            placeholder="Apartment, suite, building (optional)"
-            className={cn(getInputClasses(), 'mt-3')}
-          />
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <input {...register('district')} placeholder="District" className={getInputClasses()} />
+          <div>
+            <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
+              Address
+            </label>
             <input
-              {...register('province')}
-              placeholder="Province / City"
-              className={getInputClasses()}
-            />
-          </div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <Controller
-              name="country"
-              control={control}
-              render={({ field }) => (
-                <Select<CountryOption, false>
-                  instanceId="country-select"
-                  options={countryOptions}
-                  value={selectedCountry}
-                  onChange={(option) => field.onChange(option?.value ?? '')}
-                  placeholder="Select country"
-                  unstyled
-                  className="w-full"
-                  classNames={{
-                    control: (state) =>
-                      [
-                        'flex min-h-12 w-full items-center rounded-2xl border bg-white px-4 py-3 shadow-sm transition',
-                        state.isFocused
-                          ? 'border-slate-300 ring-2 ring-slate-200'
-                          : 'border-slate-200',
-                      ].join(' '),
-                    valueContainer: () => 'flex h-full flex-1 items-center p-0',
-                    input: () => 'text-sm text-slate-900',
-                    placeholder: () => 'text-sm text-slate-400',
-                    singleValue: () => 'text-sm text-slate-900',
-                    menu: () =>
-                      'mt-2 rounded-2xl border border-slate-200 bg-white shadow-lg overflow-hidden',
-                    option: (state) =>
-                      [
-                        'px-3 py-2 text-sm',
-                        state.isSelected
-                          ? 'bg-slate-100 font-semibold text-slate-900'
-                          : state.isFocused
-                            ? 'bg-slate-50 text-slate-800'
-                            : 'text-slate-700',
-                      ].join(' '),
-                  }}
-                />
-              )}
+              {...register('addressLine1')}
+              placeholder="Street, Ward/Commune"
+              className={cn(getInputClasses(), 'mt-2')}
             />
             <input
-              {...register('postalCode')}
-              placeholder="Postal code"
-              className={getInputClasses()}
+              {...register('addressLine2')}
+              placeholder="Apartment, suite, building (optional)"
+              className={cn(getInputClasses(), 'mt-3')}
             />
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <input
+                {...register('district')}
+                placeholder="District"
+                className={getInputClasses()}
+              />
+              <input
+                {...register('province')}
+                placeholder="Province / City"
+                className={getInputClasses()}
+              />
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <Controller
+                name="country"
+                control={control}
+                render={({ field }) => (
+                  <Select<CountryOption, false>
+                    instanceId="country-select"
+                    options={countryOptions}
+                    value={selectedCountry}
+                    onChange={(option) => field.onChange(option?.value ?? '')}
+                    placeholder="Select country"
+                    unstyled
+                    className="w-full"
+                    classNames={{
+                      control: (state) =>
+                        [
+                          'flex min-h-12 w-full items-center rounded-2xl border bg-white px-4 py-3 shadow-sm transition',
+                          state.isFocused
+                            ? 'border-slate-300 ring-2 ring-slate-200'
+                            : 'border-slate-200',
+                        ].join(' '),
+                      valueContainer: () => 'flex h-full flex-1 items-center p-0',
+                      input: () => 'text-sm text-slate-900',
+                      placeholder: () => 'text-sm text-slate-400',
+                      singleValue: () => 'text-sm text-slate-900',
+                      menu: () =>
+                        'mt-2 rounded-2xl border border-slate-200 bg-white shadow-lg overflow-hidden',
+                      option: (state) =>
+                        [
+                          'px-3 py-2 text-sm',
+                          state.isSelected
+                            ? 'bg-slate-100 font-semibold text-slate-900'
+                            : state.isFocused
+                              ? 'bg-slate-50 text-slate-800'
+                              : 'text-slate-700',
+                        ].join(' '),
+                    }}
+                  />
+                )}
+              />
+              <input
+                {...register('postalCode')}
+                placeholder="Postal code"
+                className={getInputClasses()}
+              />
+            </div>
+            <p className="mt-2 text-xs text-slate-400">
+              Your exact address will not be displayed publicly.
+            </p>
           </div>
-          <p className="mt-2 text-xs text-slate-400">
-            Your exact address will not be displayed publicly.
-          </p>
         </div>
-      </div>
+      ) : null}
     </section>
   )
 }

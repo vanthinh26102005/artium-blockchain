@@ -30,9 +30,16 @@ type AboutMeSectionProps = {
   control: Control<FormValues>
   errors: FieldErrors<FormValues>
   showErrors: boolean
+  showClassificationFields?: boolean
 }
 
-export const AboutMeSection = ({ register, control, errors, showErrors }: AboutMeSectionProps) => {
+export const AboutMeSection = ({
+  register,
+  control,
+  errors,
+  showErrors,
+  showClassificationFields = true,
+}: AboutMeSectionProps) => {
   const headline = useWatch({ control, name: 'headline' }) ?? ''
   const biography = useWatch({ control, name: 'biography' }) ?? ''
   const { field: profileCategoriesField } = useController({
@@ -134,53 +141,57 @@ export const AboutMeSection = ({ register, control, errors, showErrors }: AboutM
           />
         </div>
 
-        <div>
-          <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
-            Choose what best describes you <span className="text-rose-500">*</span>
-          </label>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {PROFILE_CATEGORY_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() =>
-                  profileCategoriesField.onChange(toggleSelection(profileCategories, option))
-                }
-                className={getChipClasses(profileCategories.includes(option))}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-          {showErrors && errors.profileCategories?.message ? (
-            <p className="mt-2 text-xs text-rose-500">
-              {typeof errors.profileCategories.message === 'string'
-                ? errors.profileCategories.message
-                : ''}
-            </p>
-          ) : null}
-        </div>
-
-        <div>
-          <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
-            My roles
-          </label>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {ROLE_OPTIONS.map((option) => {
-              const selected = roles.includes(option)
-              return (
+        {showClassificationFields ? (
+          <div>
+            <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
+              Choose what best describes you
+            </label>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {PROFILE_CATEGORY_OPTIONS.map((option) => (
                 <button
                   key={option}
                   type="button"
-                  onClick={() => rolesField.onChange(toggleSelection(roles, option))}
-                  className={getChipClasses(selected)}
+                  onClick={() =>
+                    profileCategoriesField.onChange(toggleSelection(profileCategories, option))
+                  }
+                  className={getChipClasses(profileCategories.includes(option))}
                 >
                   {option}
                 </button>
-              )
-            })}
+              ))}
+            </div>
+            {showErrors && errors.profileCategories?.message ? (
+              <p className="mt-2 text-xs text-rose-500">
+                {typeof errors.profileCategories.message === 'string'
+                  ? errors.profileCategories.message
+                  : ''}
+              </p>
+            ) : null}
           </div>
-        </div>
+        ) : null}
+
+        {showClassificationFields ? (
+          <div>
+            <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
+              My roles
+            </label>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {ROLE_OPTIONS.map((option) => {
+                const selected = roles.includes(option)
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => rolesField.onChange(toggleSelection(roles, option))}
+                    className={getChipClasses(selected)}
+                  >
+                    {option}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   )

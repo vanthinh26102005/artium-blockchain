@@ -1,12 +1,25 @@
 import { z } from 'zod'
 
+export const normalizeProfileSlug = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 75)
+
+const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
 export const editProfileSchema = z.object({
-  avatarUrl: z.string().trim().min(1, 'Profile picture is required.'),
+  avatarUrl: z.string().trim(),
   username: z
     .string()
     .trim()
     .min(1, 'Username is required.')
-    .max(30, 'Username must be 30 characters or less.'),
+    .max(75, 'Username must be 75 characters or less.')
+    .regex(slugPattern, 'Use lowercase letters, numbers, and single hyphens only.'),
   firstName: z
     .string()
     .trim()
@@ -25,7 +38,7 @@ export const editProfileSchema = z.object({
   websiteUrl: z.string(),
   instagram: z.string(),
   twitter: z.string(),
-  profileCategories: z.array(z.string()).min(1, 'Pick at least one option.'),
+  profileCategories: z.array(z.string()),
   roles: z.array(z.string()),
   artisticVibes: z.array(z.string()),
   artisticValues: z.array(z.string()),

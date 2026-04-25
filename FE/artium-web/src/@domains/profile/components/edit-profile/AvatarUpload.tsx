@@ -31,7 +31,7 @@ export const AvatarUpload = ({
   return (
     <div>
       <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
-        Profile Picture <span className="text-rose-500">*</span>
+        Profile Picture
       </label>
       <div className="mt-3">
         <div className="relative h-40 w-40">
