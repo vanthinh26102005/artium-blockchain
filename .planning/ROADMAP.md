@@ -197,7 +197,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 17. Auction frontend integration with blockchain-backed backend flow and live auction state sync | 3/3 | Completed | 2026-04-24 |
 | 18. Seller auction access and artwork eligibility policy | 3/3 | Completed | 2026-04-25 |
 | 18.1. Seller registration and role activation gap closure | 1/1 | Completed | 2026-04-25 |
-| 19. Seller auction creation workspace and terms UX | 0/TBD | Not started | - |
+| 19. Seller auction creation workspace and terms UX | 3/3 | Planned | - |
 | 20. Auction start orchestration and seller lifecycle status | 0/TBD | Not started | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
@@ -333,8 +333,13 @@ Plans:
   3. Developer can preview the final auction card and policy summary before submission, including artwork image/title, seller name, start/end timing, minimum bid, reserve disclosure, fees, and Sepolia/network expectations.
   4. Developer can see clear copy that auction economics become locked once the auction is active, with `Back`, `Save Draft`, and `Start Auction` actions behaving predictably.
   5. Developer can run frontend typecheck and targeted lint on the new auction creation workspace without introducing new form or route regressions.
-**Plans**: TBD
+**Plans**: `.planning/phases/19-seller-auction-creation-workspace-and-terms-ux/19-01-PLAN.md`, `.planning/phases/19-seller-auction-creation-workspace-and-terms-ux/19-02-PLAN.md`, `.planning/phases/19-seller-auction-creation-workspace-and-terms-ux/19-03-PLAN.md`
 **UI hint**: yes
+
+Plans:
+- [ ] 19-01 Seller auction terms validation and local draft model
+- [ ] 19-02 Seller auction terms form and preview components
+- [ ] 19-03 Seller auction creation workspace integration
 
 ### Phase 20: Auction start orchestration and seller lifecycle status
 
