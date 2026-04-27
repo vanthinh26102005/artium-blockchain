@@ -11,7 +11,7 @@ ingress:
     secretName: artium-gateway-tls
 
 sealedSecrets:
-  enabled: true
+  enabled: false
 
 networkPolicy:
   enabled: true
