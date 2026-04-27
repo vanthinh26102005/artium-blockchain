@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import {
   AlertCircle,
   Boxes,
+  Check,
   CheckCircle2,
   ImageOff,
   Lock,
@@ -12,38 +13,59 @@ import {
 } from 'lucide-react'
 import { Button } from '@shared/components/ui/button'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
-import { useSellerAuctionArtworkCandidates } from '../hooks/useSellerAuctionArtworkCandidates'
 import type { SellerAuctionArtworkCandidate } from '@shared/apis/auctionApis'
+import {
+  SellerAuctionTermsForm,
+  SellerAuctionTermsPreview,
+} from '../components'
+import { useSellerAuctionArtworkCandidates } from '../hooks/useSellerAuctionArtworkCandidates'
+import {
+  DEFAULT_SELLER_AUCTION_TERMS,
+  validateSellerAuctionTerms,
+  type SellerAuctionTermsFormValues,
+} from '../validations/sellerAuctionTerms.schema'
+import {
+  loadSellerAuctionTermsDraft,
+  saveSellerAuctionTermsDraft,
+} from '../utils'
 
 const policyCards = [
   {
-    title: 'Seller-only access',
-    body: 'Auction creation starts from an authenticated seller workspace.',
+    title: 'Contract-backed terms',
+    body: 'Reserve policy, increment, and duration are previewed as seller-set rules before activation.',
     icon: ShieldCheck,
   },
   {
-    title: 'Owned artwork only',
-    body: 'Candidate records are scoped to the seller account on the backend.',
+    title: 'Economics lock on activation',
+    body: 'Reserve, increment, and duration cannot be edited after activation.',
     icon: Lock,
   },
   {
-    title: 'Blocked reasons shown',
-    body: 'Every unavailable artwork stays visible with recovery guidance.',
+    title: 'Sepolia expectations',
+    body: 'Sepolia is a test network. Confirm wallet and network details before activation.',
     icon: AlertCircle,
   },
-]
+] as const
 
-const CandidateImage = ({ candidate }: { candidate: SellerAuctionArtworkCandidate }) => {
+const CandidateImage = ({
+  candidate,
+  className,
+}: {
+  candidate: SellerAuctionArtworkCandidate
+  className?: string
+}) => {
   if (!candidate.thumbnailUrl) {
     return (
-      <div className="flex aspect-[4/3] items-center justify-center rounded-[28px] bg-[#f5f5f5] text-[#191414]/45">
+      <div
+        className={`flex aspect-[4/3] items-center justify-center rounded-[28px] bg-[#f5f5f5] text-[#191414]/45 ${className ?? ''}`}
+      >
         <ImageOff className="h-10 w-10" />
       </div>
     )
   }
 
   return (
-    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[28px]">
+    <div className={`relative aspect-[4/3] w-full overflow-hidden rounded-[28px] ${className ?? ''}`}>
       <Image
         src={candidate.thumbnailUrl}
         alt={candidate.title}
@@ -109,8 +131,12 @@ const CandidateCard = ({
             </ul>
           </div>
         ) : (
-          <p className="rounded-2xl bg-[#2351FC]/10 px-4 py-3 text-sm font-medium text-[#2351FC]">
-            Ownership and auction readiness checks passed.
+          <p
+            className={`rounded-2xl px-4 py-3 text-sm font-medium ${
+              isSelected ? 'bg-[#2351FC] text-white' : 'bg-[#2351FC]/10 text-[#2351FC]'
+            }`}
+          >
+            {isSelected ? 'Selected for auction' : 'Ownership and auction readiness checks passed.'}
           </p>
         )}
 
@@ -119,9 +145,15 @@ const CandidateCard = ({
             type="button"
             disabled={isBlocked}
             onClick={onSelect}
-            className={`w-full ${isBlocked ? 'bg-[#191414]/20 text-[#191414]' : 'bg-[#191414] text-white hover:bg-[#2351FC]'}`}
+            className={`w-full ${
+              isBlocked
+                ? 'bg-[#191414]/20 text-[#191414]'
+                : isSelected
+                  ? 'bg-[#2351FC] text-white hover:bg-[#1d46d9]'
+                  : 'bg-[#191414] text-white hover:bg-[#2351FC]'
+            }`}
           >
-            {isBlocked ? 'Unavailable for auction' : 'Select artwork'}
+            {isBlocked ? 'Unavailable for auction' : isSelected ? 'Selected for auction' : 'Select artwork'}
           </Button>
         </div>
       </div>
@@ -143,6 +175,37 @@ const LoadingGrid = () => (
     ))}
   </div>
 )
+
+const StepRail = ({ currentStep }: { currentStep: 'artwork' | 'terms' }) => {
+  const isTermsStep = currentStep === 'terms'
+
+  return (
+    <ol className="space-y-3" aria-label="Seller auction creation steps">
+      <li
+        className={`flex items-center gap-3 rounded-[22px] border px-4 py-3 ${
+          isTermsStep ? 'border-black/10 bg-white text-[#191414]' : 'border-[#2351FC] bg-[#2351FC]/10 text-[#2351FC]'
+        }`}
+        aria-current={currentStep === 'artwork' ? 'step' : undefined}
+      >
+        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-current">
+          {isTermsStep ? <Check className="h-4 w-4" /> : <span className="text-sm font-semibold">1</span>}
+        </span>
+        <span className="text-sm font-semibold">1 Choose artwork</span>
+      </li>
+      <li
+        className={`flex items-center gap-3 rounded-[22px] border px-4 py-3 ${
+          isTermsStep ? 'border-[#2351FC] bg-[#2351FC]/10 text-[#2351FC]' : 'border-black/10 bg-white text-[#191414]/55'
+        }`}
+        aria-current={currentStep === 'terms' ? 'step' : undefined}
+      >
+        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-current">
+          <span className="text-sm font-semibold">2</span>
+        </span>
+        <span className="text-sm font-semibold">2 Set auction terms</span>
+      </li>
+    </ol>
+  )
+}
 
 const SellerProfileRequired = () => {
   const router = useRouter()
@@ -172,14 +235,94 @@ const SellerProfileRequired = () => {
 }
 
 const SellerCandidateWorkspace = () => {
+  const workspaceRef = useRef<HTMLElement | null>(null)
   const { data, eligible, blocked, isLoading, error, refresh } =
     useSellerAuctionArtworkCandidates()
+  const [currentStep, setCurrentStep] = useState<'artwork' | 'terms'>('artwork')
   const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null)
+  const [termsArtworkId, setTermsArtworkId] = useState<string | null>(null)
+  const [termsValues, setTermsValues] = useState<SellerAuctionTermsFormValues>(
+    DEFAULT_SELLER_AUCTION_TERMS,
+  )
+  const [termsErrors, setTermsErrors] = useState<
+    Partial<Record<keyof SellerAuctionTermsFormValues, string>>
+  >({})
+  const [hasSubmittedTerms, setHasSubmittedTerms] = useState(false)
+  const [draftSaved, setDraftSaved] = useState(false)
+
+  const selectedCandidate = useMemo(
+    () => eligible.find((candidate) => candidate.artworkId === selectedArtworkId) ?? null,
+    [eligible, selectedArtworkId],
+  )
+
   const hasNoArtworks = !isLoading && !error && data?.total === 0
   const hasNoEligible = !isLoading && !error && !hasNoArtworks && eligible.length === 0
 
+  const updateTermsValues = (nextValues: SellerAuctionTermsFormValues) => {
+    setTermsValues(nextValues)
+    setDraftSaved(false)
+
+    if (hasSubmittedTerms) {
+      setTermsErrors(validateSellerAuctionTerms(nextValues))
+    }
+  }
+
+  const validateCurrentTerms = () => {
+    const nextErrors = validateSellerAuctionTerms(termsValues)
+    setTermsErrors(nextErrors)
+    return nextErrors
+  }
+
+  const handleSelectArtwork = (artworkId: string) => {
+    setSelectedArtworkId(artworkId)
+    setDraftSaved(false)
+  }
+
+  const handleContinueToTerms = () => {
+    if (!selectedCandidate) {
+      return
+    }
+
+    if (termsArtworkId !== selectedCandidate.artworkId) {
+      const nextValues =
+        loadSellerAuctionTermsDraft(selectedCandidate.artworkId) ?? DEFAULT_SELLER_AUCTION_TERMS
+
+      setTermsArtworkId(selectedCandidate.artworkId)
+      setTermsValues(nextValues)
+      setTermsErrors({})
+      setHasSubmittedTerms(false)
+      setDraftSaved(false)
+    }
+
+    setCurrentStep('terms')
+    workspaceRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const handleBackToArtwork = () => {
+    setCurrentStep('artwork')
+  }
+
+  const handleSaveDraft = () => {
+    if (!selectedCandidate) {
+      return
+    }
+
+    saveSellerAuctionTermsDraft(selectedCandidate.artworkId, termsValues)
+    setDraftSaved(true)
+  }
+
+  const handleStartAttempt = () => {
+    setHasSubmittedTerms(true)
+    validateCurrentTerms()
+  }
+
+  const isTermsValid = Object.keys(validateSellerAuctionTerms(termsValues)).length === 0
+
   return (
-    <main className="min-h-screen bg-[#FDFDFD] px-5 py-8 text-[#191414] md:px-10 lg:px-12">
+    <main
+      ref={workspaceRef}
+      className="min-h-screen bg-[#FDFDFD] px-5 py-8 text-[#191414] md:px-10 lg:px-12"
+    >
       <section className="overflow-hidden rounded-[40px] border border-black/10 bg-white">
         <div className="grid gap-8 p-6 md:p-10 lg:grid-cols-[1.3fr_0.7fr] lg:p-12">
           <div>
@@ -194,18 +337,33 @@ const SellerCandidateWorkspace = () => {
               bid rules.
             </p>
           </div>
+
           <div className="rounded-[32px] bg-[#191414] p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.2em] text-white/55">Phase 18 scope</p>
-            <p className="mt-4 text-3xl font-semibold leading-tight">
-              Pick the artwork now. Terms and on-chain start come next.
-            </p>
-            <Button
-              type="button"
-              disabled
-              className="mt-8 w-full bg-white text-[#191414]"
-            >
-              Continue to auction terms
-            </Button>
+            <p className="text-sm uppercase tracking-[0.2em] text-white/55">Phase 19 workspace</p>
+            <div className="mt-5">
+              <StepRail currentStep={currentStep} />
+            </div>
+
+            {currentStep === 'artwork' ? (
+              <>
+                <p className="mt-5 text-sm leading-6 text-white/75">
+                  Select an eligible artwork to unlock local terms setup and buyer-facing preview.
+                </p>
+                <Button
+                  type="button"
+                  disabled={!selectedCandidate}
+                  onClick={handleContinueToTerms}
+                  className="mt-8 w-full bg-white text-[#191414] hover:bg-white/90 disabled:bg-white/25 disabled:text-white"
+                >
+                  Continue to auction terms
+                </Button>
+              </>
+            ) : (
+              <p className="mt-5 text-sm leading-6 text-white/75">
+                Review local terms, preview buyer-facing policy, and hand off activation to the
+                next step.
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -241,70 +399,138 @@ const SellerCandidateWorkspace = () => {
         </section>
       ) : null}
 
-      <section className="mt-10">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#2351FC]">
-              Ready for auction
-            </p>
-            <h2 className="mt-2 text-4xl font-semibold tracking-[-0.04em]">
-              {hasNoEligible ? 'No auction-ready artworks' : 'Ready for auction'}
-            </h2>
+      {currentStep === 'terms' && selectedCandidate ? (
+        <section className="mt-10">
+          <div className="rounded-[32px] border border-black/10 bg-white p-4 md:p-6">
+            <div className="grid gap-5 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-center">
+              <CandidateImage candidate={selectedCandidate} className="max-w-[160px]" />
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2351FC]">
+                  Selected artwork
+                </p>
+                <h2 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#191414]">
+                  {selectedCandidate.title}
+                </h2>
+                <p className="mt-2 text-sm text-[#191414]/60">
+                  {selectedCandidate.creatorName || 'Unknown creator'}
+                </p>
+                <span className="mt-4 inline-flex rounded-full bg-[#2351FC]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#2351FC]">
+                  {selectedCandidate.status}
+                </span>
+              </div>
+              <div className="md:justify-self-end">
+                <Button type="button" variant="outline" onClick={handleBackToArtwork}>
+                  Change artwork
+                </Button>
+              </div>
+            </div>
           </div>
-          <p className="text-sm text-[#191414]/55">
-            {eligible.length} ready / {blocked.length} needs attention
-          </p>
-        </div>
 
-        <div className="mt-5">
-          {isLoading ? <LoadingGrid /> : null}
-          {hasNoArtworks ? (
-            <div className="rounded-[32px] border border-dashed border-black/20 bg-white p-10 text-center">
-              <Boxes className="mx-auto h-10 w-10 text-[#2351FC]" />
-              <h3 className="mt-4 text-2xl font-semibold">No artworks in your inventory yet</h3>
-              <p className="mt-2 text-[#191414]/60">Upload artwork before starting an auction.</p>
-            </div>
-          ) : null}
-          {!isLoading && eligible.length > 0 ? (
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {eligible.map((candidate) => (
-                <CandidateCard
-                  key={candidate.artworkId}
-                  candidate={candidate}
-                  isSelected={selectedArtworkId === candidate.artworkId}
-                  onSelect={() => setSelectedArtworkId(candidate.artworkId)}
-                />
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </section>
-
-      {!hasNoArtworks && !isLoading ? (
-        <section className="mt-12">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#2351FC]">
-                Needs attention
-              </p>
-              <h2 className="mt-2 text-4xl font-semibold tracking-[-0.04em]">Needs attention</h2>
+              <SellerAuctionTermsForm
+                values={termsValues}
+                errors={termsErrors}
+                hasSubmitted={hasSubmittedTerms}
+                onChange={updateTermsValues}
+                onValidate={validateCurrentTerms}
+                onBack={handleBackToArtwork}
+                onSaveDraft={handleSaveDraft}
+                onStartAttempt={handleStartAttempt}
+                isStartDisabled={false}
+              />
+              {draftSaved ? (
+                <p className="mt-3 text-sm font-medium text-[#027A48]">Draft saved on this device.</p>
+              ) : null}
             </div>
-            <p className="text-sm text-[#191414]/55">Blocked artworks stay visible for recovery.</p>
+
+            <SellerAuctionTermsPreview
+              candidate={selectedCandidate}
+              values={termsValues}
+              isTermsValid={isTermsValid}
+            />
           </div>
-          {blocked.length > 0 ? (
-            <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {blocked.map((candidate) => (
-                <CandidateCard key={candidate.artworkId} candidate={candidate} />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-5 rounded-[32px] border border-black/10 bg-white p-8">
-              <CheckCircle2 className="h-8 w-8 text-[#2351FC]" />
-              <p className="mt-3 text-lg font-semibold">No blocked artworks found.</p>
-            </div>
-          )}
         </section>
-      ) : null}
+      ) : (
+        <>
+          <section className="mt-10">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#2351FC]">
+                  Ready for auction
+                </p>
+                <h2 className="mt-2 text-4xl font-semibold tracking-[-0.04em]">
+                  {hasNoEligible ? 'No auction-ready artworks' : 'Ready for auction'}
+                </h2>
+              </div>
+              <p className="text-sm text-[#191414]/55">
+                {eligible.length} ready / {blocked.length} needs attention
+              </p>
+            </div>
+
+            <div className="mt-5">
+              {isLoading ? <LoadingGrid /> : null}
+              {hasNoArtworks ? (
+                <div className="rounded-[32px] border border-dashed border-black/20 bg-white p-10 text-center">
+                  <Boxes className="mx-auto h-10 w-10 text-[#2351FC]" />
+                  <h3 className="mt-4 text-2xl font-semibold">No artworks in your inventory yet</h3>
+                  <p className="mt-2 text-[#191414]/60">
+                    Upload or publish an artwork before starting an auction.
+                  </p>
+                </div>
+              ) : null}
+              {hasNoEligible ? (
+                <div className="rounded-[32px] border border-dashed border-black/20 bg-white p-10 text-center">
+                  <Boxes className="mx-auto h-10 w-10 text-[#2351FC]" />
+                  <h3 className="mt-4 text-2xl font-semibold">No auction-ready artworks</h3>
+                  <p className="mt-2 max-w-2xl text-[#191414]/60">
+                    Your artworks need to be active, published, single-edition, and complete before
+                    they can enter an auction.
+                  </p>
+                </div>
+              ) : null}
+              {!isLoading && eligible.length > 0 ? (
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {eligible.map((candidate) => (
+                    <CandidateCard
+                      key={candidate.artworkId}
+                      candidate={candidate}
+                      isSelected={selectedArtworkId === candidate.artworkId}
+                      onSelect={() => handleSelectArtwork(candidate.artworkId)}
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </section>
+
+          {!hasNoArtworks && !isLoading ? (
+            <section className="mt-12">
+              <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#2351FC]">
+                    Needs attention
+                  </p>
+                  <h2 className="mt-2 text-4xl font-semibold tracking-[-0.04em]">Needs attention</h2>
+                </div>
+                <p className="text-sm text-[#191414]/55">Blocked artworks stay visible for recovery.</p>
+              </div>
+              {blocked.length > 0 ? (
+                <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {blocked.map((candidate) => (
+                    <CandidateCard key={candidate.artworkId} candidate={candidate} />
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-5 rounded-[32px] border border-black/10 bg-white p-8">
+                  <CheckCircle2 className="h-8 w-8 text-[#2351FC]" />
+                  <p className="mt-3 text-lg font-semibold">No blocked artworks found.</p>
+                </div>
+              )}
+            </section>
+          ) : null}
+        </>
+      )}
     </main>
   )
 }
