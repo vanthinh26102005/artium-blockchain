@@ -8,25 +8,24 @@ Artium is an artwork marketplace with seller inventory management, buyer checkou
 
 Let artists and sellers run trustworthy auctions without bypassing ownership, eligibility, wallet, or lifecycle policy checks.
 
-## Current Milestone: v1.1 Seller Auction Creation
+## Current Milestone: v1.2 Backend Deployment Strategy
 
-**Goal:** Sellers can pick an eligible artwork they own, configure compliant auction terms, and start a Sepolia-backed auction through an authenticated seller-only workflow.
+**Goal:** Build a production-grade deployment strategy for the backend by first understanding the existing backend system precisely, then mapping that reality into an opinionated Kubernetes and Docker operating model.
 
 **Target features:**
-- Seller-only auction creation route guarded in frontend and backend.
-- Own-inventory artwork picker with eligibility rules before auction setup.
-- Auction terms form for starting bid, reserve policy, bid increment, duration, and shipping/payment disclosures.
-- Backend auction start command that validates ownership, seller profile, artwork state, wallet/network policy, and idempotent on-chain/off-chain creation.
-- Seller auction status surface for pending, active, failed, and conflict/retry states.
+- Deep backend infrastructure analysis covering service structure, Dockerfiles, compose files, environment patterns, networking, stateful dependencies, and runtime/build requirements.
+- Architecture analysis that classifies backend services, maps dependencies, and highlights scalability, reliability, and unnecessary complexity risks.
+- Production deployment design spanning Kubernetes workload topology, networking, config and secret handling, Docker image strategy, CI/CD, observability, health checks, scaling, and recovery.
+- Practical delivery artifacts including a text architecture diagram, step-by-step deployment plan, sample Kubernetes manifests, and explicit risk mitigations.
 
 ## Current State
 
-- Phase 18 complete: seller-only auction access and own-inventory eligibility are implemented through backend guards, server-owned reason codes, active order lock merging, and `/artist/auctions/create`.
-- Next: Phase 19 should build auction terms configuration and preview on top of the eligible artwork picker without duplicating eligibility policy in React.
+- The backend already runs as a brownfield multi-service system with local Docker Compose orchestration, but the repository does not yet have a production-grade Kubernetes deployment strategy captured in planning artifacts.
+- This milestone starts by modeling the backend exactly as implemented before making infrastructure recommendations, so deployment decisions are grounded in real service boundaries, dependencies, and operational constraints.
 
 ## Active Requirements
 
-- Seller auction creation and governance requirements live in `.planning/REQUIREMENTS.md` under `v1.1 Requirements`.
+- Backend deployment strategy requirements live in `.planning/REQUIREMENTS.md` under `v1.2 Requirements`.
 
 ## Key Decisions
 
@@ -35,6 +34,8 @@ Let artists and sellers run trustworthy auctions without bypassing ownership, el
 - Auction eligibility must exclude sold, deleted, already-auctioned, active-order, multi-quantity, or incomplete artwork records.
 - Once an auction is active, seller-editable fields should be locked except explicitly safe lifecycle actions.
 - MetaMask transaction submission is pending evidence only; backend/on-chain synchronized state remains the source of truth.
+- Deployment planning must model the existing backend first and avoid inventing target-state topology that contradicts the current service graph.
+- Production deployment recommendations should optimize for operational clarity and reliability over preserving every local-development Docker Compose convenience.
 
 ## Evolution
 
@@ -54,4 +55,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state.
 
 ---
-*Last updated: 2026-04-25 for Phase 18 completion*
+*Last updated: 2026-04-27 for milestone v1.2 initialization*

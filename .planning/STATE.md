@@ -1,25 +1,25 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: executing
-stopped_at: Phase 20 UI-SPEC approved
-last_updated: "2026-04-27T08:31:00.000Z"
-last_activity: 2026-04-27 - Completed Phase 20 Plan 04 seller inventory and seller order lifecycle convergence.
+milestone: v1.2
+milestone_name: Backend Deployment Strategy
+status: planning
+stopped_at: Roadmap approved for Phase 21
+last_updated: "2026-04-27T10:33:50.025Z"
+last_activity: 2026-04-27 - Started milestone v1.2 Backend Deployment Strategy and approved the roadmap through Phase 25.
 progress:
-  total_phases: 22
-  completed_phases: 5
-  total_plans: 18
-  completed_plans: 26
-  percent: 100
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 ## Current Position
 
-Phase: 20 (Auction start orchestration and seller lifecycle status) — EXECUTING
-Plan: 4 of 4 completed
-Status: Phase 20 execution complete; ready for verify/validate/secure follow-up
-Last activity: 2026-04-27 - Completed Phase 20 Plan 04 seller inventory and seller order lifecycle convergence.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Roadmap approved; ready to plan Phase 21
+Last activity: 2026-04-27 - Milestone v1.2 started and roadmap approved through Phase 25.
 
 ## Decisions
 
@@ -35,10 +35,14 @@ Last activity: 2026-04-27 - Completed Phase 20 Plan 04 seller inventory and sell
 - Restore seller auction start state in FE from remembered artwork context plus backend lifecycle status, not local submit flags.
 - Promote AuctionStarted by canonical seller attempt orderId and expose only converged active auction rows publicly.
 - Gate seller-only artwork lifecycle enrichment behind an explicit query flag so private retry/failure state never leaks into public seller/profile reads.
+- Continue phase numbering from 21 for v1.2 rather than resetting roadmap history.
+- Backend deployment planning must reconcile code, Compose, Dockerfiles, env files, and legacy K8s artifacts before proposing topology.
+- Treat current Kubernetes YAML as development-era topology evidence, not as production-ready deployment truth.
+- Prefer managed stateful dependencies over in-cluster defaults unless the milestone analysis surfaces a strong reason to self-host them.
 
 ## Last Session
 
-Stopped at: Phase 20 UI-SPEC approved
+Stopped at: Roadmap approved for v1.2 Backend Deployment Strategy
 
 ## Accumulated Context
 
@@ -54,6 +58,11 @@ Stopped at: Phase 20 UI-SPEC approved
 - Phase 18 added: Seller auction access and artwork eligibility policy
 - Phase 19 added: Seller auction creation workspace and terms UX
 - Phase 20 added: Auction start orchestration and seller lifecycle status
+- Phase 21 added: Backend runtime inventory and drift reconciliation
+- Phase 22 added: Service architecture and dependency risk analysis
+- Phase 23 added: Kubernetes platform topology and workload design
+- Phase 24 added: Docker build, image lifecycle, and CI/CD strategy
+- Phase 25 added: Production operations blueprint and final deployment artifacts
 
 **Planned Phase:** 20 (Auction start orchestration and seller lifecycle status) — 4 plans — 2026-04-27T07:41:03.407Z
 **Planned Phase:** 18 (Seller auction access and artwork eligibility policy) — 3 plans — 2026-04-25T00:57:16+07:00
@@ -62,3 +71,8 @@ Stopped at: Phase 20 UI-SPEC approved
 **Completed Phase:** 19 (Seller auction creation workspace and terms UX) - 3 plans - 2026-04-27T09:25:50+07:00
 **Planned Phase:** 19.1 (Seller auction artifact recovery and policy alignment) - 3 plans - 2026-04-27T04:00:18.456Z
 **Completed Phase:** 19.1 (Seller auction artifact recovery and policy alignment) - 3 plans - 2026-04-27T04:43:24Z
+**Planned Phase:** 21 (Backend runtime inventory and drift reconciliation) — roadmap approved — 2026-04-27T10:33:50.025Z
+**Planned Phase:** 22 (Service architecture and dependency risk analysis) — roadmap approved — 2026-04-27T10:33:50.025Z
+**Planned Phase:** 23 (Kubernetes platform topology and workload design) — roadmap approved — 2026-04-27T10:33:50.025Z
+**Planned Phase:** 24 (Docker build, image lifecycle, and CI/CD strategy) — roadmap approved — 2026-04-27T10:33:50.025Z
+**Planned Phase:** 25 (Production operations blueprint and final deployment artifacts) — roadmap approved — 2026-04-27T10:33:50.025Z
