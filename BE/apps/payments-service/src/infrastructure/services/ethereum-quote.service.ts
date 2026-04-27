@@ -8,7 +8,6 @@ const DEFAULT_CHAIN_ID = '11155111';
 const DEFAULT_CHAIN_NAME = 'Sepolia';
 const DEFAULT_BLOCK_EXPLORER_URL = 'https://sepolia.etherscan.io';
 const DEFAULT_QUOTE_TTL_MS = 60_000;
-const QUOTE_SECRET_FALLBACK = 'artium-dev-ethereum-quote-secret';
 
 export type EthereumQuoteTokenPayload = {
   quoteId: string;
@@ -38,7 +37,11 @@ type CoinbaseSpotResponse = {
 
 @Injectable()
 export class EthereumQuoteService {
-  constructor(private readonly configService: ConfigService) {}
+  private readonly signingSecret: string;
+
+  constructor(private readonly configService: ConfigService) {
+    this.signingSecret = this.resolveSigningSecret();
+  }
 
   async createQuote(usdAmount: number): Promise<EthereumQuoteResponse> {
     const normalizedUsdAmount = this.normalizeUsdAmount(usdAmount);
@@ -151,7 +154,9 @@ export class EthereumQuoteService {
   }
 
   private convertUsdToWei(usdAmount: number, usdPerEth: string): bigint {
-    const usdCents = BigInt(Math.round(this.normalizeUsdAmount(usdAmount) * 100));
+    const usdCents = BigInt(
+      Math.round(this.normalizeUsdAmount(usdAmount) * 100),
+    );
     const { units: priceUnits, scale } = this.parseDecimalToUnits(usdPerEth);
 
     if (usdCents <= 0n || priceUnits <= 0n) {
@@ -187,7 +192,9 @@ export class EthereumQuoteService {
     const fraction = (wei % 10n ** 18n).toString().padStart(18, '0');
     const trimmedFraction = fraction.replace(/0+$/, '');
 
-    return trimmedFraction ? `${whole.toString()}.${trimmedFraction}` : whole.toString();
+    return trimmedFraction
+      ? `${whole.toString()}.${trimmedFraction}`
+      : whole.toString();
   }
 
   private getChainConfig() {
@@ -203,7 +210,8 @@ export class EthereumQuoteService {
 
   private getQuoteTtlMs(): number {
     const configuredTtl = Number(
-      this.configService.get<string>('ETHEREUM_QUOTE_TTL_MS') ?? DEFAULT_QUOTE_TTL_MS,
+      this.configService.get<string>('ETHEREUM_QUOTE_TTL_MS') ??
+        DEFAULT_QUOTE_TTL_MS,
     );
 
     return Number.isFinite(configuredTtl) && configuredTtl > 0
@@ -211,15 +219,27 @@ export class EthereumQuoteService {
       : DEFAULT_QUOTE_TTL_MS;
   }
 
+  private resolveSigningSecret(): string {
+    const secret = this.configService
+      .get<string>('ETHEREUM_QUOTE_SIGNING_SECRET')
+      ?.trim();
+    if (!secret) {
+      throw new Error(
+        'ETHEREUM_QUOTE_SIGNING_SECRET must be configured with a strong random secret. ' +
+          'Quotes cannot be signed without a secret key.',
+      );
+    }
+    return secret;
+  }
+
   private getSigningSecret(): string {
-    return (
-      this.configService.get<string>('ETHEREUM_QUOTE_SIGNING_SECRET')?.trim() ||
-      QUOTE_SECRET_FALLBACK
-    );
+    return this.signingSecret;
   }
 
   private signPayload(payload: EthereumQuoteTokenPayload): string {
-    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
+    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
+      'base64url',
+    );
     return `${encodedPayload}.${this.signEncodedPayload(encodedPayload)}`;
   }
 
