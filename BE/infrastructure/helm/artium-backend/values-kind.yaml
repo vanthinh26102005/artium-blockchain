@@ -1,0 +1,55 @@
+# Optional local validation only. This file does not define production.
+namespace:
+  name: artium-kind
+  create: true
+
+ingress:
+  enabled: true
+  className: nginx
+  host: artium.localtest.me
+  tls:
+    enabled: false
+    secretName: ""
+
+sealedSecrets:
+  enabled: true
+
+networkPolicy:
+  enabled: false
+
+services:
+  api-gateway:
+    replicaCount: 1
+  identity-service:
+    replicaCount: 1
+  artwork-service:
+    replicaCount: 1
+  payments-service:
+    replicaCount: 1
+  orders-service:
+    replicaCount: 1
+  messaging-service:
+    replicaCount: 1
+  notifications-service:
+    replicaCount: 1
+  events-service:
+    replicaCount: 1
+  community-service:
+    replicaCount: 1
+
+postgresql:
+  primary:
+    persistence:
+      enabled: true
+      size: 2Gi
+
+redis:
+  master:
+    persistence:
+      enabled: true
+      size: 1Gi
+
+rabbitmq:
+  persistence:
+    enabled: true
+    size: 2Gi

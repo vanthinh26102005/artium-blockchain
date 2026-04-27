@@ -1,0 +1,170 @@
+namespace:
+  name: artium-prod
+  create: true
+
+ingress:
+  enabled: true
+  className: nginx
+  host: "__SET_GATEWAY_HOST__"
+  tls:
+    enabled: true
+    secretName: artium-gateway-tls
+
+sealedSecrets:
+  enabled: true
+
+networkPolicy:
+  enabled: true
+
+services:
+  api-gateway:
+    replicaCount: 3
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+  identity-service:
+    resources:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+  artwork-service:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+  payments-service:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+  orders-service:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+  messaging-service:
+    resources:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+  notifications-service:
+    resources:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+  events-service:
+    resources:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+  community-service:
+    resources:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+
+workers:
+  outbox:
+    resources:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+  blockchain-listener:
+    resources:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+  ethereum-confirmation-retry:
+    resources:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+  notification-processor:
+    resources:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+
+postgresql:
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2000m
+        memory: 2Gi
+  networkPolicy:
+    enabled: true
+
+redis:
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+  networkPolicy:
+    enabled: true
+
+rabbitmq:
+  persistence:
+    enabled: true
+    size: 20Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  networkPolicy:
+    enabled: true
