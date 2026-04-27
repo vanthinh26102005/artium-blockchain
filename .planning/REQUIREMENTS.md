@@ -189,10 +189,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAUC-07 | Phase 20 | Pending |
 | SAUC-08 | Phase 20 | Pending |
 | SAUC-09 | Phase 20 | Pending |
-| DISC-01 | Phase 21 | Pending |
-| DISC-02 | Phase 21 | Pending |
-| DISC-03 | Phase 21 | Pending |
-| DISC-04 | Phase 21 | Pending |
+| DISC-01 | Phase 21 | Completed |
+| DISC-02 | Phase 21 | Completed |
+| DISC-03 | Phase 21 | Completed |
+| DISC-04 | Phase 21 | Completed |
 | ARCH-01 | Phase 22 | Pending |
 | ARCH-02 | Phase 22 | Pending |
 | ARCH-03 | Phase 22 | Pending |
@@ -221,4 +221,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-21*
-*Last updated: 2026-04-27 after defining v1.2 backend deployment strategy requirements*
+*Last updated: 2026-04-27 after completing Phase 21 backend runtime inventory and drift reconciliation*

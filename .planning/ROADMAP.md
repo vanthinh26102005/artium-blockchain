@@ -28,7 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 18: Seller auction access and artwork eligibility policy** - Define and enforce seller-only access plus own-inventory eligibility before auction setup
 - [x] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
 - [ ] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers
-- [ ] **Phase 21: Backend Runtime Inventory & Drift Reconciliation** - Build the authoritative backend runtime map from code, Compose, Dockerfiles, env files, and legacy K8s artifacts
+- [x] **Phase 21: Backend Runtime Inventory & Drift Reconciliation** - Build the authoritative backend runtime map from code, Compose, Dockerfiles, env files, and legacy K8s artifacts
 - [ ] **Phase 22: Service Architecture & Dependency Risk Analysis** - Classify backend services, communication paths, and production risks in the current design
 - [ ] **Phase 23: Kubernetes Platform Topology & Workload Design** - Define cluster topology, workload kinds, exposure rules, config/secrets, probes, and scaling boundaries
 - [ ] **Phase 24: Docker Build, Image Lifecycle & CI/CD Strategy** - Define production image standards and the release pipeline that builds, scans, tags, migrates, and deploys them
@@ -397,9 +397,9 @@ Plans:
 **UI hint**: no
 
 Plans:
-- [ ] 21-01 Runtime workload inventory and workload classification
-- [ ] 21-02 Dependency, environment, and external-integration inventory
-- [ ] 21-03 Runtime drift audit and Phase 22 handoff synthesis
+- [x] 21-01 Runtime workload inventory and workload classification
+- [x] 21-02 Dependency, environment, and external-integration inventory
+- [x] 21-03 Runtime drift audit and Phase 22 handoff synthesis
 
 ### Phase 22: Service Architecture & Dependency Risk Analysis
 

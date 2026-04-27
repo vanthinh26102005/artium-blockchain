@@ -29,3 +29,4 @@ yarn.lock
 
 # Documentation files (local only)
 docs/Huonghan-Doan-New.pdf
+.env.compose

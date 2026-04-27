@@ -3,23 +3,23 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Backend Deployment Strategy
 status: planning
-stopped_at: Phase 21 plans verified
-last_updated: "2026-04-27T10:33:50.025Z"
-last_activity: 2026-04-27 - Planned and verified Phase 21 Backend Runtime Inventory & Drift Reconciliation.
+stopped_at: Phase 21 completed; ready to plan Phase 22
+last_updated: "2026-04-27T11:50:52Z"
+last_activity: 2026-04-27 - Completed Phase 21 Backend Runtime Inventory & Drift Reconciliation and prepared the Phase 22 handoff.
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_plans: 3
+  percent: 20
 ---
 
 ## Current Position
 
-Phase: 21 (Backend Runtime Inventory & Drift Reconciliation) — PLANNED
-Plan: 3 plans created
-Status: Phase 21 plans verified; ready for execution
-Last activity: 2026-04-27 - Planned and verified Phase 21 Backend Runtime Inventory & Drift Reconciliation.
+Phase: 22 (Service Architecture & Dependency Risk Analysis) — NEXT
+Plan: Not planned yet
+Status: Phase 21 completed; ready to plan Phase 22
+Last activity: 2026-04-27 - Completed Phase 21 Backend Runtime Inventory & Drift Reconciliation and prepared the Phase 22 handoff.
 
 ## Decisions
 
@@ -39,10 +39,12 @@ Last activity: 2026-04-27 - Planned and verified Phase 21 Backend Runtime Invent
 - Backend deployment planning must reconcile code, Compose, Dockerfiles, env files, and legacy K8s artifacts before proposing topology.
 - Treat current Kubernetes YAML as development-era topology evidence, not as production-ready deployment truth.
 - Prefer managed stateful dependencies over in-cluster defaults unless the milestone analysis surfaces a strong reason to self-host them.
+- Treat the Phase 21 artifact set (`21-01` through `21-03`) as the authoritative baseline for Phase 22 rather than re-deriving current state from legacy Kubernetes YAML.
+- Keep gateway/service transport mismatches and partial isolated-database wiring as unresolved architecture inputs until Phase 22 classifies them.
 
 ## Last Session
 
-Stopped at: Phase 21 plans verified
+Stopped at: Phase 21 completed; ready to plan Phase 22
 
 ## Accumulated Context
 
@@ -77,3 +79,4 @@ Stopped at: Phase 21 plans verified
 **Planned Phase:** 24 (Docker build, image lifecycle, and CI/CD strategy) — roadmap approved — 2026-04-27T10:33:50.025Z
 **Planned Phase:** 25 (Production operations blueprint and final deployment artifacts) — roadmap approved — 2026-04-27T10:33:50.025Z
 **Planned Phase:** 21 (Backend Runtime Inventory & Drift Reconciliation) — 3 plans verified — 2026-04-27T10:33:50.025Z
+**Completed Phase:** 21 (Backend Runtime Inventory & Drift Reconciliation) — 3 plans — 2026-04-27T11:50:52Z
