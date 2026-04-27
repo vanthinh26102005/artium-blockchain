@@ -166,6 +166,7 @@ workers:
 
 config:
   dbStrategy: SHARED
+  dbSynchronize: "false"
   nodeEnv: production
   rabbitmq:
     host: artium-backend-rabbitmq

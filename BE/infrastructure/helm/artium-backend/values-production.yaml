@@ -19,6 +19,9 @@ networkPolicy:
 imagePullSecrets:
   - name: ghcr-pull-secret
 
+config:
+  dbSynchronize: "true"
+
 images:
   api-gateway:
     repository: ghcr.io/nouu188/api-gateway

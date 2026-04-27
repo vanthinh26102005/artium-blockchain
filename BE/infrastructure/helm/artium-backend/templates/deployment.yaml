@@ -68,11 +68,13 @@ spec:
                 configMapKeyRef:
                   name: {{ include "artium-backend.fullname" $ }}-runtime
                   key: REDIS_PORT
-            - name: RABBITMQ_URI
+            - name: RABBITMQ_PASSWORD
               valueFrom:
-                configMapKeyRef:
-                  name: {{ include "artium-backend.fullname" $ }}-runtime
-                  key: RABBITMQ_URI
+                secretKeyRef:
+                  name: {{ $.Values.sealedSecrets.name | quote }}
+                  key: {{ $.Values.rabbitmq.auth.existingSecretPasswordKey | quote }}
+            - name: RABBITMQ_URI
+              value: {{ printf "amqp://%s:$(RABBITMQ_PASSWORD)@%s:%v" $.Values.rabbitmq.auth.username $.Values.config.rabbitmq.host $.Values.config.rabbitmq.port | quote }}
             - name: OUTBOX_PROCESSOR_ENABLED
               value: "false"
             - name: BLOCKCHAIN_LISTENER_ENABLED
