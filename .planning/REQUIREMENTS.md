@@ -75,6 +75,59 @@ Milestone focus: seller-only auction creation from owned inventory with practica
 - [ ] **SAUC-08**: Backend can persist the auction start across on-chain and off-chain state so public `GET /auctions` and seller inventory/order views reflect the new auction without mock data.
 - [ ] **SAUC-09**: Sellers can monitor auction start status across pending, active, failed, and retryable states with tx hash, reason codes, and recovery paths that do not duplicate auctions.
 
+## v1.2 Requirements
+
+Milestone focus: production-grade backend deployment strategy grounded in the real backend runtime, not in stale or purely theoretical infrastructure diagrams.
+
+### Discovery & Runtime Truth
+
+- [ ] **DISC-01**: Developers can inventory every backend workload, its real ports, startup command, and environment source from code, Dockerfiles, and Compose.
+- [ ] **DISC-02**: Developers can map every internal and external dependency, including PostgreSQL, Redis, RabbitMQ, Mailhog, GCS, Stripe, SMTP, and blockchain RPC.
+- [ ] **DISC-03**: Developers can identify drift between Dockerfiles, compose files, env defaults, `main.ts`, and legacy Kubernetes manifests before proposing production topology.
+- [ ] **DISC-04**: Developers can distinguish stateless APIs, TCP-only services, websocket workloads, stateful systems, and singleton/background processes in the current backend.
+
+### Architecture Analysis
+
+- [ ] **ARCH-01**: Developers can classify each backend service by role and map the full dependency graph.
+- [ ] **ARCH-02**: Developers can explain the current communication paths across gateway TCP calls, RabbitMQ events/outbox, websocket traffic, and external callbacks/webhooks.
+- [ ] **ARCH-03**: Developers can identify scalability and reliability concerns tied to the current design, including schema-sync assumptions, in-process schedulers/listeners, shallow probes, and config drift.
+- [ ] **ARCH-04**: Developers can identify legacy or over-engineered deployment artifacts that should not be mirrored into production unchanged.
+
+### Kubernetes Design
+
+- [ ] **K8S-01**: DevOps engineers can decide what belongs in Kubernetes versus managed external services for this backend, with explicit rationale.
+- [ ] **K8S-02**: DevOps engineers can define namespace, workload, service exposure, and ingress strategy that fits the actual backend topology.
+- [ ] **K8S-03**: DevOps engineers can define replica, health/readiness/startup, resource, and autoscaling policies by workload class.
+- [ ] **K8S-04**: DevOps engineers can define config, secret, and network-boundary strategy with least-privilege defaults.
+
+### Docker & Release Strategy
+
+- [ ] **DOCK-01**: DevOps engineers can build immutable production images using optimized multi-stage builds and runtime-safe defaults.
+- [ ] **DOCK-02**: DevOps engineers can version and promote images with reproducible tags or digests and rollback-friendly release metadata.
+- [ ] **DOCK-03**: DevOps engineers can eliminate development-only container behavior from the production deployment design.
+
+### Operations & Delivery
+
+- [ ] **OPS-01**: Teams can run a CI/CD pipeline that builds, tests, scans, publishes, migrates, and deploys the backend safely.
+- [ ] **OPS-02**: Operators can observe backend health through practical logging, metrics, and tracing recommendations tied to HTTP, RabbitMQ, and blockchain/payment flows.
+- [ ] **OPS-03**: Operators can recover from pod, node, dependency, or rollout failures using defined backup, restore, and rollback procedures.
+- [ ] **OPS-04**: Operators can scale stateless services without duplicating singleton/background responsibilities such as outbox publishing or blockchain listeners.
+- [ ] **OPS-05**: Operators can protect sensitive credentials and raw-body webhook paths in production without breaking Stripe or blockchain integrations.
+
+### Delivery Artifacts
+
+- [ ] **DELV-01**: Stakeholders can review a text-based architecture diagram of the current and recommended production topology.
+- [ ] **DELV-02**: Stakeholders can follow a step-by-step deployment plan from cluster bootstrap through backend rollout.
+- [ ] **DELV-03**: Stakeholders can inspect sample Kubernetes manifests aligned to the recommended architecture.
+- [ ] **DELV-04**: Stakeholders can review a risk register with practical mitigations for brownfield adoption.
+
+### v1.2 Out of Scope
+
+- **Full infrastructure implementation in this milestone**: This milestone defines the production strategy and artifacts, not the final cluster rollout.
+- **Service-mesh adoption**: Adds complexity before the backend runtime contract is fully stabilized.
+- **Multi-region or multi-cluster disaster-tolerant architecture**: Too large for the first production deployment strategy milestone.
+- **Database re-architecture beyond what is necessary to choose a production operating model**: The goal is deployment strategy, not a full persistence redesign.
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -136,12 +189,36 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAUC-07 | Phase 20 | Pending |
 | SAUC-08 | Phase 20 | Pending |
 | SAUC-09 | Phase 20 | Pending |
+| DISC-01 | Phase 21 | Pending |
+| DISC-02 | Phase 21 | Pending |
+| DISC-03 | Phase 21 | Pending |
+| DISC-04 | Phase 21 | Pending |
+| ARCH-01 | Phase 22 | Pending |
+| ARCH-02 | Phase 22 | Pending |
+| ARCH-03 | Phase 22 | Pending |
+| ARCH-04 | Phase 22 | Pending |
+| K8S-01 | Phase 23 | Pending |
+| K8S-02 | Phase 23 | Pending |
+| K8S-03 | Phase 23 | Pending |
+| K8S-04 | Phase 23 | Pending |
+| DOCK-01 | Phase 24 | Pending |
+| DOCK-02 | Phase 24 | Pending |
+| DOCK-03 | Phase 24 | Pending |
+| OPS-01 | Phase 24 | Pending |
+| OPS-02 | Phase 25 | Pending |
+| OPS-03 | Phase 25 | Pending |
+| OPS-04 | Phase 25 | Pending |
+| OPS-05 | Phase 25 | Pending |
+| DELV-01 | Phase 25 | Pending |
+| DELV-02 | Phase 25 | Pending |
+| DELV-03 | Phase 25 | Pending |
+| DELV-04 | Phase 25 | Pending |
 
 **Coverage:**
-- v1 + v1.1 requirements: 34 total
-- Mapped to phases: 34 ✓
+- v1 + v1.1 + v1.2 requirements: 58 total
+- Mapped to phases: 58 ✓
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-21*
-*Last updated: 2026-04-27 after milestone gap planning for seller auction creation*
+*Last updated: 2026-04-27 after defining v1.2 backend deployment strategy requirements*

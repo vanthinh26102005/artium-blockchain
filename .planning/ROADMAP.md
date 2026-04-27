@@ -1,8 +1,10 @@
-# Roadmap: Artium Frontend Component Standardization
+# Roadmap: Artium Blockchain Marketplace
 
 ## Overview
 
-This milestone standardizes the frontend component layer domain-by-domain, starting with the infrastructure that makes safe migration possible (audit, barrel exports, prop contracts, regression tooling), then building the shared form primitives that every domain will delegate to, and finally migrating each domain in ROI order: highest-duplication form domains first (auth, checkout, quick-sell), then library-retirement domains (profile, events), then structural consolidation of modals and display components. Every phase preserves existing UI and behavior exactly — no visual or behavioral changes ship.
+This roadmap tracks sequential milestone work across the Artium platform. Earlier phases covered frontend standardization, checkout/order flows, and seller auction creation.
+
+The current v1.2 milestone shifts to the backend platform: first inventory the real runtime contract in `BE\`, then analyze service architecture and dependency risks, then design a production-grade Kubernetes and Docker operating model, and finally package CI/CD, observability, recovery, and deployment artifacts into an opinionated rollout blueprint.
 
 ## Phases
 
@@ -26,6 +28,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 18: Seller auction access and artwork eligibility policy** - Define and enforce seller-only access plus own-inventory eligibility before auction setup
 - [x] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
 - [ ] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers
+- [ ] **Phase 21: Backend Runtime Inventory & Drift Reconciliation** - Build the authoritative backend runtime map from code, Compose, Dockerfiles, env files, and legacy K8s artifacts
+- [ ] **Phase 22: Service Architecture & Dependency Risk Analysis** - Classify backend services, communication paths, and production risks in the current design
+- [ ] **Phase 23: Kubernetes Platform Topology & Workload Design** - Define cluster topology, workload kinds, exposure rules, config/secrets, probes, and scaling boundaries
+- [ ] **Phase 24: Docker Build, Image Lifecycle & CI/CD Strategy** - Define production image standards and the release pipeline that builds, scans, tags, migrates, and deploys them
+- [ ] **Phase 25: Production Operations Blueprint & Final Deployment Artifacts** - Finalize observability, recovery, risk mitigation, manifests, architecture diagram, and deployment plan
 
 ## Phase Details
 
@@ -174,7 +181,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Milestone v1.2 proceeds 21 → 22 → 23 → 24 → 25.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -200,6 +207,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 19. Seller auction creation workspace and terms UX | 3/3 | Completed | 2026-04-27 |
 | 19.1. Seller auction artifact recovery and policy alignment | 3/3 | Completed | 2026-04-27 |
 | 20. Auction start orchestration and seller lifecycle status | 0/TBD | Not started | - |
+| 21. Backend Runtime Inventory & Drift Reconciliation | 0/TBD | Not started | - |
+| 22. Service Architecture & Dependency Risk Analysis | 0/TBD | Not started | - |
+| 23. Kubernetes Platform Topology & Workload Design | 0/TBD | Not started | - |
+| 24. Docker Build, Image Lifecycle & CI/CD Strategy | 0/TBD | Not started | - |
+| 25. Production Operations Blueprint & Final Deployment Artifacts | 0/TBD | Not started | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -370,3 +382,69 @@ Plans:
   5. Developer can confirm the public `/auction` listing and seller inventory/order views reflect the new auction through backend state, not optimistic frontend-only mutation.
 **Plans**: TBD
 **UI hint**: yes
+
+### Phase 21: Backend Runtime Inventory & Drift Reconciliation
+
+**Goal:** Establish the authoritative backend runtime contract from code, Compose, Dockerfiles, env files, and legacy Kubernetes artifacts so later deployment design is based on reality instead of stale assumptions.
+**Depends on:** Phase 20
+**Requirements**: DISC-01, DISC-02, DISC-03, DISC-04
+**Success Criteria** (what must be TRUE):
+  1. Developer can review a single backend inventory covering every workload, real HTTP/TCP ports, startup command, env source, and current runtime mode.
+  2. Developer can distinguish HTTP+TCP services, TCP-only services, websocket-enabled workloads, stateful dependencies, and orphaned or legacy artifacts.
+  3. Developer can review a dependency map covering PostgreSQL, Redis, RabbitMQ, Mailhog, GCS, Stripe, SMTP, blockchain RPC, and mounted credential files.
+  4. Developer can point to concrete drift between `main.ts`, `.env.compose`, Dockerfiles, Compose, and legacy K8s YAML before any production topology is proposed.
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 22: Service Architecture & Dependency Risk Analysis
+
+**Goal:** Turn the backend inventory into an architecture model that explains service roles, communication paths, coupling, and the highest-risk production concerns.
+**Depends on:** Phase 21
+**Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04
+**Success Criteria** (what must be TRUE):
+  1. Developer can classify each backend service by role, including gateway, API+TCP service, TCP-only service, websocket workload, and infrastructure component.
+  2. Developer can review communication flows across gateway TCP clients, RabbitMQ outbox/event paths, websocket messaging, and webhook/external-provider callbacks.
+  3. Developer can review a concrete list of current scalability and reliability concerns with evidence from code or runtime configuration.
+  4. Developer can distinguish production-worthy architecture from dev-only or legacy artifacts that should not be mirrored directly into Kubernetes.
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 23: Kubernetes Platform Topology & Workload Design
+
+**Goal:** Define the production Kubernetes operating model for the backend, including cluster boundaries, workload kinds, service exposure, probes, config/secrets, and scaling policies.
+**Depends on:** Phase 22
+**Requirements**: K8S-01, K8S-02, K8S-03, K8S-04
+**Success Criteria** (what must be TRUE):
+  1. DevOps engineer can see an explicit decision for each workload or dependency: in Kubernetes, managed external service, or excluded from production topology.
+  2. DevOps engineer can inspect namespace, Service, Ingress, and workload-kind decisions that fit the actual backend shape instead of the local Compose layout.
+  3. DevOps engineer can inspect health/readiness/startup, resource, and autoscaling guidance tailored to stateless APIs, TCP-only services, websocket workloads, and singleton/background processors.
+  4. DevOps engineer can inspect config, secret, and network-boundary rules that protect Stripe webhook handling and sensitive blockchain credentials.
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 24: Docker Build, Image Lifecycle & CI/CD Strategy
+
+**Goal:** Define how backend workloads are built, versioned, promoted, and deployed as immutable production images with a repeatable CI/CD pipeline.
+**Depends on:** Phase 23
+**Requirements**: DOCK-01, DOCK-02, DOCK-03, OPS-01
+**Success Criteria** (what must be TRUE):
+  1. DevOps engineer can inspect a production image standard that replaces dev-time bind mounts, hot reload, and mutable `/app` assumptions with immutable runtime images.
+  2. DevOps engineer can inspect image tagging and promotion rules that support reproducible releases and rollback by version or digest.
+  3. DevOps engineer can inspect a CI/CD pipeline design covering build, test, scan, publish, migration, deploy, and rollback checkpoints.
+  4. DevOps engineer can distinguish which current Dockerfile and K8s behaviors are reusable and which must be rewritten for production.
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 25: Production Operations Blueprint & Final Deployment Artifacts
+
+**Goal:** Package the final production operating guidance, observability and recovery strategy, architecture diagram, deployment plan, sample manifests, and risk mitigations into one coherent deployment blueprint.
+**Depends on:** Phase 24
+**Requirements**: OPS-02, OPS-03, OPS-04, OPS-05, DELV-01, DELV-02, DELV-03, DELV-04
+**Success Criteria** (what must be TRUE):
+  1. Stakeholder can review a text-based architecture diagram that reflects both the current backend topology and the recommended production topology.
+  2. Operator can follow an end-to-end deployment plan from cluster/bootstrap prerequisites through service rollout and verification.
+  3. Operator can inspect sample Kubernetes manifests for ingress, deployment, service, and supporting config/secret patterns aligned to the recommended design.
+  4. Operator can review observability, recovery, and scaling guidance that addresses outbox processors, blockchain listeners, Stripe webhooks, and brownfield operational risks.
+  5. Stakeholder can review a concise risk register with practical mitigations for the highest-risk deployment gaps.
+**Plans**: TBD
+**UI hint**: no
