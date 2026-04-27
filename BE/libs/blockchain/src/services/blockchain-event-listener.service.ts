@@ -208,6 +208,16 @@ export class BlockchainEventListenerService
   // ── Lifecycle ──────────────────────────────────────
 
   async onModuleInit() {
+    const isEnabled = (process.env.BLOCKCHAIN_LISTENER_ENABLED ?? 'true')
+      .trim()
+      .toLowerCase();
+    if (isEnabled === 'false') {
+      this.logger.log(
+        'BlockchainEventListenerService disabled by BLOCKCHAIN_LISTENER_ENABLED=false',
+      );
+      return;
+    }
+
     this.logger.log('Starting blockchain event listeners...');
 
     const network = await this.provider.getNetwork();
