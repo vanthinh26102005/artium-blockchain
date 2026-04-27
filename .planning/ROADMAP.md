@@ -39,7 +39,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Developer can reference a locked TypeScript prop interface for every shared form component before a single line of implementation is written
   4. Developer can run a deterministic before/after screenshot diff on any form field surface and detect pixel-level visual differences prior to committing
   5. Developer can consult a design token audit that maps every CSS variable (`--destructive`, `--muted-foreground`, etc.) to its resolved hex value, confirming which domains use semantic tokens vs. literal hex
-**Plans**: TBD
+**Plans**: `20-01-PLAN.md`, `20-02-PLAN.md`, `20-03-PLAN.md`, `20-04-PLAN.md`
 **UI hint**: yes
 
 ### Phase 2: Shared Component Layer
