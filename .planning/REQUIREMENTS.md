@@ -81,10 +81,10 @@ Milestone focus: production-grade backend deployment strategy grounded in the re
 
 ### Discovery & Runtime Truth
 
-- [ ] **DISC-01**: Developers can inventory every backend workload, its real ports, startup command, and environment source from code, Dockerfiles, and Compose.
-- [ ] **DISC-02**: Developers can map every internal and external dependency, including PostgreSQL, Redis, RabbitMQ, Mailhog, GCS, Stripe, SMTP, and blockchain RPC.
-- [ ] **DISC-03**: Developers can identify drift between Dockerfiles, compose files, env defaults, `main.ts`, and legacy Kubernetes manifests before proposing production topology.
-- [ ] **DISC-04**: Developers can distinguish stateless APIs, TCP-only services, websocket workloads, stateful systems, and singleton/background processes in the current backend.
+- [x] **DISC-01**: Developers can inventory every backend workload, its real ports, startup command, and environment source from code, Dockerfiles, and Compose.
+- [x] **DISC-02**: Developers can map every internal and external dependency, including PostgreSQL, Redis, RabbitMQ, Mailhog, GCS, Stripe, SMTP, and blockchain RPC.
+- [x] **DISC-03**: Developers can identify drift between Dockerfiles, compose files, env defaults, `main.ts`, and legacy Kubernetes manifests before proposing production topology.
+- [x] **DISC-04**: Developers can distinguish stateless APIs, TCP-only services, websocket workloads, stateful systems, and singleton/background processes in the current backend.
 
 ### Architecture Analysis
 
