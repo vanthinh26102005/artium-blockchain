@@ -1,6 +1,6 @@
 namespace:
   name: artium-prod
-  create: true
+  create: false
 
 ingress:
   enabled: true

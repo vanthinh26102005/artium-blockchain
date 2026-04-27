@@ -55,14 +55,22 @@ spec:
               containerPort: {{ . }}
             {{- end }}
           env:
+            {{- if ne $worker.enableFlag "OUTBOX_PROCESSOR_ENABLED" }}
             - name: OUTBOX_PROCESSOR_ENABLED
               value: "false"
+            {{- end }}
+            {{- if ne $worker.enableFlag "BLOCKCHAIN_LISTENER_ENABLED" }}
             - name: BLOCKCHAIN_LISTENER_ENABLED
               value: "false"
+            {{- end }}
+            {{- if ne $worker.enableFlag "ETHEREUM_CONFIRMATION_RETRY_ENABLED" }}
             - name: ETHEREUM_CONFIRMATION_RETRY_ENABLED
               value: "false"
+            {{- end }}
+            {{- if ne $worker.enableFlag "NOTIFICATION_PROCESSOR_ENABLED" }}
             - name: NOTIFICATION_PROCESSOR_ENABLED
               value: "false"
+            {{- end }}
             - name: {{ $worker.enableFlag }}
               value: "true"
             - name: DB_STRATEGY
