@@ -393,8 +393,13 @@ Plans:
   2. Developer can distinguish HTTP+TCP services, TCP-only services, websocket-enabled workloads, stateful dependencies, and orphaned or legacy artifacts.
   3. Developer can review a dependency map covering PostgreSQL, Redis, RabbitMQ, Mailhog, GCS, Stripe, SMTP, blockchain RPC, and mounted credential files.
   4. Developer can point to concrete drift between `main.ts`, `.env.compose`, Dockerfiles, Compose, and legacy K8s YAML before any production topology is proposed.
-**Plans**: TBD
+**Plans**: `.planning/phases/21-backend-runtime-inventory-and-drift-reconciliation/21-01-PLAN.md`, `.planning/phases/21-backend-runtime-inventory-and-drift-reconciliation/21-02-PLAN.md`, `.planning/phases/21-backend-runtime-inventory-and-drift-reconciliation/21-03-PLAN.md`
 **UI hint**: no
+
+Plans:
+- [ ] 21-01 Runtime workload inventory and workload classification
+- [ ] 21-02 Dependency, environment, and external-integration inventory
+- [ ] 21-03 Runtime drift audit and Phase 22 handoff synthesis
 
 ### Phase 22: Service Architecture & Dependency Risk Analysis
 
