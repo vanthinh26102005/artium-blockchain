@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 10: Checkout Traceability & Validation Closure** - Restore PAY/UX traceability and create the verification evidence needed for milestone re-audit
 - [ ] **Phase 11: Wallet Checkout Pay-Now Orchestration & Success Redirect** - Move wallet order creation/send flow behind the main Pay Now action and return successful wallet checkouts to the success screen
 - [x] **Phase 18: Seller auction access and artwork eligibility policy** - Define and enforce seller-only access plus own-inventory eligibility before auction setup
-- [ ] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
+- [x] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
 - [ ] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers
 
 ## Phase Details
@@ -329,17 +329,17 @@ Plans:
 **Depends on:** Phase 18
 **Success Criteria** (what must be TRUE):
   1. Developer can open a seller-only auction creation page, select an eligible artwork from inventory, and move into terms setup without using quick-sell invoice UI.
-  2. Developer can configure starting bid, optional reserve policy, minimum bid increment, duration/start/end timing, and shipping/payment disclosures with validation that prevents unsafe or ambiguous auction economics.
-  3. Developer can preview the final auction card and policy summary before submission, including artwork image/title, seller name, start/end timing, minimum bid, reserve disclosure, fees, and Sepolia/network expectations.
+  2. Developer can configure optional reserve policy, minimum bid increment, duration/start-end timing guidance, and shipping/payment disclosures with validation that prevents unsafe or ambiguous auction economics.
+  3. Developer can preview the final auction card and policy summary before submission, including artwork image/title, seller name, activation timing, first bid floor, reserve disclosure, and Sepolia/network expectations.
   4. Developer can see clear copy that auction economics become locked once the auction is active, with `Back`, `Save Draft`, and `Start Auction` actions behaving predictably.
   5. Developer can run frontend typecheck and targeted lint on the new auction creation workspace without introducing new form or route regressions.
 **Plans**: `.planning/phases/19-seller-auction-creation-workspace-and-terms-ux/19-01-PLAN.md`, `.planning/phases/19-seller-auction-creation-workspace-and-terms-ux/19-02-PLAN.md`, `.planning/phases/19-seller-auction-creation-workspace-and-terms-ux/19-03-PLAN.md`
 **UI hint**: yes
 
 Plans:
-- [ ] 19-01 Seller auction terms validation and local draft model
-- [ ] 19-02 Seller auction terms form and preview components
-- [ ] 19-03 Seller auction creation workspace integration
+- [x] 19-01 Seller auction terms validation and local draft model
+- [x] 19-02 Seller auction terms form and preview components
+- [x] 19-03 Seller auction creation workspace integration
 
 ### Phase 20: Auction start orchestration and seller lifecycle status
 
