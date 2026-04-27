@@ -72,6 +72,22 @@ export class EscrowContractService {
     return Number(fee);
   }
 
+  encodeCreateAuctionCalldata(
+    orderId: string,
+    duration: bigint,
+    reservePrice: bigint,
+    minBidIncrement: bigint,
+    ipfsHash: string,
+  ): string {
+    return this.contract.interface.encodeFunctionData('createAuction', [
+      orderId,
+      duration,
+      reservePrice,
+      minBidIncrement,
+      ipfsHash,
+    ]);
+  }
+
   async createAuction(
     orderId: string,
     duration: bigint,

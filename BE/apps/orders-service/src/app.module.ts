@@ -16,19 +16,23 @@ import {
   OrderItem,
   ShoppingCart,
   CartItem,
+  AuctionStartAttempt,
 } from './domain/entities';
 
 import {
+  IAuctionStartAttemptRepository,
   IOrderRepository,
   IOrderItemRepository,
 } from './domain/interfaces';
 
 import {
+  AuctionStartAttemptRepository,
   OrderRepository,
   OrderItemRepository,
 } from './infrastructure/repositories';
 
 import {
+  AttachSellerAuctionStartTxHandler,
   CreateOrderHandler,
   UpdateOrderStatusHandler,
   CancelOrderHandler,
@@ -43,6 +47,8 @@ import {
   GetOrderByIdHandler,
   GetOrderByOnChainIdHandler,
   GetOrderItemsHandler,
+  GetSellerAuctionStartStatusHandler,
+  StartSellerAuctionHandler,
 } from './application';
 
 import {
@@ -54,6 +60,8 @@ import { OrdersMicroserviceController } from './presentation/microservice';
 
 export const CommandHandlers = [
   CreateOrderHandler,
+  StartSellerAuctionHandler,
+  AttachSellerAuctionStartTxHandler,
   UpdateOrderStatusHandler,
   CancelOrderHandler,
   MarkShippedHandler,
@@ -70,11 +78,16 @@ export const QueryHandlers = [
   GetOrderByIdHandler,
   GetOrderByOnChainIdHandler,
   GetOrderItemsHandler,
+  GetSellerAuctionStartStatusHandler,
 ];
 
 export const Repositories = [
   { provide: IOrderRepository, useClass: OrderRepository },
   { provide: IOrderItemRepository, useClass: OrderItemRepository },
+  {
+    provide: IAuctionStartAttemptRepository,
+    useClass: AuctionStartAttemptRepository,
+  },
 ];
 
 export const Services = [
@@ -103,6 +116,7 @@ export const Controllers = [
       OrderItem,
       ShoppingCart,
       CartItem,
+      AuctionStartAttempt,
       OutboxEntity,
     ]),
 

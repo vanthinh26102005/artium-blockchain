@@ -5,3 +5,4 @@ export * from './GetArtworkOrderLocks.query.handler';
 export * from './GetOrderById.query.handler';
 export * from './GetOrderByOnChainId.query.handler';
 export * from './GetOrderItems.query.handler';
+export * from './GetSellerAuctionStartStatus.query.handler';

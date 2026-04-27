@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
+status: executing
 stopped_at: Phase 20 UI-SPEC approved
-last_updated: "2026-04-27T07:41:03.412Z"
-last_activity: 2026-04-27 - Completed Phase 19.1 Plan 03 verification recovery and traceability alignment.
+last_updated: "2026-04-27T07:53:20.331Z"
+last_activity: 2026-04-27 - Completed Phase 20 Plan 01 seller auction start contract and status persistence.
 progress:
   total_phases: 22
   completed_phases: 5
@@ -16,10 +16,10 @@ progress:
 
 ## Current Position
 
-Phase: 19.1 (Seller auction artifact recovery and policy alignment)
-Plan: 3 of 3 completed
-Status: Completed
-Last activity: 2026-04-27 - Completed Phase 19.1 Plan 03 verification recovery and traceability alignment.
+Phase: 20 (Auction start orchestration and seller lifecycle status) — EXECUTING
+Plan: 1 of 4 completed
+Status: Executing Phase 20
+Last activity: 2026-04-27 - Completed Phase 20 Plan 01 seller auction start contract and status persistence.
 
 ## Decisions
 
@@ -31,6 +31,7 @@ Last activity: 2026-04-27 - Completed Phase 19.1 Plan 03 verification recovery a
 - Standardized seller-auction helper copy to next phase so Start Auction stays clearly outside Phase 20 orchestration.
 - Use `19-VERIFICATION.md` as the durable SAUC-04 and SAUC-05 evidence artifact tied to current FE files and approved validation commands.
 - Mark only SAUC-10, SAUC-04, and SAUC-05 complete during 19.1 reconciliation; keep SAUC-06 through SAUC-09 pending for Phase 20.
+- Use gateway-side readiness aggregation plus orders-service canonical attempt persistence for seller auction start preflight in Phase 20.
 
 ## Last Session
 
