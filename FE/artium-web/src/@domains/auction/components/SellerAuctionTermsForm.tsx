@@ -19,6 +19,11 @@ type SellerAuctionTermsFormProps = {
   onSaveDraft: () => void
   onStartAttempt: () => void
   isStartDisabled: boolean
+  isLocked?: boolean
+  isBackDisabled?: boolean
+  isSaveDraftDisabled?: boolean
+  startButtonLabel?: string
+  supportingMessage?: string
 }
 
 type SellerAuctionTermsFieldName = keyof SellerAuctionTermsFormValues
@@ -40,6 +45,11 @@ export const SellerAuctionTermsForm = ({
   onSaveDraft,
   onStartAttempt,
   isStartDisabled,
+  isLocked = false,
+  isBackDisabled = false,
+  isSaveDraftDisabled = false,
+  startButtonLabel = 'Start Auction',
+  supportingMessage = 'Network gas is shown in MetaMask during activation.',
 }: SellerAuctionTermsFormProps) => {
   const [touchedFields, setTouchedFields] = useState<
     Partial<Record<SellerAuctionTermsFieldName, boolean>>
@@ -96,6 +106,7 @@ export const SellerAuctionTermsForm = ({
           <legend className={fieldLabelClass}>Reserve policy</legend>
           <RadioGroup
             value={values.reservePolicy}
+            disabled={isLocked}
             onValueChange={(nextValue) => {
               if (nextValue !== 'none' && nextValue !== 'set') {
                 return
@@ -143,6 +154,7 @@ export const SellerAuctionTermsForm = ({
                 }
                 onBlur={() => handleBlur('reservePriceEth')}
                 aria-invalid={shouldShowError('reservePriceEth')}
+                disabled={isLocked}
                 aria-describedby={
                   shouldShowError('reservePriceEth')
                     ? getFieldMessageId('reservePriceEth')
@@ -181,15 +193,14 @@ export const SellerAuctionTermsForm = ({
                 })
               }
               onBlur={() => handleBlur('minBidIncrementEth')}
-                aria-invalid={shouldShowError('minBidIncrementEth')}
-                aria-describedby={`seller-auction-min-bid-increment-helper seller-auction-min-bid-increment-note${
-                  shouldShowError('minBidIncrementEth')
-                    ? ` ${getFieldMessageId('minBidIncrementEth')}`
-                    : ''
-                }`}
-                className="h-12 rounded-[20px] border-[#E5E5E5] bg-white pr-14 text-sm text-[#191414] focus-visible:border-[#2351FC] focus-visible:ring-[#2351FC]/20"
-                placeholder="0.00"
-              />
+              aria-invalid={shouldShowError('minBidIncrementEth')}
+              disabled={isLocked}
+              aria-describedby={`seller-auction-min-bid-increment-helper seller-auction-min-bid-increment-note${
+                shouldShowError('minBidIncrementEth') ? ` ${getFieldMessageId('minBidIncrementEth')}` : ''
+              }`}
+              className="h-12 rounded-[20px] border-[#E5E5E5] bg-white pr-14 text-sm text-[#191414] focus-visible:border-[#2351FC] focus-visible:ring-[#2351FC]/20"
+              placeholder="0.00"
+            />
             <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-[#191414]/50">
               ETH
             </span>
@@ -213,11 +224,12 @@ export const SellerAuctionTermsForm = ({
           <div className="mt-4 flex flex-wrap gap-3">
             {SELLER_AUCTION_DURATION_PRESETS.map((preset) => (
               <button
-                key={preset.value}
-                type="button"
-                onClick={() =>
-                  handleValuesChange('durationPreset', { ...values, durationPreset: preset.value })
-                }
+                  key={preset.value}
+                  type="button"
+                  disabled={isLocked}
+                  onClick={() =>
+                    handleValuesChange('durationPreset', { ...values, durationPreset: preset.value })
+                  }
                 className={`rounded-[22px] border px-4 py-3 text-sm font-medium transition ${
                   values.durationPreset === preset.value
                     ? 'border-[#2351FC] bg-[#2351FC] text-white'
@@ -229,6 +241,7 @@ export const SellerAuctionTermsForm = ({
             ))}
               <button
                 type="button"
+                disabled={isLocked}
                 onClick={() => handleValuesChange('durationPreset', { ...values, durationPreset: 'custom' })}
                 className={`rounded-[22px] border px-4 py-3 text-sm font-medium transition ${
                   values.durationPreset === 'custom'
@@ -257,6 +270,7 @@ export const SellerAuctionTermsForm = ({
                 max="720"
                 step="1"
                 value={values.customDurationHours}
+                disabled={isLocked}
                 onChange={(event) =>
                   handleValuesChange('customDurationHours', {
                     ...values,
@@ -289,6 +303,7 @@ export const SellerAuctionTermsForm = ({
           <Textarea
             id="seller-auction-shipping-disclosure"
             value={values.shippingDisclosure}
+            disabled={isLocked}
             onChange={(event) =>
               handleValuesChange('shippingDisclosure', {
                 ...values,
@@ -319,6 +334,7 @@ export const SellerAuctionTermsForm = ({
           <Textarea
             id="seller-auction-payment-disclosure"
             value={values.paymentDisclosure}
+            disabled={isLocked}
             onChange={(event) =>
               handleValuesChange('paymentDisclosure', {
                 ...values,
@@ -347,6 +363,7 @@ export const SellerAuctionTermsForm = ({
             <Checkbox
               id="seller-auction-economics-lock"
               checked={values.economicsLockedAcknowledged}
+              disabled={isLocked}
               onCheckedChange={(checked) =>
                 handleValuesChange('economicsLockedAcknowledged', {
                   ...values,
@@ -374,6 +391,7 @@ export const SellerAuctionTermsForm = ({
             type="button"
             variant="outline"
             onClick={onBack}
+            disabled={isBackDisabled}
             className={actionButtonClass}
           >
             Back to artwork
@@ -382,6 +400,7 @@ export const SellerAuctionTermsForm = ({
             type="button"
             variant="outline"
             onClick={onSaveDraft}
+            disabled={isSaveDraftDisabled}
             className={actionButtonClass}
           >
             Save Draft
@@ -394,10 +413,10 @@ export const SellerAuctionTermsForm = ({
             disabled={isStartDisabled}
             className="w-full bg-[#191414] text-white hover:bg-[#2351FC]"
           >
-            Start Auction
+            {startButtonLabel}
           </Button>
           <p className="mt-3 text-sm leading-6 text-[#191414]/60">
-            Auction start connects to wallet and backend orchestration in the next phase.
+            {supportingMessage}
           </p>
         </div>
       </div>

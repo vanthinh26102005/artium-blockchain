@@ -11,6 +11,7 @@ type SellerAuctionTermsPreviewProps = {
   candidate: SellerAuctionArtworkCandidate
   values: SellerAuctionTermsFormValues
   isTermsValid: boolean
+  mode?: 'draft' | 'submitted'
 }
 
 const formatDurationLabel = (values: SellerAuctionTermsFormValues) => {
@@ -61,6 +62,7 @@ export const SellerAuctionTermsPreview = ({
   candidate,
   values,
   isTermsValid,
+  mode = 'draft',
 }: SellerAuctionTermsPreviewProps) => {
   const durationLabel = formatDurationLabel(values)
   const reserveCopy =
@@ -70,7 +72,12 @@ export const SellerAuctionTermsPreview = ({
 
   return (
     <aside className="rounded-[32px] border border-black/10 bg-white p-6 md:p-8 lg:sticky lg:top-8">
-      <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[#191414]">Auction preview</h2>
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2351FC]">
+        {mode === 'submitted' ? 'Submitted snapshot' : 'Auction preview'}
+      </p>
+      <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#191414]">
+        {mode === 'submitted' ? 'Submitted auction snapshot' : 'Auction preview'}
+      </h2>
 
       <div className="mt-6 overflow-hidden rounded-[28px] border border-[#E5E5E5] bg-[#FDFDFD]">
         {candidate.thumbnailUrl ? (
@@ -170,7 +177,10 @@ export const SellerAuctionTermsPreview = ({
           <div className="space-y-3 border-t border-[#E5E5E5] pt-5">
             <ChecklistRow label="Eligible artwork selected" complete />
             <ChecklistRow label="Terms validated" complete={isTermsValid} />
-            <ChecklistRow label="Activation handled in next phase" complete />
+            <ChecklistRow
+              label={mode === 'submitted' ? 'Submitted snapshot locked' : 'Ready for wallet handoff'}
+              complete
+            />
           </div>
         </div>
       </div>

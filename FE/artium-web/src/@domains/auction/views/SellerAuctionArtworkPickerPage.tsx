@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import {
@@ -15,12 +15,19 @@ import { Button } from '@shared/components/ui/button'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import type { SellerAuctionArtworkCandidate } from '@shared/apis/auctionApis'
 import {
+  SellerAuctionStartStatusShell,
   SellerAuctionTermsForm,
   SellerAuctionTermsPreview,
 } from '../components'
+import { useSellerAuctionStart } from '../hooks/useSellerAuctionStart'
 import { useSellerAuctionArtworkCandidates } from '../hooks/useSellerAuctionArtworkCandidates'
 import {
+  submitSellerAuctionStartTransaction,
+} from '../services/auctionStartWallet'
+import {
   DEFAULT_SELLER_AUCTION_TERMS,
+  SELLER_AUCTION_DURATION_PRESETS,
+  getAuctionDurationHours,
   validateSellerAuctionTerms,
   type SellerAuctionTermsFormValues,
 } from '../validations/sellerAuctionTerms.schema'
@@ -249,18 +256,58 @@ const SellerCandidateWorkspace = () => {
   >({})
   const [hasSubmittedTerms, setHasSubmittedTerms] = useState(false)
   const [draftSaved, setDraftSaved] = useState(false)
+  const [walletError, setWalletError] = useState<string | null>(null)
+  const [isEditingFailedTerms, setIsEditingFailedTerms] = useState(false)
+
+  const sellerAuctionStart = useSellerAuctionStart({ artworkId: termsArtworkId })
+  const allCandidates = useMemo(() => [...eligible, ...blocked], [eligible, blocked])
+  const restoredCandidate = useMemo(() => {
+    if (currentStep !== 'artwork' || selectedArtworkId || !sellerAuctionStart.rememberedArtworkId) {
+      return null
+    }
+
+    return (
+      allCandidates.find(
+        (candidate) => candidate.artworkId === sellerAuctionStart.rememberedArtworkId,
+      ) ?? null
+    )
+  }, [allCandidates, currentStep, selectedArtworkId, sellerAuctionStart.rememberedArtworkId])
+  const activeArtworkId =
+    sellerAuctionStart.status?.artworkId ??
+    termsArtworkId ??
+    restoredCandidate?.artworkId ??
+    selectedArtworkId
+  const effectiveCurrentStep =
+    currentStep === 'terms' || sellerAuctionStart.status || restoredCandidate ? 'terms' : 'artwork'
 
   const selectedCandidate = useMemo(
+    () => allCandidates.find((candidate) => candidate.artworkId === activeArtworkId) ?? null,
+    [activeArtworkId, allCandidates],
+  )
+  const selectedEligibleCandidate = useMemo(
     () => eligible.find((candidate) => candidate.artworkId === selectedArtworkId) ?? null,
     [eligible, selectedArtworkId],
   )
 
   const hasNoArtworks = !isLoading && !error && data?.total === 0
   const hasNoEligible = !isLoading && !error && !hasNoArtworks && eligible.length === 0
+  const lifecycleStatus = sellerAuctionStart.status
+  const isFailureEditable =
+    lifecycleStatus?.status === 'start_failed' && lifecycleStatus.editAllowed && isEditingFailedTerms
+  const isLifecycleLocked = Boolean(
+    lifecycleStatus &&
+      !isFailureEditable &&
+      (lifecycleStatus.status === 'pending_start' ||
+        lifecycleStatus.status === 'auction_active' ||
+        lifecycleStatus.status === 'retry_available' ||
+        lifecycleStatus.status === 'start_failed'),
+  )
+  const shouldShowLifecycleShell = Boolean(lifecycleStatus && !isFailureEditable)
 
   const updateTermsValues = (nextValues: SellerAuctionTermsFormValues) => {
     setTermsValues(nextValues)
     setDraftSaved(false)
+    setWalletError(null)
 
     if (hasSubmittedTerms) {
       setTermsErrors(validateSellerAuctionTerms(nextValues))
@@ -276,22 +323,30 @@ const SellerCandidateWorkspace = () => {
   const handleSelectArtwork = (artworkId: string) => {
     setSelectedArtworkId(artworkId)
     setDraftSaved(false)
+    setWalletError(null)
+    setIsEditingFailedTerms(false)
+    if (lifecycleStatus?.artworkId !== artworkId) {
+      sellerAuctionStart.setTrackedArtworkId(null)
+    }
   }
 
   const handleContinueToTerms = () => {
-    if (!selectedCandidate) {
+    if (!selectedEligibleCandidate) {
       return
     }
 
-    if (termsArtworkId !== selectedCandidate.artworkId) {
+    if (termsArtworkId !== selectedEligibleCandidate.artworkId) {
       const nextValues =
-        loadSellerAuctionTermsDraft(selectedCandidate.artworkId) ?? DEFAULT_SELLER_AUCTION_TERMS
+        loadSellerAuctionTermsDraft(selectedEligibleCandidate.artworkId) ??
+        DEFAULT_SELLER_AUCTION_TERMS
 
-      setTermsArtworkId(selectedCandidate.artworkId)
+      setTermsArtworkId(selectedEligibleCandidate.artworkId)
       setTermsValues(nextValues)
       setTermsErrors({})
       setHasSubmittedTerms(false)
       setDraftSaved(false)
+      setWalletError(null)
+      setIsEditingFailedTerms(false)
     }
 
     setCurrentStep('terms')
@@ -300,10 +355,13 @@ const SellerCandidateWorkspace = () => {
 
   const handleBackToArtwork = () => {
     setCurrentStep('artwork')
+    setTermsArtworkId(null)
+    setIsEditingFailedTerms(false)
+    setWalletError(null)
   }
 
   const handleSaveDraft = () => {
-    if (!selectedCandidate) {
+    if (!selectedCandidate || isLifecycleLocked) {
       return
     }
 
@@ -311,12 +369,129 @@ const SellerCandidateWorkspace = () => {
     setDraftSaved(true)
   }
 
-  const handleStartAttempt = () => {
+  const mapSnapshotToFormValues = useCallback(
+    (snapshot: NonNullable<typeof lifecycleStatus>['submittedTermsSnapshot']) => {
+      const preset =
+        SELLER_AUCTION_DURATION_PRESETS.find((option) => option.hours === snapshot.durationHours)
+          ?.value ?? 'custom'
+
+      return {
+        reservePolicy: snapshot.reservePolicy,
+        reservePriceEth: snapshot.reservePriceEth ?? '',
+        minBidIncrementEth: snapshot.minBidIncrementEth,
+        durationPreset: preset,
+        customDurationHours: preset === 'custom' ? String(snapshot.durationHours) : '',
+        shippingDisclosure: snapshot.shippingDisclosure,
+        paymentDisclosure: snapshot.paymentDisclosure,
+        economicsLockedAcknowledged: snapshot.economicsLockedAcknowledged,
+      } satisfies SellerAuctionTermsFormValues
+    },
+    [],
+  )
+
+  const buildStartRequest = useCallback(
+    (artworkId: string, values: SellerAuctionTermsFormValues) => ({
+      artworkId,
+      reservePolicy: values.reservePolicy,
+      reservePriceEth:
+        values.reservePolicy === 'set' ? values.reservePriceEth.trim() || null : null,
+      minBidIncrementEth: values.minBidIncrementEth.trim(),
+      durationHours: getAuctionDurationHours(values) ?? 0,
+      shippingDisclosure: values.shippingDisclosure.trim(),
+      paymentDisclosure: values.paymentDisclosure.trim(),
+      economicsLockedAcknowledged: values.economicsLockedAcknowledged,
+    }),
+    [],
+  )
+
+  const runWalletHandoff = useCallback(
+    async (attempt: NonNullable<typeof lifecycleStatus>) => {
+      if (!attempt.transactionRequest) {
+        await sellerAuctionStart.refresh(attempt.artworkId)
+        return
+      }
+
+      setWalletError(null)
+
+      try {
+        const walletResult = await submitSellerAuctionStartTransaction({
+          transactionRequest: attempt.transactionRequest,
+        })
+
+        await sellerAuctionStart.attachTransaction(attempt.attemptId, {
+          walletAddress: walletResult.walletAddress,
+          txHash: walletResult.txHash,
+        })
+      } catch (nextError) {
+        const message =
+          nextError instanceof Error
+            ? nextError.message
+            : 'MetaMask could not continue the seller auction start.'
+        setWalletError(message)
+        await sellerAuctionStart.refresh(attempt.artworkId).catch(() => null)
+      }
+    },
+    [sellerAuctionStart],
+  )
+
+  const handleStartAttempt = async () => {
     setHasSubmittedTerms(true)
-    validateCurrentTerms()
+    setWalletError(null)
+
+    const nextErrors = validateCurrentTerms()
+    if (Object.keys(nextErrors).length > 0 || !selectedCandidate) {
+      return
+    }
+
+    try {
+      setIsEditingFailedTerms(false)
+      const response = await sellerAuctionStart.start(
+        buildStartRequest(selectedCandidate.artworkId, termsValues),
+      )
+      await runWalletHandoff(response)
+    } catch {
+      return
+    }
   }
 
-  const isTermsValid = Object.keys(validateSellerAuctionTerms(termsValues)).length === 0
+  const handleRetryStart = async () => {
+    if (!selectedCandidate) {
+      return
+    }
+
+    setWalletError(null)
+    try {
+      const response = await sellerAuctionStart.retry(
+        buildStartRequest(selectedCandidate.artworkId, termsValues),
+      )
+      await runWalletHandoff(response)
+    } catch {
+      return
+    }
+  }
+
+  const displayedTermsValues =
+    shouldShowLifecycleShell && lifecycleStatus
+      ? mapSnapshotToFormValues(lifecycleStatus.submittedTermsSnapshot)
+      : termsValues
+  const isTermsValid = Object.keys(validateSellerAuctionTerms(displayedTermsValues)).length === 0
+  const previewMode = isLifecycleLocked ? 'submitted' : 'draft'
+  const startButtonLabel = sellerAuctionStart.isStarting
+    ? 'Preparing auction...'
+    : lifecycleStatus?.status === 'pending_start'
+      ? 'Auction start in progress'
+      : lifecycleStatus?.status === 'auction_active'
+        ? 'Auction active'
+        : lifecycleStatus?.status === 'retry_available'
+          ? 'Retry from status shell'
+          : lifecycleStatus?.status === 'start_failed' && !isEditingFailedTerms
+            ? 'Review failure state above'
+            : 'Start Auction'
+  const supportingMessage = lifecycleStatus?.status === 'pending_start'
+    ? 'Do not submit again while auction start is in progress.'
+    : lifecycleStatus?.status === 'auction_active'
+      ? 'Reserve, increment, and duration cannot be edited after activation.'
+      : 'Network gas is shown in MetaMask during activation.'
 
   return (
     <main
@@ -341,17 +516,17 @@ const SellerCandidateWorkspace = () => {
           <div className="rounded-[32px] bg-[#191414] p-6 text-white">
             <p className="text-sm uppercase tracking-[0.2em] text-white/55">Phase 19 workspace</p>
             <div className="mt-5">
-              <StepRail currentStep={currentStep} />
+              <StepRail currentStep={effectiveCurrentStep} />
             </div>
 
-            {currentStep === 'artwork' ? (
+            {effectiveCurrentStep === 'artwork' ? (
               <>
                 <p className="mt-5 text-sm leading-6 text-white/75">
                   Select an eligible artwork to unlock local terms setup and buyer-facing preview.
                 </p>
                 <Button
                   type="button"
-                  disabled={!selectedCandidate}
+                  disabled={!selectedEligibleCandidate}
                   onClick={handleContinueToTerms}
                   className="mt-8 w-full bg-white text-[#191414] hover:bg-white/90 disabled:bg-white/25 disabled:text-white"
                 >
@@ -360,8 +535,8 @@ const SellerCandidateWorkspace = () => {
               </>
             ) : (
               <p className="mt-5 text-sm leading-6 text-white/75">
-                Review local terms, preview buyer-facing policy, and hand off activation to the
-                next phase.
+                Review submitted terms, MetaMask handoff, and persisted lifecycle status without
+                leaving this page.
               </p>
             )}
           </div>
@@ -399,8 +574,41 @@ const SellerCandidateWorkspace = () => {
         </section>
       ) : null}
 
-      {currentStep === 'terms' && selectedCandidate ? (
+      {effectiveCurrentStep === 'terms' && selectedCandidate ? (
         <section className="mt-10">
+          {shouldShowLifecycleShell && lifecycleStatus ? (
+            <div className="mb-6">
+              <SellerAuctionStartStatusShell
+                status={lifecycleStatus}
+                walletError={walletError || sellerAuctionStart.error}
+                isWalletActionLoading={
+                  sellerAuctionStart.isRetrying || sellerAuctionStart.isAttachingTx
+                }
+                onOpenMetaMask={() => void runWalletHandoff(lifecycleStatus)}
+                onRetry={() => void handleRetryStart()}
+                onBackToTerms={
+                  lifecycleStatus.editAllowed
+                    ? () => {
+                        setIsEditingFailedTerms(true)
+                        setWalletError(null)
+                        setTermsErrors({})
+                        setHasSubmittedTerms(false)
+                        setTermsValues(
+                          mapSnapshotToFormValues(lifecycleStatus.submittedTermsSnapshot),
+                        )
+                      }
+                    : undefined
+                }
+              />
+            </div>
+          ) : null}
+
+          {!shouldShowLifecycleShell && sellerAuctionStart.error ? (
+            <div className="mb-6 rounded-[24px] border border-[#FF4337]/20 bg-[#FFF5F4] px-4 py-3 text-sm text-[#FF4337]">
+              {sellerAuctionStart.error}
+            </div>
+          ) : null}
+
           <div className="rounded-[32px] border border-black/10 bg-white p-4 md:p-6">
             <div className="grid gap-5 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-center">
               <CandidateImage candidate={selectedCandidate} className="max-w-[160px]" />
@@ -419,7 +627,12 @@ const SellerCandidateWorkspace = () => {
                 </span>
               </div>
               <div className="md:justify-self-end">
-                <Button type="button" variant="outline" onClick={handleBackToArtwork}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBackToArtwork}
+                  disabled={isLifecycleLocked}
+                >
                   Change artwork
                 </Button>
               </div>
@@ -429,15 +642,20 @@ const SellerCandidateWorkspace = () => {
           <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
             <div>
               <SellerAuctionTermsForm
-                values={termsValues}
+                values={displayedTermsValues}
                 errors={termsErrors}
                 hasSubmitted={hasSubmittedTerms}
                 onChange={updateTermsValues}
                 onValidate={validateCurrentTerms}
                 onBack={handleBackToArtwork}
                 onSaveDraft={handleSaveDraft}
-                onStartAttempt={handleStartAttempt}
-                isStartDisabled={false}
+                onStartAttempt={() => void handleStartAttempt()}
+                isStartDisabled={sellerAuctionStart.isBusy || isLifecycleLocked}
+                isLocked={isLifecycleLocked}
+                isBackDisabled={isLifecycleLocked}
+                isSaveDraftDisabled={isLifecycleLocked}
+                startButtonLabel={startButtonLabel}
+                supportingMessage={supportingMessage}
               />
               {draftSaved ? (
                 <p className="mt-3 text-sm font-medium text-[#027A48]">Draft saved on this device.</p>
@@ -446,8 +664,9 @@ const SellerCandidateWorkspace = () => {
 
             <SellerAuctionTermsPreview
               candidate={selectedCandidate}
-              values={termsValues}
-              isTermsValid={isTermsValid}
+              values={displayedTermsValues}
+              isTermsValid={previewMode === 'submitted' ? true : isTermsValid}
+              mode={previewMode}
             />
           </div>
         </section>
