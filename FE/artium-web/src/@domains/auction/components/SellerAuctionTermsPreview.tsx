@@ -129,10 +129,23 @@ export const SellerAuctionTermsPreview = ({
             </div>
           </div>
 
+          <div className="rounded-[24px] border border-[#E5E5E5] bg-white px-4 py-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2351FC]">
+              Fees and activation costs
+            </p>
+            <div className="mt-3 space-y-2 text-sm leading-6 text-[#191414]/70">
+              <p>Marketplace seller fees follow current policy.</p>
+              <p>Network gas is shown in MetaMask during activation.</p>
+              <p>Sepolia is a test network. Confirm wallet and network details before activation.</p>
+              <p>Shipping and payment disclosures are shown to buyers before bidding.</p>
+            </div>
+          </div>
+
           <div className="rounded-[24px] bg-[#FFF7E6] px-4 py-4 text-sm text-[#7A4B00]">
             <p className="font-semibold text-[#191414]">Sepolia test network</p>
-            <p className="mt-2">MetaMask confirmation happens in the next step.</p>
-            <p className="mt-2">Reserve, increment, and duration lock after activation.</p>
+            <p className="mt-2">
+              Reserve, increment, and duration cannot be edited after activation.
+            </p>
           </div>
 
           <div className="space-y-4">
@@ -157,7 +170,7 @@ export const SellerAuctionTermsPreview = ({
           <div className="space-y-3 border-t border-[#E5E5E5] pt-5">
             <ChecklistRow label="Eligible artwork selected" complete />
             <ChecklistRow label="Terms validated" complete={isTermsValid} />
-            <ChecklistRow label="Activation handled in next step" complete />
+            <ChecklistRow label="Activation handled in next phase" complete />
           </div>
         </div>
       </div>
