@@ -65,8 +65,8 @@ Milestone focus: seller-only auction creation from owned inventory with practica
 
 ### Auction Terms & Policy
 
-- [ ] **SAUC-04**: Sellers can configure auction terms with validated starting bid, optional reserve policy, minimum bid increment, duration/start/end timing, and shipping/payment disclosures before starting the auction.
-- [ ] **SAUC-05**: Sellers can preview the final auction card and policy summary before submission, including fees, irreversibility after activation, Sepolia/network expectations, and buyer-facing disclosures.
+- [x] **SAUC-04**: Sellers can configure auction terms with validated starting bid, optional reserve policy, minimum bid increment, duration/start/end timing, and shipping/payment disclosures before starting the auction.
+- [x] **SAUC-05**: Sellers can preview the final auction card and policy summary before submission, including fees, irreversibility after activation, Sepolia/network expectations, and buyer-facing disclosures.
 - [ ] **SAUC-06**: Sellers cannot edit unsafe auction economics after activation; only explicitly safe lifecycle actions remain available according to auction state.
 
 ### Auction Start & Lifecycle Truth

@@ -198,7 +198,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 18. Seller auction access and artwork eligibility policy | 3/3 | Completed | 2026-04-25 |
 | 18.1. Seller registration and role activation gap closure | 1/1 | Completed | 2026-04-25 |
 | 19. Seller auction creation workspace and terms UX | 3/3 | Completed | 2026-04-27 |
-| 19.1. Seller auction artifact recovery and policy alignment | 0/TBD | Not started | - |
+| 19.1. Seller auction artifact recovery and policy alignment | 1/3 | In progress | 2026-04-27 |
 | 20. Auction start orchestration and seller lifecycle status | 0/TBD | Not started | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
