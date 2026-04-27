@@ -1,10 +1,11 @@
 ---
 phase: 20
 slug: auction-start-orchestration-and-seller-lifecycle-status
-status: draft
+status: approved
 shadcn_initialized: partial-local
 preset: radix-lyra / Artium seller workspace
 created: 2026-04-27
+reviewed_at: 2026-04-27T00:00:00Z
 ---
 
 # Phase 20 — UI Design Contract
@@ -57,6 +58,8 @@ created: 2026-04-27
 - Failure / retry callout with reason code
 - Active success summary card
 - Seller lifecycle badge for inventory/order surfaces
+
+The inline lifecycle status shell is the primary visual anchor on `/artist/auctions/create` once submission begins, ahead of the locked form and preview rail.
 
 ---
 
@@ -189,6 +192,8 @@ Rules:
 | Inventory / order convergence | Seller inventory and seller order surfaces must render backend-provided lifecycle badges. Do not manually inject an optimistic active auction card into these views. |
 | Public convergence | The public auction listing may render the auction only after backend state reports it active. Pending, failed, and retryable starts stay seller-only. |
 
+If copy, explorer, or transaction actions use icons in execution, they must also render visible text labels or an explicit accessible-name fallback.
+
 ---
 
 ## Registry Safety
@@ -202,11 +207,11 @@ Rules:
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-04-27
