@@ -88,10 +88,10 @@ Milestone focus: production-grade backend deployment strategy grounded in the re
 
 ### Architecture Analysis
 
-- [ ] **ARCH-01**: Developers can classify each backend service by role and map the full dependency graph.
-- [ ] **ARCH-02**: Developers can explain the current communication paths across gateway TCP calls, RabbitMQ events/outbox, websocket traffic, and external callbacks/webhooks.
-- [ ] **ARCH-03**: Developers can identify scalability and reliability concerns tied to the current design, including schema-sync assumptions, in-process schedulers/listeners, shallow probes, and config drift.
-- [ ] **ARCH-04**: Developers can identify legacy or over-engineered deployment artifacts that should not be mirrored into production unchanged.
+- [x] **ARCH-01**: Developers can classify each backend service by role and map the full dependency graph.
+- [x] **ARCH-02**: Developers can explain the current communication paths across gateway TCP calls, RabbitMQ events/outbox, websocket traffic, and external callbacks/webhooks.
+- [x] **ARCH-03**: Developers can identify scalability and reliability concerns tied to the current design, including schema-sync assumptions, in-process schedulers/listeners, shallow probes, and config drift.
+- [x] **ARCH-04**: Developers can identify legacy or over-engineered deployment artifacts that should not be mirrored into production unchanged.
 
 ### Kubernetes Design
 
@@ -193,10 +193,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DISC-02 | Phase 21 | Completed |
 | DISC-03 | Phase 21 | Completed |
 | DISC-04 | Phase 21 | Completed |
-| ARCH-01 | Phase 22 | Pending |
-| ARCH-02 | Phase 22 | Pending |
-| ARCH-03 | Phase 22 | Pending |
-| ARCH-04 | Phase 22 | Pending |
+| ARCH-01 | Phase 22 | Completed |
+| ARCH-02 | Phase 22 | Completed |
+| ARCH-03 | Phase 22 | Completed |
+| ARCH-04 | Phase 22 | Completed |
 | K8S-01 | Phase 23 | Pending |
 | K8S-02 | Phase 23 | Pending |
 | K8S-03 | Phase 23 | Pending |

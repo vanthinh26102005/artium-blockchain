@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
 - [ ] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers
 - [x] **Phase 21: Backend Runtime Inventory & Drift Reconciliation** - Build the authoritative backend runtime map from code, Compose, Dockerfiles, env files, and legacy K8s artifacts
-- [ ] **Phase 22: Service Architecture & Dependency Risk Analysis** - Classify backend services, communication paths, and production risks in the current design
+- [x] **Phase 22: Service Architecture & Dependency Risk Analysis** - Classify backend services, communication paths, and production risks in the current design
 - [ ] **Phase 23: Kubernetes Platform Topology & Workload Design** - Define cluster topology, workload kinds, exposure rules, config/secrets, probes, and scaling boundaries
 - [ ] **Phase 24: Docker Build, Image Lifecycle & CI/CD Strategy** - Define production image standards and the release pipeline that builds, scans, tags, migrates, and deploys them
 - [ ] **Phase 25: Production Operations Blueprint & Final Deployment Artifacts** - Finalize observability, recovery, risk mitigation, manifests, architecture diagram, and deployment plan
@@ -208,7 +208,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 19.1. Seller auction artifact recovery and policy alignment | 3/3 | Completed | 2026-04-27 |
 | 20. Auction start orchestration and seller lifecycle status | 0/TBD | Not started | - |
 | 21. Backend Runtime Inventory & Drift Reconciliation | 3/3 | Complete   | 2026-04-27 |
-| 22. Service Architecture & Dependency Risk Analysis | 0/TBD | Not started | - |
+| 22. Service Architecture & Dependency Risk Analysis | 2/2 | Complete   | 2026-04-27 |
 | 23. Kubernetes Platform Topology & Workload Design | 0/TBD | Not started | - |
 | 24. Docker Build, Image Lifecycle & CI/CD Strategy | 0/TBD | Not started | - |
 | 25. Production Operations Blueprint & Final Deployment Artifacts | 0/TBD | Not started | - |
@@ -415,8 +415,8 @@ Plans:
 **UI hint**: no
 
 Plans:
-- [ ] 22-01-PLAN.md — Service-role catalog and communication-path matrix from the Phase 21 baseline
-- [ ] 22-02-PLAN.md — Architecture risk register and legacy/dev-artifact disposition guidance
+- [x] 22-01-PLAN.md — Service-role catalog and communication-path matrix from the Phase 21 baseline (completed 2026-04-27)
+- [x] 22-02-PLAN.md — Architecture risk register and legacy/dev-artifact disposition guidance (completed 2026-04-27)
 
 ### Phase 23: Kubernetes Platform Topology & Workload Design
 

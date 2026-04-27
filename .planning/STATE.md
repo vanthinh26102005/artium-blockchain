@@ -3,23 +3,23 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Backend Deployment Strategy
 status: planning
-stopped_at: Phase 21 completed; ready to plan Phase 22
-last_updated: "2026-04-27T14:53:08.463Z"
-last_activity: 2026-04-27 - Completed Phase 21 Backend Runtime Inventory & Drift Reconciliation and prepared the Phase 22 handoff.
+stopped_at: Phase 22 completed; ready to plan Phase 23
+last_updated: "2026-04-27T15:03:00.000Z"
+last_activity: 2026-04-27 - Completed Phase 22 Service Architecture & Dependency Risk Analysis and prepared Phase 23 guardrails.
 progress:
   total_phases: 27
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 23
-  completed_plans: 33
+  completed_plans: 35
   percent: 100
 ---
 
 ## Current Position
 
-Phase: 22 (Service Architecture & Dependency Risk Analysis) — NEXT
+Phase: 23 (Kubernetes Platform Topology & Workload Design) — NEXT
 Plan: Not planned yet
-Status: Phase 21 completed; ready to plan Phase 22
-Last activity: 2026-04-27 - Completed Phase 21 Backend Runtime Inventory & Drift Reconciliation and prepared the Phase 22 handoff.
+Status: Phase 22 completed; ready to plan Phase 23
+Last activity: 2026-04-27 - Completed Phase 22 Service Architecture & Dependency Risk Analysis and prepared Phase 23 guardrails.
 
 ## Decisions
 
@@ -41,6 +41,7 @@ Last activity: 2026-04-27 - Completed Phase 21 Backend Runtime Inventory & Drift
 - Prefer managed stateful dependencies over in-cluster defaults unless the milestone analysis surfaces a strong reason to self-host them.
 - Treat the Phase 21 artifact set (`21-01` through `21-03`) as the authoritative baseline for Phase 22 rather than re-deriving current state from legacy Kubernetes YAML.
 - Keep gateway/service transport mismatches and partial isolated-database wiring as unresolved architecture inputs until Phase 22 classifies them.
+- Use Phase 22 risk/disposition artifacts (`22-03`, `22-04`) as guardrails before Phase 23 chooses any Kubernetes platform topology.
 
 ## Last Session
 
@@ -80,3 +81,4 @@ Stopped at: Phase 21 completed; ready to plan Phase 22
 **Planned Phase:** 25 (Production operations blueprint and final deployment artifacts) — roadmap approved — 2026-04-27T10:33:50.025Z
 **Planned Phase:** 21 (Backend Runtime Inventory & Drift Reconciliation) — 3 plans verified — 2026-04-27T10:33:50.025Z
 **Completed Phase:** 21 (Backend Runtime Inventory & Drift Reconciliation) — 3 plans — 2026-04-27T11:50:52Z
+**Completed Phase:** 22 (Service Architecture & Dependency Risk Analysis) — 2 plans — 2026-04-27T15:03:00Z
