@@ -98,7 +98,7 @@ Milestone focus: production-grade backend deployment strategy grounded in the re
 - [x] **K8S-01**: DevOps engineers can decide what belongs in Kubernetes versus managed external services for this backend, with explicit rationale.
 - [x] **K8S-02**: DevOps engineers can define namespace, workload, service exposure, and ingress strategy that fits the actual backend topology.
 - [x] **K8S-03**: DevOps engineers can define replica, health/readiness/startup, resource, and autoscaling policies by workload class.
-- [ ] **K8S-04**: DevOps engineers can define config, secret, and network-boundary strategy with least-privilege defaults.
+- [x] **K8S-04**: DevOps engineers can define config, secret, and network-boundary strategy with least-privilege defaults.
 
 ### Docker & Release Strategy
 
@@ -109,10 +109,10 @@ Milestone focus: production-grade backend deployment strategy grounded in the re
 ### Operations & Delivery
 
 - [ ] **OPS-01**: Teams can run a CI/CD pipeline that builds, tests, scans, publishes, migrates, and deploys the backend safely.
-- [ ] **OPS-02**: Operators can observe backend health through practical logging, metrics, and tracing recommendations tied to HTTP, RabbitMQ, and blockchain/payment flows.
+- [x] **OPS-02**: Operators can observe backend health through practical logging, metrics, and tracing recommendations tied to HTTP, RabbitMQ, and blockchain/payment flows.
 - [ ] **OPS-03**: Operators can recover from pod, node, dependency, or rollout failures using defined backup, restore, and rollback procedures.
 - [x] **OPS-04**: Operators can scale stateless services without duplicating singleton/background responsibilities such as outbox publishing or blockchain listeners.
-- [ ] **OPS-05**: Operators can protect sensitive credentials and raw-body webhook paths in production without breaking Stripe or blockchain integrations.
+- [x] **OPS-05**: Operators can protect sensitive credentials and raw-body webhook paths in production without breaking Stripe or blockchain integrations.
 
 ### Delivery Artifacts
 
@@ -200,15 +200,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | K8S-01 | Phase 23 | Complete |
 | K8S-02 | Phase 23 | Complete |
 | K8S-03 | Phase 23 | Complete |
-| K8S-04 | Phase 23 | Pending |
+| K8S-04 | Phase 23 | Complete |
 | DOCK-01 | Phase 24 | Complete |
 | DOCK-02 | Phase 24 | Complete |
 | DOCK-03 | Phase 24 | Complete |
 | OPS-01 | Phase 24 | Pending |
-| OPS-02 | Phase 25 | Pending |
+| OPS-02 | Phase 25 | Complete |
 | OPS-03 | Phase 25 | Pending |
 | OPS-04 | Phase 25 | Complete |
-| OPS-05 | Phase 25 | Pending |
+| OPS-05 | Phase 25 | Complete |
 | DELV-01 | Phase 25 | Pending |
 | DELV-02 | Phase 25 | Pending |
 | DELV-03 | Phase 25 | Complete |
