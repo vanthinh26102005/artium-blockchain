@@ -33,6 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 23: Kubernetes Platform Topology & Workload Design** - Define cluster topology, workload kinds, exposure rules, config/secrets, probes, and scaling boundaries
 - [ ] **Phase 24: Docker Build, Image Lifecycle & CI/CD Strategy** - Define production image standards and the release pipeline that builds, scans, tags, migrates, and deploys them
 - [ ] **Phase 25: Production Operations Blueprint & Final Deployment Artifacts** - Finalize observability, recovery, risk mitigation, manifests, architecture diagram, and deployment plan
+- [ ] **Phase 26: Kubernetes Deployment Implementation & Production Platform Stack Foundation** - Implement the approved Kubernetes/Helm foundation, managed dependency integration, ingress/TLS, secrets, probes, observability hooks, and rollback-ready deployment path
 
 ## Phase Details
 
@@ -181,7 +182,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Milestone v1.2 proceeds 21 → 22 → 23 → 24 → 25.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Milestone v1.2 proceeds 21 → 22 → 23 → 24 → 25 → 26.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -212,6 +213,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 23. Kubernetes Platform Topology & Workload Design | 0/TBD | Not started | - |
 | 24. Docker Build, Image Lifecycle & CI/CD Strategy | 0/TBD | Not started | - |
 | 25. Production Operations Blueprint & Final Deployment Artifacts | 0/TBD | Not started | - |
+| 26. Kubernetes Deployment Implementation & Production Platform Stack Foundation | 0/TBD | Not started | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -457,3 +459,18 @@ Plans:
   5. Stakeholder can review a concise risk register with practical mitigations for the highest-risk deployment gaps.
 **Plans**: TBD
 **UI hint**: no
+
+### Phase 26: Kubernetes Deployment Implementation & Production Platform Stack Foundation
+
+**Goal:** Implement the production Kubernetes foundation approved by Phases 23-25, using Helm-based deployment artifacts, managed external dependencies, one public gateway ingress, secret/config separation, production image/runtime standards, health probes, observability hooks, and rollback/smoke-check workflows.
+**Requirements**: K8S-01, K8S-02, K8S-03, K8S-04, DOCK-01, DOCK-02, DOCK-03, OPS-01, OPS-02, OPS-03, OPS-04, DELV-01, DELV-02, DELV-03, DELV-04
+**Depends on:** Phase 25
+**Success Criteria** (what must be TRUE):
+  1. Operator can deploy the backend application workloads through Helm charts or equivalent Helm-compatible release artifacts with environment-specific values and immutable image tags or digests.
+  2. Public traffic enters only through the API gateway Ingress with TLS, while identity, artwork, payments, orders, messaging, notifications, events, and community services remain private behind internal Kubernetes Services.
+  3. PostgreSQL, Redis, RabbitMQ, object storage, SMTP, Stripe, and blockchain RPC integration are wired as managed external dependencies or explicitly documented exceptions; Mailhog and dev-only dependencies are excluded from production.
+  4. Every application workload has production-appropriate resource requests/limits plus readiness, startup, and liveness probes that reflect real dependency and runtime behavior rather than TCP-only checks.
+  5. Secrets and runtime config are separated from images and manifests, with external secret manager integration or a documented equivalent that supports rotation and avoids long-lived key files where workload identity is available.
+  6. Singleton/background work such as outbox processing and blockchain event listening has an explicit deployment and scaling model that avoids duplicate side effects.
+  7. Deployment verification includes migration/bootstrap Jobs where needed, synthetic smoke checks after rollout, rollback instructions, and baseline logs/metrics/tracing hooks for cross-service and async flows.
+**Plans**: TBD
