@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Seller Auction Creation
-status: Phase 19.1 in progress
-stopped_at: Completed 19.1-01-PLAN.md
-last_updated: "2026-04-27T04:37:09Z"
-last_activity: 2026-04-27 - Completed Phase 19.1 Plan 01 FE seller-auction copy and policy alignment.
+status: Phase 19.1 complete
+stopped_at: Completed 19.1-03-PLAN.md
+last_updated: "2026-04-27T04:43:24Z"
+last_activity: 2026-04-27 - Completed Phase 19.1 Plan 03 verification recovery and traceability alignment.
 progress:
   total_phases: 20
   completed_phases: 3
@@ -17,9 +17,9 @@ progress:
 ## Current Position
 
 Phase: 19.1 (Seller auction artifact recovery and policy alignment)
-Plan: 1 of 3 completed
-Status: In Progress
-Last activity: 2026-04-27 - Completed Phase 19.1 Plan 01 FE seller-auction copy and policy alignment.
+Plan: 3 of 3 completed
+Status: Completed
+Last activity: 2026-04-27 - Completed Phase 19.1 Plan 03 verification recovery and traceability alignment.
 
 ## Decisions
 
@@ -29,10 +29,12 @@ Last activity: 2026-04-27 - Completed Phase 19.1 Plan 01 FE seller-auction copy 
 - gateway createStripeCustomer injects userId from req.user?.id so payments-service can associate the customer (Plan 6-4)
 - Kept seller-auction fee and gas disclosures static and system-authored in the preview to satisfy SAUC-05 without inventing numeric fees.
 - Standardized seller-auction helper copy to next phase so Start Auction stays clearly outside Phase 20 orchestration.
+- Use `19-VERIFICATION.md` as the durable SAUC-04 and SAUC-05 evidence artifact tied to current FE files and approved validation commands.
+- Mark only SAUC-10, SAUC-04, and SAUC-05 complete during 19.1 reconciliation; keep SAUC-06 through SAUC-09 pending for Phase 20.
 
 ## Last Session
 
-Stopped at: Completed 19.1-01-PLAN.md
+Stopped at: Completed 19.1-03-PLAN.md
 
 ## Accumulated Context
 
@@ -55,3 +57,4 @@ Stopped at: Completed 19.1-01-PLAN.md
 **Planned Phase:** 19 (Seller auction creation workspace and terms UX) - 3 plans - 2026-04-25T08:21:10+07:00
 **Completed Phase:** 19 (Seller auction creation workspace and terms UX) - 3 plans - 2026-04-27T09:25:50+07:00
 **Planned Phase:** 19.1 (Seller auction artifact recovery and policy alignment) - 3 plans - 2026-04-27T04:00:18.456Z
+**Completed Phase:** 19.1 (Seller auction artifact recovery and policy alignment) - 3 plans - 2026-04-27T04:43:24Z
