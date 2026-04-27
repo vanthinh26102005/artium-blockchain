@@ -1,0 +1,30 @@
+{{- range $name, $service := .Values.services }}
+{{- if $service.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "artium-backend.serviceName" (dict "root" $ "name" $name) }}
+  namespace: {{ $.Values.namespace.name | quote }}
+  labels:
+    {{- include "artium-backend.labels" $ | nindent 4 }}
+    artium.io/workload: {{ $name | quote }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "artium-backend.selectorLabels" $ | nindent 4 }}
+    artium.io/workload: {{ $name | quote }}
+    artium.io/workload-kind: api
+  ports:
+    {{- with $service.ports.http }}
+    - name: http
+      port: {{ . }}
+      targetPort: http
+    {{- end }}
+    {{- with $service.ports.tcp }}
+    - name: tcp
+      port: {{ . }}
+      targetPort: tcp
+    {{- end }}
+{{- end }}
+{{- end }}
