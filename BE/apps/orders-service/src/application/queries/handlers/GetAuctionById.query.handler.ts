@@ -1,7 +1,13 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject, Logger, HttpException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { AuctionReadObject, GetAuctionsDto, RpcExceptionHelper } from '@app/common';
+import {
+  AuctionReadObject,
+  GetAuctionsDto,
+  OrderPaymentMethod,
+  OrderStatus,
+  RpcExceptionHelper,
+} from '@app/common';
 import { GetAuctionByIdQuery } from '../GetAuctionById.query';
 import { GetAuctionsHandler } from './GetAuctions.query.handler';
 import { IOrderRepository } from '../../../domain/interfaces';
@@ -26,6 +32,13 @@ export class GetAuctionByIdHandler implements IQueryHandler<GetAuctionByIdQuery>
         (await this.orderRepo.findById(auctionId));
 
       if (!order) {
+        throw RpcExceptionHelper.notFound(`Auction ${auctionId} not found`);
+      }
+      if (
+        order.paymentMethod !== OrderPaymentMethod.BLOCKCHAIN ||
+        order.status !== OrderStatus.AUCTION_ACTIVE ||
+        !order.onChainOrderId
+      ) {
         throw RpcExceptionHelper.notFound(`Auction ${auctionId} not found`);
       }
 

@@ -5,7 +5,7 @@ milestone_name: milestone
 status: executing
 stopped_at: Phase 20 UI-SPEC approved
 last_updated: "2026-04-27T07:53:20.331Z"
-last_activity: 2026-04-27 - Completed Phase 20 Plan 02 FE wallet handoff and lifecycle shell.
+last_activity: 2026-04-27 - Completed Phase 20 Plan 03 blockchain convergence and active-only public auction reads.
 progress:
   total_phases: 22
   completed_phases: 5
@@ -17,9 +17,9 @@ progress:
 ## Current Position
 
 Phase: 20 (Auction start orchestration and seller lifecycle status) — EXECUTING
-Plan: 2 of 4 completed
+Plan: 3 of 4 completed
 Status: Executing Phase 20
-Last activity: 2026-04-27 - Completed Phase 20 Plan 02 FE wallet handoff and lifecycle shell.
+Last activity: 2026-04-27 - Completed Phase 20 Plan 03 blockchain convergence and active-only public auction reads.
 
 ## Decisions
 
@@ -33,6 +33,7 @@ Last activity: 2026-04-27 - Completed Phase 20 Plan 02 FE wallet handoff and lif
 - Mark only SAUC-10, SAUC-04, and SAUC-05 complete during 19.1 reconciliation; keep SAUC-06 through SAUC-09 pending for Phase 20.
 - Use gateway-side readiness aggregation plus orders-service canonical attempt persistence for seller auction start preflight in Phase 20.
 - Restore seller auction start state in FE from remembered artwork context plus backend lifecycle status, not local submit flags.
+- Promote AuctionStarted by canonical seller attempt orderId and expose only converged active auction rows publicly.
 
 ## Last Session
 

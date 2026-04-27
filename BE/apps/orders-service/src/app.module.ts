@@ -9,6 +9,7 @@ import { BlockchainModule } from '@app/blockchain';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import {
@@ -103,6 +104,15 @@ export const Controllers = [
   OrdersMicroserviceController,
 ];
 
+const ArtworkServiceClient = {
+  name: 'ARTWORK_SERVICE',
+  transport: Transport.TCP as const,
+  options: {
+    host: process.env.ARTWORK_SERVICE_HOST || 'localhost',
+    port: parseInt(process.env.ARTWORK_SERVICE_PORT || '3102', 10),
+  },
+};
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -123,6 +133,7 @@ export const Controllers = [
     OutboxModule,
     AppRabbitMQModule,
     CqrsModule,
+    ClientsModule.register([ArtworkServiceClient]),
     BlockchainModule.forRoot(),
   ],
   controllers: [...Controllers],

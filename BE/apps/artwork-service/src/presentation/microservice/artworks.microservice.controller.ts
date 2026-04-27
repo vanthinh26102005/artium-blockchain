@@ -3,6 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   CreateArtworkCommand,
+  MarkArtworkInAuctionCommand,
   UpdateArtworkCommand,
   DeleteArtworkCommand,
   BulkMoveArtworksCommand,
@@ -45,6 +46,20 @@ export class ArtworkMicroserviceController {
   ) {
     return this.queryBus.execute(
       new ListSellerAuctionArtworkCandidatesQuery(data.sellerId),
+    );
+  }
+
+  @MessagePattern({ cmd: 'mark_artwork_in_auction' })
+  async markArtworkInAuction(
+    @Payload()
+    data: { artworkId: string; sellerId: string; onChainAuctionId: string },
+  ) {
+    return this.commandBus.execute(
+      new MarkArtworkInAuctionCommand(
+        data.artworkId,
+        data.sellerId,
+        data.onChainAuctionId,
+      ),
     );
   }
 

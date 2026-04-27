@@ -8,6 +8,7 @@ import {
   EscrowState,
   GetAuctionsDto,
   OrderPaymentMethod,
+  OrderStatus,
   RpcExceptionHelper,
 } from '@app/common';
 import { EscrowContractService, AuctionCoreDto } from '@app/blockchain';
@@ -45,7 +46,11 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
 
       const take = Math.min(filters.take ?? DEFAULT_AUCTION_TAKE, MAX_AUCTION_TAKE);
       const skip = filters.skip ?? 0;
-      const blockchainWhere = { paymentMethod: OrderPaymentMethod.BLOCKCHAIN };
+      const blockchainWhere = {
+        paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+        status: OrderStatus.AUCTION_ACTIVE,
+        onChainOrderId: { $ne: null },
+      };
 
       const [orders, total] = await Promise.all([
         this.orderRepo.find({
@@ -53,6 +58,7 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
           skip,
           take,
           orderBy: { createdAt: 'desc' },
+          relations: ['items'],
         }),
         this.orderRepo.count(blockchainWhere),
       ]);
@@ -99,7 +105,12 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
   ): Promise<AuctionReadObject | null> {
     const orderWithItems = (await this.orderRepo.findWithItems(order.id)) ?? order;
     const item = orderWithItems.items?.[0];
-    const onChainOrderId = orderWithItems.onChainOrderId ?? orderWithItems.id;
+    const onChainOrderId = orderWithItems.onChainOrderId;
+
+    if (!onChainOrderId || !item?.artworkId || !item.artworkTitle?.trim()) {
+      return null;
+    }
+
     const chainAuction = await this.getOnChainAuction(orderWithItems);
     const currentBidWei = this.resolveCurrentBidWei(orderWithItems, chainAuction);
     const minBidIncrementWei = chainAuction?.minBidIncrement?.toString() ?? DEFAULT_MIN_INCREMENT_WEI;
@@ -107,8 +118,8 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     const endsAt = this.resolveEndsAt(orderWithItems, chainAuction);
     const statusKey = this.resolveStatusKey(orderWithItems, chainAuction, endsAt);
     const categoryKey = this.resolveCategory(filters, index);
-    const title = item?.artworkTitle ?? orderWithItems.orderNumber ?? `Auction ${onChainOrderId}`;
-    const imageSrc = item?.artworkImageUrl ?? '';
+    const title = item.artworkTitle.trim();
+    const imageSrc = item.artworkImageUrl?.trim() ?? '';
 
     return {
       auctionId: onChainOrderId,
@@ -127,7 +138,7 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
       sellerWallet: this.normalizeAddress(chainAuction?.seller ?? orderWithItems.sellerWallet),
       txHash: orderWithItems.txHash ?? null,
       artwork: {
-        artworkId: item?.artworkId ?? onChainOrderId,
+        artworkId: item.artworkId,
         title,
         creatorName: orderWithItems.sellerWallet ?? 'Artium seller',
         imageSrc,
@@ -189,7 +200,8 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     if (Number.isFinite(endsAtMs) && endsAtMs - Date.now() <= ONE_HOUR_MS) {
       return AuctionStatusKey.ENDING_SOON;
     }
-    if (!order.bidAmountWei || order.bidAmountWei === '0') {
+    const currentBidWei = this.resolveCurrentBidWei(order, chainAuction);
+    if (!currentBidWei || currentBidWei === '0') {
       return AuctionStatusKey.NEWLY_LISTED;
     }
     return AuctionStatusKey.ACTIVE;

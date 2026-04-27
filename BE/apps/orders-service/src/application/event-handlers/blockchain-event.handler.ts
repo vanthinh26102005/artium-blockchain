@@ -1,13 +1,27 @@
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { Injectable, Logger, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { ExchangeName, RoutingKey } from '@app/rabbitmq';
 import {
   EscrowState,
+  PayoutStatus,
+  RpcExceptionHelper,
   OrderPaymentMethod,
   OrderPaymentStatus,
   OrderStatus,
+  SellerAuctionStartStatus,
 } from '@app/common';
-import { IOrderRepository } from '../../domain/interfaces';
+import {
+  IAuctionStartAttemptRepository,
+  IOrderItemRepository,
+  IOrderRepository,
+} from '../../domain/interfaces';
+import { AuctionStartAttempt, Order } from '../../domain/entities';
+
+const ARTWORK_SERVICE_CLIENT = 'ARTWORK_SERVICE';
+const ARTWORK_RPC_TIMEOUT_MS = 30_000;
 
 @Injectable()
 export class BlockchainEventHandler {
@@ -16,6 +30,12 @@ export class BlockchainEventHandler {
   constructor(
     @Inject(IOrderRepository)
     private readonly orderRepo: IOrderRepository,
+    @Inject(IOrderItemRepository)
+    private readonly orderItemRepo: IOrderItemRepository,
+    @Inject(IAuctionStartAttemptRepository)
+    private readonly startAttemptRepo: IAuctionStartAttemptRepository,
+    @Inject(ARTWORK_SERVICE_CLIENT)
+    private readonly artworkClient: ClientProxy,
   ) {}
 
   private generateOrderNumber(prefix = 'AUC') {
@@ -46,6 +66,17 @@ export class BlockchainEventHandler {
     try {
       const existing = await this.orderRepo.findByOnChainOrderId(message.orderId);
       const estimatedDeliveryDate = this.parseUnixSecondsToDate(message.endTime);
+      const startAttempt = await this.startAttemptRepo.findByOrderId(message.orderId);
+
+      if (startAttempt) {
+        await this.promoteStartAttempt(
+          startAttempt,
+          message,
+          estimatedDeliveryDate,
+          existing,
+        );
+        return;
+      }
 
       if (existing) {
         await this.orderRepo.update(existing.id, {
@@ -79,6 +110,135 @@ export class BlockchainEventHandler {
       this.logger.error(`Failed to handle AuctionStarted: ${error.message}`, error.stack);
       throw error;
     }
+  }
+
+  private async promoteStartAttempt(
+    attempt: AuctionStartAttempt,
+    message: { orderId: string; seller: string; endTime: string },
+    estimatedDeliveryDate: Date | null,
+    existingOrder: Order | null,
+  ) {
+    const order = existingOrder
+      ? await this.orderRepo.update(existingOrder.id, {
+          status: OrderStatus.AUCTION_ACTIVE,
+          paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+          paymentStatus: OrderPaymentStatus.UNPAID,
+          onChainOrderId: message.orderId,
+          contractAddress: attempt.contractAddress ?? existingOrder.contractAddress ?? null,
+          sellerWallet: message.seller,
+          txHash: attempt.txHash ?? existingOrder.txHash ?? null,
+          escrowState: EscrowState.STARTED,
+          estimatedDeliveryDate,
+        })
+      : await this.orderRepo.create({
+          collectorId: null,
+          orderNumber: attempt.orderId,
+          status: OrderStatus.AUCTION_ACTIVE,
+          subtotal: 0,
+          totalAmount: 0,
+          shippingCost: 0,
+          taxAmount: 0,
+          currency: 'ETH',
+          paymentStatus: OrderPaymentStatus.UNPAID,
+          paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+          onChainOrderId: message.orderId,
+          contractAddress: attempt.contractAddress ?? null,
+          txHash: attempt.txHash ?? null,
+          sellerWallet: message.seller,
+          escrowState: EscrowState.STARTED,
+          estimatedDeliveryDate,
+        });
+
+    if (!order) {
+      throw RpcExceptionHelper.internalError(
+        'Failed to promote seller auction start into an order projection',
+      );
+    }
+
+    await this.ensureAuctionOrderItem(order.id, attempt);
+    await this.startAttemptRepo.update(attempt.id, {
+      status: SellerAuctionStartStatus.AUCTION_ACTIVE,
+      walletAddress: message.seller,
+      retryAllowed: false,
+      editAllowed: false,
+      walletActionRequired: false,
+      reasonCode: null,
+      reasonMessage: null,
+      activatedAt: attempt.activatedAt ?? new Date(),
+    });
+    await this.markArtworkInAuction(attempt);
+  }
+
+  private async ensureAuctionOrderItem(
+    orderId: string,
+    attempt: AuctionStartAttempt,
+  ) {
+    const existingItems = await this.orderItemRepo.findByOrderId(orderId);
+    const matchedItem =
+      existingItems.find((item) => item.artworkId === attempt.artworkId) ??
+      existingItems[0] ??
+      null;
+
+    if (!matchedItem) {
+      await this.orderItemRepo.create({
+        orderId,
+        artworkId: attempt.artworkId,
+        sellerId: attempt.sellerId,
+        priceAtPurchase: 0,
+        quantity: 1,
+        currency: 'ETH',
+        artworkTitle: attempt.artworkTitle,
+        artworkImageUrl: attempt.thumbnailUrl ?? null,
+        artworkDescription: null,
+        platformFee: null,
+        sellerPayoutAmount: null,
+        payoutStatus: PayoutStatus.PENDING,
+        payoutAt: null,
+      });
+      return;
+    }
+
+    const nextItemPatch: Record<string, unknown> = {};
+    if (matchedItem.artworkId !== attempt.artworkId) {
+      nextItemPatch.artworkId = attempt.artworkId;
+    }
+    if (matchedItem.sellerId !== attempt.sellerId) {
+      nextItemPatch.sellerId = attempt.sellerId;
+    }
+    if (matchedItem.artworkTitle !== attempt.artworkTitle) {
+      nextItemPatch.artworkTitle = attempt.artworkTitle;
+    }
+    if ((matchedItem.artworkImageUrl ?? null) !== (attempt.thumbnailUrl ?? null)) {
+      nextItemPatch.artworkImageUrl = attempt.thumbnailUrl ?? null;
+    }
+    if (matchedItem.currency !== 'ETH') {
+      nextItemPatch.currency = 'ETH';
+    }
+    if (matchedItem.quantity !== 1) {
+      nextItemPatch.quantity = 1;
+    }
+    if (Number(matchedItem.priceAtPurchase) !== 0) {
+      nextItemPatch.priceAtPurchase = 0;
+    }
+
+    if (Object.keys(nextItemPatch).length > 0) {
+      await this.orderItemRepo.update(matchedItem.id, nextItemPatch);
+    }
+  }
+
+  private async markArtworkInAuction(attempt: AuctionStartAttempt) {
+    await firstValueFrom(
+      this.artworkClient
+        .send(
+          { cmd: 'mark_artwork_in_auction' },
+          {
+            artworkId: attempt.artworkId,
+            sellerId: attempt.sellerId,
+            onChainAuctionId: attempt.orderId,
+          },
+        )
+        .pipe(timeout(ARTWORK_RPC_TIMEOUT_MS)),
+    );
   }
 
   @RabbitSubscribe({
