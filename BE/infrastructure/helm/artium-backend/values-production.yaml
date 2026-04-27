@@ -16,6 +16,48 @@ sealedSecrets:
 networkPolicy:
   enabled: true
 
+images:
+  api-gateway:
+    repository: ghcr.io/nouu188/api-gateway
+    tag: "20260428-5c077fa2"
+    digest: ""
+  identity-service:
+    repository: ghcr.io/nouu188/identity-service
+    tag: "20260428-5c077fa2"
+    digest: ""
+  artwork-service:
+    repository: ghcr.io/nouu188/artwork-service
+    tag: "20260428-5c077fa2"
+    digest: ""
+  payments-service:
+    repository: ghcr.io/nouu188/payments-service
+    tag: "20260428-5c077fa2"
+    digest: ""
+  orders-service:
+    repository: ghcr.io/nouu188/orders-service
+    tag: "20260428-5c077fa2"
+    digest: ""
+  messaging-service:
+    repository: ghcr.io/nouu188/messaging-service
+    tag: "20260428-5c077fa2"
+    digest: ""
+  notifications-service:
+    repository: ghcr.io/nouu188/notifications-service
+    tag: "20260428-5c077fa2"
+    digest: ""
+  events-service:
+    repository: ghcr.io/nouu188/events-service
+    tag: "20260428-5c077fa2"
+    digest: ""
+  community-service:
+    repository: ghcr.io/nouu188/community-service
+    tag: "20260428-5c077fa2"
+    digest: ""
+  web:
+    repository: ghcr.io/nouu188/artium-web
+    tag: "20260428-5c077fa2"
+    digest: ""
+
 web:
   enabled: true
   replicaCount: 1
