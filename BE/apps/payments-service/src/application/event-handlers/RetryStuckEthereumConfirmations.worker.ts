@@ -19,6 +19,18 @@ export class RetryStuckEthereumConfirmationsWorker {
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   async rescheduleReadyTransactions() {
+    const isEnabled = (
+      process.env.ETHEREUM_CONFIRMATION_RETRY_ENABLED ?? 'true'
+    )
+      .trim()
+      .toLowerCase();
+    if (isEnabled === 'false') {
+      this.logger.debug(
+        'RetryStuckEthereumConfirmationsWorker disabled by ETHEREUM_CONFIRMATION_RETRY_ENABLED=false',
+      );
+      return;
+    }
+
     const staleAfter = new Date(Date.now() - this.leaseMs);
     const transactions = await this.transactionRepo.findEthereumTransactionsReadyForConfirmation(
       this.batchSize,

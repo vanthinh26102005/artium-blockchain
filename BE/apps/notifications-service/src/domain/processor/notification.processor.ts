@@ -24,6 +24,16 @@ export class NotificationProcessor {
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async handleStuckNotifications() {
+    const isEnabled = (process.env.NOTIFICATION_PROCESSOR_ENABLED ?? 'true')
+      .trim()
+      .toLowerCase();
+    if (isEnabled === 'false') {
+      this.logger.debug(
+        'NotificationProcessor disabled by NOTIFICATION_PROCESSOR_ENABLED=false',
+      );
+      return;
+    }
+
     this.logger.debug('Bắt đầu chu kỳ kiểm tra các thông báo bị kẹt...');
 
     await this.transactionService
@@ -110,7 +120,7 @@ export class NotificationProcessor {
       {
         aggregateType: 'notification',
         aggregateId: history.id,
-        eventType: RoutingKey.SEND_TRANSACTIONAL_EMAIL,
+        eventType: RoutingKey.SEND_TRANSACTIONAL_EMAIL, // send_transactional_email
         payload,
         exchange: ExchangeName.NOTIFICATION_EVENTS,
         routingKey: RoutingKey.SEND_TRANSACTIONAL_EMAIL,
