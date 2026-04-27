@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 20 UI-SPEC approved
-last_updated: "2026-04-27T07:53:20.331Z"
-last_activity: 2026-04-27 - Completed Phase 20 Plan 03 blockchain convergence and active-only public auction reads.
+last_updated: "2026-04-27T08:31:00.000Z"
+last_activity: 2026-04-27 - Completed Phase 20 Plan 04 seller inventory and seller order lifecycle convergence.
 progress:
   total_phases: 22
   completed_phases: 5
@@ -17,9 +17,9 @@ progress:
 ## Current Position
 
 Phase: 20 (Auction start orchestration and seller lifecycle status) — EXECUTING
-Plan: 3 of 4 completed
-Status: Executing Phase 20
-Last activity: 2026-04-27 - Completed Phase 20 Plan 03 blockchain convergence and active-only public auction reads.
+Plan: 4 of 4 completed
+Status: Phase 20 execution complete; ready for verify/validate/secure follow-up
+Last activity: 2026-04-27 - Completed Phase 20 Plan 04 seller inventory and seller order lifecycle convergence.
 
 ## Decisions
 
@@ -34,6 +34,7 @@ Last activity: 2026-04-27 - Completed Phase 20 Plan 03 blockchain convergence an
 - Use gateway-side readiness aggregation plus orders-service canonical attempt persistence for seller auction start preflight in Phase 20.
 - Restore seller auction start state in FE from remembered artwork context plus backend lifecycle status, not local submit flags.
 - Promote AuctionStarted by canonical seller attempt orderId and expose only converged active auction rows publicly.
+- Gate seller-only artwork lifecycle enrichment behind an explicit query flag so private retry/failure state never leaks into public seller/profile reads.
 
 ## Last Session
 

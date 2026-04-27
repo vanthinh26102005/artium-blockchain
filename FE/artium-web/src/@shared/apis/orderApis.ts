@@ -1,4 +1,5 @@
 import { apiFetch, apiPost } from '@shared/services/apiClient'
+import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
 // --- Request Types ---
 
@@ -86,6 +87,7 @@ export type OrderResponse = {
   disputeResolvedAt?: string | null
   onChainOrderId?: string | null
   txHash?: string | null
+  sellerAuctionLifecycle?: SellerAuctionStartStatusResponse | null
   items?: OrderItemResponse[]
   createdAt: string
   updatedAt: string

@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@shared/components/ui/dropdown-menu'
+import { OrderStatusBadge } from '@domains/orders/components/OrderStatusBadge'
 
 // @domains - inventory
 import {
@@ -57,6 +58,7 @@ export const InventoryArtworkGridViewItem = ({
   const priceLabel =
     typeof artwork.price === 'number' ? `US$${artwork.price.toLocaleString('en-US')}` : null
   const isSelected = selectedIds.includes(artwork.id)
+  const visibilityLabel = artwork.status === 'Hidden' ? 'Hidden in profile' : 'Draft'
 
   // -- handlers --
   const handleToggleSelection = () => {
@@ -241,21 +243,25 @@ export const InventoryArtworkGridViewItem = ({
           {artwork.title}
         </h3>
 
-        {/* Price or Status */}
-        <div className="flex items-center gap-2">
+        {/* Price and lifecycle */}
+        <div className="flex flex-wrap items-center gap-2">
           {priceLabel ? (
             <>
               <span className="text-xl font-bold text-blue-600">●</span>
               <span className="text-base font-semibold text-slate-900">{priceLabel}</span>
             </>
-          ) : (
-            <>
-              <span className={`text-lg ${statusConfig.className}`}>{statusConfig.icon}</span>
-              <span className={`text-base font-medium ${statusConfig.className}`}>
-                {statusConfig.label}
-              </span>
-            </>
-          )}
+          ) : null}
+          <span
+            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
+              artwork.status === 'Hidden'
+                ? 'bg-slate-100 text-slate-600'
+                : 'bg-amber-50 text-amber-700'
+            }`}
+          >
+            <span className={`text-base leading-none ${statusConfig.className}`}>{statusConfig.icon}</span>
+            {visibilityLabel}
+          </span>
+          {artwork.auctionLifecycle ? <OrderStatusBadge status={artwork.auctionLifecycle.status} /> : null}
         </div>
       </div>
     </article>

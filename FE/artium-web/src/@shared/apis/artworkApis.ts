@@ -1,4 +1,5 @@
 import { apiFetch } from '@shared/services/apiClient'
+import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
 type ArtworkImage = {
   url?: string
@@ -45,6 +46,7 @@ export type ArtworkApiItem = {
   likeCount?: number
   commentCount?: number
   moodboardCount?: number
+  auctionLifecycle?: SellerAuctionStartStatusResponse | null
 }
 
 export type ListArtworksParams = {
@@ -58,6 +60,7 @@ export type ListArtworksParams = {
   maxPrice?: number
   sortBy?: string
   sortOrder?: string
+  includeSellerAuctionLifecycle?: boolean
 }
 
 export type CreateArtworkInput = {

@@ -41,6 +41,7 @@ export const mapArtworkToInventory = (item: ArtworkApiItem): InventoryArtwork =>
     title: item.title,
     creatorName: item.creatorName ?? 'Unknown artist',
     status: resolveDisplayStatus(item),
+    auctionLifecycle: item.auctionLifecycle ?? null,
     backendStatus: item.status,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,

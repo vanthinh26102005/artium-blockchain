@@ -1,4 +1,5 @@
 import type { OrderItemResponse, OrderResponse } from '@shared/apis/orderApis'
+import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 import type { OrderActorRole, OrderTimelineStep, OrdersWorkspaceScope } from '../types/orderTypes'
 
 export type ShippingRecordValue = {
@@ -13,17 +14,59 @@ export type ShippingPresentation = {
   records: ShippingRecordValue[]
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'Pending',
-  confirmed: 'Confirmed',
-  processing: 'Processing',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
-  refunded: 'Refunded',
-  dispute_open: 'Dispute Open',
-  escrow_held: 'Escrow Held',
-  auction_active: 'Auction Active',
+const STATUS_REGISTRY: Record<string, { label: string; tone: string }> = {
+  pending: {
+    label: 'Pending',
+    tone: 'bg-slate-100 text-slate-700 border-slate-200',
+  },
+  confirmed: {
+    label: 'Confirmed',
+    tone: 'bg-blue-50 text-blue-700 border-blue-200',
+  },
+  processing: {
+    label: 'Processing',
+    tone: 'bg-blue-50 text-blue-700 border-blue-200',
+  },
+  shipped: {
+    label: 'Shipped',
+    tone: 'bg-blue-50 text-blue-700 border-blue-200',
+  },
+  delivered: {
+    label: 'Delivered',
+    tone: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    tone: 'bg-rose-50 text-rose-700 border-rose-200',
+  },
+  refunded: {
+    label: 'Refunded',
+    tone: 'bg-rose-50 text-rose-700 border-rose-200',
+  },
+  dispute_open: {
+    label: 'Dispute Open',
+    tone: 'bg-amber-50 text-amber-700 border-amber-200',
+  },
+  escrow_held: {
+    label: 'Escrow Held',
+    tone: 'bg-blue-50 text-blue-700 border-blue-200',
+  },
+  pending_start: {
+    label: 'Auction Start Pending',
+    tone: 'bg-amber-50 text-amber-700 border-amber-200',
+  },
+  retry_available: {
+    label: 'Retry Available',
+    tone: 'bg-amber-50 text-amber-700 border-amber-200',
+  },
+  start_failed: {
+    label: 'Auction Start Failed',
+    tone: 'bg-rose-50 text-rose-700 border-rose-200',
+  },
+  auction_active: {
+    label: 'Auction Active',
+    tone: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  },
 }
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -92,7 +135,7 @@ export const getOrderStatusLabel = (status?: string | null) => {
     return 'Unknown'
   }
 
-  return STATUS_LABELS[status] ?? status
+  return STATUS_REGISTRY[status]?.label ?? status
 }
 
 export const getPaymentMethodLabel = (paymentMethod?: string | null) => {
@@ -113,20 +156,8 @@ export const getPaymentStatusLabel = (paymentStatus?: string | null) => {
 
 export const getStatusTone = (status?: string | null) => {
   switch (status) {
-    case 'delivered':
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-    case 'shipped':
-    case 'processing':
-    case 'confirmed':
-    case 'escrow_held':
-      return 'bg-blue-50 text-blue-700 border-blue-200'
-    case 'dispute_open':
-      return 'bg-amber-50 text-amber-700 border-amber-200'
-    case 'cancelled':
-    case 'refunded':
-      return 'bg-rose-50 text-rose-700 border-rose-200'
     default:
-      return 'bg-slate-100 text-slate-700 border-slate-200'
+      return STATUS_REGISTRY[status ?? '']?.tone ?? 'bg-slate-100 text-slate-700 border-slate-200'
   }
 }
 
@@ -175,7 +206,39 @@ export const canOpenDispute = (order: OrderResponse) => {
   return Date.now() - shippedAt <= fourteenDaysMs
 }
 
+const getSellerAuctionLifecycle = (
+  order: OrderResponse,
+  role?: OrderActorRole,
+): SellerAuctionStartStatusResponse | null => {
+  if (role !== 'seller' || order.paymentMethod !== 'blockchain') {
+    return null
+  }
+
+  return order.sellerAuctionLifecycle ?? null
+}
+
+export const getDisplayOrderStatus = (order: OrderResponse, role?: OrderActorRole) => {
+  return getSellerAuctionLifecycle(order, role)?.status ?? order.status
+}
+
 export const getNextActionLabel = (order: OrderResponse, role: OrderActorRole) => {
+  const sellerAuctionLifecycle = getSellerAuctionLifecycle(order, role)
+
+  if (sellerAuctionLifecycle) {
+    switch (sellerAuctionLifecycle.status) {
+      case 'pending_start':
+        return sellerAuctionLifecycle.walletActionRequired ? 'Open MetaMask' : 'Review status'
+      case 'retry_available':
+        return 'Retry start auction'
+      case 'start_failed':
+        return sellerAuctionLifecycle.editAllowed ? 'Review terms' : 'Review failure'
+      case 'auction_active':
+        return 'View auction'
+      default:
+        break
+    }
+  }
+
   if (role === 'seller' && canMarkShipped(order.status)) {
     return 'Prepare shipment'
   }
@@ -200,6 +263,32 @@ export const getNextActionLabel = (order: OrderResponse, role: OrderActorRole) =
 }
 
 export const getNextStepDescription = (order: OrderResponse, role: OrderActorRole) => {
+  const sellerAuctionLifecycle = getSellerAuctionLifecycle(order, role)
+
+  if (sellerAuctionLifecycle) {
+    switch (sellerAuctionLifecycle.status) {
+      case 'pending_start':
+        return sellerAuctionLifecycle.walletActionRequired
+          ? 'Confirm the createAuction transaction in MetaMask. Do not submit the auction again.'
+          : 'This canonical auction request is still syncing between backend and blockchain.'
+      case 'retry_available':
+        return (
+          sellerAuctionLifecycle.reasonMessage ??
+          'Retry the same seller auction request from the create auction workspace.'
+        )
+      case 'start_failed':
+        return sellerAuctionLifecycle.editAllowed
+          ? (sellerAuctionLifecycle.reasonMessage ??
+              'Review the failure reason and return to editable terms from the create auction workspace.')
+          : (sellerAuctionLifecycle.reasonMessage ??
+              'This attempt is blocked until the backend indicates a safe next action.')
+      case 'auction_active':
+        return 'This auction is live and now reflects authoritative backend and blockchain state.'
+      default:
+        break
+    }
+  }
+
   if (role === 'seller' && canMarkShipped(order.status)) {
     return 'Add carrier and tracking details when the artwork leaves your studio.'
   }

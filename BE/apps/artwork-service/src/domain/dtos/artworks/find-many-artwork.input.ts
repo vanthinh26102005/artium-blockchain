@@ -1,6 +1,7 @@
 import { ArtworkStatus } from '@app/common';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class FindManyArtworkInput {
   @ApiPropertyOptional({
@@ -78,4 +79,14 @@ export class FindManyArtworkInput {
   @IsOptional()
   @IsString()
   sortOrder?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Include seller-only auction lifecycle enrichment for authenticated workspace inventory views',
+    example: true,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  includeSellerAuctionLifecycle?: boolean;
 }

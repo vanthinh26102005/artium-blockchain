@@ -33,6 +33,7 @@ import {
 } from '@shared/components/ui/dropdown-menu'
 import { Checkbox } from '@shared/components/ui/checkbox'
 import { cn } from '@shared/lib/utils'
+import { OrderStatusBadge } from '@domains/orders/components/OrderStatusBadge'
 
 // @domains - inventory
 import { useInventorySelectionStore } from '@domains/inventory/stores/useInventorySelectionStore'
@@ -265,6 +266,7 @@ export const InventoryArtworkList = ({
   const renderArtworkRow = (artwork: InventoryArtwork, nestLevel = 0) => {
     const isSelected = selectedIds.includes(artwork.id)
     const isDragging = draggedArtworkId === artwork.id
+    const visibilityLabel = artwork.status === 'Hidden' ? 'Hidden in profile' : 'Draft'
 
     return (
       <div
@@ -322,14 +324,19 @@ export const InventoryArtworkList = ({
         </div>
 
         {/* Status badge */}
-        <div
-          className={cn(
-            'rounded-full px-3 py-1 text-xs font-medium',
-            artwork.status === 'Draft' && 'bg-amber-50 text-amber-700',
-            artwork.status === 'Hidden' && 'bg-slate-100 text-slate-600',
-          )}
-        >
-          {artwork.status}
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <div
+            className={cn(
+              'rounded-full px-3 py-1 text-xs font-medium uppercase tracking-[0.12em]',
+              artwork.status === 'Draft' && 'bg-amber-50 text-amber-700',
+              artwork.status === 'Hidden' && 'bg-slate-100 text-slate-600',
+            )}
+          >
+            {visibilityLabel}
+          </div>
+          {artwork.auctionLifecycle ? (
+            <OrderStatusBadge status={artwork.auctionLifecycle.status} />
+          ) : null}
         </div>
 
         {/* Actions */}

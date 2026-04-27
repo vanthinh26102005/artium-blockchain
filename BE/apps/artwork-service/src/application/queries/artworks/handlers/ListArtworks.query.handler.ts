@@ -1,12 +1,17 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
-import { ArtworkStatus } from '@app/common';
-import { ListArtworksQuery } from '../ListArtworks.query';
 import {
-  IArtworkRepository,
-  PaginatedResponse,
-  ArtworkObject,
-} from 'apps/artwork-service/src/domain';
+  ArtworkStatus,
+  SellerAuctionStartStatusObject,
+} from '@app/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { timeout } from 'rxjs/operators';
+import { ListArtworksQuery } from '../ListArtworks.query';
+import { IArtworkRepository } from '../../../../domain/interfaces/artwork.repository.interface';
+import { PaginatedResponse } from '../../../../domain/dtos/common/paginated-response.dto';
+
+const ORDERS_RPC_TIMEOUT_MS = 3000;
 
 @QueryHandler(ListArtworksQuery)
 export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
@@ -14,6 +19,7 @@ export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
 
   constructor(
     @Inject(IArtworkRepository) private readonly repo: IArtworkRepository,
+    @Inject('ORDERS_SERVICE') private readonly ordersClient: ClientProxy,
   ) {}
 
   private getDisplayStatus(status: ArtworkStatus): 'Draft' | 'Hidden' {
@@ -44,6 +50,7 @@ export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
         q,
         minPrice,
         maxPrice,
+        includeSellerAuctionLifecycle,
         ...restOptions
       } = query.options;
 
@@ -83,10 +90,23 @@ export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
         maxPrice,
       });
 
+      const shouldIncludeAuctionLifecycle =
+        includeSellerAuctionLifecycle === true &&
+        typeof restOptions.sellerId === 'string' &&
+        restOptions.sellerId.length > 0;
+      const sellerIdForLifecycle = shouldIncludeAuctionLifecycle
+        ? restOptions.sellerId
+        : null;
+
+      const auctionLifecycleByArtworkId = sellerIdForLifecycle
+        ? await this.loadAuctionLifecycleByArtworkId(sellerIdForLifecycle, artworks)
+        : new Map<string, SellerAuctionStartStatusObject | null>();
+
       const artworkObjects = artworks.map((artwork) => ({
         ...artwork,
         thumbnailUrl: artwork.images?.[0]?.secureUrl || null,
         displayStatus: this.getDisplayStatus(artwork.status),
+        auctionLifecycle: auctionLifecycleByArtworkId.get(artwork.id) ?? null,
       }));
 
       return PaginatedResponse.create(artworkObjects, total, skip, take);
@@ -94,5 +114,30 @@ export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
       this.logger.error(`[${reqId}] list failed`, err.stack || err);
       throw err;
     }
+  }
+
+  private async loadAuctionLifecycleByArtworkId(
+    sellerId: string,
+    artworks: Array<{ id: string }>,
+  ): Promise<Map<string, SellerAuctionStartStatusObject | null>> {
+    const lifecycleEntries = await Promise.all(
+      artworks.map(async (artwork) => {
+        const lifecycle = await firstValueFrom(
+          this.ordersClient
+            .send<SellerAuctionStartStatusObject | null>(
+              { cmd: 'get_seller_auction_start_status' },
+              {
+                sellerId,
+                artworkId: artwork.id,
+              },
+            )
+            .pipe(timeout(ORDERS_RPC_TIMEOUT_MS)),
+        );
+
+        return [artwork.id, lifecycle ?? null] as const;
+      }),
+    );
+
+    return new Map(lifecycleEntries);
   }
 }

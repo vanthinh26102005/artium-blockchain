@@ -174,13 +174,14 @@ export const InventoryPage = () => {
     let isActive = true
     setIsLoading(true)
 
-    const loadArtworks = async () => {
-      try {
-        const response = await artworkApis.listArtworksPaginated({
-          sellerId: user.id,
-          q: debouncedSearchName || undefined,
-          status: filters.status,
-          minPrice: filters.minPrice,
+        const loadArtworks = async () => {
+          try {
+            const response = await artworkApis.listArtworksPaginated({
+              sellerId: user.id,
+              includeSellerAuctionLifecycle: true,
+              q: debouncedSearchName || undefined,
+              status: filters.status,
+              minPrice: filters.minPrice,
           maxPrice: filters.maxPrice,
           skip: (page - 1) * pageSize,
           take: pageSize,

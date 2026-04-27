@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { ArtworkStatus } from '../../../enums/artwork-status.enum';
 
 export class GetArtworksQueryDto {
@@ -94,4 +102,15 @@ export class GetArtworksQueryDto {
   @IsOptional()
   @IsString()
   sortOrder?: string;
+
+  @ApiProperty({
+    description:
+      'Include seller-only auction start lifecycle enrichment for authenticated workspace views',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  includeSellerAuctionLifecycle?: boolean;
 }

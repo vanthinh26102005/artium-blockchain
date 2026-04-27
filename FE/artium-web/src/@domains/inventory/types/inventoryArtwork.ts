@@ -1,4 +1,5 @@
 import type { InventoryFolder } from './inventoryFolder'
+import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
 export type InventoryArtworkStatus = 'Draft' | 'Hidden'
 
@@ -7,6 +8,7 @@ export type InventoryArtwork = {
   title: string
   creatorName: string
   status: InventoryArtworkStatus
+  auctionLifecycle?: SellerAuctionStartStatusResponse | null
   backendStatus?: string
   createdAt?: string
   updatedAt?: string

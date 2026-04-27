@@ -60,7 +60,13 @@ export const useInventoryBootstrap = (
         ]
 
         if (includeArtworks) {
-          requests.unshift(artworkApis.listArtworks({ sellerId: user.id, take: 200 }))
+          requests.unshift(
+            artworkApis.listArtworks({
+              sellerId: user.id,
+              take: 200,
+              includeSellerAuctionLifecycle: true,
+            }),
+          )
         }
 
         const results = await Promise.all(requests)

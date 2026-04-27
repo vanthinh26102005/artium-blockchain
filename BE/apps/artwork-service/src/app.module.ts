@@ -7,6 +7,7 @@ import { OutboxEntity, OutboxModule } from '@app/outbox';
 import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import {
@@ -153,6 +154,15 @@ export const Controllers = [
   UploadMicroserviceController,
 ];
 
+const OrdersServiceClient = {
+  name: 'ORDERS_SERVICE',
+  transport: Transport.TCP as const,
+  options: {
+    host: process.env.ORDERS_SERVICE_HOST || 'localhost',
+    port: parseInt(process.env.ORDERS_SERVICE_PORT || '3104', 10),
+  },
+};
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -174,6 +184,7 @@ export const Controllers = [
 
     OutboxModule,
     CqrsModule,
+    ClientsModule.register([OrdersServiceClient]),
     SeederModule,
   ],
   controllers: [...Controllers],

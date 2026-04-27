@@ -6,7 +6,9 @@ import type { OrdersWorkspaceScope } from '../types/orderTypes'
 import {
   formatOrderDate,
   formatOrderMoney,
+  getDisplayOrderStatus,
   getNextActionLabel,
+  getNextStepDescription,
   getOrderActorRole,
   getPaymentMethodLabel,
   getPrimaryArtwork,
@@ -22,6 +24,8 @@ type OrderListCardProps = {
 export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProps) => {
   const primaryArtwork = getPrimaryArtwork(order.items)
   const role = getOrderActorRole(order, currentUserId, scope)
+  const displayStatus = getDisplayOrderStatus(order, role)
+  const nextStepDescription = getNextStepDescription(order, role)
 
   return (
     <Link
@@ -54,7 +58,7 @@ export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProp
               <h3 className="text-lg font-semibold text-slate-900 transition group-hover:text-blue-700">
                 {order.orderNumber}
               </h3>
-              <OrderStatusBadge status={order.status} />
+              <OrderStatusBadge status={displayStatus} />
             </div>
             <p className="mt-1 truncate text-sm text-slate-900">
               {primaryArtwork?.artworkTitle ?? 'Artwork details available on the order detail page'}
@@ -62,6 +66,11 @@ export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProp
             <p className="mt-2 text-sm text-slate-500">
               Created {formatOrderDate(order.createdAt)} • {getPaymentMethodLabel(order.paymentMethod)}
             </p>
+            {role === 'seller' && order.sellerAuctionLifecycle?.reasonMessage ? (
+              <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                {order.sellerAuctionLifecycle.reasonMessage}
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -82,6 +91,9 @@ export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProp
               {getNextActionLabel(order, role)}
               <ChevronRight className="h-4 w-4" />
             </div>
+            <p className="mt-2 max-w-[18rem] text-xs leading-5 text-slate-500">
+              {nextStepDescription}
+            </p>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { Search } from 'lucide-react'
 import { Metadata } from '@/components/SEO/Metadata'
+import auctionApis from '@shared/apis/auctionApis'
 import orderApis, { type OrderItemResponse, type OrderResponse } from '@shared/apis/orderApis'
 import { Input } from '@shared/components/ui/input'
 import { Pagination } from '@domains/inventory/components/Pagination'
@@ -81,10 +82,36 @@ export const OrdersPageView = () => {
         }
 
         const itemMap = new Map(itemsByOrderId)
+        const hydratedOrders = response.data.map((order) => ({
+          ...order,
+          items: itemMap.get(order.id) ?? [],
+        }))
+
+        const sellerLifecycleByOrderId =
+          scope === 'seller'
+            ? new Map(
+                await Promise.all(
+                  hydratedOrders.map(async (order) => {
+                    const primaryArtworkId = order.items?.[0]?.artworkId
+
+                    if (order.paymentMethod !== 'blockchain' || !primaryArtworkId) {
+                      return [order.id, null] as const
+                    }
+
+                    const lifecycle = await auctionApis.getSellerAuctionStartStatus(primaryArtworkId)
+                    return [
+                      order.id,
+                      lifecycle?.orderId === order.id ? lifecycle : null,
+                    ] as const
+                  }),
+                ),
+              )
+            : new Map<string, null>()
+
         setOrders(
-          response.data.map((order) => ({
+          hydratedOrders.map((order) => ({
             ...order,
-            items: itemMap.get(order.id) ?? [],
+            sellerAuctionLifecycle: sellerLifecycleByOrderId.get(order.id) ?? null,
           })),
         )
         setTotal(response.total)
