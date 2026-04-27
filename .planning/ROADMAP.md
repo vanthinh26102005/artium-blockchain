@@ -198,7 +198,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 18. Seller auction access and artwork eligibility policy | 3/3 | Completed | 2026-04-25 |
 | 18.1. Seller registration and role activation gap closure | 1/1 | Completed | 2026-04-25 |
 | 19. Seller auction creation workspace and terms UX | 3/3 | Completed | 2026-04-27 |
-| 19.1. Seller auction artifact recovery and policy alignment | 1/3 | In progress | 2026-04-27 |
+| 19.1. Seller auction artifact recovery and policy alignment | 3/3 | Completed | 2026-04-27 |
 | 20. Auction start orchestration and seller lifecycle status | 0/TBD | Not started | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
@@ -354,7 +354,7 @@ Plans:
   3. Developer can inspect the seller auction preview/policy summary and confirm it matches the final milestone contract for pre-start seller terms disclosure.
   4. Developer can open `REQUIREMENTS.md` and `ROADMAP.md` and see seller-auction requirement/phase status aligned to implemented reality.
   5. Developer can re-run milestone audit and remove the orphaned-artifact and Phase 19 traceability blockers.
-**Plans**: TBD
+**Plans**: `.planning/phases/19.1-seller-auction-artifact-recovery-and-policy-alignment/19.1-01-PLAN.md`, `.planning/phases/19.1-seller-auction-artifact-recovery-and-policy-alignment/19.1-02-PLAN.md`, `.planning/phases/19.1-seller-auction-artifact-recovery-and-policy-alignment/19.1-03-PLAN.md`
 **UI hint**: yes
 
 ### Phase 20: Auction start orchestration and seller lifecycle status

@@ -61,7 +61,7 @@ Milestone focus: seller-only auction creation from owned inventory with practica
 - [x] **SAUC-01**: Sellers can access a protected auction creation workspace only when authenticated and recognized as seller-capable; non-sellers are blocked by both frontend route guards and backend authorization.
 - [x] **SAUC-02**: Sellers can choose only artworks they own from inventory, with the picker excluding sold, deleted, already-auctioned, active-order, multi-quantity, or incomplete artwork records.
 - [x] **SAUC-03**: Sellers can see clear eligibility reasons and recovery actions when an artwork cannot be auctioned, such as completing required metadata, uploading a primary image, or resolving an active listing/order state.
-- [ ] **SAUC-10**: Authenticated non-sellers can register a seller profile from profile settings, with backend seller role activation performed server-side in the same transaction as seller profile creation and without auto-granting verification or payment onboarding.
+- [x] **SAUC-10**: Authenticated non-sellers can register a seller profile from profile settings, with backend seller role activation performed server-side in the same transaction as seller profile creation and without auto-granting verification or payment onboarding.
 
 ### Auction Terms & Policy
 
@@ -129,9 +129,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAUC-01 | Phase 18 | Completed |
 | SAUC-02 | Phase 18 | Completed |
 | SAUC-03 | Phase 18 | Completed |
-| SAUC-10 | Phase 19.1 | Pending |
-| SAUC-04 | Phase 19.1 | Pending |
-| SAUC-05 | Phase 19.1 | Pending |
+| SAUC-10 | Phase 19.1 | Completed |
+| SAUC-04 | Phase 19.1 | Completed |
+| SAUC-05 | Phase 19.1 | Completed |
 | SAUC-06 | Phase 20 | Pending |
 | SAUC-07 | Phase 20 | Pending |
 | SAUC-08 | Phase 20 | Pending |
