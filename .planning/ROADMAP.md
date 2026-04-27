@@ -213,7 +213,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 23. Kubernetes Platform Topology & Workload Design | 0/TBD | Not started | - |
 | 24. Docker Build, Image Lifecycle & CI/CD Strategy | 0/TBD | Not started | - |
 | 25. Production Operations Blueprint & Final Deployment Artifacts | 0/TBD | Not started | - |
-| 26. Kubernetes Deployment Implementation & Production Platform Stack Foundation | 4/4 | Planned | - |
+| 26. Kubernetes Deployment Implementation & Production Platform Stack Foundation | 1/4 | In Progress|  |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -476,7 +476,7 @@ Plans:
 **Plans**: `.planning/phases/26-kubernetes-deployment-implementation-and-production-platform/26-01-PLAN.md`, `.planning/phases/26-kubernetes-deployment-implementation-and-production-platform/26-02-PLAN.md`, `.planning/phases/26-kubernetes-deployment-implementation-and-production-platform/26-03-PLAN.md`, `.planning/phases/26-kubernetes-deployment-implementation-and-production-platform/26-04-PLAN.md`
 
 Plans:
-- [ ] 26-01-PLAN.md — Helm chart foundation, provider-portable values, in-cluster dependency baseline, and legacy-manifest guardrails
+- [x] 26-01-PLAN.md — Helm chart foundation, provider-portable values, in-cluster dependency baseline, and legacy-manifest guardrails
 - [ ] 26-02-PLAN.md — Runtime gates and documentation for singleton/background worker separation
 - [ ] 26-03-PLAN.md — Kubernetes templates for API deployments, worker deployments, services, ingress, Sealed Secrets, network policy, and disruption budgets
 - [ ] 26-04-PLAN.md — Validation scripts, real-cluster deployment guide, smoke checks, rollback, backup/restore, and runbook documentation

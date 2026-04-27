@@ -95,16 +95,16 @@ Milestone focus: production-grade backend deployment strategy grounded in the re
 
 ### Kubernetes Design
 
-- [ ] **K8S-01**: DevOps engineers can decide what belongs in Kubernetes versus managed external services for this backend, with explicit rationale.
-- [ ] **K8S-02**: DevOps engineers can define namespace, workload, service exposure, and ingress strategy that fits the actual backend topology.
+- [x] **K8S-01**: DevOps engineers can decide what belongs in Kubernetes versus managed external services for this backend, with explicit rationale.
+- [x] **K8S-02**: DevOps engineers can define namespace, workload, service exposure, and ingress strategy that fits the actual backend topology.
 - [ ] **K8S-03**: DevOps engineers can define replica, health/readiness/startup, resource, and autoscaling policies by workload class.
 - [ ] **K8S-04**: DevOps engineers can define config, secret, and network-boundary strategy with least-privilege defaults.
 
 ### Docker & Release Strategy
 
-- [ ] **DOCK-01**: DevOps engineers can build immutable production images using optimized multi-stage builds and runtime-safe defaults.
-- [ ] **DOCK-02**: DevOps engineers can version and promote images with reproducible tags or digests and rollback-friendly release metadata.
-- [ ] **DOCK-03**: DevOps engineers can eliminate development-only container behavior from the production deployment design.
+- [x] **DOCK-01**: DevOps engineers can build immutable production images using optimized multi-stage builds and runtime-safe defaults.
+- [x] **DOCK-02**: DevOps engineers can version and promote images with reproducible tags or digests and rollback-friendly release metadata.
+- [x] **DOCK-03**: DevOps engineers can eliminate development-only container behavior from the production deployment design.
 
 ### Operations & Delivery
 
@@ -118,7 +118,7 @@ Milestone focus: production-grade backend deployment strategy grounded in the re
 
 - [ ] **DELV-01**: Stakeholders can review a text-based architecture diagram of the current and recommended production topology.
 - [ ] **DELV-02**: Stakeholders can follow a step-by-step deployment plan from cluster bootstrap through backend rollout.
-- [ ] **DELV-03**: Stakeholders can inspect sample Kubernetes manifests aligned to the recommended architecture.
+- [x] **DELV-03**: Stakeholders can inspect sample Kubernetes manifests aligned to the recommended architecture.
 - [ ] **DELV-04**: Stakeholders can review a risk register with practical mitigations for brownfield adoption.
 
 ### v1.2 Out of Scope
@@ -197,13 +197,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ARCH-02 | Phase 22 | Completed |
 | ARCH-03 | Phase 22 | Completed |
 | ARCH-04 | Phase 22 | Completed |
-| K8S-01 | Phase 23 | Pending |
-| K8S-02 | Phase 23 | Pending |
+| K8S-01 | Phase 23 | Complete |
+| K8S-02 | Phase 23 | Complete |
 | K8S-03 | Phase 23 | Pending |
 | K8S-04 | Phase 23 | Pending |
-| DOCK-01 | Phase 24 | Pending |
-| DOCK-02 | Phase 24 | Pending |
-| DOCK-03 | Phase 24 | Pending |
+| DOCK-01 | Phase 24 | Complete |
+| DOCK-02 | Phase 24 | Complete |
+| DOCK-03 | Phase 24 | Complete |
 | OPS-01 | Phase 24 | Pending |
 | OPS-02 | Phase 25 | Pending |
 | OPS-03 | Phase 25 | Pending |
@@ -211,7 +211,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OPS-05 | Phase 25 | Pending |
 | DELV-01 | Phase 25 | Pending |
 | DELV-02 | Phase 25 | Pending |
-| DELV-03 | Phase 25 | Pending |
+| DELV-03 | Phase 25 | Complete |
 | DELV-04 | Phase 25 | Pending |
 
 **Coverage:**
