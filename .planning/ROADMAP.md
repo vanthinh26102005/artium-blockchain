@@ -411,8 +411,12 @@ Plans:
   2. Developer can review communication flows across gateway TCP clients, RabbitMQ outbox/event paths, websocket messaging, and webhook/external-provider callbacks.
   3. Developer can review a concrete list of current scalability and reliability concerns with evidence from code or runtime configuration.
   4. Developer can distinguish production-worthy architecture from dev-only or legacy artifacts that should not be mirrored directly into Kubernetes.
-**Plans**: TBD
+**Plans**: 2 plans
 **UI hint**: no
+
+Plans:
+- [ ] 22-01-PLAN.md — Service-role catalog and communication-path matrix from the Phase 21 baseline
+- [ ] 22-02-PLAN.md — Architecture risk register and legacy/dev-artifact disposition guidance
 
 ### Phase 23: Kubernetes Platform Topology & Workload Design
 
