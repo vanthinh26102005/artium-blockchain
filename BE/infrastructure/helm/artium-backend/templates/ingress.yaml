@@ -20,7 +20,7 @@ spec:
     - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
-          {{- range $path := list "/" "/api" "/api-docs" "/socket.io" "/messaging" "/auction" }}
+          {{- range $path := list "/api" "/api-docs" "/socket.io" "/messaging" "/auction" }}
           - path: {{ $path | quote }}
             pathType: Prefix
             backend:
@@ -29,4 +29,11 @@ spec:
                 port:
                   number: 8081
           {{- end }}
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "artium-backend.serviceName" (dict "root" $ "name" (ternary "web" "api-gateway" $.Values.web.enabled)) }}
+                port:
+                  number: {{ ternary $.Values.web.port 8081 $.Values.web.enabled }}
 {{- end }}

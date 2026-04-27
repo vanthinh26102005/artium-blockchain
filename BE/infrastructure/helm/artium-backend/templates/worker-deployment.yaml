@@ -82,6 +82,8 @@ spec:
                   name: {{ include "artium-backend.fullname" $ }}-runtime
                   key: RABBITMQ_URI
           envFrom:
+            - configMapRef:
+                name: {{ include "artium-backend.fullname" $ }}-runtime
             - secretRef:
                 name: {{ $.Values.sealedSecrets.name | quote }}
           resources:

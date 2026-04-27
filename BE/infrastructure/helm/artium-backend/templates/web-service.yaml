@@ -1,0 +1,20 @@
+{{- if .Values.web.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "artium-backend.serviceName" (dict "root" . "name" "web") }}
+  namespace: {{ .Values.namespace.name | quote }}
+  labels:
+    {{- include "artium-backend.labels" . | nindent 4 }}
+    artium.io/workload: web
+spec:
+  type: {{ .Values.web.type | default "ClusterIP" }}
+  selector:
+    {{- include "artium-backend.selectorLabels" . | nindent 4 }}
+    artium.io/workload: web
+    artium.io/workload-kind: frontend
+  ports:
+    - name: http
+      port: {{ .Values.web.port }}
+      targetPort: http
+{{- end }}

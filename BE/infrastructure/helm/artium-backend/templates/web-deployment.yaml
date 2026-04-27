@@ -1,0 +1,61 @@
+{{- if .Values.web.enabled }}
+{{- $image := .Values.images.web }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "artium-backend.serviceName" (dict "root" . "name" "web") }}
+  namespace: {{ .Values.namespace.name | quote }}
+  labels:
+    {{- include "artium-backend.labels" . | nindent 4 }}
+    artium.io/workload: web
+    artium.io/workload-kind: frontend
+spec:
+  replicas: {{ default 1 .Values.web.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "artium-backend.selectorLabels" . | nindent 6 }}
+      artium.io/workload: web
+      artium.io/workload-kind: frontend
+  template:
+    metadata:
+      labels:
+        {{- include "artium-backend.selectorLabels" . | nindent 8 }}
+        artium.io/workload: web
+        artium.io/workload-kind: frontend
+    spec:
+      containers:
+        - name: web
+          image: {{ include "artium-backend.image" (dict "image" $image) | quote }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.web.port }}
+          env:
+            {{- range $key, $value := .Values.web.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.sealedSecrets.name | quote }}
+          resources:
+            {{- toYaml (default dict .Values.web.resources) | nindent 12 }}
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+{{- end }}

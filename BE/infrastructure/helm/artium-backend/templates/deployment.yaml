@@ -45,6 +45,8 @@ spec:
           env:
             - name: PORT
               value: {{ default "" $service.ports.http | quote }}
+            - name: port
+              value: {{ default "" $service.ports.http | quote }}
             - name: MICROSERVICE_PORT
               value: {{ default "" $service.ports.tcp | quote }}
             - name: DB_STRATEGY
@@ -76,6 +78,8 @@ spec:
             - name: NOTIFICATION_PROCESSOR_ENABLED
               value: "false"
           envFrom:
+            - configMapRef:
+                name: {{ include "artium-backend.fullname" $ }}-runtime
             - secretRef:
                 name: {{ $.Values.sealedSecrets.name | quote }}
           resources:
