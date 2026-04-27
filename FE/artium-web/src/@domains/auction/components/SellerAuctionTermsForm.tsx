@@ -397,7 +397,7 @@ export const SellerAuctionTermsForm = ({
             Start Auction
           </Button>
           <p className="mt-3 text-sm leading-6 text-[#191414]/60">
-            Auction start connects to wallet and backend orchestration in the next step.
+            Auction start connects to wallet and backend orchestration in the next phase.
           </p>
         </div>
       </div>

@@ -36,8 +36,8 @@ const policyCards = [
     icon: ShieldCheck,
   },
   {
-    title: 'Economics lock on activation',
-    body: 'Reserve, increment, and duration cannot be edited after activation.',
+    title: 'Fees and lock after activation',
+    body: 'Seller fees follow current policy. Reserve, increment, and duration lock once the auction is activated.',
     icon: Lock,
   },
   {
@@ -361,7 +361,7 @@ const SellerCandidateWorkspace = () => {
             ) : (
               <p className="mt-5 text-sm leading-6 text-white/75">
                 Review local terms, preview buyer-facing policy, and hand off activation to the
-                next step.
+                next phase.
               </p>
             )}
           </div>
