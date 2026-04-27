@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 23: Kubernetes Platform Topology & Workload Design** - Define cluster topology, workload kinds, exposure rules, config/secrets, probes, and scaling boundaries
 - [ ] **Phase 24: Docker Build, Image Lifecycle & CI/CD Strategy** - Define production image standards and the release pipeline that builds, scans, tags, migrates, and deploys them
 - [ ] **Phase 25: Production Operations Blueprint & Final Deployment Artifacts** - Finalize observability, recovery, risk mitigation, manifests, architecture diagram, and deployment plan
-- [ ] **Phase 26: Kubernetes Deployment Implementation & Production Platform Stack Foundation** - Implement the approved Kubernetes/Helm foundation, managed dependency integration, ingress/TLS, secrets, probes, observability hooks, and rollback-ready deployment path
+- [x] **Phase 26: Kubernetes Deployment Implementation & Production Platform Stack Foundation** - Implement the approved Kubernetes/Helm foundation, managed dependency integration, ingress/TLS, secrets, probes, observability hooks, and rollback-ready deployment path (completed 2026-04-27)
 
 ## Phase Details
 
@@ -213,7 +213,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 23. Kubernetes Platform Topology & Workload Design | 0/TBD | Not started | - |
 | 24. Docker Build, Image Lifecycle & CI/CD Strategy | 0/TBD | Not started | - |
 | 25. Production Operations Blueprint & Final Deployment Artifacts | 0/TBD | Not started | - |
-| 26. Kubernetes Deployment Implementation & Production Platform Stack Foundation | 3/4 | In Progress|  |
+| 26. Kubernetes Deployment Implementation & Production Platform Stack Foundation | 4/4 | Complete   | 2026-04-27 |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -479,5 +479,5 @@ Plans:
 - [x] 26-01-PLAN.md — Helm chart foundation, provider-portable values, in-cluster dependency baseline, and legacy-manifest guardrails
 - [x] 26-02-PLAN.md — Runtime gates and documentation for singleton/background worker separation
 - [x] 26-03-PLAN.md — Kubernetes templates for API deployments, worker deployments, services, ingress, Sealed Secrets, network policy, and disruption budgets
-- [ ] 26-04-PLAN.md — Validation scripts, real-cluster deployment guide, smoke checks, rollback, backup/restore, and runbook documentation
+- [x] 26-04-PLAN.md — Validation scripts, real-cluster deployment guide, smoke checks, rollback, backup/restore, and runbook documentation
 **UI hint**: no

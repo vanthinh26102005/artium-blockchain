@@ -108,18 +108,18 @@ Milestone focus: production-grade backend deployment strategy grounded in the re
 
 ### Operations & Delivery
 
-- [ ] **OPS-01**: Teams can run a CI/CD pipeline that builds, tests, scans, publishes, migrates, and deploys the backend safely.
+- [x] **OPS-01**: Teams can run a CI/CD pipeline that builds, tests, scans, publishes, migrates, and deploys the backend safely.
 - [x] **OPS-02**: Operators can observe backend health through practical logging, metrics, and tracing recommendations tied to HTTP, RabbitMQ, and blockchain/payment flows.
-- [ ] **OPS-03**: Operators can recover from pod, node, dependency, or rollout failures using defined backup, restore, and rollback procedures.
+- [x] **OPS-03**: Operators can recover from pod, node, dependency, or rollout failures using defined backup, restore, and rollback procedures.
 - [x] **OPS-04**: Operators can scale stateless services without duplicating singleton/background responsibilities such as outbox publishing or blockchain listeners.
 - [x] **OPS-05**: Operators can protect sensitive credentials and raw-body webhook paths in production without breaking Stripe or blockchain integrations.
 
 ### Delivery Artifacts
 
-- [ ] **DELV-01**: Stakeholders can review a text-based architecture diagram of the current and recommended production topology.
-- [ ] **DELV-02**: Stakeholders can follow a step-by-step deployment plan from cluster bootstrap through backend rollout.
+- [x] **DELV-01**: Stakeholders can review a text-based architecture diagram of the current and recommended production topology.
+- [x] **DELV-02**: Stakeholders can follow a step-by-step deployment plan from cluster bootstrap through backend rollout.
 - [x] **DELV-03**: Stakeholders can inspect sample Kubernetes manifests aligned to the recommended architecture.
-- [ ] **DELV-04**: Stakeholders can review a risk register with practical mitigations for brownfield adoption.
+- [x] **DELV-04**: Stakeholders can review a risk register with practical mitigations for brownfield adoption.
 
 ### v1.2 Out of Scope
 
@@ -204,15 +204,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOCK-01 | Phase 24 | Complete |
 | DOCK-02 | Phase 24 | Complete |
 | DOCK-03 | Phase 24 | Complete |
-| OPS-01 | Phase 24 | Pending |
+| OPS-01 | Phase 24 | Complete |
 | OPS-02 | Phase 25 | Complete |
-| OPS-03 | Phase 25 | Pending |
+| OPS-03 | Phase 25 | Complete |
 | OPS-04 | Phase 25 | Complete |
 | OPS-05 | Phase 25 | Complete |
-| DELV-01 | Phase 25 | Pending |
-| DELV-02 | Phase 25 | Pending |
+| DELV-01 | Phase 25 | Complete |
+| DELV-02 | Phase 25 | Complete |
 | DELV-03 | Phase 25 | Complete |
-| DELV-04 | Phase 25 | Pending |
+| DELV-04 | Phase 25 | Complete |
 
 **Coverage:**
 - v1 + v1.1 + v1.2 requirements: 58 total
