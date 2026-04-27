@@ -3,6 +3,8 @@ global:
   clusterDomain: cluster.local
   imagePullPolicy: IfNotPresent
 
+imagePullSecrets: []
+
 namespace:
   create: true
   name: artium

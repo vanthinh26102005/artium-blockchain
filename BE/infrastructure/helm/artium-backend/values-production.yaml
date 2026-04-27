@@ -16,6 +16,9 @@ sealedSecrets:
 networkPolicy:
   enabled: true
 
+imagePullSecrets:
+  - name: ghcr-pull-secret
+
 images:
   api-gateway:
     repository: ghcr.io/nouu188/api-gateway

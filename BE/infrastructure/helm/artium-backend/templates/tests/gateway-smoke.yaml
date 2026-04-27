@@ -9,6 +9,10 @@ metadata:
     helm.sh/hook: test
 spec:
   restartPolicy: Never
+  {{- with .Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   containers:
     - name: curl
       image: curlimages/curl:8.8.0

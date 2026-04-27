@@ -25,6 +25,10 @@ spec:
         artium.io/workload: {{ $name | quote }}
         artium.io/workload-kind: api
     spec:
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ $name }}
           image: {{ include "artium-backend.image" (dict "image" $image) | quote }}

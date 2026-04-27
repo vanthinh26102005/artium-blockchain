@@ -33,6 +33,10 @@ spec:
       annotations:
         artium.io/scale-guardrail: "replicas-above-1-require-locking-leader-election-or-idempotency"
     spec:
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ $name }}
           image: {{ include "artium-backend.image" (dict "image" $image) | quote }}
