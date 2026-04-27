@@ -1,4 +1,6 @@
 export { BidEditingModal, type AuctionBidLot } from './BidEditingModal'
 export { ConfirmedBidState } from './ConfirmedBidState'
 export { PendingBidState } from './PendingBidState'
+export { SellerAuctionTermsForm } from './SellerAuctionTermsForm'
+export { SellerAuctionTermsPreview } from './SellerAuctionTermsPreview'
 export { SubmittingBidState } from './SubmittingBidState'
