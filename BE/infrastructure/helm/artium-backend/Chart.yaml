@@ -7,13 +7,13 @@ appVersion: "1.0.0"
 dependencies:
   - name: postgresql
     alias: postgresql
-    version: 17.1.0
+    version: 18.5.23
     repository: oci://registry-1.docker.io/bitnamicharts
   - name: redis
     alias: redis
-    version: 23.1.1
+    version: 24.1.2
     repository: oci://registry-1.docker.io/bitnamicharts
   - name: rabbitmq
     alias: rabbitmq
-    version: 16.0.16
+    version: 16.0.14
     repository: oci://registry-1.docker.io/bitnamicharts
