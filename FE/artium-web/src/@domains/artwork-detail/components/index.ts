@@ -4,9 +4,6 @@ export { HeroSection, ArtworkGallery, ArtworkInfo, ArtworkActions } from './Hero
 // TabsSection
 export { TabsSection, AboutArtwork, AboutCreator } from './TabsSection'
 
-// MoreFromArtistSection
-export { MoreFromArtistSection } from './MoreFromArtistSection'
-
 // SimilarArtworksSection
 export { SimilarArtworksSection } from './SimilarArtworksSection'
 

@@ -12,7 +12,7 @@ import {
 } from './interfaces/blockchain-config.interface';
 import { EscrowContractService } from './services/escrow-contract.service';
 import { BlockchainEventListenerService } from './services/blockchain-event-listener.service';
-import * as ABI from './abi/ArtAuctionEscrow.json';
+import ABI from './abi/ArtAuctionEscrow.json';
 import { BlockchainEventCursor } from './entities/blockchain-event-cursor.entity';
 import { BlockchainProcessedEvent } from './entities/blockchain-processed-event.entity';
 

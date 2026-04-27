@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager, FindOptionsOrder } from 'typeorm';
 import { Order } from '../../domain/entities';
-import { IOrderRepository } from '../../domain/interfaces';
+import { IOrderRepository, SellerOrderListOptions } from '../../domain/interfaces';
 import {
   OrderStatus,
   FindManyOptions,
@@ -159,7 +159,7 @@ export class OrderRepository implements IOrderRepository {
 
   async findBySellerIdViaItems(
     sellerId: string,
-    options?: { skip?: number; take?: number },
+    options?: SellerOrderListOptions,
     transactionManager?: EntityManager,
   ): Promise<{ data: Order[]; total: number }> {
     const repo = this.getRepo(transactionManager);
@@ -167,7 +167,30 @@ export class OrderRepository implements IOrderRepository {
       .createQueryBuilder('order')
       .innerJoin('order_items', 'item', 'item.order_id = order.order_id')
       .where('item.seller_id = :sellerId', { sellerId })
+      .distinct(true)
       .orderBy('order.created_at', 'DESC');
+
+    if (options?.status) {
+      qb.andWhere('order.status = :status', { status: options.status });
+    }
+
+    if (options?.onChainOrderId) {
+      qb.andWhere('order.on_chain_order_id = :onChainOrderId', {
+        onChainOrderId: options.onChainOrderId,
+      });
+    }
+
+    if (options?.escrowState !== undefined) {
+      qb.andWhere('order.escrow_state = :escrowState', {
+        escrowState: options.escrowState,
+      });
+    }
+
+    if (options?.paymentMethod) {
+      qb.andWhere('order.payment_method = :paymentMethod', {
+        paymentMethod: options.paymentMethod,
+      });
+    }
 
     const total = await qb.getCount();
 

@@ -36,6 +36,22 @@ export class OrderItemDto {
   @IsNumber()
   @Min(0, { message: 'Price must be non-negative' })
   price: number;
+
+  @ApiPropertyOptional({
+    description: 'Artwork title snapshot at purchase time',
+    example: 'Moonlit Reverie',
+  })
+  @IsOptional()
+  @IsString()
+  artworkTitle?: string;
+
+  @ApiPropertyOptional({
+    description: 'Artwork image URL snapshot at purchase time',
+    example: 'https://cdn.example.com/artworks/moonlit-reverie.jpg',
+  })
+  @IsOptional()
+  @IsString()
+  artworkImageUrl?: string;
 }
 
 export class ShippingAddressDto {
@@ -107,6 +123,16 @@ export class CreateOrderDto {
   @ValidateNested()
   @Type(() => ShippingAddressDto)
   shippingAddress?: ShippingAddressDto;
+
+  @ApiPropertyOptional({
+    description: 'Shipping cost',
+    example: 25.0,
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0, { message: 'Shipping cost must be non-negative' })
+  shippingCost?: number;
 
   @ApiPropertyOptional({
     description: 'Additional notes',

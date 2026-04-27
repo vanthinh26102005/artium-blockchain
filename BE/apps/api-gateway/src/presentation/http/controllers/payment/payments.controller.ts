@@ -6,8 +6,10 @@ import {
   Inject,
   Param,
   Post,
+  Query,
   RawBodyRequest,
   Req,
+  NotFoundException,
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -30,6 +32,8 @@ import {
   AttachPaymentMethodDto,
 } from '@app/common';
 import { sendRpc } from '../../utils';
+import { RecordEthereumPaymentDto } from './dtos/record-ethereum-payment.dto';
+import { GetEthereumQuoteDto } from './dtos/get-ethereum-quote.dto';
 
 @ApiTags('Stripe')
 @Controller('payments')
@@ -88,11 +92,11 @@ export class PaymentsController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 409, description: 'Customer already exists' })
-  async createStripeCustomer(@Body() data: CreateStripeCustomerDto) {
+  async createStripeCustomer(@Body() data: CreateStripeCustomerDto, @Req() req: any) {
     return sendRpc(
       this.paymentsClient,
       { cmd: 'create_stripe_customer' },
-      data,
+      { ...data, userId: req.user?.id },
     );
   }
 
@@ -181,12 +185,18 @@ export class PaymentsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
-  async getTransactionById(@Param('id') id: string) {
-    return sendRpc(
+  async getTransactionById(@Param('id') id: string, @Req() req: any) {
+    const transaction = await sendRpc<{ id: string; userId?: string | null }>(
       this.paymentsClient,
       { cmd: 'get_transaction_by_id' },
       { id },
     );
+
+    if (transaction?.userId !== req.user?.id) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    return transaction;
   }
 
   // ==================== PAYMENT METHODS ====================
@@ -205,6 +215,43 @@ export class PaymentsController {
       this.paymentsClient,
       { cmd: 'get_payment_methods' },
       { userId: req.user?.id },
+    );
+  }
+
+  // ==================== ETHEREUM PAYMENTS ====================
+
+  @Post('ethereum')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Record Ethereum payment transaction' })
+  @ApiBody({ type: RecordEthereumPaymentDto })
+  @ApiResponse({ status: 201, description: 'Payment recorded successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 409, description: 'Transaction already recorded' })
+  async recordEthereumPayment(
+    @Body() data: RecordEthereumPaymentDto,
+    @Req() req: any,
+  ) {
+    return sendRpc(
+      this.paymentsClient,
+      { cmd: 'record_ethereum_payment' },
+      { ...data, userId: req.user?.id },
+    );
+  }
+
+  @Get('ethereum/quote')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get a Sepolia MetaMask quote for checkout' })
+  @ApiResponse({ status: 200, description: 'Ethereum quote generated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid quote input' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getEthereumQuote(@Query() query: GetEthereumQuoteDto) {
+    return sendRpc(
+      this.paymentsClient,
+      { cmd: 'get_ethereum_quote' },
+      { usdAmount: query.usdAmount },
     );
   }
 }

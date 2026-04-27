@@ -1,13 +1,19 @@
+import { PaymentProvider } from '@app/common';
+
 export class PaymentSucceededEvent {
   constructor(
-    public readonly transactionId: string,
-    public readonly userId: string,
-    public readonly stripePaymentIntentId: string,
-    public readonly stripeChargeId: string,
-    public readonly amount: number,
-    public readonly currency: string,
-    public readonly orderId?: string,
-    public readonly invoiceId?: string,
+    public readonly payload: {
+      transactionId: string;
+      userId: string;
+      amount: number;
+      currency: string;
+      provider: PaymentProvider;
+      orderId?: string;
+      invoiceId?: string;
+      stripePaymentIntentId?: string | null;
+      stripeChargeId?: string | null;
+      txHash?: string | null;
+    },
   ) {}
 
   static getEventType(): string {
@@ -16,14 +22,7 @@ export class PaymentSucceededEvent {
 
   toPayload(): Record<string, any> {
     return {
-      transactionId: this.transactionId,
-      userId: this.userId,
-      stripePaymentIntentId: this.stripePaymentIntentId,
-      stripeChargeId: this.stripeChargeId,
-      amount: this.amount,
-      currency: this.currency,
-      orderId: this.orderId,
-      invoiceId: this.invoiceId,
+      ...this.payload,
       timestamp: new Date().toISOString(),
     };
   }

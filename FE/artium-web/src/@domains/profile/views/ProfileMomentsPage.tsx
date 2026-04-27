@@ -20,9 +20,18 @@ export const ProfileMomentsPageView = ({ username: _username }: ProfileMomentsPa
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
+  const profileHandle = resolvedUsername || profileData.user.username || usernameFromRoute || ''
   const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Moments`
-  const baseHref = `/profile/${resolvedUsername}`
-  const useProfileBaseHref = profileData.moments.length > 0
+  const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}` : ''
+  const tabHrefs = profileHandle
+    ? {
+        overview: baseHref,
+        artworks: `${baseHref}/artworks`,
+        moments: `${baseHref}/moments`,
+        moodboards: `${baseHref}/moodboards`,
+      }
+    : undefined
+  const useProfileBaseHref = profileData.moments.length > 0 && Boolean(profileHandle)
   const moments = profileData.moments.map((moment) =>
     mapProfileMomentToMomentCard(moment, profileData.user),
   )
@@ -53,12 +62,7 @@ export const ProfileMomentsPageView = ({ username: _username }: ProfileMomentsPa
           <ProfileTabs
             tabs={PROFILE_TABS}
             activeTab="moments"
-            tabHrefs={{
-              overview: baseHref,
-              artworks: `${baseHref}/artworks`,
-              moments: `${baseHref}/moments`,
-              moodboards: `${baseHref}/moodboards`,
-            }}
+            tabHrefs={tabHrefs}
           />
         </div>
         <div className="container py-6">

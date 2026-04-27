@@ -162,7 +162,7 @@ export const useMessaging = () => {
     if (user?.id) {
       loadConversations()
 
-      messagingWs.connect(user.id, user.username, user.email)
+      messagingWs.connect(user.id, user.username ?? undefined, user.email ?? undefined)
 
       const handleNewMessage = (message: Message) => {
         setMessages((prev) => {

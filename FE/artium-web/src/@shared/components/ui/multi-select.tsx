@@ -32,7 +32,7 @@ const multiSelectVariants = cva(
         secondary:
           'border-foreground/10 bg-secondary text-secondary-foreground hover:bg-secondary/80',
         destructive:
-          'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
+          'border-black bg-destructive text-destructive-foreground hover:bg-destructive/80',
         inverted: 'inverted',
       },
     },
@@ -303,6 +303,7 @@ export const MultiSelect = React.forwardRef<
                 <div className="flex flex-wrap items-center">
                   {selectedValues.slice(0, maxCount).map((value) => {
                     const option = options.find((o) => o.value === value)
+                    if (!option) return null
                     const IconComponent = option?.icon
                     return (
                       <Badge
@@ -314,10 +315,9 @@ export const MultiSelect = React.forwardRef<
                         style={{ animationDuration: `${animation}s` }}
                       >
                         {IconComponent && <IconComponent className="mr-2 h-4 w-4" />}
-                        {/* @ts-ignore */}
                         {customRenderSelectedOption
                           ? customRenderSelectedOption(option)
-                          : option?.label}
+                          : option.label}
                         <XCircle
                           className="ml-2 h-4 w-4 cursor-pointer"
                           onClick={(event) => {

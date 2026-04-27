@@ -299,10 +299,10 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
   const [isTagFormOpen, setIsTagFormOpen] = useState(false)
   const locationNameRef = useRef<HTMLInputElement>(null)
   const tagInputRef = useRef<HTMLInputElement>(null)
-  const inputBaseClassName = 'h-[52px] text-[15px] lg:h-[56px] lg:text-[16px]'
+  const inputBaseClassName = 'h-[52px] text-[15px] lg:h-14 lg:text-[16px]'
   const textareaBaseClassName = 'min-h-[140px] text-[15px] lg:min-h-[160px] lg:text-[16px]'
   const labelClassName =
-    'text-[11px] font-semibold uppercase tracking-[0.2em] text-black/50 lg:text-[12px] rounded-[16px]!'
+    'text-[11px] font-semibold uppercase tracking-[0.2em] text-black/50 lg:text-[12px] rounded-2xl!'
   const sectionTitleClassName =
     'text-[13px] font-extrabold uppercase tracking-[0.05em] text-black/50 lg:text-[17px]'
   const selectedLocation = locations.find((location) => location.id === details.locationId)
@@ -328,7 +328,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
 
   return (
     <div className={cn('mt-4 space-y-4 lg:space-y-8', className)}>
-      <div className="rounded-[32px] border border-black/10 bg-white p-4 lg:p-6">
+      <div className="rounded-4xl border border-black/10 bg-white p-4 lg:p-6">
         <p className={sectionTitleClassName}>Artwork details</p>
         <div className="mt-4 space-y-4 lg:space-y-6">
           <div>
@@ -429,8 +429,8 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
                 />
               </div>
               {errors['details.dimensions.height'] ||
-              errors['details.dimensions.width'] ||
-              errors['details.dimensions.depth'] ? (
+                errors['details.dimensions.width'] ||
+                errors['details.dimensions.depth'] ? (
                 <p className="mt-2 text-sm text-red-600">
                   {errors['details.dimensions.height'] ||
                     errors['details.dimensions.width'] ||
@@ -494,7 +494,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
                 <button
                   type="button"
                   className={cn(
-                    'mt-2 flex h-[56px] w-full items-center justify-between rounded-[18px] border border-black/10 bg-white px-5 text-[16px] text-[#191414]',
+                    'mt-2 flex h-14 w-full items-center justify-between rounded-[18px] border border-black/10 bg-white px-5 text-[16px] text-[#191414]',
                     !selectedLocation && 'text-[#9A9A9A]',
                   )}
                 >
@@ -662,7 +662,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
         ) : null}
       </div>
 
-      <div className="rounded-[32px] border border-black/10 bg-white p-4 lg:p-6">
+      <div className="rounded-4xl border border-black/10 bg-white p-4 lg:p-6">
         <p className={sectionTitleClassName}>Listing information</p>
         <p className="mt-2 text-[15px] text-[#898788]">
           Choose whether to list this artwork&apos;s availability status for sale, allow for inquiry
@@ -764,7 +764,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
         </div>
       </div>
 
-      <div className="rounded-[32px] border border-black/10 bg-white p-4 lg:p-6">
+      <div className="rounded-4xl border border-black/10 bg-white p-4 lg:p-6">
         <p className={sectionTitleClassName}>Custom tag</p>
         <p className="mt-2 text-[15px] text-[#898788]">
           Add a personal status or note for this artwork. Tags don&apos;t affect checkout but help
@@ -784,7 +784,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
             <div
               role="button"
               tabIndex={0}
-              className="mt-3 flex min-h-[56px] w-full items-center justify-between gap-3 rounded-[18px] border border-black/10 bg-white px-4 py-2 text-left"
+              className="mt-3 flex min-h-14 w-full items-center justify-between gap-3 rounded-[18px] border border-black/10 bg-white px-4 py-2 text-left"
             >
               <div className="flex flex-1 flex-wrap items-center gap-2">
                 {customTags.length > 0 ? (
@@ -926,7 +926,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
         ) : null}
       </div>
 
-      <div className="rounded-[32px] border border-black/10 bg-white p-4 lg:p-6">
+      <div className="rounded-4xl border border-black/10 bg-white p-4 lg:p-6">
         <p className={sectionTitleClassName}>Custom delivery note</p>
         <p className="mt-2 text-[15px] text-[#898788]">
           Add a personal message to include with this artwork shipment. This note is for buyers and

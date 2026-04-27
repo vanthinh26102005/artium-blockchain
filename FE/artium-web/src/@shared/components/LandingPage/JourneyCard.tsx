@@ -28,7 +28,7 @@ export const JourneyCard = ({
       )}
     >
       {/* -- image -- */}
-      <div className="relative h-[200px] w-full flex-shrink-0 self-stretch overflow-hidden rounded-[8px] lg:h-[400px]">
+      <div className="relative h-[200px] w-full shrink-0 self-stretch overflow-hidden rounded-[8px] lg:h-[400px]">
         <Image src={imageSrc} alt={title} fill priority className="object-cover" />
       </div>
 
@@ -45,9 +45,9 @@ export const JourneyCard = ({
         <Button
           asChild
           size="lg"
-          className="h-[38px] min-w-[100px] rounded-[32px] bg-[#0F6BFF] px-4 text-[12px] leading-[14px] text-white hover:bg-[#0d5edc] lg:h-[48px] lg:min-w-[151px] lg:px-6 lg:text-[20px] lg:leading-[18px]"
+          className="h-[38px] min-w-25 rounded-4xl bg-[#0F6BFF] px-4 text-[12px] leading-[14px] text-white hover:bg-[#0d5edc] lg:h-12 lg:min-w-[151px] lg:px-6 lg:text-[20px] lg:leading-[18px]"
         >
-          <Link href={href} className="block flex-shrink-0">
+          <Link href={href} className="block shrink-0">
             {cta}
           </Link>
         </Button>

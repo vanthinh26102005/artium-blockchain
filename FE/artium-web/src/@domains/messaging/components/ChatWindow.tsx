@@ -145,7 +145,7 @@ export const ChatWindow = ({
                           {message.type === 'IMAGE' ? (
                             <div 
                               className="relative group cursor-pointer"
-                              onClick={() => handleImageClick(message.id, message.mediaUrl!)}
+                              onClick={() => handleImageClick(message.id)}
                             >
                               <img
                                 src={message.mediaUrl}

@@ -84,7 +84,7 @@ export const QuickSellCheckoutLayout = ({
 
             {/* Main Scrollable Content */}
             <main className="flex-1 pt-[100px] pb-[120px] px-6 lg:px-12">
-                <div className="mx-auto max-w-[1400px] bg-white rounded-[32px] p-8 shadow-sm">
+                <div className="mx-auto max-w-[1400px] bg-white rounded-4xl p-8 shadow-sm">
                     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[420px_1fr] xl:grid-cols-[480px_1fr]">
                         {/* Sidebar Column */}
                         <div className="flex flex-col gap-4">

@@ -14,6 +14,7 @@ import {
   LayoutPanelLeft,
   LogOut,
   Mail,
+  Package,
   MessageCircle,
   MoreVertical,
   Share2,
@@ -21,7 +22,6 @@ import {
   User,
   Users,
 } from 'lucide-react'
-import { PageItemGroup } from '@shared/components/display/PageItemGroup'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { PlanUpgradeModal } from '@shared/components/modals/PlanUpgradeModal'
 
@@ -70,7 +70,12 @@ const SidebarItem = ({
   onUpgradeRequired,
 }: SidebarItemConfig & { onUpgradeRequired: () => void }) => {
   const router = useRouter()
-  const isActive = href ? router.asPath === href : false
+  const isActive = href
+    ? router.asPath === href ||
+      router.asPath.startsWith(`${href}/`) ||
+      router.pathname === href ||
+      router.pathname.startsWith(`${href}/`)
+    : false
 
   const badgeColors = {
     Pro: 'bg-blue-600 text-white',
@@ -190,6 +195,12 @@ export const SideBar = () => {
                 onUpgradeRequired={handleUpgradeRequired}
               />
             ))}
+            <SidebarItem
+              label="Orders"
+              href="/orders"
+              icon={Package}
+              onUpgradeRequired={handleUpgradeRequired}
+            />
             <SidebarItem
               label="Invoices"
               href="/artist/invoices"

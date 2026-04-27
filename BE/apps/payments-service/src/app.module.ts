@@ -4,6 +4,7 @@ import {
   TransactionService,
 } from '@app/common';
 import { OutboxEntity, OutboxModule } from '@app/outbox';
+import { AppRabbitMQModule } from '@app/rabbitmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -37,6 +38,7 @@ import {
 } from './infrastructure/repositories';
 
 import {
+  ConfirmEthereumPaymentHandler,
   CancelInvoiceHandler,
   CreateInvoiceHandler,
   CreateInvoicePaymentIntentHandler,
@@ -45,6 +47,7 @@ import {
   GetInvoiceHandler,
   GetInvoiceByNumberHandler,
   GetInvoicesByCollectorHandler,
+  GetEthereumQuoteHandler,
   GetInvoicesBySellerHandler,
   GetPaymentMethodsHandler,
   GetPaymentTransactionHandler,
@@ -58,6 +61,7 @@ import {
   SendInvoiceToBuyerHandler,
   SavePaymentMethodHandler,
   UpdateInvoiceHandler,
+  RecordEthereumPaymentHandler,
 } from './application';
 
 import {
@@ -66,9 +70,12 @@ import {
   CreateStripeCustomerHandler,
   CreateStripePaymentIntentHandler,
   CreateStripeRefundHandler,
+  HandleStripeWebhookHandler,
 } from './application/commands/stripe';
 
 import { StripeService } from './infrastructure/services/stripe.service';
+import { EthereumQuoteService } from './infrastructure/services/ethereum-quote.service';
+import { EthereumTransactionConfirmationService } from './infrastructure/services/ethereum-transaction-confirmation.service';
 
 import { HealthController } from './presentation';
 
@@ -78,6 +85,10 @@ import {
 } from './presentation/http/controllers';
 
 import { PaymentsMicroserviceController } from './presentation/microservice';
+import {
+  EthereumPaymentConfirmationProcessorEventHandler,
+  RetryStuckEthereumConfirmationsWorker,
+} from './application/event-handlers';
 
 export const CommandHandlers = [
   CreateInvoiceHandler,
@@ -100,6 +111,10 @@ export const CommandHandlers = [
   CreateStripeCustomerHandler,
   CreateStripeRefundHandler,
   AttachStripePaymentMethodHandler,
+  HandleStripeWebhookHandler,
+
+  RecordEthereumPaymentHandler,
+  ConfirmEthereumPaymentHandler,
 ];
 
 export const QueryHandlers = [
@@ -108,6 +123,7 @@ export const QueryHandlers = [
   GetInvoicesBySellerHandler,
   GetInvoicesByCollectorHandler,
 
+  GetEthereumQuoteHandler,
   GetPaymentTransactionHandler,
   GetPaymentMethodsHandler,
   GetTransactionsByUserHandler,
@@ -131,6 +147,10 @@ export const Repositories = [
 export const Services = [
   { provide: ITransactionService, useClass: TransactionService },
   StripeService,
+  EthereumQuoteService,
+  EthereumTransactionConfirmationService,
+  EthereumPaymentConfirmationProcessorEventHandler,
+  RetryStuckEthereumConfirmationsWorker,
   {
     provide: 'STRIPE_API_KEY',
     useFactory: async (configService: ConfigService) =>
@@ -165,6 +185,7 @@ export const Controllers = [
     ]),
 
     OutboxModule,
+    AppRabbitMQModule,
     CqrsModule,
   ],
   controllers: [...Controllers],

@@ -15,7 +15,7 @@ COPY libs ./libs
 RUN yarn install --frozen-lockfile
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
-COPY apps/orders-service/tsconfig.json ./apps/orders-service/tsconfig.json
+COPY apps/orders-service/tsconfig.app.json ./apps/orders-service/tsconfig.json
 COPY apps/orders-service ./apps/orders-service
 
 RUN yarn workspace @backend/orders-service build

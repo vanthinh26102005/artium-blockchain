@@ -1,5 +1,9 @@
+// third-party
 import { AlertCircle } from 'lucide-react'
+
+// @shared - components
 import { Button } from '@shared/components/ui/button'
+import { Dialog, DialogContent } from '@shared/components/ui/dialog'
 
 type DeleteConfirmDialogProps = {
   isOpen: boolean
@@ -16,13 +20,11 @@ export const DeleteConfirmDialog = ({
   title = 'Delete Message',
   message = 'Are you sure you want to delete this message? This action cannot be undone.',
 }: DeleteConfirmDialogProps) => {
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent size="sm" className="rounded-lg bg-white p-6 shadow-xl">
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 rounded-full bg-red-100 p-2">
+          <div className="shrink-0 rounded-full bg-red-100 p-2">
             <AlertCircle className="h-5 w-5 text-red-600" />
           </div>
           <div className="flex-1">
@@ -45,7 +47,7 @@ export const DeleteConfirmDialog = ({
             Delete
           </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

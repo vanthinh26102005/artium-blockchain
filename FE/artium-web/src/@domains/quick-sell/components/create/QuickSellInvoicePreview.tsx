@@ -38,7 +38,7 @@ export const QuickSellInvoicePreview = ({
                     {/* Left Column: FROM, Item, ORDER SUMMARY, Trust Badge */}
                     <div className="col-span-5 space-y-5">
                         {/* FROM */}
-                        <div className="rounded-[12px] border border-[#E5E5E5] p-5">
+                        <div className="rounded-xl border border-[#E5E5E5] p-5">
                             <span className="mb-3 block text-[13px] font-extrabold uppercase tracking-wider text-[#191414]">FROM</span>
                             <div className="space-y-1">
                                 <p className="text-[14px] font-bold text-[#191414]">Thinh Van</p>
@@ -52,7 +52,7 @@ export const QuickSellInvoicePreview = ({
 
                         {/* TO (Buyer Info) */}
                         {(draft.buyer.name || draft.buyer.email) && (
-                            <div className="rounded-[12px] border border-[#E5E5E5] p-5">
+                            <div className="rounded-xl border border-[#E5E5E5] p-5">
                                 <span className="mb-3 block text-[13px] font-extrabold uppercase tracking-wider text-[#191414]">TO</span>
                                 <div className="space-y-1">
                                     {draft.buyer.name && (
@@ -72,7 +72,7 @@ export const QuickSellInvoicePreview = ({
                         {hasItems ? (
                             <div className="space-y-4">
                                 {draft.items.map((item, i) => (
-                                    <div key={item.id || i} className="rounded-[12px] border border-[#E5E5E5] p-4 flex gap-4 bg-white">
+                                    <div key={item.id || i} className="rounded-xl border border-[#E5E5E5] p-4 flex gap-4 bg-white">
                                         {/* Image */}
                                         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-[#F5F5F5] border border-[#E5E5E5]">
                                             {(item.type === 'artwork' && item.artworkImageUrl) ? (
@@ -114,7 +114,7 @@ export const QuickSellInvoicePreview = ({
                             </div>
                         ) : (
                             /* Item Preview Placeholder (Show if no items) */
-                            <div className="rounded-[12px] border border-[#E5E5E5] p-5">
+                            <div className="rounded-xl border border-[#E5E5E5] p-5">
                                 <div className="flex gap-4">
                                     <div className="h-24 w-24 shrink-0 rounded-lg bg-[#F5F5F5]" />
                                     <div className="flex-1 space-y-2 pt-2">
@@ -127,7 +127,7 @@ export const QuickSellInvoicePreview = ({
                         )}
 
                         {/* Order Summary */}
-                        <div className="rounded-[12px] border border-[#E5E5E5] p-5">
+                        <div className="rounded-xl border border-[#E5E5E5] p-5">
                             <span className="mb-4 block text-[13px] font-extrabold uppercase tracking-wider text-[#191414]">ORDER SUMMARY</span>
                             <div className="space-y-3">
                                 <div className="flex justify-between text-[14px]">
@@ -142,7 +142,7 @@ export const QuickSellInvoicePreview = ({
                         </div>
 
                         {/* Trust Badge */}
-                        <div className="rounded-[12px] border border-[#E5E5E5] p-5 flex gap-3">
+                        <div className="rounded-xl border border-[#E5E5E5] p-5 flex gap-3">
                             <ShieldCheck className="h-5 w-5 shrink-0 text-[#989898] mt-0.5" />
                             <div>
                                 <h4 className="text-[13px] font-bold text-[#191414]">Your Trust is Our Priority</h4>
@@ -156,7 +156,7 @@ export const QuickSellInvoicePreview = ({
                     {/* Right Column: Payment Method Only */}
                     <div className="col-span-7">
                         {/* Payment Method */}
-                        <div className="rounded-[12px] border border-[#E5E5E5] p-5">
+                        <div className="rounded-xl border border-[#E5E5E5] p-5">
                             <span className="mb-4 block text-[13px] font-extrabold uppercase tracking-wider text-[#191414]">PAYMENT METHOD</span>
 
                             {/* Tabs */}
@@ -180,7 +180,7 @@ export const QuickSellInvoicePreview = ({
                             </div>
 
                             {/* Card Form */}
-                            <div className="space-y-4 rounded-[12px] border border-[#E5E5E5] p-5 bg-[#FDFDFD]">
+                            <div className="space-y-4 rounded-xl border border-[#E5E5E5] p-5 bg-[#FDFDFD]">
                                 <div className="flex items-center gap-2 mb-2">
                                     <CreditCard className="h-4 w-4 text-[#191414]" />
                                     <span className="text-[12px] font-bold text-[#191414]">CARD</span>

@@ -9,7 +9,11 @@ const MessagingView = dynamic(
 )
 
 const MessagesPage: NextPageWithLayout = () => {
-  useRequireAuth()
+  const { canRenderProtected } = useRequireAuth()
+
+  if (!canRenderProtected) {
+    return null
+  }
 
   return <MessagingView />
 }

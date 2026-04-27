@@ -15,7 +15,7 @@ export const ArtworkCardCompact = ({ artwork, className }: ArtworkCardCompactPro
         <Link
             href={`/artworks/${artwork.id}`}
             className={cn(
-                'group flex w-[200px] flex-shrink-0 flex-col',
+                'group flex w-[200px] shrink-0 flex-col',
                 className,
             )}
         >

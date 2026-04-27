@@ -42,7 +42,7 @@ export const TestimonialVideoCard = ({
 }: TestimonialVideoCardProps) => {
   return (
     <Card
-      className="flex h-[273px] w-[183px] flex-col space-y-[20px] rounded-[16px] border-none p-4 lg:!h-[415px] lg:!w-[219px] lg:space-y-[15px] lg:!rounded-[16.7px] lg:p-[10px] lg:pt-[20px]"
+      className="flex h-[273px] w-[183px] flex-col space-y-[20px] rounded-2xl border-none p-4 lg:!h-[415px] lg:!w-[219px] lg:space-y-[15px] lg:!rounded-[16.7px] lg:p-[10px] lg:pt-[20px]"
       style={{ backgroundColor }}
     >
       {/* -- info -- */}
@@ -56,7 +56,7 @@ export const TestimonialVideoCard = ({
       </div>
 
       {/* -- video -- */}
-      <div className="h-[177px] w-[151px] overflow-hidden rounded-[12px] lg:h-[329px] lg:w-[199px] lg:rounded-t-none lg:rounded-b-[12.52px]">
+      <div className="h-[177px] w-[151px] overflow-hidden rounded-xl lg:h-[329px] lg:w-[199px] lg:rounded-t-none lg:rounded-b-[12.52px]">
         <video
           src={videoSrc}
           className="h-full w-full object-cover"
@@ -88,7 +88,7 @@ export const ArtistQuoteCard = ({
 }: ArtistQuoteCardProps) => {
   return (
     <Card
-      className="font-inter lg:font-monument-grotes flex h-[273px] w-[275px] flex-col space-y-[20px] rounded-[16px] border-none px-4 py-8 lg:!h-[415px] lg:!w-[350px] lg:space-y-[16.7px] lg:!rounded-[16.7px] lg:p-[33.4px]"
+      className="font-inter lg:font-monument-grotes flex h-[273px] w-[275px] flex-col space-y-[20px] rounded-2xl border-none px-4 py-8 lg:!h-[415px] lg:!w-[350px] lg:space-y-[16.7px] lg:!rounded-[16.7px] lg:p-[33.4px]"
       style={{ backgroundColor }}
     >
       {/* -- quote -- */}
@@ -98,7 +98,7 @@ export const ArtistQuoteCard = ({
 
       {/* -- footer -- */}
       <div className="flex items-center space-x-4 pt-[16.7px]">
-        <div className="relative h-[40px] w-[40px] flex-shrink-0 overflow-hidden rounded-full lg:h-[66.7px] lg:w-[66.7px]">
+        <div className="relative h-[40px] w-[40px] shrink-0 overflow-hidden rounded-full lg:h-[66.7px] lg:w-[66.7px]">
           {avatarSrc && (
             <Image src={avatarSrc} alt={name || 'Artist avatar'} fill className="object-cover" />
           )}

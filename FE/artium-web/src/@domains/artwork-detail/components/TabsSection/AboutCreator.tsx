@@ -15,7 +15,6 @@ export const AboutCreator = ({ creator }: AboutCreatorProps) => {
 
     const handleFollow = () => {
         // TODO: Implement follow functionality
-        console.log('Follow clicked')
     }
 
     return (
@@ -23,7 +22,7 @@ export const AboutCreator = ({ creator }: AboutCreatorProps) => {
             {/* Avatar */}
             <Link
                 href={profileHref}
-                className="relative h-12 w-12 flex-shrink-0 cursor-pointer overflow-hidden rounded-full"
+                className="relative h-12 w-12 shrink-0 cursor-pointer overflow-hidden rounded-full"
             >
                 <Image
                     src={creator.avatarUrl}
@@ -50,7 +49,7 @@ export const AboutCreator = ({ creator }: AboutCreatorProps) => {
                     <Button
                         variant="default"
                         size="sm"
-                        className="ml-2 rounded-full border border-transparent bg-[#060f2a] px-5 py-1.5 text-white transition hover:bg-[#050b1f] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#060f2a]"
+                        className="ml-2 rounded-full border border-black bg-[#060f2a] px-5 py-1.5 text-white transition hover:bg-[#050b1f] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#060f2a]"
                         onClick={handleFollow}
                     >
                         Follow

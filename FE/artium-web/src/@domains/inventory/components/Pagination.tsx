@@ -1,8 +1,12 @@
-// react
-import type { ChangeEvent } from 'react'
-
 // @shared - components
 import { Button } from '@shared/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@shared/components/ui/select'
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50]
 
@@ -38,10 +42,6 @@ export const Pagination = ({
     onPageChange(page + 1)
   }
 
-  const handlePageSizeChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    onPageSizeChange(Number(event.target.value))
-  }
-
   // -- render --
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-black/10 px-4 py-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
@@ -56,17 +56,18 @@ export const Pagination = ({
       <div className="flex flex-wrap items-center gap-2">
         <label className="flex items-center gap-2 text-sm text-slate-500">
           <span>Page size</span>
-          <select
-            value={pageSize}
-            onChange={handlePageSizeChange}
-            className="h-9 rounded-full border border-black/10 bg-white px-3 text-sm text-slate-700"
-          >
-            {PAGE_SIZE_OPTIONS.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
+          <Select value={String(pageSize)} onValueChange={(value) => onPageSizeChange(Number(value))}>
+            <SelectTrigger className="h-9 w-auto rounded-full border-black/10 bg-white px-3 text-sm text-slate-700">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <SelectItem key={size} value={String(size)}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </label>
         <Button
           variant="outline"

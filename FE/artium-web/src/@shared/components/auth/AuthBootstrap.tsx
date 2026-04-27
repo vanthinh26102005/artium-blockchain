@@ -9,13 +9,12 @@ export const AuthBootstrap = () => {
   // -- state --
   const isHydrated = useAuthStore((state) => state.isHydrated)
   const accessToken = useAuthStore((state) => state.accessToken)
-  const refreshToken = useAuthStore((state) => state.refreshToken)
   const didRefreshRef = useRef(false)
 
   // -- effects --
   useEffect(() => {
     hydrateAuth()
-  }, [hydrateAuth])
+  }, [])
 
   useEffect(() => {
     if (!isHydrated || didRefreshRef.current) {
@@ -24,12 +23,12 @@ export const AuthBootstrap = () => {
 
     didRefreshRef.current = true
 
-    if (!accessToken || !refreshToken) {
+    if (!accessToken) {
       return
     }
 
     void refreshMe()
-  }, [isHydrated, accessToken, refreshToken, refreshMe])
+  }, [isHydrated, accessToken])
 
   // -- render --
   return null

@@ -67,7 +67,7 @@ export const getMicroserviceConfig = (service: string): TcpClientOptions => {
       transport: Transport.TCP,
       options: {
         host: process.env.COMMUNITY_SERVICE_HOST || 'localhost',
-        port: parseInt(process.env.COMMUNITY_SERVICE_PORT || '3108', 10),
+        port: parseInt(process.env.COMMUNITY_SERVICE_PORT || '3109', 10),
       },
     },
     [MICROSERVICES.CRM_SERVICE]: {

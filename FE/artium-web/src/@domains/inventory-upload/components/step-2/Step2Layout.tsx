@@ -81,7 +81,7 @@ const Step2LeftColumn = ({ className }: Step2ColumnProps) => {
 
   return (
     <div className={cn('space-y-4 lg:space-y-8', className)}>
-      <div className="rounded-[32px] border border-black/10 bg-white p-4 lg:p-6">
+      <div className="rounded-4xl border border-black/10 bg-white p-4 lg:p-6">
         <p className={SECTION_TITLE_CLASSNAME}>Artwork tags</p>
         <div className="mt-4 space-y-6">
           <TagGroup
@@ -139,7 +139,7 @@ const Step2RightColumn = ({ className }: Step2ColumnProps) => {
         onRemove={() => setMomentVideo(null)}
       />
 
-      <div className="rounded-[32px] border border-black/10 bg-white p-4 lg:p-6">
+      <div className="rounded-4xl border border-black/10 bg-white p-4 lg:p-6">
         <p className={SECTION_TITLE_CLASSNAME}>Quick facts</p>
         <div className="mt-4 space-y-4">
           {trivias.map((trivia, index) => {
@@ -170,7 +170,7 @@ const Step2RightColumn = ({ className }: Step2ColumnProps) => {
                 >
                   <SelectTrigger
                     className={cn(
-                      'mt-3 h-[56px] rounded-[18px] border-black/10 px-5 text-[16px] !text-[#191414] data-[placeholder]:text-[#9A9A9A]',
+                      'mt-3 h-14 rounded-[18px] border-black/10 px-5 text-[16px] !text-[#191414] data-[placeholder]:text-[#9A9A9A]',
                       isQuestionPlaceholder && '!text-[#9A9A9A]',
                     )}
                   >

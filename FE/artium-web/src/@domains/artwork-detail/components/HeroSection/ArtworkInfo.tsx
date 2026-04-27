@@ -33,7 +33,6 @@ export const ArtworkInfo = ({ artwork }: ArtworkInfoProps) => {
 
     const handleMakeOffer = () => {
         // TODO: Implement make offer functionality
-        console.log('Make offer clicked')
     }
 
     return (

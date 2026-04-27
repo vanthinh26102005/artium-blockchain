@@ -190,7 +190,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
       return 'bg-white border-b border-slate-200 shadow-sm backdrop-blur-none'
     }
     // Completely transparent at top
-    return 'bg-transparent! border-transparent shadow-none backdrop-blur-none'
+    return 'bg-transparent! border-black shadow-none backdrop-blur-none'
   }
 
   // Marketing header class for non-landing, non-editorial, non-auth routes
@@ -200,7 +200,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
       : isMarketingRoute
         ? shouldForceHeaderBorder
           ? 'bg-white border-b border-slate-200 shadow-[0_4px_12px_rgba(15,23,42,0.08)]'
-          : 'bg-transparent border-b border-transparent'
+          : 'bg-transparent border-b border-black'
         : 'bg-white/70 border-b border-white/40 shadow-[0_6px_20px_rgba(15,23,42,0.06)]'
 
   const headerClasses = [
@@ -208,9 +208,9 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
     isLandingVariant
       ? isScrolled
         ? 'bg-black border-b border-white/10 text-white shadow-[0_8px_30px_rgba(0,0,0,0.45)]'
-        : 'bg-transparent border-b border-transparent text-white'
+        : 'bg-transparent border-b border-black text-white'
       : isAuthRoute
-        ? 'bg-transparent border-b border-transparent shadow-none backdrop-blur-none'
+        ? 'bg-transparent border-b border-black shadow-none backdrop-blur-none'
         : 'backdrop-blur-2xl backdrop-saturate-150',
     !isLandingVariant &&
     !isAuthRoute &&

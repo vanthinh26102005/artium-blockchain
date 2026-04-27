@@ -15,9 +15,13 @@ const UploadPage = dynamic(
 
 const UploadRoute: NextPageWithLayout = () => {
   // -- state --
-  useRequireAuth()
+  const { canRenderProtected } = useRequireAuth()
 
   // -- render --
+  if (!canRenderProtected) {
+    return null
+  }
+
   return <UploadPage />
 }
 

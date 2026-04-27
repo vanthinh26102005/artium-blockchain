@@ -30,13 +30,13 @@ export class CreatePaymentIntentDto {
   @IsNotEmpty({ message: 'Currency is required' })
   currency: string;
 
-  @ApiProperty({
-    description: 'User ID making the payment',
+  @ApiPropertyOptional({
+    description: 'User ID making the payment (injected from auth token, not required in request body)',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'User ID is required' })
-  userId: string;
+  userId?: string;
 
   @ApiPropertyOptional({
     description: 'Seller ID receiving the payment',

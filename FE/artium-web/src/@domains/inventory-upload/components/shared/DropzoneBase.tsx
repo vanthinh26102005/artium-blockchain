@@ -76,7 +76,7 @@ export const DropzoneBase = ({
 
   // -- render --
   const wrapperClassName = cn(
-    variant === 'card' ? 'rounded-[32px] border border-black/10 bg-white p-4 lg:p-6' : 'space-y-3',
+    variant === 'card' ? 'rounded-4xl border border-black/10 bg-white p-4 lg:p-6' : 'space-y-3',
     containerClassName,
   )
 

@@ -1,8 +1,22 @@
-import { IRepository, OrderStatus } from '@app/common';
+import {
+  EscrowState,
+  IRepository,
+  OrderPaymentMethod,
+  OrderStatus,
+} from '@app/common';
 import { EntityManager } from 'typeorm';
 import { Order } from '../entities';
 
 export const IOrderRepository = Symbol('IOrderRepository');
+
+export type SellerOrderListOptions = {
+  skip?: number;
+  take?: number;
+  status?: OrderStatus;
+  onChainOrderId?: string;
+  escrowState?: EscrowState;
+  paymentMethod?: OrderPaymentMethod;
+};
 
 export interface IOrderRepository extends IRepository<Order, string> {
   findByCollectorId(
@@ -23,7 +37,7 @@ export interface IOrderRepository extends IRepository<Order, string> {
 
   findBySellerIdViaItems(
     sellerId: string,
-    options?: { skip?: number; take?: number },
+    options?: SellerOrderListOptions,
     transactionManager?: EntityManager,
   ): Promise<{ data: Order[]; total: number }>;
 

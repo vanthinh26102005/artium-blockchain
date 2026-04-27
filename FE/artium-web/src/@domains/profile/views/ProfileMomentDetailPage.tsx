@@ -5,7 +5,9 @@ import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 
 // third-party
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Bookmark, Heart, Share2 } from 'lucide-react'
+import { useForm, useWatch } from 'react-hook-form'
 
 // internal - components
 import { Metadata } from '@/components/SEO/Metadata'
@@ -25,6 +27,10 @@ import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
 import { mapCommentToMomentComment, mapMomentToProfileDetail } from '@domains/profile/utils/profileApiMapper'
 import type { Moment } from '@domains/profile/constants/moments'
 import { MomentComment } from '@domains/profile/types'
+import {
+  commentFormSchema,
+  type CommentFormValues,
+} from '@domains/profile/validations/profileForms.schema'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { cn } from '@shared/lib/utils'
 
@@ -43,6 +49,7 @@ export const ProfileMomentDetailPageView = ({
     username: usernameFromRoute,
   })
   const profileData = baseData
+  const profileHandle = resolvedUsername || profileData.user.username || usernameFromRoute || ''
   const momentId = Array.isArray(_momentId) ? _momentId[0] : _momentId
   const [moment, setMoment] = useState<Moment | null>(null)
   const [momentLoading, setMomentLoading] = useState(false)
@@ -50,7 +57,6 @@ export const ProfileMomentDetailPageView = ({
   const [commentsLoading, setCommentsLoading] = useState(false)
   const [commentsError, setCommentsError] = useState<string | null>(null)
   const [commentSubmitting, setCommentSubmitting] = useState(false)
-  const [commentDraft, setCommentDraft] = useState('')
   const [isLiked, setIsLiked] = useState(false)
   const [likePending, setLikePending] = useState(false)
   const [likeError, setLikeError] = useState<string | null>(null)
@@ -60,15 +66,33 @@ export const ProfileMomentDetailPageView = ({
     () =>
       isAuthenticated
         ? {
-            id: authUser?.id,
-            username: authUser?.username || 'guest',
-            displayName: authUser?.displayName || authUser?.username || 'Guest',
-            avatarUrl: authUser?.avatarUrl || '/images/logo-dark-mode.png',
-          }
+          id: authUser?.id,
+          username: authUser?.username || 'guest',
+          displayName: authUser?.displayName || authUser?.username || 'Guest',
+          avatarUrl: authUser?.avatarUrl || '/images/logo-dark-mode.png',
+        }
         : undefined,
     [authUser, isAuthenticated],
   )
-  const baseHref = `/profile/${resolvedUsername}/moments`
+  const baseHref = profileHandle
+    ? `/profile/${encodeURIComponent(profileHandle)}/moments`
+    : '/'
+  const {
+    register: registerComment,
+    handleSubmit: handleCommentSubmit,
+    reset: resetCommentForm,
+    formState: { errors: commentFormErrors },
+    control: commentControl,
+  } = useForm<CommentFormValues>({
+    resolver: zodResolver(commentFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      content: '',
+    },
+  })
+  const commentDraft = useWatch({ control: commentControl, name: 'content' }) ?? ''
+  const commentField = registerComment('content')
 
   const hasArtwork = moment?.artworkPreview !== undefined
 
@@ -184,9 +208,9 @@ export const ProfileMomentDetailPageView = ({
     setMoment((prev) =>
       prev
         ? {
-            ...prev,
-            likes: nextLiked ? (prev.likes ?? 0) + 1 : Math.max((prev.likes ?? 0) - 1, 0),
-          }
+          ...prev,
+          likes: nextLiked ? (prev.likes ?? 0) + 1 : Math.max((prev.likes ?? 0) - 1, 0),
+        }
         : prev,
     )
 
@@ -231,9 +255,9 @@ export const ProfileMomentDetailPageView = ({
       setMoment((prev) =>
         prev
           ? {
-              ...prev,
-              comments: (prev.comments ?? 0) + 1,
-            }
+            ...prev,
+            comments: (prev.comments ?? 0) + 1,
+          }
           : prev,
       )
     } catch {
@@ -326,7 +350,7 @@ export const ProfileMomentDetailPageView = ({
                     <p className="text-lg leading-snug font-medium text-slate-900">
                       {moment.caption}
                     </p>
-                  <div className="inline-flex items-center divide-x divide-slate-200 rounded-full border border-slate-200 bg-white">
+                    <div className="inline-flex items-center divide-x divide-slate-200 rounded-full border border-slate-200 bg-white">
                       <button
                         type="button"
                         onClick={handleToggleLike}
@@ -380,7 +404,7 @@ export const ProfileMomentDetailPageView = ({
                       <AccordionContent className="px-4 pt-4 pb-4 sm:px-6">
                         {moment.artworkPreview ? (
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                            <div className="relative h-40 w-40 flex-shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                            <div className="relative h-40 w-40 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
                               <Image
                                 src={moment.artworkPreview.imageUrl}
                                 alt={moment.artworkPreview.title}
@@ -454,7 +478,7 @@ export const ProfileMomentDetailPageView = ({
                                     comment.status === 'pending' && 'opacity-60',
                                   )}
                                 >
-                                  <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-slate-200">
+                                  <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full bg-slate-200">
                                     <Image
                                       src={comment.author.avatarUrl}
                                       alt={comment.author.displayName}
@@ -492,12 +516,11 @@ export const ProfileMomentDetailPageView = ({
                           )}
 
                           <form
-                            onSubmit={(event) => {
-                              event.preventDefault()
+                            onSubmit={handleCommentSubmit(({ content }) => {
                               if (!canSubmitComment) return
-                              void handlePostComment(commentDraft.trim())
-                              setCommentDraft('')
-                            }}
+                              void handlePostComment(content.trim())
+                              resetCommentForm()
+                            })}
                             className={cn(
                               'flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-3',
                               !isAuthenticated && 'opacity-70',
@@ -516,17 +539,17 @@ export const ProfileMomentDetailPageView = ({
                             </div>
                             <input
                               type="text"
-                              value={commentDraft}
-                              onChange={(event) => setCommentDraft(event.target.value)}
                               placeholder={
                                 isAuthenticated ? 'Respond with your thoughts...' : 'Sign in to comment.'
                               }
                               disabled={!isAuthenticated || commentSubmitting}
                               className={cn(
                                 'flex-1 bg-transparent text-sm text-slate-600 outline-none placeholder:text-slate-400',
+                                commentFormErrors.content && 'text-rose-500 placeholder:text-rose-300',
                                 (!isAuthenticated || commentSubmitting) &&
-                                  'cursor-not-allowed text-slate-400',
+                                'cursor-not-allowed text-slate-400',
                               )}
+                              {...commentField}
                             />
                             <button
                               type="submit"
@@ -536,6 +559,11 @@ export const ProfileMomentDetailPageView = ({
                               {commentSubmitting ? 'Posting...' : 'Post'}
                             </button>
                           </form>
+                          {commentFormErrors.content?.message ? (
+                            <p className="mt-2 text-sm text-rose-500">
+                              {commentFormErrors.content.message}
+                            </p>
+                          ) : null}
                         </div>
                       </AccordionContent>
                     </AccordionItem>

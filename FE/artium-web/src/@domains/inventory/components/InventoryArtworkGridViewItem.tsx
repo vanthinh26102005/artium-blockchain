@@ -31,13 +31,13 @@ const STATUS_CONFIG: Record<
 > = {
   Draft: {
     icon: '○',
-    label: 'List for sale',
-    className: 'text-slate-700',
+    label: 'Draft',
+    className: 'text-slate-500',
   },
   Hidden: {
-    icon: '●',
-    label: 'SOLD',
-    className: 'text-rose-600',
+    icon: '◉',
+    label: 'Hidden',
+    className: 'text-amber-600',
   },
 }
 
@@ -80,27 +80,31 @@ export const InventoryArtworkGridViewItem = ({
   }
 
   const handleDuplicate = () => {
-    if (typeof window !== 'undefined') {
-      window.alert(`Duplicate "${artwork.title}" (stub)`)
-    }
+    // Feature requires BE support - disabled for now
   }
 
-  const handleCopyLink = () => {
-    if (typeof window !== 'undefined') {
-      window.alert(`Copy link for "${artwork.title}" (stub)`)
+  const handleCopyLink = async () => {
+    const artworkUrl = `${window.location.origin}/artworks/${artwork.id}`
+    try {
+      await navigator.clipboard.writeText(artworkUrl)
+      // Could show toast here if we had access to toast context
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement('textarea')
+      textarea.value = artworkUrl
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
     }
   }
 
   const handleChangeToDraft = () => {
-    if (typeof window !== 'undefined') {
-      window.alert(`Change "${artwork.title}" to Draft (stub)`)
-    }
+    // Feature requires BE API - disabled for now
   }
 
   const handleToggleVisibility = () => {
-    if (typeof window !== 'undefined') {
-      window.alert(`Show "${artwork.title}" on profile (stub)`)
-    }
+    // Feature requires BE API - disabled for now
   }
 
   // -- render --
@@ -155,10 +159,10 @@ export const InventoryArtworkGridViewItem = ({
                 Edit Artwork
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={handleChangeToDraft}
-                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50"
+                disabled
+                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-400 cursor-not-allowed"
               >
-                <Repeat2 className="h-4 w-4 text-slate-600" />
+                <Repeat2 className="h-4 w-4 text-slate-400" />
                 Change to Draft
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -169,10 +173,10 @@ export const InventoryArtworkGridViewItem = ({
                 Move to folder
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={handleDuplicate}
-                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50"
+                disabled
+                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-400 cursor-not-allowed"
               >
-                <Copy className="h-4 w-4 text-slate-600" />
+                <Copy className="h-4 w-4 text-slate-400" />
                 Duplicate artwork
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -183,10 +187,10 @@ export const InventoryArtworkGridViewItem = ({
                 Copy link to this artwork
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={handleToggleVisibility}
-                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50"
+                disabled
+                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-400 cursor-not-allowed"
               >
-                <Eye className="h-4 w-4 text-slate-600" />
+                <Eye className="h-4 w-4 text-slate-400" />
                 Show Artwork on Profile
               </DropdownMenuItem>
               <div className="my-1 h-px bg-black/5" />

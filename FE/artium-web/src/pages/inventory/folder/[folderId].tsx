@@ -21,13 +21,17 @@ const InventoryFolderPage = dynamic(
 
 const InventoryFolderRoute: NextPageWithLayout = () => {
   // -- state --
-  useRequireAuth()
+  const { canRenderProtected } = useRequireAuth()
 
   // -- derived --
 
   // -- handlers --
 
   // -- render --
+  if (!canRenderProtected) {
+    return null
+  }
+
   return <InventoryFolderPage />
 }
 
