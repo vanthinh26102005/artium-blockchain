@@ -2,14 +2,17 @@ import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
+  AttachSellerAuctionStartTxDto,
   CreateOrderDto,
   UpdateOrderDto,
   GetOrdersDto,
   GetAuctionsDto,
   OrderStatus,
   RpcExceptionHelper,
+  StartSellerAuctionDto,
 } from '@app/common';
 import {
+  AttachSellerAuctionStartTxCommand,
   CreateOrderCommand,
   UpdateOrderStatusCommand,
   CancelOrderCommand,
@@ -24,6 +27,8 @@ import {
   GetOrderByIdQuery,
   GetOrderByOnChainIdQuery,
   GetOrderItemsQuery,
+  GetSellerAuctionStartStatusQuery,
+  StartSellerAuctionCommand,
 } from '../../application';
 
 @Controller()
@@ -57,6 +62,52 @@ export class OrdersMicroserviceController {
   async getAuctionById(@Payload() data: { auctionId: string }) {
     this.logger.debug(`Getting auction: ${data.auctionId}`);
     return this.queryBus.execute(new GetAuctionByIdQuery(data.auctionId));
+  }
+
+  @MessagePattern({ cmd: 'start_seller_auction' })
+  async startSellerAuction(
+    @Payload()
+    data: StartSellerAuctionDto & {
+      sellerId: string;
+      walletAddress: string;
+      artworkTitle: string;
+      creatorName?: string | null;
+      thumbnailUrl?: string | null;
+      ipfsMetadataHash: string;
+    },
+  ) {
+    this.logger.debug(`Starting seller auction for artwork: ${data.artworkId}`);
+    return this.commandBus.execute(new StartSellerAuctionCommand(data));
+  }
+
+  @MessagePattern({ cmd: 'attach_seller_auction_start_tx' })
+  async attachSellerAuctionStartTx(
+    @Payload()
+    data: AttachSellerAuctionStartTxDto & { attemptId: string; sellerId: string },
+  ) {
+    this.logger.debug(
+      `Attaching seller auction tx for attempt: ${data.attemptId}`,
+    );
+    return this.commandBus.execute(
+      new AttachSellerAuctionStartTxCommand(
+        data.attemptId,
+        data.sellerId,
+        data.walletAddress,
+        data.txHash,
+      ),
+    );
+  }
+
+  @MessagePattern({ cmd: 'get_seller_auction_start_status' })
+  async getSellerAuctionStartStatus(
+    @Payload() data: { sellerId: string; artworkId: string },
+  ) {
+    this.logger.debug(
+      `Getting seller auction start status for artwork: ${data.artworkId}`,
+    );
+    return this.queryBus.execute(
+      new GetSellerAuctionStartStatusQuery(data.sellerId, data.artworkId),
+    );
   }
 
   @MessagePattern({ cmd: 'get_artwork_order_locks' })

@@ -110,6 +110,26 @@ export class CreateSellerProfileInputType {
   profileImageUrl?: string;
 
   @ApiProperty({
+    example: 'https://my-art-website.com',
+    required: false,
+    description: 'Personal website URL',
+  })
+  @IsUrl()
+  @IsOptional()
+  websiteUrl?: string;
+
+  @ApiProperty({
+    example: 'Ho Chi Minh City, Vietnam',
+    required: false,
+    description: 'Location of the seller',
+    maxLength: 255,
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  location?: string;
+
+  @ApiProperty({
     type: () => BusinessAddressInput,
     required: false,
     description: 'Business address information',

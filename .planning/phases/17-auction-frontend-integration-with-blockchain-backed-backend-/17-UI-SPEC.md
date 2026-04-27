@@ -1,10 +1,11 @@
 ---
 phase: 17
 slug: auction-frontend-integration-with-blockchain-backed-backend-
-status: draft
+status: approved
 shadcn_initialized: true
 preset: radix-lyra
 created: 2026-04-24
+reviewed_at: 2026-04-24T00:00:00+07:00
 ---
 
 # Phase 17 - UI Design Contract
@@ -39,7 +40,7 @@ Declared values (must be multiples of 4):
 | 2xl | 48px | Major modal padding and large section breaks |
 | 3xl | 64px | Page-level top/bottom rhythm and major layout separation |
 
-Exceptions: preserve the existing `44px` minimum icon tap targets, `56px` bid modal action heights, and `60px` blocking CTA heights in submitting/pending/confirmed states.
+Exceptions: preserve the existing `44px` minimum icon tap targets, `56px` bid modal action heights, and `56px` blocking CTA heights in submitting/pending/confirmed states.
 
 ---
 
@@ -50,9 +51,9 @@ Exceptions: preserve the existing `44px` minimum icon tap targets, `56px` bid mo
 | Body | 16px | 400 | 1.5 |
 | Label | 11px | 700 | 1.2 |
 | Heading | 32px | 700 | 1.2 |
-| Display | 56px desktop / 40px mobile minimum | 700 | 1.0 |
+| Display | 56px | 700 | 1.0 |
 
-Rule: new integration UI added in Phase 17 must stay inside this four-role scale even if the legacy baseline contains incidental intermediate values.
+Rule: new integration UI added in Phase 17 must stay inside this four-role scale even if the legacy baseline contains incidental intermediate values. On mobile, preserve the display role through wrapping and layout compression rather than introducing a fifth numeric size.
 
 ---
 
@@ -77,7 +78,7 @@ Accent reserved for: primary `Place Bid` actions, selected filter-option fills, 
 | Empty state heading | No live auctions match your filters. |
 | Empty state body | If filters are active, prompt: "Adjust or clear your filters to view other auction lots." If no filters are active, prompt: "No live auctions are available right now. Please check back soon." |
 | Error state | We could not sync the latest auction state. Refresh the lot, review the newest current bid, and try again. |
-| Destructive confirmation | None: Phase 17 introduces no destructive confirmation dialog. Closing the modal must never imply cancelling a submitted wallet transaction; after submission, secondary copy must read `Close`, not `Cancel Transaction`. |
+| Destructive confirmation | None: Phase 17 introduces no destructive confirmation dialog. Closing the modal must never imply cancelling a submitted wallet transaction; before submission, secondary copy must read `Back to Auction`, and after submission it must read `Close`. Do not use transaction-cancellation language for modal dismissal. |
 
 ---
 
@@ -85,7 +86,7 @@ Accent reserved for: primary `Place Bid` actions, selected filter-option fills, 
 
 | Surface | Contract |
 |---------|----------|
-| Auction listing page | Preserve the current `/auction` route shell, hero, filter controls, grid/list rendering, and pagination layout from `LiveAuctionPage.tsx`. This phase replaces mock data and simulated state only; it does not redesign the page. |
+| Auction listing page | Preserve the current `/auction` route shell, hero, filter controls, grid/list rendering, and pagination layout from `LiveAuctionPage.tsx`. This phase replaces mock data and simulated state only; it does not redesign the page. Visual focal point: once lots are in view, the live lot grid is the primary anchor and each card's current-bid figure carries first emphasis, artwork/title carries second emphasis, and filters/pagination remain tertiary support. |
 | Auction data ownership | Listing and modal surfaces must consume auction-first DTOs from the backend read layer. FE must not fetch artwork separately and stitch it client-side for Phase 17 flows. |
 | Filtering and pagination | Keep existing behaviors exactly: category/status/price changes reset to page 1, desktop dropdown behavior stays intact, mobile filter sheet keeps apply/reset flow, and page changes scroll the results region back into view with the current sticky-header offsets. |
 | Lot CTA mapping | Authoritative `statusKey` controls CTA behavior: `active` and `ending-soon` open bid modal, `newly-listed` uses `Enter Auction`, `paused` uses `View Artwork`, `closed` uses `View Results`. Non-biddable states must never open the modal. |
@@ -96,7 +97,7 @@ Accent reserved for: primary `Place Bid` actions, selected filter-option fills, 
 | Pending versus confirmed | Local wallet submission is not final truth. Replace the current mock-success assumption with a pending sync state: once a tx hash exists, copy must say the bid is awaiting backend/on-chain synchronized confirmation. A true confirmed state is allowed only after a refreshed auction DTO shows authoritative acceptance of the new bid state. |
 | Conflict recovery | If backend refresh shows a higher competing bid or a stale minimum, reopen a failure/conflict state using the existing failed-state visual shell: show latest top bid, show the user's failed bid, update minimum next bid, and expose a retry path back to `editing`. |
 | Error recovery | If no transaction was submitted, preserve the typed bid value and let the user retry inline. If transaction status is uncertain, prefer a pending-sync or refresh-required state over a hard failure claim. |
-| Modal closing rules | Before submission, secondary action label is `Cancel`. After a tx hash exists, secondary action label becomes `Close`. Dismissing the panel never mutates auction state; it only dismisses the current view. |
+| Modal closing rules | Before submission, secondary action label is `Back to Auction`. After a tx hash exists, secondary action label becomes `Close`. Dismissing the panel never mutates auction state; it only dismisses the current view. |
 | Realtime behavior | While the modal is open, refresh authoritative lot state on open, after wallet submission, and on any available backend realtime event. If realtime push is not yet wired, fall back to polling on a short interval and on window refocus. |
 | Mobile behavior | Preserve the current mobile-first list rendering and mobile filter panel. Bid modal content may stack vertically, but action ordering must remain primary action last in source order and visually prominent. |
 
