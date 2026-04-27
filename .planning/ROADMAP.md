@@ -326,7 +326,7 @@ Plans:
 ### Phase 19: Seller auction creation workspace and terms UX
 
 **Goal:** Build a practical seller workspace where an eligible artwork can be picked, auction terms can be configured with clear policy constraints, and the seller can preview buyer-facing auction details before submission.
-**Requirements**: SAUC-04, SAUC-05, SAUC-06
+**Requirements**: SAUC-04, SAUC-05
 **Depends on:** Phase 18
 **Success Criteria** (what must be TRUE):
   1. Developer can open a seller-only auction creation page, select an eligible artwork from inventory, and move into terms setup without using quick-sell invoice UI.
