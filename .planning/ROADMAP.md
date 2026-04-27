@@ -174,7 +174,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 20 after the buyer-facing auction read/bid flow exists.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -197,7 +197,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 17. Auction frontend integration with blockchain-backed backend flow and live auction state sync | 3/3 | Completed | 2026-04-24 |
 | 18. Seller auction access and artwork eligibility policy | 3/3 | Completed | 2026-04-25 |
 | 18.1. Seller registration and role activation gap closure | 1/1 | Completed | 2026-04-25 |
-| 19. Seller auction creation workspace and terms UX | 3/3 | Planned | - |
+| 19. Seller auction creation workspace and terms UX | 3/3 | Completed | 2026-04-27 |
+| 19.1. Seller auction artifact recovery and policy alignment | 0/TBD | Not started | - |
 | 20. Auction start orchestration and seller lifecycle status | 0/TBD | Not started | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
@@ -341,16 +342,31 @@ Plans:
 - [x] 19-02 Seller auction terms form and preview components
 - [x] 19-03 Seller auction creation workspace integration
 
+### Phase 19.1: Seller auction artifact recovery and policy alignment
+
+**Goal:** Recover missing seller-auction evidence, align the Phase 19 terms/policy contract to the milestone wording, and restore roadmap/requirements traceability before final milestone closeout.
+**Requirements**: SAUC-10, SAUC-04, SAUC-05
+**Gap Closure:** Closes orphaned Phase 18.1 artifacts, missing Phase 19 verification, preview/policy alignment gaps, and stale milestone traceability from `v1.1-MILESTONE-AUDIT.md`
+**Depends on:** Phase 19
+**Success Criteria** (what must be TRUE):
+  1. Developer can open a persisted Phase 18.1 artifact trail and verify seller registration / seller-role activation behavior against SAUC-10.
+  2. Developer can open Phase 19 verification artifacts and see SAUC-04 and SAUC-05 proven with current seller auction workspace behavior.
+  3. Developer can inspect the seller auction preview/policy summary and confirm it matches the final milestone contract for pre-start seller terms disclosure.
+  4. Developer can open `REQUIREMENTS.md` and `ROADMAP.md` and see seller-auction requirement/phase status aligned to implemented reality.
+  5. Developer can re-run milestone audit and remove the orphaned-artifact and Phase 19 traceability blockers.
+**Plans**: TBD
+**UI hint**: yes
+
 ### Phase 20: Auction start orchestration and seller lifecycle status
 
-**Goal:** Connect seller auction creation to the backend/on-chain start flow with idempotent orchestration, authoritative auction state persistence, and seller-visible pending/active/failed lifecycle feedback.
-**Requirements**: SAUC-07, SAUC-08, SAUC-09
-**Depends on:** Phase 19
+**Goal:** Connect seller auction creation to the backend/on-chain start flow with idempotent orchestration, authoritative auction state persistence, locked post-activation economics, and seller-visible pending/active/failed lifecycle feedback.
+**Requirements**: SAUC-06, SAUC-07, SAUC-08, SAUC-09
+**Depends on:** Phase 19.1
 **Success Criteria** (what must be TRUE):
   1. Developer can submit a valid seller auction start request and observe backend validation for seller identity, artwork ownership, eligibility, seller wallet/profile readiness, and contract/network configuration before on-chain creation.
   2. Developer can retry a timed-out or duplicated start request without creating duplicate on-chain/off-chain auctions for the same artwork.
   3. Developer can inspect persistence and confirm artwork status, auction/order state, on-chain auction ID, tx hash, and public auction read DTOs converge after the auction starts.
-  4. Developer can see seller lifecycle feedback for pending, active, failed, and retryable auction start states with actionable reason codes.
+  4. Developer can see seller lifecycle feedback for pending, active, failed, and retryable auction start states with actionable reason codes, while unsafe auction economics remain locked after activation and only explicitly safe lifecycle actions stay available.
   5. Developer can confirm the public `/auction` listing and seller inventory/order views reflect the new auction through backend state, not optimistic frontend-only mutation.
 **Plans**: TBD
 **UI hint**: yes
