@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "artium-backend.fullname" . }}-runtime
+  namespace: {{ .Values.namespace.name | quote }}
+  labels:
+    {{- include "artium-backend.labels" . | nindent 4 }}
+data:
+  NODE_ENV: {{ .Values.config.nodeEnv | quote }}
+  DB_STRATEGY: {{ .Values.config.dbStrategy | quote }}
+  REDIS_HOST: {{ .Values.config.redis.host | quote }}
+  REDIS_PORT: {{ .Values.config.redis.port | quote }}
+  RABBITMQ_URI: {{ printf "amqp://%s:%v" .Values.config.rabbitmq.host .Values.config.rabbitmq.port | quote }}
+  MICROSERVICE_HOST: "0.0.0.0"
+  API_GATEWAY_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "api-gateway") | quote }}
+  IDENTITY_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "identity-service") | quote }}
+  ARTWORK_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "artwork-service") | quote }}
+  PAYMENTS_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "payments-service") | quote }}
+  ORDERS_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "orders-service") | quote }}
+  MESSAGING_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "messaging-service") | quote }}
+  NOTIFICATIONS_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "notifications-service") | quote }}
+  EVENTS_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "events-service") | quote }}
+  COMMUNITY_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "community-service") | quote }}
