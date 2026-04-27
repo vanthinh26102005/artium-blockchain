@@ -24,6 +24,7 @@ export type CreateOrderRequest = {
   sellerId: string
   items: OrderItemRequest[]
   shippingAddress?: ShippingAddressRequest
+  shippingCost?: number
   notes?: string
 }
 

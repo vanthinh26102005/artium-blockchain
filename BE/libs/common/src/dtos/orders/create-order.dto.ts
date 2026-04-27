@@ -125,6 +125,16 @@ export class CreateOrderDto {
   shippingAddress?: ShippingAddressDto;
 
   @ApiPropertyOptional({
+    description: 'Shipping cost',
+    example: 25.0,
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0, { message: 'Shipping cost must be non-negative' })
+  shippingCost?: number;
+
+  @ApiPropertyOptional({
     description: 'Additional notes',
     example: 'Please handle with care',
   })

@@ -330,7 +330,7 @@ services:
       EVENTS_SERVICE_PORT: 3107
       COMMUNITY_SERVICE_HOST: community-service
       COMMUNITY_SERVICE_PORT: 3109
-      JWT_SECRET: 5c3bf5bfc210c43aa7342efcb40bc0eb6831ac38ea12de39578d09afaec6d37e
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in environment}
       TZ: Asia/Ho_Chi_Minh
     volumes:
       - .:/app
@@ -375,10 +375,10 @@ services:
       DB_NAME: identity_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      JWT_SECRET: 5c3bf5bfc210c43aa7342efcb40bc0eb6831ac38ea12de39578d09afaec6d37e
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in environment}
       JWT_EXPIRES_IN: 1d
-      GOOGLE_CLIENT_ID: 873456140774-gi4pt3aq0m3gpd5f10uv4ivv59lvbgej.apps.googleusercontent.com
-      GOOGLE_CLIENT_SECRET: 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
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       SIWE_ALLOWED_CHAIN_IDS: 11155111
       SIWE_DOMAIN: localhost:3000
       SIWE_URI: http://localhost:3000
@@ -517,9 +517,9 @@ services:
       DB_USER: orders_user
       DB_PASS: "1"
       DB_NAME: orders_db
-      PLATFORM_PRIVATE_KEY: ${PLATFORM_PRIVATE_KEY:-0x1b4b5319b42ea0c0cb9c1d040452efbd90b4c4d7cecf639db41348aac043d780}
-      CONTRACT_ADDRESS: ${CONTRACT_ADDRESS:-0x77a2Ac8226Cdbb13aD77859B204405ABb0AE2E89}
-      BLOCKCHAIN_RPC_URL: ${BLOCKCHAIN_RPC_URL:-https://sepolia.infura.io/v3/b73ae055f50e418893fadecd159bc616}
+      PLATFORM_PRIVATE_KEY: ${PLATFORM_PRIVATE_KEY:?PLATFORM_PRIVATE_KEY must be set in environment}
+      CONTRACT_ADDRESS: ${CONTRACT_ADDRESS:?CONTRACT_ADDRESS must be set in environment}
+      BLOCKCHAIN_RPC_URL: ${BLOCKCHAIN_RPC_URL:?BLOCKCHAIN_RPC_URL must be set in environment}
       RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
       TZ: Asia/Ho_Chi_Minh
     volumes:
@@ -605,10 +605,11 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
-      STRIPE_API_KEY: ${STRIPE_API_KEY:-sk_test_51Soh8gRDpKThXbxEj7jOIXEQ8pDSCrIUkMXsPeVs4ChFcVfP7YwPxw7yJh4OTkLWU5zMe0Pq0SF1NDitQa7WYnHV006398hDVl}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_9bd3a32e9a38185ed4645cb41f4dfab380b832da491fe2db1baf0ef92d7cb124}
-      PLATFORM_PRIVATE_KEY: ${PLATFORM_PRIVATE_KEY:-0x1b4b5319b42ea0c0cb9c1d040452efbd90b4c4d7cecf639db41348aac043d780}
-      PLATFORM_ETH_WALLET: ${PLATFORM_ETH_WALLET:-0x77a2Ac8226Cdbb13aD77859B204405ABb0AE2E89}
+      STRIPE_API_KEY: ${STRIPE_API_KEY:?STRIPE_API_KEY must be set in environment}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?STRIPE_WEBHOOK_SECRET must be set in environment}
+      PLATFORM_PRIVATE_KEY: ${PLATFORM_PRIVATE_KEY:?PLATFORM_PRIVATE_KEY must be set in environment}
+      PLATFORM_ETH_WALLET: ${PLATFORM_ETH_WALLET:?PLATFORM_ETH_WALLET must be set in environment}
+      ETHEREUM_QUOTE_SIGNING_SECRET: ${ETHEREUM_QUOTE_SIGNING_SECRET:?ETHEREUM_QUOTE_SIGNING_SECRET must be set in environment}
       TZ: Asia/Ho_Chi_Minh
     volumes:
       - .:/app

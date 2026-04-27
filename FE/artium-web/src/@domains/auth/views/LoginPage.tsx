@@ -23,6 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/compon
 // @domains - auth
 import { useGoogleLoginBridge } from '@domains/auth/hooks/useGoogleLoginBridge'
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
+import { useWalletLogin } from '@domains/auth/hooks/useWalletLogin'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { buildAuthCallbackUrl, getSafeNextPath } from '@domains/auth/utils/authRedirect'
 import {
@@ -31,6 +32,7 @@ import {
   AuthFormPasswordInput,
   AuthFooter,
   AuthFormCard,
+  AuthProviderButton,
   AuthShell,
   SocialAuthButtons,
   WalletLoginPanel,

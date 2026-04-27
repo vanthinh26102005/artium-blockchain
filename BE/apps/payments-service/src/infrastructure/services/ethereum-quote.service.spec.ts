@@ -12,10 +12,12 @@ describe('EthereumQuoteService', () => {
   });
 
   it('creates a signed Sepolia quote with exact wei formatting', async () => {
-    const fetchMock = jest.fn(async () => ({
-      ok: true,
-      json: async () => ({ data: { amount: '2500.00' } }),
-    }));
+    const fetchMock = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: { amount: '2500.00' } }),
+      }),
+    );
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const service = new EthereumQuoteService(
@@ -39,13 +41,19 @@ describe('EthereumQuoteService', () => {
   });
 
   it('rejects when the provider response fails', async () => {
-    const fetchMock = jest.fn(async () => ({
-      ok: false,
-      json: async () => ({}),
-    }));
+    const fetchMock = jest.fn(() =>
+      Promise.resolve({
+        ok: false,
+        json: () => Promise.resolve({}),
+      }),
+    );
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    const service = new EthereumQuoteService(new ConfigService());
+    const service = new EthereumQuoteService(
+      new ConfigService({
+        ETHEREUM_QUOTE_SIGNING_SECRET: 'test-secret',
+      }),
+    );
 
     await expect(service.createQuote(150.25)).rejects.toBeDefined();
   });

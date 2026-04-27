@@ -36,14 +36,15 @@ export class CreateOrderHandler implements ICommandHandler<CreateOrderCommand> {
       data.items.forEach((item) => {
         subtotal += item.price * item.quantity;
       });
+      const shippingCost = data.shippingCost ?? 0;
 
       const order = await this.orderRepo.create({
         collectorId: data.buyerId,
         orderNumber,
         status: OrderStatus.PENDING,
         subtotal,
-        totalAmount: subtotal,
-        shippingCost: 0,
+        totalAmount: subtotal + shippingCost,
+        shippingCost,
         taxAmount: 0,
         currency: 'USD',
         paymentStatus: OrderPaymentStatus.UNPAID,
@@ -67,15 +68,19 @@ export class CreateOrderHandler implements ICommandHandler<CreateOrderCommand> {
 
       this.logger.log(`Order created: ${order.id}, number: ${orderNumber}`);
       return this.orderRepo.findById(order.id);
-    } catch (error) {
-      this.logger.error(`Failed to create order`, error.stack);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to create order';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(`Failed to create order`, errorStack);
       if (error instanceof RpcException) {
         throw error;
       }
       if (error instanceof HttpException) {
         throw RpcExceptionHelper.from(error.getStatus(), error.message);
       }
-      throw RpcExceptionHelper.internalError(error.message);
+      throw RpcExceptionHelper.internalError(errorMessage);
     }
   }
 }

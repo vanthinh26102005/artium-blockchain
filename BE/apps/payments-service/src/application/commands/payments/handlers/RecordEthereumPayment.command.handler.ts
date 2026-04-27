@@ -17,9 +17,7 @@ import { PaymentTransaction } from '../../../../domain/entities';
 import { EthereumQuoteService } from '../../../../infrastructure/services/ethereum-quote.service';
 
 @CommandHandler(RecordEthereumPaymentCommand)
-export class RecordEthereumPaymentHandler
-  implements ICommandHandler<RecordEthereumPaymentCommand>
-{
+export class RecordEthereumPaymentHandler implements ICommandHandler<RecordEthereumPaymentCommand> {
   private readonly logger = new Logger(RecordEthereumPaymentHandler.name);
 
   constructor(
@@ -38,10 +36,18 @@ export class RecordEthereumPaymentHandler
       `Recording Ethereum payment for user: ${data.userId}, txHash: ${data.txHash}`,
     );
 
-    const existing = await this.transactionRepo.findByTxHash(data.txHash);
+    // Validate wallet address format
+    if (!/^0x[a-fA-F0-9]{40}$/.test(data.walletAddress)) {
+      throw RpcExceptionHelper.badRequest('Invalid wallet address format');
+    }
+
+    // Normalize txHash to lowercase for consistent deduplication
+    const normalizedTxHash = data.txHash.toLowerCase();
+
+    const existing = await this.transactionRepo.findByTxHash(normalizedTxHash);
     if (existing) {
       throw RpcExceptionHelper.conflict(
-        `Transaction with txHash ${data.txHash} already recorded`,
+        `Transaction with txHash ${normalizedTxHash} already recorded`,
       );
     }
 
@@ -54,7 +60,8 @@ export class RecordEthereumPaymentHandler
     }
 
     if (
-      this.normalizeChainId(data.chainId) !== this.normalizeChainId(quote.chainId)
+      this.normalizeChainId(data.chainId) !==
+      this.normalizeChainId(quote.chainId)
     ) {
       throw RpcExceptionHelper.badRequest(
         'Wallet checkout is only allowed on Sepolia testnet.',
@@ -85,7 +92,7 @@ export class RecordEthereumPaymentHandler
         currency: quote.fiatCurrency,
         paymentMethodType: PaymentMethodType.CRYPTO_WALLET,
         walletAddress: data.walletAddress,
-        txHash: data.txHash,
+        txHash: normalizedTxHash, // Store normalized txHash
         description: data.description ?? null,
         metadata: {
           quoteId: quote.quoteId,
@@ -109,7 +116,7 @@ export class RecordEthereumPaymentHandler
     } catch (error) {
       this.logger.error(
         'Failed to create Ethereum payment transaction',
-        error.stack,
+        error instanceof Error ? error.message : String(error),
       );
       throw RpcExceptionHelper.internalError('Failed to record payment');
     }
@@ -118,7 +125,7 @@ export class RecordEthereumPaymentHandler
       transaction.id,
       data.userId,
       data.walletAddress,
-      data.txHash,
+      normalizedTxHash,
       quote.usdAmount,
       quote.fiatCurrency,
       data.orderId,
@@ -134,7 +141,10 @@ export class RecordEthereumPaymentHandler
     });
 
     const confirmationRequestedEvent =
-      new EthereumPaymentConfirmationRequestedEvent(transaction.id, data.txHash);
+      new EthereumPaymentConfirmationRequestedEvent(
+        transaction.id,
+        normalizedTxHash,
+      );
 
     await this.outboxService.createOutboxMessage({
       aggregateType: 'PaymentTransaction',
