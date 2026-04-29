@@ -1,8 +1,16 @@
-import { ArtworkImageInput } from '@app/common';
-import { Controller, Logger } from '@nestjs/common';
+import {
+  ArtworkImageInput,
+  ArtworkStatus,
+  RpcExceptionHelper,
+} from '@app/common';
+import { Controller, Inject, Logger } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
-import { GcsStorageService } from 'apps/artwork-service/src/domain';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
+import type { GcsStorageService } from '../../domain/services/gcs-storage.service';
+import {
+  IArtworkRepository,
+  type IArtworkRepository as ArtworkRepositoryContract,
+} from '../../domain/interfaces/artwork.repository.interface';
 
 interface UploadArtworkImageDto {
   sellerId: string;
@@ -28,7 +36,42 @@ interface UploadAvatarDto {
 export class UploadMicroserviceController {
   private readonly logger = new Logger(UploadMicroserviceController.name);
 
-  constructor(private readonly gcsStorage: GcsStorageService) {}
+  constructor(
+    private readonly gcsStorage: GcsStorageService,
+    @Inject(IArtworkRepository)
+    private readonly artworkRepo: ArtworkRepositoryContract,
+  ) {}
+
+  private async validateDraftUpload(
+    sellerId: string,
+    artworkId: string,
+    file?: Express.Multer.File,
+  ): Promise<void> {
+    if (!file) {
+      throw RpcExceptionHelper.badRequest('Artwork image file is required');
+    }
+
+    if (sellerId === 'undefined' || artworkId === 'undefined') {
+      throw new RpcException('sellerId or artworkId is "undefined" string');
+    }
+
+    const artwork = await this.artworkRepo.findById(artworkId);
+    if (!artwork) {
+      throw RpcExceptionHelper.notFound(`Artwork draft ${artworkId} not found`);
+    }
+
+    if (artwork.sellerId !== sellerId) {
+      throw RpcExceptionHelper.forbidden(
+        `Artwork draft ${artworkId} does not belong to this seller`,
+      );
+    }
+
+    if (artwork.status !== ArtworkStatus.DRAFT) {
+      throw RpcExceptionHelper.badRequest(
+        `Artwork ${artworkId} is not a draft`,
+      );
+    }
+  }
 
   @MessagePattern({ cmd: 'upload_artwork_image' })
   async uploadArtworkImage(
@@ -40,13 +83,11 @@ export class UploadMicroserviceController {
       fileName: dto.file?.originalname,
     });
 
-    if (dto.sellerId === 'undefined' || dto.artworkId === 'undefined') {
-      throw new RpcException('sellerId or artworkId is "undefined" string');
-    }
+    await this.validateDraftUpload(dto.sellerId, dto.artworkId, dto.file);
 
     const uploadResult = await this.gcsStorage.uploadFile(dto.file, {
       folder: `artworks/${dto.sellerId}/${dto.artworkId}`,
-      fileName: `${uuidv4()}.webp`,
+      fileName: `${randomUUID()}.webp`,
       makePublic: true,
       metadata: {
         sellerId: dto.sellerId,
@@ -76,15 +117,40 @@ export class UploadMicroserviceController {
       filesCount: dto.files?.length,
     });
 
+    if (!dto.files?.length) {
+      throw RpcExceptionHelper.badRequest(
+        'At least one artwork image is required',
+      );
+    }
+
     if (dto.sellerId === 'undefined' || dto.artworkId === 'undefined') {
       throw new RpcException('sellerId or artworkId is "undefined" string');
+    }
+
+    const artwork = await this.artworkRepo.findById(dto.artworkId);
+    if (!artwork) {
+      throw RpcExceptionHelper.notFound(
+        `Artwork draft ${dto.artworkId} not found`,
+      );
+    }
+
+    if (artwork.sellerId !== dto.sellerId) {
+      throw RpcExceptionHelper.forbidden(
+        `Artwork draft ${dto.artworkId} does not belong to this seller`,
+      );
+    }
+
+    if (artwork.status !== ArtworkStatus.DRAFT) {
+      throw RpcExceptionHelper.badRequest(
+        `Artwork ${dto.artworkId} is not a draft`,
+      );
     }
 
     const results = await Promise.all(
       dto.files.map(async (file, index) => {
         const uploadResult = await this.gcsStorage.uploadFile(file, {
           folder: `artworks/${dto.sellerId}/${dto.artworkId}`,
-          fileName: `${uuidv4()}.webp`,
+          fileName: `${randomUUID()}.webp`,
           makePublic: true,
           metadata: {
             sellerId: dto.sellerId,
