@@ -201,6 +201,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
   const connectedWalletAddress = walletCheckout.walletAddress
   const clearWalletTransactionState = walletCheckout.clearTransactionState
   const submitWalletTransaction = walletCheckout.submitQuotedTransaction
+  const syncWalletState = walletCheckout.syncWalletState
 
   useEffect(() => {
     const nextWalletAddress = connectedWalletAddress
@@ -214,6 +215,9 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
       shouldDirty: true,
       shouldValidate: connectedWalletAddress.length > 0,
     })
+    if (nextWalletAddress) {
+      paymentForm.clearErrors('walletAddress')
+    }
   }, [connectedWalletAddress, paymentForm])
 
   // -- handlers --
@@ -466,6 +470,18 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         return
       }
 
+      const walletState = await syncWalletState()
+      const walletAddressForValidation = walletState.walletAddress.trim()
+
+      paymentForm.setValue('walletAddress', walletAddressForValidation, {
+        shouldDirty: true,
+        shouldValidate: false,
+      })
+
+      if (walletAddressForValidation) {
+        paymentForm.clearErrors('walletAddress')
+      }
+
       const isStepValid = await paymentForm.trigger()
       if (!isStepValid) {
         setPaymentError({
@@ -593,7 +609,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
           throw new Error('The Sepolia quote expired. Refresh the quote and retry the payment.')
         }
 
-        const { txHash } = await submitWalletTransaction()
+        const { txHash, walletAddress } = await submitWalletTransaction()
         submittedWalletTxHash = txHash
 
         if (
@@ -605,7 +621,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
 
         const recordedTransaction = await paymentApis.recordEthereumPayment({
           txHash,
-          walletAddress: connectedWalletAddress,
+          walletAddress,
           orderId: createdOrder.id,
           amount: walletQuote.usdAmount,
           currency: 'USD',
@@ -663,9 +679,9 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     showSuccessState,
     step,
     submitWalletTransaction,
+    syncWalletState,
     stripe,
     walletQuote,
-    connectedWalletAddress,
   ])
 
   const handlePaymentRecovery = useCallback(() => {

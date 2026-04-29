@@ -23,6 +23,12 @@ type UseWalletCheckoutArgs = {
 
 type SubmitQuotedTransactionResult = {
   txHash: string
+  walletAddress: string
+}
+
+export type WalletStateSnapshot = {
+  walletAddress: string
+  currentChainId: string | null
 }
 
 export type UseWalletCheckoutResult = {
@@ -35,6 +41,7 @@ export type UseWalletCheckoutResult = {
   networkError: WalletErrorState | null
   transactionError: WalletErrorState | null
   isOnRequiredChain: boolean
+  syncWalletState: () => Promise<WalletStateSnapshot>
   connectWallet: () => Promise<void>
   disconnectWallet: () => void
   switchToRequiredChain: () => Promise<boolean>
@@ -187,9 +194,9 @@ export const useWalletCheckout = ({
     clearTransactionState()
   }, [clearTransactionState])
 
-  const syncWalletState = useCallback(async () => {
+  const syncWalletState = useCallback(async (): Promise<WalletStateSnapshot> => {
     if (typeof window === 'undefined' || !window.ethereum) {
-      return
+      return { walletAddress: '', currentChainId: null }
     }
 
     try {
@@ -197,11 +204,14 @@ export const useWalletCheckout = ({
       const chainId = normalizeChainId(
         (await window.ethereum.request({ method: 'eth_chainId' })) as string,
       )
+      const nextWalletAddress = accounts[0] ?? ''
 
       setCurrentChainId(chainId)
-      setWalletAddress(accounts[0] ?? '')
+      setWalletAddress(nextWalletAddress)
+      return { walletAddress: nextWalletAddress, currentChainId: chainId }
     } catch {
       setCurrentChainId(null)
+      return { walletAddress: '', currentChainId: null }
     }
   }, [])
 
@@ -356,7 +366,10 @@ export const useWalletCheckout = ({
       throw new Error('The Sepolia quote expired. Refresh the quote and try again.')
     }
 
-    if (!walletAddress) {
+    const walletState = await syncWalletState()
+    const fromAddress = walletState.walletAddress
+
+    if (!fromAddress) {
       throw new Error('Please connect your wallet before checking out.')
     }
 
@@ -366,7 +379,7 @@ export const useWalletCheckout = ({
     setTransactionError(null)
 
     try {
-      if (!isOnRequiredChain) {
+      if (walletState.currentChainId !== requiredChainId) {
         const switched = await switchToRequiredChain()
         if (!switched) {
           throw new Error('MetaMask must be connected to Sepolia before sending this payment.')
@@ -376,11 +389,11 @@ export const useWalletCheckout = ({
       clearTransactionState()
       const nextTxHash = (await window.ethereum.request({
         method: 'eth_sendTransaction',
-        params: [{ from: walletAddress, to: toAddress, value: quote.weiHex }],
+        params: [{ from: fromAddress, to: toAddress, value: quote.weiHex }],
       })) as string
 
       setTxHash(nextTxHash)
-      return { txHash: nextTxHash }
+      return { txHash: nextTxHash, walletAddress: fromAddress }
     } catch (err: unknown) {
       const classified = classifyMetaMaskError(err, 'transaction')
       setTransactionError(classified)
@@ -390,11 +403,11 @@ export const useWalletCheckout = ({
     }
   }, [
     clearTransactionState,
-    isOnRequiredChain,
     isQuoteExpired,
     quote,
+    requiredChainId,
     switchToRequiredChain,
-    walletAddress,
+    syncWalletState,
   ])
 
   return {
@@ -407,6 +420,7 @@ export const useWalletCheckout = ({
     networkError,
     transactionError,
     isOnRequiredChain,
+    syncWalletState,
     connectWallet,
     disconnectWallet,
     switchToRequiredChain,
