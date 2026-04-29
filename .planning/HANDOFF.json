@@ -1,0 +1,78 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-04-29T05:00:14.469Z",
+  "phase": "27",
+  "phase_name": "Frontend shared API definition standardization and edge-case audit",
+  "phase_dir": ".planning/phases/27-frontend-shared-api-definition-standardization-and-edge-case",
+  "plan": 1,
+  "task": 3,
+  "total_tasks": 3,
+  "status": "paused",
+  "completed_tasks": [
+    {
+      "id": 1,
+      "name": "Extend the shared API client primitives",
+      "status": "appears_done_unverified",
+      "progress": "apiClient.ts exports ApiQueryPrimitive, ApiQueryValue, buildApiUrl, buildQueryString, withQuery, encodePathSegment, and jsonBody."
+    },
+    {
+      "id": 2,
+      "name": "Preserve structured error details and empty success responses",
+      "status": "appears_done_unverified",
+      "progress": "apiClient.ts exports ApiError with status/data/headers and parses 204/empty bodies via response.text()."
+    },
+    {
+      "id": 3,
+      "name": "Document the API module standard",
+      "status": "appears_done_unverified",
+      "progress": "FE/artium-web/src/@shared/apis/README.md exists with the required standard sections and helper names."
+    }
+  ],
+  "remaining_tasks": [
+    {
+      "id": 4,
+      "name": "Run plan 27-01 verification",
+      "status": "not_started"
+    },
+    {
+      "id": 5,
+      "name": "Create 27-01-SUMMARY.md if verification passes",
+      "status": "not_started"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "STATE.md contains a stale Phase 20 stopped_at marker mixed with Phase 27 execution state.",
+      "type": "technical",
+      "workaround": "Use roadmap.analyze plus Phase 27 artifact counts as source of truth; update stopped_at through gsd-sdk state.record-session before committing state."
+    },
+    {
+      "description": "Large unrelated source worktree changes exist outside Phase 27 plan 01.",
+      "type": "technical",
+      "workaround": "Do not revert or stage unrelated files; stage only the files required for the active plan or handoff."
+    }
+  ],
+  "human_actions_pending": [],
+  "decisions": [
+    {
+      "decision": "Resume Phase 27 from plan 01, not from the stale phase-7 current_phase object returned by init.progress.",
+      "rationale": "roadmap.analyze, STATE.md Current Position, and Phase 27 plan artifacts all point to Phase 27 plan 01 as the active work.",
+      "phase": "27"
+    },
+    {
+      "decision": "Phase 20 context was captured separately and committed as e808e515.",
+      "rationale": "Do not conflate Phase 20 discussion artifacts with Phase 27 execution.",
+      "phase": "20"
+    }
+  ],
+  "uncommitted_files": [
+    ".planning/STATE.md",
+    ".planning/phases/20-auction-start-orchestration-and-seller-lifecycle-status/20-UAT.md",
+    ".planning/phases/27-frontend-shared-api-definition-standardization-and-edge-case/.gitkeep",
+    "FE/artium-web/src/@shared/services/apiClient.ts",
+    "FE/artium-web/src/@shared/apis/README.md",
+    "Many unrelated source/planning files shown by git status; inspect before staging."
+  ],
+  "next_action": "Run the structural rg checks from 27-01-PLAN.md, then cd FE/artium-web && npm run lint and npm run build. If green, write 27-01-SUMMARY.md and commit only the plan 01 files.",
+  "context_notes": "Plan 27-01 implementation appears mostly present, but it has not been verified or summarized. The resuming agent must keep Phase 20 context work separate from Phase 27 execution state."
+}
