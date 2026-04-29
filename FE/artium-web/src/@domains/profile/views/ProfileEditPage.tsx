@@ -105,20 +105,25 @@ export const ProfileEditPageView = ({ username: _username }: ProfileEditPageView
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
-  const finalUsername = resolvedUsername || profileData.user.username || ''
-  const pageTitle = `Edit Profile | ${profileData.user.displayName}`
+  const finalUsername = resolvedUsername || profileData?.user.username || ''
+  const pageTitle = profileData ? `Edit Profile | ${profileData.user.displayName}` : 'Edit Profile'
   const initialValues = useMemo(
-    () => buildInitialValues(profileData.user, profileData.about, finalUsername, sellerProfile),
-    [profileData.user, profileData.about, finalUsername, sellerProfile],
+    () =>
+      profileData
+        ? buildInitialValues(profileData.user, profileData.about, finalUsername, sellerProfile)
+        : null,
+    [profileData, finalUsername, sellerProfile],
   )
   const formKey = useMemo(
     () =>
-      [
-        initialValues.username,
-        initialValues.firstName,
-        initialValues.lastName,
-        initialValues.avatarUrl,
-      ].join('|'),
+      initialValues
+        ? [
+            initialValues.username,
+            initialValues.firstName,
+            initialValues.lastName,
+            initialValues.avatarUrl,
+          ].join('|')
+        : 'profile-edit-loading',
     [initialValues],
   )
 
@@ -127,8 +132,8 @@ export const ProfileEditPageView = ({ username: _username }: ProfileEditPageView
       <Metadata title={pageTitle} />
       {isLoading ? (
         <div className="container py-10 text-sm text-slate-500">Loading profile...</div>
-      ) : error ? (
-        <div className="container py-10 text-sm text-rose-600">{error}</div>
+      ) : error || !initialValues ? (
+        <div className="container py-10 text-sm text-rose-600">{error ?? 'Profile not found.'}</div>
       ) : (
         <ProfileEditForm
           key={formKey}

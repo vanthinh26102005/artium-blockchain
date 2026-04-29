@@ -509,7 +509,7 @@ export const CreateEventForm = ({
                       Cover image selected
                     </div>
                     <div className="text-xs text-slate-500">
-                      PNG, JPG. Max 2MB.
+                      PNG, JPG, WebP. Max 2MB.
                     </div>
                   </div>
                 </div>
@@ -519,7 +519,7 @@ export const CreateEventForm = ({
                     Drag image or upload from device
                   </div>
                   <div className="text-xs text-slate-500">
-                    Supported formats: PNG, JPG. Max: 2MB. A high-resolution image
+                    Supported formats: PNG, JPG, WebP. Max: 2MB. A high-resolution image
                     is recommended.
                   </div>
                   <EventButton

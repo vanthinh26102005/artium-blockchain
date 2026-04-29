@@ -37,6 +37,11 @@ export const ProfileMoodboardDetailPageView = ({
     let isActive = true
 
     const resolveMoodboard = async () => {
+      if (!profileData) {
+        setSelectedMoodboard(null)
+        return
+      }
+
       if (!moodboardIdFromRoute) {
         setSelectedMoodboard(profileData.moodboards[0] ?? null)
         return
@@ -68,13 +73,15 @@ export const ProfileMoodboardDetailPageView = ({
     return () => {
       isActive = false
     }
-  }, [moodboardIdFromRoute, profileData.moodboards, profileData.user])
+  }, [moodboardIdFromRoute, profileData])
 
   const moodboard = selectedMoodboard
-  const artworks = profileData.artworks.slice(0, 8)
+  const artworks = profileData?.artworks.slice(0, 8) ?? []
   const featuringArtist = artworks[0]?.artistName
   const featuringSuffix = artworks.length > 1 ? ' and 1 other' : ''
-  const pageTitle = `${moodboard?.title || 'Moodboard'} | ${profileData.user.displayName}`
+  const pageTitle = profileData
+    ? `${moodboard?.title || 'Moodboard'} | ${profileData.user.displayName}`
+    : 'Moodboard | Artium'
 
   return (
     <>
@@ -85,60 +92,64 @@ export const ProfileMoodboardDetailPageView = ({
             <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
               Loading moodboard...
             </div>
-          ) : error ? (
+          ) : error || !profileData ? (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-600">
-              {error}
+              {error ?? 'Profile not found.'}
             </div>
           ) : null}
-          <div className="relative">
-            <button
-              type="button"
-              className="absolute top-0 right-0 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900"
-              aria-label="More options"
-            >
-              <MoreHorizontal className="h-5 w-5" />
-            </button>
-            <div className="text-center">
-              <p className="text-xs font-semibold tracking-[0.3em] text-slate-400 uppercase">
-                Moodboard
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-                {moodboard?.title || 'Moodboard'}
-              </h1>
-              <div className="mt-4 flex items-center justify-center gap-3 text-sm text-slate-600">
-                <div className="relative h-8 w-8 overflow-hidden rounded-full bg-slate-200">
-                  <Image
-                    src={moodboard?.authorAvatarUrl || profileData.user.avatarUrl}
-                    alt={moodboard?.author || profileData.user.displayName}
-                    fill
-                    sizes="32px"
-                    className="object-cover"
-                  />
+          {profileData ? (
+            <>
+              <div className="relative">
+                <button
+                  type="button"
+                  className="absolute top-0 right-0 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                  aria-label="More options"
+                >
+                  <MoreHorizontal className="h-5 w-5" />
+                </button>
+                <div className="text-center">
+                  <p className="text-xs font-semibold tracking-[0.3em] text-slate-400 uppercase">
+                    Moodboard
+                  </p>
+                  <h1 className="mt-2 text-3xl font-semibold text-slate-900">
+                    {moodboard?.title || 'Moodboard'}
+                  </h1>
+                  <div className="mt-4 flex items-center justify-center gap-3 text-sm text-slate-600">
+                    <div className="relative h-8 w-8 overflow-hidden rounded-full bg-slate-200">
+                      <Image
+                        src={moodboard?.authorAvatarUrl || profileData.user.avatarUrl}
+                        alt={moodboard?.author || profileData.user.displayName}
+                        fill
+                        sizes="32px"
+                        className="object-cover"
+                      />
+                    </div>
+                    <span className="font-semibold text-slate-800">
+                      {moodboard?.author || profileData.user.displayName}
+                    </span>
+                  </div>
+                  {featuringArtist ? (
+                    <p className="mt-2 text-xs text-slate-500">
+                      Featuring {featuringArtist}
+                      {featuringSuffix}
+                    </p>
+                  ) : null}
+                  <p className="mt-1 text-xs text-slate-400">@{resolvedUsername}</p>
                 </div>
-                <span className="font-semibold text-slate-800">
-                  {moodboard?.author || profileData.user.displayName}
-                </span>
               </div>
-              {featuringArtist ? (
-                <p className="mt-2 text-xs text-slate-500">
-                  Featuring {featuringArtist}
-                  {featuringSuffix}
-                </p>
-              ) : null}
-              <p className="mt-1 text-xs text-slate-400">@{resolvedUsername}</p>
-            </div>
-          </div>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {artworks.map((artwork) => (
-              <ProfileArtworkCard
-                key={artwork.id}
-                artwork={artwork}
-                artist={profileData.user}
-                showPrice={false}
-              />
-            ))}
-          </div>
+              <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {artworks.map((artwork) => (
+                  <ProfileArtworkCard
+                    key={artwork.id}
+                    artwork={artwork}
+                    artist={profileData.user}
+                    showPrice={false}
+                  />
+                ))}
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
     </>

@@ -4,6 +4,11 @@ import { Metadata } from '@/components/SEO/Metadata'
 // @domains - profile
 import { ProfileArtworkCard } from '@domains/profile/components/ProfileArtworkCard'
 import { ProfileHero } from '@domains/profile/components/ProfileHero'
+import {
+  ProfileArtworksSectionSkeleton,
+  ProfileHeroSkeleton,
+  ProfileTabsSkeleton,
+} from '@domains/profile/components/ProfileSkeletons'
 import { ProfileTabs } from '@domains/profile/components/ProfileTabs'
 import { PROFILE_TABS } from '@domains/profile/constants/profileTabs'
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
@@ -20,8 +25,11 @@ export const ProfileArtworksPageView = ({ username: _username }: ProfileArtworks
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
-  const profileHandle = resolvedUsername || profileData.user.username || usernameFromRoute || ''
-  const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Artworks`
+  const profileHandle = resolvedUsername || profileData?.user.username || usernameFromRoute || ''
+  const canRenderProfile = !isLoading && !error && Boolean(profileData)
+  const pageTitle = profileData
+    ? `${profileData.user.displayName} (@${resolvedUsername}) | Artworks`
+    : 'Profile Artworks | Artium'
   const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}` : ''
   const tabHrefs = profileHandle
     ? {
@@ -39,12 +47,10 @@ export const ProfileArtworksPageView = ({ username: _username }: ProfileArtworks
       <div className="space-y-4">
         <div className="container">
           {isLoading ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
-              Loading profile...
-            </div>
-          ) : error ? (
+            <ProfileHeroSkeleton />
+          ) : error || !profileData ? (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-600">
-              {error}
+              {error ?? 'Profile not found.'}
             </div>
           ) : (
             <ProfileHero
@@ -55,29 +61,37 @@ export const ProfileArtworksPageView = ({ username: _username }: ProfileArtworks
             />
           )}
         </div>
-        <div className="container">
-          <ProfileTabs
-            tabs={PROFILE_TABS}
-            activeTab="artworks"
-            tabHrefs={tabHrefs}
-          />
-        </div>
-        <div className="container py-6">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
-                Artworks
-              </h2>
-              <p className="text-sm text-slate-500">All artworks by this artist</p>
+        {isLoading ? (
+          <div className="container">
+            <ProfileTabsSkeleton />
+          </div>
+        ) : canRenderProfile ? (
+          <div className="container">
+            <ProfileTabs tabs={PROFILE_TABS} activeTab="artworks" tabHrefs={tabHrefs} />
+          </div>
+        ) : null}
+        {isLoading ? (
+          <div className="container py-6">
+            <ProfileArtworksSectionSkeleton count={8} layout="grid" />
+          </div>
+        ) : canRenderProfile && profileData ? (
+          <div className="container py-6">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
+                  Artworks
+                </h2>
+                <p className="text-sm text-slate-500">All artworks by this artist</p>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {profileData.artworks.map((artwork) => (
+                <ProfileArtworkCard key={artwork.id} artwork={artwork} artist={profileData.user} />
+              ))}
             </div>
           </div>
-
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {profileData.artworks.map((artwork) => (
-              <ProfileArtworkCard key={artwork.id} artwork={artwork} artist={profileData.user} />
-            ))}
-          </div>
-        </div>
+        ) : null}
       </div>
     </>
   )

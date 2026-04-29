@@ -4,7 +4,7 @@ export const TITLE_LIMIT = 255
 export const VENUE_LIMIT = 255
 export const DESCRIPTION_LIMIT = 10000
 export const MAX_IMAGE_SIZE = 2 * 1024 * 1024
-export const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg'] as const
+export const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as const
 
 export type CreateEventFormValues = {
   title: string
@@ -103,7 +103,7 @@ export const createEventFormSchema = ({
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['coverImage'],
-          message: 'Only PNG or JPG files are allowed',
+          message: 'Only PNG, JPG, or WebP files are allowed',
         })
       }
 

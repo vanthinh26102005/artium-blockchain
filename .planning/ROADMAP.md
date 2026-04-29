@@ -28,7 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 18: Seller auction access and artwork eligibility policy** - Define and enforce seller-only access plus own-inventory eligibility before auction setup
 - [x] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
 - [x] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers (completed 2026-04-29)
-- [ ] **Phase 27: Frontend shared API definition standardization and edge-case audit** - Standardize frontend shared API request behavior while preserving existing module exports
+- [x] **Phase 27: Frontend shared API definition standardization and edge-case audit** - Standardize frontend shared API request behavior while preserving existing module exports (completed 2026-04-29)
 
 ## Phase Details
 
@@ -204,7 +204,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 19.1. Seller auction artifact recovery and policy alignment | 3/3 | Completed | 2026-04-27 |
 | 20. Auction start orchestration and seller lifecycle status | 4/4 | Complete    | 2026-04-29 |
 | 21-26. Backend deployment strategy scope | historical artifacts retained | Omitted/redundant | 2026-04-29 |
-| 27. Frontend shared API definition standardization and edge-case audit | 0/4 | Executing | - |
+| 27. Frontend shared API definition standardization and edge-case audit | 4/4 | Complete    | 2026-04-29 |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -397,16 +397,16 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 27-01-PLAN.md — Shared API client primitives, structured errors, empty response handling, and API definition README
+- [x] 27-01-PLAN.md — Shared API client primitives, structured errors, empty response handling, and API definition README
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 27-02-PLAN.md — JSON API module migration to shared query, path, and artwork base URL helpers
+- [x] 27-02-PLAN.md — JSON API module migration to shared query, path, and artwork base URL helpers
 
 **Wave 3** *(blocked on Wave 1 and Wave 2 completion)*
-- [ ] 27-03-PLAN.md — Shared upload transport and invoice mock isolation
+- [x] 27-03-PLAN.md — Shared upload transport and invoice mock isolation
 
 **Wave 4** *(blocked on Wave 1, Wave 2, and Wave 3 completion)*
-- [ ] 27-04-PLAN.md — Final API edge-case audit, documentation examples, lint, and build verification
+- [x] 27-04-PLAN.md — Final API edge-case audit, documentation examples, lint, and build verification
 
 Cross-cutting constraints:
 - Existing API module default exports remain stable.

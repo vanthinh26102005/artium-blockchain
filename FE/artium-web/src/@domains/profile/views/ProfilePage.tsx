@@ -14,6 +14,14 @@ import { MoodboardsSection } from '@domains/profile/components/MoodboardsSection
 import { ProfileAboutSection } from '@domains/profile/components/ProfileAboutSection'
 import { ProfileHero } from '@domains/profile/components/ProfileHero'
 import { ProfileSalesStatsSection } from '@domains/profile/components/ProfileSalesStatsSection'
+import {
+  ProfileArtworksSectionSkeleton,
+  ProfileHeroSkeleton,
+  ProfileMomentsSectionSkeleton,
+  ProfileMoodboardsSectionSkeleton,
+  ProfileOverviewSkeleton,
+  ProfileTabsSkeleton,
+} from '@domains/profile/components/ProfileSkeletons'
 import { ProfileTabs } from '@domains/profile/components/ProfileTabs'
 import { PROFILE_TABS } from '@domains/profile/constants/profileTabs'
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
@@ -71,9 +79,12 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
   const isAuthenticated = Boolean(authUser?.id)
 
   const profileData = profileDataWithDraft
-  const profileHandle = resolvedUsername || profileData.user.username || usernameFromRoute || ''
+  const profileHandle = resolvedUsername || profileData?.user.username || usernameFromRoute || ''
+  const canRenderProfile = !isLoading && !error && Boolean(profileData)
 
-  const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Artium`
+  const pageTitle = profileData
+    ? `${profileData.user.displayName} (@${resolvedUsername}) | Artium`
+    : 'Profile | Artium'
   const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}` : ''
   const tabHrefs = profileHandle
     ? {
@@ -84,12 +95,12 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
       }
     : undefined
   const moments = useMemo(
-    () => [...createdMoments, ...profileData.moments],
-    [createdMoments, profileData.moments],
+    () => [...createdMoments, ...(profileData?.moments ?? [])],
+    [createdMoments, profileData?.moments],
   )
   const moodboards = useMemo(
-    () => [...createdMoodboards, ...profileData.moodboards],
-    [createdMoodboards, profileData.moodboards],
+    () => [...createdMoodboards, ...(profileData?.moodboards ?? [])],
+    [createdMoodboards, profileData?.moodboards],
   )
 
   const resetMomentForm = () => {
@@ -196,6 +207,9 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
 
     try {
       const created = await profileApis.createMoodboard(payload)
+      if (!profileData) {
+        return
+      }
       setCreatedMoodboards((prev) => [
         mapMoodboardToProfileMoodboard(created, profileData.user),
         ...prev,
@@ -211,6 +225,28 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
   }
 
   const renderTabContent = () => {
+    if (isLoading) {
+      switch (activeTab) {
+        case 'artworks':
+          return <ProfileArtworksSectionSkeleton count={5} />
+        case 'moments':
+          return <ProfileMomentsSectionSkeleton count={6} />
+        case 'moodboards':
+          return <ProfileMoodboardsSectionSkeleton count={4} />
+        case 'overview':
+        default:
+          return <ProfileOverviewSkeleton />
+      }
+    }
+
+    if (error) {
+      return null
+    }
+
+    if (!profileData) {
+      return null
+    }
+
     switch (activeTab) {
       case 'artworks':
         return <ArtworksSection artworks={profileData.artworks} showSeeAll={false} isOwner={isOwner} />
@@ -268,12 +304,10 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
       <div className="space-y-4">
         <div className="container">
           {isLoading ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
-              Loading profile...
-            </div>
-          ) : error ? (
+            <ProfileHeroSkeleton />
+          ) : error || !profileData ? (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-600">
-              {error}
+              {error ?? 'Profile not found.'}
             </div>
           ) : (
             <ProfileHero
@@ -284,7 +318,7 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
             />
           )}
         </div>
-        {isOwner && !isLoading && !error ? (
+        {isOwner && canRenderProfile ? (
           <div className="container">
             <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
               <div className="flex flex-col gap-6 px-6 py-6 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
@@ -334,7 +368,12 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
             </section>
           </div>
         ) : null}
-        <div className="container">
+        {isLoading ? (
+          <div className="container">
+            <ProfileTabsSkeleton />
+          </div>
+        ) : canRenderProfile ? (
+          <div className="container">
             <ProfileTabs
               tabs={PROFILE_TABS}
               activeTab={activeTab}
@@ -342,7 +381,10 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
               tabHrefs={tabHrefs}
             />
           </div>
-        <div className="container px-4 py-6 sm:px-6">{renderTabContent()}</div>
+        ) : null}
+        {(isLoading || canRenderProfile) ? (
+          <div className="container px-4 py-6 sm:px-6">{renderTabContent()}</div>
+        ) : null}
       </div>
 
       <Dialog

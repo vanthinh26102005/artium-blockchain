@@ -36,11 +36,9 @@ import {
   AuthShell,
   SocialAuthButtons,
   WalletLoginPanel,
-  AuthProviderButton,
 } from '@domains/auth/components'
 import { type LoginFormValues, loginFormSchema } from '@domains/auth/validations/auth.schema'
 import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
-import { useWalletLogin } from '../hooks/useWalletLogin'
 
 export const LoginPage = () => {
   const router = useRouter()

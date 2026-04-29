@@ -19,7 +19,6 @@ skills/
 **/.env.local
 
 # Local development files
-.planning
 .DS_Store
 .claude
 .github
@@ -30,3 +29,4 @@ yarn.lock
 # Documentation files (local only)
 docs/Huonghan-Doan-New.pdf
 .env.compose
+.env.prod

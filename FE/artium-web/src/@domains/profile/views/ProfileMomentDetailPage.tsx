@@ -49,7 +49,7 @@ export const ProfileMomentDetailPageView = ({
     username: usernameFromRoute,
   })
   const profileData = baseData
-  const profileHandle = resolvedUsername || profileData.user.username || usernameFromRoute || ''
+  const profileHandle = resolvedUsername || profileData?.user.username || usernameFromRoute || ''
   const momentId = Array.isArray(_momentId) ? _momentId[0] : _momentId
   const [moment, setMoment] = useState<Moment | null>(null)
   const [momentLoading, setMomentLoading] = useState(false)
@@ -100,7 +100,7 @@ export const ProfileMomentDetailPageView = ({
     let isActive = true
 
     const loadMoment = async () => {
-      if (!momentId) {
+      if (!momentId || !profileData) {
         setMoment(null)
         return
       }
@@ -130,7 +130,7 @@ export const ProfileMomentDetailPageView = ({
     return () => {
       isActive = false
     }
-  }, [momentId, profileData.user])
+  }, [momentId, profileData])
 
   useEffect(() => {
     let isActive = true
@@ -285,7 +285,7 @@ export const ProfileMomentDetailPageView = ({
     )
   }
 
-  if (error || !moment) {
+  if (error || !profileData || !moment) {
     return (
       <div className="min-h-screen bg-slate-100">
         <div className="container space-y-6 py-10">

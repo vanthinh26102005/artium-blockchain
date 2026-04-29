@@ -38,7 +38,7 @@ const subscribe = (onStoreChange: () => void) => {
   }
 }
 
-export const useProfileDraftData = (data: ProfileOverviewData) => {
+export const useProfileDraftData = (data: ProfileOverviewData | null) => {
   const draft = useSyncExternalStore<ProfileDraft | null>(subscribe, getSnapshot, () => null)
-  return useMemo(() => applyProfileDraft(data, draft), [data, draft])
+  return useMemo(() => (data ? applyProfileDraft(data, draft) : null), [data, draft])
 }

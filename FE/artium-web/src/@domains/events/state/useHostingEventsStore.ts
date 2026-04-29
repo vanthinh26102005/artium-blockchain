@@ -8,6 +8,7 @@ import {
   type HostingEvent,
 } from "@domains/events/mock/mockHostingEvents";
 import { type EventInvitation } from "@domains/events/types/invitation";
+import artworkUploadApi from "@shared/apis/artworkUploadApi";
 import eventsApis, {
   type EventApiResponse,
 } from "@shared/apis/eventsApis";
@@ -58,6 +59,32 @@ const mapApiToHostingEvent = (event: EventApiResponse): HostingEvent => {
   return ensureCoverImage(mapApiEventToHostingEvent(event));
 };
 
+const createLocalId = () => {
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+const resolveUploadedImageUrl = (result: { secureUrl?: string; url?: string }) => {
+  return result.secureUrl || result.url;
+};
+
+const uploadEventCoverImage = async (file: File, eventId: string, title: string) => {
+  const { user } = useAuthStore.getState();
+  const uploadResult = await artworkUploadApi.uploadArtworkImage({
+    file,
+    sellerId: user?.id ?? "event-host",
+    artworkId: `event-${eventId}`,
+    altText: title,
+    isPrimary: true,
+  });
+  const coverImageUrl = resolveUploadedImageUrl(uploadResult);
+
+  if (!coverImageUrl) {
+    throw new Error("Event cover upload did not return an image URL.");
+  }
+
+  return coverImageUrl;
+};
+
 export const useHostingEventsStore = create<HostingEventsState>((set, get) => ({
   events: [],
   invitations: [],
@@ -83,7 +110,11 @@ export const useHostingEventsStore = create<HostingEventsState>((set, get) => ({
     }
   },
   addEvent: async (values) => {
-    const payload = buildCreateEventPayload(values);
+    const eventUploadId = createLocalId();
+    const coverImageUrl = values.coverImage
+      ? await uploadEventCoverImage(values.coverImage, eventUploadId, values.title)
+      : undefined;
+    const payload = buildCreateEventPayload(values, coverImageUrl);
     const created = await eventsApis.createEvent(payload);
     const event = mapApiToHostingEvent(created);
     set((state) => ({ events: [event, ...state.events] }));
@@ -104,7 +135,10 @@ export const useHostingEventsStore = create<HostingEventsState>((set, get) => ({
   },
   updateEventFromForm: async (id, values) => {
     const existing = get().events.find((event) => event.id === id);
-    const payload = buildCreateEventPayload(values, existing?.coverImageUrl ?? null);
+    const coverImageUrl = values.coverImage
+      ? await uploadEventCoverImage(values.coverImage, id, values.title)
+      : existing?.coverImageUrl ?? null;
+    const payload = buildCreateEventPayload(values, coverImageUrl);
     const updatedApi = await eventsApis.updateEvent(id, payload);
     const updated = mapApiToHostingEvent(updatedApi);
     set((state) => ({

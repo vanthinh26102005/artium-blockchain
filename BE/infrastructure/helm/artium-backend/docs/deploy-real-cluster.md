@@ -21,7 +21,6 @@ Build the frontend image with public browser-facing values baked in:
 ```bash
 docker build -t ghcr.io/<owner>/artium-web:<tag> FE/artium-web \
   --build-arg NEXT_PUBLIC_API_URL=https://dg.pthinh.io.vn/api \
-  --build-arg NEXT_PUBLIC_ARTWORK_API_URL=https://dg.pthinh.io.vn/api/artwork \
   --build-arg NEXT_PUBLIC_WS_URL=https://dg.pthinh.io.vn \
   --build-arg NEXT_PUBLIC_WEB_BASE_URL=https://dg.pthinh.io.vn \
   --build-arg NEXTAUTH_URL=https://dg.pthinh.io.vn \

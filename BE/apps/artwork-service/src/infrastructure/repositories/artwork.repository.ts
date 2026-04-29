@@ -22,6 +22,32 @@ import { Artwork, IArtworkRepository } from '../../domain';
 @Injectable()
 export class ArtworkRepository implements IArtworkRepository {
   private readonly logger = new Logger(ArtworkRepository.name);
+  private readonly filterableArtworkFields = new Set([
+    'id',
+    'sellerId',
+    'creatorName',
+    'title',
+    'description',
+    'creationYear',
+    'editionRun',
+    'materials',
+    'location',
+    'price',
+    'currency',
+    'quantity',
+    'status',
+    'isPublished',
+    'folderId',
+    'viewCount',
+    'likeCount',
+    'commentCount',
+    'moodboardCount',
+    'ipfsMetadataHash',
+    'reservePrice',
+    'minBidIncrement',
+    'auctionDuration',
+    'onChainAuctionId',
+  ]);
 
   constructor(
     @InjectRepository(Artwork)
@@ -32,6 +58,23 @@ export class ArtworkRepository implements IArtworkRepository {
     return transactionManager
       ? transactionManager.getRepository(Artwork)
       : this.ormRepository;
+  }
+
+  private sanitizeArtworkWhere(where?: Record<string, unknown>) {
+    if (!where) {
+      return {};
+    }
+
+    return Object.entries(where).reduce<Record<string, unknown>>(
+      (acc, [key, value]) => {
+        if (this.filterableArtworkFields.has(key)) {
+          acc[key] = value;
+        }
+
+        return acc;
+      },
+      {},
+    );
   }
 
   async create(
@@ -103,19 +146,31 @@ export class ArtworkRepository implements IArtworkRepository {
       searchQuery?: string;
       minPrice?: number;
       maxPrice?: number;
+      includeSellerAuctionLifecycle?: unknown;
     } = {},
     transactionManager?: EntityManager,
   ): Promise<[Artwork[], number]> {
-    const { where, orderBy, searchQuery, minPrice, maxPrice, ...rest } =
-      options;
+    const {
+      where,
+      orderBy,
+      searchQuery,
+      minPrice,
+      maxPrice,
+      includeSellerAuctionLifecycle: _includeSellerAuctionLifecycle,
+      ...rest
+    } = options;
+
+    const safeWhere = this.sanitizeArtworkWhere(
+      where as Record<string, unknown> | undefined,
+    );
 
     let typeOrmWhere: FindOptionsWhere<Artwork> | FindOptionsWhere<Artwork>[] =
-      mapToTypeOrmWhere(where);
+      mapToTypeOrmWhere(safeWhere as WhereOperator<Artwork>);
 
     // Handle search query - search across title, description, materials, and creatorName
     if (searchQuery) {
       const searchPattern = `%${searchQuery}%`;
-      const baseWhere = mapToTypeOrmWhere(where);
+      const baseWhere = mapToTypeOrmWhere(safeWhere as WhereOperator<Artwork>);
 
       // Create an array of search conditions (OR logic)
       typeOrmWhere = [

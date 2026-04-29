@@ -2,7 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { EthereumQuoteResponse } from '@shared/apis/paymentApis'
 
-type MetaMaskError = { code?: number; message?: string }
+type MetaMaskError = {
+  code?: number
+  message?: string
+  data?: {
+    message?: string
+  }
+}
 
 export type WalletErrorState = {
   message: string
@@ -47,7 +53,13 @@ function classifyMetaMaskError(
   context: 'connect' | 'transaction' | 'network',
 ): WalletErrorState {
   const code = (err as MetaMaskError)?.code
-  if (code === 4001 || (err instanceof Error && err.message.toLowerCase().includes('user rejected'))) {
+  const message =
+    err instanceof Error
+      ? err.message
+      : (err as MetaMaskError)?.message || (err as MetaMaskError)?.data?.message || ''
+  const normalizedMessage = message.toLowerCase()
+
+  if (code === 4001 || normalizedMessage.includes('user rejected')) {
     if (context === 'connect') {
       return {
         message: 'You rejected the MetaMask connection request. Retry connection when you are ready.',
@@ -102,7 +114,7 @@ function classifyMetaMaskError(
   }[context]
 
   return {
-    message: err instanceof Error ? err.message : fallback,
+    message: message || fallback,
     canRetry: true,
     retryLabel:
       context === 'connect'
@@ -127,6 +139,19 @@ function normalizeChainId(chainId: string | null | undefined): string | null {
 
 function toHexChainId(chainId: string): string {
   return `0x${BigInt(chainId).toString(16)}`
+}
+
+function resolvePlatformWalletAddress(): string {
+  const address = process.env.NEXT_PUBLIC_PLATFORM_ETH_WALLET?.trim()
+  if (!address) {
+    throw new Error('Platform wallet address not configured')
+  }
+
+  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+    throw new Error('Platform wallet address is invalid. Check NEXT_PUBLIC_PLATFORM_ETH_WALLET.')
+  }
+
+  return address
 }
 
 export const useWalletCheckout = ({
@@ -335,10 +360,7 @@ export const useWalletCheckout = ({
       throw new Error('Please connect your wallet before checking out.')
     }
 
-    const toAddress = process.env.NEXT_PUBLIC_PLATFORM_ETH_WALLET
-    if (!toAddress) {
-      throw new Error('Platform wallet address not configured')
-    }
+    const toAddress = resolvePlatformWalletAddress()
 
     setIsSubmittingPayment(true)
     setTransactionError(null)

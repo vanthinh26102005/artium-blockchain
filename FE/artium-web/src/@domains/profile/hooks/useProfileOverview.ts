@@ -5,7 +5,6 @@ import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis
 import usersApi from '@shared/apis/usersApi'
 import type { UserPayload } from '@shared/types/auth'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
-import { profileOverviewData as fallbackProfile } from '@domains/profile/constants/mockProfileData'
 import {
   buildProfileOverviewData,
   resolveUsername,
@@ -17,7 +16,7 @@ type UseProfileOverviewOptions = {
 }
 
 type UseProfileOverviewResult = {
-  data: ProfileOverviewData
+  data: ProfileOverviewData | null
   user: UserPayload | null
   sellerProfile: SellerProfilePayload | null
   isOwner: boolean
@@ -30,10 +29,12 @@ export const useProfileOverview = ({
   username,
 }: UseProfileOverviewOptions): UseProfileOverviewResult => {
   const authUser = useAuthStore((state) => state.user)
+  const isAuthHydrated = useAuthStore((state) => state.isHydrated)
+  const hydrateAuth = useAuthStore((state) => state.hydrateAuth)
   const [data, setData] = useState<ProfileOverviewData | null>(null)
   const [user, setUser] = useState<UserPayload | null>(null)
   const [sellerProfile, setSellerProfile] = useState<SellerProfilePayload | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const isOwner = useMemo(() => {
@@ -47,9 +48,17 @@ export const useProfileOverview = ({
   useEffect(() => {
     let isActive = true
 
+    if (!username && !isAuthHydrated && typeof window !== 'undefined') {
+      hydrateAuth()
+      return () => {
+        isActive = false
+      }
+    }
+
     const loadProfile = async () => {
       setIsLoading(true)
       setError(null)
+      setData(null)
 
       try {
         // Step 1: Fetch User
@@ -80,7 +89,7 @@ export const useProfileOverview = ({
         if (!fetchedUser) {
           setUser(null)
           setSellerProfile(null)
-          setData(fallbackProfile)
+          setData(null)
           setError('Profile not found.')
           return
         }
@@ -136,7 +145,7 @@ export const useProfileOverview = ({
       } catch (fetchError) {
         if (!isActive) return
         setError(fetchError instanceof Error ? fetchError.message : 'Failed to load profile.')
-        setData(fallbackProfile)
+        setData(null)
         setUser(null)
         setSellerProfile(null)
       } finally {
@@ -151,7 +160,7 @@ export const useProfileOverview = ({
     return () => {
       isActive = false
     }
-  }, [username, authUser?.id, authUser?.slug, authUser?.username])
+  }, [username, authUser, isAuthHydrated, hydrateAuth])
 
   const resolvedUsername = useMemo(
     () => resolveUsername(user ?? authUser, sellerProfile, username || ''),
@@ -159,7 +168,7 @@ export const useProfileOverview = ({
   )
 
   return {
-    data: data ?? fallbackProfile,
+    data,
     user,
     sellerProfile,
     isOwner,
