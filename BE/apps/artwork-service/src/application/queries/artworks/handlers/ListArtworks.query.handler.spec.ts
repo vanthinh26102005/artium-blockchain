@@ -1,9 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { of } from 'rxjs';
-import {
-  ArtworkStatus,
-  SellerAuctionStartStatus,
-} from '@app/common';
+import { ArtworkStatus, SellerAuctionStartStatus } from '@app/common';
 import { ListArtworksQuery } from '../ListArtworks.query';
 import { ListArtworksHandler } from './ListArtworks.query.handler';
 
@@ -12,15 +8,16 @@ describe('ListArtworksHandler', () => {
     findAndCount: jest.fn(),
   };
 
-  const ordersClient = {
-    send: jest.fn(),
+  const lifecycleRepo = {
+    findBySellerAndArtworkIds: jest.fn(),
   };
 
   let handler: ListArtworksHandler;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    handler = new ListArtworksHandler(repo as never, ordersClient as never);
+    lifecycleRepo.findBySellerAndArtworkIds.mockResolvedValue([] as never);
+    handler = new ListArtworksHandler(repo as never, lifecycleRepo as never);
   });
 
   it('enriches seller artwork rows with auction lifecycle when requested', async () => {
@@ -36,8 +33,8 @@ describe('ListArtworksHandler', () => {
       ],
       1,
     ] as never);
-    ordersClient.send.mockReturnValue(
-      of({
+    lifecycleRepo.findBySellerAndArtworkIds.mockResolvedValue([
+      {
         attemptId: 'attempt-1',
         sellerId: 'seller-1',
         artworkId: 'artwork-1',
@@ -69,8 +66,8 @@ describe('ListArtworksHandler', () => {
         },
         activatedAt: null,
         updatedAt: '2026-04-27T08:00:00.000Z',
-      }),
-    );
+      },
+    ] as never);
 
     const result = await handler.execute(
       new ListArtworksQuery({
@@ -79,12 +76,9 @@ describe('ListArtworksHandler', () => {
       }),
     );
 
-    expect(ordersClient.send).toHaveBeenCalledWith(
-      { cmd: 'get_seller_auction_start_status' },
-      {
-        sellerId: 'seller-1',
-        artworkId: 'artwork-1',
-      },
+    expect(lifecycleRepo.findBySellerAndArtworkIds).toHaveBeenCalledWith(
+      'seller-1',
+      ['artwork-1'],
     );
     expect(result.data[0]).toEqual(
       expect.objectContaining({
@@ -119,9 +113,47 @@ describe('ListArtworksHandler', () => {
       }),
     );
 
-    expect(ordersClient.send).not.toHaveBeenCalled();
+    expect(lifecycleRepo.findBySellerAndArtworkIds).not.toHaveBeenCalled();
     expect(result.data[0]).toEqual(
       expect.objectContaining({
+        auctionLifecycle: null,
+      }),
+    );
+  });
+
+  it('keeps artwork listing available when auction lifecycle enrichment fails', async () => {
+    repo.findAndCount.mockResolvedValue([
+      [
+        {
+          id: 'artwork-1',
+          sellerId: 'seller-1',
+          title: 'Ocean Study',
+          status: ArtworkStatus.ACTIVE,
+          images: [],
+        },
+      ],
+      1,
+    ] as never);
+    lifecycleRepo.findBySellerAndArtworkIds.mockRejectedValue(
+      new Error(
+        'relation "artwork_auction_lifecycle_snapshots" does not exist',
+      ) as never,
+    );
+
+    const result = await handler.execute(
+      new ListArtworksQuery({
+        sellerId: 'seller-1',
+        includeSellerAuctionLifecycle: true,
+      }),
+    );
+
+    expect(lifecycleRepo.findBySellerAndArtworkIds).toHaveBeenCalledWith(
+      'seller-1',
+      ['artwork-1'],
+    );
+    expect(result.data[0]).toEqual(
+      expect.objectContaining({
+        id: 'artwork-1',
         auctionLifecycle: null,
       }),
     );

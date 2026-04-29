@@ -50,6 +50,7 @@ import {
   GetOrderItemsHandler,
   GetSellerAuctionStartStatusHandler,
   StartSellerAuctionHandler,
+  SellerAuctionLifecycleOutboxService,
 } from './application';
 
 import {
@@ -93,16 +94,12 @@ export const Repositories = [
 
 export const Services = [
   { provide: ITransactionService, useClass: TransactionService },
+  SellerAuctionLifecycleOutboxService,
 ];
 
-export const EventHandlers = [
-  BlockchainEventHandler,
-  PaymentEventHandler,
-];
+export const EventHandlers = [BlockchainEventHandler, PaymentEventHandler];
 
-export const Controllers = [
-  OrdersMicroserviceController,
-];
+export const Controllers = [OrdersMicroserviceController];
 
 const ArtworkServiceClient = {
   name: 'ARTWORK_SERVICE',

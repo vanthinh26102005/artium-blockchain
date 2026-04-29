@@ -27,6 +27,9 @@ describe('StartSellerAuctionHandler', () => {
   const configService = {
     get: jest.fn(),
   };
+  const lifecycleOutbox = {
+    queueSnapshot: jest.fn(),
+  };
 
   let handler: StartSellerAuctionHandler;
 
@@ -58,16 +61,21 @@ describe('StartSellerAuctionHandler', () => {
       }
       return null;
     });
-    escrowContractService.encodeCreateAuctionCalldata.mockReturnValue('0xdeadbeef');
+    escrowContractService.encodeCreateAuctionCalldata.mockReturnValue(
+      '0xdeadbeef',
+    );
     handler = new StartSellerAuctionHandler(
       startAttemptRepo as never,
       escrowContractService as never,
       configService as never,
+      lifecycleOutbox as never,
     );
   });
 
   it('creates a new pending attempt with encoded wallet request data', async () => {
-    startAttemptRepo.findLatestBySellerAndArtwork.mockResolvedValue(null as never);
+    startAttemptRepo.findLatestBySellerAndArtwork.mockResolvedValue(
+      null as never,
+    );
     startAttemptRepo.create.mockImplementation(async (data: any) => ({
       id: 'attempt-1',
       createdAt: new Date('2026-04-27T07:00:00.000Z'),
@@ -75,7 +83,9 @@ describe('StartSellerAuctionHandler', () => {
       ...data,
     }));
 
-    const result = await handler.execute(new StartSellerAuctionCommand({ ...input }));
+    const result = await handler.execute(
+      new StartSellerAuctionCommand({ ...input }),
+    );
 
     expect(startAttemptRepo.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -93,7 +103,16 @@ describe('StartSellerAuctionHandler', () => {
       data: '0xdeadbeef',
     });
     expect(result.submittedTermsSnapshot.durationHours).toBe(72);
-    expect(escrowContractService.encodeCreateAuctionCalldata).toHaveBeenCalled();
+    expect(
+      escrowContractService.encodeCreateAuctionCalldata,
+    ).toHaveBeenCalled();
+    expect(lifecycleOutbox.queueSnapshot).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attemptId: 'attempt-1',
+        artworkId: input.artworkId,
+        status: SellerAuctionStartStatus.PENDING_START,
+      }),
+    );
   });
 
   it('reuses an existing pending attempt instead of creating a duplicate', async () => {
@@ -132,7 +151,9 @@ describe('StartSellerAuctionHandler', () => {
       updatedAt: new Date('2026-04-27T07:00:00.000Z'),
     } as never);
 
-    const result = await handler.execute(new StartSellerAuctionCommand({ ...input }));
+    const result = await handler.execute(
+      new StartSellerAuctionCommand({ ...input }),
+    );
 
     expect(startAttemptRepo.create).not.toHaveBeenCalled();
     expect(result.attemptId).toBe('attempt-1');
@@ -176,12 +197,16 @@ describe('StartSellerAuctionHandler', () => {
       updatedAt: new Date('2026-04-27T07:00:00.000Z'),
     } as never);
 
-    const result = await handler.execute(new StartSellerAuctionCommand({ ...input }));
+    const result = await handler.execute(
+      new StartSellerAuctionCommand({ ...input }),
+    );
 
     expect(result.status).toBe(SellerAuctionStartStatus.PENDING_START);
     expect(result.walletActionRequired).toBe(false);
     expect(result.txHash).toBe('0xabc');
     expect(result.transactionRequest).toBeNull();
-    expect(escrowContractService.encodeCreateAuctionCalldata).not.toHaveBeenCalled();
+    expect(
+      escrowContractService.encodeCreateAuctionCalldata,
+    ).not.toHaveBeenCalled();
   });
 });

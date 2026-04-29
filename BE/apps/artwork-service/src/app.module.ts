@@ -4,20 +4,22 @@ import {
   TransactionService,
 } from '@app/common';
 import { OutboxEntity, OutboxModule } from '@app/outbox';
+import { AppRabbitMQModule } from '@app/rabbitmq';
 import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import {
   Artwork,
+  ArtworkAuctionLifecycleSnapshot,
   ArtworkComment,
   ArtworkCommentLike,
   ArtworkFolder,
   ArtworkLike,
   ArtworkTag,
   GcsStorageService,
+  IArtworkAuctionLifecycleRepository,
   IArtworkFolderRepository,
   IArtworkRepository,
   ITagRepository,
@@ -25,6 +27,7 @@ import {
 } from './domain';
 
 import {
+  ArtworkAuctionLifecycleRepository,
   ArtworkFolderRepository,
   ArtworkRepository,
   TagRepository,
@@ -85,6 +88,7 @@ import {
   UpdateArtworkHandler,
   UpdateArtworkImagesHandler,
   UpdateTagHandler,
+  SellerAuctionLifecycleEventHandler,
 } from './application';
 import { SeederModule } from './db/seeder.module';
 import { SeederService } from './db/seeder.service';
@@ -142,6 +146,10 @@ export const QueryHandlers = [
 export const Repositories = [
   { provide: ITagRepository, useClass: TagRepository },
   { provide: IArtworkFolderRepository, useClass: ArtworkFolderRepository },
+  {
+    provide: IArtworkAuctionLifecycleRepository,
+    useClass: ArtworkAuctionLifecycleRepository,
+  },
   { provide: IArtworkRepository, useClass: ArtworkRepository },
 ];
 
@@ -162,14 +170,7 @@ export const Controllers = [
   UploadMicroserviceController,
 ];
 
-const OrdersServiceClient = {
-  name: 'ORDERS_SERVICE',
-  transport: Transport.TCP as const,
-  options: {
-    host: process.env.ORDERS_SERVICE_HOST || 'localhost',
-    port: parseInt(process.env.ORDERS_SERVICE_PORT || '3104', 10),
-  },
-};
+export const EventHandlers = [SellerAuctionLifecycleEventHandler];
 
 @Module({
   imports: [
@@ -181,6 +182,7 @@ const OrdersServiceClient = {
     DynamicDatabaseModule.forRoot('artwork'),
     TypeOrmModule.forFeature([
       Artwork,
+      ArtworkAuctionLifecycleSnapshot,
       ArtworkFolder,
       ArtworkTag,
       ArtworkComment,
@@ -191,8 +193,8 @@ const OrdersServiceClient = {
     ]),
 
     OutboxModule,
+    AppRabbitMQModule,
     CqrsModule,
-    ClientsModule.register([OrdersServiceClient]),
     SeederModule,
   ],
   controllers: [...Controllers],
@@ -201,6 +203,7 @@ const OrdersServiceClient = {
     ...QueryHandlers,
     ...Repositories,
     ...Services,
+    ...EventHandlers,
   ],
   exports: [ConfigModule],
 })

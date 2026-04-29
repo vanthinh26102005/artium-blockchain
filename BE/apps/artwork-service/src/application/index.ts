@@ -48,6 +48,7 @@ export * from './commands/tags/UpdateTag.command.handler';
 export * from './commands/tags/handlers/CreateTag.command.handler';
 export * from './commands/tags/handlers/DeleteTag.command.handler';
 export * from './commands/tags/handlers/UpdateTag.command.handler';
+export * from './event-handlers';
 export * from './queries/artwork-folders/CountArtworksInFolder.query';
 export * from './queries/artwork-folders/FindArtworksInFolder.query';
 export * from './queries/artwork-folders/GetArtworkFolder.query';

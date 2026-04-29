@@ -6,7 +6,11 @@ export * from './dtos/artwork-folder/move-folder.input';
 export { ReorderFoldersInput } from '@app/common';
 export * from './dtos/artwork-folder/update-artwork-folder.input';
 export * from './dtos/artworks/artwork.object';
-export { BulkDeleteArtworksInput, BulkMoveArtworksInput, BulkUpdateArtworkStatusInput } from '@app/common';
+export {
+  BulkDeleteArtworksInput,
+  BulkMoveArtworksInput,
+  BulkUpdateArtworkStatusInput,
+} from '@app/common';
 export * from './dtos/artworks/create-artwork.input';
 export * from './dtos/artworks/find-many-artwork.input';
 export * from './dtos/artworks/update-artwork.input';
@@ -19,8 +23,10 @@ export * from './entities/artwork-comment.entity';
 export * from './entities/artwork-folder.entity';
 export * from './entities/artwork-like.entity';
 export * from './entities/artwork-tag.entity';
+export * from './entities/artwork-auction-lifecycle.entity';
 export * from './entities/artworks.entity';
 export * from './entities/tags.entity';
+export * from './interfaces/artwork-auction-lifecycle.repository.interface';
 export * from './interfaces/artwork-folder.repository.interface';
 export * from './interfaces/artwork.repository.interface';
 export * from './interfaces/tag.repository.interface';

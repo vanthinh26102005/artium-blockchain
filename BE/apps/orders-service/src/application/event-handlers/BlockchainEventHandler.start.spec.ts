@@ -8,6 +8,15 @@ import {
   SellerAuctionReservePolicy,
   SellerAuctionStartStatus,
 } from '@app/common';
+
+jest.mock(
+  '@app/blockchain',
+  () => ({
+    EscrowContractService: class EscrowContractService {},
+  }),
+  { virtual: true },
+);
+
 import { BlockchainEventHandler } from './blockchain-event.handler';
 
 describe('BlockchainEventHandler.handleAuctionStarted', () => {
@@ -27,6 +36,9 @@ describe('BlockchainEventHandler.handleAuctionStarted', () => {
   };
   const artworkClient = {
     send: jest.fn(),
+  };
+  const lifecycleOutbox = {
+    queueAttemptSnapshot: jest.fn(),
   };
 
   let handler: BlockchainEventHandler;
@@ -73,6 +85,7 @@ describe('BlockchainEventHandler.handleAuctionStarted', () => {
       orderItemRepo as never,
       startAttemptRepo as never,
       artworkClient as never,
+      lifecycleOutbox as never,
     );
   });
 

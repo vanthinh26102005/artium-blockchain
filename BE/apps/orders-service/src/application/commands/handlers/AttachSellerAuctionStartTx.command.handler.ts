@@ -11,17 +11,17 @@ import { ethers } from 'ethers';
 import { AttachSellerAuctionStartTxCommand } from '../AttachSellerAuctionStartTx.command';
 import { AuctionStartAttempt } from '../../../domain/entities';
 import { IAuctionStartAttemptRepository } from '../../../domain/interfaces';
+import { SellerAuctionLifecycleOutboxService } from '../../services';
 
 @CommandHandler(AttachSellerAuctionStartTxCommand)
-export class AttachSellerAuctionStartTxHandler
-  implements ICommandHandler<AttachSellerAuctionStartTxCommand>
-{
+export class AttachSellerAuctionStartTxHandler implements ICommandHandler<AttachSellerAuctionStartTxCommand> {
   private readonly logger = new Logger(AttachSellerAuctionStartTxHandler.name);
 
   constructor(
     @Inject(IAuctionStartAttemptRepository)
     private readonly startAttemptRepo: IAuctionStartAttemptRepository,
     private readonly escrowContractService: EscrowContractService,
+    private readonly lifecycleOutbox: SellerAuctionLifecycleOutboxService,
   ) {}
 
   async execute(
@@ -46,7 +46,9 @@ export class AttachSellerAuctionStartTxHandler
         );
       }
 
-      const existingByTxHash = await this.startAttemptRepo.findByTxHash(command.txHash);
+      const existingByTxHash = await this.startAttemptRepo.findByTxHash(
+        command.txHash,
+      );
       if (existingByTxHash && existingByTxHash.id !== attempt.id) {
         throw RpcExceptionHelper.conflict(
           'This transaction hash is already attached to another auction start',
@@ -69,7 +71,9 @@ export class AttachSellerAuctionStartTxHandler
         );
       }
 
-      return this.toStatusObject(updated);
+      const snapshot = this.toStatusObject(updated);
+      await this.lifecycleOutbox.queueSnapshot(snapshot);
+      return snapshot;
     } catch (error) {
       this.logger.error(
         'Failed to attach seller auction start tx',
@@ -87,7 +91,9 @@ export class AttachSellerAuctionStartTxHandler
 
   private normalizeWalletAddress(address: string): string {
     if (!ethers.isAddress(address)) {
-      throw RpcExceptionHelper.badRequest('Seller wallet address must be a valid EVM address');
+      throw RpcExceptionHelper.badRequest(
+        'Seller wallet address must be a valid EVM address',
+      );
     }
     return ethers.getAddress(address);
   }
@@ -120,7 +126,11 @@ export class AttachSellerAuctionStartTxHandler
       walletActionRequired: attempt.walletActionRequired,
       submittedTermsSnapshot: attempt.termsSnapshot,
       activatedAt: attempt.activatedAt?.toISOString() ?? null,
-      updatedAt: (attempt.updatedAt ?? attempt.createdAt ?? new Date()).toISOString(),
+      updatedAt: (
+        attempt.updatedAt ??
+        attempt.createdAt ??
+        new Date()
+      ).toISOString(),
       transactionRequest:
         shouldIncludeWalletRequest && attempt.contractAddress
           ? {

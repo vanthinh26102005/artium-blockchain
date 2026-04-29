@@ -17,11 +17,10 @@ import {
   SellerAuctionStartTermsSnapshot,
 } from '../../../domain/entities';
 import { IAuctionStartAttemptRepository } from '../../../domain/interfaces';
+import { SellerAuctionLifecycleOutboxService } from '../../services';
 
 @CommandHandler(StartSellerAuctionCommand)
-export class StartSellerAuctionHandler
-  implements ICommandHandler<StartSellerAuctionCommand>
-{
+export class StartSellerAuctionHandler implements ICommandHandler<StartSellerAuctionCommand> {
   private readonly logger = new Logger(StartSellerAuctionHandler.name);
 
   constructor(
@@ -29,6 +28,7 @@ export class StartSellerAuctionHandler
     private readonly startAttemptRepo: IAuctionStartAttemptRepository,
     private readonly escrowContractService: EscrowContractService,
     private readonly configService: ConfigService,
+    private readonly lifecycleOutbox: SellerAuctionLifecycleOutboxService,
   ) {}
 
   async execute(
@@ -62,7 +62,9 @@ export class StartSellerAuctionHandler
           data,
         );
         if (reused) {
-          return this.toStatusObject(reused);
+          const snapshot = this.toStatusObject(reused);
+          await this.lifecycleOutbox.queueSnapshot(snapshot);
+          return snapshot;
         }
       }
 
@@ -90,9 +92,14 @@ export class StartSellerAuctionHandler
         termsSnapshot,
       });
 
-      return this.toStatusObject(created);
+      const snapshot = this.toStatusObject(created);
+      await this.lifecycleOutbox.queueSnapshot(snapshot);
+      return snapshot;
     } catch (error) {
-      this.logger.error('Failed to start seller auction', (error as Error).stack);
+      this.logger.error(
+        'Failed to start seller auction',
+        (error as Error).stack,
+      );
       if (error instanceof RpcException) {
         throw error;
       }
@@ -156,7 +163,7 @@ export class StartSellerAuctionHandler
       reservePolicy: data.reservePolicy,
       reservePriceEth:
         data.reservePolicy === SellerAuctionReservePolicy.SET
-          ? data.reservePriceEth?.trim() ?? null
+          ? (data.reservePriceEth?.trim() ?? null)
           : null,
       minBidIncrementEth: data.minBidIncrementEth.trim(),
       durationHours: data.durationHours,
@@ -167,7 +174,9 @@ export class StartSellerAuctionHandler
   }
 
   private getRequiredContractAddress(): string {
-    const contractAddress = this.configService.get<string>('CONTRACT_ADDRESS')?.trim();
+    const contractAddress = this.configService
+      .get<string>('CONTRACT_ADDRESS')
+      ?.trim();
     const rpcUrl = this.configService.get<string>('BLOCKCHAIN_RPC_URL')?.trim();
 
     if (!contractAddress || !rpcUrl) {
@@ -181,7 +190,9 @@ export class StartSellerAuctionHandler
 
   private normalizeWalletAddress(address: string): string {
     if (!ethers.isAddress(address)) {
-      throw RpcExceptionHelper.badRequest('Seller wallet address must be a valid EVM address');
+      throw RpcExceptionHelper.badRequest(
+        'Seller wallet address must be a valid EVM address',
+      );
     }
     return ethers.getAddress(address);
   }
@@ -240,7 +251,11 @@ export class StartSellerAuctionHandler
       walletActionRequired: attempt.walletActionRequired,
       submittedTermsSnapshot: attempt.termsSnapshot,
       activatedAt: attempt.activatedAt?.toISOString() ?? null,
-      updatedAt: (attempt.updatedAt ?? attempt.createdAt ?? new Date()).toISOString(),
+      updatedAt: (
+        attempt.updatedAt ??
+        attempt.createdAt ??
+        new Date()
+      ).toISOString(),
       transactionRequest:
         shouldIncludeWalletRequest && attempt.contractAddress
           ? {
