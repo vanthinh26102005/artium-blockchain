@@ -87,7 +87,6 @@ const buildUploadPath = (path: string): string => {
  * ```typescript
  * const response = await uploadArtworkImage({
  *   file: imageFile,
- *   sellerId: '123',
  *   artworkId: '456',
  *   altText: 'Beautiful artwork',
  *   isPrimary: true
@@ -100,16 +99,9 @@ export const uploadArtworkImage = async (
   request: UploadArtworkImageRequest,
   options?: UploadOptions,
 ): Promise<ArtworkImageUploadResponse> => {
-  const { file, sellerId, artworkId, altText, isPrimary, order } = request
+  const { file, artworkId, altText, isPrimary, order } = request
 
   // Validate inputs
-  if (!sellerId || sellerId === 'undefined') {
-    throw createUploadError(
-      UploadErrorType.INVALID_PARAMS,
-      "sellerId is required and must not be 'undefined'",
-    )
-  }
-
   if (!artworkId || artworkId === 'undefined') {
     throw createUploadError(
       UploadErrorType.INVALID_PARAMS,
@@ -122,7 +114,6 @@ export const uploadArtworkImage = async (
   // Build FormData
   const formData = new FormData()
   formData.append('file', file)
-  formData.append('sellerId', sellerId)
   formData.append('artworkId', artworkId)
 
   if (altText) {
@@ -153,7 +144,6 @@ export const uploadArtworkImage = async (
  * ```typescript
  * const responses = await uploadArtworkImages({
  *   files: [file1, file2, file3],
- *   sellerId: '123',
  *   artworkId: '456'
  * }, {
  *   onProgress: ({ percentage }) => console.log(`${percentage}%`)
@@ -164,16 +154,9 @@ export const uploadArtworkImages = async (
   request: UploadArtworkImagesRequest,
   options?: UploadOptions,
 ): Promise<ArtworkImageUploadResponse[]> => {
-  const { files, sellerId, artworkId } = request
+  const { files, artworkId } = request
 
   // Validate inputs
-  if (!sellerId || sellerId === 'undefined') {
-    throw createUploadError(
-      UploadErrorType.INVALID_PARAMS,
-      "sellerId is required and must not be 'undefined'",
-    )
-  }
-
   if (!artworkId || artworkId === 'undefined') {
     throw createUploadError(
       UploadErrorType.INVALID_PARAMS,
@@ -200,7 +183,6 @@ export const uploadArtworkImages = async (
   files.forEach((file) => {
     formData.append('files', file)
   })
-  formData.append('sellerId', sellerId)
   formData.append('artworkId', artworkId)
 
   return apiUpload<ArtworkImageUploadResponse[]>(buildUploadPath('/artwork-images'), formData, {

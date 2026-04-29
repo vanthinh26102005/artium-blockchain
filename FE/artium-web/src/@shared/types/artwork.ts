@@ -232,7 +232,7 @@ export interface BulkMoveArtworksResponse {
  */
 export interface UploadArtworkImageRequest {
   file: File;
-  sellerId: string;
+  sellerId?: string;
   artworkId: string;
   altText?: string;
   isPrimary?: boolean;
@@ -247,7 +247,7 @@ export interface UploadArtworkImageRequest {
  */
 export interface UploadArtworkImagesRequest {
   files: File[];
-  sellerId: string;
+  sellerId?: string;
   artworkId: string;
 }
 
