@@ -78,7 +78,7 @@ updated: 2026-04-29
 | Escalated | 0 |
 
 - State A audit of existing validation artifact completed.
-- Phase 20 backend validation passed: 6 Jest suites, 12 tests.
+- Phase 20 backend validation passed: 6 Jest suites, 14 tests after code-review regression coverage.
 - Targeted FE ESLint exited 0 with 9 pre-existing warnings in inventory files and no errors.
 - `cd FE/artium-web && npx tsc --noEmit` exited 0.
 - No new test files were generated because all planned backend coverage exists and the FE workspace has no committed unit/e2e test runner; wallet and browser lifecycle flows remain explicit manual-only validations.
