@@ -6,6 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "docker:build:local": "set -a && . ./.env.local && set +a && docker build -t artium-web:local --build-arg NEXT_PUBLIC_API_URL=\"$NEXT_PUBLIC_API_URL\" --build-arg NEXT_PUBLIC_WS_URL=\"$NEXT_PUBLIC_WS_URL\" --build-arg NEXTAUTH_URL=\"$NEXTAUTH_URL\" --build-arg NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=\"$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY\" --build-arg NEXT_PUBLIC_PLATFORM_ETH_WALLET=\"$NEXT_PUBLIC_PLATFORM_ETH_WALLET\" --build-arg NEXT_PUBLIC_ETH_CHAIN_ID=\"$NEXT_PUBLIC_ETH_CHAIN_ID\" --build-arg NEXT_PUBLIC_ETH_CHAIN_NAME=\"$NEXT_PUBLIC_ETH_CHAIN_NAME\" --build-arg NEXT_PUBLIC_ETH_RPC_URL=\"$NEXT_PUBLIC_ETH_RPC_URL\" --build-arg NEXT_PUBLIC_ETH_BLOCK_EXPLORER_URL=\"$NEXT_PUBLIC_ETH_BLOCK_EXPLORER_URL\" .",
+    "docker:build:prod": "set -a && . ./.env.prod && set +a && docker build -t artium-web:prod --build-arg NEXT_PUBLIC_API_URL=\"$NEXT_PUBLIC_API_URL\" --build-arg NEXT_PUBLIC_WS_URL=\"$NEXT_PUBLIC_WS_URL\" --build-arg NEXTAUTH_URL=\"$NEXTAUTH_URL\" --build-arg NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=\"$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY\" --build-arg NEXT_PUBLIC_PLATFORM_ETH_WALLET=\"$NEXT_PUBLIC_PLATFORM_ETH_WALLET\" --build-arg NEXT_PUBLIC_ETH_CHAIN_ID=\"$NEXT_PUBLIC_ETH_CHAIN_ID\" --build-arg NEXT_PUBLIC_ETH_CHAIN_NAME=\"$NEXT_PUBLIC_ETH_CHAIN_NAME\" --build-arg NEXT_PUBLIC_ETH_RPC_URL=\"$NEXT_PUBLIC_ETH_RPC_URL\" --build-arg NEXT_PUBLIC_ETH_BLOCK_EXPLORER_URL=\"$NEXT_PUBLIC_ETH_BLOCK_EXPLORER_URL\" .",
+    "docker:run:local": "docker run --rm --env-file .env.local -p 3000:3000 --name artium-web-local artium-web:local",
+    "docker:run:prod": "docker run --rm --env-file .env.prod -p 3000:3000 --name artium-web-prod artium-web:prod",
+    "docker:local": "npm run docker:build:local && npm run docker:run:local",
+    "docker:prod": "npm run docker:build:prod && npm run docker:run:prod",
     "lint": "eslint"
   },
   "dependencies": {
