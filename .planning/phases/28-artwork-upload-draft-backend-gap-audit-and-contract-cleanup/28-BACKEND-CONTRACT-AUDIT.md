@@ -108,7 +108,15 @@ Task 1 structural audit:
 - Draft gateway routes confirmed for `/artwork/drafts/:draftArtworkId` and `/artwork/drafts/:draftArtworkId/submit`.
 - Draft RPC patterns confirmed for `create_artwork_upload_draft`, `get_artwork_upload_draft`, `save_artwork_upload_draft`, and `submit_artwork_upload_draft`.
 - Media RPC pattern confirmed for `upload_artwork_image`.
-- Full targeted verification command results are recorded by Task 2 below.
+Task 2 command results:
+
+- `cd BE && npx jest apps/artwork-service/src/application/commands/artworks/handlers/SaveArtworkDraft.command.handler.spec.ts apps/artwork-service/src/application/commands/artworks/handlers/SubmitArtworkDraft.command.handler.spec.ts apps/artwork-service/src/presentation/microservice/upload.microservice.controller.spec.ts --runInBand` - passed; 3 suites and 15 tests.
+- `cd BE && yarn build:gateway` - passed; webpack compiled successfully.
+- `cd BE && yarn build:artwork` - passed; webpack compiled successfully.
+- `cd FE/artium-web && npx eslint src/@domains/inventory-upload src/@shared/apis/artworkApis.ts src/@shared/apis/artworkUploadApi.ts` - exited 0 with 5 warnings from existing `<img>` usage in `MediaPreviewCard.tsx`, `Step1Layout.tsx`, and `VideoPicker.tsx`.
+- `cd FE/artium-web && npx tsc --noEmit --pretty false` - passed.
+
+No verification blocker references a Phase 28 modified file.
 
 ## Remaining Risks
 
