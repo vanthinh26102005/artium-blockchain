@@ -481,3 +481,35 @@ Plans:
 - [x] 26-03-PLAN.md — Kubernetes templates for API deployments, worker deployments, services, ingress, Sealed Secrets, network policy, and disruption budgets
 - [x] 26-04-PLAN.md — Validation scripts, real-cluster deployment guide, smoke checks, rollback, backup/restore, and runbook documentation
 **UI hint**: no
+
+### Phase 27: Frontend shared API definition standardization and edge-case audit
+
+**Goal:** Standardize the frontend shared API definition layer so all JSON, upload, mock, query, path, base URL, auth, cache, and error-handling behavior uses one documented client contract without breaking existing API module imports.
+**Requirements**: TBD
+**Depends on:** Phase 26
+**Success Criteria** (what must be TRUE):
+  1. Frontend API modules under `FE/artium-web/src/@shared/apis` preserve their current public default exports while using shared helpers for query strings, path params, base URL resolution, JSON bodies, and structured API errors.
+  2. Artwork, folder, upload, messaging, invoice, auction, order, payment, profile, followers, events, and users API modules no longer duplicate ad hoc request plumbing where the shared client can support the behavior.
+  3. Edge cases are explicitly handled or documented: `204 No Content`, string-array backend messages, `0` and `false` query values, array query values, IDs containing reserved URL characters, artwork base URL variants, and `FormData` boundaries.
+  4. Upload requests with progress and invoice mock responses are represented as documented special cases rather than hidden one-off implementations.
+  5. Frontend verification runs through existing commands: `cd FE/artium-web && npm run lint` and `cd FE/artium-web && npm run build`, with any unrelated pre-existing failures named in the execution summary.
+**Plans**: `.planning/phases/27-frontend-shared-api-definition-standardization-and-edge-case/27-01-PLAN.md`, `.planning/phases/27-frontend-shared-api-definition-standardization-and-edge-case/27-02-PLAN.md`, `.planning/phases/27-frontend-shared-api-definition-standardization-and-edge-case/27-03-PLAN.md`, `.planning/phases/27-frontend-shared-api-definition-standardization-and-edge-case/27-04-PLAN.md`
+
+Plans:
+**Wave 1**
+- [ ] 27-01-PLAN.md — Shared API client primitives, structured errors, empty response handling, and API definition README
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 27-02-PLAN.md — JSON API module migration to shared query, path, and artwork base URL helpers
+
+**Wave 3** *(blocked on Wave 1 and Wave 2 completion)*
+- [ ] 27-03-PLAN.md — Shared upload transport and invoice mock isolation
+
+**Wave 4** *(blocked on Wave 1, Wave 2, and Wave 3 completion)*
+- [ ] 27-04-PLAN.md — Final API edge-case audit, documentation examples, lint, and build verification
+
+Cross-cutting constraints:
+- Existing API module default exports remain stable.
+- Dynamic route parameters use shared path encoding.
+- Query strings use the shared helper and preserve `0` and `false`.
+- Frontend verification uses existing `lint` and `build` scripts unless execution explicitly adds new test tooling.
