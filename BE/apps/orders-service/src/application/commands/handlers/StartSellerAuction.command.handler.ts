@@ -216,8 +216,10 @@ export class StartSellerAuctionHandler
     attempt: AuctionStartAttempt,
   ): SellerAuctionStartStatusObject {
     const shouldIncludeWalletRequest =
-      attempt.status === SellerAuctionStartStatus.PENDING_START ||
-      attempt.status === SellerAuctionStartStatus.RETRY_AVAILABLE;
+      attempt.walletActionRequired &&
+      !attempt.txHash &&
+      (attempt.status === SellerAuctionStartStatus.PENDING_START ||
+        attempt.status === SellerAuctionStartStatus.RETRY_AVAILABLE);
 
     return {
       attemptId: attempt.id,
