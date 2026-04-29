@@ -75,9 +75,11 @@ Milestone focus: seller-only auction creation from owned inventory with practica
 - [x] **SAUC-08**: Backend can persist the auction start across on-chain and off-chain state so public `GET /auctions` and seller inventory/order views reflect the new auction without mock data.
 - [x] **SAUC-09**: Sellers can monitor auction start status across pending, active, failed, and retryable states with tx hash, reason codes, and recovery paths that do not duplicate auctions.
 
-## v1.2 Requirements
+## Omitted v1.2 Requirements (Historical)
 
-Milestone focus: production-grade backend deployment strategy grounded in the real backend runtime, not in stale or purely theoretical infrastructure diagrams.
+Milestone focus was production-grade backend deployment strategy grounded in the real backend runtime, not in stale or purely theoretical infrastructure diagrams.
+
+**Status:** Omitted/redundant by user decision on 2026-04-29. Keep these requirements as historical context only. They are not active milestone closure requirements and are intentionally excluded from active traceability.
 
 ### Discovery & Runtime Truth
 
@@ -189,36 +191,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAUC-07 | Phase 20 | Complete |
 | SAUC-08 | Phase 20 | Complete |
 | SAUC-09 | Phase 20 | Complete |
-| DISC-01 | Phase 21 | Completed |
-| DISC-02 | Phase 21 | Completed |
-| DISC-03 | Phase 21 | Completed |
-| DISC-04 | Phase 21 | Completed |
-| ARCH-01 | Phase 22 | Completed |
-| ARCH-02 | Phase 22 | Completed |
-| ARCH-03 | Phase 22 | Completed |
-| ARCH-04 | Phase 22 | Completed |
-| K8S-01 | Phase 23 | Complete |
-| K8S-02 | Phase 23 | Complete |
-| K8S-03 | Phase 23 | Complete |
-| K8S-04 | Phase 23 | Complete |
-| DOCK-01 | Phase 24 | Complete |
-| DOCK-02 | Phase 24 | Complete |
-| DOCK-03 | Phase 24 | Complete |
-| OPS-01 | Phase 24 | Complete |
-| OPS-02 | Phase 25 | Complete |
-| OPS-03 | Phase 25 | Complete |
-| OPS-04 | Phase 25 | Complete |
-| OPS-05 | Phase 25 | Complete |
-| DELV-01 | Phase 25 | Complete |
-| DELV-02 | Phase 25 | Complete |
-| DELV-03 | Phase 25 | Complete |
-| DELV-04 | Phase 25 | Complete |
+| v1.2 backend deployment strategy | Phases 21-26 | Omitted/redundant 2026-04-29 |
 
 **Coverage:**
-- v1 + v1.1 + v1.2 requirements: 58 total
-- Mapped to phases: 58 ✓
+- Active v1 + v1.1 requirements: 34 total
+- Mapped to phases: 34 ✓
 - Unmapped: 0 ✓
+- Omitted historical v1.2 requirements: 24 total
 
 ---
 *Requirements defined: 2026-04-21*
-*Last updated: 2026-04-27 after completing Phase 21 backend runtime inventory and drift reconciliation*
+*Last updated: 2026-04-29 after omitting redundant Phase 21-26 backend deployment strategy scope*

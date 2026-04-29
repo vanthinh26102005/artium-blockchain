@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Backend Deployment Strategy
-status: ready_to_plan
-stopped_at: Phase 20 UAT prioritized; resume verification
-last_updated: "2026-04-29T05:04:26.402Z"
-last_activity: 2026-04-29 -- Phase 27 execution started
+status: executing
+stopped_at: Phase 27 active after omitting redundant phases 21-26
+last_updated: "2026-04-29T09:23:05.708Z"
+last_activity: 2026-04-29 -- Quick task 260429-mr8 omitted phases 21-26 and advanced active work to Phase 27
 progress:
   total_phases: 29
   completed_phases: 10
@@ -16,9 +16,9 @@ progress:
 
 ## Current Position
 
-Phase: 21
-Plan: Not started
-Status: Ready to plan
+Phase: 27
+Plan: 27-01-PLAN.md
+Status: Executing
 Last activity: 2026-04-29
 
 ## Decisions
@@ -42,10 +42,17 @@ Last activity: 2026-04-29
 - Treat the Phase 21 artifact set (`21-01` through `21-03`) as the authoritative baseline for Phase 22 rather than re-deriving current state from legacy Kubernetes YAML.
 - Keep gateway/service transport mismatches and partial isolated-database wiring as unresolved architecture inputs until Phase 22 classifies them.
 - Use Phase 22 risk/disposition artifacts (`22-03`, `22-04`) as guardrails before Phase 23 chooses any Kubernetes platform topology.
+- Omit phases 21-26 from active milestone closure as redundant by user decision on 2026-04-29; keep historical artifacts, but resume active work at Phase 27.
 
 ## Last Session
 
-Stopped at: Phase 20 UAT prioritized; resume verification
+Stopped at: Phase 27 active after omitting redundant phases 21-26
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260429-mr8 | mark phases 21-26 as intentionally omitted/redundant, exclude them from active milestone closure, keep historical artifacts, and advance active work to phase 27 | 2026-04-29 | docs-only | [260429-mr8-mark-phases-21-26-as-intentionally-omitt](./quick/260429-mr8-mark-phases-21-26-as-intentionally-omitt/) |
 
 ## Accumulated Context
 

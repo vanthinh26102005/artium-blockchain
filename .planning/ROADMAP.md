@@ -4,7 +4,7 @@
 
 This roadmap tracks sequential milestone work across the Artium platform. Earlier phases covered frontend standardization, checkout/order flows, and seller auction creation.
 
-The current v1.2 milestone shifts to the backend platform: first inventory the real runtime contract in `BE\`, then analyze service architecture and dependency risks, then design a production-grade Kubernetes and Docker operating model, and finally package CI/CD, observability, recovery, and deployment artifacts into an opinionated rollout blueprint.
+Phases 21-26 previously covered a v1.2 backend deployment strategy. On 2026-04-29, the user marked that scope intentionally redundant and omitted it from active milestone closure. Historical artifacts remain in `.planning/phases/`, but these phases are no longer blockers for active work. Current active work resumes at Phase 27.
 
 ## Phases
 
@@ -28,12 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 18: Seller auction access and artwork eligibility policy** - Define and enforce seller-only access plus own-inventory eligibility before auction setup
 - [x] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
 - [x] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers (completed 2026-04-29)
-- [x] **Phase 21: Backend Runtime Inventory & Drift Reconciliation** - Build the authoritative backend runtime map from code, Compose, Dockerfiles, env files, and legacy K8s artifacts
-- [x] **Phase 22: Service Architecture & Dependency Risk Analysis** - Classify backend services, communication paths, and production risks in the current design
-- [ ] **Phase 23: Kubernetes Platform Topology & Workload Design** - Define cluster topology, workload kinds, exposure rules, config/secrets, probes, and scaling boundaries
-- [ ] **Phase 24: Docker Build, Image Lifecycle & CI/CD Strategy** - Define production image standards and the release pipeline that builds, scans, tags, migrates, and deploys them
-- [ ] **Phase 25: Production Operations Blueprint & Final Deployment Artifacts** - Finalize observability, recovery, risk mitigation, manifests, architecture diagram, and deployment plan
-- [x] **Phase 26: Kubernetes Deployment Implementation & Production Platform Stack Foundation** - Implement the approved Kubernetes/Helm foundation, managed dependency integration, ingress/TLS, secrets, probes, observability hooks, and rollback-ready deployment path (completed 2026-04-27)
+- [ ] **Phase 27: Frontend shared API definition standardization and edge-case audit** - Standardize frontend shared API request behavior while preserving existing module exports
 
 ## Phase Details
 
@@ -182,7 +177,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Milestone v1.2 proceeds 21 → 22 → 23 → 24 → 25 → 26.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Phases 21-26 are intentionally omitted/redundant as of 2026-04-29, so active work resumes at Phase 27.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -208,12 +203,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 19. Seller auction creation workspace and terms UX | 3/3 | Completed | 2026-04-27 |
 | 19.1. Seller auction artifact recovery and policy alignment | 3/3 | Completed | 2026-04-27 |
 | 20. Auction start orchestration and seller lifecycle status | 4/4 | Complete    | 2026-04-29 |
-| 21. Backend Runtime Inventory & Drift Reconciliation | 3/3 | Complete   | 2026-04-27 |
-| 22. Service Architecture & Dependency Risk Analysis | 2/2 | Complete   | 2026-04-27 |
-| 23. Kubernetes Platform Topology & Workload Design | 0/TBD | Not started | - |
-| 24. Docker Build, Image Lifecycle & CI/CD Strategy | 0/TBD | Not started | - |
-| 25. Production Operations Blueprint & Final Deployment Artifacts | 0/TBD | Not started | - |
-| 26. Kubernetes Deployment Implementation & Production Platform Stack Foundation | 4/4 | Complete   | 2026-04-27 |
+| 21-26. Backend deployment strategy scope | historical artifacts retained | Omitted/redundant | 2026-04-29 |
+| 27. Frontend shared API definition standardization and edge-case audit | 0/4 | Executing | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -385,108 +376,17 @@ Plans:
 **Plans**: TBD
 **UI hint**: yes
 
-### Phase 21: Backend Runtime Inventory & Drift Reconciliation
+### Omitted Phases 21-26: Backend Deployment Strategy
 
-**Goal:** Establish the authoritative backend runtime contract from code, Compose, Dockerfiles, env files, and legacy Kubernetes artifacts so later deployment design is based on reality instead of stale assumptions.
-**Depends on:** Phase 20
-**Requirements**: DISC-01, DISC-02, DISC-03, DISC-04
-**Success Criteria** (what must be TRUE):
-  1. Developer can review a single backend inventory covering every workload, real HTTP/TCP ports, startup command, env source, and current runtime mode.
-  2. Developer can distinguish HTTP+TCP services, TCP-only services, websocket-enabled workloads, stateful dependencies, and orphaned or legacy artifacts.
-  3. Developer can review a dependency map covering PostgreSQL, Redis, RabbitMQ, Mailhog, GCS, Stripe, SMTP, blockchain RPC, and mounted credential files.
-  4. Developer can point to concrete drift between `main.ts`, `.env.compose`, Dockerfiles, Compose, and legacy K8s YAML before any production topology is proposed.
-**Plans**: `.planning/phases/21-backend-runtime-inventory-and-drift-reconciliation/21-01-PLAN.md`, `.planning/phases/21-backend-runtime-inventory-and-drift-reconciliation/21-02-PLAN.md`, `.planning/phases/21-backend-runtime-inventory-and-drift-reconciliation/21-03-PLAN.md`
-**UI hint**: no
-
-Plans:
-- [x] 21-01 Runtime workload inventory and workload classification
-- [x] 21-02 Dependency, environment, and external-integration inventory
-- [x] 21-03 Runtime drift audit and Phase 22 handoff synthesis
-
-### Phase 22: Service Architecture & Dependency Risk Analysis
-
-**Goal:** Turn the backend inventory into an architecture model that explains service roles, communication paths, coupling, and the highest-risk production concerns.
-**Depends on:** Phase 21
-**Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04
-**Success Criteria** (what must be TRUE):
-  1. Developer can classify each backend service by role, including gateway, API+TCP service, TCP-only service, websocket workload, and infrastructure component.
-  2. Developer can review communication flows across gateway TCP clients, RabbitMQ outbox/event paths, websocket messaging, and webhook/external-provider callbacks.
-  3. Developer can review a concrete list of current scalability and reliability concerns with evidence from code or runtime configuration.
-  4. Developer can distinguish production-worthy architecture from dev-only or legacy artifacts that should not be mirrored directly into Kubernetes.
-**Plans**: 2 plans
-**UI hint**: no
-
-Plans:
-- [x] 22-01-PLAN.md — Service-role catalog and communication-path matrix from the Phase 21 baseline (completed 2026-04-27)
-- [x] 22-02-PLAN.md — Architecture risk register and legacy/dev-artifact disposition guidance (completed 2026-04-27)
-
-### Phase 23: Kubernetes Platform Topology & Workload Design
-
-**Goal:** Define the production Kubernetes operating model for the backend, including cluster boundaries, workload kinds, service exposure, probes, config/secrets, and scaling policies.
-**Depends on:** Phase 22
-**Requirements**: K8S-01, K8S-02, K8S-03, K8S-04
-**Success Criteria** (what must be TRUE):
-  1. DevOps engineer can see an explicit decision for each workload or dependency: in Kubernetes, managed external service, or excluded from production topology.
-  2. DevOps engineer can inspect namespace, Service, Ingress, and workload-kind decisions that fit the actual backend shape instead of the local Compose layout.
-  3. DevOps engineer can inspect health/readiness/startup, resource, and autoscaling guidance tailored to stateless APIs, TCP-only services, websocket workloads, and singleton/background processors.
-  4. DevOps engineer can inspect config, secret, and network-boundary rules that protect Stripe webhook handling and sensitive blockchain credentials.
-**Plans**: TBD
-**UI hint**: no
-
-### Phase 24: Docker Build, Image Lifecycle & CI/CD Strategy
-
-**Goal:** Define how backend workloads are built, versioned, promoted, and deployed as immutable production images with a repeatable CI/CD pipeline.
-**Depends on:** Phase 23
-**Requirements**: DOCK-01, DOCK-02, DOCK-03, OPS-01
-**Success Criteria** (what must be TRUE):
-  1. DevOps engineer can inspect a production image standard that replaces dev-time bind mounts, hot reload, and mutable `/app` assumptions with immutable runtime images.
-  2. DevOps engineer can inspect image tagging and promotion rules that support reproducible releases and rollback by version or digest.
-  3. DevOps engineer can inspect a CI/CD pipeline design covering build, test, scan, publish, migration, deploy, and rollback checkpoints.
-  4. DevOps engineer can distinguish which current Dockerfile and K8s behaviors are reusable and which must be rewritten for production.
-**Plans**: TBD
-**UI hint**: no
-
-### Phase 25: Production Operations Blueprint & Final Deployment Artifacts
-
-**Goal:** Package the final production operating guidance, observability and recovery strategy, architecture diagram, deployment plan, sample manifests, and risk mitigations into one coherent deployment blueprint.
-**Depends on:** Phase 24
-**Requirements**: OPS-02, OPS-03, OPS-04, OPS-05, DELV-01, DELV-02, DELV-03, DELV-04
-**Success Criteria** (what must be TRUE):
-  1. Stakeholder can review a text-based architecture diagram that reflects both the current backend topology and the recommended production topology.
-  2. Operator can follow an end-to-end deployment plan from cluster/bootstrap prerequisites through service rollout and verification.
-  3. Operator can inspect sample Kubernetes manifests for ingress, deployment, service, and supporting config/secret patterns aligned to the recommended design.
-  4. Operator can review observability, recovery, and scaling guidance that addresses outbox processors, blockchain listeners, Stripe webhooks, and brownfield operational risks.
-  5. Stakeholder can review a concise risk register with practical mitigations for the highest-risk deployment gaps.
-**Plans**: TBD
-**UI hint**: no
-
-### Phase 26: Kubernetes Deployment Implementation & Production Platform Stack Foundation
-
-**Goal:** Implement the production Kubernetes foundation approved by Phases 23-25, using Helm-based deployment artifacts, managed external dependencies, one public gateway ingress, secret/config separation, production image/runtime standards, health probes, observability hooks, and rollback/smoke-check workflows.
-**Requirements**: K8S-01, K8S-02, K8S-03, K8S-04, DOCK-01, DOCK-02, DOCK-03, OPS-01, OPS-02, OPS-03, OPS-04, DELV-01, DELV-02, DELV-03, DELV-04
-**Depends on:** Phase 25
-**Success Criteria** (what must be TRUE):
-  1. Operator can deploy the backend application workloads through Helm charts or equivalent Helm-compatible release artifacts with environment-specific values and immutable image tags or digests.
-  2. Public traffic enters only through the API gateway Ingress with TLS, while identity, artwork, payments, orders, messaging, notifications, events, and community services remain private behind internal Kubernetes Services.
-  3. PostgreSQL, Redis, RabbitMQ, object storage, SMTP, Stripe, and blockchain RPC integration are wired as managed external dependencies or explicitly documented exceptions; Mailhog and dev-only dependencies are excluded from production.
-  4. Every application workload has production-appropriate resource requests/limits plus readiness, startup, and liveness probes that reflect real dependency and runtime behavior rather than TCP-only checks.
-  5. Secrets and runtime config are separated from images and manifests, with external secret manager integration or a documented equivalent that supports rotation and avoids long-lived key files where workload identity is available.
-  6. Singleton/background work such as outbox processing and blockchain event listening has an explicit deployment and scaling model that avoids duplicate side effects.
-  7. Deployment verification includes migration/bootstrap Jobs where needed, synthetic smoke checks after rollout, rollback instructions, and baseline logs/metrics/tracing hooks for cross-service and async flows.
-**Plans**: `.planning/phases/26-kubernetes-deployment-implementation-and-production-platform/26-01-PLAN.md`, `.planning/phases/26-kubernetes-deployment-implementation-and-production-platform/26-02-PLAN.md`, `.planning/phases/26-kubernetes-deployment-implementation-and-production-platform/26-03-PLAN.md`, `.planning/phases/26-kubernetes-deployment-implementation-and-production-platform/26-04-PLAN.md`
-
-Plans:
-- [x] 26-01-PLAN.md — Helm chart foundation, provider-portable values, in-cluster dependency baseline, and legacy-manifest guardrails
-- [x] 26-02-PLAN.md — Runtime gates and documentation for singleton/background worker separation
-- [x] 26-03-PLAN.md — Kubernetes templates for API deployments, worker deployments, services, ingress, Sealed Secrets, network policy, and disruption budgets
-- [x] 26-04-PLAN.md — Validation scripts, real-cluster deployment guide, smoke checks, rollback, backup/restore, and runbook documentation
-**UI hint**: no
+**Status:** Intentionally omitted/redundant by user decision on 2026-04-29.
+**Historical artifacts:** retained under `.planning/phases/21-*`, `.planning/phases/22-*`, and `.planning/phases/26-*` where present.
+**Active milestone impact:** no remaining milestone closure blocker. Do not treat missing or incomplete Phase 21-26 verification as active work unless the user explicitly reopens backend deployment strategy.
 
 ### Phase 27: Frontend shared API definition standardization and edge-case audit
 
 **Goal:** Standardize the frontend shared API definition layer so all JSON, upload, mock, query, path, base URL, auth, cache, and error-handling behavior uses one documented client contract without breaking existing API module imports.
 **Requirements**: TBD
-**Depends on:** Phase 26
+**Depends on:** Phase 20; Phases 21-26 intentionally omitted/redundant
 **Success Criteria** (what must be TRUE):
   1. Frontend API modules under `FE/artium-web/src/@shared/apis` preserve their current public default exports while using shared helpers for query strings, path params, base URL resolution, JSON bodies, and structured API errors.
   2. Artwork, folder, upload, messaging, invoice, auction, order, payment, profile, followers, events, and users API modules no longer duplicate ad hoc request plumbing where the shared client can support the behavior.
