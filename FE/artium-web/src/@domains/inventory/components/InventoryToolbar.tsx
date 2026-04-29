@@ -1,5 +1,5 @@
 // react
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 // third-party
 import { FileDown, Folder, LayoutGrid, List, Lock, SlidersHorizontal, X } from 'lucide-react'
@@ -94,14 +94,16 @@ export const InventoryToolbar = ({
     activeTab === 'artists' ? 'Search by artist name' : 'Search by artwork title'
   const showFilterButton = activeTab !== 'artists'
 
-  useEffect(() => {
-    if (isFilterOpen) {
+  // -- handlers --
+  const handleFilterOpenChange = (open: boolean) => {
+    if (open) {
       setDraftFilters(buildDraftFilters(filters))
       setPriceError(null)
     }
-  }, [filters, isFilterOpen])
 
-  // -- handlers --
+    setIsFilterOpen(open)
+  }
+
   const handleClearSelection = () => {
     clear()
   }
@@ -284,7 +286,7 @@ export const InventoryToolbar = ({
           </button>
         </div>
         {showFilterButton ? (
-          <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <Popover open={isFilterOpen} onOpenChange={handleFilterOpenChange}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="lg" className="gap-2 rounded-xl font-semibold">
                 <SlidersHorizontal className="h-4 w-4" />

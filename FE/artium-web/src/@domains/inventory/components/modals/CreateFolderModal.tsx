@@ -47,8 +47,20 @@ export const CreateFolderModal = ({ isOpen, onClose, onCreate }: CreateFolderMod
 
   useEffect(() => {
     if (!isOpen) {
-      setName('')
-      setDescription('')
+      let isCancelled = false
+
+      window.queueMicrotask(() => {
+        if (isCancelled) {
+          return
+        }
+
+        setName('')
+        setDescription('')
+      })
+
+      return () => {
+        isCancelled = true
+      }
     }
   }, [isOpen])
 

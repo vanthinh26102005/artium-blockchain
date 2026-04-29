@@ -52,7 +52,19 @@ export const RenameFolderModal = ({ isOpen, folder, onClose, onSave }: RenameFol
       return
     }
 
-    setName(folder?.name ?? '')
+    let isCancelled = false
+
+    window.queueMicrotask(() => {
+      if (isCancelled) {
+        return
+      }
+
+      setName(folder?.name ?? '')
+    })
+
+    return () => {
+      isCancelled = true
+    }
   }, [folder?.name, isOpen])
 
   // -- render --

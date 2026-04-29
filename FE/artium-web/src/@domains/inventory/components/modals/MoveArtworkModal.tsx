@@ -61,7 +61,19 @@ export const MoveArtworkModal = ({
       return
     }
 
-    setSelectedDestination(artwork?.folderId ?? INVENTORY_DESTINATION_ID)
+    let isCancelled = false
+
+    window.queueMicrotask(() => {
+      if (isCancelled) {
+        return
+      }
+
+      setSelectedDestination(artwork?.folderId ?? INVENTORY_DESTINATION_ID)
+    })
+
+    return () => {
+      isCancelled = true
+    }
   }, [artwork?.folderId, isOpen])
 
   // -- render --

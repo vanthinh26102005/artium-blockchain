@@ -1,5 +1,5 @@
 // react
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 // @domains - inventory
 import { type InventoryArtwork } from '@domains/inventory/types/inventoryArtwork'
@@ -29,16 +29,13 @@ export const useInventoryPagination = (
 
   const total = items.length
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize])
+  const clampedPage = clampPage(page, totalPages)
 
   const pageItems = useMemo(() => {
-    const startIndex = (page - 1) * pageSize
+    const startIndex = (clampedPage - 1) * pageSize
     const endIndex = startIndex + pageSize
     return items.slice(startIndex, endIndex)
-  }, [items, page, pageSize])
-
-  useEffect(() => {
-    setPageState((current) => clampPage(current, totalPages))
-  }, [totalPages, items])
+  }, [clampedPage, items, pageSize])
 
   const setPage = useCallback(
     (nextPage: number) => {
@@ -53,7 +50,7 @@ export const useInventoryPagination = (
   }, [])
 
   return {
-    page,
+    page: clampedPage,
     pageSize,
     total,
     totalPages,
