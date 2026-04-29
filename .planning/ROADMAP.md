@@ -206,7 +206,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 20. Auction start orchestration and seller lifecycle status | 4/4 | Complete    | 2026-04-29 |
 | 21-26. Backend deployment strategy scope | historical artifacts retained | Omitted/redundant | 2026-04-29 |
 | 27. Frontend shared API definition standardization and edge-case audit | 4/4 | Complete    | 2026-04-29 |
-| 28. Artwork upload draft backend gap audit and contract cleanup | 3/3 | Planned | - |
+| 28. Artwork upload draft backend gap audit and contract cleanup | 1/3 | In Progress|  |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -421,7 +421,7 @@ Cross-cutting constraints:
 **Goal:** The artwork upload draft flow at `/artworks/upload?draftArtworkId=6f2c4075-4892-4e09-ba4e-e24101b262f9` is audited end-to-end against backend reality, with frontend/API contract gaps identified and cleaned so draft loading, editing, validation, media handling, and final submission are accurate, secure, and maintainable.
 **Requirements**: AUD-28-01 backend draft identity, AUD-28-02 owner-scoped draft authorization, AUD-28-03 upload media ownership, AUD-28-04 frontend/backend DTO parity, AUD-28-05 targeted verification evidence
 **Depends on:** Phase 27
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 **UI hint**: yes
 **Backend focus:** inventory/artwork draft APIs, API gateway contracts, DTO validation, persistence semantics, file/media ownership, auth/authorization, and frontend request mapping for the upload draft route.
 **Success Criteria** (what must be TRUE):
@@ -434,7 +434,7 @@ Cross-cutting constraints:
 
 Plans:
 **Wave 1**
-- [ ] 28-01-PLAN.md — Backend upload-draft contract, owner-scoped CQRS handlers, and draft submit validation
+- [x] 28-01-PLAN.md — Backend upload-draft contract, owner-scoped CQRS handlers, and draft submit validation
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 28-02-PLAN.md — Upload endpoint hardening plus frontend draft hydration and draft-aware submit mapping
