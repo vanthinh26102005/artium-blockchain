@@ -3,7 +3,10 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   CreateArtworkCommand,
+  CreateArtworkDraftCommand,
   MarkArtworkInAuctionCommand,
+  SaveArtworkDraftCommand,
+  SubmitArtworkDraftCommand,
   UpdateArtworkCommand,
   DeleteArtworkCommand,
   BulkMoveArtworksCommand,
@@ -11,10 +14,19 @@ import {
   BulkUpdateArtworkStatusCommand,
   AddImagesToArtworkCommand,
   GetArtworkQuery,
+  GetArtworkUploadDraftQuery,
   ListArtworksQuery,
   ListSellerAuctionArtworkCandidatesQuery,
 } from '../../application';
-import { GetArtworksQueryDto, UserPayload, ArtworkImageInput, ArtworkStatus } from '@app/common';
+import {
+  CreateArtworkDraftInput,
+  GetArtworksQueryDto,
+  SaveArtworkDraftInput,
+  SubmitArtworkDraftInput,
+  UserPayload,
+  ArtworkImageInput,
+  ArtworkStatus,
+} from '@app/common';
 import { CreateArtworkInput } from '../../domain/dtos/artworks/create-artwork.input';
 import { UpdateArtworkInput } from '../../domain/dtos/artworks/update-artwork.input';
 import {
@@ -68,6 +80,57 @@ export class ArtworkMicroserviceController {
     @Payload() data: CreateArtworkInput & { user?: UserPayload },
   ) {
     return this.commandBus.execute(new CreateArtworkCommand(data));
+  }
+
+  @MessagePattern({ cmd: 'create_artwork_upload_draft' })
+  async createArtworkUploadDraft(
+    @Payload()
+    data: {
+      draftArtworkId: string;
+      data: CreateArtworkDraftInput;
+      user: UserPayload;
+    },
+  ) {
+    return this.commandBus.execute(
+      new CreateArtworkDraftCommand(data.draftArtworkId, data.data, data.user),
+    );
+  }
+
+  @MessagePattern({ cmd: 'get_artwork_upload_draft' })
+  async getArtworkUploadDraft(
+    @Payload() data: { draftArtworkId: string; user: UserPayload },
+  ) {
+    return this.queryBus.execute(
+      new GetArtworkUploadDraftQuery(data.draftArtworkId, data.user),
+    );
+  }
+
+  @MessagePattern({ cmd: 'save_artwork_upload_draft' })
+  async saveArtworkUploadDraft(
+    @Payload()
+    data: {
+      draftArtworkId: string;
+      data: SaveArtworkDraftInput;
+      user: UserPayload;
+    },
+  ) {
+    return this.commandBus.execute(
+      new SaveArtworkDraftCommand(data.draftArtworkId, data.data, data.user),
+    );
+  }
+
+  @MessagePattern({ cmd: 'submit_artwork_upload_draft' })
+  async submitArtworkUploadDraft(
+    @Payload()
+    data: {
+      draftArtworkId: string;
+      data: SubmitArtworkDraftInput;
+      user: UserPayload;
+    },
+  ) {
+    return this.commandBus.execute(
+      new SubmitArtworkDraftCommand(data.draftArtworkId, data.data, data.user),
+    );
   }
 
   @MessagePattern({ cmd: 'update_artwork' })

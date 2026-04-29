@@ -11,12 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ArtworkStatus } from '../../../enums';
-import {
-  ArtworkImage,
-  ArtworkImageInput,
-  Dimensions,
-  Weight,
-} from '../../../interfaces';
+import { ArtworkImageInput, Dimensions, Weight } from '../../../interfaces';
 import { ArtworkObject } from './artwork.object';
 
 export type ArtworkDraftListingStatus = 'sale' | 'inquire' | 'sold';
@@ -147,10 +142,4 @@ export class ArtworkUploadDraftObject extends ArtworkObject {
   })
   tagIds?: string[];
 
-  @ApiPropertyOptional({
-    type: () => [ArtworkImage],
-    nullable: true,
-    description: 'Draft images',
-  })
-  images?: ArtworkImage[];
 }
