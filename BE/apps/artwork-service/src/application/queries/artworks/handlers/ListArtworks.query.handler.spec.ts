@@ -121,6 +121,30 @@ describe('ListArtworksHandler', () => {
     );
   });
 
+  it('passes published active filters through to repository queries', async () => {
+    repo.findAndCount.mockResolvedValue([[], 0] as never);
+
+    await handler.execute(
+      new ListArtworksQuery({
+        sellerId: 'seller-1',
+        status: ArtworkStatus.ACTIVE,
+        isPublished: true,
+        skip: 0,
+        take: 20,
+      } as never),
+    );
+
+    expect(repo.findAndCount).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          sellerId: 'seller-1',
+          status: ArtworkStatus.ACTIVE,
+          isPublished: true,
+        },
+      }),
+    );
+  });
+
   it('keeps artwork listing available when auction lifecycle enrichment fails', async () => {
     repo.findAndCount.mockResolvedValue([
       [

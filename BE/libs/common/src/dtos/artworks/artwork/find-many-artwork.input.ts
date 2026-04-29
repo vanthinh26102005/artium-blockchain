@@ -19,6 +19,11 @@ export class FindManyArtworkInput {
   @IsEnum(ArtworkStatus)
   status?: ArtworkStatus;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
+
   @Field(() => Int, { nullable: true })
   @IsOptional()
   skip?: number;

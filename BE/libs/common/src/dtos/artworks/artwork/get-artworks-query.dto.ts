@@ -40,6 +40,16 @@ export class GetArtworksQueryDto {
   status?: ArtworkStatus;
 
   @ApiProperty({
+    description: 'Filter by public profile visibility',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isPublished?: boolean;
+
+  @ApiProperty({
     description: 'Filter by minimum price',
     example: 0,
     required: false,
