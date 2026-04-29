@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import {
@@ -242,7 +242,9 @@ const SellerProfileRequired = () => {
 }
 
 const SellerCandidateWorkspace = () => {
+  const router = useRouter()
   const workspaceRef = useRef<HTMLElement | null>(null)
+  const hydratedQueryArtworkRef = useRef<string | null>(null)
   const { data, eligible, blocked, isLoading, error, refresh } =
     useSellerAuctionArtworkCandidates()
   const [currentStep, setCurrentStep] = useState<'artwork' | 'terms'>('artwork')
@@ -260,6 +262,15 @@ const SellerCandidateWorkspace = () => {
   const [isEditingFailedTerms, setIsEditingFailedTerms] = useState(false)
 
   const sellerAuctionStart = useSellerAuctionStart({ artworkId: termsArtworkId })
+  const queryArtworkId = useMemo(() => {
+    const value = router.query.artworkId
+
+    if (Array.isArray(value)) {
+      return value[0] ?? null
+    }
+
+    return value ?? null
+  }, [router.query.artworkId])
   const allCandidates = useMemo(() => [...eligible, ...blocked], [eligible, blocked])
   const restoredCandidate = useMemo(() => {
     if (currentStep !== 'artwork' || selectedArtworkId || !sellerAuctionStart.rememberedArtworkId) {
@@ -303,6 +314,52 @@ const SellerCandidateWorkspace = () => {
         lifecycleStatus.status === 'start_failed'),
   )
   const shouldShowLifecycleShell = Boolean(lifecycleStatus && !isFailureEditable)
+
+  useEffect(() => {
+    if (!router.isReady || !queryArtworkId || isLoading) {
+      return
+    }
+
+    if (hydratedQueryArtworkRef.current === queryArtworkId) {
+      return
+    }
+
+    const queryCandidate = allCandidates.find(
+      (candidate) => candidate.artworkId === queryArtworkId,
+    )
+
+    if (!queryCandidate) {
+      return
+    }
+
+    let isCancelled = false
+    hydratedQueryArtworkRef.current = queryArtworkId
+
+    window.queueMicrotask(() => {
+      if (isCancelled) {
+        return
+      }
+
+      setCurrentStep('artwork')
+      setSelectedArtworkId(queryArtworkId)
+      setTermsArtworkId(null)
+      setDraftSaved(false)
+      setWalletError(null)
+      setIsEditingFailedTerms(false)
+      sellerAuctionStart.setTrackedArtworkId(queryArtworkId)
+      void sellerAuctionStart.refresh(queryArtworkId).catch(() => null)
+    })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [
+    allCandidates,
+    isLoading,
+    queryArtworkId,
+    router.isReady,
+    sellerAuctionStart,
+  ])
 
   const updateTermsValues = (nextValues: SellerAuctionTermsFormValues) => {
     setTermsValues(nextValues)
@@ -737,7 +794,11 @@ const SellerCandidateWorkspace = () => {
               {blocked.length > 0 ? (
                 <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                   {blocked.map((candidate) => (
-                    <CandidateCard key={candidate.artworkId} candidate={candidate} />
+                    <CandidateCard
+                      key={candidate.artworkId}
+                      candidate={candidate}
+                      isSelected={selectedArtworkId === candidate.artworkId}
+                    />
                   ))}
                 </div>
               ) : (
