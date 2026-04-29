@@ -9,6 +9,7 @@ export * from './dtos/artworks/artwork-folder/move-folder.input';
 export * from './dtos/artworks/artwork-folder/reorder-folders.input';
 export * from './dtos/artworks/artwork-folder/update-artwork-folder.input';
 export * from './dtos/artworks/artwork/artwork.object';
+export * from './dtos/artworks/artwork/artwork-upload-draft.dto';
 export * from './dtos/artworks/artwork/bulk-delete-artworks.input';
 export * from './dtos/artworks/artwork/bulk-move-artworks.input';
 export * from './dtos/artworks/artwork/bulk-update-artwork-status.input';
