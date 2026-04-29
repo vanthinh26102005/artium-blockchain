@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Bell, DollarSign, FileText, ImagePlus, Plus, Search, Video, User } from 'lucide-react'
+import { Bell, DollarSign, FileText, ImagePlus, Menu, Plus, Search, User, Video } from 'lucide-react'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@shared/components/ui/dropdown-menu'
 import { profileApis, type SellerProfilePayload } from '@shared/apis/profileApis'
@@ -55,6 +56,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [isPostMomentModalOpen, setIsPostMomentModalOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const desktopInputRef = useRef<HTMLInputElement>(null)
   const mobileInputRef = useRef<HTMLInputElement>(null)
   const searchResultsRef = useRef<HTMLDivElement>(null)
@@ -450,70 +452,179 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
           ) : null}
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Mobile Hamburger Menu */}
+          <div className="md:hidden">
+            <DropdownMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open menu"
+                  className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${isLandingVariant
+                    ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
+                    }`}
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] p-2">
+                {user ? (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push('/artist/invoices/create')
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                    >
+                      <DollarSign className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Quick Sell</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push('/artworks/upload')
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                    >
+                      <ImagePlus className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Upload Inventory</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setIsPostMomentModalOpen(true)
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                    >
+                      <Video className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Post a Moment</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push('/artist/invoices/create')
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                    >
+                      <FileText className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Create Invoice</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="my-1" />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        // TODO: Implement notifications navigation/action
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                    >
+                      <Bell className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Notifications</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/profile/${encodeURIComponent(profileHandle)}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      >
+                        <User className="h-5 w-5 text-slate-700" />
+                        <span className="font-semibold text-slate-900">@{profileLabel}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/login"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      >
+                        <span className="font-semibold text-slate-900">Login</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      >
+                        <span className="font-semibold text-slate-900">Get Started</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Desktop Actions */}
           {user ? (
             <>
               <button
                 type="button"
                 onClick={() => router.push('/artist/invoices/create')}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-[16px] font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                className="hidden md:inline-flex cursor-pointer items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-[16px] font-semibold text-white shadow-sm transition hover:bg-blue-700"
               >
                 <DollarSign className="h-4 w-4" />
                 Quick Sell
               </button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label="Create"
-                    className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${isLandingVariant
-                      ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
-                      }`}
+              <div className="hidden md:inline-flex">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Create"
+                      className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${isLandingVariant
+                        ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
+                        }`}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="center"
+                    sideOffset={12}
+                    className="w-[320px] max-w-[calc(100vw-2rem)] rounded-3xl! border border-slate-200 bg-white p-3 shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:w-[360px]"
                   >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="center"
-                  sideOffset={12}
-                  className="w-[320px] max-w-[calc(100vw-2rem)] rounded-3xl! border border-slate-200 bg-white p-3 shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:w-[360px]"
-                >
-                  <div className="flex flex-col gap-3">
-                    {createMenuItems.map((item) => {
-                      const Icon = item.icon
-                      return (
-                        <DropdownMenuItem
-                          key={item.title}
-                          onSelect={() => {
-                            if (item.action) {
-                              item.action()
-                            } else if (item.href) {
-                              router.push(item.href)
-                            }
-                          }}
-                          className="flex w-full cursor-pointer items-start gap-4 rounded-2xl! border border-slate-200/80 bg-white px-4 py-3 text-left text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50/60 hover:shadow-md focus:bg-white"
-                        >
-                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
-                            <Icon className="h-5 w-5" />
-                          </span>
-                          <span className="flex flex-col gap-1">
-                            <span className="text-base leading-tight font-semibold text-slate-900">
-                              {item.title}
+                    <div className="flex flex-col gap-3">
+                      {createMenuItems.map((item) => {
+                        const Icon = item.icon
+                        return (
+                          <DropdownMenuItem
+                            key={item.title}
+                            onSelect={() => {
+                              if (item.action) {
+                                item.action()
+                              } else if (item.href) {
+                                router.push(item.href)
+                              }
+                            }}
+                            className="flex w-full cursor-pointer items-start gap-4 rounded-2xl! border border-slate-200/80 bg-white px-4 py-3 text-left text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50/60 hover:shadow-md focus:bg-white"
+                          >
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                              <Icon className="h-5 w-5" />
                             </span>
-                            <span className="text-sm leading-snug text-slate-500">
-                              {item.description}
+                            <span className="flex flex-col gap-1">
+                              <span className="text-base leading-tight font-semibold text-slate-900">
+                                {item.title}
+                              </span>
+                              <span className="text-sm leading-snug text-slate-500">
+                                {item.description}
+                              </span>
                             </span>
-                          </span>
-                        </DropdownMenuItem>
-                      )
-                    })}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                          </DropdownMenuItem>
+                        )
+                      })}
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               <button
                 type="button"
                 aria-label="Notifications"
-                className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${isLandingVariant
+                className={`hidden md:inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${isLandingVariant
                   ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
                   : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
                   }`}
@@ -522,7 +633,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
               </button>
               <Link
                 href={`/profile/${encodeURIComponent(profileHandle)}`}
-                className={`hidden cursor-pointer items-center gap-2 text-base font-semibold sm:inline-flex ${isLandingVariant ? 'text-white' : 'text-slate-700 hover:text-slate-900'
+                className={`hidden md:inline-flex cursor-pointer items-center gap-2 text-base font-semibold ${isLandingVariant ? 'text-white' : 'text-slate-700 hover:text-slate-900'
                   }`}
               >
                 <span>@{profileLabel}</span>
@@ -543,7 +654,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 onClick={() => {
                   router.push('/login')
                 }}
-                className={`cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition ${isLandingVariant
+                className={`hidden md:inline-flex cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition ${isLandingVariant
                   ? 'border border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
                   : 'border border-slate-200 bg-white text-slate-800 hover:border-slate-300'
                   }`}
@@ -555,7 +666,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 onClick={() => {
                   router.push('/')
                 }}
-                className={`cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition ${isLandingVariant
+                className={`hidden md:inline-flex cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition ${isLandingVariant
                   ? 'bg-white text-black hover:bg-white/90'
                   : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
