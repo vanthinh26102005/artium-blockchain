@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Artium is an artwork marketplace with seller inventory management, buyer checkout, private order tracking, and blockchain-backed auction flows on Sepolia. The current auction surface supports public auction browsing and buyer bidding; the next milestone closes the missing seller-side workflow for starting auctions from owned inventory.
+Artium is an artwork marketplace with seller inventory management, buyer checkout, private order tracking, and blockchain-backed auction flows on Sepolia. The auction surface now supports public auction browsing, buyer bidding, and seller-side auction start orchestration from owned inventory with persisted lifecycle status.
 
 ## Core Value
 
@@ -22,6 +22,7 @@ Let artists and sellers run trustworthy auctions without bypassing ownership, el
 
 - The backend already runs as a brownfield multi-service system with local Docker Compose orchestration, but the repository does not yet have a production-grade Kubernetes deployment strategy captured in planning artifacts.
 - This milestone starts by modeling the backend exactly as implemented before making infrastructure recommendations, so deployment decisions are grounded in real service boundaries, dependencies, and operational constraints.
+- Phase 20 is complete: seller auction starts are idempotent, lifecycle status is seller-visible, unsafe economics lock after activation, and public auction reads wait for authoritative active convergence.
 
 ## Active Requirements
 
@@ -34,6 +35,7 @@ Let artists and sellers run trustworthy auctions without bypassing ownership, el
 - Auction eligibility must exclude sold, deleted, already-auctioned, active-order, multi-quantity, or incomplete artwork records.
 - Once an auction is active, seller-editable fields should be locked except explicitly safe lifecycle actions.
 - MetaMask transaction submission is pending evidence only; backend/on-chain synchronized state remains the source of truth.
+- Backend lifecycle DTOs should expose wallet calldata only while wallet action is still required and no tx hash has been attached.
 - Deployment planning must model the existing backend first and avoid inventing target-state topology that contradicts the current service graph.
 - Production deployment recommendations should optimize for operational clarity and reliability over preserving every local-development Docker Compose convenience.
 
@@ -55,4 +57,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state.
 
 ---
-*Last updated: 2026-04-27 for milestone v1.2 initialization*
+*Last updated: 2026-04-29 after completing Phase 20 seller auction start lifecycle*
