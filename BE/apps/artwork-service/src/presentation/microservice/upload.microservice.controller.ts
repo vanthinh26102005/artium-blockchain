@@ -6,7 +6,7 @@ import {
 import { Controller, Inject, Logger } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
-import type { GcsStorageService } from '../../domain/services/gcs-storage.service';
+import { GcsStorageService } from '../../domain/services/gcs-storage.service';
 import {
   IArtworkRepository,
   type IArtworkRepository as ArtworkRepositoryContract,

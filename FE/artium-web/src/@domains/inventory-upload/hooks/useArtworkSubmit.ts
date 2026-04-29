@@ -34,7 +34,10 @@ interface UseArtworkSubmitReturn {
   completedArtwork: ArtworkApiItem | null;
 
   // Actions
-  submit: (draftArtworkId: string) => Promise<ArtworkApiItem | null>;
+  submit: (
+    draftArtworkId: string,
+    options?: { creatorName?: string | null },
+  ) => Promise<ArtworkApiItem | null>;
   reset: () => void;
 }
 
@@ -75,7 +78,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
    * Submit artwork
    */
   const submit = useCallback(
-    async (draftArtworkId: string): Promise<ArtworkApiItem | null> => {
+    async (
+      draftArtworkId: string,
+      options?: { creatorName?: string | null },
+    ): Promise<ArtworkApiItem | null> => {
       // Reset previous state
       setSubmitting(true);
       setProgress({ stage: 'validating', message: 'Validating artwork data...', percentage: 0 });
@@ -110,7 +116,7 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
           media,
           listing,
           draftArtworkId,
-          getDraftPayload(),
+          getDraftPayload({ creatorName: options?.creatorName }),
           (uploadProgress) => {
             // Map upload progress to UI progress
             if (uploadProgress.stage === 'uploading_images') {

@@ -12,6 +12,7 @@ import { Dialog, DialogContent } from '@shared/components/ui/dialog'
 import { Button } from '@shared/components/ui/button'
 import type { ApiError } from '@shared/services/apiClient'
 import artworkApis from '@shared/apis/artworkApis'
+import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis'
 
 // @domains - inventory upload
 import { UploadWizardShell } from '@domains/inventory-upload/components/layout/UploadWizardShell'
@@ -20,6 +21,7 @@ import { Step2Layout } from '@domains/inventory-upload/components/step-2/Step2La
 import { SubmissionProgress } from '@domains/inventory-upload/components/shared/SubmissionProgress'
 import { useUploadArtworkStore } from '@domains/inventory-upload/stores/useUploadArtworkStore'
 import { useArtworkSubmit } from '@domains/inventory-upload/hooks/useArtworkSubmit'
+import { resolveUploadCreatorName } from '@domains/inventory-upload/utils/artistIdentity'
 import { useAuthStore } from '@/@domains/auth/stores/useAuthStore'
 
 const TOTAL_STEPS = 2
@@ -59,6 +61,7 @@ export const UploadPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDraftLoading, setIsDraftLoading] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+  const [sellerProfile, setSellerProfile] = useState<SellerProfilePayload | null>(null)
   const allowNavigationRef = useRef(false)
   const generatedDraftIdRef = useRef<string | null>(null)
   const lastHydratedDraftIdRef = useRef<string | null>(null)
@@ -69,6 +72,34 @@ export const UploadPage = () => {
   const stepStatus = getStepStatus(step)
 
   // -- effects --
+  useEffect(() => {
+    if (!user?.id) {
+      setSellerProfile(null)
+      return
+    }
+
+    let isCancelled = false
+
+    const loadSellerProfile = async () => {
+      try {
+        const profile = await profileApis.getSellerProfileByUserId(user.id)
+        if (!isCancelled) {
+          setSellerProfile(profile)
+        }
+      } catch {
+        if (!isCancelled) {
+          setSellerProfile(null)
+        }
+      }
+    }
+
+    loadSellerProfile()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [user?.id])
+
   useEffect(() => {
     if (!router.isReady) {
       return
@@ -223,7 +254,9 @@ export const UploadPage = () => {
 
       try {
         setIsSubmitting(true)
-        const artwork = await submit(draftId)
+        const artwork = await submit(draftId, {
+          creatorName: resolveUploadCreatorName(user, sellerProfile),
+        })
 
         if (artwork) {
           // Success! Navigate to inventory or artwork detail
@@ -335,7 +368,7 @@ export const UploadPage = () => {
             </div>
           </div>
         ) : step === 1 ? (
-          <Step1Layout />
+          <Step1Layout currentUser={user} sellerProfile={sellerProfile} />
         ) : (
           <Step2Layout />
         )}

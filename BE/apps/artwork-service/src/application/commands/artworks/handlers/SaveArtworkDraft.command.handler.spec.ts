@@ -38,6 +38,7 @@ describe('SaveArtworkDraftHandler', () => {
         'draft-1',
         {
           title: 'Ocean Study',
+          creatorName: 'Actual Seller',
           status: ArtworkStatus.ACTIVE,
           isPublished: true,
         },
@@ -49,6 +50,7 @@ describe('SaveArtworkDraftHandler', () => {
       'draft-1',
       expect.objectContaining({
         title: 'Ocean Study',
+        creatorName: 'Actual Seller',
         sellerId: 'seller-1',
         status: ArtworkStatus.DRAFT,
         isPublished: false,

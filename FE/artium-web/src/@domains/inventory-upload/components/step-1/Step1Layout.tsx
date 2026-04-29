@@ -6,6 +6,7 @@ import { ChevronDownIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outlin
 
 // @shared - components
 import { Button } from '@shared/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@shared/components/ui/avatar'
 import { Checkbox } from '@shared/components/ui/checkbox'
 import { Input } from '@shared/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/components/ui/popover'
@@ -18,6 +19,8 @@ import {
   CommandList,
   CommandSeparator,
 } from '@shared/components/ui/command'
+import type { SellerProfilePayload } from '@shared/apis/profileApis'
+import type { UserPayload } from '@shared/types/auth'
 
 // @shared - utils
 import { cn } from '@shared/lib/utils'
@@ -27,16 +30,25 @@ import {
   UPLOAD_MEDIA_RULES,
   useUploadArtworkStore,
 } from '@domains/inventory-upload/stores/useUploadArtworkStore'
+import {
+  getUploadArtistInitials,
+  resolveUploadArtistAvatarUrl,
+  resolveUploadArtistName,
+} from '@domains/inventory-upload/utils/artistIdentity'
 
 type Step1LayoutProps = {
   className?: string
+  currentUser?: UserPayload | null
+  sellerProfile?: SellerProfilePayload | null
 }
 
 type Step1ColumnProps = {
   className?: string
+  currentUser?: UserPayload | null
+  sellerProfile?: SellerProfilePayload | null
 }
 
-const Step1LeftColumn = ({ className }: Step1ColumnProps) => {
+const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnProps) => {
   // -- state --
   const media = useUploadArtworkStore((state) => state.media)
   const errors = useUploadArtworkStore((state) => state.errors)
@@ -90,6 +102,10 @@ const Step1LeftColumn = ({ className }: Step1ColumnProps) => {
 
   const canAddMore = media.additionalImages.length < UPLOAD_MEDIA_RULES.MAX_ADDITIONAL_IMAGES
   const isEmptyState = !media.coverImage && media.additionalImages.length === 0
+  const artistName = resolveUploadArtistName(currentUser, sellerProfile)
+  const artistAvatarUrl = resolveUploadArtistAvatarUrl(currentUser, sellerProfile)
+  const artistInitials = getUploadArtistInitials(artistName)
+  const artistSourceLabel = sellerProfile ? 'Seller profile' : 'Account'
 
   return (
     <div className={cn('space-y-4 lg:space-y-8', className)}>
@@ -98,16 +114,27 @@ const Step1LeftColumn = ({ className }: Step1ColumnProps) => {
           Artist name <span className="text-red-500">*</span>
         </p>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/10 bg-white px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-[#F5F5F5]" />
-            <div>
-              <p className="text-sm font-semibold text-[#191414] lg:text-base">Thinh Van</p>
-              <p className="text-sm text-[#898788]">That&apos;s you!</p>
+          <div className="flex min-w-0 items-center gap-3">
+            <Avatar className="h-10 w-10 border border-black/10 bg-[#F5F5F5]">
+              {artistAvatarUrl ? (
+                <AvatarImage src={artistAvatarUrl} alt={artistName} className="object-cover" />
+              ) : null}
+              <AvatarFallback className="bg-[#F5F5F5] text-sm font-semibold text-[#191414]">
+                {artistInitials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-[#191414] lg:text-base">
+                {artistName}
+              </p>
+              <p className="truncate text-sm text-[#898788]">
+                {currentUser?.email ?? 'Signed-in account'}
+              </p>
             </div>
           </div>
-          <Button type="button" variant="ghost" size="sm" className="text-[#0F6BFF]">
-            Change
-          </Button>
+          <span className="rounded-full bg-[#F5F5F5] px-3 py-1 text-xs font-semibold text-black/50">
+            {artistSourceLabel}
+          </span>
         </div>
       </div>
 
@@ -946,12 +973,16 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
   )
 }
 
-export const Step1Layout = ({ className }: Step1LayoutProps) => {
+export const Step1Layout = ({ className, currentUser, sellerProfile }: Step1LayoutProps) => {
   return (
     <section
       className={cn('grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-8', className)}
     >
-      <Step1LeftColumn className="lg:sticky lg:top-[96px] lg:self-start" />
+      <Step1LeftColumn
+        className="lg:sticky lg:top-[96px] lg:self-start"
+        currentUser={currentUser}
+        sellerProfile={sellerProfile}
+      />
       <Step1RightColumn className="lg:self-start" />
     </section>
   )

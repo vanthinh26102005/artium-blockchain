@@ -106,6 +106,7 @@ export type ArtworkUploadDraft = ArtworkApiItem & {
 
 export type SaveArtworkDraftInput = {
   title?: string
+  creatorName?: string | null
   description?: string
   creationYear?: number
   editionRun?: string

@@ -73,7 +73,7 @@ type UploadArtworkState = {
   hydrateFromQuery: (draftId?: string | null) => void
   hydrateFromBackendDraft: (draft: ArtworkUploadDraft) => void
   setHydrationError: (message: string | null) => void
-  getDraftPayload: () => SaveArtworkDraftInput
+  getDraftPayload: (options?: { creatorName?: string | null }) => SaveArtworkDraftInput
   markDirty: () => void
   clearDirty: () => void
   validateStep: (step: UploadStep) => boolean
@@ -912,16 +912,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           hydrationError: message,
           isHydrated: true,
         }),
-      getDraftPayload: () => {
+      getDraftPayload: (options) => {
         const { details, listing, locations } = get()
         const height = parseOptionalNumber(details.dimensions.height)
         const width = parseOptionalNumber(details.dimensions.width)
         const depth = parseOptionalNumber(details.dimensions.depth)
         const weightValue = parseOptionalNumber(details.weight.value)
         const quantity = parseOptionalNumber(listing.quantity)
+        const creatorName = options?.creatorName?.trim()
 
         return {
           title: details.title.trim(),
+          creatorName: creatorName || undefined,
           description: details.description.trim() || undefined,
           creationYear: parseOptionalNumber(details.year),
           editionRun: details.editionRun.trim() || undefined,

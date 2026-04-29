@@ -30,3 +30,4 @@ yarn.lock
 docs/Huonghan-Doan-New.pdf
 .env.compose
 .env.prod
+gcs-service-account.json

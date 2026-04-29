@@ -24,6 +24,14 @@ export class SaveArtworkDraftInput {
   @IsString()
   title?: string;
 
+  @ApiPropertyOptional({
+    description: 'Artist or creator display name shown for the artwork',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  creatorName?: string | null;
+
   @ApiPropertyOptional({ description: 'Artwork description' })
   @IsOptional()
   @IsString()
