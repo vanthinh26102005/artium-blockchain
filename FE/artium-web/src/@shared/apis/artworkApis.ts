@@ -67,6 +67,7 @@ export type ListArtworksParams = {
   sellerId?: string
   folderId?: string | null
   status?: string
+  isPublished?: boolean
   q?: string
   skip?: number
   take?: number

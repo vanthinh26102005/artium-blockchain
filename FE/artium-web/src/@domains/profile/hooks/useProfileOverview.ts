@@ -111,6 +111,8 @@ export const useProfileOverview = ({
           artworkApis
             .listArtworksPaginated({
               sellerId: fetchedUser.id,
+              status: 'ACTIVE',
+              isPublished: true,
               take: 24,
               skip: 0,
             })
