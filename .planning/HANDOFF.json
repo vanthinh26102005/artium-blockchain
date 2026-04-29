@@ -1,78 +1,96 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-29T05:00:14.469Z",
-  "phase": "27",
-  "phase_name": "Frontend shared API definition standardization and edge-case audit",
-  "phase_dir": ".planning/phases/27-frontend-shared-api-definition-standardization-and-edge-case",
-  "plan": 1,
-  "task": 3,
-  "total_tasks": 3,
+  "timestamp": "2026-04-29T05:03:13.928Z",
+  "phase": "20",
+  "phase_name": "Auction start orchestration and seller lifecycle status",
+  "phase_dir": ".planning/phases/20-auction-start-orchestration-and-seller-lifecycle-status",
+  "plan": null,
+  "task": 1,
+  "total_tasks": 4,
   "status": "paused",
   "completed_tasks": [
     {
       "id": 1,
-      "name": "Extend the shared API client primitives",
-      "status": "appears_done_unverified",
-      "progress": "apiClient.ts exports ApiQueryPrimitive, ApiQueryValue, buildApiUrl, buildQueryString, withQuery, encodePathSegment, and jsonBody."
+      "name": "Implement backend start-attempt contract",
+      "status": "done",
+      "evidence": "20-01-SUMMARY.md"
     },
     {
       "id": 2,
-      "name": "Preserve structured error details and empty success responses",
-      "status": "appears_done_unverified",
-      "progress": "apiClient.ts exports ApiError with status/data/headers and parses 204/empty bodies via response.text()."
+      "name": "Implement seller start UI and MetaMask handoff",
+      "status": "done",
+      "evidence": "20-02-SUMMARY.md"
     },
     {
       "id": 3,
-      "name": "Document the API module standard",
-      "status": "appears_done_unverified",
-      "progress": "FE/artium-web/src/@shared/apis/README.md exists with the required standard sections and helper names."
+      "name": "Promote blockchain AuctionStarted into active public state",
+      "status": "done",
+      "evidence": "20-03-SUMMARY.md"
+    },
+    {
+      "id": 4,
+      "name": "Surface seller lifecycle state in inventory/orders",
+      "status": "done",
+      "evidence": "20-04-SUMMARY.md"
     }
   ],
   "remaining_tasks": [
     {
-      "id": 4,
-      "name": "Run plan 27-01 verification",
-      "status": "not_started"
+      "id": 1,
+      "name": "Run UAT: Start auction from seller workspace",
+      "status": "pending"
     },
     {
-      "id": 5,
-      "name": "Create 27-01-SUMMARY.md if verification passes",
-      "status": "not_started"
+      "id": 2,
+      "name": "Run UAT: Refresh restores the same seller auction attempt",
+      "status": "pending"
+    },
+    {
+      "id": 3,
+      "name": "Run UAT: Public auction visibility waits for authoritative activation",
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "name": "Run UAT: Seller inventory and seller orders show authoritative lifecycle state",
+      "status": "pending"
     }
   ],
   "blockers": [
     {
-      "description": "STATE.md contains a stale Phase 20 stopped_at marker mixed with Phase 27 execution state.",
-      "type": "technical",
-      "workaround": "Use roadmap.analyze plus Phase 27 artifact counts as source of truth; update stopped_at through gsd-sdk state.record-session before committing state."
+      "description": "Phase 20 UAT requires manual/browser validation with seller workflow and wallet/on-chain lifecycle behavior.",
+      "type": "human_action",
+      "workaround": "Use $gsd-verify-work 20 to resume the pending UAT sequence."
     },
     {
-      "description": "Large unrelated source worktree changes exist outside Phase 27 plan 01.",
-      "type": "technical",
-      "workaround": "Do not revert or stage unrelated files; stage only the files required for the active plan or handoff."
+      "description": "Phase 27 plan 01 has in-progress API client changes but the user explicitly wants to prioritize Phase 20 first.",
+      "type": "prioritization",
+      "workaround": "Do not continue Phase 27 until Phase 20 UAT/verification is handled or the user redirects."
     }
   ],
-  "human_actions_pending": [],
+  "human_actions_pending": [
+    {
+      "action": "Run seller auction start UAT in the browser/wallet flow.",
+      "context": "20-UAT.md is in testing status with 4 pending acceptance checks.",
+      "blocking": true
+    }
+  ],
   "decisions": [
     {
-      "decision": "Resume Phase 27 from plan 01, not from the stale phase-7 current_phase object returned by init.progress.",
-      "rationale": "roadmap.analyze, STATE.md Current Position, and Phase 27 plan artifacts all point to Phase 27 plan 01 as the active work.",
-      "phase": "27"
+      "decision": "Prioritize Phase 20 before resuming Phase 27.",
+      "rationale": "User explicitly redirected priority after the Phase 27 pause handoff was created.",
+      "phase": "20"
     },
     {
-      "decision": "Phase 20 context was captured separately and committed as e808e515.",
-      "rationale": "Do not conflate Phase 20 discussion artifacts with Phase 27 execution.",
+      "decision": "Seller must check an irreversible-activation confirmation checkbox before Start Auction enables.",
+      "rationale": "Captured in 20-CONTEXT.md D-15/D-16 and supersedes the earlier UI-spec no-confirmation assumption.",
       "phase": "20"
     }
   ],
   "uncommitted_files": [
-    ".planning/STATE.md",
     ".planning/phases/20-auction-start-orchestration-and-seller-lifecycle-status/20-UAT.md",
-    ".planning/phases/27-frontend-shared-api-definition-standardization-and-edge-case/.gitkeep",
-    "FE/artium-web/src/@shared/services/apiClient.ts",
-    "FE/artium-web/src/@shared/apis/README.md",
-    "Many unrelated source/planning files shown by git status; inspect before staging."
+    "Large unrelated source and planning changes exist in the worktree; do not stage them for Phase 20 UAT unless directly relevant."
   ],
-  "next_action": "Run the structural rg checks from 27-01-PLAN.md, then cd FE/artium-web && npm run lint and npm run build. If green, write 27-01-SUMMARY.md and commit only the plan 01 files.",
-  "context_notes": "Plan 27-01 implementation appears mostly present, but it has not been verified or summarized. The resuming agent must keep Phase 20 context work separate from Phase 27 execution state."
+  "next_action": "Run $gsd-verify-work 20 to continue the Phase 20 UAT sequence from test 1.",
+  "context_notes": "Phase 20 implementation artifacts are complete and context was captured in commit e808e515. The immediate priority is user acceptance testing and verification of the seller auction start lifecycle."
 }
