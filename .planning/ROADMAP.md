@@ -454,17 +454,17 @@ Cross-cutting constraints:
 **Goal:** Implement backend-backed inventory artwork actions for edit, delete, profile visibility, and safe auction handoff, while preserving public profile filtering and seller auction lifecycle rules.
 **Requirements**: TBD
 **Depends on:** Phase 28
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 **Wave 1**
-- [ ] 29-01 — Backend policy and visibility filters
+- [x] 29-01 — Backend policy and visibility filters
 
 **Wave 2 *(blocked on Wave 1 completion)***
-- [ ] 29-02 — Inventory action menu and root/folder handlers
+- [x] 29-02 — Inventory action menu and root/folder handlers
 
 **Wave 3 *(blocked on Wave 1 and Wave 2 completion)***
-- [ ] 29-03 — Profile filtering, auction handoff, and final evidence
+- [x] 29-03 — Profile filtering, auction handoff, and final evidence
 
 Cross-cutting constraints:
 - Artwork update and delete commands must derive seller authorization from authenticated `UserPayload.id`, not from request body fields.
