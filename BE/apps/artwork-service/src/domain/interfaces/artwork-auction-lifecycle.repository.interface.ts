@@ -16,4 +16,10 @@ export interface IArtworkAuctionLifecycleRepository {
     artworkIds: string[],
     transactionManager?: EntityManager,
   ): Promise<SellerAuctionStartStatusObject[]>;
+
+  findBySellerAndArtworkId(
+    sellerId: string,
+    artworkId: string,
+    transactionManager?: EntityManager,
+  ): Promise<SellerAuctionStartStatusObject | null>;
 }

@@ -71,4 +71,19 @@ export class ArtworkAuctionLifecycleRepository implements IArtworkAuctionLifecyc
 
     return snapshots.map((snapshot) => snapshot.lifecycle);
   }
+
+  async findBySellerAndArtworkId(
+    sellerId: string,
+    artworkId: string,
+    transactionManager?: EntityManager,
+  ): Promise<SellerAuctionStartStatusObject | null> {
+    const snapshot = await this.getRepo(transactionManager).findOne({
+      where: {
+        sellerId,
+        artworkId,
+      },
+    });
+
+    return snapshot?.lifecycle ?? null;
+  }
 }

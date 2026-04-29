@@ -139,12 +139,12 @@ export class ArtworkMicroserviceController {
     data: { id: string } & UpdateArtworkInput & { user?: UserPayload },
   ) {
     const { id, user, ...updateData } = data;
-    return this.commandBus.execute(new UpdateArtworkCommand(id, updateData));
+    return this.commandBus.execute(new UpdateArtworkCommand(id, updateData, user));
   }
 
   @MessagePattern({ cmd: 'delete_artwork' })
   async deleteArtwork(@Payload() data: { id: string; user?: UserPayload }) {
-    return this.commandBus.execute(new DeleteArtworkCommand(data.id));
+    return this.commandBus.execute(new DeleteArtworkCommand(data.id, data.user));
   }
 
   @MessagePattern({ cmd: 'bulk_move_artworks' })
