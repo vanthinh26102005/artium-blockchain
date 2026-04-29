@@ -109,11 +109,14 @@ const validateMediaItem = (item?: UploadMediaItem | null, validator?: (file: Fil
   return validator(item.file)
 }
 
+const hasUsableImage = (item?: UploadMediaItem | null) =>
+  Boolean(item?.file || item?.secureUrl || item?.url || item?.previewUrl)
+
 export const validateUploadState = (state: UploadValidationState) => {
   const errors: UploadValidationErrors = {}
   const { media, details, listing, story } = state
 
-  if (!media.coverImage?.file) {
+  if (!hasUsableImage(media.coverImage)) {
     errors['media.coverImage'] = 'Cover image is required.'
   } else {
     const coverError = validateMediaItem(media.coverImage, validateImageFile)

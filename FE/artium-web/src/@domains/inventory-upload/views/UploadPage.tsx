@@ -9,6 +9,9 @@ import { Metadata } from '@/components/SEO/Metadata'
 
 // @shared - components
 import { Dialog, DialogContent } from '@shared/components/ui/dialog'
+import { Button } from '@shared/components/ui/button'
+import type { ApiError } from '@shared/services/apiClient'
+import artworkApis from '@shared/apis/artworkApis'
 
 // @domains - inventory upload
 import { UploadWizardShell } from '@domains/inventory-upload/components/layout/UploadWizardShell'
@@ -39,11 +42,11 @@ export const UploadPage = () => {
   // -- state --
   const step = useUploadArtworkStore((state) => state.step)
   const draftId = useUploadArtworkStore((state) => state.draftId)
-  const isHydrated = useUploadArtworkStore((state) => state.isHydrated)
-  const media = useUploadArtworkStore((state) => state.media)
-  const story = useUploadArtworkStore((state) => state.story)
   const isDirty = useUploadArtworkStore((state) => state.isDirty)
   const hydrateFromQuery = useUploadArtworkStore((state) => state.hydrateFromQuery)
+  const hydrateFromBackendDraft = useUploadArtworkStore((state) => state.hydrateFromBackendDraft)
+  const hydrationError = useUploadArtworkStore((state) => state.hydrationError)
+  const setHydrationError = useUploadArtworkStore((state) => state.setHydrationError)
   const resetDraft = useUploadArtworkStore((state) => state.resetDraft)
   const nextStep = useUploadArtworkStore((state) => state.nextStep)
   const prevStep = useUploadArtworkStore((state) => state.prevStep)
@@ -54,7 +57,11 @@ export const UploadPage = () => {
 
   const [isExitOpen, setIsExitOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDraftLoading, setIsDraftLoading] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
   const allowNavigationRef = useRef(false)
+  const generatedDraftIdRef = useRef<string | null>(null)
+  const lastHydratedDraftIdRef = useRef<string | null>(null)
 
   // -- submission --
   const { submit, submitting, progress, error, completedArtwork, reset: resetSubmit } = useArtworkSubmit()
@@ -73,6 +80,8 @@ export const UploadPage = () => {
 
     if (!draftArtworkIdParam) {
       const nextDraftId = createDraftArtworkId()
+      generatedDraftIdRef.current = nextDraftId
+      lastHydratedDraftIdRef.current = null
       allowNavigationRef.current = true
       router
         .replace(
@@ -86,12 +95,68 @@ export const UploadPage = () => {
         .finally(() => {
           allowNavigationRef.current = false
         })
-      hydrateFromQuery(nextDraftId)
       return
     }
 
-    hydrateFromQuery(draftArtworkIdParam)
-  }, [router.isReady, router.pathname, router.query, router.replace, router, hydrateFromQuery])
+    if (lastHydratedDraftIdRef.current === draftArtworkIdParam) {
+      return
+    }
+
+    let isCancelled = false
+    const loadDraft = async () => {
+      const isGeneratedDraft = generatedDraftIdRef.current === draftArtworkIdParam
+      hydrateFromQuery(draftArtworkIdParam)
+      setHydrationError(null)
+      setIsDraftLoading(true)
+
+      try {
+        const draft = isGeneratedDraft
+          ? await artworkApis.createUploadDraft(draftArtworkIdParam)
+          : await artworkApis.getUploadDraft(draftArtworkIdParam)
+
+        if (isCancelled) {
+          return
+        }
+
+        hydrateFromBackendDraft(draft)
+        lastHydratedDraftIdRef.current = draftArtworkIdParam
+        generatedDraftIdRef.current = null
+      } catch (err) {
+        if (isCancelled) {
+          return
+        }
+
+        const apiError = err as ApiError
+        const message =
+          apiError.status === 401
+            ? 'Please log in again to continue editing this draft.'
+            : apiError.status === 403 || apiError.status === 404
+              ? 'This draft is not available for your account. Start a new upload or open one of your drafts.'
+              : apiError.message || 'We could not load this draft. Please try again.'
+        setHydrationError(message)
+      } finally {
+        if (!isCancelled) {
+          setIsDraftLoading(false)
+        }
+      }
+    }
+
+    loadDraft()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [
+    hydrateFromBackendDraft,
+    hydrateFromQuery,
+    retryCount,
+    router,
+    router.isReady,
+    router.pathname,
+    router.query,
+    router.replace,
+    setHydrationError,
+  ])
 
   useEffect(() => {
     return () => revokeMediaPreviews()
@@ -143,13 +208,22 @@ export const UploadPage = () => {
     // If on step 2 (final step), submit the artwork
     if (step === TOTAL_STEPS) {
       if (!user || !user.id) {
-        alert('Please log in to submit artwork')
+        setHydrationError('Please log in to submit artwork.')
+        return
+      }
+
+      if (!draftId) {
+        setHydrationError('Draft artwork id is missing. Refresh the page and try again.')
+        return
+      }
+
+      if (hydrationError || isDraftLoading) {
         return
       }
 
       try {
         setIsSubmitting(true)
-        const artwork = await submit(user.id)
+        const artwork = await submit(user.id, draftId)
 
         if (artwork) {
           // Success! Navigate to inventory or artwork detail
@@ -191,6 +265,32 @@ export const UploadPage = () => {
     router.push('/inventory')
   }
 
+  const handleRetryDraftLoad = () => {
+    lastHydratedDraftIdRef.current = null
+    setRetryCount((count) => count + 1)
+  }
+
+  const handleStartNewDraft = () => {
+    const nextDraftId = createDraftArtworkId()
+    generatedDraftIdRef.current = nextDraftId
+    lastHydratedDraftIdRef.current = null
+    resetDraft()
+    setHydrationError(null)
+    allowNavigationRef.current = true
+    router
+      .replace(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, draftArtworkId: nextDraftId },
+        },
+        undefined,
+        { shallow: true },
+      )
+      .finally(() => {
+        allowNavigationRef.current = false
+      })
+  }
+
   // -- render --
   return (
     <>
@@ -202,9 +302,43 @@ export const UploadPage = () => {
         onCancel={handleClose}
         onPrev={handlePrevStep}
         onNext={handleNextStep}
-        isNextDisabled={!stepStatus.isValid}
+        isNextDisabled={!stepStatus.isValid || isDraftLoading || !!hydrationError || submitting || isSubmitting}
       >
-        {step === 1 ? <Step1Layout /> : <Step2Layout />}
+        {isDraftLoading ? (
+          <div className="mx-auto mt-16 max-w-2xl rounded-[28px] border border-black/10 bg-white p-8 text-center shadow-sm">
+            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-black/10 border-t-[#0F6BFF]" />
+            <h1 className="mt-6 text-[22px] font-bold text-[#191414]">Loading draft</h1>
+            <p className="mt-2 text-[15px] text-black/60">
+              Syncing the upload form with the backend draft before you continue.
+            </p>
+          </div>
+        ) : hydrationError ? (
+          <div className="mx-auto mt-16 max-w-2xl rounded-[28px] border border-red-200 bg-white p-8 text-center shadow-sm">
+            <h1 className="text-[22px] font-bold text-[#191414]">Draft unavailable</h1>
+            <p className="mt-3 text-[15px] leading-6 text-black/65">{hydrationError}</p>
+            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleRetryDraftLoad}
+                className="rounded-full px-6"
+              >
+                Try Again
+              </Button>
+              <Button
+                type="button"
+                onClick={handleStartNewDraft}
+                className="rounded-full px-6"
+              >
+                Start New Draft
+              </Button>
+            </div>
+          </div>
+        ) : step === 1 ? (
+          <Step1Layout />
+        ) : (
+          <Step2Layout />
+        )}
       </UploadWizardShell>
       <Dialog open={isExitOpen} onOpenChange={setIsExitOpen}>
         <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">

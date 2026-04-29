@@ -162,7 +162,7 @@ export const VideoPicker = ({
         )}
         renderDropzoneContent={
           isMoments
-            ? (openFileDialog) => {
+            ? (inputId) => {
               if (!video?.previewUrl) {
                 return (
                   <div className="flex h-full w-full flex-col">
@@ -190,16 +190,14 @@ export const VideoPicker = ({
                         for more details.
                       </p>
                       <Button
-                        type="button"
+                        asChild
                         variant="outline"
                         size="sm"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          openFileDialog()
-                        }}
                         className="mt-6 rounded-full px-6 text-[13px] font-semibold"
                       >
-                        Upload moments
+                        <label htmlFor={inputId} onClick={(event) => event.stopPropagation()}>
+                          Upload moments
+                        </label>
                       </Button>
                     </div>
                   </div>
@@ -244,17 +242,14 @@ export const VideoPicker = ({
                         </button>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        openFileDialog()
-                      }}
+                    <label
+                      htmlFor={inputId}
+                      onClick={(event) => event.stopPropagation()}
                       className="flex h-[240px] w-[180px] flex-col items-center justify-center rounded-2xl border border-dashed border-black/20 bg-white text-[15px] font-semibold text-[#191414]"
                     >
                       <span className="text-2xl font-semibold">+</span>
                       Add another video
-                    </button>
+                    </label>
                   </div>
                   <div className="mt-auto border-t border-black/10 bg-[#F5F5F5] px-6 py-3 text-sm text-[#898788]">
                     Drag and drop videos to change the order of your artwork videos

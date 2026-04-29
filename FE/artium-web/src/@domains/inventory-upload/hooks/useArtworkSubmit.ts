@@ -1,13 +1,12 @@
 /**
  * useArtworkSubmit Hook
  * 
- * Handles the final submission of artwork upload form.
+ * Handles final submission of an existing backend upload draft.
  * Integrates with the upload store and artwork upload service.
  * Provides progress tracking and error handling.
  */
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/router";
 import { useUploadArtworkStore } from "../stores/useUploadArtworkStore";
 import {
   uploadArtworkWithImages,
@@ -35,7 +34,7 @@ interface UseArtworkSubmitReturn {
   completedArtwork: ArtworkApiItem | null;
 
   // Actions
-  submit: (sellerId: string) => Promise<ArtworkApiItem | null>;
+  submit: (sellerId: string, draftArtworkId: string) => Promise<ArtworkApiItem | null>;
   reset: () => void;
 }
 
@@ -51,7 +50,7 @@ interface UseArtworkSubmitReturn {
  * const { submit, submitting, progress, error } = useArtworkSubmit();
  * 
  * const handleSubmit = async () => {
- *   const artwork = await submit(user.id);
+ *   const artwork = await submit(user.id, draftArtworkId);
  *   if (artwork) {
  *     router.push(`/inventory/${artwork.id}`);
  *   }
@@ -59,13 +58,11 @@ interface UseArtworkSubmitReturn {
  * ```
  */
 export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
-  const router = useRouter();
-
   // Store state
   const media = useUploadArtworkStore((state) => state.media);
-  const details = useUploadArtworkStore((state) => state.details);
   const listing = useUploadArtworkStore((state) => state.listing);
   const validateAll = useUploadArtworkStore((state) => state.validateAll);
+  const getDraftPayload = useUploadArtworkStore((state) => state.getDraftPayload);
   const resetDraft = useUploadArtworkStore((state) => state.resetDraft);
 
   // Local state
@@ -78,7 +75,7 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
    * Submit artwork
    */
   const submit = useCallback(
-    async (sellerId: string): Promise<ArtworkApiItem | null> => {
+    async (sellerId: string, draftArtworkId: string): Promise<ArtworkApiItem | null> => {
       // Reset previous state
       setSubmitting(true);
       setProgress({ stage: 'validating', message: 'Validating artwork data...', percentage: 0 });
@@ -92,13 +89,17 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
           throw new Error('Please fill in all required fields correctly');
         }
 
+        if (!draftArtworkId) {
+          throw new Error('Draft artwork id is missing. Refresh the page and try again.');
+        }
+
         // Step 2: Validate media
         const mediaValidation = validateMediaForUpload(media);
         if (!mediaValidation.valid) {
           throw new Error(mediaValidation.errors.join('. '));
         }
 
-        // Step 3: Upload images and create artwork
+        // Step 3: Save the draft, upload new images, then submit the backend draft
         setProgress({
           stage: 'uploading_images',
           message: 'Uploading images...',
@@ -107,9 +108,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
 
         const result = await uploadArtworkWithImages(
           media,
-          details,
           listing,
           sellerId,
+          draftArtworkId,
+          getDraftPayload(),
           (uploadProgress) => {
             // Map upload progress to UI progress
             if (uploadProgress.stage === 'uploading_images') {
@@ -124,13 +126,13 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
             } else if (uploadProgress.stage === 'creating_artwork') {
               setProgress({
                 stage: 'creating_artwork',
-                message: 'Creating artwork...',
+                message: 'Saving draft and publishing artwork...',
                 percentage: 95,
               });
             } else if (uploadProgress.stage === 'complete') {
               setProgress({
                 stage: 'complete',
-                message: 'Artwork created successfully!',
+                message: 'Artwork published successfully!',
                 percentage: 100,
               });
             }
@@ -157,7 +159,7 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
         return null;
       }
     },
-    [media, details, listing, validateAll, resetDraft],
+    [media, listing, validateAll, getDraftPayload, resetDraft],
   );
 
   /**

@@ -1,5 +1,5 @@
 // react
-import React, { useRef, useState } from 'react'
+import React, { useId, useRef, useState } from 'react'
 
 // @shared - utils
 import { cn } from '@shared/lib/utils'
@@ -16,7 +16,7 @@ type DropzoneBaseProps = {
   hideHeader?: boolean
   containerClassName?: string
   dropzoneClassName?: string
-  renderDropzoneContent?: (openFileDialog: () => void) => React.ReactNode
+  renderDropzoneContent?: (inputId: string) => React.ReactNode
   onFiles: (files: File[]) => void
   children?: React.ReactNode
 }
@@ -42,6 +42,7 @@ export const DropzoneBase = ({
 
   // -- refs --
   const inputRef = useRef<HTMLInputElement>(null)
+  const inputId = useId()
 
   // -- handlers --
   const handleFiles = (files: FileList | null) => {
@@ -81,7 +82,7 @@ export const DropzoneBase = ({
   )
 
   const dropzoneContent = renderDropzoneContent ? (
-    renderDropzoneContent(handleClick)
+    renderDropzoneContent(inputId)
   ) : (
     <>
       <span className="text-[15px] font-semibold text-[#191414] lg:text-[16px]">
@@ -133,6 +134,7 @@ export const DropzoneBase = ({
       >
         <input
           ref={inputRef}
+          id={inputId}
           type="file"
           accept={accept}
           multiple={multiple}

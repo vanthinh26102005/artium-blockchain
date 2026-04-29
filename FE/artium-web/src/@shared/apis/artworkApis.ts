@@ -6,8 +6,18 @@ import {
 import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
 type ArtworkImage = {
+  id?: string
+  publicId?: string
   url?: string
   secureUrl?: string
+  format?: string
+  width?: number
+  height?: number
+  size?: number
+  bucket?: string
+  altText?: string
+  order?: number
+  isPrimary?: boolean
 }
 
 type ArtworkFolderRef = {
@@ -76,6 +86,8 @@ export type CreateArtworkInput = {
   editionRun?: string
   materials?: string
   location?: string
+  dimensions?: ArtworkApiItem['dimensions']
+  weight?: ArtworkApiItem['weight']
   price?: string
   currency?: string
   quantity?: number
@@ -86,6 +98,44 @@ export type CreateArtworkInput = {
 }
 
 export type UpdateArtworkInput = Partial<CreateArtworkInput>
+
+export type ArtworkUploadDraft = ArtworkApiItem & {
+  folderId?: string | null
+  tagIds?: string[]
+}
+
+export type SaveArtworkDraftInput = {
+  title?: string
+  description?: string
+  creationYear?: number
+  editionRun?: string
+  dimensions?: {
+    height?: number
+    width?: number
+    depth?: number
+    unit: 'cm' | 'in'
+  }
+  weight?: {
+    value?: number
+    unit: 'kg' | 'lbs'
+  }
+  materials?: string
+  location?: string
+  price?: string
+  currency?: string
+  quantity?: number
+  status?: string
+  isPublished?: boolean
+  folderId?: string | null
+  tagIds?: string[]
+}
+
+export type SubmitArtworkDraftInput = {
+  listingStatus: 'sale' | 'inquire' | 'sold'
+  price?: string
+  quantity?: number
+  isPublished?: boolean
+}
 
 type BulkMoveInput = {
   artworkIds: string[]
@@ -169,6 +219,37 @@ const artworkApis = {
   },
   getArtworkById: (id: string) =>
     apiFetch<ArtworkApiItem | null>(`/artwork/${encodePathSegment(id)}`),
+  createUploadDraft: (draftArtworkId: string) =>
+    apiFetch<ArtworkUploadDraft>(
+      `/artwork/drafts/${encodePathSegment(draftArtworkId)}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({}),
+      },
+    ),
+  getUploadDraft: (draftArtworkId: string) =>
+    apiFetch<ArtworkUploadDraft>(
+      `/artwork/drafts/${encodePathSegment(draftArtworkId)}`,
+      {
+        cache: 'no-store',
+      },
+    ),
+  saveUploadDraft: (draftArtworkId: string, input: SaveArtworkDraftInput) =>
+    apiFetch<ArtworkUploadDraft>(
+      `/artwork/drafts/${encodePathSegment(draftArtworkId)}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      },
+    ),
+  submitUploadDraft: (draftArtworkId: string, input: SubmitArtworkDraftInput) =>
+    apiFetch<ArtworkUploadDraft>(
+      `/artwork/drafts/${encodePathSegment(draftArtworkId)}/submit`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    ),
   createArtwork: (input: CreateArtworkInput) =>
     apiFetch<ArtworkApiItem>('/artwork', {
       method: 'POST',

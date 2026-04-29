@@ -2,6 +2,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+// @shared - apis
+import type {
+  ArtworkUploadDraft,
+  SaveArtworkDraftInput,
+} from '@shared/apis/artworkApis'
+
 // @domains - inventory upload
 import {
   UploadDetailsState,
@@ -39,6 +45,7 @@ type UploadArtworkState = {
   isDirty: boolean
   isSaving: boolean
   isHydrated: boolean
+  hydrationError: string | null
   errors: UploadValidationErrors
   touched: Record<string, boolean>
   setStep: (step: UploadStep) => void
@@ -64,6 +71,9 @@ type UploadArtworkState = {
   removeTrivia: (id: string) => void
   resetDraft: () => void
   hydrateFromQuery: (draftId?: string | null) => void
+  hydrateFromBackendDraft: (draft: ArtworkUploadDraft) => void
+  setHydrationError: (message: string | null) => void
+  getDraftPayload: () => SaveArtworkDraftInput
   markDirty: () => void
   clearDirty: () => void
   validateStep: (step: UploadStep) => boolean
@@ -211,10 +221,55 @@ const serializeMediaItem = (item: UploadMediaItem | null) => {
   }
   return {
     id: item.id,
+    uploaded: item.uploaded,
+    publicId: item.publicId,
+    url: item.url,
+    secureUrl: item.secureUrl,
+    format: item.format,
+    width: item.width,
+    height: item.height,
+    bucket: item.bucket,
     name: item.name,
     size: item.size,
     type: item.type,
     lastModified: item.lastModified,
+  }
+}
+
+const stringifyOptional = (value: string | number | null | undefined) =>
+  value === undefined || value === null ? '' : String(value)
+
+const parseOptionalNumber = (value: string) => {
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return undefined
+  }
+  const parsed = Number(trimmed)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+const getLocationName = (locations: UploadLocation[], locationId: string) =>
+  locations.find((location) => location.id === locationId)?.name ?? locationId
+
+const createUploadedMediaItem = (
+  image: NonNullable<ArtworkUploadDraft['images']>[number],
+  fallbackName: string,
+): UploadMediaItem => {
+  const imageId = image.publicId ?? image.id ?? fallbackName
+
+  return {
+    id: imageId,
+    uploaded: true,
+    publicId: image.publicId,
+    url: image.url,
+    secureUrl: image.secureUrl,
+    format: image.format,
+    width: image.width,
+    height: image.height,
+    size: image.size,
+    bucket: image.bucket,
+    previewUrl: image.secureUrl ?? image.url,
+    name: image.altText ?? image.publicId ?? fallbackName,
   }
 }
 
@@ -231,6 +286,7 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
       isDirty: false,
       isSaving: false,
       isHydrated: false,
+      hydrationError: null,
       errors: {},
       touched: {},
       setStep: (step) => set({ step: Math.max(1, Math.min(2, step)) as UploadStep }),
@@ -755,6 +811,8 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           story: createEmptyStory(),
           isDirty: false,
           isSaving: false,
+          isHydrated: false,
+          hydrationError: null,
           errors: {},
           touched: {},
         })
@@ -763,7 +821,137 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
         set({
           draftId: draftId ?? null,
           isHydrated: true,
+          hydrationError: null,
         }),
+      hydrateFromBackendDraft: (draft) =>
+        set((state) => {
+          const images = draft.images ?? []
+          const primaryImage = images.find((image) => image.isPrimary === true) ?? images[0]
+          const additionalImages = images
+            .filter((image) => image !== primaryImage)
+            .map((image, index) => createUploadedMediaItem(image, `Artwork image ${index + 1}`))
+          const backendLocation = typeof draft.location === 'string' ? draft.location : ''
+          const nextLocations =
+            backendLocation && !state.locations.some((location) => location.id === backendLocation)
+              ? [
+                  ...state.locations,
+                  {
+                    id: backendLocation,
+                    name: backendLocation,
+                    address1: '',
+                    address2: '',
+                    city: '',
+                    state: '',
+                    country: '',
+                    postalCode: '',
+                  },
+                ]
+              : state.locations
+
+          const nextDetails: UploadDetailsState = {
+            ...state.details,
+            title: draft.title === 'Untitled draft' ? '' : draft.title ?? '',
+            description: draft.description ?? '',
+            year: stringifyOptional(draft.creationYear),
+            editionRun: draft.editionRun ?? '',
+            dimensions: {
+              height: stringifyOptional(draft.dimensions?.height),
+              width: stringifyOptional(draft.dimensions?.width),
+              depth: stringifyOptional(draft.dimensions?.depth),
+              unit: draft.dimensions?.unit === 'cm' ? 'cm' : 'in',
+            },
+            weight: {
+              value: stringifyOptional(draft.weight?.value),
+              unit: draft.weight?.unit === 'kg' ? 'kg' : 'lbs',
+            },
+            materials: draft.materials ?? '',
+            locationId: backendLocation,
+            customTags: draft.tagIds ?? state.details.customTags,
+          }
+          const nextListing: UploadListingState = {
+            ...state.listing,
+            status:
+              draft.status === 'SOLD'
+                ? 'sold'
+                : draft.status === 'INACTIVE'
+                  ? 'inquire'
+                  : state.listing.status,
+            price: stringifyOptional(draft.price),
+            quantity: stringifyOptional(draft.quantity),
+          }
+          const nextMedia: UploadMediaState = {
+            coverImage: primaryImage
+              ? createUploadedMediaItem(primaryImage, 'Cover image')
+              : state.media.coverImage,
+            additionalImages,
+            momentVideo: state.media.momentVideo,
+          }
+          const nextState = {
+            ...state,
+            details: nextDetails,
+            listing: nextListing,
+            locations: nextLocations,
+            media: nextMedia,
+          }
+          const errors = validateUploadState(buildValidationState(nextState))
+
+          return {
+            draftId: draft.id,
+            media: nextMedia,
+            details: nextDetails,
+            locations: nextLocations,
+            listing: nextListing,
+            isDirty: false,
+            isHydrated: true,
+            hydrationError: null,
+            errors,
+          }
+        }),
+      setHydrationError: (message) =>
+        set({
+          hydrationError: message,
+          isHydrated: true,
+        }),
+      getDraftPayload: () => {
+        const { details, listing, locations } = get()
+        const height = parseOptionalNumber(details.dimensions.height)
+        const width = parseOptionalNumber(details.dimensions.width)
+        const depth = parseOptionalNumber(details.dimensions.depth)
+        const weightValue = parseOptionalNumber(details.weight.value)
+        const quantity = parseOptionalNumber(listing.quantity)
+
+        return {
+          title: details.title.trim(),
+          description: details.description.trim() || undefined,
+          creationYear: parseOptionalNumber(details.year),
+          editionRun: details.editionRun.trim() || undefined,
+          dimensions:
+            height !== undefined && width !== undefined
+              ? {
+                  height,
+                  width,
+                  ...(depth !== undefined ? { depth } : {}),
+                  unit: details.dimensions.unit,
+                }
+              : undefined,
+          weight:
+            weightValue !== undefined
+              ? {
+                  value: weightValue,
+                  unit: details.weight.unit,
+                }
+              : undefined,
+          materials: details.materials.trim() || undefined,
+          location: details.locationId
+            ? getLocationName(locations, details.locationId)
+            : undefined,
+          price: listing.price.trim() || undefined,
+          currency: 'USD',
+          quantity: quantity !== undefined ? quantity : undefined,
+          isPublished: listing.status === 'sale',
+          tagIds: details.customTags.length > 0 ? details.customTags : undefined,
+        }
+      },
       markDirty: () => set({ isDirty: true }),
       clearDirty: () => set({ isDirty: false }),
       validateStep: (step) => {

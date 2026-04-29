@@ -4,6 +4,14 @@ type UploadMediaItem = {
   id: string
   file?: File
   previewUrl?: string
+  uploaded?: boolean
+  publicId?: string
+  url?: string
+  secureUrl?: string
+  format?: string
+  width?: number
+  height?: number
+  bucket?: string
   name?: string
   size?: number
   type?: string
