@@ -29,6 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
 - [x] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers (completed 2026-04-29)
 - [x] **Phase 27: Frontend shared API definition standardization and edge-case audit** - Standardize frontend shared API request behavior while preserving existing module exports (completed 2026-04-29)
+- [ ] **Phase 28: Artwork upload draft backend gap audit and contract cleanup** - Audit `/artworks/upload?draftArtworkId=...` against backend draft-artwork APIs, close contract gaps, and keep the implementation clean
 
 ## Phase Details
 
@@ -177,7 +178,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Phases 21-26 are intentionally omitted/redundant as of 2026-04-29, so active work resumes at Phase 27.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Phases 21-26 are intentionally omitted/redundant as of 2026-04-29, so active work resumes at Phase 27. Phase 28 follows Phase 27 and focuses the next backend accuracy pass on the artwork upload draft flow.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -205,6 +206,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 20. Auction start orchestration and seller lifecycle status | 4/4 | Complete    | 2026-04-29 |
 | 21-26. Backend deployment strategy scope | historical artifacts retained | Omitted/redundant | 2026-04-29 |
 | 27. Frontend shared API definition standardization and edge-case audit | 4/4 | Complete    | 2026-04-29 |
+| 28. Artwork upload draft backend gap audit and contract cleanup | 3/3 | Planned | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -413,3 +415,36 @@ Cross-cutting constraints:
 - Dynamic route parameters use shared path encoding.
 - Query strings use the shared helper and preserve `0` and `false`.
 - Frontend verification uses existing `lint` and `build` scripts unless execution explicitly adds new test tooling.
+
+### Phase 28: Artwork upload draft backend gap audit and contract cleanup
+
+**Goal:** The artwork upload draft flow at `/artworks/upload?draftArtworkId=6f2c4075-4892-4e09-ba4e-e24101b262f9` is audited end-to-end against backend reality, with frontend/API contract gaps identified and cleaned so draft loading, editing, validation, media handling, and final submission are accurate, secure, and maintainable.
+**Requirements**: AUD-28-01 backend draft identity, AUD-28-02 owner-scoped draft authorization, AUD-28-03 upload media ownership, AUD-28-04 frontend/backend DTO parity, AUD-28-05 targeted verification evidence
+**Depends on:** Phase 27
+**Plans:** 3 plans
+**UI hint**: yes
+**Backend focus:** inventory/artwork draft APIs, API gateway contracts, DTO validation, persistence semantics, file/media ownership, auth/authorization, and frontend request mapping for the upload draft route.
+**Success Criteria** (what must be TRUE):
+  1. Developer can trace the exact frontend calls made by `/artworks/upload?draftArtworkId=6f2c4075-4892-4e09-ba4e-e24101b262f9` to backend controllers, DTOs, services, and persistence paths without relying on mocks or undocumented assumptions.
+  2. Developer can identify and close mismatches between upload-form fields and backend artwork/draft DTOs, including required fields, enum values, numeric formats, dimensions, pricing, materials, tags, visibility/status, and media metadata.
+  3. Backend-side validation and authorization are authoritative: only the draft owner can read/update/submit the draft, invalid payloads fail with structured errors, and frontend validation mirrors backend rules without becoming the source of truth.
+  4. Draft media/file handling is clean and accurate: uploaded media references are owned by the authenticated seller, stale or missing media states are handled explicitly, and final artwork submission cannot persist inconsistent media records.
+  5. API client code for the upload flow uses shared Phase 27 helpers for path encoding, query handling, structured errors, and upload transport rather than ad hoc request logic.
+  6. Verification evidence includes backend-focused checks for the relevant service/gateway code plus frontend type/lint checks targeted to the upload flow, with any existing unrelated lint debt documented separately.
+
+Plans:
+**Wave 1**
+- [ ] 28-01-PLAN.md — Backend upload-draft contract, owner-scoped CQRS handlers, and draft submit validation
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 28-02-PLAN.md — Upload endpoint hardening plus frontend draft hydration and draft-aware submit mapping
+
+**Wave 3** *(blocked on Wave 1 and Wave 2 completion)*
+- [ ] 28-03-PLAN.md — Backend contract audit artifact, targeted verification, and final structural checks
+
+Cross-cutting constraints:
+- The URL query value `draftArtworkId` is treated as a backend draft artwork ID, not only a local Zustand key.
+- Seller identity for draft and upload mutations is derived from authenticated `UserPayload`; request bodies must not control `sellerId`.
+- Upload endpoints must validate seller-owned `DRAFT` artwork state before writing media.
+- Frontend API modules must keep using Phase 27 helpers: `apiFetch`, `apiUpload`, and `encodePathSegment`.
+- Verification must separate Phase 28 regressions from unrelated repository lint/build debt.
