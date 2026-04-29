@@ -8,6 +8,7 @@ export type InventoryArtwork = {
   title: string
   creatorName: string
   status: InventoryArtworkStatus
+  isPublished?: boolean
   auctionLifecycle?: SellerAuctionStartStatusResponse | null
   backendStatus?: string
   createdAt?: string

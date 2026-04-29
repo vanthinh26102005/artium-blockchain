@@ -33,6 +33,7 @@ type InventoryDataState = {
   artworks: InventoryArtwork[]
   folders: InventoryFolder[]
   setArtworks: (artworks: InventoryArtwork[]) => void
+  updateArtwork: (artwork: InventoryArtwork) => void
   setFolders: (folders: InventoryFolder[]) => void
   addFolder: (folder: InventoryFolder) => void
   removeArtwork: (id: string) => void
@@ -54,6 +55,10 @@ export const useInventoryDataStore = create<InventoryDataState>()(
       artworks: [],
       folders: [],
       setArtworks: (artworks) => set({ artworks }),
+      updateArtwork: (artwork) =>
+        set((state) => ({
+          artworks: state.artworks.map((item) => (item.id === artwork.id ? artwork : item)),
+        })),
       setFolders: (folders) => set({ folders }),
       addFolder: (folder) => set((state) => ({ folders: [...state.folders, folder] })),
       removeArtwork: (id) =>
