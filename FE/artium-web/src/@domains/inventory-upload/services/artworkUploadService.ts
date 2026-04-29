@@ -76,7 +76,6 @@ const buildSubmitPayload = (listing: UploadListingState): SubmitArtworkDraftInpu
 const uploadImageFile = async (
   file: File,
   draftArtworkId: string,
-  sellerId: string,
   isPrimary: boolean,
   order: number,
   total: number,
@@ -97,7 +96,6 @@ const uploadImageFile = async (
   return artworkUploadApi.uploadArtworkImage(
     {
       file,
-      sellerId,
       artworkId: draftArtworkId,
       isPrimary,
       order,
@@ -123,7 +121,6 @@ const uploadImageFile = async (
 export const uploadArtworkWithImages = async (
   media: UploadMediaState,
   listing: UploadListingState,
-  sellerId: string,
   draftArtworkId: string,
   draftPayload: SaveArtworkDraftInput,
   onProgress?: ProgressCallback,
@@ -141,15 +138,19 @@ export const uploadArtworkWithImages = async (
     (file): file is File => Boolean(file),
   )
   const uploadedImages: ArtworkImageUploadResponse[] = []
+  const savePayload: SaveArtworkDraftInput = {
+    ...draftPayload,
+    dimensions: draftPayload.dimensions,
+    weight: draftPayload.weight,
+  }
 
-  await artworkApis.saveUploadDraft(draftArtworkId, draftPayload)
+  await artworkApis.saveUploadDraft(draftArtworkId, savePayload)
 
   for (let index = 0; index < filesToUpload.length; index += 1) {
     const file = filesToUpload[index]
     const image = await uploadImageFile(
       file,
       draftArtworkId,
-      sellerId,
       index === 0 && Boolean(coverImage),
       index,
       filesToUpload.length,

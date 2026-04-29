@@ -223,7 +223,7 @@ export const UploadPage = () => {
 
       try {
         setIsSubmitting(true)
-        const artwork = await submit(user.id, draftId)
+        const artwork = await submit(draftId)
 
         if (artwork) {
           // Success! Navigate to inventory or artwork detail
