@@ -1,17 +1,9 @@
-// third-party
-import { Copy, Eye, Folder, Link2, MoreHorizontal, Pencil, Repeat2, Trash2 } from 'lucide-react'
-
 // @shared - components
 import { Checkbox } from '@shared/components/ui/checkbox'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@shared/components/ui/dropdown-menu'
 import { OrderStatusBadge } from '@domains/orders/components/OrderStatusBadge'
 
 // @domains - inventory
+import { InventoryArtworkActionMenu } from '@domains/inventory/components/InventoryArtworkActionMenu'
 import {
   type InventoryArtwork,
   type InventoryArtworkStatus,
@@ -24,6 +16,8 @@ type InventoryArtworkGridViewItemProps = {
   onDelete: (artwork: InventoryArtwork) => void
   onMove: (artwork: InventoryArtwork) => void
   onOpenDetails: (artwork: InventoryArtwork) => void
+  onToggleProfileVisibility: (artwork: InventoryArtwork) => void
+  onStartAuction: (artwork: InventoryArtwork) => void
 }
 
 const STATUS_CONFIG: Record<
@@ -48,6 +42,8 @@ export const InventoryArtworkGridViewItem = ({
   onDelete,
   onMove,
   onOpenDetails,
+  onToggleProfileVisibility,
+  onStartAuction,
 }: InventoryArtworkGridViewItemProps) => {
   // -- state --
   const selectedIds = useInventorySelectionStore((state) => state.selectedIds)
@@ -65,48 +61,8 @@ export const InventoryArtworkGridViewItem = ({
     toggle(artwork.id)
   }
 
-  const handleEdit = () => {
-    onEdit(artwork)
-  }
-
-  const handleDelete = () => {
-    onDelete(artwork)
-  }
-
-  const handleMove = () => {
-    onMove(artwork)
-  }
-
   const handleOpenDetails = () => {
     onOpenDetails(artwork)
-  }
-
-  const handleDuplicate = () => {
-    // Feature requires BE support - disabled for now
-  }
-
-  const handleCopyLink = async () => {
-    const artworkUrl = `${window.location.origin}/artworks/${artwork.id}`
-    try {
-      await navigator.clipboard.writeText(artworkUrl)
-      // Could show toast here if we had access to toast context
-    } catch {
-      // Fallback for older browsers
-      const textarea = document.createElement('textarea')
-      textarea.value = artworkUrl
-      document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textarea)
-    }
-  }
-
-  const handleChangeToDraft = () => {
-    // Feature requires BE API - disabled for now
-  }
-
-  const handleToggleVisibility = () => {
-    // Feature requires BE API - disabled for now
   }
 
   // -- render --
@@ -136,75 +92,17 @@ export const InventoryArtworkGridViewItem = ({
             isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`}
         >
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                onClick={(event) => event.stopPropagation()}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/80 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition hover:bg-white hover:shadow-lg"
-                aria-label="Artwork actions"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              onClick={(event) => event.stopPropagation()}
-              onPointerDown={(event) => event.stopPropagation()}
-              className="w-64 rounded-2xl border-black/5 bg-white/98 p-2 shadow-xl backdrop-blur-xl"
-            >
-              <DropdownMenuItem
-                onSelect={handleEdit}
-                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50"
-              >
-                <Pencil className="h-4 w-4 text-slate-600" />
-                Edit Artwork
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled
-                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-400 cursor-not-allowed"
-              >
-                <Repeat2 className="h-4 w-4 text-slate-400" />
-                Change to Draft
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={handleMove}
-                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50"
-              >
-                <Folder className="h-4 w-4 text-slate-600" />
-                Move to folder
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled
-                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-400 cursor-not-allowed"
-              >
-                <Copy className="h-4 w-4 text-slate-400" />
-                Duplicate artwork
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={handleCopyLink}
-                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50"
-              >
-                <Link2 className="h-4 w-4 text-slate-600" />
-                Copy link to this artwork
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled
-                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-400 cursor-not-allowed"
-              >
-                <Eye className="h-4 w-4 text-slate-400" />
-                Show Artwork on Profile
-              </DropdownMenuItem>
-              <div className="my-1 h-px bg-black/5" />
-              <DropdownMenuItem
-                onSelect={handleDelete}
-                className="gap-3 rounded-xl px-4 py-3 text-base font-medium text-rose-600 hover:bg-rose-50"
-              >
-                <Trash2 className="h-4 w-4 text-rose-500" />
-                Delete Artwork
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <InventoryArtworkActionMenu
+            artwork={artwork}
+            onOpenDetails={onOpenDetails}
+            onEdit={onEdit}
+            onToggleProfileVisibility={onToggleProfileVisibility}
+            onMove={onMove}
+            onStartAuction={onStartAuction}
+            onDelete={onDelete}
+            triggerClassName="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/80 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition hover:bg-white hover:shadow-lg"
+            contentClassName="w-64 rounded-2xl border-black/5 bg-white/98 p-2 shadow-xl backdrop-blur-xl"
+          />
         </div>
       </div>
 
@@ -229,13 +127,6 @@ export const InventoryArtworkGridViewItem = ({
             </div>
           </div>
           <span className="text-base font-medium text-slate-600">{artwork.creatorName}</span>
-          <button
-            type="button"
-            onClick={(event) => event.stopPropagation()}
-            className="ml-auto text-slate-400 opacity-0 transition group-hover:opacity-100 hover:text-slate-600"
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
         </div>
 
         {/* Title */}

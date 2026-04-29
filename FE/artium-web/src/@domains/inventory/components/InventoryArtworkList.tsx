@@ -17,10 +17,8 @@ import {
   GripVertical,
   ImageIcon,
   MoreHorizontal,
-  Move,
   Pencil,
   Trash2,
-  Eye,
 } from 'lucide-react'
 
 // @shared - components
@@ -36,6 +34,7 @@ import { cn } from '@shared/lib/utils'
 import { OrderStatusBadge } from '@domains/orders/components/OrderStatusBadge'
 
 // @domains - inventory
+import { InventoryArtworkActionMenu } from '@domains/inventory/components/InventoryArtworkActionMenu'
 import { useInventorySelectionStore } from '@domains/inventory/stores/useInventorySelectionStore'
 import { type InventoryArtwork } from '@domains/inventory/types/inventoryArtwork'
 import { type InventoryFolder } from '@domains/inventory/types/inventoryFolder'
@@ -50,6 +49,8 @@ type InventoryArtworkListProps = {
   onDelete: (artwork: InventoryArtwork) => void
   onMove: (artwork: InventoryArtwork) => void
   onOpenDetails: (artwork: InventoryArtwork) => void
+  onToggleProfileVisibility: (artwork: InventoryArtwork) => void
+  onStartAuction: (artwork: InventoryArtwork) => void
   onRenameFolder?: (folder: InventoryFolder) => void
   onDeleteFolder?: (folder: InventoryFolder) => void
   onHideFolder?: (folder: InventoryFolder) => void
@@ -66,6 +67,8 @@ export const InventoryArtworkList = ({
   onDelete,
   onMove,
   onOpenDetails,
+  onToggleProfileVisibility,
+  onStartAuction,
   onRenameFolder,
   onDeleteFolder,
   onHideFolder,
@@ -340,46 +343,17 @@ export const InventoryArtworkList = ({
         </div>
 
         {/* Actions */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 opacity-0 transition group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-600"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 rounded-xl border-slate-200 bg-white p-1">
-            <DropdownMenuItem
-              onSelect={() => onOpenDetails(artwork)}
-              className="cursor-pointer gap-2 rounded-lg px-3 py-2"
-            >
-              <Eye className="h-4 w-4 text-slate-500" />
-              View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => onEdit(artwork)}
-              className="cursor-pointer gap-2 rounded-lg px-3 py-2"
-            >
-              <Pencil className="h-4 w-4 text-slate-500" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => onMove(artwork)}
-              className="cursor-pointer gap-2 rounded-lg px-3 py-2"
-            >
-              <Move className="h-4 w-4 text-slate-500" />
-              Move to Folder
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => onDelete(artwork)}
-              className="cursor-pointer gap-2 rounded-lg px-3 py-2 text-red-600 focus:text-red-600"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <InventoryArtworkActionMenu
+          artwork={artwork}
+          onOpenDetails={onOpenDetails}
+          onEdit={onEdit}
+          onToggleProfileVisibility={onToggleProfileVisibility}
+          onMove={onMove}
+          onStartAuction={onStartAuction}
+          onDelete={onDelete}
+          triggerClassName="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 opacity-0 transition group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-600"
+          contentClassName="w-64 rounded-xl border-slate-200 bg-white p-2"
+        />
       </div>
     )
   }

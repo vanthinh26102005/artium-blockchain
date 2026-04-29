@@ -11,6 +11,8 @@ type InventoryArtworkGridProps = {
   onDelete: (artwork: InventoryArtwork) => void
   onMove: (artwork: InventoryArtwork) => void
   onOpenDetails: (artwork: InventoryArtwork) => void
+  onToggleProfileVisibility: (artwork: InventoryArtwork) => void
+  onStartAuction: (artwork: InventoryArtwork) => void
   emptyMessage?: string
 }
 
@@ -20,6 +22,8 @@ export const InventoryArtworkGrid = ({
   onDelete,
   onMove,
   onOpenDetails,
+  onToggleProfileVisibility,
+  onStartAuction,
   emptyMessage = 'No artworks found',
 }: InventoryArtworkGridProps) => {
   // -- render --
@@ -47,6 +51,8 @@ export const InventoryArtworkGrid = ({
           onDelete={onDelete}
           onMove={onMove}
           onOpenDetails={onOpenDetails}
+          onToggleProfileVisibility={onToggleProfileVisibility}
+          onStartAuction={onStartAuction}
         />
       ))}
     </div>

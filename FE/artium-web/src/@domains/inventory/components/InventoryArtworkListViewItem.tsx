@@ -1,27 +1,11 @@
 // third-party
-import {
-  Copy,
-  Eye,
-  EyeOff,
-  Folder,
-  Info,
-  Link2,
-  MoreHorizontal,
-  Pencil,
-  Repeat2,
-  Trash2,
-} from 'lucide-react'
+import { EyeOff, Info } from 'lucide-react'
 
 // @shared - components
 import { Checkbox } from '@shared/components/ui/checkbox'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@shared/components/ui/dropdown-menu'
 
 // @domains - inventory
+import { InventoryArtworkActionMenu } from '@domains/inventory/components/InventoryArtworkActionMenu'
 import { type InventoryArtwork } from '@domains/inventory/types/inventoryArtwork'
 import { useInventorySelectionStore } from '@domains/inventory/stores/useInventorySelectionStore'
 
@@ -31,6 +15,8 @@ type InventoryArtworkListViewItemProps = {
   onDelete: (artwork: InventoryArtwork) => void
   onMove: (artwork: InventoryArtwork) => void
   onOpenDetails: (artwork: InventoryArtwork) => void
+  onToggleProfileVisibility: (artwork: InventoryArtwork) => void
+  onStartAuction: (artwork: InventoryArtwork) => void
 }
 
 const DIMENSIONS_PLACEHOLDER = '36 × 24 × 1.9 in'
@@ -41,6 +27,8 @@ export const InventoryArtworkListViewItem = ({
   onDelete,
   onMove,
   onOpenDetails,
+  onToggleProfileVisibility,
+  onStartAuction,
 }: InventoryArtworkListViewItemProps) => {
   // -- state --
   const selectedIds = useInventorySelectionStore((state) => state.selectedIds)
@@ -59,44 +47,8 @@ export const InventoryArtworkListViewItem = ({
     toggle(artwork.id)
   }
 
-  const handleEdit = () => {
-    onEdit(artwork)
-  }
-
-  const handleDelete = () => {
-    onDelete(artwork)
-  }
-
-  const handleMove = () => {
-    onMove(artwork)
-  }
-
   const handleOpenDetails = () => {
     onOpenDetails(artwork)
-  }
-
-  const handleDuplicate = () => {
-    if (typeof window !== 'undefined') {
-      window.alert(`Duplicate "${artwork.title}" (stub)`)
-    }
-  }
-
-  const handleCopyLink = () => {
-    if (typeof window !== 'undefined') {
-      window.alert(`Copy link for "${artwork.title}" (stub)`)
-    }
-  }
-
-  const handleChangeToDraft = () => {
-    if (typeof window !== 'undefined') {
-      window.alert(`Change "${artwork.title}" to Draft (stub)`)
-    }
-  }
-
-  const handleToggleVisibility = () => {
-    if (typeof window !== 'undefined') {
-      window.alert(`Show "${artwork.title}" on profile (stub)`)
-    }
   }
 
   // -- render --
@@ -137,74 +89,17 @@ export const InventoryArtworkListViewItem = ({
               {visibilityLabel}
             </span>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                onClick={(event) => event.stopPropagation()}
-                className="inline-flex h-8 w-8 cursor-pointer items-center justify-center text-slate-500 transition hover:text-slate-700"
-                aria-label="Artwork actions"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              onClick={(event) => event.stopPropagation()}
-              onPointerDown={(event) => event.stopPropagation()}
-              className="w-64 rounded-2xl border-black/10 bg-white p-2 shadow-lg"
-            >
-              <DropdownMenuItem
-                onSelect={handleEdit}
-                className="gap-2 px-3 py-2 text-base font-semibold text-slate-900"
-              >
-                <Pencil className="h-4 w-4 text-slate-600" />
-                Edit Artwork
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={handleChangeToDraft}
-                className="gap-2 px-3 py-2 text-base font-semibold text-slate-900"
-              >
-                <Repeat2 className="h-4 w-4 text-slate-600" />
-                Change to Draft
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={handleMove}
-                className="gap-2 px-3 py-2 text-base font-semibold text-slate-900"
-              >
-                <Folder className="h-4 w-4 text-slate-600" />
-                Move to folder
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={handleDuplicate}
-                className="gap-2 px-3 py-2 text-base font-semibold text-slate-900"
-              >
-                <Copy className="h-4 w-4 text-slate-600" />
-                Duplicate artwork
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={handleCopyLink}
-                className="gap-2 px-3 py-2 text-base font-semibold text-slate-900"
-              >
-                <Link2 className="h-4 w-4 text-slate-600" />
-                Copy link to this artwork
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={handleToggleVisibility}
-                className="gap-2 px-3 py-2 text-base font-semibold text-slate-900"
-              >
-                <Eye className="h-4 w-4 text-slate-600" />
-                Show Artwork on Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={handleDelete}
-                className="gap-2 px-3 py-2 text-base font-semibold text-rose-600"
-              >
-                <Trash2 className="h-4 w-4 text-rose-500" />
-                Delete Artwork
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <InventoryArtworkActionMenu
+            artwork={artwork}
+            onOpenDetails={onOpenDetails}
+            onEdit={onEdit}
+            onToggleProfileVisibility={onToggleProfileVisibility}
+            onMove={onMove}
+            onStartAuction={onStartAuction}
+            onDelete={onDelete}
+            triggerClassName="inline-flex h-8 w-8 cursor-pointer items-center justify-center text-slate-500 transition hover:text-slate-700"
+            contentClassName="w-64 rounded-2xl border-black/10 bg-white p-2 shadow-lg"
+          />
         </div>
       </div>
 

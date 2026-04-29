@@ -15,6 +15,8 @@ type DraggableArtworkItemProps = {
   onDelete: (artwork: InventoryArtwork) => void
   onMove: (artwork: InventoryArtwork) => void
   onOpenDetails: (artwork: InventoryArtwork) => void
+  onToggleProfileVisibility: (artwork: InventoryArtwork) => void
+  onStartAuction: (artwork: InventoryArtwork) => void
 }
 
 export const DraggableArtworkItem = ({
@@ -23,6 +25,8 @@ export const DraggableArtworkItem = ({
   onDelete,
   onMove,
   onOpenDetails,
+  onToggleProfileVisibility,
+  onStartAuction,
 }: DraggableArtworkItemProps) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: artwork.id,
@@ -45,6 +49,8 @@ export const DraggableArtworkItem = ({
         onDelete={onDelete}
         onMove={onMove}
         onOpenDetails={onOpenDetails}
+        onToggleProfileVisibility={onToggleProfileVisibility}
+        onStartAuction={onStartAuction}
       />
     </div>
   )
