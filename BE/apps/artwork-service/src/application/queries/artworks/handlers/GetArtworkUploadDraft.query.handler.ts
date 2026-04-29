@@ -1,7 +1,7 @@
 import { ArtworkStatus, RpcExceptionHelper } from '@app/common';
 import { Inject, Logger } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { IArtworkRepository } from 'apps/artwork-service/src/domain';
+import { IArtworkRepository } from '../../../../domain/interfaces/artwork.repository.interface';
 import { GetArtworkUploadDraftQuery } from '../GetArtworkUploadDraft.query';
 
 @QueryHandler(GetArtworkUploadDraftQuery)

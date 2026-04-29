@@ -1,7 +1,8 @@
 import { ArtworkStatus, RpcExceptionHelper } from '@app/common';
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Artwork, IArtworkRepository } from 'apps/artwork-service/src/domain';
+import { Artwork } from '../../../../domain/entities/artworks.entity';
+import { IArtworkRepository } from '../../../../domain/interfaces/artwork.repository.interface';
 import { SubmitArtworkDraftCommand } from '../SubmitArtworkDraft.command';
 
 @CommandHandler(SubmitArtworkDraftCommand)
