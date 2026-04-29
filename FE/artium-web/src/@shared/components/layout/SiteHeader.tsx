@@ -31,6 +31,15 @@ const shortenWalletAddress = (address?: string | null) => {
 
 const isWalletLocalEmail = (email?: string | null) => Boolean(email?.endsWith('@wallet.local'))
 
+const getUsableAvatarUrl = (avatarUrl?: string | null) => {
+  const trimmed = avatarUrl?.trim()
+  if (!trimmed || trimmed === '/images/logo-dark-mode.png' || trimmed === '/images/default-avatar.png') {
+    return null
+  }
+
+  return trimmed
+}
+
 type SiteHeaderProps = {
   variant?: 'default' | 'landing'
 }
@@ -239,8 +248,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
     walletLabel ??
     (isWalletLocalEmail(user?.email) ? null : user?.email) ??
     'user'
-  const avatarUrl = user?.avatarUrl ?? '/images/logo-dark-mode.png'
   const useWhiteNav = isLandingVariant || isAuthRoute || (isTransparentHeaderPage && !isScrolled)
+  const avatarFallbackUrl = useWhiteNav
+    ? '/images/logo/logo-dark-mode.png'
+    : '/images/logo/logo-light-mode.png'
+  const avatarUrl = getUsableAvatarUrl(user?.avatarUrl) || avatarFallbackUrl
   const logoSrc = useWhiteNav
     ? '/images/logo/logo-and-text-dark-mode.png'
     : '/images/logo/logo-and-text-light-mode.png'

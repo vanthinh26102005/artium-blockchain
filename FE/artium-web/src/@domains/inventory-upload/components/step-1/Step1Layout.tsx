@@ -1,5 +1,8 @@
 // react
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+
+// next
+import Image from 'next/image'
 
 // third-party
 import { ChevronDownIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline'
@@ -19,8 +22,14 @@ import {
   CommandSeparator,
 } from '@shared/components/ui/command'
 
+// @shared - apis
+import { profileApis, type SellerProfilePayload } from '@shared/apis/profileApis'
+
 // @shared - utils
 import { cn } from '@shared/lib/utils'
+
+// @domains - auth
+import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
 // @domains - inventory upload
 import {
@@ -36,8 +45,34 @@ type Step1ColumnProps = {
   className?: string
 }
 
+const APP_LOGO_AVATAR_SRC = '/images/logo/logo-light-mode.png'
+
+const shortenWalletAddress = (address?: string | null) => {
+  if (!address) {
+    return null
+  }
+
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+
+const isWalletLocalEmail = (email?: string | null) => Boolean(email?.endsWith('@wallet.local'))
+
+const getUsableAvatarUrl = (avatarUrl?: string | null) => {
+  const trimmed = avatarUrl?.trim()
+  if (!trimmed || trimmed === '/images/logo-dark-mode.png' || trimmed === '/images/default-avatar.png') {
+    return null
+  }
+
+  return trimmed
+}
+
 const Step1LeftColumn = ({ className }: Step1ColumnProps) => {
   // -- state --
+  const user = useAuthStore((state) => state.user)
+  const [artistProfileResult, setArtistProfileResult] = useState<{
+    userId: string
+    profile: SellerProfilePayload | null
+  } | null>(null)
   const media = useUploadArtworkStore((state) => state.media)
   const errors = useUploadArtworkStore((state) => state.errors)
   const setCoverImage = useUploadArtworkStore((state) => state.setCoverImage)
@@ -48,6 +83,35 @@ const Step1LeftColumn = ({ className }: Step1ColumnProps) => {
   const coverInputRef = useRef<HTMLInputElement>(null)
   const additionalInputRef = useRef<HTMLInputElement>(null)
   const emptyInputRef = useRef<HTMLInputElement>(null)
+
+  // -- effects --
+  useEffect(() => {
+    if (!user?.id) {
+      return
+    }
+
+    let isMounted = true
+    const userId = user.id
+
+    const loadArtistProfile = async () => {
+      try {
+        const profile = await profileApis.getSellerProfileByUserId(userId)
+        if (isMounted) {
+          setArtistProfileResult({ userId, profile })
+        }
+      } catch {
+        if (isMounted) {
+          setArtistProfileResult({ userId, profile: null })
+        }
+      }
+    }
+
+    void loadArtistProfile()
+
+    return () => {
+      isMounted = false
+    }
+  }, [user?.id])
 
   // -- handlers --
   const handleCoverChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,6 +154,20 @@ const Step1LeftColumn = ({ className }: Step1ColumnProps) => {
 
   const canAddMore = media.additionalImages.length < UPLOAD_MEDIA_RULES.MAX_ADDITIONAL_IMAGES
   const isEmptyState = !media.coverImage && media.additionalImages.length === 0
+  const artistProfile = artistProfileResult?.userId === user?.id ? artistProfileResult.profile : null
+  const walletLabel = shortenWalletAddress(user?.walletAddress)
+  const artistName =
+    artistProfile?.displayName?.trim() ||
+    user?.fullName?.trim() ||
+    user?.displayName?.trim() ||
+    user?.username?.trim() ||
+    walletLabel ||
+    (isWalletLocalEmail(user?.email) ? null : user?.email?.trim()) ||
+    'Artist'
+  const artistAvatarUrl =
+    getUsableAvatarUrl(artistProfile?.profileImageUrl) ||
+    getUsableAvatarUrl(user?.avatarUrl) ||
+    APP_LOGO_AVATAR_SRC
 
   return (
     <div className={cn('space-y-4 lg:space-y-8', className)}>
@@ -97,17 +175,20 @@ const Step1LeftColumn = ({ className }: Step1ColumnProps) => {
         <p className="text-[12px] font-extrabold tracking-[0.05em] text-black/50 uppercase lg:text-[13px]">
           Artist name <span className="text-red-500">*</span>
         </p>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/10 bg-white px-4 py-3">
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-black/10 bg-white px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-[#F5F5F5]" />
+            <Image
+              src={artistAvatarUrl}
+              alt={artistName}
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-full border border-black/10 bg-[#F5F5F5] object-cover"
+            />
             <div>
-              <p className="text-sm font-semibold text-[#191414] lg:text-base">Thinh Van</p>
+              <p className="text-sm font-semibold text-[#191414] lg:text-base">{artistName}</p>
               <p className="text-sm text-[#898788]">That&apos;s you!</p>
             </div>
           </div>
-          <Button type="button" variant="ghost" size="sm" className="text-[#0F6BFF]">
-            Change
-          </Button>
         </div>
       </div>
 

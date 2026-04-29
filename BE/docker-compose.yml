@@ -476,7 +476,7 @@ services:
       GCS_BUCKET_NAME: artwork_uit
       GCS_KEY_FILE: /app/config/gcs-service-account.json
       MAX_FILE_SIZE_MB: 10
-      ALLOWED_IMAGE_TYPES: image/jpeg,image/png,image/webp,image/jpg
+      ALLOWED_IMAGE_TYPES: image/jpeg,image/png,image/webp,image/gif,image/jpg
       IMAGE_QUALITY: 85
       IMAGE_MAX_WIDTH: 2000
       IMAGE_MAX_HEIGHT: 2000
