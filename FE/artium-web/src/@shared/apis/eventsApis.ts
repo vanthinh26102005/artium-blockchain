@@ -1,4 +1,4 @@
-import { apiFetch, apiPost } from '@shared/services/apiClient'
+import { apiFetch, apiPost, encodePathSegment } from '@shared/services/apiClient'
 
 export type EventLocation = {
   type?: 'PHYSICAL' | 'VIRTUAL' | 'HYBRID'
@@ -78,7 +78,7 @@ const eventsApis = {
   },
 
   getEventById: async (eventId: string): Promise<EventApiResponse> => {
-    return apiFetch<EventApiResponse>(`/events/${eventId}`, { auth: false })
+    return apiFetch<EventApiResponse>(`/events/${encodePathSegment(eventId)}`, { auth: false })
   },
 
   createEvent: async (
@@ -91,14 +91,14 @@ const eventsApis = {
     eventId: string,
     payload: UpdateEventRequest,
   ): Promise<EventApiResponse> => {
-    return apiFetch<EventApiResponse>(`/events/${eventId}`, {
+    return apiFetch<EventApiResponse>(`/events/${encodePathSegment(eventId)}`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
     })
   },
 
   deleteEvent: async (eventId: string): Promise<{ success: boolean }> => {
-    return apiFetch<{ success: boolean }>(`/events/${eventId}`, {
+    return apiFetch<{ success: boolean }>(`/events/${encodePathSegment(eventId)}`, {
       method: 'DELETE',
     })
   },
@@ -108,7 +108,7 @@ const eventsApis = {
     payload: SendEventInvitationsRequest,
   ): Promise<{ success: boolean; invitedCount?: number }> => {
     return apiPost<{ success: boolean; invitedCount?: number }>(
-      `/events/${eventId}/invitations`,
+      `/events/${encodePathSegment(eventId)}/invitations`,
       payload,
     )
   },

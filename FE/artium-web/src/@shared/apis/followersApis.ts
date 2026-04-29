@@ -1,4 +1,4 @@
-import { apiFetch, apiPost } from '@shared/services/apiClient'
+import { apiFetch, apiPost, encodePathSegment, withQuery } from '@shared/services/apiClient'
 
 type FollowerObject = {
   id: string
@@ -32,38 +32,39 @@ export const followersApis = {
     }),
 
   unfollowUser: (userId: string) =>
-    apiFetch<{ success: boolean }>(`/community/followers/${userId}`, {
+    apiFetch<{ success: boolean }>(`/community/followers/${encodePathSegment(userId)}`, {
       method: 'DELETE',
       auth: true,
     }),
 
   getFollowers: (userId: string, options?: { skip?: number; take?: number }) => {
-    const params = new URLSearchParams()
-    if (options?.skip !== undefined) params.append('skip', String(options.skip))
-    if (options?.take !== undefined) params.append('take', String(options.take))
-    const query = params.toString() ? `?${params.toString()}` : ''
-    return apiFetch<FollowerObject[]>(`/community/followers/followers/${userId}${query}`, {
-      auth: false,
-      cache: 'no-store',
-    })
+    return apiFetch<FollowerObject[]>(
+      withQuery(`/community/followers/followers/${encodePathSegment(userId)}`, options),
+      {
+        auth: false,
+        cache: 'no-store',
+      },
+    )
   },
 
   getFollowing: (userId: string, options?: { skip?: number; take?: number }) => {
-    const params = new URLSearchParams()
-    if (options?.skip !== undefined) params.append('skip', String(options.skip))
-    if (options?.take !== undefined) params.append('take', String(options.take))
-    const query = params.toString() ? `?${params.toString()}` : ''
-    return apiFetch<FollowerObject[]>(`/community/followers/following/${userId}${query}`, {
-      auth: false,
-      cache: 'no-store',
-    })
+    return apiFetch<FollowerObject[]>(
+      withQuery(`/community/followers/following/${encodePathSegment(userId)}`, options),
+      {
+        auth: false,
+        cache: 'no-store',
+      },
+    )
   },
 
   checkFollowStatus: (userId: string) =>
-    apiFetch<CheckFollowStatusResponse>(`/community/followers/status/${userId}`, {
-      auth: true,
-      cache: 'no-store',
-    }),
+    apiFetch<CheckFollowStatusResponse>(
+      `/community/followers/status/${encodePathSegment(userId)}`,
+      {
+        auth: true,
+        cache: 'no-store',
+      },
+    ),
 }
 
 export type { FollowerObject, FollowUserInput, CheckFollowStatusResponse }

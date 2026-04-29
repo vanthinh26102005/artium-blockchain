@@ -1,7 +1,15 @@
 // Quick Sell Invoice APIs
 // Based on blueprint: 06_QUICK_SELL_API_CONTRACT.md
 
-import { apiFetch, apiPost } from '@shared/services/apiClient'
+import { apiFetch, apiPost, encodePathSegment } from '@shared/services/apiClient'
+import {
+  mockCreateQuickSellInvoice,
+  mockCreateQuickSellPaymentIntent,
+  mockDeleteInvoice,
+  mockGetInvoiceByCode,
+  mockSendQuickSellInvoice,
+  mockUpdateInvoice,
+} from './invoiceMocks'
 
 // --- Configuration ---
 // Set NEXT_PUBLIC_USE_MOCK_API=true to force mock responses
@@ -119,110 +127,6 @@ export type CreateInvoicePaymentIntentResponse = {
   currency: string
 }
 
-// --- Mock Helpers ---
-
-const generateMockInvoiceCode = (): string => {
-  const timestamp = Date.now().toString(36).toUpperCase()
-  const random = Math.random().toString(36).slice(2, 6).toUpperCase()
-  return `INV-${timestamp}-${random}`
-}
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
-// --- Mock Implementations ---
-
-const mockCreateQuickSellInvoice = async (
-  payload: CreateInvoiceRequest,
-): Promise<CreateInvoiceResponse> => {
-  // Simulate network delay
-  await delay(800)
-
-  console.log('[Mock API] Creating invoice with payload:', payload)
-
-  // Calculate total from items
-  const artworkTotal = payload.artworks.reduce((sum, item) => {
-    const qty = item.quantity || 1
-    const lineTotal = item.price * qty
-    const discounted = lineTotal * (1 - item.discountPercent / 100)
-    return sum + discounted
-  }, 0)
-
-  const customTotal = payload.customItems.reduce((sum, item) => {
-    const qty = item.quantity || 1
-    const lineTotal = item.price * qty
-    const discounted = lineTotal * (1 - item.discountPercent / 100)
-    return sum + discounted
-  }, 0)
-
-  const subtotal = artworkTotal + customTotal
-  const tax = payload.isApplySalesTax ? subtotal * ((payload.taxPercent || 0) / 100) : 0
-  const totalAmount = Math.round((subtotal + tax) * 100) / 100
-
-  // Generate mock response
-  const response: CreateInvoiceResponse = {
-    id: `mock-invoice-${Date.now()}`,
-    invoiceCode: generateMockInvoiceCode(),
-    totalAmount,
-    invoiceItems: [
-      ...payload.artworks.map((item, i) => ({
-        id: `item-artwork-${i}`,
-        type: 'Artium-artwork' as const,
-        salePrice: item.price,
-        quantity: item.quantity || 1,
-        discountPercentage: item.discountPercent,
-        artworkId: item.id,
-        artworkName: item.artworkName,
-        artworkImageUrl: item.artworkImageUrl,
-      })),
-      ...payload.customItems.map((item, i) => ({
-        id: `item-custom-${i}`,
-        type: 'custom-item' as const,
-        salePrice: item.price,
-        quantity: item.quantity || 1,
-        discountPercentage: item.discountPercent,
-        artworkName: item.title,
-      })),
-    ],
-  }
-
-  console.log('[Mock API] Invoice created:', response)
-
-  return response
-}
-
-const mockGetInvoiceByCode = async (invoiceCode: string): Promise<InvoiceResponse> => {
-  await delay(500)
-
-  console.log('[Mock API] Getting invoice:', invoiceCode)
-
-  return {
-    id: 'mock-invoice-id',
-    invoiceCode,
-    status: 'sent',
-    subtotal: 1500,
-    discountAmount: 0,
-    taxAmount: 0,
-    taxPercent: 0,
-    totalAmount: 1500,
-    currency: 'USD',
-    collector: {
-      name: 'Mock Buyer',
-      email: 'buyer@example.com',
-    },
-    items: [
-      {
-        id: 'mock-item-1',
-        type: 'Artium-artwork',
-        salePrice: 1500,
-        quantity: 1,
-        discountPercentage: 0,
-        artworkName: 'Mock Artwork',
-      },
-    ],
-    createdAt: new Date().toISOString(),
-  }
-}
-
 // --- API Functions ---
 
 const invoiceApis = {
@@ -245,7 +149,9 @@ const invoiceApis = {
     if (USE_MOCK_API) {
       return mockGetInvoiceByCode(invoiceCode)
     }
-    return apiFetch<InvoiceResponse>(`/store/sale/invoice/code/${invoiceCode}`)
+    return apiFetch<InvoiceResponse>(
+      `/store/sale/invoice/code/${encodePathSegment(invoiceCode)}`,
+    )
   },
 
   /**
@@ -254,11 +160,9 @@ const invoiceApis = {
    */
   deleteInvoice: async (id: string): Promise<{ success: boolean }> => {
     if (USE_MOCK_API) {
-      await delay(500)
-      console.log('[Mock API] Deleted invoice:', id)
-      return { success: true }
+      return mockDeleteInvoice(id)
     }
-    return apiFetch<{ success: boolean }>(`/store/sale/invoice/${id}`, {
+    return apiFetch<{ success: boolean }>(`/store/sale/invoice/${encodePathSegment(id)}`, {
       method: 'DELETE',
     })
   },
@@ -272,11 +176,9 @@ const invoiceApis = {
     payload: UpdateInvoiceRequest,
   ): Promise<InvoiceResponse> => {
     if (USE_MOCK_API) {
-      await delay(500)
-      console.log('[Mock API] Updated invoice:', id, payload)
-      return mockGetInvoiceByCode(id)
+      return mockUpdateInvoice(id, payload)
     }
-    return apiFetch<InvoiceResponse>(`/payments/invoices/${id}`, {
+    return apiFetch<InvoiceResponse>(`/payments/invoices/${encodePathSegment(id)}`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
     })
@@ -291,12 +193,10 @@ const invoiceApis = {
     payload: SendInvoiceRequest,
   ): Promise<{ success: boolean }> => {
     if (USE_MOCK_API) {
-      await delay(500)
-      console.log('[Mock API] Sent invoice:', invoiceCode, payload)
-      return { success: true }
+      return mockSendQuickSellInvoice(invoiceCode, payload)
     }
     return apiPost<{ success: boolean }>(
-      `/store/sale/invoice/code/${invoiceCode}/send`,
+      `/store/sale/invoice/code/${encodePathSegment(invoiceCode)}/send`,
       payload,
     )
   },
@@ -310,18 +210,10 @@ const invoiceApis = {
     payload: CreateInvoicePaymentIntentRequest,
   ): Promise<CreateInvoicePaymentIntentResponse> => {
     if (USE_MOCK_API) {
-      await delay(500)
-      const mockId = `pi_mock_${Date.now()}`
-      return {
-        transactionId: `txn_${Date.now()}`,
-        paymentIntentId: mockId,
-        clientSecret: `${mockId}_secret_mock`,
-        amount: 0,
-        currency: 'usd',
-      }
+      return mockCreateQuickSellPaymentIntent(invoiceCode, payload)
     }
     return apiPost<CreateInvoicePaymentIntentResponse>(
-      `/store/sale/invoice/code/${invoiceCode}/payment-intent`,
+      `/store/sale/invoice/code/${encodePathSegment(invoiceCode)}/payment-intent`,
       payload,
     )
   },

@@ -1,4 +1,4 @@
-import { apiFetch, apiPost } from '@shared/services/apiClient'
+import { apiFetch, apiPost, encodePathSegment, withQuery } from '@shared/services/apiClient'
 
 // --- Request Types ---
 
@@ -148,7 +148,9 @@ const paymentApis = {
   getTransactionById: async (
     id: string,
   ): Promise<PaymentTransactionResponse> => {
-    return apiFetch<PaymentTransactionResponse>(`/payments/transactions/${id}`)
+    return apiFetch<PaymentTransactionResponse>(
+      `/payments/transactions/${encodePathSegment(id)}`,
+    )
   },
 
   recordEthereumPayment: async (
@@ -160,7 +162,7 @@ const paymentApis = {
   getEthereumQuote: async (usdAmount: number): Promise<EthereumQuoteResponse> => {
     const normalizedAmount = usdAmount.toFixed(2)
     return apiFetch<EthereumQuoteResponse>(
-      `/payments/ethereum/quote?usdAmount=${encodeURIComponent(normalizedAmount)}`,
+      withQuery('/payments/ethereum/quote', { usdAmount: normalizedAmount }),
     )
   },
 }

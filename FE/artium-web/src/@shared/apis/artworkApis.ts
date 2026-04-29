@@ -1,4 +1,8 @@
-import { apiFetch } from '@shared/services/apiClient'
+import {
+  apiFetch,
+  encodePathSegment,
+  withQuery,
+} from '@shared/services/apiClient'
 import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
 type ArtworkImage = {
@@ -89,41 +93,6 @@ type BulkMoveInput = {
   sellerId: string
 }
 
-const ARTWORK_BASE_URL = (
-  process.env.NEXT_PUBLIC_ARTWORK_API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  ''
-).replace(/\/$/, '')
-
-const normalizeArtworkPath = (path: string) => {
-  const base = ARTWORK_BASE_URL.toLowerCase()
-  if (base.endsWith('/artworks') || base.endsWith('/artwork')) {
-    return path.replace(/^\/artworks?/, '')
-  }
-  return path
-}
-
-const buildQuery = (params?: Record<string, string | number | boolean | null | undefined>) => {
-  if (!params) {
-    return ''
-  }
-
-  const entries = Object.entries(params).filter(
-    ([, value]) => value !== undefined && value !== null && value !== '',
-  )
-
-  if (entries.length === 0) {
-    return ''
-  }
-
-  const query = new URLSearchParams(entries.map(([key, value]) => [key, String(value)]))
-  return `?${query.toString()}`
-}
-
-const apiWithBase = async <T>(path: string, options?: Parameters<typeof apiFetch<T>>[1]) => {
-  return apiFetch<T>(normalizeArtworkPath(path), { ...options, baseUrl: ARTWORK_BASE_URL })
-}
-
 type ArtworkPagination = {
   total: number
   skip: number
@@ -181,8 +150,8 @@ const normalizeArtworkPage = (
 
 const artworkApis = {
   listArtworks: async (params?: ListArtworksParams) => {
-    const response = await apiWithBase<ArtworkApiItem[] | ArtworkListResponse>(
-      `/artworks${buildQuery(params)}`,
+    const response = await apiFetch<ArtworkApiItem[] | ArtworkListResponse>(
+      withQuery('/artwork', params),
       {
         cache: 'no-store',
       },
@@ -190,27 +159,28 @@ const artworkApis = {
     return normalizeArtworkList(response)
   },
   listArtworksPaginated: async (params?: ListArtworksParams) => {
-    const response = await apiWithBase<ArtworkApiItem[] | ArtworkListResponse>(
-      `/artworks${buildQuery(params)}`,
+    const response = await apiFetch<ArtworkApiItem[] | ArtworkListResponse>(
+      withQuery('/artwork', params),
       {
         cache: 'no-store',
       },
     )
     return normalizeArtworkPage(response)
   },
-  getArtworkById: (id: string) => apiWithBase<ArtworkApiItem | null>(`/artworks/${id}`),
+  getArtworkById: (id: string) =>
+    apiFetch<ArtworkApiItem | null>(`/artwork/${encodePathSegment(id)}`),
   createArtwork: (input: CreateArtworkInput) =>
-    apiWithBase<ArtworkApiItem>('/artworks', {
+    apiFetch<ArtworkApiItem>('/artwork', {
       method: 'POST',
       body: JSON.stringify(input),
     }),
   updateArtwork: (id: string, input: UpdateArtworkInput) =>
-    apiWithBase<ArtworkApiItem>(`/artworks/${id}`, {
+    apiFetch<ArtworkApiItem>(`/artwork/${encodePathSegment(id)}`, {
       method: 'PUT',
       body: JSON.stringify(input),
     }),
   deleteArtwork: (id: string) =>
-    apiWithBase<{ success: boolean }>(`/artworks/${id}`, {
+    apiFetch<{ success: boolean }>(`/artwork/${encodePathSegment(id)}`, {
       method: 'DELETE',
     }),
   addImagesToArtwork: (
@@ -226,12 +196,12 @@ const artworkApis = {
       isPrimary?: boolean
     }>,
   ) =>
-    apiWithBase<ArtworkApiItem>(`/artworks/${id}/images`, {
+    apiFetch<ArtworkApiItem>(`/artwork/${encodePathSegment(id)}/images`, {
       method: 'POST',
       body: JSON.stringify({ images }),
     }),
   bulkMoveArtworks: (input: BulkMoveInput) =>
-    apiWithBase<{ movedCount: number }>(`/artworks/bulk/move`, {
+    apiFetch<{ movedCount: number }>('/artwork/bulk/move', {
       method: 'POST',
       body: JSON.stringify(input),
     }),

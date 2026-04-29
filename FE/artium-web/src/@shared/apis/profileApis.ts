@@ -1,4 +1,4 @@
-import { apiFetch } from '@shared/services/apiClient'
+import { apiFetch, encodePathSegment, withQuery } from '@shared/services/apiClient'
 
 type SellerProfilePayload = {
   profileId?: string // DTO field name
@@ -197,37 +197,33 @@ type SearchSellerProfilesResponse = {
   hasMore: boolean
 }
 
-const buildQuery = (params?: Record<string, string | number | boolean | null | undefined>) => {
-  if (!params) return ''
-  const entries = Object.entries(params).filter(
-    ([, value]) => value !== undefined && value !== null && value !== '',
-  )
-  if (entries.length === 0) return ''
-  const query = new URLSearchParams(entries.map(([key, value]) => [key, String(value)]))
-  return `?${query.toString()}`
-}
-
 export const profileApis = {
   getSellerProfileByUserId: (userId: string) =>
-    apiFetch<SellerProfilePayload>(`/identity/seller-profiles/user/${userId}`, {
+    apiFetch<SellerProfilePayload>(`/identity/seller-profiles/user/${encodePathSegment(userId)}`, {
       auth: true,
       cache: 'no-store',
     }),
   updateSellerProfile: (profileId: string, input: UpdateSellerProfileInput) =>
-    apiFetch<UpdateSellerProfileResponse>(`/identity/seller-profiles/${profileId}`, {
-      method: 'PUT',
-      body: JSON.stringify(input),
-    }),
+    apiFetch<UpdateSellerProfileResponse>(
+      `/identity/seller-profiles/${encodePathSegment(profileId)}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      },
+    ),
   listUserMoments: (
     userId: string,
     options?: { skip?: number; take?: number; includeArchived?: boolean },
   ) =>
-    apiFetch<MomentApiItem[]>(`/community/moments/user/${userId}${buildQuery(options)}`, {
-      auth: false,
-      cache: 'no-store',
-    }),
+    apiFetch<MomentApiItem[]>(
+      withQuery(`/community/moments/user/${encodePathSegment(userId)}`, options),
+      {
+        auth: false,
+        cache: 'no-store',
+      },
+    ),
   getMoment: (momentId: string) =>
-    apiFetch<MomentApiItem | null>(`/community/moments/${momentId}`, {
+    apiFetch<MomentApiItem | null>(`/community/moments/${encodePathSegment(momentId)}`, {
       auth: false,
       cache: 'no-store',
     }),
@@ -235,36 +231,48 @@ export const profileApis = {
     userId: string,
     options?: { skip?: number; take?: number; includePrivate?: boolean },
   ) =>
-    apiFetch<MoodboardApiItem[]>(`/community/moodboards/user/${userId}${buildQuery(options)}`, {
-      auth: false,
-      cache: 'no-store',
-    }),
+    apiFetch<MoodboardApiItem[]>(
+      withQuery(`/community/moodboards/user/${encodePathSegment(userId)}`, options),
+      {
+        auth: false,
+        cache: 'no-store',
+      },
+    ),
   getMoodboard: (moodboardId: string) =>
-    apiFetch<MoodboardApiItem | null>(`/community/moodboards/${moodboardId}`, {
-      auth: false,
-      cache: 'no-store',
-    }),
+    apiFetch<MoodboardApiItem | null>(
+      `/community/moodboards/${encodePathSegment(moodboardId)}`,
+      {
+        auth: false,
+        cache: 'no-store',
+      },
+    ),
   listMomentComments: (
     momentId: string,
     options?: { skip?: number; take?: number; includeDeleted?: boolean },
   ) =>
-    apiFetch<CommentApiItem[]>(`/community/moments/${momentId}/comments${buildQuery(options)}`, {
-      auth: false,
-      cache: 'no-store',
-    }),
+    apiFetch<CommentApiItem[]>(
+      withQuery(`/community/moments/${encodePathSegment(momentId)}/comments`, options),
+      {
+        auth: false,
+        cache: 'no-store',
+      },
+    ),
   createMomentComment: (momentId: string, input: CreateMomentCommentInput) =>
-    apiFetch<CommentApiItem>(`/community/moments/${momentId}/comments`, {
+    apiFetch<CommentApiItem>(`/community/moments/${encodePathSegment(momentId)}/comments`, {
       method: 'POST',
       body: JSON.stringify(input),
       auth: true,
     }),
   getMomentLikeStatus: (momentId: string) =>
-    apiFetch<{ liked: boolean }>(`/community/moments/${momentId}/likes/me`, {
-      auth: true,
-      cache: 'no-store',
-    }),
+    apiFetch<{ liked: boolean }>(
+      `/community/moments/${encodePathSegment(momentId)}/likes/me`,
+      {
+        auth: true,
+        cache: 'no-store',
+      },
+    ),
   setMomentLikeStatus: (momentId: string, liked: boolean, contentOwnerId?: string) =>
-    apiFetch<LikeStatusResponse>(`/community/moments/${momentId}/likes`, {
+    apiFetch<LikeStatusResponse>(`/community/moments/${encodePathSegment(momentId)}/likes`, {
       method: 'PUT',
       body: JSON.stringify({ liked, contentOwnerId }),
       auth: true,
@@ -283,7 +291,7 @@ export const profileApis = {
     }),
   searchSellerProfiles: (searchQuery: string, options?: { skip?: number; take?: number }) =>
     apiFetch<SearchSellerProfilesResponse>(
-      `/identity/seller-profiles${buildQuery({ searchQuery, ...options })}`,
+      withQuery('/identity/seller-profiles', { searchQuery, ...options }),
       {
         auth: false,
         cache: 'no-store',

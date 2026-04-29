@@ -1,4 +1,4 @@
-import { apiFetch } from '@shared/services/apiClient'
+import { apiFetch, encodePathSegment, withQuery } from '@shared/services/apiClient'
 
 export type AuctionStatusKey = 'active' | 'ending-soon' | 'newly-listed' | 'paused' | 'closed'
 
@@ -159,29 +159,13 @@ export type GetAuctionsInput = {
   take?: number
 }
 
-const buildQueryString = (params: Record<string, string | number | undefined>) => {
-  const searchParams = new URLSearchParams()
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === '') {
-      return
-    }
-
-    searchParams.set(key, String(value))
-  })
-
-  const queryString = searchParams.toString()
-  return queryString.length > 0 ? `?${queryString}` : ''
-}
-
 const auctionApis = {
   getAuctions: async (input: GetAuctionsInput = {}): Promise<PaginatedAuctionsResponse> => {
-    const query = buildQueryString(input)
-    return apiFetch<PaginatedAuctionsResponse>(`/auctions${query}`, { auth: false })
+    return apiFetch<PaginatedAuctionsResponse>(withQuery('/auctions', input), { auth: false })
   },
 
   getAuctionById: async (auctionId: string): Promise<AuctionReadResponse> => {
-    return apiFetch<AuctionReadResponse>(`/auctions/${encodeURIComponent(auctionId)}`, {
+    return apiFetch<AuctionReadResponse>(`/auctions/${encodePathSegment(auctionId)}`, {
       auth: false,
     })
   },
@@ -206,7 +190,7 @@ const auctionApis = {
     input: AttachSellerAuctionStartTxRequest,
   ): Promise<SellerAuctionStartStatusResponse> => {
     return apiFetch<SellerAuctionStartStatusResponse>(
-      `/auctions/seller/start-attempts/${encodeURIComponent(attemptId)}/tx`,
+      `/auctions/seller/start-attempts/${encodePathSegment(attemptId)}/tx`,
       {
         method: 'PATCH',
         body: JSON.stringify(input),
@@ -224,7 +208,7 @@ const auctionApis = {
     artworkId: string,
   ): Promise<SellerAuctionStartStatusResponse | null> => {
     return apiFetch<SellerAuctionStartStatusResponse | null>(
-      `/auctions/seller/start-status/${encodeURIComponent(artworkId)}`,
+      `/auctions/seller/start-status/${encodePathSegment(artworkId)}`,
       { cache: 'no-store' },
     )
   },

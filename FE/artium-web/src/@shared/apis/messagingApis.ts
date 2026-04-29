@@ -1,5 +1,9 @@
-import { apiFetch } from '@shared/services/apiClient'
-import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import {
+  apiFetch,
+  apiUpload,
+  encodePathSegment,
+  withQuery,
+} from '@shared/services/apiClient'
 import type {
   Conversation,
   Message,
@@ -29,35 +33,23 @@ const messagingApis = {
     const formData = new FormData()
     formData.append('file', file)
 
-    const headers: HeadersInit = {}
-    const { accessToken } = useAuthStore.getState()
-    if (accessToken) {
-      headers['Authorization'] = `Bearer ${accessToken}`
-    }
-
-    const response = await fetch(`${MESSAGING_BASE_URL}/messaging/upload`, {
-      method: 'POST',
-      headers,
-      body: formData,
+    return apiUpload('/messaging/upload', formData, {
+      baseUrl: MESSAGING_BASE_URL,
     })
-
-    if (!response.ok) {
-      throw new Error('File upload failed')
-    }
-
-    const data = await response.json()
-    return data
   },
 
   getConversationsForUser: (userId: string) =>
-    apiFetch<Conversation[]>(`/messaging/conversations/user/${userId}`, {
-      baseUrl: MESSAGING_BASE_URL,
-      cache: 'no-store',
-    }),
+    apiFetch<Conversation[]>(
+      `/messaging/conversations/user/${encodePathSegment(userId)}`,
+      {
+        baseUrl: MESSAGING_BASE_URL,
+        cache: 'no-store',
+      },
+    ),
 
   getConversationById: (conversationId: string, userId: string) =>
     apiFetch<Conversation>(
-      `/messaging/conversations/${conversationId}?userId=${userId}`,
+      withQuery(`/messaging/conversations/${encodePathSegment(conversationId)}`, { userId }),
       {
         baseUrl: MESSAGING_BASE_URL,
         cache: 'no-store',
@@ -78,7 +70,11 @@ const messagingApis = {
     offset = 0,
   ) =>
     apiFetch<Message[]>(
-      `/messaging/conversations/${conversationId}/messages?userId=${userId}&limit=${limit}&offset=${offset}`,
+      withQuery(`/messaging/conversations/${encodePathSegment(conversationId)}/messages`, {
+        userId,
+        limit,
+        offset,
+      }),
       {
         baseUrl: MESSAGING_BASE_URL,
         cache: 'no-store',
@@ -93,23 +89,29 @@ const messagingApis = {
     }),
 
   getMessageById: (messageId: string, userId: string) =>
-    apiFetch<Message>(`/messaging/messages/${messageId}?userId=${userId}`, {
-      baseUrl: MESSAGING_BASE_URL,
-      cache: 'no-store',
-    }),
+    apiFetch<Message>(
+      withQuery(`/messaging/messages/${encodePathSegment(messageId)}`, { userId }),
+      {
+        baseUrl: MESSAGING_BASE_URL,
+        cache: 'no-store',
+      },
+    ),
 
   updateMessage: (messageId: string, input: UpdateMessageInput) =>
-    apiFetch<Message>(`/messaging/messages/${messageId}`, {
+    apiFetch<Message>(`/messaging/messages/${encodePathSegment(messageId)}`, {
       baseUrl: MESSAGING_BASE_URL,
       method: 'PUT',
       body: JSON.stringify(input),
     }),
 
   deleteMessage: (messageId: string, userId: string) =>
-    apiFetch<void>(`/messaging/messages/${messageId}?userId=${userId}`, {
-      baseUrl: MESSAGING_BASE_URL,
-      method: 'DELETE',
-    }),
+    apiFetch<void>(
+      withQuery(`/messaging/messages/${encodePathSegment(messageId)}`, { userId }),
+      {
+        baseUrl: MESSAGING_BASE_URL,
+        method: 'DELETE',
+      },
+    ),
 
   markMessageAsRead: (input: MarkMessageReadInput) =>
     apiFetch<ReadReceipt>('/messaging/messages/read', {

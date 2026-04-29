@@ -1,4 +1,4 @@
-import { apiFetch, apiPost } from '@shared/services/apiClient'
+import { apiFetch, apiPost, encodePathSegment, withQuery } from '@shared/services/apiClient'
 import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
 // --- Request Types ---
@@ -108,21 +108,6 @@ export type OpenDisputeRequest = {
   reason: string
 }
 
-const buildQueryString = (params: Record<string, string | number | undefined>) => {
-  const searchParams = new URLSearchParams()
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === '') {
-      return
-    }
-
-    searchParams.set(key, String(value))
-  })
-
-  const queryString = searchParams.toString()
-  return queryString.length > 0 ? `?${queryString}` : ''
-}
-
 // --- API Functions ---
 
 const orderApis = {
@@ -131,41 +116,40 @@ const orderApis = {
   },
 
   getOrderById: async (id: string): Promise<OrderResponse> => {
-    return apiFetch<OrderResponse>(`/orders/${id}`)
+    return apiFetch<OrderResponse>(`/orders/${encodePathSegment(id)}`)
   },
 
   getMyOrders: async ({ scope, status, skip, take }: GetMyOrdersInput): Promise<PaginatedOrdersResponse> => {
-    const query = buildQueryString({ scope, status, skip, take })
-    return apiFetch<PaginatedOrdersResponse>(`/orders${query}`)
+    return apiFetch<PaginatedOrdersResponse>(withQuery('/orders', { scope, status, skip, take }))
   },
 
   getOrderItems: async (orderId: string): Promise<OrderItemResponse[]> => {
-    return apiFetch<OrderItemResponse[]>(`/orders/${orderId}/items`)
+    return apiFetch<OrderItemResponse[]>(`/orders/${encodePathSegment(orderId)}/items`)
   },
 
   cancelOrder: async (id: string, reason?: string): Promise<OrderResponse> => {
-    return apiFetch<OrderResponse>(`/orders/${id}/cancel`, {
+    return apiFetch<OrderResponse>(`/orders/${encodePathSegment(id)}/cancel`, {
       method: 'PATCH',
       body: JSON.stringify({ reason }),
     })
   },
 
   markShipped: async (id: string, data: MarkShippedRequest): Promise<OrderResponse> => {
-    return apiFetch<OrderResponse>(`/orders/${id}/ship`, {
+    return apiFetch<OrderResponse>(`/orders/${encodePathSegment(id)}/ship`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     })
   },
 
   confirmDelivery: async (id: string, data: ConfirmDeliveryRequest): Promise<OrderResponse> => {
-    return apiFetch<OrderResponse>(`/orders/${id}/confirm-delivery`, {
+    return apiFetch<OrderResponse>(`/orders/${encodePathSegment(id)}/confirm-delivery`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     })
   },
 
   openDispute: async (id: string, data: OpenDisputeRequest): Promise<OrderResponse> => {
-    return apiFetch<OrderResponse>(`/orders/${id}/dispute`, {
+    return apiFetch<OrderResponse>(`/orders/${encodePathSegment(id)}/dispute`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     })

@@ -1,5 +1,5 @@
 // @shared - services
-import { apiFetch, apiPost } from '@shared/services/apiClient'
+import { apiFetch, apiPost, encodePathSegment, withQuery } from '@shared/services/apiClient'
 
 // @shared - types
 import type {
@@ -10,7 +10,6 @@ import type {
   RequestOtpResponse,
   RequestPasswordResetPayload,
   RequestPasswordResetResponse,
-  UserPayload,
   VerifyPasswordResetPayload,
   VerifyPasswordResetResponse,
   WalletNonceResponse,
@@ -41,7 +40,7 @@ const usersApi = {
   },
   getWalletNonce: (address: string) =>
     apiFetch<WalletNonceResponse>(
-      `/identity/auth/wallet/nonce?address=${encodeURIComponent(address)}`,
+      withQuery('/identity/auth/wallet/nonce', { address }),
       { auth: false, cache: 'no-store' },
     ),
   loginByWallet: async (input: LoginByWalletPayload) => {
@@ -77,10 +76,13 @@ const usersApi = {
     return normalizeUserPayload(raw)
   },
   getUserBySlug: async (slug: string) => {
-    const raw = await apiFetch<Record<string, unknown>>(`/identity/users/slug/${encodeURIComponent(slug)}`, {
-      auth: false,
-      cache: 'no-store',
-    })
+    const raw = await apiFetch<Record<string, unknown>>(
+      `/identity/users/slug/${encodePathSegment(slug)}`,
+      {
+        auth: false,
+        cache: 'no-store',
+      },
+    )
     return normalizeUserPayload(raw)
   },
   updateMe: async (input: { fullName?: string | null; slug?: string | null; avatarUrl?: string | null }) => {
@@ -92,10 +94,13 @@ const usersApi = {
     return normalizeUserPayload((raw as { user: Record<string, unknown> }).user ?? raw)
   },
   getUserById: async (userId: string) => {
-    const raw = await apiFetch<Record<string, unknown>>(`/identity/users/${encodeURIComponent(userId)}`, {
-      auth: false,
-      cache: 'no-store',
-    })
+    const raw = await apiFetch<Record<string, unknown>>(
+      `/identity/users/${encodePathSegment(userId)}`,
+      {
+        auth: false,
+        cache: 'no-store',
+      },
+    )
     return normalizeUserPayload(raw)
   },
 }
