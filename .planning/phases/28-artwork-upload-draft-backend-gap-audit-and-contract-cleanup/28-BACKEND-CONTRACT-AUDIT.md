@@ -118,6 +118,11 @@ Task 2 command results:
 
 No verification blocker references a Phase 28 modified file.
 
+Task 3 structural audit:
+
+- `! rg -n "formData\\.append\\('sellerId'|sellerId, artworkId|temp-\\$\\{Date\\.now\\(\\)\\}|temp-\\$\\{Date\\.now" FE/artium-web/src/@shared/apis/artworkUploadApi.ts FE/artium-web/src/@domains/inventory-upload/services/artworkUploadService.ts` - passed; no insecure frontend upload patterns found.
+- `rg -n "sellerId: req\\.user\\.id|ArtworkStatus\\.DRAFT|IArtworkRepository|artwork\\.sellerId !== dto\\.sellerId" BE/apps/api-gateway/src/presentation/http/controllers/artwork/upload.controller.ts BE/apps/artwork-service/src/presentation/microservice/upload.microservice.controller.ts` - passed; gateway auth identity injection and artwork-service ownership/status gates are present.
+
 ## Remaining Risks
 
 - Browser-level verification still requires an authenticated local session and a seeded draft row for `6f2c4075-4892-4e09-ba4e-e24101b262f9`.
