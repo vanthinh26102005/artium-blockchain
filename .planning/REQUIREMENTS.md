@@ -67,13 +67,13 @@ Milestone focus: seller-only auction creation from owned inventory with practica
 
 - [x] **SAUC-04**: Sellers can configure auction terms with validated starting bid, optional reserve policy, minimum bid increment, duration/start/end timing, and shipping/payment disclosures before starting the auction.
 - [x] **SAUC-05**: Sellers can preview the final auction card and policy summary before submission, including fees, irreversibility after activation, Sepolia/network expectations, and buyer-facing disclosures.
-- [ ] **SAUC-06**: Sellers cannot edit unsafe auction economics after activation; only explicitly safe lifecycle actions remain available according to auction state.
+- [x] **SAUC-06**: Sellers cannot edit unsafe auction economics after activation; only explicitly safe lifecycle actions remain available according to auction state.
 
 ### Auction Start & Lifecycle Truth
 
-- [ ] **SAUC-07**: Backend can start an auction idempotently only after validating seller identity, artwork ownership, artwork eligibility, seller wallet/profile readiness, and contract/network configuration.
-- [ ] **SAUC-08**: Backend can persist the auction start across on-chain and off-chain state so public `GET /auctions` and seller inventory/order views reflect the new auction without mock data.
-- [ ] **SAUC-09**: Sellers can monitor auction start status across pending, active, failed, and retryable states with tx hash, reason codes, and recovery paths that do not duplicate auctions.
+- [x] **SAUC-07**: Backend can start an auction idempotently only after validating seller identity, artwork ownership, artwork eligibility, seller wallet/profile readiness, and contract/network configuration.
+- [x] **SAUC-08**: Backend can persist the auction start across on-chain and off-chain state so public `GET /auctions` and seller inventory/order views reflect the new auction without mock data.
+- [x] **SAUC-09**: Sellers can monitor auction start status across pending, active, failed, and retryable states with tx hash, reason codes, and recovery paths that do not duplicate auctions.
 
 ## v1.2 Requirements
 
@@ -185,10 +185,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAUC-10 | Phase 19.1 | Completed |
 | SAUC-04 | Phase 19.1 | Completed |
 | SAUC-05 | Phase 19.1 | Completed |
-| SAUC-06 | Phase 20 | Pending |
-| SAUC-07 | Phase 20 | Pending |
-| SAUC-08 | Phase 20 | Pending |
-| SAUC-09 | Phase 20 | Pending |
+| SAUC-06 | Phase 20 | Complete |
+| SAUC-07 | Phase 20 | Complete |
+| SAUC-08 | Phase 20 | Complete |
+| SAUC-09 | Phase 20 | Complete |
 | DISC-01 | Phase 21 | Completed |
 | DISC-02 | Phase 21 | Completed |
 | DISC-03 | Phase 21 | Completed |

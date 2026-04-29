@@ -27,7 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 11: Wallet Checkout Pay-Now Orchestration & Success Redirect** - Move wallet order creation/send flow behind the main Pay Now action and return successful wallet checkouts to the success screen
 - [x] **Phase 18: Seller auction access and artwork eligibility policy** - Define and enforce seller-only access plus own-inventory eligibility before auction setup
 - [x] **Phase 19: Seller auction creation workspace and terms UX** - Let sellers pick eligible artwork, configure compliant terms, and preview auction policy before submission
-- [ ] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers
+- [x] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers (completed 2026-04-29)
 - [x] **Phase 21: Backend Runtime Inventory & Drift Reconciliation** - Build the authoritative backend runtime map from code, Compose, Dockerfiles, env files, and legacy K8s artifacts
 - [x] **Phase 22: Service Architecture & Dependency Risk Analysis** - Classify backend services, communication paths, and production risks in the current design
 - [ ] **Phase 23: Kubernetes Platform Topology & Workload Design** - Define cluster topology, workload kinds, exposure rules, config/secrets, probes, and scaling boundaries
@@ -207,7 +207,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 18.1. Seller registration and role activation gap closure | 1/1 | Completed | 2026-04-25 |
 | 19. Seller auction creation workspace and terms UX | 3/3 | Completed | 2026-04-27 |
 | 19.1. Seller auction artifact recovery and policy alignment | 3/3 | Completed | 2026-04-27 |
-| 20. Auction start orchestration and seller lifecycle status | 0/TBD | Not started | - |
+| 20. Auction start orchestration and seller lifecycle status | 4/4 | Complete    | 2026-04-29 |
 | 21. Backend Runtime Inventory & Drift Reconciliation | 3/3 | Complete   | 2026-04-27 |
 | 22. Service Architecture & Dependency Risk Analysis | 2/2 | Complete   | 2026-04-27 |
 | 23. Kubernetes Platform Topology & Workload Design | 0/TBD | Not started | - |
