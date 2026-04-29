@@ -76,6 +76,7 @@ Stopped at: Completed 28-03-PLAN.md
 - Phase 26 added: Kubernetes deployment implementation and production platform stack foundation
 - Phase 27 added: Frontend shared API definition standardization and edge-case audit
 - Phase 28 added: Artwork upload draft backend gap audit and contract cleanup
+- Phase 29 added: please check /inventory from frontend and please implement delete artwork, edit artwork and show on profile functions with best practice. And check if we have got any where in inventory that can trigger starting auction
 
 **Planned Phase:** 28 (Artwork upload draft backend gap audit and contract cleanup) - 3 plans - 2026-04-29T14:58:47.943Z
 **Planned Phase:** 20 (Auction start orchestration and seller lifecycle status) — 4 plans — 2026-04-27T07:41:03.407Z

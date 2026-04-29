@@ -448,3 +448,13 @@ Cross-cutting constraints:
 - Upload endpoints must validate seller-owned `DRAFT` artwork state before writing media.
 - Frontend API modules must keep using Phase 27 helpers: `apiFetch`, `apiUpload`, and `encodePathSegment`.
 - Verification must separate Phase 28 regressions from unrelated repository lint/build debt.
+
+### Phase 29: please check /inventory from frontend and please implement delete artwork, edit artwork and show on profile functions with best practice. And check if we have got any where in inventory that can trigger starting auction
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 28
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 29 to break down)
