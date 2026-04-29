@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/compon
 type ConfirmDeleteModalProps = {
   isOpen: boolean
   artworkTitle: string
+  isDeleting?: boolean
   onCancel: () => void
   onConfirm: () => void
 }
@@ -11,6 +12,7 @@ type ConfirmDeleteModalProps = {
 export const ConfirmDeleteModal = ({
   isOpen,
   artworkTitle,
+  isDeleting = false,
   onCancel,
   onConfirm,
 }: ConfirmDeleteModalProps) => {
@@ -20,7 +22,7 @@ export const ConfirmDeleteModal = ({
 
   // -- handlers --
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
+    if (!open && !isDeleting) {
       onCancel()
     }
   }
@@ -58,6 +60,7 @@ export const ConfirmDeleteModal = ({
             <button
               type="button"
               onClick={onCancel}
+              disabled={isDeleting}
               className="rounded-bl-3xl py-4 text-slate-700 transition hover:bg-slate-50"
             >
               Cancel
@@ -65,9 +68,11 @@ export const ConfirmDeleteModal = ({
             <button
               type="button"
               onClick={onConfirm}
-              className="rounded-br-3xl border-l border-black/10 py-4 text-rose-600 transition hover:bg-rose-50"
+              disabled={isDeleting}
+              aria-busy={isDeleting}
+              className="rounded-br-3xl border-l border-black/10 py-4 text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Delete artwork
+              {isDeleting ? 'Deleting...' : 'Delete artwork'}
             </button>
           </div>
         </div>

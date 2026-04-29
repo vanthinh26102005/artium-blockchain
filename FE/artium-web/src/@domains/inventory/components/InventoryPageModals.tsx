@@ -20,6 +20,7 @@ type InventoryPageModalsProps = {
   onExport: () => void
 
   deleteTarget: InventoryArtwork | null
+  isDeletingArtwork?: boolean
   onCloseDeleteModal: () => void
   onConfirmDelete: () => void
 
@@ -52,6 +53,7 @@ export const InventoryPageModals = ({
   onCloseExportModal,
   onExport,
   deleteTarget,
+  isDeletingArtwork = false,
   onCloseDeleteModal,
   onConfirmDelete,
   renameFolderTarget,
@@ -86,6 +88,7 @@ export const InventoryPageModals = ({
       <ConfirmDeleteModal
         isOpen={Boolean(deleteTarget)}
         artworkTitle={deleteTarget?.title ?? ''}
+        isDeleting={isDeletingArtwork}
         onCancel={onCloseDeleteModal}
         onConfirm={onConfirmDelete}
       />

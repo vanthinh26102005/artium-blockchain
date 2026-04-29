@@ -52,6 +52,11 @@ import { type InventoryArtwork, type DragItemData } from '@domains/inventory/typ
 import { type InventoryFolder } from '@domains/inventory/types/inventoryFolder'
 import { type InventoryViewMode } from '@domains/inventory/types/inventoryUi'
 import { mapArtworkToInventory } from '@domains/inventory/utils/inventoryApiMapper'
+import {
+  getAuctionHandoffHref,
+  getEditArtworkHref,
+  getProfileVisibilityPatch,
+} from '@domains/inventory/utils/inventoryArtworkActions'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { InventoryFolderCard } from '@domains/inventory/components/InventoryFolderCard'
 import { InventoryArtworkGridViewItem } from '@domains/inventory/components/InventoryArtworkGridViewItem'
@@ -79,6 +84,7 @@ export const InventoryPage = () => {
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const [isDeletingArtwork, setIsDeletingArtwork] = useState(false)
   const [refreshToken, setRefreshToken] = useState(0)
 
   // DnD state — properly typed for drag overlay
@@ -92,6 +98,7 @@ export const InventoryPage = () => {
   const user = useAuthStore((state) => state.user)
   const artworks = useInventoryDataStore((state) => state.artworks)
   const setArtworks = useInventoryDataStore((state) => state.setArtworks)
+  const updateArtwork = useInventoryDataStore((state) => state.updateArtwork)
   const folders = useInventoryDataStore((state) => state.folders)
   const addFolder = useInventoryDataStore((state) => state.addFolder)
   const removeArtwork = useInventoryDataStore((state) => state.removeArtwork)
@@ -352,11 +359,35 @@ export const InventoryPage = () => {
   }
 
   const handleEditArtwork = (artwork: InventoryArtwork) => {
-    router.push(`/artworks/${artwork.id}`)
+    void router.push(getEditArtworkHref(artwork))
   }
 
   const handleMoveArtwork = (artwork: InventoryArtwork) => {
     setMoveTarget(artwork)
+  }
+
+  const handleToggleProfileVisibility = async (artwork: InventoryArtwork) => {
+    try {
+      const response = await artworkApis.updateArtwork(
+        artwork.id,
+        getProfileVisibilityPatch(artwork),
+      )
+      const updatedArtwork = mapArtworkToInventory(response)
+      updateArtwork(updatedArtwork)
+      setDetailsTarget((current) => (current?.id === updatedArtwork.id ? updatedArtwork : current))
+      setRefreshToken((value) => value + 1)
+      setToastMessage('Profile visibility updated.')
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'We could not update this artwork. Try again.'
+      setToastMessage(message)
+    }
+  }
+
+  const handleStartAuction = (artwork: InventoryArtwork) => {
+    void router.push(getAuctionHandoffHref(artwork))
   }
 
   const handleOpenDeleteModal = (artwork: InventoryArtwork) => {
@@ -373,16 +404,22 @@ export const InventoryPage = () => {
     }
 
     const deletedId = deleteTarget.id
+    setIsDeletingArtwork(true)
     try {
       await artworkApis.deleteArtwork(deletedId)
       removeArtwork(deletedId)
       setMany(selectedIds.filter((id) => id !== deletedId))
+      setDetailsTarget((current) => (current?.id === deletedId ? null : current))
       setRefreshToken((value) => value + 1)
       setToastMessage('Artwork deleted successfully.')
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete artwork.'
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'We could not delete this artwork. Try again.'
       setToastMessage(message)
     } finally {
+      setIsDeletingArtwork(false)
       setDeleteTarget(null)
     }
   }
@@ -710,6 +747,8 @@ export const InventoryPage = () => {
                     onMove={handleMoveArtwork}
                     onDelete={handleOpenDeleteModal}
                     onOpenDetails={handleOpenDetails}
+                    onToggleProfileVisibility={handleToggleProfileVisibility}
+                    onStartAuction={handleStartAuction}
                   />
                 ) : (
                   <div className="mt-4">
@@ -720,6 +759,8 @@ export const InventoryPage = () => {
                       onMove={handleMoveArtwork}
                       onDelete={handleOpenDeleteModal}
                       onOpenDetails={handleOpenDetails}
+                      onToggleProfileVisibility={handleToggleProfileVisibility}
+                      onStartAuction={handleStartAuction}
                       onRenameFolder={handleOpenRenameFolder}
                       onDeleteFolder={handleOpenDeleteFolder}
                       onHideFolder={handleOpenHideFolder}
@@ -764,6 +805,8 @@ export const InventoryPage = () => {
                onDelete={() => {}}
                onMove={() => {}}
                onOpenDetails={() => {}}
+               onToggleProfileVisibility={() => {}}
+               onStartAuction={() => {}}
              />
           </div>
         ) : null}
@@ -783,6 +826,7 @@ export const InventoryPage = () => {
         onCloseExportModal={handleCloseExportModal}
         onExport={() => setToastMessage('Export started.')}
         deleteTarget={deleteTarget}
+        isDeletingArtwork={isDeletingArtwork}
         onCloseDeleteModal={handleCloseDeleteModal}
         onConfirmDelete={handleConfirmDelete}
         renameFolderTarget={renameFolderTarget}
