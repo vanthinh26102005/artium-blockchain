@@ -94,6 +94,71 @@ export type OrderResponse = {
   updatedAt: string
 }
 
+export type OrderInvoiceAddressResponse = {
+  name?: string | null
+  line1?: string | null
+  line2?: string | null
+  city?: string | null
+  state?: string | null
+  postalCode?: string | null
+  country?: string | null
+  phone?: string | null
+}
+
+export type OrderInvoicePartyResponse = {
+  id: string
+  name?: string | null
+  email?: string | null
+}
+
+export type OrderInvoicePaymentResponse = {
+  paymentStatus: string
+  paymentMethod?: string | null
+  paymentTransactionId?: string | null
+  paymentIntentId?: string | null
+  txHash?: string | null
+  onChainOrderId?: string | null
+}
+
+export type OrderInvoiceItemResponse = {
+  id: string
+  artworkId?: string | null
+  sellerId?: string | null
+  artworkTitle?: string | null
+  artworkImageUrl?: string | null
+  description: string
+  quantity: number
+  unitPrice: number
+  lineTotal: number
+  taxAmount: number
+  discountAmount: number
+}
+
+export type OrderInvoiceResponse = {
+  id: string
+  invoiceNumber: string
+  status: string
+  orderId: string
+  orderNumber: string
+  issueDate?: string | null
+  dueDate?: string | null
+  paidAt?: string | null
+  currency: string
+  subtotal: number
+  taxAmount: number
+  discountAmount: number
+  shippingAmount: number
+  totalAmount: number
+  buyer: OrderInvoicePartyResponse
+  seller: OrderInvoicePartyResponse
+  shippingAddress?: OrderInvoiceAddressResponse | Record<string, unknown> | null
+  billingAddress?: OrderInvoiceAddressResponse | Record<string, unknown> | null
+  payment: OrderInvoicePaymentResponse
+  items: OrderInvoiceItemResponse[]
+  createdAt: string
+  updatedAt: string
+}
+
 export type MarkShippedRequest = {
   carrier: string
   trackingNumber: string
@@ -117,6 +182,10 @@ const orderApis = {
 
   getOrderById: async (id: string): Promise<OrderResponse> => {
     return apiFetch<OrderResponse>(`/orders/${encodePathSegment(id)}`)
+  },
+
+  getOrderInvoice: async (id: string): Promise<OrderInvoiceResponse> => {
+    return apiFetch<OrderInvoiceResponse>(`/orders/${encodePathSegment(id)}/invoice`)
   },
 
   getMyOrders: async ({ scope, status, skip, take }: GetMyOrdersInput): Promise<PaginatedOrdersResponse> => {
