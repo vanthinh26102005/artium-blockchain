@@ -88,14 +88,15 @@ export const OrderDetailPageView = () => {
   const preferredScope: OrdersWorkspaceScope | null =
     scope === 'seller' || scope === 'buyer' ? scope : null
 
-  const loadInvoice = useCallback(async (targetOrderId: string) => {
+  const loadInvoice = useCallback(async (order: Pick<OrderResponse, 'id'>) => {
+    const targetOrderId = order.id
     latestInvoiceOrderIdRef.current = targetOrderId
     setIsInvoiceLoading(true)
     setInvoiceErrorMessage(null)
     setIsInvoiceUnavailable(false)
 
     try {
-      const response = await orderApis.getOrderInvoice(targetOrderId)
+      const response = await orderApis.getOrderInvoice(order.id)
 
       if (latestInvoiceOrderIdRef.current !== targetOrderId) {
         return
@@ -181,7 +182,7 @@ export const OrderDetailPageView = () => {
       return
     }
 
-    void loadInvoice(order.id)
+    void loadInvoice({ id: order.id })
   }, [loadInvoice, order?.id])
 
   useEffect(() => {
@@ -218,7 +219,7 @@ export const OrderDetailPageView = () => {
     setIsInvoiceModalOpen(true)
 
     if (order?.id && !invoice && !isInvoiceLoading) {
-      void loadInvoice(order.id)
+      void loadInvoice({ id: order.id })
     }
   }
 
@@ -227,7 +228,7 @@ export const OrderDetailPageView = () => {
       return
     }
 
-    void loadInvoice(order.id)
+    void loadInvoice({ id: order.id })
   }
 
   const handlePrintInvoice = () => {
