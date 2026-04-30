@@ -424,6 +424,9 @@ export const InventoryFolderPage = () => {
         isOpen={Boolean(detailsTarget)}
         artwork={detailsTarget}
         onClose={handleCloseDetails}
+        onEdit={handleEditArtwork}
+        onDelete={handleOpenDeleteModal}
+        onToggleProfileVisibility={handleToggleProfileVisibility}
       />
       <InventoryPageModals
         isCreateFolderOpen={false}

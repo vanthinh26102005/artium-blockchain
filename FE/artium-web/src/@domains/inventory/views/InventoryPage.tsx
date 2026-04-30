@@ -181,14 +181,14 @@ export const InventoryPage = () => {
     let isActive = true
     setIsLoading(true)
 
-        const loadArtworks = async () => {
-          try {
-            const response = await artworkApis.listArtworksPaginated({
-              sellerId: user.id,
-              includeSellerAuctionLifecycle: true,
-              q: debouncedSearchName || undefined,
-              status: filters.status,
-              minPrice: filters.minPrice,
+    const loadArtworks = async () => {
+      try {
+        const response = await artworkApis.listArtworksPaginated({
+          sellerId: user.id,
+          includeSellerAuctionLifecycle: true,
+          q: debouncedSearchName || undefined,
+          status: filters.status,
+          minPrice: filters.minPrice,
           maxPrice: filters.maxPrice,
           skip: (page - 1) * pageSize,
           take: pageSize,
@@ -603,14 +603,14 @@ export const InventoryPage = () => {
     } else if (activeType === 'Artwork' && overType === 'Folder') {
       const artworkId = active.id as string
       const folderId = over.id as string
-      
+
       // Capture previous state for rollback
       const artwork = artworks.find((a) => a.id === artworkId)
       const previousFolderId = artwork?.folderId
-      
+
       // Optimistic update
       optimisticMoveArtwork(artworkId, folderId)
-      
+
       try {
         await artworkApis.bulkMoveArtworks({
           artworkIds: [artworkId],
@@ -790,24 +790,24 @@ export const InventoryPage = () => {
       <DragOverlay>
         {activeId && activeItem?.type === 'Folder' ? (
           <div className="w-[200px] opacity-80">
-             <InventoryFolderCard
-                folder={activeItem.folder}
-                onRename={() => {}}
-                onDelete={() => {}}
-                onHide={() => {}}
-              />
+            <InventoryFolderCard
+              folder={activeItem.folder}
+              onRename={() => {}}
+              onDelete={() => {}}
+              onHide={() => {}}
+            />
           </div>
         ) : activeId && activeItem?.type === 'Artwork' ? (
           <div className="w-[200px] opacity-80">
             <InventoryArtworkGridViewItem
-               artwork={activeItem.artwork}
-               onEdit={() => {}}
-               onDelete={() => {}}
-               onMove={() => {}}
-               onOpenDetails={() => {}}
-               onToggleProfileVisibility={() => {}}
-               onStartAuction={() => {}}
-             />
+              artwork={activeItem.artwork}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              onMove={() => {}}
+              onOpenDetails={() => {}}
+              onToggleProfileVisibility={() => {}}
+              onStartAuction={() => {}}
+            />
           </div>
         ) : null}
       </DragOverlay>
@@ -817,6 +817,9 @@ export const InventoryPage = () => {
         isOpen={Boolean(detailsTarget)}
         artwork={detailsTarget}
         onClose={handleCloseDetails}
+        onEdit={handleEditArtwork}
+        onDelete={handleOpenDeleteModal}
+        onToggleProfileVisibility={handleToggleProfileVisibility}
       />
       <InventoryPageModals
         isCreateFolderOpen={isCreateFolderOpen}

@@ -1,8 +1,11 @@
 // react
 import { useState } from 'react'
 
+// next
+import Image from 'next/image'
+
 // third-party
-import { Bookmark, DollarSign, Eye, Heart, Pencil, Share2, Trash2, X } from 'lucide-react'
+import { Bookmark, DollarSign, Eye, EyeOff, Heart, Pencil, Share2, Trash2, X } from 'lucide-react'
 
 // @shared - components
 import { Button } from '@shared/components/ui/button'
@@ -10,17 +13,27 @@ import { Dialog, DialogOverlay, DialogPortal, DialogPrimitive } from '@shared/co
 
 // @domains - inventory
 import { type InventoryArtwork } from '@domains/inventory/types/inventoryArtwork'
+import {
+  getProfileVisibilityLabel,
+  isArtworkEditLocked,
+} from '@domains/inventory/utils/inventoryArtworkActions'
 
 type InventoryArtworkDetailsPanelProps = {
   isOpen: boolean
   artwork: InventoryArtwork | null
   onClose: () => void
+  onEdit: (artwork: InventoryArtwork) => void
+  onDelete: (artwork: InventoryArtwork) => void
+  onToggleProfileVisibility: (artwork: InventoryArtwork) => void
 }
 
 export const InventoryArtworkDetailsPanel = ({
   isOpen,
   artwork,
   onClose,
+  onEdit,
+  onDelete,
+  onToggleProfileVisibility,
 }: InventoryArtworkDetailsPanelProps) => {
   // -- state --
   const [activeSection, setActiveSection] = useState<'artwork' | 'creator'>('artwork')
@@ -33,6 +46,25 @@ export const InventoryArtworkDetailsPanel = ({
     typeof artwork.price === 'number' ? `US$${artwork.price.toLocaleString('en-US')}` : '—'
 
   const isArtworkSection = activeSection === 'artwork'
+  const isEditLocked = isArtworkEditLocked(artwork)
+  const profileVisibilityLabel = getProfileVisibilityLabel(artwork)
+
+  const handleEdit = () => {
+    if (isEditLocked) {
+      return
+    }
+    onClose()
+    onEdit(artwork)
+  }
+
+  const handleDelete = () => {
+    onClose()
+    onDelete(artwork)
+  }
+
+  const handleToggleProfileVisibility = () => {
+    onToggleProfileVisibility(artwork)
+  }
 
   // -- render --
   return (
@@ -69,9 +101,12 @@ export const InventoryArtworkDetailsPanel = ({
               <div className="self-start rounded-2xl bg-[#EFEFEF] p-6">
                 <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
                   <div className="aspect-[4/3] w-full">
-                    <img
+                    <Image
                       src={artwork.thumbnailUrl}
                       alt={artwork.title}
+                      width={960}
+                      height={720}
+                      sizes="(min-width: 1024px) 55vw, 100vw"
                       className="h-full w-full object-cover"
                     />
                   </div>
@@ -216,18 +251,32 @@ export const InventoryArtworkDetailsPanel = ({
           </div>
 
           <div className="sticky bottom-0 flex items-center justify-between border-t border-slate-200 bg-white px-10 py-6 text-lg">
-            <button type="button" className="flex items-center gap-2 text-rose-600">
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="flex items-center gap-2 text-rose-600 transition hover:text-rose-700"
+            >
               <Trash2 className="h-4 w-4" />
               Delete artwork
             </button>
             <div className="flex items-center gap-6">
-              <button type="button" className="flex items-center gap-2 text-slate-700">
+              <button
+                type="button"
+                onClick={handleEdit}
+                disabled={isEditLocked}
+                className="flex items-center gap-2 text-slate-700 transition hover:text-slate-950 disabled:cursor-not-allowed disabled:text-slate-400"
+                title={isEditLocked ? 'Artwork is locked by auction lifecycle' : undefined}
+              >
                 <Pencil className="h-4 w-4" />
                 Edit Artwork
               </button>
-              <button type="button" className="flex items-center gap-2 text-slate-700">
-                <Eye className="h-4 w-4" />
-                Show on Profile
+              <button
+                type="button"
+                onClick={handleToggleProfileVisibility}
+                className="flex items-center gap-2 text-slate-700 transition hover:text-slate-950"
+              >
+                {artwork.isPublished ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {profileVisibilityLabel}
               </button>
             </div>
           </div>
