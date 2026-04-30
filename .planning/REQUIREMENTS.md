@@ -142,14 +142,14 @@ Milestone focus: order-linked invoice preview and extraction from the authentica
 
 ### Orders Invoice UI
 
-- [ ] **OINV-04**: Buyers and sellers can see an invoice action from the orders list and order detail pages when invoice preview or extraction is available for the order state.
-- [ ] **OINV-05**: Buyers and sellers can open a responsive invoice preview from `/orders` that presents artwork, buyer/seller, order, payment, shipping, subtotal, tax, discount, shipping, total, and key identifiers in a polished document-style layout.
-- [ ] **OINV-06**: Invoice preview UI handles loading, empty, unavailable, unauthorized, and retry states without breaking the existing orders workspace filters, pagination, role scope, or order actions.
+- [x] **OINV-04**: Buyers and sellers can see an invoice action from the orders list and order detail pages when invoice preview or extraction is available for the order state.
+- [x] **OINV-05**: Buyers and sellers can open a responsive invoice preview from `/orders` that presents artwork, buyer/seller, order, payment, shipping, subtotal, tax, discount, shipping, total, and key identifiers in a polished document-style layout.
+- [x] **OINV-06**: Invoice preview UI handles loading, empty, unavailable, unauthorized, and retry states without breaking the existing orders workspace filters, pagination, role scope, or order actions.
 
 ### Invoice Extraction
 
-- [ ] **OINV-07**: Buyers and sellers can extract the invoice through a print/download-ready flow that preserves layout, identifiers, totals, dates, and Artium branding across desktop and mobile.
-- [ ] **OINV-08**: Extracted invoices avoid client-only recomputation of financial truth; frontend formatting must be derived from the backend invoice/order DTO and must clearly label unavailable backend fields rather than inventing placeholders.
+- [x] **OINV-07**: Buyers and sellers can extract the invoice through a print/download-ready flow that preserves layout, identifiers, totals, dates, and Artium branding across desktop and mobile.
+- [x] **OINV-08**: Extracted invoices avoid client-only recomputation of financial truth; frontend formatting must be derived from the backend invoice/order DTO and must clearly label unavailable backend fields rather than inventing placeholders.
 
 ### Verification
 
@@ -220,11 +220,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OINV-01 | Phase 30 | Complete |
 | OINV-02 | Phase 30 | Complete |
 | OINV-03 | Phase 30 | Complete |
-| OINV-04 | Phase 31 | Pending |
-| OINV-05 | Phase 31 | Pending |
-| OINV-06 | Phase 31 | Pending |
-| OINV-07 | Phase 31 | Pending |
-| OINV-08 | Phase 31 | Pending |
+| OINV-04 | Phase 31 | Complete |
+| OINV-05 | Phase 31 | Complete |
+| OINV-06 | Phase 31 | Complete |
+| OINV-07 | Phase 31 | Complete |
+| OINV-08 | Phase 31 | Complete |
 | OINV-09 | Phase 32 | Pending |
 
 **Coverage:**

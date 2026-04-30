@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 28: Artwork upload draft backend gap audit and contract cleanup** - Audit `/artworks/upload?draftArtworkId=...` against backend draft-artwork APIs, close contract gaps, and keep the implementation clean (completed 2026-04-29)
 - [x] **Phase 29: Inventory artwork actions and profile visibility** - Implement backend-backed inventory edit/delete/profile visibility and safe auction handoff behavior (completed 2026-04-29)
 - [x] **Phase 30: Order-linked invoice backend contract and materialization** - Expose authorization-safe order invoice reads and idempotently materialize missing invoices from canonical order/payment data (completed 2026-04-30)
-- [ ] **Phase 31: Orders invoice preview and extraction UI** - Add invoice actions, preview, and print/download-ready extraction to the Orders workspace using a professional document layout
+- [x] **Phase 31: Orders invoice preview and extraction UI** - Add invoice actions, preview, and print/download-ready extraction to the Orders workspace using a professional document layout (completed 2026-04-30)
 - [ ] **Phase 32: Order invoice validation and milestone closure** - Verify backend authorization, frontend behavior, responsive UI quality, extraction output, and milestone evidence
 
 ## Phase Details
@@ -213,7 +213,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 28. Artwork upload draft backend gap audit and contract cleanup | 3/3 | Complete   | 2026-04-29 |
 | 29. Inventory artwork actions and profile visibility | 3/3 | Complete | 2026-04-29 |
 | 30. Order-linked invoice backend contract and materialization | 2/2 | Complete    | 2026-04-30 |
-| 31. Orders invoice preview and extraction UI | 1/2 | In Progress|  |
+| 31. Orders invoice preview and extraction UI | 2/2 | Complete    | 2026-04-30 |
 | 32. Order invoice validation and milestone closure | 0/TBD | Not started | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
@@ -519,7 +519,7 @@ Cross-cutting constraints:
   4. Developer can use print/download extraction controls and produce an invoice output that preserves layout, identifiers, totals, and readable spacing across desktop and mobile widths.
   5. Developer can trigger loading, unavailable, unauthorized, and retryable backend failure states and see clear inline UI that does not break order filters, pagination, or detail navigation.
   6. Developer can inspect frontend code and confirm monetary values and invoice identity come from backend DTOs, with no client-only recomputation or invented financial placeholders.
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 **Wave 1**
 - 31-01 — Core invoice presentation, availability helpers, detail panel, preview modal, and DTO-driven invoice document
 
