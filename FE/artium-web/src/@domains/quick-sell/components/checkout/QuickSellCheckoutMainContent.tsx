@@ -5,7 +5,6 @@ import { ChevronDown, ChevronUp, CreditCard, Info } from 'lucide-react'
 
 import { BaseFormField, BaseInputField } from '@shared/components/forms'
 import { Input } from '@shared/components/ui/input'
-import { Label } from '@shared/components/ui/label'
 import { cn } from '@shared/lib/utils'
 
 import type { QuickSellCheckoutFormValues } from '../../validations/quickSellCheckout.schema'
@@ -22,12 +21,8 @@ export const QuickSellCheckoutMainContent = ({
   const [isCardPaymentOpen, setIsCardPaymentOpen] = useState(true)
   const [isWireTransferOpen, setIsWireTransferOpen] = useState(false)
   const [paymentTab, setPaymentTab] = useState<'card' | 'google' | 'klarna'>('card')
-  const {
-    formState,
-    getFieldState,
-    register,
-    setValue,
-  } = useFormContext<QuickSellCheckoutFormValues>()
+  const { formState, getFieldState, register, setValue } =
+    useFormContext<QuickSellCheckoutFormValues>()
 
   const address = useWatch({ name: 'address' })
   const deliveryMethod = useWatch({ name: 'deliveryMethod' }) ?? 'pickup'
@@ -46,7 +41,7 @@ export const QuickSellCheckoutMainContent = ({
   return (
     <div className="flex flex-col gap-4">
       <section className={cardClass}>
-        <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+        <h3 className="mb-3 text-[11px] font-bold tracking-wider text-[#989898] uppercase">
           IN-PERSON PAYMENT
         </h3>
         <p className="mb-4 text-[13px] font-medium text-[#595959]">
@@ -64,7 +59,7 @@ export const QuickSellCheckoutMainContent = ({
       </section>
 
       <section className={cardClass}>
-        <h3 className="mb-6 text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+        <h3 className="mb-6 text-[11px] font-bold tracking-wider text-[#989898] uppercase">
           CONTACT INFORMATION
         </h3>
 
@@ -131,54 +126,60 @@ export const QuickSellCheckoutMainContent = ({
             labelClassName={labelClass}
             descriptionClassName={helperClass}
           >
-          <div className="flex gap-3">
-            <div className="flex w-25 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#E5E5E5] bg-[#FCFCFC]">
-              <span className="text-[16px]">🇺🇸</span>
-              <span className="text-[14px] font-bold text-[#191414]">+1</span>
+            <div className="flex gap-3">
+              <div className="flex w-25 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#E5E5E5] bg-[#FCFCFC]">
+                <span className="text-[16px]">🇺🇸</span>
+                <span className="text-[14px] font-bold text-[#191414]">+1</span>
+              </div>
+              <BaseInputField
+                type="tel"
+                {...register('address.phone')}
+                id="quick-sell-checkout-phone"
+                label="PHONE NUMBER INPUT"
+                placeholder="201-555-0123"
+                containerClassName="flex-1 space-y-0"
+                labelClassName="sr-only"
+                descriptionClassName="sr-only"
+                messageClassName="sr-only"
+                inputClassName={`${inputClass} flex-1`}
+              />
             </div>
-            <BaseInputField
-              type="tel"
-              {...register('address.phone')}
-              id="quick-sell-checkout-phone"
-              label="PHONE NUMBER INPUT"
-              placeholder="201-555-0123"
-              containerClassName="flex-1 space-y-0"
-              labelClassName="sr-only"
-              descriptionClassName="sr-only"
-              messageClassName="sr-only"
-              inputClassName={`${inputClass} flex-1`}
-            />
-          </div>
           </BaseFormField>
         </div>
       </section>
 
       <section className={cardClass}>
-        <h3 className="mb-4 text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+        <h3 className="mb-4 text-[11px] font-bold tracking-wider text-[#989898] uppercase">
           DELIVERY METHOD
         </h3>
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          {([
-            ['pickup', 'Pick up / Ship by seller'],
-            ['Artium', 'Ship by Artium'],
-            ['invoice_only', 'Invoice Only'],
-          ] as const).map(([value, label]) => (
+          {(
+            [
+              ['pickup', 'Pick up / Ship by seller'],
+              ['Artium', 'Ship by Artium'],
+              ['invoice_only', 'Invoice Only'],
+            ] as const
+          ).map(([value, label]) => (
             <button
               key={value}
               type="button"
-              onClick={() => setValue('deliveryMethod', value, { shouldDirty: true, shouldValidate: true })}
-              className={`group relative h-[52px] rounded-full border transition-all ${deliveryMethod === value
-                ? 'z-10 border-blue-600 bg-blue-50/50 text-blue-600'
-                : 'border-[#E5E5E5] bg-white text-[#595959] hover:border-[#989898]'
-                }`}
+              onClick={() =>
+                setValue('deliveryMethod', value, { shouldDirty: true, shouldValidate: true })
+              }
+              className={`group relative h-[52px] rounded-full border transition-all ${
+                deliveryMethod === value
+                  ? 'z-10 border-blue-600 bg-blue-50/50 text-blue-600'
+                  : 'border-[#E5E5E5] bg-white text-[#595959] hover:border-[#989898]'
+              }`}
             >
               <div className="flex items-center justify-center gap-2.5">
                 <div
-                  className={`flex h-4 w-4 items-center justify-center rounded-full border transition-colors ${deliveryMethod === value
-                    ? 'border-blue-600'
-                    : 'border-[#D1D1D1] group-hover:border-[#989898]'
-                    }`}
+                  className={`flex h-4 w-4 items-center justify-center rounded-full border transition-colors ${
+                    deliveryMethod === value
+                      ? 'border-blue-600'
+                      : 'border-[#D1D1D1] group-hover:border-[#989898]'
+                  }`}
                 >
                   {deliveryMethod === value && <div className="h-2 w-2 rounded-full bg-blue-600" />}
                 </div>
@@ -198,7 +199,7 @@ export const QuickSellCheckoutMainContent = ({
       </section>
 
       <section className={cardClass}>
-        <h3 className="mb-6 text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+        <h3 className="mb-6 text-[11px] font-bold tracking-wider text-[#989898] uppercase">
           PICK UP / SHIP ADDRESS
         </h3>
 
@@ -285,7 +286,7 @@ export const QuickSellCheckoutMainContent = ({
                   <option value="VN">Việt Nam</option>
                   <option value="CA">Canada</option>
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#989898]" />
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[#989898]" />
               </div>
             </BaseFormField>
 
@@ -308,7 +309,9 @@ export const QuickSellCheckoutMainContent = ({
 
       <section className={cardClass}>
         <div className="mb-3 flex items-center gap-1">
-          <h3 className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">SALES TAX</h3>
+          <h3 className="text-[11px] font-bold tracking-wider text-[#989898] uppercase">
+            SALES TAX
+          </h3>
           <span className="text-[11px] text-red-500">*</span>
         </div>
         <p className="mb-6 text-[13px] font-medium text-[#595959]">
@@ -346,7 +349,7 @@ export const QuickSellCheckoutMainContent = ({
           >
             <div className="relative">
               <Input type="text" value="6" readOnly className={inputClass} />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[15px] font-medium text-[#989898]">
+              <span className="absolute top-1/2 right-4 -translate-y-1/2 text-[15px] font-medium text-[#989898]">
                 %
               </span>
             </div>
@@ -355,7 +358,7 @@ export const QuickSellCheckoutMainContent = ({
       </section>
 
       <section className="overflow-hidden rounded-3xl border border-black/5 bg-white">
-        <h3 className="p-6 pb-4 text-[11px] font-bold uppercase tracking-wider text-[#989898] md:p-8 md:pb-4">
+        <h3 className="p-6 pb-4 text-[11px] font-bold tracking-wider text-[#989898] uppercase md:p-8 md:pb-4">
           PAYMENT METHOD
         </h3>
 
@@ -367,7 +370,9 @@ export const QuickSellCheckoutMainContent = ({
           >
             <div className="flex items-center gap-3">
               <CreditCard className="h-5 w-5 text-[#191414]" />
-              <span className="text-[14px] font-bold text-[#191414]">CARD &amp; ONLINE PAYMENT</span>
+              <span className="text-[14px] font-bold text-[#191414]">
+                CARD &amp; ONLINE PAYMENT
+              </span>
             </div>
             {isCardPaymentOpen ? (
               <ChevronUp className="h-5 w-5 text-[#989898]" />
@@ -379,19 +384,22 @@ export const QuickSellCheckoutMainContent = ({
           {isCardPaymentOpen && (
             <div className="px-6 pb-6 md:px-8 md:pb-8">
               <div className="mb-6 grid grid-cols-3 gap-3">
-                {([
-                  ['card', 'Thẻ'],
-                  ['google', 'Google Pay'],
-                  ['klarna', 'Klarna'],
-                ] as const).map(([value, label]) => (
+                {(
+                  [
+                    ['card', 'Thẻ'],
+                    ['google', 'Google Pay'],
+                    ['klarna', 'Klarna'],
+                  ] as const
+                ).map(([value, label]) => (
                   <button
                     key={value}
                     type="button"
                     onClick={() => setPaymentTab(value)}
-                    className={`flex h-[64px] flex-col items-center justify-center gap-1 rounded-xl border-2 transition-all ${paymentTab === value
-                      ? 'border-blue-600 bg-blue-50/50'
-                      : 'border-[#E5E5E5] bg-white hover:border-[#989898]'
-                      }`}
+                    className={`flex h-[64px] flex-col items-center justify-center gap-1 rounded-xl border-2 transition-all ${
+                      paymentTab === value
+                        ? 'border-blue-600 bg-blue-50/50'
+                        : 'border-[#E5E5E5] bg-white hover:border-[#989898]'
+                    }`}
                   >
                     {value === 'card' ? (
                       <CreditCard
@@ -404,11 +412,12 @@ export const QuickSellCheckoutMainContent = ({
                         className="h-4 object-contain"
                       />
                     ) : (
-                      <span className="text-[16px] font-bold leading-none text-pink-500">K.</span>
+                      <span className="text-[16px] leading-none font-bold text-pink-500">K.</span>
                     )}
                     <span
-                      className={`text-[12px] font-medium ${paymentTab === value ? 'text-blue-600' : 'text-[#595959]'
-                        }`}
+                      className={`text-[12px] font-medium ${
+                        paymentTab === value ? 'text-blue-600' : 'text-[#595959]'
+                      }`}
                     >
                       {label}
                     </span>
@@ -423,33 +432,22 @@ export const QuickSellCheckoutMainContent = ({
                       {paymentElement}
                     </div>
                   ) : (
-                    paymentPlaceholder ?? (
-                      <div className="grid grid-cols-[1fr_120px] gap-4 md:grid-cols-[1fr_160px_100px]">
-                        <div className="col-span-2 md:col-span-1">
-                          <Label className={labelClass}>SỐ THẺ</Label>
-                          <div className="relative">
-                            <Input
-                              type="text"
-                              placeholder="1234 1234 1234 1234"
-                              className={inputClass}
-                              disabled
-                            />
-                            <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-2 opacity-50">
-                              <div className="h-5 w-8 rounded bg-gray-200"></div>
-                              <div className="h-5 w-8 rounded bg-gray-200"></div>
-                            </div>
+                    (paymentPlaceholder ?? (
+                      <div className="rounded-2xl border border-[#E5E5E5] bg-[#FCFCFC] p-4">
+                        <div className="flex items-start gap-3">
+                          <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-[#595959]" />
+                          <div>
+                            <p className="text-[13px] font-semibold text-[#191414]">
+                              Secure card form will appear after Stripe initializes.
+                            </p>
+                            <p className="mt-1 text-[12px] leading-5 text-[#595959]">
+                              Click the payment button to create a Stripe session, then enter card
+                              details in Stripe&apos;s encrypted fields.
+                            </p>
                           </div>
                         </div>
-                        <div>
-                          <Label className={labelClass}>NGÀY HẾT HẠN</Label>
-                          <Input type="text" placeholder="MM / YY" className={inputClass} disabled />
-                        </div>
-                        <div>
-                          <Label className={labelClass}>MÃ BẢO MẬT</Label>
-                          <Input type="text" placeholder="CVC" className={inputClass} disabled />
-                        </div>
                       </div>
-                    )
+                    ))
                   )}
 
                   <BaseFormField
@@ -480,7 +478,7 @@ export const QuickSellCheckoutMainContent = ({
                         <option value="VN">Việt Nam</option>
                         <option value="US">United States</option>
                       </select>
-                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#989898]" />
+                      <ChevronDown className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[#989898]" />
                     </div>
                   </BaseFormField>
 
@@ -508,7 +506,12 @@ export const QuickSellCheckoutMainContent = ({
           >
             <div className="flex items-center gap-3">
               <div className="flex h-5 w-5 items-center justify-center">
-                <svg className="h-full w-full text-[#191414]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="h-full w-full text-[#191414]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -529,9 +532,12 @@ export const QuickSellCheckoutMainContent = ({
           {isWireTransferOpen && (
             <div className="px-6 pb-6 md:px-8 md:pb-8">
               <p className="mb-6 text-[13px] leading-relaxed text-[#595959]">
-                Transfer funds directly to our account using the details below. Once you&apos;ve made
-                payment, contact{' '}
-                <a href="mailto:sales@Artium.com" className="text-blue-600 underline hover:text-blue-700">
+                Transfer funds directly to our account using the details below. Once you&apos;ve
+                made payment, contact{' '}
+                <a
+                  href="mailto:sales@Artium.com"
+                  className="text-blue-600 underline hover:text-blue-700"
+                >
                   sales@Artium.com
                 </a>{' '}
                 with your proof of payment. Processing times may take up to five business days.
@@ -540,37 +546,39 @@ export const QuickSellCheckoutMainContent = ({
               <div className="rounded-xl bg-[#F9FAFB] p-6">
                 <div className="space-y-4">
                   <div className="flex flex-col justify-between gap-1 md:flex-row md:items-center">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+                    <span className="text-[11px] font-bold tracking-wider text-[#989898] uppercase">
                       Bank Name
                     </span>
-                    <span className="text-[13px] font-bold text-[#191414]">Silicon Valley Bank (SVB)</span>
+                    <span className="text-[13px] font-bold text-[#191414]">
+                      Silicon Valley Bank (SVB)
+                    </span>
                   </div>
                   <div className="flex flex-col justify-between gap-1 md:flex-row md:items-center">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+                    <span className="text-[11px] font-bold tracking-wider text-[#989898] uppercase">
                       Routing Number
                     </span>
                     <span className="text-[13px] font-bold text-[#191414]">121140399</span>
                   </div>
                   <div className="flex flex-col justify-between gap-1 md:flex-row md:items-center">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+                    <span className="text-[11px] font-bold tracking-wider text-[#989898] uppercase">
                       Account Number
                     </span>
                     <span className="text-[13px] font-bold text-[#191414]">3304399019</span>
                   </div>
                   <div className="flex flex-col justify-between gap-1 md:flex-row md:items-center">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+                    <span className="text-[11px] font-bold tracking-wider text-[#989898] uppercase">
                       Swift Code
                     </span>
                     <span className="text-[13px] font-bold text-[#191414]">SVBKUS6S</span>
                   </div>
                   <div className="flex flex-col justify-between gap-1 md:flex-row md:items-center">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+                    <span className="text-[11px] font-bold tracking-wider text-[#989898] uppercase">
                       Account Name
                     </span>
                     <span className="text-[13px] font-bold text-[#191414]">Artium Inc</span>
                   </div>
                   <div className="flex flex-col justify-between gap-1 pt-2 md:flex-row md:items-start">
-                    <span className="shrink-0 text-[11px] font-bold uppercase tracking-wider text-[#989898]">
+                    <span className="shrink-0 text-[11px] font-bold tracking-wider text-[#989898] uppercase">
                       General Bank Reference Address
                     </span>
                     <span className="max-w-[420px] text-[13px] font-bold text-[#191414] md:text-right">
