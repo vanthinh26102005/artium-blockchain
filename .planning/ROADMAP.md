@@ -2,7 +2,7 @@
 
 ## Overview
 
-This roadmap tracks sequential milestone work across the Artium platform. Earlier phases covered frontend standardization, checkout/order flows, and seller auction creation.
+This roadmap tracks sequential milestone work across the Artium platform. Earlier phases covered frontend standardization, checkout/order flows, seller auction creation, inventory actions, and backend contract cleanup. Current active work starts the v1.3 order invoice preview and export milestone at Phase 30.
 
 Phases 21-26 previously covered a v1.2 backend deployment strategy. On 2026-04-29, the user marked that scope intentionally redundant and omitted it from active milestone closure. Historical artifacts remain in `.planning/phases/`, but these phases are no longer blockers for active work. Current active work resumes at Phase 27.
 
@@ -30,6 +30,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 20: Auction start orchestration and seller lifecycle status** - Start auctions idempotently through backend/on-chain flow and expose pending/active/failed status to sellers (completed 2026-04-29)
 - [x] **Phase 27: Frontend shared API definition standardization and edge-case audit** - Standardize frontend shared API request behavior while preserving existing module exports (completed 2026-04-29)
 - [x] **Phase 28: Artwork upload draft backend gap audit and contract cleanup** - Audit `/artworks/upload?draftArtworkId=...` against backend draft-artwork APIs, close contract gaps, and keep the implementation clean (completed 2026-04-29)
+- [x] **Phase 29: Inventory artwork actions and profile visibility** - Implement backend-backed inventory edit/delete/profile visibility and safe auction handoff behavior (completed 2026-04-29)
+- [ ] **Phase 30: Order-linked invoice backend contract and materialization** - Expose authorization-safe order invoice reads and idempotently materialize missing invoices from canonical order/payment data
+- [ ] **Phase 31: Orders invoice preview and extraction UI** - Add invoice actions, preview, and print/download-ready extraction to the Orders workspace using a professional document layout
+- [ ] **Phase 32: Order invoice validation and milestone closure** - Verify backend authorization, frontend behavior, responsive UI quality, extraction output, and milestone evidence
 
 ## Phase Details
 
@@ -178,7 +182,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Phases 21-26 are intentionally omitted/redundant as of 2026-04-29, so active work resumes at Phase 27. Phase 28 follows Phase 27 and focuses the next backend accuracy pass on the artwork upload draft flow.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Phases 21-26 are intentionally omitted/redundant as of 2026-04-29, so active work resumes at Phase 27. Phase 28 follows Phase 27 and focuses the next backend accuracy pass on the artwork upload draft flow. Phase 29 completes inventory edit/delete/profile visibility and auction handoff. v1.3 order invoice work proceeds 30 → 31 → 32.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -207,6 +211,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 21-26. Backend deployment strategy scope | historical artifacts retained | Omitted/redundant | 2026-04-29 |
 | 27. Frontend shared API definition standardization and edge-case audit | 4/4 | Complete    | 2026-04-29 |
 | 28. Artwork upload draft backend gap audit and contract cleanup | 3/3 | Complete   | 2026-04-29 |
+| 29. Inventory artwork actions and profile visibility | 3/3 | Complete | 2026-04-29 |
+| 30. Order-linked invoice backend contract and materialization | 0/TBD | Not started | - |
+| 31. Orders invoice preview and extraction UI | 0/TBD | Not started | - |
+| 32. Order invoice validation and milestone closure | 0/TBD | Not started | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -471,3 +479,46 @@ Cross-cutting constraints:
 - Profile-visible artwork is queryable with `status: ArtworkStatus.ACTIVE` and `isPublished: true`.
 - Inventory may navigate to seller auction setup, but it must not call seller auction start, retry, attach-transaction, or wallet APIs directly.
 - Root inventory and folder inventory must share the same artwork action behavior.
+
+### Phase 30: Order-linked invoice backend contract and materialization
+
+**Goal:** Orders can expose a trustworthy invoice read model by reusing payments-service invoice persistence, enforcing the same buyer/seller access rules as `/orders`, and materializing a missing invoice from canonical order/payment data when needed.
+**Requirements:** OINV-01, OINV-02, OINV-03
+**Depends on:** Phase 29
+**Success Criteria** (what must be TRUE):
+  1. Developer can call an authenticated order-invoice endpoint for an order they bought or sold and receive invoice data; unauthorized users receive the same non-disclosing access behavior as private order reads.
+  2. Developer can inspect backend code and confirm invoice lookup/materialization reuses payments-service invoices with `order_id`, line items, invoice numbers, statuses, totals, and payment transaction links rather than creating a parallel orders-service invoice table.
+  3. Developer can request invoice data for an order without an existing invoice and see one idempotently derived from persisted order, order items, payment, shipping, and lifecycle data.
+  4. Developer can request invoice data repeatedly for the same order and observe stable invoice identity, totals, line items, and status with no duplicate invoices.
+  5. Backend DTOs expose only the fields needed for order invoice preview/export and avoid leaking unrelated buyer/seller private data across workspace scopes.
+**Plans:** TBD
+**UI hint:** no
+
+### Phase 31: Orders invoice preview and extraction UI
+
+**Goal:** Buyers and sellers can open invoice preview and extraction actions directly from the Orders workspace, with a polished responsive document layout that derives all financial truth from backend invoice/order DTOs.
+**Requirements:** OINV-04, OINV-05, OINV-06, OINV-07, OINV-08
+**Depends on:** Phase 30
+**Success Criteria** (what must be TRUE):
+  1. Developer can open `/orders` in buyer or seller scope and see invoice actions only where the backend says invoice preview/extraction is available for the order state.
+  2. Developer can open `/orders/[orderId]` and launch an invoice preview without losing the existing order detail context, action panel, timeline, payment records, or role-aware behavior.
+  3. Developer can inspect the invoice preview UI and find a professional document layout with invoice number/status, order number, dates, buyer/seller blocks, artwork line items, payment identifiers, shipping/billing context, subtotal, tax, discount, shipping, total, and Artium branding.
+  4. Developer can use print/download extraction controls and produce an invoice output that preserves layout, identifiers, totals, and readable spacing across desktop and mobile widths.
+  5. Developer can trigger loading, unavailable, unauthorized, and retryable backend failure states and see clear inline UI that does not break order filters, pagination, or detail navigation.
+  6. Developer can inspect frontend code and confirm monetary values and invoice identity come from backend DTOs, with no client-only recomputation or invented financial placeholders.
+**Plans:** TBD
+**UI hint:** yes
+
+### Phase 32: Order invoice validation and milestone closure
+
+**Goal:** Prove the order invoice contract, preview, extraction, and UI quality are complete through focused backend, frontend, responsive, and documentation evidence before closing v1.3.
+**Requirements:** OINV-09
+**Depends on:** Phase 31
+**Success Criteria** (what must be TRUE):
+  1. Developer can open verification artifacts showing authorized buyer, authorized seller, unauthorized user, existing invoice, missing invoice materialization, and repeated materialization scenarios all behave correctly.
+  2. Developer can inspect frontend evidence covering buyer and seller orders list actions, order detail preview, extraction output, responsive mobile/desktop layout, and loading/error states.
+  3. Developer can run backend targeted tests/build checks around orders gateway, payments invoice query/materialization, and shared DTOs with no invoice regressions.
+  4. Developer can run `cd FE/artium-web && npx tsc --noemit`, targeted lint, and any invoice preview component checks with no new Orders workspace regressions.
+  5. Developer can open `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, and phase verification artifacts and see OINV-01 through OINV-09 fully mapped and evidenced.
+**Plans:** TBD
+**UI hint:** yes

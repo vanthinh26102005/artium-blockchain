@@ -1,4 +1,4 @@
-# Requirements: Artium Frontend Component Standardization
+# Requirements: Artium Blockchain Marketplace
 
 **Defined:** 2026-04-21
 **Core Value:** Ship a reusable shared component layer that reduces duplication across domains without changing current user-facing UI or business logic.
@@ -130,6 +130,31 @@ Milestone focus was production-grade backend deployment strategy grounded in the
 - **Multi-region or multi-cluster disaster-tolerant architecture**: Too large for the first production deployment strategy milestone.
 - **Database re-architecture beyond what is necessary to choose a production operating model**: The goal is deployment strategy, not a full persistence redesign.
 
+## v1.3 Requirements
+
+Milestone focus: order-linked invoice preview and extraction from the authenticated Orders workspace.
+
+### Order-Invoice Backend Contract
+
+- [ ] **OINV-01**: Buyers and sellers can request invoice data for an order only when the existing `/orders` access policy already authorizes them to view that order.
+- [ ] **OINV-02**: Backend can return an order-linked invoice read model that includes invoice number, status, issue/paid dates, order number, artwork line items, totals, currency, payment identifiers, buyer/seller context, and shipping/billing context without exposing cross-user data.
+- [ ] **OINV-03**: Backend can idempotently materialize an invoice from canonical order, order item, and payment records when an authorized order has no linked invoice yet, reusing payments-service invoice persistence and `order_id` rather than adding a duplicate orders-service invoice store.
+
+### Orders Invoice UI
+
+- [ ] **OINV-04**: Buyers and sellers can see an invoice action from the orders list and order detail pages when invoice preview or extraction is available for the order state.
+- [ ] **OINV-05**: Buyers and sellers can open a responsive invoice preview from `/orders` that presents artwork, buyer/seller, order, payment, shipping, subtotal, tax, discount, shipping, total, and key identifiers in a polished document-style layout.
+- [ ] **OINV-06**: Invoice preview UI handles loading, empty, unavailable, unauthorized, and retry states without breaking the existing orders workspace filters, pagination, role scope, or order actions.
+
+### Invoice Extraction
+
+- [ ] **OINV-07**: Buyers and sellers can extract the invoice through a print/download-ready flow that preserves layout, identifiers, totals, dates, and Artium branding across desktop and mobile.
+- [ ] **OINV-08**: Extracted invoices avoid client-only recomputation of financial truth; frontend formatting must be derived from the backend invoice/order DTO and must clearly label unavailable backend fields rather than inventing placeholders.
+
+### Verification
+
+- [ ] **OINV-09**: Developers can verify invoice authorization, idempotent materialization, DTO mapping, frontend preview/extraction behavior, responsive UI, and TypeScript/lint/build checks with documented evidence before the milestone is closed.
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -192,13 +217,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAUC-08 | Phase 20 | Complete |
 | SAUC-09 | Phase 20 | Complete |
 | v1.2 backend deployment strategy | Phases 21-26 | Omitted/redundant 2026-04-29 |
+| OINV-01 | Phase 30 | Pending |
+| OINV-02 | Phase 30 | Pending |
+| OINV-03 | Phase 30 | Pending |
+| OINV-04 | Phase 31 | Pending |
+| OINV-05 | Phase 31 | Pending |
+| OINV-06 | Phase 31 | Pending |
+| OINV-07 | Phase 31 | Pending |
+| OINV-08 | Phase 31 | Pending |
+| OINV-09 | Phase 32 | Pending |
 
 **Coverage:**
 - Active v1 + v1.1 requirements: 34 total
 - Mapped to phases: 34 ✓
 - Unmapped: 0 ✓
 - Omitted historical v1.2 requirements: 24 total
+- Active v1.3 requirements: 9 total
+- Mapped to phases: 9 ✓
 
 ---
 *Requirements defined: 2026-04-21*
-*Last updated: 2026-04-29 after omitting redundant Phase 21-26 backend deployment strategy scope*
+*Last updated: 2026-04-30 after defining v1.3 order invoice preview and export requirements*

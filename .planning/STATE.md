@@ -1,25 +1,24 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Backend Deployment Strategy
-status: milestone_complete
-stopped_at: "Phase 29 planned: 3 plans ready to execute"
-last_updated: "2026-04-29T23:23:42.947Z"
-last_activity: 2026-04-29 -- Phase 29 execution started
+milestone: v1.3
+milestone_name: Order Invoice Preview and Export
+status: ready
+last_updated: "2026-04-30T07:47:55.458Z"
+last_activity: 2026-04-30
 progress:
-  total_phases: 25
-  completed_phases: 9
-  total_plans: 28
-  completed_plans: 37
-  percent: 36
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 ## Current Position
 
-Phase: 29
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-04-29
+Phase: 30
+Plan: —
+Status: Roadmap ready
+Last activity: 2026-04-30 — Milestone v1.3 roadmap created
 
 ## Decisions
 
@@ -43,6 +42,8 @@ Last activity: 2026-04-29
 - Keep gateway/service transport mismatches and partial isolated-database wiring as unresolved architecture inputs until Phase 22 classifies them.
 - Use Phase 22 risk/disposition artifacts (`22-03`, `22-04`) as guardrails before Phase 23 chooses any Kubernetes platform topology.
 - Omit phases 21-26 from active milestone closure as redundant by user decision on 2026-04-29; keep historical artifacts, but resume active work at Phase 27.
+- v1.3 order invoice preview/export must reuse the existing payments-service invoice model with `order_id` instead of adding a duplicate invoice store in orders-service.
+- Order invoice preview and extraction must derive financial truth from backend-authorized order/invoice DTOs, not frontend-only recomputation.
 
 ## Last Session
 
@@ -77,6 +78,13 @@ Stopped at: Phase 29 planned: 3 plans ready to execute
 - Phase 27 added: Frontend shared API definition standardization and edge-case audit
 - Phase 28 added: Artwork upload draft backend gap audit and contract cleanup
 - Phase 29 added: please check /inventory from frontend and please implement delete artwork, edit artwork and show on profile functions with best practice. And check if we have got any where in inventory that can trigger starting auction
+- Phase 30 added: Order-linked invoice backend contract and materialization
+- Phase 31 added: Orders invoice preview and extraction UI
+- Phase 32 added: Order invoice validation and milestone closure
+
+**Planned Phase:** 30 (Order-linked invoice backend contract and materialization) — roadmap approved — 2026-04-30
+**Planned Phase:** 31 (Orders invoice preview and extraction UI) — roadmap approved — 2026-04-30
+**Planned Phase:** 32 (Order invoice validation and milestone closure) — roadmap approved — 2026-04-30
 
 **Planned Phase:** 28 (Artwork upload draft backend gap audit and contract cleanup) - 3 plans - 2026-04-29T14:58:47.943Z
 **Planned Phase:** 20 (Auction start orchestration and seller lifecycle status) — 4 plans — 2026-04-27T07:41:03.407Z
