@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { ChevronRight } from 'lucide-react'
 import type { OrderResponse } from '@shared/apis/orderApis'
 import type { OrdersWorkspaceScope } from '../types/orderTypes'
+import { getOrderListInvoiceAvailability } from '../utils/orderInvoicePresentation'
 import {
   formatOrderDate,
   formatOrderMoney,
@@ -13,6 +14,7 @@ import {
   getPaymentMethodLabel,
   getPrimaryArtwork,
 } from '../utils/orderPresentation'
+import { OrderInvoiceStatusChip } from './OrderInvoiceStatusChip'
 import { OrderStatusBadge } from './OrderStatusBadge'
 
 type OrderListCardProps = {
@@ -26,12 +28,13 @@ export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProp
   const role = getOrderActorRole(order, currentUserId, scope)
   const displayStatus = getDisplayOrderStatus(order, role)
   const nextStepDescription = getNextStepDescription(order, role)
+  const invoiceAvailability = getOrderListInvoiceAvailability(order)
 
   return (
     <Link
       href={{
         pathname: `/orders/${order.id}`,
-        query: { scope },
+        query: { scope, invoice: '1' },
       }}
       className="group block rounded-[28px] border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm"
     >
@@ -59,6 +62,7 @@ export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProp
                 {order.orderNumber}
               </h3>
               <OrderStatusBadge status={displayStatus} />
+              <OrderInvoiceStatusChip availability={invoiceAvailability} />
             </div>
             <p className="mt-1 truncate text-sm text-slate-900">
               {primaryArtwork?.artworkTitle ?? 'Artwork details available on the order detail page'}
