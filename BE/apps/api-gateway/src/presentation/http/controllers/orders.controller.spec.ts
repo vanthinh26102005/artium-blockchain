@@ -116,12 +116,75 @@ describe('OrdersController', () => {
 
   it('returns an order invoice for an authorized seller', async () => {
     sendRpcMock.mockImplementation(async (_client: any, pattern: any) =>
-      pattern.cmd === 'get_order_by_id' ? order : invoice,
+      pattern.cmd === 'get_order_by_id'
+        ? {
+            ...order,
+            items: [
+              ...order.items,
+              {
+                id: 'item-2',
+                orderId: 'order-1',
+                artworkId: 'artwork-2',
+                sellerId: 'seller-2',
+                artworkTitle: 'Red Study',
+                artworkImageUrl: null,
+                priceAtPurchase: 50,
+                quantity: 1,
+                currency: 'USD',
+                payoutStatus: 'pending',
+              },
+            ],
+          }
+        : {
+            ...invoice,
+            shippingAddress: { city: 'Ho Chi Minh City' },
+            billingAddress: { city: 'Ho Chi Minh City' },
+            payment: {
+              ...invoice.payment,
+              paymentTransactionId: 'tx-1',
+              paymentIntentId: 'pi-1',
+              txHash: '0xabc',
+            },
+            items: [
+              { id: 'invoice-item-1', sellerId: 'seller-1' },
+              { id: 'invoice-item-2', sellerId: 'seller-2' },
+            ],
+          },
     );
+
+    const result = await controller.getOrderInvoice('order-1', {
+      user: { id: 'seller-1' },
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        shippingAddress: null,
+        billingAddress: null,
+        payment: expect.objectContaining({
+          paymentTransactionId: null,
+          paymentIntentId: null,
+          txHash: null,
+        }),
+        items: [{ id: 'invoice-item-1', sellerId: 'seller-1' }],
+      }),
+    );
+  });
+
+  it('throws not found before payment RPC for buyerless seller orders', async () => {
+    sendRpcMock.mockImplementation(async () => ({
+      ...order,
+      collectorId: null,
+    }));
 
     await expect(
       controller.getOrderInvoice('order-1', { user: { id: 'seller-1' } }),
-    ).resolves.toEqual(invoice);
+    ).rejects.toBeInstanceOf(NotFoundException);
+
+    expect(
+      sendRpcMock.mock.calls.some(([, pattern]: any[]) => {
+        return pattern.cmd === 'get_or_materialize_order_invoice';
+      }),
+    ).toBe(false);
   });
 
   it('throws not found before payment RPC for an unauthorized user', async () => {

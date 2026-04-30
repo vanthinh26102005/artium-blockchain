@@ -57,6 +57,8 @@ type AuthorizedOrderObject = OrderObject & {
   items?: OrderItemAccessObject[];
 };
 
+type OrderInvoiceViewerRole = 'buyer' | 'seller';
+
 @ApiTags('Orders')
 @Controller('orders')
 export class OrdersController {
@@ -87,10 +89,14 @@ export class OrdersController {
   private buildOrderInvoiceSource(
     order: AuthorizedOrderObject,
   ): OrderInvoiceSourceOrderDto {
+    if (!order.collectorId) {
+      throw new NotFoundException('Order invoice not found');
+    }
+
     return {
       id: order.id,
       orderNumber: order.orderNumber,
-      collectorId: order.collectorId ?? '',
+      collectorId: order.collectorId,
       status: order.status,
       paymentStatus: order.paymentStatus,
       paymentMethod: order.paymentMethod ?? null,
@@ -121,6 +127,33 @@ export class OrdersController {
       createdAt: order.createdAt,
       updatedAt: order.updatedAt ?? order.createdAt,
       confirmedAt: order.confirmedAt ?? null,
+    };
+  }
+
+  private getOrderInvoiceViewerRole(
+    order: AuthorizedOrderObject,
+    userId?: string,
+  ): OrderInvoiceViewerRole {
+    return order.collectorId === userId ? 'buyer' : 'seller';
+  }
+
+  private redactOrderInvoiceForSeller(
+    invoice: OrderInvoiceObject,
+    sellerId?: string,
+  ): OrderInvoiceObject {
+    return {
+      ...invoice,
+      shippingAddress: null,
+      billingAddress: null,
+      payment: {
+        paymentStatus: invoice.payment.paymentStatus,
+        paymentMethod: invoice.payment.paymentMethod,
+        paymentTransactionId: null,
+        paymentIntentId: null,
+        txHash: null,
+        onChainOrderId: invoice.payment.onChainOrderId ?? null,
+      },
+      items: invoice.items.filter((item) => item.sellerId === sellerId),
     };
   }
 
@@ -194,12 +227,19 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: 'Order not found' })
   async getOrderInvoice(@Param('id') id: string, @Req() req: any) {
     const order = await this.getAuthorizedOrder(id, req.user?.id);
+    const viewerRole = this.getOrderInvoiceViewerRole(order, req.user?.id);
 
-    return sendRpc<OrderInvoiceObject>(
+    const invoice = await sendRpc<OrderInvoiceObject>(
       this.paymentsClient,
       { cmd: 'get_or_materialize_order_invoice' },
       { order: this.buildOrderInvoiceSource(order) },
     );
+
+    if (viewerRole === 'seller') {
+      return this.redactOrderInvoiceForSeller(invoice, req.user?.id);
+    }
+
+    return invoice;
   }
 
   @Get(':id')
