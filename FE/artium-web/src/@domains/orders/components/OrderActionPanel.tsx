@@ -130,7 +130,7 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
   ].filter(Boolean) as Array<{ key: Exclude<ActiveAction, null>; label: string; variant: 'default' | 'outline' }>
 
   return (
-    <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+    <div tabIndex={10} className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
       <div className="flex flex-col gap-2">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Next step</p>
         <h2 className="text-xl font-semibold text-slate-900">Manage this order</h2>
