@@ -212,7 +212,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 27. Frontend shared API definition standardization and edge-case audit | 4/4 | Complete    | 2026-04-29 |
 | 28. Artwork upload draft backend gap audit and contract cleanup | 3/3 | Complete   | 2026-04-29 |
 | 29. Inventory artwork actions and profile visibility | 3/3 | Complete | 2026-04-29 |
-| 30. Order-linked invoice backend contract and materialization | 2/2 | Planned | - |
+| 30. Order-linked invoice backend contract and materialization | 1/2 | In Progress|  |
 | 31. Orders invoice preview and extraction UI | 0/TBD | Not started | - |
 | 32. Order invoice validation and milestone closure | 0/TBD | Not started | - |
 
@@ -491,12 +491,12 @@ Cross-cutting constraints:
   3. Developer can request invoice data for an order without an existing invoice and see one idempotently derived from persisted order, order items, payment, shipping, and lifecycle data.
   4. Developer can request invoice data repeatedly for the same order and observe stable invoice identity, totals, line items, and status with no duplicate invoices.
   5. Backend DTOs expose only the fields needed for order invoice preview/export and avoid leaking unrelated buyer/seller private data across workspace scopes.
-**Plans:** `.planning/phases/30-order-linked-invoice-backend-contract-and-materialization/30-01-PLAN.md`, `.planning/phases/30-order-linked-invoice-backend-contract-and-materialization/30-02-PLAN.md`
+**Plans:** 1/2 plans executed
 **UI hint:** no
 
 Plans:
 **Wave 1**
-- [ ] 30-01 — Payments-service order invoice DTO and materialization contract
+- [x] 30-01 — Payments-service order invoice DTO and materialization contract
 
 **Wave 2 *(blocked on Wave 1 completion)***
 - [ ] 30-02 — Gateway authorized order invoice endpoint and frontend API contract
