@@ -21,15 +21,19 @@ Let artists and sellers run trustworthy auctions without bypassing ownership, el
 
 ## Current State
 
-- The frontend orders domain lives under `FE/artium-web/src/@domains/orders` and currently provides private buyer/seller order lists, order detail, payment/shipping summaries, copyable payment identifiers, and role-valid lifecycle actions.
+- The frontend orders domain lives under `FE/artium-web/src/@domains/orders` and currently provides private buyer/seller order lists, order detail, payment/shipping summaries, copyable payment identifiers, role-valid lifecycle actions, and invoice preview/export entry points.
 - The frontend invoice API and quick-sell invoice surfaces already exist separately under `FE/artium-web/src/@shared/apis/invoiceApis.ts` and `FE/artium-web/src/@domains/quick-sell`, but `/orders` does not yet expose invoice preview or extraction actions.
 - Phase 30 completed the backend order invoice bridge: `GET /orders/:id/invoice` authorizes through the existing private order policy, calls payments-service materialization only after authorization, redacts seller invoice responses, and exposes `orderApis.getOrderInvoice` for Phase 31.
 - Payments-service now reuses existing invoice persistence to read or idempotently materialize order-linked invoices with stable `INV-${orderNumber}` numbers, invoice items, totals, and payment transaction links.
-- Phase 31 should build invoice preview/extraction UI on top of the Phase 30 backend/API contract rather than adding new invoice persistence or recomputing financial truth in the frontend.
+- Phase 31 completed the Orders invoice preview and extraction UI: order cards deep-link to the invoice panel, order detail lazily fetches `orderApis.getOrderInvoice`, the preview modal renders a backend DTO-driven invoice document, and browser print/save-as-PDF output is scoped to the invoice document.
 
 ## Active Requirements
 
-- Order invoice preview/export requirements live in `.planning/REQUIREMENTS.md` under `v1.3 Requirements`.
+- OINV-09 remains active for Phase 32 validation and milestone closure.
+
+## Validated Requirements
+
+- Validated in Phase 31: OINV-04, OINV-05, OINV-06, OINV-07, and OINV-08 for Orders invoice actions, responsive preview, loading/unavailable/retry states, browser print extraction, and backend DTO-derived financial truth.
 
 ## Key Decisions
 
@@ -63,4 +67,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state.
 
 ---
-*Last updated: 2026-04-30 after completing Phase 30 order-linked invoice backend contract*
+*Last updated: 2026-04-30 after completing Phase 31 Orders invoice preview and extraction UI*
