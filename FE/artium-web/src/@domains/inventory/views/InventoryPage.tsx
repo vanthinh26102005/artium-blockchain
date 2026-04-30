@@ -741,15 +741,17 @@ export const InventoryPage = () => {
                     Loading...
                   </div>
                 ) : viewMode === 'grid' ? (
-                  <InventoryArtworkGrid
-                    artworks={artworks}
-                    onEdit={handleEditArtwork}
-                    onMove={handleMoveArtwork}
-                    onDelete={handleOpenDeleteModal}
-                    onOpenDetails={handleOpenDetails}
-                    onToggleProfileVisibility={handleToggleProfileVisibility}
-                    onStartAuction={handleStartAuction}
-                  />
+                  <div className="mt-4">
+                    <InventoryArtworkGrid
+                      artworks={artworks}
+                      onEdit={handleEditArtwork}
+                      onMove={handleMoveArtwork}
+                      onDelete={handleOpenDeleteModal}
+                      onOpenDetails={handleOpenDetails}
+                      onToggleProfileVisibility={handleToggleProfileVisibility}
+                      onStartAuction={handleStartAuction}
+                    />                    
+                  </div>
                 ) : (
                   <div className="mt-4">
                     <InventoryArtworkList

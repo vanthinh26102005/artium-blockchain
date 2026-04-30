@@ -379,15 +379,12 @@ export const InventoryArtworkList = ({
           onDragEnd={handleFolderDragEnd}
           style={{ marginLeft: nestLevel > 0 ? `${nestLevel * 24}px` : undefined }}
           className={cn(
-            'group relative flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition-all',
+            'group relative flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition-all border-black',
             isDragging && 'opacity-50',
             isDragOver && 'border-blue-400 bg-blue-50',
             isDropTarget && 'border-green-400 bg-green-50 ring-2 ring-green-200',
             isFolderDropTarget && 'border-violet-400 bg-violet-50 ring-2 ring-violet-200',
-            !isDragging && !isDragOver && !isDropTarget && !isFolderDropTarget &&
-            (nestLevel > 0
-              ? 'border-black bg-gradient-to-r from-orange-50 to-yellow-50 hover:from-orange-100 hover:to-yellow-100'
-              : 'border-black bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100'),
+            !isDragging && !isDragOver && !isDropTarget && !isFolderDropTarget,
           )}
         >
           {/* Drop zone overlay for artwork/folder drops */}
