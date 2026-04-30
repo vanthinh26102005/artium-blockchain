@@ -79,7 +79,7 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
         className,
       )}
     >
-      <header className="flex flex-col gap-6 border-b border-slate-200 pb-6 lg:flex-row lg:items-start lg:justify-between">
+      <header className="order-invoice-document-header flex flex-col gap-6 border-b border-slate-200 pb-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
             Artium invoice
@@ -97,14 +97,14 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
           </p>
         </div>
 
-        <div className="grid gap-4 rounded-[16px] border border-slate-200 bg-slate-50 p-4 sm:grid-cols-3 lg:min-w-[420px]">
+        <div className="order-invoice-document-summary grid gap-4 rounded-[16px] border border-slate-200 bg-slate-50 p-4 sm:grid-cols-3 lg:min-w-[420px]">
           <FieldBlock label="Issue date" value={formatInvoiceDate(invoice.issueDate ?? invoice.createdAt)} />
           <FieldBlock label="Paid date" value={formatInvoiceDate(invoice.paidAt)} />
           <FieldBlock label="Total" value={formatInvoiceMoney(invoice.totalAmount, invoice.currency)} />
         </div>
       </header>
 
-      <section className="grid gap-4 py-6 lg:grid-cols-2">
+      <section className="order-invoice-party-grid grid gap-4 py-6 lg:grid-cols-2">
         <div className="rounded-[16px] border border-slate-200 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
             Buyer
@@ -130,13 +130,13 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
         </div>
       </section>
 
-      <section className="grid gap-4 pb-6 lg:grid-cols-2">
+      <section className="order-invoice-address-grid grid gap-4 pb-6 lg:grid-cols-2">
         <AddressBlock title="Shipping" lines={shippingLines} />
         <AddressBlock title="Billing" lines={billingLines} />
       </section>
 
       <section className="border-t border-slate-200 py-6">
-        <div className="hidden rounded-[16px] border border-slate-200 lg:block">
+        <div className="order-invoice-line-table hidden rounded-[16px] border border-slate-200 lg:block">
           <div className="grid grid-cols-[minmax(0,1.7fr)_0.5fr_0.8fr_0.8fr_0.8fr_0.9fr] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
             <span>Artwork</span>
             <span>Qty</span>
@@ -185,7 +185,7 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
           ))}
         </div>
 
-        <div className="space-y-4 lg:hidden">
+        <div className="order-invoice-line-cards space-y-4 lg:hidden">
           {invoice.items.map((item) => (
             <div key={item.id} className="rounded-[16px] border border-slate-200 p-4">
               <p className="font-medium text-slate-900">
@@ -206,8 +206,8 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
         </div>
       </section>
 
-      <section className="grid gap-6 border-t border-slate-200 pt-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="grid gap-4 sm:grid-cols-2">
+      <section className="order-invoice-payment-grid grid gap-6 border-t border-slate-200 pt-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="order-invoice-payment-fields grid gap-4 sm:grid-cols-2">
           <FieldBlock label="Payment status" value={formatInvoiceField(invoice.payment.paymentStatus)} />
           <FieldBlock label="Payment method" value={formatInvoiceField(invoice.payment.paymentMethod)} />
           <FieldBlock label="Transaction" value={formatInvoiceField(invoice.payment.paymentTransactionId)} />

@@ -9,6 +9,7 @@ import { CopyValueField } from '@shared/components/display/CopyValueField'
 import { Button } from '@shared/components/ui/button'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { OrderActionPanel } from '../components/OrderActionPanel'
+import { OrderInvoiceDocument } from '../components/OrderInvoiceDocument'
 import { OrderInvoicePanel } from '../components/OrderInvoicePanel'
 import { OrderInvoicePreviewModal } from '../components/OrderInvoicePreviewModal'
 import { OrderStatusBadge } from '../components/OrderStatusBadge'
@@ -569,6 +570,11 @@ export const OrderDetailPageView = () => {
           onPrint={handlePrintInvoice}
           onRetry={handleRetryInvoice}
         />
+      ) : null}
+      {invoiceAvailability.state === 'ready' && invoice ? (
+        <div className="order-invoice-print-host" aria-hidden="true">
+          <OrderInvoiceDocument invoice={invoice} />
+        </div>
       ) : null}
     </>
   )
