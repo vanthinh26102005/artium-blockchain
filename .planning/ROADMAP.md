@@ -212,7 +212,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 27. Frontend shared API definition standardization and edge-case audit | 4/4 | Complete    | 2026-04-29 |
 | 28. Artwork upload draft backend gap audit and contract cleanup | 3/3 | Complete   | 2026-04-29 |
 | 29. Inventory artwork actions and profile visibility | 3/3 | Complete | 2026-04-29 |
-| 30. Order-linked invoice backend contract and materialization | 2/2 | Complete   | 2026-04-30 |
+| 30. Order-linked invoice backend contract and materialization | 2/2 | Complete    | 2026-04-30 |
 | 31. Orders invoice preview and extraction UI | 0/TBD | Not started | - |
 | 32. Order invoice validation and milestone closure | 0/TBD | Not started | - |
 

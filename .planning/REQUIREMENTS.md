@@ -136,9 +136,9 @@ Milestone focus: order-linked invoice preview and extraction from the authentica
 
 ### Order-Invoice Backend Contract
 
-- [ ] **OINV-01**: Buyers and sellers can request invoice data for an order only when the existing `/orders` access policy already authorizes them to view that order.
-- [ ] **OINV-02**: Backend can return an order-linked invoice read model that includes invoice number, status, issue/paid dates, order number, artwork line items, totals, currency, payment identifiers, buyer/seller context, and shipping/billing context without exposing cross-user data.
-- [ ] **OINV-03**: Backend can idempotently materialize an invoice from canonical order, order item, and payment records when an authorized order has no linked invoice yet, reusing payments-service invoice persistence and `order_id` rather than adding a duplicate orders-service invoice store.
+- [x] **OINV-01**: Buyers and sellers can request invoice data for an order only when the existing `/orders` access policy already authorizes them to view that order.
+- [x] **OINV-02**: Backend can return an order-linked invoice read model that includes invoice number, status, issue/paid dates, order number, artwork line items, totals, currency, payment identifiers, buyer/seller context, and shipping/billing context without exposing cross-user data.
+- [x] **OINV-03**: Backend can idempotently materialize an invoice from canonical order, order item, and payment records when an authorized order has no linked invoice yet, reusing payments-service invoice persistence and `order_id` rather than adding a duplicate orders-service invoice store.
 
 ### Orders Invoice UI
 
@@ -217,9 +217,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAUC-08 | Phase 20 | Complete |
 | SAUC-09 | Phase 20 | Complete |
 | v1.2 backend deployment strategy | Phases 21-26 | Omitted/redundant 2026-04-29 |
-| OINV-01 | Phase 30 | Pending |
-| OINV-02 | Phase 30 | Pending |
-| OINV-03 | Phase 30 | Pending |
+| OINV-01 | Phase 30 | Complete |
+| OINV-02 | Phase 30 | Complete |
+| OINV-03 | Phase 30 | Complete |
 | OINV-04 | Phase 31 | Pending |
 | OINV-05 | Phase 31 | Pending |
 | OINV-06 | Phase 31 | Pending |

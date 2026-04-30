@@ -2,24 +2,24 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Order Invoice Preview and Export
-status: executing
+status: ready_to_plan
 stopped_at: "Phase 30 planned: 2 plans ready to execute"
 last_updated: "2026-04-30T08:12:32.758Z"
 last_activity: 2026-04-30 -- Phase 30 execution started
 progress:
   total_phases: 28
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 30
   completed_plans: 40
-  percent: 100
+  percent: 36
 ---
 
 ## Current Position
 
-Phase: 30 (order-linked-invoice-backend-contract-and-materialization) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 30
-Last activity: 2026-04-30 -- Phase 30 execution started
+Phase: 31
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-04-30
 
 ## Decisions
 
