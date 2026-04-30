@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 27: Frontend shared API definition standardization and edge-case audit** - Standardize frontend shared API request behavior while preserving existing module exports (completed 2026-04-29)
 - [x] **Phase 28: Artwork upload draft backend gap audit and contract cleanup** - Audit `/artworks/upload?draftArtworkId=...` against backend draft-artwork APIs, close contract gaps, and keep the implementation clean (completed 2026-04-29)
 - [x] **Phase 29: Inventory artwork actions and profile visibility** - Implement backend-backed inventory edit/delete/profile visibility and safe auction handoff behavior (completed 2026-04-29)
-- [ ] **Phase 30: Order-linked invoice backend contract and materialization** - Expose authorization-safe order invoice reads and idempotently materialize missing invoices from canonical order/payment data
+- [x] **Phase 30: Order-linked invoice backend contract and materialization** - Expose authorization-safe order invoice reads and idempotently materialize missing invoices from canonical order/payment data (completed 2026-04-30)
 - [ ] **Phase 31: Orders invoice preview and extraction UI** - Add invoice actions, preview, and print/download-ready extraction to the Orders workspace using a professional document layout
 - [ ] **Phase 32: Order invoice validation and milestone closure** - Verify backend authorization, frontend behavior, responsive UI quality, extraction output, and milestone evidence
 
@@ -212,7 +212,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 27. Frontend shared API definition standardization and edge-case audit | 4/4 | Complete    | 2026-04-29 |
 | 28. Artwork upload draft backend gap audit and contract cleanup | 3/3 | Complete   | 2026-04-29 |
 | 29. Inventory artwork actions and profile visibility | 3/3 | Complete | 2026-04-29 |
-| 30. Order-linked invoice backend contract and materialization | 1/2 | In Progress|  |
+| 30. Order-linked invoice backend contract and materialization | 2/2 | Complete   | 2026-04-30 |
 | 31. Orders invoice preview and extraction UI | 0/TBD | Not started | - |
 | 32. Order invoice validation and milestone closure | 0/TBD | Not started | - |
 
@@ -491,7 +491,7 @@ Cross-cutting constraints:
   3. Developer can request invoice data for an order without an existing invoice and see one idempotently derived from persisted order, order items, payment, shipping, and lifecycle data.
   4. Developer can request invoice data repeatedly for the same order and observe stable invoice identity, totals, line items, and status with no duplicate invoices.
   5. Backend DTOs expose only the fields needed for order invoice preview/export and avoid leaking unrelated buyer/seller private data across workspace scopes.
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 **UI hint:** no
 
 Plans:
@@ -499,7 +499,7 @@ Plans:
 - [x] 30-01 — Payments-service order invoice DTO and materialization contract
 
 **Wave 2 *(blocked on Wave 1 completion)***
-- [ ] 30-02 — Gateway authorized order invoice endpoint and frontend API contract
+- [x] 30-02 — Gateway authorized order invoice endpoint and frontend API contract
 
 Cross-cutting constraints:
 - Order invoice persistence must reuse payments-service `Invoice` and `InvoiceItem` entities with `order_id`; do not create an orders-service invoice table.
