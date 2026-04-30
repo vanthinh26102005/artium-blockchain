@@ -164,3 +164,63 @@ input[type='number'] {
   -moz-appearance: textfield; /* Firefox */
   appearance: textfield;
 }
+
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  nav,
+  header,
+  [data-order-workspace-chrome='true'],
+  .order-invoice-screen-only {
+    display: none !important;
+  }
+
+  .order-invoice-modal-frame {
+    position: static !important;
+    inset: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    max-width: none !important;
+    overflow: visible !important;
+    transform: none !important;
+    border: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  .order-invoice-modal-frame [class*='overflow-y-auto'] {
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .order-invoice-print-root,
+  .order-invoice-print-root * {
+    visibility: visible !important;
+  }
+
+  .order-invoice-print-root {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0.5in !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+  }
+
+  .order-invoice-print-root tr {
+    break-inside: avoid;
+  }
+}

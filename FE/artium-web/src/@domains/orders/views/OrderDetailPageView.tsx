@@ -16,6 +16,7 @@ import { OrderTimeline } from '../components/OrderTimeline'
 import type { OrdersWorkspaceScope } from '../types/orderTypes'
 import { hydrateOrderItems } from '../utils/hydrateOrderItems'
 import {
+  canPrintOrderInvoice,
   getOrderInvoiceAvailability,
   INVOICE_UNAVAILABLE_COPY,
 } from '../utils/orderInvoicePresentation'
@@ -229,7 +230,13 @@ export const OrderDetailPageView = () => {
     void loadInvoice(order.id)
   }
 
-  const handlePrintInvoice = () => undefined
+  const handlePrintInvoice = () => {
+    if (!canPrintOrderInvoice(invoiceAvailability)) {
+      return
+    }
+
+    window.print()
+  }
 
   return (
     <>
