@@ -285,7 +285,7 @@ export const OrderDetailPageView = () => {
           </div>
         ) : (
           <>
-            <div className="mt-6 rounded-[32px] border border-slate-200 bg-white px-6 py-6 shadow-sm">
+            <div tabIndex={0} className="mt-6 rounded-[32px] border border-slate-200 bg-white px-6 py-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
@@ -337,7 +337,7 @@ export const OrderDetailPageView = () => {
 
             <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.9fr)]">
               <div className="space-y-5">
-                <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+                <div tabIndex={1} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <div className="flex items-center gap-3">
                     <ReceiptText className="h-5 w-5 text-slate-500" />
                     <h2 className="text-xl font-semibold text-slate-900">Artwork summary</h2>
@@ -387,7 +387,7 @@ export const OrderDetailPageView = () => {
                 </div>
 
                 <div className="grid gap-5 lg:grid-cols-2">
-                  <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+                  <div tabIndex={2} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <div className="flex items-center gap-3">
                       <Truck className="h-5 w-5 text-slate-500" />
                       <h2 className="text-xl font-semibold text-slate-900">Shipping</h2>
@@ -440,7 +440,7 @@ export const OrderDetailPageView = () => {
                     </div>
                   </div>
 
-                  <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+                  <div tabIndex={3} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <div className="flex items-center gap-3">
                       <MapPin className="h-5 w-5 text-slate-500" />
                       <h2 className="text-xl font-semibold text-slate-900">Payment & records</h2>
@@ -487,7 +487,7 @@ export const OrderDetailPageView = () => {
                   </div>
                 </div>
 
-                <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+                <div tabIndex={4} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <h2 className="text-xl font-semibold text-slate-900">Lifecycle timeline</h2>
                   <div className="mt-6">
                     <OrderTimeline steps={timelineSteps} />
@@ -518,7 +518,7 @@ export const OrderDetailPageView = () => {
                   panelRef={invoicePanelRef}
                 />
 
-                <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+                <div tabIndex={5} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <h2 className="text-xl font-semibold text-slate-900">Order totals</h2>
                   <div className="mt-6 space-y-4 text-sm text-slate-600">
                     <div className="flex items-center justify-between">

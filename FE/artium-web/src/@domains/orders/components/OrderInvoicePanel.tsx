@@ -30,7 +30,7 @@ export const OrderInvoicePanel = ({
     <div
       ref={panelRef}
       tabIndex={-1}
-      className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
