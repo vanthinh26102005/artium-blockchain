@@ -171,42 +171,47 @@ export const SellerRegistrationPage = () => {
   }
 
   const existingProfileHref = buildProfileEditHref(authUser?.slug || authUser?.id || '')
+  const fieldLabelClass = 'text-sm font-semibold text-slate-800'
+  const inputClass =
+    'mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-4 focus:ring-slate-900/10'
+  const errorTextClass = 'mt-2 block text-xs font-medium text-rose-600'
 
   return (
     <>
       <Metadata title="Register as Seller | Artium" />
-      <main className="min-h-screen bg-[#f6f1e8] font-['Inter'] text-[#251d16]">
-        <section className="relative overflow-hidden border-b border-[#d8c9b5] bg-[radial-gradient(circle_at_top_left,#f8d58a_0,#f6f1e8_32%,#efe3d1_100%)]">
-          <div className="absolute top-[-14rem] right-[-12rem] h-96 w-96 rounded-full bg-[#9f4d2f]/20 blur-3xl" />
-          <div className="relative container py-12 lg:py-16">
-            <div className="max-w-3xl">
-              <p className="text-xs font-semibold tracking-[0.3em] text-[#9f4d2f] uppercase">
-                Seller onboarding
+      <div className="-mx-6 -my-1 min-h-screen bg-[#F7F8FA] px-4 pb-12 text-slate-900 sm:-mx-8 sm:px-6 lg:-mx-12 lg:px-8">
+        <div className="pt-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                Seller workspace
               </p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#21170f] lg:text-6xl">
-                Register your seller profile before starting an auction.
-              </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-[#6f5a45]">
-                This creates your seller profile and grants your account seller access. Verification
-                and payment onboarding remain separate policy gates for future marketplace controls.
+              <h1 className="mt-2 text-3xl font-semibold text-slate-900">Register seller</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Create the seller profile required for auction setup, fulfillment, and seller-only
+                marketplace tools.
               </p>
             </div>
+            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm">
+              <ShieldCheck className="h-4 w-4 text-slate-500" />
+              {existingSellerProfile ? 'Seller active' : 'Onboarding'}
+            </span>
           </div>
-        </section>
+        </div>
 
-        <section className="container grid gap-6 py-8 lg:grid-cols-[1fr_360px] lg:py-10">
+        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <form
             onSubmit={(event) => void handleSubmit(handleRegister)(event)}
-            className="rounded-[2rem] border border-[#d9c8b1] bg-white/90 p-6 shadow-[0_18px_60px_rgba(80,52,30,0.12)] lg:p-8"
+            className="rounded-[32px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8"
           >
             {submitError ? (
-              <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
                 {submitError}
               </div>
             ) : null}
 
             {existingSellerProfile ? (
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6">
+              <div className="rounded-[28px] border border-emerald-200 bg-emerald-50 p-6">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-700" />
                   <div>
@@ -232,43 +237,37 @@ export const SellerRegistrationPage = () => {
               <div className="space-y-6">
                 <div className="grid gap-5 lg:grid-cols-2">
                   <label className="block">
-                    <span className="text-sm font-semibold text-[#3c2d20]">
-                      Seller display name
-                    </span>
+                    <span className={fieldLabelClass}>Seller display name</span>
                     <input
                       {...register('displayName')}
-                      className="mt-2 w-full rounded-2xl border border-[#d9c8b1] bg-white px-4 py-3 text-sm transition outline-none focus:border-[#9f4d2f] focus:ring-4 focus:ring-[#9f4d2f]/10"
+                      className={inputClass}
                       placeholder="Your artist or gallery name"
                     />
                     {errors.displayName ? (
-                      <span className="mt-2 block text-xs text-rose-600">
-                        {errors.displayName.message}
-                      </span>
+                      <span className={errorTextClass}>{errors.displayName.message}</span>
                     ) : null}
                   </label>
 
                   <label className="block">
-                    <span className="text-sm font-semibold text-[#3c2d20]">Profile URL</span>
+                    <span className={fieldLabelClass}>Profile URL</span>
                     <input
                       {...register('slug', { setValueAs: normalizeSellerSlug })}
-                      className="mt-2 w-full rounded-2xl border border-[#d9c8b1] bg-white px-4 py-3 text-sm transition outline-none focus:border-[#9f4d2f] focus:ring-4 focus:ring-[#9f4d2f]/10"
+                      className={inputClass}
                       placeholder="atelier-nguyen"
                     />
                     {errors.slug ? (
-                      <span className="mt-2 block text-xs text-rose-600">
-                        {errors.slug.message}
-                      </span>
+                      <span className={errorTextClass}>{errors.slug.message}</span>
                     ) : null}
                   </label>
                 </div>
 
                 <div>
-                  <span className="text-sm font-semibold text-[#3c2d20]">Seller type</span>
+                  <span className={fieldLabelClass}>Seller type</span>
                   <div className="mt-3 grid gap-3 lg:grid-cols-3">
                     {profileTypeOptions.map((option) => (
                       <label
                         key={option.value}
-                        className="cursor-pointer rounded-2xl border border-[#d9c8b1] bg-[#fbf7ef] p-4 transition has-[:checked]:border-[#9f4d2f] has-[:checked]:bg-[#fff3dd]"
+                        className="cursor-pointer rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:bg-slate-100 has-[:checked]:border-slate-900 has-[:checked]:bg-white has-[:checked]:shadow-sm"
                       >
                         <input
                           {...register('profileType')}
@@ -276,61 +275,53 @@ export const SellerRegistrationPage = () => {
                           value={option.value}
                           className="sr-only"
                         />
-                        <span className="block text-sm font-semibold text-[#2d2017]">
+                        <span className="block text-sm font-semibold text-slate-900">
                           {option.label}
                         </span>
-                        <span className="mt-1 block text-xs leading-5 text-[#7a6651]">
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
                           {option.description}
                         </span>
                       </label>
                     ))}
                   </div>
                   {errors.profileType ? (
-                    <span className="mt-2 block text-xs text-rose-600">
-                      {errors.profileType.message}
-                    </span>
+                    <span className={errorTextClass}>{errors.profileType.message}</span>
                   ) : null}
                 </div>
 
                 <label className="block">
-                  <span className="text-sm font-semibold text-[#3c2d20]">Seller bio</span>
+                  <span className={fieldLabelClass}>Seller bio</span>
                   <textarea
                     {...register('bio')}
                     rows={5}
-                    className="mt-2 w-full rounded-2xl border border-[#d9c8b1] bg-white px-4 py-3 text-sm transition outline-none focus:border-[#9f4d2f] focus:ring-4 focus:ring-[#9f4d2f]/10"
+                    className={inputClass}
                     placeholder="Describe your practice, gallery program, or collection focus."
                   />
-                  {errors.bio ? (
-                    <span className="mt-2 block text-xs text-rose-600">{errors.bio.message}</span>
-                  ) : null}
+                  {errors.bio ? <span className={errorTextClass}>{errors.bio.message}</span> : null}
                 </label>
 
                 <div className="grid gap-5 lg:grid-cols-2">
                   <label className="block">
-                    <span className="text-sm font-semibold text-[#3c2d20]">Location</span>
+                    <span className={fieldLabelClass}>Location</span>
                     <input
                       {...register('location')}
-                      className="mt-2 w-full rounded-2xl border border-[#d9c8b1] bg-white px-4 py-3 text-sm transition outline-none focus:border-[#9f4d2f] focus:ring-4 focus:ring-[#9f4d2f]/10"
+                      className={inputClass}
                       placeholder="Ho Chi Minh City, Vietnam"
                     />
                     {errors.location ? (
-                      <span className="mt-2 block text-xs text-rose-600">
-                        {errors.location.message}
-                      </span>
+                      <span className={errorTextClass}>{errors.location.message}</span>
                     ) : null}
                   </label>
 
                   <label className="block">
-                    <span className="text-sm font-semibold text-[#3c2d20]">Website</span>
+                    <span className={fieldLabelClass}>Website</span>
                     <input
                       {...register('websiteUrl')}
-                      className="mt-2 w-full rounded-2xl border border-[#d9c8b1] bg-white px-4 py-3 text-sm transition outline-none focus:border-[#9f4d2f] focus:ring-4 focus:ring-[#9f4d2f]/10"
+                      className={inputClass}
                       placeholder="https://yourstudio.com"
                     />
                     {errors.websiteUrl ? (
-                      <span className="mt-2 block text-xs text-rose-600">
-                        {errors.websiteUrl.message}
-                      </span>
+                      <span className={errorTextClass}>{errors.websiteUrl.message}</span>
                     ) : null}
                   </label>
                 </div>
@@ -338,7 +329,7 @@ export const SellerRegistrationPage = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || isCheckingExisting}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#21170f] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#3a281b] disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
                 >
                   {isSubmitting ? 'Registering seller profile...' : 'Register as seller'}
                   <ArrowRight className="h-4 w-4" />
@@ -348,25 +339,25 @@ export const SellerRegistrationPage = () => {
           </form>
 
           <aside className="space-y-4">
-            <div className="rounded-[2rem] border border-[#d9c8b1] bg-[#21170f] p-6 text-white shadow-[0_18px_60px_rgba(33,23,15,0.22)]">
-              <Store className="h-6 w-6 text-[#f6d990]" />
+            <div className="rounded-[32px] border border-slate-900 bg-slate-900 p-6 text-white shadow-sm">
+              <Store className="h-6 w-6 text-white/80" />
               <h2 className="mt-4 text-xl font-semibold">What this unlocks</h2>
               <p className="mt-3 text-sm leading-6 text-white/75">
                 Seller registration enables profile seller sections and seller-only auction
                 preparation routes.
               </p>
             </div>
-            <div className="rounded-[2rem] border border-[#d9c8b1] bg-white/80 p-6">
-              <ShieldCheck className="h-6 w-6 text-[#9f4d2f]" />
-              <h2 className="mt-4 text-lg font-semibold text-[#251d16]">Policy defaults</h2>
-              <p className="mt-3 text-sm leading-6 text-[#6f5a45]">
+            <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+              <ShieldCheck className="h-6 w-6 text-slate-700" />
+              <h2 className="mt-4 text-lg font-semibold text-slate-900">Policy defaults</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
                 New seller profiles start active but unverified. Payment onboarding is not marked
                 complete during registration.
               </p>
             </div>
           </aside>
         </section>
-      </main>
+      </div>
     </>
   )
 }

@@ -21,9 +21,7 @@ import {
 } from '../components'
 import { useSellerAuctionStart } from '../hooks/useSellerAuctionStart'
 import { useSellerAuctionArtworkCandidates } from '../hooks/useSellerAuctionArtworkCandidates'
-import {
-  submitSellerAuctionStartTransaction,
-} from '../services/auctionStartWallet'
+import { submitSellerAuctionStartTransaction } from '../services/auctionStartWallet'
 import {
   DEFAULT_SELLER_AUCTION_TERMS,
   SELLER_AUCTION_DURATION_PRESETS,
@@ -31,20 +29,17 @@ import {
   validateSellerAuctionTerms,
   type SellerAuctionTermsFormValues,
 } from '../validations/sellerAuctionTerms.schema'
-import {
-  loadSellerAuctionTermsDraft,
-  saveSellerAuctionTermsDraft,
-} from '../utils'
+import { loadSellerAuctionTermsDraft, saveSellerAuctionTermsDraft } from '../utils'
 
 const policyCards = [
   {
     title: 'Contract-backed terms',
-    body: 'Reserve policy, increment, and duration are previewed as seller-set rules before activation.',
+    body: 'Reserve policy, increment, and duration are previewed before wallet activation.',
     icon: ShieldCheck,
   },
   {
     title: 'Fees and lock after activation',
-    body: 'Seller fees follow current policy. Reserve, increment, and duration lock once the auction is activated.',
+    body: 'Seller fees follow current policy. Economics lock once the auction is activated.',
     icon: Lock,
   },
   {
@@ -64,7 +59,7 @@ const CandidateImage = ({
   if (!candidate.thumbnailUrl) {
     return (
       <div
-        className={`flex aspect-[4/3] items-center justify-center rounded-[28px] bg-[#f5f5f5] text-[#191414]/45 ${className ?? ''}`}
+        className={`flex aspect-[4/3] items-center justify-center rounded-[24px] bg-slate-100 text-slate-400 ${className ?? ''}`}
       >
         <ImageOff className="h-10 w-10" />
       </div>
@@ -72,7 +67,9 @@ const CandidateImage = ({
   }
 
   return (
-    <div className={`relative aspect-[4/3] w-full overflow-hidden rounded-[28px] ${className ?? ''}`}>
+    <div
+      className={`relative aspect-[4/3] w-full overflow-hidden rounded-[24px] ${className ?? ''}`}
+    >
       <Image
         src={candidate.thumbnailUrl}
         alt={candidate.title}
@@ -98,22 +95,24 @@ const CandidateCard = ({
 
   return (
     <article
-      className={`flex h-full flex-col rounded-[34px] border bg-white p-3 shadow-sm transition ${
+      className={`flex h-full flex-col rounded-[28px] border bg-white p-3 shadow-sm transition ${
         isSelected
-          ? 'border-[#2351FC] shadow-[0_24px_80px_rgba(35,81,252,0.16)]'
-          : 'border-black/10'
-      } ${isBlocked ? 'bg-[#f5f5f5]' : 'hover:-translate-y-1 hover:shadow-xl'}`}
+          ? 'border-slate-900 shadow-[0_18px_48px_rgba(15,23,42,0.12)]'
+          : 'border-slate-200'
+      } ${isBlocked ? 'bg-slate-50' : 'hover:-translate-y-0.5 hover:shadow-md'}`}
     >
       <CandidateImage candidate={candidate} />
-      <div className="flex flex-1 flex-col gap-4 px-2 pb-2 pt-5">
+      <div className="flex flex-1 flex-col gap-4 px-2 pt-5 pb-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#2351FC]">
+          <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
             {candidate.status}
           </p>
-          <h3 className="mt-2 line-clamp-2 text-2xl font-semibold leading-tight text-[#191414]">
+          <h3 className="mt-2 line-clamp-2 text-xl leading-tight font-semibold text-slate-900">
             {candidate.title}
           </h3>
-          <p className="mt-1 text-sm text-[#191414]/60">{candidate.creatorName || 'Unknown creator'}</p>
+          <p className="mt-1 text-sm text-slate-500">
+            {candidate.creatorName || 'Unknown creator'}
+          </p>
         </div>
 
         {isBlocked ? (
@@ -122,16 +121,16 @@ const CandidateCard = ({
               {candidate.recoveryActions.slice(0, 2).map((action) => (
                 <span
                   key={action.reasonCode}
-                  className="rounded-full border border-[#191414]/10 bg-white px-3 py-1 text-xs font-medium text-[#191414]"
+                  className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700"
                 >
                   {action.message}
                 </span>
               ))}
             </div>
-            <ul className="space-y-2 text-sm text-[#191414]/65">
+            <ul className="space-y-2 text-sm text-slate-500">
               {candidate.recoveryActions.map((action) => (
                 <li key={action.reasonCode} className="flex gap-2">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#2351FC]" />
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
                   <span>{action.actionLabel}</span>
                 </li>
               ))}
@@ -140,7 +139,7 @@ const CandidateCard = ({
         ) : (
           <p
             className={`rounded-2xl px-4 py-3 text-sm font-medium ${
-              isSelected ? 'bg-[#2351FC] text-white' : 'bg-[#2351FC]/10 text-[#2351FC]'
+              isSelected ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
             }`}
           >
             {isSelected ? 'Selected for auction' : 'Ownership and auction readiness checks passed.'}
@@ -154,13 +153,17 @@ const CandidateCard = ({
             onClick={onSelect}
             className={`w-full ${
               isBlocked
-                ? 'bg-[#191414]/20 text-[#191414]'
+                ? 'bg-slate-200 text-slate-500'
                 : isSelected
-                  ? 'bg-[#2351FC] text-white hover:bg-[#1d46d9]'
-                  : 'bg-[#191414] text-white hover:bg-[#2351FC]'
+                  ? 'bg-slate-900 text-white hover:bg-slate-700'
+                  : 'bg-slate-900 text-white hover:bg-slate-700'
             }`}
           >
-            {isBlocked ? 'Unavailable for auction' : isSelected ? 'Selected for auction' : 'Select artwork'}
+            {isBlocked
+              ? 'Unavailable for auction'
+              : isSelected
+                ? 'Unselect artwork'
+                : 'Select artwork'}
           </Button>
         </div>
       </div>
@@ -171,12 +174,12 @@ const CandidateCard = ({
 const LoadingGrid = () => (
   <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
     {[0, 1, 2].map((item) => (
-      <div key={item} className="rounded-[34px] border border-black/10 bg-white p-3">
-        <div className="aspect-[4/3] animate-pulse rounded-[28px] bg-[#f5f5f5]" />
-        <div className="space-y-3 px-2 pb-3 pt-5">
-          <div className="h-3 w-24 animate-pulse rounded-full bg-[#f5f5f5]" />
-          <div className="h-7 w-3/4 animate-pulse rounded-full bg-[#f5f5f5]" />
-          <div className="h-12 animate-pulse rounded-2xl bg-[#f5f5f5]" />
+      <div key={item} className="rounded-[28px] border border-slate-200 bg-white p-3">
+        <div className="aspect-[4/3] animate-pulse rounded-[24px] bg-slate-100" />
+        <div className="space-y-3 px-2 pt-5 pb-3">
+          <div className="h-3 w-24 animate-pulse rounded-full bg-slate-100" />
+          <div className="h-7 w-3/4 animate-pulse rounded-full bg-slate-100" />
+          <div className="h-12 animate-pulse rounded-2xl bg-slate-100" />
         </div>
       </div>
     ))}
@@ -190,18 +193,26 @@ const StepRail = ({ currentStep }: { currentStep: 'artwork' | 'terms' }) => {
     <ol className="space-y-3" aria-label="Seller auction creation steps">
       <li
         className={`flex items-center gap-3 rounded-[22px] border px-4 py-3 ${
-          isTermsStep ? 'border-black/10 bg-white text-[#191414]' : 'border-[#2351FC] bg-[#2351FC]/10 text-[#2351FC]'
+          isTermsStep
+            ? 'border-white/15 bg-white/10 text-white'
+            : 'border-white bg-white text-slate-900'
         }`}
         aria-current={currentStep === 'artwork' ? 'step' : undefined}
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-full border border-current">
-          {isTermsStep ? <Check className="h-4 w-4" /> : <span className="text-sm font-semibold">1</span>}
+          {isTermsStep ? (
+            <Check className="h-4 w-4" />
+          ) : (
+            <span className="text-sm font-semibold">1</span>
+          )}
         </span>
         <span className="text-sm font-semibold">1 Choose artwork</span>
       </li>
       <li
         className={`flex items-center gap-3 rounded-[22px] border px-4 py-3 ${
-          isTermsStep ? 'border-[#2351FC] bg-[#2351FC]/10 text-[#2351FC]' : 'border-black/10 bg-white text-[#191414]/55'
+          isTermsStep
+            ? 'border-white bg-white text-slate-900'
+            : 'border-white/15 bg-white/10 text-white/60'
         }`}
         aria-current={currentStep === 'terms' ? 'step' : undefined}
       >
@@ -220,33 +231,32 @@ const SellerProfileRequired = () => {
   const profileHref = user?.slug ? `/profile/${user.slug}/edit` : '/profile'
 
   return (
-    <section className="mx-auto flex min-h-[70vh] max-w-3xl flex-col items-center justify-center px-6 text-center">
-      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#2351FC]">
-        SELLER AUCTIONS
-      </p>
-      <h1 className="mt-5 text-5xl font-semibold tracking-[-0.05em] text-[#191414]">
-        Seller profile required
-      </h1>
-      <p className="mt-5 max-w-xl text-lg leading-8 text-[#191414]/65">
-        Create or complete your seller profile before starting an auction.
-      </p>
-      <Button
-        type="button"
-        className="mt-8 bg-[#191414] text-white hover:bg-[#2351FC]"
-        onClick={() => void router.push(profileHref)}
-      >
-        Go to seller profile
-      </Button>
+    <section className="-mx-6 -my-1 flex min-h-screen items-center justify-center bg-[#F7F8FA] px-4 py-12 text-center sm:-mx-8 sm:px-6 lg:-mx-12 lg:px-8">
+      <div className="max-w-3xl rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
+        <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
+          Seller auctions
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold text-slate-900">Seller profile required</h1>
+        <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500">
+          Create or complete your seller profile before starting an auction.
+        </p>
+        <Button
+          type="button"
+          className="mt-6 bg-slate-900 text-white hover:bg-slate-700"
+          onClick={() => void router.push(profileHref)}
+        >
+          Go to seller profile
+        </Button>
+      </div>
     </section>
   )
 }
 
 const SellerCandidateWorkspace = () => {
   const router = useRouter()
-  const workspaceRef = useRef<HTMLElement | null>(null)
+  const workspaceRef = useRef<HTMLDivElement | null>(null)
   const hydratedQueryArtworkRef = useRef<string | null>(null)
-  const { data, eligible, blocked, isLoading, error, refresh } =
-    useSellerAuctionArtworkCandidates()
+  const { data, eligible, blocked, isLoading, error, refresh } = useSellerAuctionArtworkCandidates()
   const [currentStep, setCurrentStep] = useState<'artwork' | 'terms'>('artwork')
   const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null)
   const [termsArtworkId, setTermsArtworkId] = useState<string | null>(null)
@@ -304,14 +314,16 @@ const SellerCandidateWorkspace = () => {
   const hasNoEligible = !isLoading && !error && !hasNoArtworks && eligible.length === 0
   const lifecycleStatus = sellerAuctionStart.status
   const isFailureEditable =
-    lifecycleStatus?.status === 'start_failed' && lifecycleStatus.editAllowed && isEditingFailedTerms
+    lifecycleStatus?.status === 'start_failed' &&
+    lifecycleStatus.editAllowed &&
+    isEditingFailedTerms
   const isLifecycleLocked = Boolean(
     lifecycleStatus &&
-      !isFailureEditable &&
-      (lifecycleStatus.status === 'pending_start' ||
-        lifecycleStatus.status === 'auction_active' ||
-        lifecycleStatus.status === 'retry_available' ||
-        lifecycleStatus.status === 'start_failed'),
+    !isFailureEditable &&
+    (lifecycleStatus.status === 'pending_start' ||
+      lifecycleStatus.status === 'auction_active' ||
+      lifecycleStatus.status === 'retry_available' ||
+      lifecycleStatus.status === 'start_failed'),
   )
   const shouldShowLifecycleShell = Boolean(lifecycleStatus && !isFailureEditable)
 
@@ -324,9 +336,7 @@ const SellerCandidateWorkspace = () => {
       return
     }
 
-    const queryCandidate = allCandidates.find(
-      (candidate) => candidate.artworkId === queryArtworkId,
-    )
+    const queryCandidate = allCandidates.find((candidate) => candidate.artworkId === queryArtworkId)
 
     if (!queryCandidate) {
       return
@@ -353,13 +363,7 @@ const SellerCandidateWorkspace = () => {
     return () => {
       isCancelled = true
     }
-  }, [
-    allCandidates,
-    isLoading,
-    queryArtworkId,
-    router.isReady,
-    sellerAuctionStart,
-  ])
+  }, [allCandidates, isLoading, queryArtworkId, router.isReady, sellerAuctionStart])
 
   const updateTermsValues = (nextValues: SellerAuctionTermsFormValues) => {
     setTermsValues(nextValues)
@@ -378,6 +382,20 @@ const SellerCandidateWorkspace = () => {
   }
 
   const handleSelectArtwork = (artworkId: string) => {
+    if (selectedArtworkId === artworkId) {
+      setSelectedArtworkId(null)
+      setTermsArtworkId(null)
+      setTermsErrors({})
+      setHasSubmittedTerms(false)
+      setDraftSaved(false)
+      setWalletError(null)
+      setIsEditingFailedTerms(false)
+      if (lifecycleStatus?.artworkId === artworkId) {
+        sellerAuctionStart.setTrackedArtworkId(null)
+      }
+      return
+    }
+
     setSelectedArtworkId(artworkId)
     setDraftSaved(false)
     setWalletError(null)
@@ -544,84 +562,86 @@ const SellerCandidateWorkspace = () => {
           : lifecycleStatus?.status === 'start_failed' && !isEditingFailedTerms
             ? 'Review failure state above'
             : 'Start Auction'
-  const supportingMessage = lifecycleStatus?.status === 'pending_start'
-    ? 'Do not submit again while auction start is in progress.'
-    : lifecycleStatus?.status === 'auction_active'
-      ? 'Reserve, increment, and duration cannot be edited after activation.'
-      : 'Network gas is shown in MetaMask during activation.'
+  const supportingMessage =
+    lifecycleStatus?.status === 'pending_start'
+      ? 'Do not submit again while auction start is in progress.'
+      : lifecycleStatus?.status === 'auction_active'
+        ? 'Reserve, increment, and duration cannot be edited after activation.'
+        : 'Network gas is shown in MetaMask during activation.'
 
   return (
-    <main
+    <div
       ref={workspaceRef}
-      className="min-h-screen bg-[#FDFDFD] px-5 py-8 text-[#191414] md:px-10 lg:px-12"
+      className="-mx-6 -my-1 min-h-screen bg-[#F7F8FA] px-4 pb-12 text-slate-900 sm:-mx-8 sm:px-6 lg:-mx-12 lg:px-8"
     >
-      <section className="overflow-hidden rounded-[40px] border border-black/10 bg-white">
-        <div className="grid gap-8 p-6 md:p-10 lg:grid-cols-[1.3fr_0.7fr] lg:p-12">
+      <div className="pt-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#2351FC]">
-              SELLER AUCTIONS
+            <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
+              Seller workspace
             </p>
-            <h1 className="mt-4 max-w-3xl text-5xl font-semibold tracking-[-0.06em] md:text-7xl">
-              Choose artwork for auction
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-[#191414]/65">
-              We check ownership and auction readiness before you set reserve price, duration, or
-              bid rules.
+            <h1 className="mt-2 text-3xl font-semibold text-slate-900">Create auction</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+              Select an eligible artwork, set buyer-facing auction terms, and hand off activation to
+              your wallet.
             </p>
           </div>
-
-          <div className="rounded-[32px] bg-[#191414] p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.2em] text-white/55">Phase 19 workspace</p>
-            <div className="mt-5">
+          <div className="w-full rounded-[28px] border border-slate-900 bg-slate-900 p-5 text-white shadow-sm lg:w-[360px]">
+            <p className="text-xs font-semibold tracking-[0.18em] text-white/50 uppercase">
+              Auction setup
+            </p>
+            <div className="mt-4">
               <StepRail currentStep={effectiveCurrentStep} />
             </div>
 
             {effectiveCurrentStep === 'artwork' ? (
               <>
                 <p className="mt-5 text-sm leading-6 text-white/75">
-                  Select an eligible artwork to unlock local terms setup and buyer-facing preview.
+                  Select an eligible artwork to unlock terms setup and preview.
                 </p>
                 <Button
                   type="button"
                   disabled={!selectedEligibleCandidate}
                   onClick={handleContinueToTerms}
-                  className="mt-8 w-full bg-white text-[#191414] hover:bg-white/90 disabled:bg-white/25 disabled:text-white"
+                  className="mt-6 w-full bg-white text-slate-900 hover:bg-white/90 disabled:bg-white/25 disabled:text-white"
                 >
                   Continue to auction terms
                 </Button>
               </>
             ) : (
               <p className="mt-5 text-sm leading-6 text-white/75">
-                Review submitted terms, MetaMask handoff, and persisted lifecycle status without
-                leaving this page.
+                Review terms, MetaMask handoff, and persisted lifecycle status.
               </p>
             )}
           </div>
         </div>
-      </section>
+      </div>
 
       <section className="mt-6 grid gap-4 md:grid-cols-3">
         {policyCards.map((card) => {
           const Icon = card.icon
 
           return (
-            <article key={card.title} className="rounded-[28px] border border-black/10 bg-white p-5">
-              <Icon className="h-6 w-6 text-[#2351FC]" />
-              <h2 className="mt-4 text-lg font-semibold">{card.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-[#191414]/60">{card.body}</p>
+            <article
+              key={card.title}
+              className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm"
+            >
+              <Icon className="h-6 w-6 text-slate-600" />
+              <h2 className="mt-4 text-lg font-semibold text-slate-900">{card.title}</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-500">{card.body}</p>
             </article>
           )
         })}
       </section>
 
       {error ? (
-        <section className="mt-8 rounded-[32px] border border-red-200 bg-red-50 p-6">
+        <section className="mt-8 rounded-[32px] border border-rose-200 bg-rose-50 p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-red-950">
+              <h2 className="text-xl font-semibold text-rose-950">
                 We could not load auction eligibility. Try again or return to inventory.
               </h2>
-              <p className="mt-2 text-sm text-red-700">{error.message}</p>
+              <p className="mt-2 text-sm text-rose-700">{error.message}</p>
             </div>
             <Button type="button" variant="outline" onClick={() => void refresh()}>
               <RefreshCcw className="h-4 w-4" />
@@ -666,20 +686,20 @@ const SellerCandidateWorkspace = () => {
             </div>
           ) : null}
 
-          <div className="rounded-[32px] border border-black/10 bg-white p-4 md:p-6">
+          <div className="rounded-[32px] border border-slate-200 bg-white p-4 shadow-sm md:p-6">
             <div className="grid gap-5 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-center">
               <CandidateImage candidate={selectedCandidate} className="max-w-[160px]" />
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2351FC]">
+                <p className="text-[11px] font-bold tracking-[0.18em] text-slate-400 uppercase">
                   Selected artwork
                 </p>
-                <h2 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[#191414]">
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
                   {selectedCandidate.title}
                 </h2>
-                <p className="mt-2 text-sm text-[#191414]/60">
+                <p className="mt-2 text-sm text-slate-500">
                   {selectedCandidate.creatorName || 'Unknown creator'}
                 </p>
-                <span className="mt-4 inline-flex rounded-full bg-[#2351FC]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#2351FC]">
+                <span className="mt-4 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-slate-600 uppercase">
                   {selectedCandidate.status}
                 </span>
               </div>
@@ -715,7 +735,9 @@ const SellerCandidateWorkspace = () => {
                 supportingMessage={supportingMessage}
               />
               {draftSaved ? (
-                <p className="mt-3 text-sm font-medium text-[#027A48]">Draft saved on this device.</p>
+                <p className="mt-3 text-sm font-medium text-[#027A48]">
+                  Draft saved on this device.
+                </p>
               ) : null}
             </div>
 
@@ -732,14 +754,14 @@ const SellerCandidateWorkspace = () => {
           <section className="mt-10">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#2351FC]">
+                <p className="text-sm font-semibold tracking-[0.18em] text-slate-400 uppercase">
                   Ready for auction
                 </p>
-                <h2 className="mt-2 text-4xl font-semibold tracking-[-0.04em]">
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
                   {hasNoEligible ? 'No auction-ready artworks' : 'Ready for auction'}
                 </h2>
               </div>
-              <p className="text-sm text-[#191414]/55">
+              <p className="text-sm text-slate-500">
                 {eligible.length} ready / {blocked.length} needs attention
               </p>
             </div>
@@ -747,19 +769,23 @@ const SellerCandidateWorkspace = () => {
             <div className="mt-5">
               {isLoading ? <LoadingGrid /> : null}
               {hasNoArtworks ? (
-                <div className="rounded-[32px] border border-dashed border-black/20 bg-white p-10 text-center">
-                  <Boxes className="mx-auto h-10 w-10 text-[#2351FC]" />
-                  <h3 className="mt-4 text-2xl font-semibold">No artworks in your inventory yet</h3>
-                  <p className="mt-2 text-[#191414]/60">
+                <div className="rounded-[32px] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+                  <Boxes className="mx-auto h-10 w-10 text-slate-500" />
+                  <h3 className="mt-4 text-2xl font-semibold text-slate-900">
+                    No artworks in your inventory yet
+                  </h3>
+                  <p className="mt-2 text-slate-500">
                     Upload or publish an artwork before starting an auction.
                   </p>
                 </div>
               ) : null}
               {hasNoEligible ? (
-                <div className="rounded-[32px] border border-dashed border-black/20 bg-white p-10 text-center">
-                  <Boxes className="mx-auto h-10 w-10 text-[#2351FC]" />
-                  <h3 className="mt-4 text-2xl font-semibold">No auction-ready artworks</h3>
-                  <p className="mt-2 max-w-2xl text-[#191414]/60">
+                <div className="rounded-[32px] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+                  <Boxes className="mx-auto h-10 w-10 text-slate-500" />
+                  <h3 className="mt-4 text-2xl font-semibold text-slate-900">
+                    No auction-ready artworks
+                  </h3>
+                  <p className="mt-2 max-w-2xl text-slate-500">
                     Your artworks need to be active, published, single-edition, and complete before
                     they can enter an auction.
                   </p>
@@ -784,12 +810,14 @@ const SellerCandidateWorkspace = () => {
             <section className="mt-12">
               <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#2351FC]">
+                  <p className="text-sm font-semibold tracking-[0.18em] text-slate-400 uppercase">
                     Needs attention
                   </p>
-                  <h2 className="mt-2 text-4xl font-semibold tracking-[-0.04em]">Needs attention</h2>
+                  <h2 className="mt-2 text-2xl font-semibold text-slate-900">Needs attention</h2>
                 </div>
-                <p className="text-sm text-[#191414]/55">Blocked artworks stay visible for recovery.</p>
+                <p className="text-sm text-slate-500">
+                  Blocked artworks stay visible for recovery.
+                </p>
               </div>
               {blocked.length > 0 ? (
                 <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -802,16 +830,18 @@ const SellerCandidateWorkspace = () => {
                   ))}
                 </div>
               ) : (
-                <div className="mt-5 rounded-[32px] border border-black/10 bg-white p-8">
-                  <CheckCircle2 className="h-8 w-8 text-[#2351FC]" />
-                  <p className="mt-3 text-lg font-semibold">No blocked artworks found.</p>
+                <div className="mt-5 rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
+                  <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                  <p className="mt-3 text-lg font-semibold text-slate-900">
+                    No blocked artworks found.
+                  </p>
                 </div>
               )}
             </section>
           ) : null}
         </>
       )}
-    </main>
+    </div>
   )
 }
 

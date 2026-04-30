@@ -27,6 +27,6 @@ const CreateSellerAuctionRoute: NextPageWithLayout = () => {
   )
 }
 
-CreateSellerAuctionRoute.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>
+CreateSellerAuctionRoute.getLayout = (page) => <SidebarLayout hideFooter>{page}</SidebarLayout>
 
 export default CreateSellerAuctionRoute

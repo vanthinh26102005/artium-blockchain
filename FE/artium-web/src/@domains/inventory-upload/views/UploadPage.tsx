@@ -67,7 +67,14 @@ export const UploadPage = () => {
   const lastHydratedDraftIdRef = useRef<string | null>(null)
 
   // -- submission --
-  const { submit, submitting, progress, error, completedArtwork, reset: resetSubmit } = useArtworkSubmit()
+  const {
+    submit,
+    submitting,
+    progress,
+    error,
+    completedArtwork,
+    reset: resetSubmit,
+  } = useArtworkSubmit()
 
   const stepStatus = getStepStatus(step)
 
@@ -105,9 +112,36 @@ export const UploadPage = () => {
       return
     }
 
-    const draftArtworkIdParam = Array.isArray(router.query.draftArtworkId)
-      ? router.query.draftArtworkId[0]
-      : router.query.draftArtworkId
+    const legacyDraftParam = router.query.draft
+    const draftArtworkIdQuery = router.query.draftArtworkId ?? legacyDraftParam
+    const draftArtworkIdParam = Array.isArray(draftArtworkIdQuery)
+      ? draftArtworkIdQuery[0]
+      : draftArtworkIdQuery
+
+    if (
+      !router.query.draftArtworkId &&
+      typeof draftArtworkIdParam === 'string' &&
+      draftArtworkIdParam
+    ) {
+      const nextQuery = { ...router.query }
+      delete nextQuery.draft
+      nextQuery.draftArtworkId = draftArtworkIdParam
+
+      allowNavigationRef.current = true
+      router
+        .replace(
+          {
+            pathname: router.pathname,
+            query: nextQuery,
+          },
+          undefined,
+          { shallow: true },
+        )
+        .finally(() => {
+          allowNavigationRef.current = false
+        })
+      return
+    }
 
     if (!draftArtworkIdParam) {
       const nextDraftId = createDraftArtworkId()
@@ -335,7 +369,9 @@ export const UploadPage = () => {
         onCancel={handleClose}
         onPrev={handlePrevStep}
         onNext={handleNextStep}
-        isNextDisabled={!stepStatus.isValid || isDraftLoading || !!hydrationError || submitting || isSubmitting}
+        isNextDisabled={
+          !stepStatus.isValid || isDraftLoading || !!hydrationError || submitting || isSubmitting
+        }
       >
         {isDraftLoading ? (
           <div className="mx-auto mt-16 max-w-2xl rounded-[28px] border border-black/10 bg-white p-8 text-center shadow-sm">
@@ -358,11 +394,7 @@ export const UploadPage = () => {
               >
                 Try Again
               </Button>
-              <Button
-                type="button"
-                onClick={handleStartNewDraft}
-                className="rounded-full px-6"
-              >
+              <Button type="button" onClick={handleStartNewDraft} className="rounded-full px-6">
                 Start New Draft
               </Button>
             </div>
@@ -401,11 +433,14 @@ export const UploadPage = () => {
       </Dialog>
 
       {/* Submission Progress Dialog */}
-      <Dialog open={submitting || !!completedArtwork} onOpenChange={() => {
-        if (completedArtwork && !submitting) {
-          resetSubmit()
-        }
-      }}>
+      <Dialog
+        open={submitting || !!completedArtwork}
+        onOpenChange={() => {
+          if (completedArtwork && !submitting) {
+            resetSubmit()
+          }
+        }}
+      >
         <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">
           <div className="px-8 py-6">
             {progress && (

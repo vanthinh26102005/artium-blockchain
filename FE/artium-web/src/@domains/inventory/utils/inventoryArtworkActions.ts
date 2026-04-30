@@ -32,11 +32,15 @@ export const getProfileVisibilityPatch = (artwork: InventoryArtwork): UpdateArtw
   }
 }
 
-export const getEditArtworkHref = (artwork: InventoryArtwork) =>
-  `/artworks/upload?draftArtworkId=${encodeURIComponent(artwork.id)}`
+export const getEditArtworkHref = (artwork: InventoryArtwork) => ({
+  pathname: '/artworks/upload',
+  query: { draftArtworkId: artwork.id },
+})
 
-export const getAuctionHandoffHref = (artwork: InventoryArtwork) =>
-  `/artist/auctions/create?artworkId=${encodeURIComponent(artwork.id)}`
+export const getAuctionHandoffHref = (artwork: InventoryArtwork) => ({
+  pathname: '/artist/auctions/create',
+  query: { artworkId: artwork.id },
+})
 
 export const getAuctionHandoffLabel = (artwork: InventoryArtwork) => {
   const status = artwork.auctionLifecycle?.status

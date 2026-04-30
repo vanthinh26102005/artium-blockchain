@@ -71,7 +71,7 @@ export const InventoryArtworkGridViewItem = ({
       className={`group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-3xl border bg-white shadow-sm transition-all duration-200 hover:shadow-xl ${
         isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-black/5'
       }`}
-      onClick={handleOpenDetails}
+      onClick={handleToggleSelection}
     >
       {/* Selection & Actions Overlay */}
       <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between p-4">

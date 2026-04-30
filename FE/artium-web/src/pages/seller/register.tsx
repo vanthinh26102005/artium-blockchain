@@ -22,6 +22,6 @@ const SellerRegisterRoute: NextPageWithLayout = () => {
   return <SellerRegistrationPage />
 }
 
-SellerRegisterRoute.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>
+SellerRegisterRoute.getLayout = (page) => <SidebarLayout hideFooter>{page}</SidebarLayout>
 
 export default SellerRegisterRoute
