@@ -2,7 +2,17 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Bell, DollarSign, FileText, ImagePlus, Menu, Plus, Search, User, Video } from 'lucide-react'
+import {
+  Bell,
+  DollarSign,
+  FileText,
+  ImagePlus,
+  Menu,
+  Plus,
+  Search,
+  User,
+  Video,
+} from 'lucide-react'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import {
   DropdownMenu,
@@ -34,7 +44,11 @@ const isWalletLocalEmail = (email?: string | null) => Boolean(email?.endsWith('@
 
 const getUsableAvatarUrl = (avatarUrl?: string | null) => {
   const trimmed = avatarUrl?.trim()
-  if (!trimmed || trimmed === '/images/logo-dark-mode.png' || trimmed === '/images/default-avatar.png') {
+  if (
+    !trimmed ||
+    trimmed === '/images/logo-dark-mode.png' ||
+    trimmed === '/images/default-avatar.png'
+  ) {
     return null
   }
 
@@ -224,8 +238,8 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
         ? 'bg-transparent border-b border-black shadow-none backdrop-blur-none'
         : 'backdrop-blur-2xl backdrop-saturate-150',
     !isLandingVariant &&
-    !isAuthRoute &&
-    (isTransparentHeaderPage ? getTransparentHeaderClasses() : marketingHeaderClass),
+      !isAuthRoute &&
+      (isTransparentHeaderPage ? getTransparentHeaderClasses() : marketingHeaderClass),
   ]
     .filter(Boolean)
     .join(' ')
@@ -307,14 +321,15 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`rounded-full px-4 py-2 transition-colors ${useWhiteNav
-                    ? isActive
-                      ? 'text-white'
-                      : 'text-white/70 hover:bg-white/20 hover:text-white'
-                    : isActive
-                      ? 'bg-slate-100 text-slate-900'
-                      : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
-                    }`}
+                  className={`rounded-full px-4 py-2 transition-colors ${
+                    useWhiteNav
+                      ? isActive
+                        ? 'text-white'
+                        : 'text-white/70 hover:bg-white/20 hover:text-white'
+                      : isActive
+                        ? 'bg-slate-100 text-slate-900'
+                        : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -367,10 +382,10 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   {showResults && searchResults && searchResults.length > 0 && (
                     <div
                       ref={searchResultsRef}
-                      className="absolute left-0 right-0 top-full z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+                      className="absolute top-full right-0 left-0 z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
                     >
                       <div className="border-b border-slate-200 bg-slate-50 px-4 py-2">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                        <div className="text-xs font-semibold tracking-wide text-slate-600 uppercase">
                           Artists
                         </div>
                       </div>
@@ -381,7 +396,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                             type="button"
                             onClick={() => {
                               const slug = resolvedSlugs[profile.userId] || profile.userId
-                              console.log('[SiteHeader] Navigating to profile:', slug, profile.displayName)
+                              console.log(
+                                '[SiteHeader] Navigating to profile:',
+                                slug,
+                                profile.displayName,
+                              )
                               router.push(`/profile/${encodeURIComponent(slug)}`)
                               setIsSearchOpen(false)
                               setShowResults(false)
@@ -402,12 +421,14 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                                 <User className="h-5 w-5 text-slate-500" />
                               </div>
                             )}
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-slate-900 truncate">
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate font-semibold text-slate-900">
                                 {profile.displayName}
                               </div>
                               {profile.location && (
-                                <div className="text-sm text-slate-500 truncate">{profile.location}</div>
+                                <div className="truncate text-sm text-slate-500">
+                                  {profile.location}
+                                </div>
                               )}
                             </div>
                             {profile.isVerified && (
@@ -430,22 +451,26 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                       </div>
                     </div>
                   )}
-                  {showResults && searchQuery.trim() && searchResults && searchResults.length === 0 && !isSearching && (
-                    <div
-                      ref={searchResultsRef}
-                      className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl"
-                    >
-                      <div className="px-4 py-8 text-center">
-                        <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-                          <Search className="h-6 w-6 text-slate-400" />
-                        </div>
-                        <div className="text-sm font-medium text-slate-900">No artists found</div>
-                        <div className="mt-1 text-sm text-slate-500">
-                          Try searching with a different name
+                  {showResults &&
+                    searchQuery.trim() &&
+                    searchResults &&
+                    searchResults.length === 0 &&
+                    !isSearching && (
+                      <div
+                        ref={searchResultsRef}
+                        className="absolute top-full right-0 left-0 z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl"
+                      >
+                        <div className="px-4 py-8 text-center">
+                          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                            <Search className="h-6 w-6 text-slate-400" />
+                          </div>
+                          <div className="text-sm font-medium text-slate-900">No artists found</div>
+                          <div className="mt-1 text-sm text-slate-500">
+                            Try searching with a different name
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               </div>
             </>
@@ -459,10 +484,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 <button
                   type="button"
                   aria-label="Open menu"
-                  className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${isLandingVariant
-                    ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
-                    }`}
+                  className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${
+                    isLandingVariant
+                      ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
+                  }`}
                 >
                   <Menu className="h-5 w-5" />
                 </button>
@@ -511,6 +537,19 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                       <span className="font-semibold text-slate-900">Create Invoice</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="my-1" />
+                    {navLinks.map((link) => (
+                      <DropdownMenuItem
+                        key={link.href}
+                        onClick={() => {
+                          router.push(link.href)
+                          setIsMobileMenuOpen(false)
+                        }}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      >
+                        {link.label}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator className="my-1" />
                     <DropdownMenuItem
                       onClick={() => {
                         // TODO: Implement notifications navigation/action
@@ -534,6 +573,19 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   </>
                 ) : (
                   <>
+                    {navLinks.map((link) => (
+                      <DropdownMenuItem
+                        key={link.href}
+                        onClick={() => {
+                          router.push(link.href)
+                          setIsMobileMenuOpen(false)
+                        }}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      >
+                        {link.label}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator className="my-1" />
                     <DropdownMenuItem asChild>
                       <Link
                         href="/login"
@@ -564,7 +616,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
               <button
                 type="button"
                 onClick={() => router.push('/artist/invoices/create')}
-                className="hidden md:inline-flex cursor-pointer items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-[16px] font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                className="hidden cursor-pointer items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-[16px] font-semibold text-white shadow-sm transition hover:bg-blue-700 md:inline-flex"
               >
                 <DollarSign className="h-4 w-4" />
                 Quick Sell
@@ -575,10 +627,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                     <button
                       type="button"
                       aria-label="Create"
-                      className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${isLandingVariant
-                        ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
-                        }`}
+                      className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${
+                        isLandingVariant
+                          ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
+                      }`}
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -624,17 +677,19 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
               <button
                 type="button"
                 aria-label="Notifications"
-                className={`hidden md:inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${isLandingVariant
-                  ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
-                  }`}
+                className={`hidden h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition md:inline-flex ${
+                  isLandingVariant
+                    ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
+                }`}
               >
                 <Bell className="h-4 w-4" />
               </button>
               <Link
                 href={`/profile/${encodeURIComponent(profileHandle)}`}
-                className={`hidden md:inline-flex cursor-pointer items-center gap-2 text-base font-semibold ${isLandingVariant ? 'text-white' : 'text-slate-700 hover:text-slate-900'
-                  }`}
+                className={`hidden cursor-pointer items-center gap-2 text-base font-semibold md:inline-flex ${
+                  isLandingVariant ? 'text-white' : 'text-slate-700 hover:text-slate-900'
+                }`}
               >
                 <span>@{profileLabel}</span>
                 <Image
@@ -642,8 +697,9 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   alt={profileLabel}
                   width={40}
                   height={40}
-                  className={`h-10 w-10 rounded-full object-cover ${isLandingVariant ? 'border border-white/30' : 'border border-slate-200'
-                    }`}
+                  className={`h-10 w-10 rounded-full object-cover ${
+                    isLandingVariant ? 'border border-white/30' : 'border border-slate-200'
+                  }`}
                 />
               </Link>
             </>
@@ -654,10 +710,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 onClick={() => {
                   router.push('/login')
                 }}
-                className={`hidden md:inline-flex cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition ${isLandingVariant
-                  ? 'border border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                  : 'border border-slate-200 bg-white text-slate-800 hover:border-slate-300'
-                  }`}
+                className={`hidden cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition md:inline-flex ${
+                  isLandingVariant
+                    ? 'border border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
+                    : 'border border-slate-200 bg-white text-slate-800 hover:border-slate-300'
+                }`}
               >
                 Login
               </button>
@@ -666,10 +723,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 onClick={() => {
                   router.push('/')
                 }}
-                className={`hidden md:inline-flex cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition ${isLandingVariant
-                  ? 'bg-white text-black hover:bg-white/90'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
+                className={`hidden cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition md:inline-flex ${
+                  isLandingVariant
+                    ? 'bg-white text-black hover:bg-white/90'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
               >
                 Get Started
               </button>
@@ -710,9 +768,9 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 )}
               </div>
               {showResults && searchResults && searchResults.length > 0 && (
-                <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                <div className="absolute top-full right-0 left-0 z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
                   <div className="border-b border-slate-200 bg-slate-50 px-4 py-2">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    <div className="text-xs font-semibold tracking-wide text-slate-600 uppercase">
                       Artists
                     </div>
                   </div>
@@ -723,7 +781,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                         type="button"
                         onClick={() => {
                           const slug = resolvedSlugs[profile.userId] || profile.userId
-                          console.log('[SiteHeader Mobile] Navigating to profile:', slug, profile.displayName)
+                          console.log(
+                            '[SiteHeader Mobile] Navigating to profile:',
+                            slug,
+                            profile.displayName,
+                          )
                           router.push(`/profile/${encodeURIComponent(slug)}`)
                           setIsSearchOpen(false)
                           setShowResults(false)
@@ -744,12 +806,14 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                             <User className="h-5 w-5 text-slate-500" />
                           </div>
                         )}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-slate-900 truncate">
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate font-semibold text-slate-900">
                             {profile.displayName}
                           </div>
                           {profile.location && (
-                            <div className="text-sm text-slate-500 truncate">{profile.location}</div>
+                            <div className="truncate text-sm text-slate-500">
+                              {profile.location}
+                            </div>
                           )}
                         </div>
                         {profile.isVerified && (
@@ -772,19 +836,23 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   </div>
                 </div>
               )}
-              {showResults && searchQuery.trim() && searchResults && searchResults.length === 0 && !isSearching && (
-                <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                  <div className="px-4 py-8 text-center">
-                    <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-                      <Search className="h-6 w-6 text-slate-400" />
-                    </div>
-                    <div className="text-sm font-medium text-slate-900">No artists found</div>
-                    <div className="mt-1 text-sm text-slate-500">
-                      Try searching with a different name
+              {showResults &&
+                searchQuery.trim() &&
+                searchResults &&
+                searchResults.length === 0 &&
+                !isSearching && (
+                  <div className="absolute top-full right-0 left-0 z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                    <div className="px-4 py-8 text-center">
+                      <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                        <Search className="h-6 w-6 text-slate-400" />
+                      </div>
+                      <div className="text-sm font-medium text-slate-900">No artists found</div>
+                      <div className="mt-1 text-sm text-slate-500">
+                        Try searching with a different name
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
         </div>
