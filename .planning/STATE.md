@@ -4,8 +4,8 @@ milestone: v1.3
 milestone_name: Order Invoice Preview and Export
 status: executing
 stopped_at: Phase 31 planned
-last_updated: "2026-04-30T14:54:39.442Z"
-last_activity: 2026-04-30 -- Phase 31 planning complete
+last_updated: "2026-04-30T14:57:00.923Z"
+last_activity: 2026-04-30 -- Phase 31 execution started
 progress:
   total_phases: 28
   completed_phases: 10
@@ -16,10 +16,10 @@ progress:
 
 ## Current Position
 
-Phase: 31
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-30 -- Phase 31 planning complete
+Phase: 31 (orders-invoice-preview-and-extraction-ui) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 31
+Last activity: 2026-04-30 -- Phase 31 execution started
 
 ## Decisions
 
