@@ -15,12 +15,15 @@ import { Button } from '@shared/components/ui/button'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import type { SellerAuctionArtworkCandidate } from '@shared/apis/auctionApis'
 import {
+  SellerAuctionDraftBadge,
   SellerAuctionStartStatusShell,
   SellerAuctionTermsForm,
   SellerAuctionTermsPreview,
+  SellerAuctionWalletReadiness,
 } from '../components'
 import { useSellerAuctionStart } from '../hooks/useSellerAuctionStart'
 import { useSellerAuctionArtworkCandidates } from '../hooks/useSellerAuctionArtworkCandidates'
+import { useSellerAuctionTermsDraftStatus } from '../hooks/useSellerAuctionTermsDraftStatus'
 import { submitSellerAuctionStartTransaction } from '../services/auctionStartWallet'
 import {
   DEFAULT_SELLER_AUCTION_TERMS,
@@ -92,15 +95,17 @@ const CandidateCard = ({
   onSelect?: () => void
 }) => {
   const isBlocked = !candidate.isEligible
+  const hasDraft = useSellerAuctionTermsDraftStatus(candidate.artworkId)
 
   return (
     <article
-      className={`flex h-full flex-col rounded-[28px] border bg-white p-3 shadow-sm transition ${
+      className={`relative flex h-full flex-col rounded-[28px] border bg-white p-3 shadow-sm transition ${
         isSelected
           ? 'border-slate-900 shadow-[0_18px_48px_rgba(15,23,42,0.12)]'
           : 'border-slate-200'
       } ${isBlocked ? 'bg-slate-50' : 'hover:-translate-y-0.5 hover:shadow-md'}`}
     >
+      {hasDraft ? <SellerAuctionDraftBadge className="absolute top-5 right-5 z-10" /> : null}
       <CandidateImage candidate={candidate} />
       <div className="flex flex-1 flex-col gap-4 px-2 pt-5 pb-2">
         <div>
@@ -254,6 +259,7 @@ const SellerProfileRequired = () => {
 
 const SellerCandidateWorkspace = () => {
   const router = useRouter()
+  const user = useAuthStore((state) => state.user)
   const workspaceRef = useRef<HTMLDivElement | null>(null)
   const hydratedQueryArtworkRef = useRef<string | null>(null)
   const { data, eligible, blocked, isLoading, error, refresh } = useSellerAuctionArtworkCandidates()
@@ -633,6 +639,8 @@ const SellerCandidateWorkspace = () => {
           )
         })}
       </section>
+
+      <SellerAuctionWalletReadiness userWalletAddress={user?.walletAddress} />
 
       {error ? (
         <section className="mt-8 rounded-[32px] border border-rose-200 bg-rose-50 p-6">

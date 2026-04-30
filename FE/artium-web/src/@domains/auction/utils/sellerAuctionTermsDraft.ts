@@ -1,6 +1,7 @@
 import type { SellerAuctionTermsFormValues } from '../validations/sellerAuctionTerms.schema'
 
 export const SELLER_AUCTION_TERMS_DRAFT_STORAGE_PREFIX = 'artium:seller-auction-terms:'
+export const SELLER_AUCTION_TERMS_DRAFT_EVENT = 'seller-auction-terms-draft-updated'
 
 export const getSellerAuctionTermsDraftKey = (artworkId: string): string =>
   `${SELLER_AUCTION_TERMS_DRAFT_STORAGE_PREFIX}${artworkId}`
@@ -50,6 +51,19 @@ export const loadSellerAuctionTermsDraft = (
   }
 }
 
+export const hasSellerAuctionTermsDraft = (artworkId: string): boolean =>
+  Boolean(loadSellerAuctionTermsDraft(artworkId))
+
+const emitSellerAuctionTermsDraftEvent = (artworkId: string) => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.dispatchEvent(
+    new CustomEvent(SELLER_AUCTION_TERMS_DRAFT_EVENT, { detail: { artworkId } }),
+  )
+}
+
 export const saveSellerAuctionTermsDraft = (
   artworkId: string,
   values: SellerAuctionTermsFormValues,
@@ -59,6 +73,7 @@ export const saveSellerAuctionTermsDraft = (
   }
 
   window.localStorage.setItem(getSellerAuctionTermsDraftKey(artworkId), JSON.stringify(values))
+  emitSellerAuctionTermsDraftEvent(artworkId)
 }
 
 export const clearSellerAuctionTermsDraft = (artworkId: string): void => {
@@ -67,4 +82,5 @@ export const clearSellerAuctionTermsDraft = (artworkId: string): void => {
   }
 
   window.localStorage.removeItem(getSellerAuctionTermsDraftKey(artworkId))
+  emitSellerAuctionTermsDraftEvent(artworkId)
 }

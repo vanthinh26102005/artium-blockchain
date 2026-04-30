@@ -9,6 +9,7 @@ import {
   DollarSign,
   Gift,
   Globe,
+  Gavel,
   Home,
   Image as ImageIcon,
   LayoutPanelLeft,
@@ -205,6 +206,12 @@ export const SideBar = () => {
               label="Invoices"
               href="/artist/invoices"
               icon={DollarSign}
+              onUpgradeRequired={handleUpgradeRequired}
+            />
+            <SidebarItem
+              label="Auctions"
+              href="/artist/auctions/create"
+              icon={Gavel}
               onUpgradeRequired={handleUpgradeRequired}
             />
             {mainItems.slice(5).map((item) => (

@@ -5,6 +5,8 @@ import { EyeOff, Info } from 'lucide-react'
 import { Checkbox } from '@shared/components/ui/checkbox'
 
 // @domains - inventory
+import { SellerAuctionDraftBadge } from '@domains/auction/components'
+import { useSellerAuctionTermsDraftStatus } from '@domains/auction/hooks/useSellerAuctionTermsDraftStatus'
 import { InventoryArtworkActionMenu } from '@domains/inventory/components/InventoryArtworkActionMenu'
 import { type InventoryArtwork } from '@domains/inventory/types/inventoryArtwork'
 import { useInventorySelectionStore } from '@domains/inventory/stores/useInventorySelectionStore'
@@ -41,6 +43,7 @@ export const InventoryArtworkListViewItem = ({
   const subtitleParts = [priceLabel, artwork.creatorName].filter(Boolean)
   const subtitleLabel = subtitleParts.join(' • ')
   const visibilityLabel = artwork.status === 'Hidden' ? 'Hidden in profile' : 'Draft'
+  const hasAuctionDraft = useSellerAuctionTermsDraftStatus(artwork.id)
 
   // -- handlers --
   const handleToggleSelection = () => {
@@ -83,6 +86,7 @@ export const InventoryArtworkListViewItem = ({
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {hasAuctionDraft ? <SellerAuctionDraftBadge /> : null}
           <div className="flex items-center gap-2">
             {artwork.status === 'Hidden' && <EyeOff className="h-4 w-4 text-slate-400" />}
             <span className="text-sm font-semibold text-slate-500 uppercase">

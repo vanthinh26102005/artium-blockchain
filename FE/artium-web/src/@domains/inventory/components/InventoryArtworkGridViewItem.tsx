@@ -3,6 +3,8 @@ import { Checkbox } from '@shared/components/ui/checkbox'
 import { OrderStatusBadge } from '@domains/orders/components/OrderStatusBadge'
 
 // @domains - inventory
+import { SellerAuctionDraftBadge } from '@domains/auction/components'
+import { useSellerAuctionTermsDraftStatus } from '@domains/auction/hooks/useSellerAuctionTermsDraftStatus'
 import { InventoryArtworkActionMenu } from '@domains/inventory/components/InventoryArtworkActionMenu'
 import {
   type InventoryArtwork,
@@ -51,6 +53,7 @@ export const InventoryArtworkGridViewItem = ({
 
   // -- derived --
   const statusConfig = STATUS_CONFIG[artwork.status] ?? STATUS_CONFIG.Hidden
+  const hasAuctionDraft = useSellerAuctionTermsDraftStatus(artwork.id)
   const priceLabel =
     typeof artwork.price === 'number' ? `US$${artwork.price.toLocaleString('en-US')}` : null
   const isSelected = selectedIds.includes(artwork.id)
@@ -87,22 +90,25 @@ export const InventoryArtworkGridViewItem = ({
             className="h-5 w-5 rounded border-2 border-white bg-white shadow-md data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
           />
         </div>
-        <div
-          className={`transition-opacity ${
-            isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}
-        >
-          <InventoryArtworkActionMenu
-            artwork={artwork}
-            onOpenDetails={onOpenDetails}
-            onEdit={onEdit}
-            onToggleProfileVisibility={onToggleProfileVisibility}
-            onMove={onMove}
-            onStartAuction={onStartAuction}
-            onDelete={onDelete}
-            triggerClassName="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/80 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition hover:bg-white hover:shadow-lg"
-            contentClassName="w-64 rounded-2xl border-black/5 bg-white/98 p-2 shadow-xl backdrop-blur-xl"
-          />
+        <div className="flex flex-col items-end gap-2">
+          {hasAuctionDraft ? <SellerAuctionDraftBadge /> : null}
+          <div
+            className={`transition-opacity ${
+              isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
+          >
+            <InventoryArtworkActionMenu
+              artwork={artwork}
+              onOpenDetails={onOpenDetails}
+              onEdit={onEdit}
+              onToggleProfileVisibility={onToggleProfileVisibility}
+              onMove={onMove}
+              onStartAuction={onStartAuction}
+              onDelete={onDelete}
+              triggerClassName="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/80 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition hover:bg-white hover:shadow-lg"
+              contentClassName="w-64 rounded-2xl border-black/5 bg-white/98 p-2 shadow-xl backdrop-blur-xl"
+            />
+          </div>
         </div>
       </div>
 
