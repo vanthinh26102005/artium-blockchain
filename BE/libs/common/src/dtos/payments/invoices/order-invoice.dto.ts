@@ -182,6 +182,11 @@ export class OrderInvoiceSourceItemDto {
   @IsString()
   id?: string;
 
+  @ApiPropertyOptional({ description: 'Order ID for the item' })
+  @IsOptional()
+  @IsString()
+  orderId?: string | null;
+
   @ApiPropertyOptional({ description: 'Artwork ID' })
   @IsOptional()
   @IsString()
@@ -209,6 +214,16 @@ export class OrderInvoiceSourceItemDto {
   @ApiProperty({ description: 'Price captured when the order was placed' })
   @IsNumber()
   priceAtPurchase: number;
+
+  @ApiPropertyOptional({ description: 'Line item currency code' })
+  @IsOptional()
+  @IsString()
+  currency?: string | null;
+
+  @ApiPropertyOptional({ description: 'Seller payout status for the item' })
+  @IsOptional()
+  @IsString()
+  payoutStatus?: string | null;
 }
 
 export class OrderInvoiceSourceOrderDto {

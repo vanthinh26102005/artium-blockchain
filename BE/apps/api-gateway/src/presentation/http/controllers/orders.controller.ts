@@ -30,6 +30,8 @@ import {
   MarkShippedDto,
   OpenDisputeDto,
   OrderObject,
+  OrderInvoiceObject,
+  OrderInvoiceSourceOrderDto,
   OrdersWorkspaceScope,
   ResolveDisputeDto,
   UpdateOrderDto,
@@ -38,10 +40,20 @@ import {
 import { sendRpc } from '../utils';
 
 type OrderItemAccessObject = {
+  id?: string | null;
+  orderId?: string | null;
+  artworkId?: string | null;
   sellerId?: string | null;
+  artworkTitle?: string | null;
+  artworkImageUrl?: string | null;
+  priceAtPurchase?: number | null;
+  quantity?: number | null;
+  currency?: string | null;
+  payoutStatus?: string | null;
 };
 
 type AuthorizedOrderObject = OrderObject & {
+  updatedAt?: Date | string;
   items?: OrderItemAccessObject[];
 };
 
@@ -51,6 +63,8 @@ export class OrdersController {
   constructor(
     @Inject(MICROSERVICES.ORDERS_SERVICE)
     private readonly ordersClient: ClientProxy,
+    @Inject(MICROSERVICES.PAYMENTS_SERVICE)
+    private readonly paymentsClient: ClientProxy,
   ) {}
 
   private async getAuthorizedOrder(id: string, userId?: string): Promise<AuthorizedOrderObject> {
@@ -68,6 +82,46 @@ export class OrdersController {
     }
 
     return order;
+  }
+
+  private buildOrderInvoiceSource(
+    order: AuthorizedOrderObject,
+  ): OrderInvoiceSourceOrderDto {
+    return {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      collectorId: order.collectorId ?? '',
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod ?? null,
+      paymentTransactionId: order.paymentTransactionId ?? null,
+      paymentIntentId: order.paymentIntentId ?? null,
+      txHash: order.txHash ?? null,
+      onChainOrderId: order.onChainOrderId ?? null,
+      subtotal: order.subtotal,
+      shippingCost: order.shippingCost,
+      taxAmount: order.taxAmount,
+      discountAmount: order.discountAmount ?? 0,
+      totalAmount: order.totalAmount,
+      currency: order.currency,
+      shippingAddress: order.shippingAddress ?? null,
+      billingAddress: order.billingAddress ?? null,
+      items: (order.items ?? []).map((item) => ({
+        id: item.id ?? undefined,
+        orderId: item.orderId ?? order.id,
+        artworkId: item.artworkId ?? null,
+        sellerId: item.sellerId ?? '',
+        artworkTitle: item.artworkTitle ?? null,
+        artworkImageUrl: item.artworkImageUrl ?? null,
+        priceAtPurchase: Number(item.priceAtPurchase ?? 0),
+        quantity: Number(item.quantity ?? 1),
+        currency: item.currency ?? order.currency,
+        payoutStatus: item.payoutStatus ?? null,
+      })),
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt ?? order.createdAt,
+      confirmedAt: order.confirmedAt ?? null,
+    };
   }
 
   @Post()
@@ -129,6 +183,23 @@ export class OrdersController {
   async getOrderItems(@Param('id') id: string, @Req() req: any) {
     const order = await this.getAuthorizedOrder(id, req.user?.id);
     return order.items ?? [];
+  }
+
+  @Get(':id/invoice')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get order invoice preview data' })
+  @ApiParam({ name: 'id', type: 'string', description: 'Order ID' })
+  @ApiResponse({ status: 200, description: 'Order invoice retrieved', type: OrderInvoiceObject })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async getOrderInvoice(@Param('id') id: string, @Req() req: any) {
+    const order = await this.getAuthorizedOrder(id, req.user?.id);
+
+    return sendRpc<OrderInvoiceObject>(
+      this.paymentsClient,
+      { cmd: 'get_or_materialize_order_invoice' },
+      { order: this.buildOrderInvoiceSource(order) },
+    );
   }
 
   @Get(':id')
