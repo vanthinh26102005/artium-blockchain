@@ -1,18 +1,24 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ExternalLink, MapPin, ReceiptText, Truck } from 'lucide-react'
 import { Metadata } from '@/components/SEO/Metadata'
-import orderApis, { type OrderResponse } from '@shared/apis/orderApis'
+import orderApis, { type OrderInvoiceResponse, type OrderResponse } from '@shared/apis/orderApis'
 import { CopyValueField } from '@shared/components/display/CopyValueField'
 import { Button } from '@shared/components/ui/button'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { OrderActionPanel } from '../components/OrderActionPanel'
+import { OrderInvoicePanel } from '../components/OrderInvoicePanel'
+import { OrderInvoicePreviewModal } from '../components/OrderInvoicePreviewModal'
 import { OrderStatusBadge } from '../components/OrderStatusBadge'
 import { OrderTimeline } from '../components/OrderTimeline'
 import type { OrdersWorkspaceScope } from '../types/orderTypes'
 import { hydrateOrderItems } from '../utils/hydrateOrderItems'
+import {
+  getOrderInvoiceAvailability,
+  INVOICE_UNAVAILABLE_COPY,
+} from '../utils/orderInvoicePresentation'
 import {
   buildOrderTimeline,
   formatOrderDate,
@@ -46,6 +52,20 @@ const trimHash = (value?: string | null) => {
   return `${value.slice(0, 10)}...${value.slice(-6)}`
 }
 
+const INVOICE_RETRY_COPY = 'Unable to load invoice. Try again without leaving this order.'
+
+const isInvoiceUnavailableError = (message?: string | null) => {
+  const normalized = message?.toLowerCase() ?? ''
+
+  return (
+    normalized.includes('not found') ||
+    normalized.includes('forbidden') ||
+    normalized.includes('unauthorized') ||
+    normalized.includes('404') ||
+    normalized.includes('403')
+  )
+}
+
 export const OrderDetailPageView = () => {
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
@@ -55,9 +75,55 @@ export const OrderDetailPageView = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [invoice, setInvoice] = useState<OrderInvoiceResponse | null>(null)
+  const [isInvoiceLoading, setIsInvoiceLoading] = useState(false)
+  const [invoiceErrorMessage, setInvoiceErrorMessage] = useState<string | null>(null)
+  const [isInvoiceUnavailable, setIsInvoiceUnavailable] = useState(false)
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false)
+  const invoicePanelRef = useRef<HTMLDivElement | null>(null)
+  const invoiceFocusOrderRef = useRef<string | null>(null)
+  const latestInvoiceOrderIdRef = useRef<string | null>(null)
 
   const preferredScope: OrdersWorkspaceScope | null =
     scope === 'seller' || scope === 'buyer' ? scope : null
+
+  const loadInvoice = useCallback(async (targetOrderId: string) => {
+    latestInvoiceOrderIdRef.current = targetOrderId
+    setIsInvoiceLoading(true)
+    setInvoiceErrorMessage(null)
+    setIsInvoiceUnavailable(false)
+
+    try {
+      const response = await orderApis.getOrderInvoice(targetOrderId)
+
+      if (latestInvoiceOrderIdRef.current !== targetOrderId) {
+        return
+      }
+
+      setInvoice(response)
+      setInvoiceErrorMessage(null)
+      setIsInvoiceUnavailable(false)
+    } catch (error) {
+      if (latestInvoiceOrderIdRef.current !== targetOrderId) {
+        return
+      }
+
+      const message = error instanceof Error ? error.message : INVOICE_RETRY_COPY
+      setInvoice(null)
+
+      if (isInvoiceUnavailableError(message)) {
+        setIsInvoiceUnavailable(true)
+        setInvoiceErrorMessage(INVOICE_UNAVAILABLE_COPY)
+      } else {
+        setIsInvoiceUnavailable(false)
+        setInvoiceErrorMessage(INVOICE_RETRY_COPY)
+      }
+    } finally {
+      if (latestInvoiceOrderIdRef.current === targetOrderId) {
+        setIsInvoiceLoading(false)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!router.isReady || typeof orderId !== 'string') {
@@ -67,6 +133,13 @@ export const OrderDetailPageView = () => {
     let isActive = true
     setIsLoading(true)
     setErrorMessage(null)
+    setInvoice(null)
+    setIsInvoiceLoading(false)
+    setInvoiceErrorMessage(null)
+    setIsInvoiceUnavailable(false)
+    setIsInvoiceModalOpen(false)
+    latestInvoiceOrderIdRef.current = null
+    invoiceFocusOrderRef.current = null
 
     const loadOrder = async () => {
       try {
@@ -102,10 +175,61 @@ export const OrderDetailPageView = () => {
     }
   }, [orderId, router.isReady])
 
+  useEffect(() => {
+    if (!order?.id) {
+      return
+    }
+
+    void loadInvoice(order.id)
+  }, [loadInvoice, order?.id])
+
+  useEffect(() => {
+    if (!order?.id || router.query.invoice !== '1') {
+      return
+    }
+
+    if (invoiceFocusOrderRef.current === order.id) {
+      return
+    }
+
+    invoiceFocusOrderRef.current = order.id
+    window.setTimeout(() => {
+      invoicePanelRef.current?.focus()
+    }, 0)
+  }, [order?.id, router.query.invoice])
+
   const role = order && user?.id ? getOrderActorRole(order, user.id, preferredScope) : 'buyer'
   const timelineSteps = order ? buildOrderTimeline(order) : []
   const shippingLines = formatAddress(order?.shippingAddress ?? null)
   const shippingPresentation = order ? getShippingPresentation(order) : null
+  const invoiceAvailability = useMemo(
+    () =>
+      getOrderInvoiceAvailability({
+        invoice,
+        isLoading: isInvoiceLoading,
+        errorMessage: invoiceErrorMessage,
+        isUnavailable: isInvoiceUnavailable,
+      }),
+    [invoice, invoiceErrorMessage, isInvoiceLoading, isInvoiceUnavailable],
+  )
+
+  const handlePreviewInvoice = () => {
+    setIsInvoiceModalOpen(true)
+
+    if (order?.id && !invoice && !isInvoiceLoading) {
+      void loadInvoice(order.id)
+    }
+  }
+
+  const handleRetryInvoice = () => {
+    if (!order?.id) {
+      return
+    }
+
+    void loadInvoice(order.id)
+  }
+
+  const handlePrintInvoice = () => undefined
 
   return (
     <>
@@ -114,7 +238,10 @@ export const OrderDetailPageView = () => {
         description="Review order details, shipping status, payment records, and the next valid lifecycle action."
       />
 
-      <div className="-mx-6 -my-1 min-h-screen bg-[#F7F8FA] px-4 pb-12 sm:-mx-8 sm:px-6 lg:-mx-12 lg:px-8">
+      <div
+        data-order-workspace-chrome="true"
+        className="-mx-6 -my-1 min-h-screen bg-[#F7F8FA] px-4 pb-12 sm:-mx-8 sm:px-6 lg:-mx-12 lg:px-8"
+      >
         <div className="pt-5">
           <Link
             href={{
@@ -374,6 +501,15 @@ export const OrderDetailPageView = () => {
                   }}
                 />
 
+                <OrderInvoicePanel
+                  availability={invoiceAvailability}
+                  invoice={invoice}
+                  onPreview={handlePreviewInvoice}
+                  onPrint={handlePrintInvoice}
+                  onRetry={handleRetryInvoice}
+                  panelRef={invoicePanelRef}
+                />
+
                 <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
                   <h2 className="text-xl font-semibold text-slate-900">Order totals</h2>
                   <div className="mt-6 space-y-4 text-sm text-slate-600">
@@ -416,6 +552,16 @@ export const OrderDetailPageView = () => {
           </>
         )}
       </div>
+      {order ? (
+        <OrderInvoicePreviewModal
+          open={isInvoiceModalOpen}
+          invoice={invoice}
+          availability={invoiceAvailability}
+          onOpenChange={setIsInvoiceModalOpen}
+          onPrint={handlePrintInvoice}
+          onRetry={handleRetryInvoice}
+        />
+      ) : null}
     </>
   )
 }
