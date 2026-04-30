@@ -34,7 +34,7 @@ export const getProfileVisibilityPatch = (artwork: InventoryArtwork): UpdateArtw
 
 export const getEditArtworkHref = (artwork: InventoryArtwork) => ({
   pathname: '/artworks/upload',
-  query: { draftArtworkId: artwork.id },
+  query: { artworkId: artwork.id },
 })
 
 export const getAuctionHandoffHref = (artwork: InventoryArtwork) => ({

@@ -34,6 +34,9 @@ const createDraftArtworkId = () => {
   return `draft-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 }
 
+const getQueryParam = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value
+
 export const UploadPage = () => {
   // -- router --
   const router = useRouter()
@@ -65,10 +68,14 @@ export const UploadPage = () => {
   const allowNavigationRef = useRef(false)
   const generatedDraftIdRef = useRef<string | null>(null)
   const lastHydratedDraftIdRef = useRef<string | null>(null)
+  const lastHydratedArtworkIdRef = useRef<string | null>(null)
+  const artworkIdParam = getQueryParam(router.query.artworkId)
+  const isEditingArtwork = Boolean(artworkIdParam)
 
   // -- submission --
   const {
     submit,
+    updateExisting,
     submitting,
     progress,
     error,
@@ -112,11 +119,64 @@ export const UploadPage = () => {
       return
     }
 
+    const artworkIdParam = getQueryParam(router.query.artworkId)
     const legacyDraftParam = router.query.draft
     const draftArtworkIdQuery = router.query.draftArtworkId ?? legacyDraftParam
-    const draftArtworkIdParam = Array.isArray(draftArtworkIdQuery)
-      ? draftArtworkIdQuery[0]
-      : draftArtworkIdQuery
+    const draftArtworkIdParam = getQueryParam(draftArtworkIdQuery)
+
+    if (artworkIdParam) {
+      if (lastHydratedArtworkIdRef.current === artworkIdParam) {
+        return
+      }
+
+      let isCancelled = false
+      const loadArtwork = async () => {
+        hydrateFromQuery(artworkIdParam)
+        setHydrationError(null)
+        setIsDraftLoading(true)
+        generatedDraftIdRef.current = null
+        lastHydratedDraftIdRef.current = null
+
+        try {
+          const artwork = await artworkApis.getArtworkById(artworkIdParam)
+
+          if (isCancelled) {
+            return
+          }
+
+          if (!artwork) {
+            setHydrationError('This artwork is not available for your account.')
+            return
+          }
+
+          hydrateFromBackendDraft(artwork)
+          lastHydratedArtworkIdRef.current = artworkIdParam
+        } catch (err) {
+          if (isCancelled) {
+            return
+          }
+
+          const apiError = err as ApiError
+          const message =
+            apiError.status === 401
+              ? 'Please log in again to continue editing this artwork.'
+              : apiError.status === 403 || apiError.status === 404
+                ? 'This artwork is not available for your account.'
+                : apiError.message || 'We could not load this artwork. Please try again.'
+          setHydrationError(message)
+        } finally {
+          if (!isCancelled) {
+            setIsDraftLoading(false)
+          }
+        }
+      }
+
+      loadArtwork()
+
+      return () => {
+        isCancelled = true
+      }
+    }
 
     if (
       !router.query.draftArtworkId &&
@@ -147,6 +207,7 @@ export const UploadPage = () => {
       const nextDraftId = createDraftArtworkId()
       generatedDraftIdRef.current = nextDraftId
       lastHydratedDraftIdRef.current = null
+      lastHydratedArtworkIdRef.current = null
       allowNavigationRef.current = true
       router
         .replace(
@@ -277,7 +338,12 @@ export const UploadPage = () => {
         return
       }
 
-      if (!draftId) {
+      if (isEditingArtwork && !artworkIdParam) {
+        setHydrationError('Artwork id is missing. Refresh the page and try again.')
+        return
+      }
+
+      if (!isEditingArtwork && !draftId) {
         setHydrationError('Draft artwork id is missing. Refresh the page and try again.')
         return
       }
@@ -288,9 +354,14 @@ export const UploadPage = () => {
 
       try {
         setIsSubmitting(true)
-        const artwork = await submit(draftId, {
-          creatorName: resolveUploadCreatorName(user, sellerProfile),
-        })
+        const creatorName = resolveUploadCreatorName(user, sellerProfile)
+        const artwork = isEditingArtwork
+          ? await updateExisting(artworkIdParam ?? '', {
+              creatorName,
+            })
+          : await submit(draftId ?? '', {
+              creatorName,
+            })
 
         if (artwork) {
           // Success! Navigate to inventory or artwork detail
@@ -334,6 +405,7 @@ export const UploadPage = () => {
 
   const handleRetryDraftLoad = () => {
     lastHydratedDraftIdRef.current = null
+    lastHydratedArtworkIdRef.current = null
     setRetryCount((count) => count + 1)
   }
 
@@ -341,14 +413,18 @@ export const UploadPage = () => {
     const nextDraftId = createDraftArtworkId()
     generatedDraftIdRef.current = nextDraftId
     lastHydratedDraftIdRef.current = null
+    lastHydratedArtworkIdRef.current = null
     resetDraft()
     setHydrationError(null)
+    const nextQuery = { ...router.query }
+    delete nextQuery.artworkId
+    nextQuery.draftArtworkId = nextDraftId
     allowNavigationRef.current = true
     router
       .replace(
         {
           pathname: router.pathname,
-          query: { ...router.query, draftArtworkId: nextDraftId },
+          query: nextQuery,
         },
         undefined,
         { shallow: true },
@@ -361,9 +437,9 @@ export const UploadPage = () => {
   // -- render --
   return (
     <>
-      <Metadata title="Upload Artwork | Artium" />
+      <Metadata title={`${isEditingArtwork ? 'Edit' : 'Upload'} Artwork | Artium`} />
       <UploadWizardShell
-        title="Upload Artwork"
+        title={isEditingArtwork ? 'Edit Artwork' : 'Upload Artwork'}
         step={step}
         totalSteps={TOTAL_STEPS}
         onCancel={handleClose}
@@ -376,14 +452,18 @@ export const UploadPage = () => {
         {isDraftLoading ? (
           <div className="mx-auto mt-16 max-w-2xl rounded-[28px] border border-black/10 bg-white p-8 text-center shadow-sm">
             <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-black/10 border-t-[#0F6BFF]" />
-            <h1 className="mt-6 text-[22px] font-bold text-[#191414]">Loading draft</h1>
+            <h1 className="mt-6 text-[22px] font-bold text-[#191414]">
+              Loading {isEditingArtwork ? 'artwork' : 'draft'}
+            </h1>
             <p className="mt-2 text-[15px] text-black/60">
-              Syncing the upload form with the backend draft before you continue.
+              Syncing the upload form before you continue.
             </p>
           </div>
         ) : hydrationError ? (
           <div className="mx-auto mt-16 max-w-2xl rounded-[28px] border border-red-200 bg-white p-8 text-center shadow-sm">
-            <h1 className="text-[22px] font-bold text-[#191414]">Draft unavailable</h1>
+            <h1 className="text-[22px] font-bold text-[#191414]">
+              {isEditingArtwork ? 'Artwork unavailable' : 'Draft unavailable'}
+            </h1>
             <p className="mt-3 text-[15px] leading-6 text-black/65">{hydrationError}</p>
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
               <Button
@@ -408,9 +488,13 @@ export const UploadPage = () => {
       <Dialog open={isExitOpen} onOpenChange={setIsExitOpen}>
         <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">
           <div className="px-8 py-6">
-            <h2 className="text-[22px] font-bold text-[#191414] uppercase">Exit Draft?</h2>
+            <h2 className="text-[22px] font-bold text-[#191414] uppercase">
+              {isEditingArtwork ? 'Exit Editing?' : 'Exit Draft?'}
+            </h2>
             <p className="mt-4 text-[18px] text-[#191414]">
-              Your progress has been saved automatically, you can exit or discard your progress
+              {isEditingArtwork
+                ? 'You can exit and discard your unsaved changes.'
+                : 'Your progress has been saved automatically, you can exit or discard your progress'}
             </p>
           </div>
           <div className="grid grid-cols-2 border-t border-black/10 text-[18px] font-semibold">
@@ -419,7 +503,7 @@ export const UploadPage = () => {
               onClick={handleDeleteDraft}
               className="px-6 py-5 text-center text-red-500 transition hover:bg-red-50"
             >
-              Delete Draft
+              {isEditingArtwork ? 'Discard Changes' : 'Delete Draft'}
             </button>
             <button
               type="button"

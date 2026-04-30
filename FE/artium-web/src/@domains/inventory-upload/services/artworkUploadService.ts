@@ -2,16 +2,11 @@ import artworkApis, {
   type ArtworkApiItem,
   type SaveArtworkDraftInput,
   type SubmitArtworkDraftInput,
+  type UpdateArtworkInput,
 } from '@shared/apis/artworkApis'
 import artworkUploadApi from '@shared/apis/artworkUploadApi'
-import type {
-  ArtworkImageUploadResponse,
-  UploadError,
-} from '@shared/types/artwork'
-import type {
-  UploadListingState,
-  UploadMediaState,
-} from '../types/uploadArtwork'
+import type { ArtworkImageUploadResponse, UploadError } from '@shared/types/artwork'
+import type { UploadListingState, UploadMediaState } from '../types/uploadArtwork'
 
 interface UploadProgress {
   stage: 'uploading_images' | 'creating_artwork' | 'complete'
@@ -30,7 +25,9 @@ interface UploadResult {
 
 type ProgressCallback = (progress: UploadProgress) => void
 
-const extractFilesFromMedia = (media: UploadMediaState): {
+const extractFilesFromMedia = (
+  media: UploadMediaState,
+): {
   coverImage: File | null
   additionalImages: File[]
 } => {
@@ -43,7 +40,11 @@ const extractFilesFromMedia = (media: UploadMediaState): {
 }
 
 const hasExistingPrimaryImage = (media: UploadMediaState) =>
-  Boolean(media.coverImage && !media.coverImage.file && (media.coverImage.secureUrl || media.coverImage.url))
+  Boolean(
+    media.coverImage &&
+    !media.coverImage.file &&
+    (media.coverImage.secureUrl || media.coverImage.url),
+  )
 
 const toUploadedImageInput = (image: ArtworkImageUploadResponse) => ({
   publicId: image.publicId,
@@ -70,6 +71,15 @@ const buildSubmitPayload = (listing: UploadListingState): SubmitArtworkDraftInpu
   listingStatus: listing.status,
   price: listing.price.trim() || undefined,
   quantity: parseOptionalNumber(listing.quantity),
+  isPublished: listing.status === 'sale',
+})
+
+const buildExistingArtworkPayload = (
+  listing: UploadListingState,
+  draftPayload: SaveArtworkDraftInput,
+): UpdateArtworkInput => ({
+  ...draftPayload,
+  status: listing.status === 'sold' ? 'SOLD' : listing.status === 'inquire' ? 'INACTIVE' : 'ACTIVE',
   isPublished: listing.status === 'sale',
 })
 
@@ -134,8 +144,8 @@ export const uploadArtworkWithImages = async (
     throw new Error('Cover image is required')
   }
 
-  const filesToUpload = [coverImage, ...additionalImages].filter(
-    (file): file is File => Boolean(file),
+  const filesToUpload = [coverImage, ...additionalImages].filter((file): file is File =>
+    Boolean(file),
   )
   const uploadedImages: ArtworkImageUploadResponse[] = []
   const savePayload: SaveArtworkDraftInput = {
@@ -160,10 +170,7 @@ export const uploadArtworkWithImages = async (
   }
 
   if (uploadedImages.length > 0) {
-    await artworkApis.addImagesToArtwork(
-      draftArtworkId,
-      uploadedImages.map(toUploadedImageInput),
-    )
+    await artworkApis.addImagesToArtwork(draftArtworkId, uploadedImages.map(toUploadedImageInput))
   }
 
   onProgress?.({
@@ -175,10 +182,77 @@ export const uploadArtworkWithImages = async (
     },
   })
 
-  const artwork = await artworkApis.submitUploadDraft(
-    draftArtworkId,
-    buildSubmitPayload(listing),
+  const artwork = await artworkApis.submitUploadDraft(draftArtworkId, buildSubmitPayload(listing))
+
+  onProgress?.({
+    stage: 'complete',
+    imageProgress: {
+      current: filesToUpload.length,
+      total: filesToUpload.length,
+      percentage: 100,
+    },
+  })
+
+  return {
+    artwork,
+    uploadedImages,
+  }
+}
+
+export const updateArtworkWithImages = async (
+  media: UploadMediaState,
+  listing: UploadListingState,
+  artworkId: string,
+  draftPayload: SaveArtworkDraftInput,
+  onProgress?: ProgressCallback,
+): Promise<UploadResult> => {
+  if (!artworkId) {
+    throw new Error('Artwork id is required before updating')
+  }
+
+  const { coverImage, additionalImages } = extractFilesFromMedia(media)
+  if (!coverImage && !hasExistingPrimaryImage(media)) {
+    throw new Error('Cover image is required')
+  }
+
+  const filesToUpload = [coverImage, ...additionalImages].filter((file): file is File =>
+    Boolean(file),
   )
+  const uploadedImages: ArtworkImageUploadResponse[] = []
+
+  onProgress?.({
+    stage: 'creating_artwork',
+    imageProgress: {
+      current: 0,
+      total: filesToUpload.length,
+      percentage: filesToUpload.length > 0 ? 10 : 90,
+    },
+  })
+
+  let artwork = await artworkApis.updateArtwork(
+    artworkId,
+    buildExistingArtworkPayload(listing, draftPayload),
+  )
+
+  for (let index = 0; index < filesToUpload.length; index += 1) {
+    const file = filesToUpload[index]
+    const image = await uploadImageFile(
+      file,
+      artworkId,
+      index === 0 && Boolean(coverImage),
+      index,
+      filesToUpload.length,
+      onProgress,
+    )
+    uploadedImages.push(image)
+  }
+
+  if (uploadedImages.length > 0) {
+    artwork = await artworkApis.addImagesToArtwork(
+      artworkId,
+      uploadedImages.map(toUploadedImageInput),
+    )
+  }
 
   onProgress?.({
     stage: 'complete',
@@ -213,7 +287,14 @@ export const validateMediaForUpload = (
   ].filter((file): file is File => file !== undefined)
 
   const maxSize = 25 * 1024 * 1024
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif']
+  const allowedTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/heic',
+    'image/heif',
+  ]
 
   allFiles.forEach((file) => {
     if (file.size > maxSize) {

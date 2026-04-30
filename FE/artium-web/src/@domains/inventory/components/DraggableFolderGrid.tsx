@@ -1,5 +1,5 @@
 // react
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 // next
 import Link from 'next/link'
@@ -42,6 +42,19 @@ import artworkFolderApis from '@shared/apis/artworkFolderApis'
 
 type FolderWithCount = InventoryFolder & { itemCount: number }
 
+const dedupeFoldersById = (folders: FolderWithCount[]) => {
+  const seen = new Set<string>()
+
+  return folders.filter((folder) => {
+    if (seen.has(folder.id)) {
+      return false
+    }
+
+    seen.add(folder.id)
+    return true
+  })
+}
+
 type SortableFolderItemProps = {
   folder: FolderWithCount
   onRename: (folder: InventoryFolder) => void
@@ -57,7 +70,7 @@ const SortableFolderItem = ({ folder, onRename, onDelete, onHide }: SortableFold
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0 : 1,
   }
 
   return (
@@ -136,9 +149,11 @@ export const DraggableFolderGrid = ({
   onError,
 }: DraggableFolderGridProps) => {
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [localFolders, setLocalFolders] = useState(folders)
+  const dedupedFolders = useMemo(() => dedupeFoldersById(folders), [folders])
+  const [localFolders, setLocalFolders] = useState<FolderWithCount[] | null>(null)
   const optimisticReorderFolders = useInventoryDataStore((state) => state.optimisticReorderFolders)
   const user = useAuthStore((state) => state.user)
+  const renderedFolders = localFolders ?? dedupedFolders
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -152,6 +167,7 @@ export const DraggableFolderGrid = ({
   )
 
   const handleDragStart = (event: DragStartEvent) => {
+    setLocalFolders(renderedFolders)
     setActiveId(event.active.id as string)
   }
 
@@ -159,38 +175,44 @@ export const DraggableFolderGrid = ({
     const { active, over } = event
 
     if (!over || active.id === over.id) {
+      setLocalFolders(null)
       setActiveId(null)
       return
     }
 
-    const oldIndex = localFolders.findIndex((f) => f.id === active.id)
-    const newIndex = localFolders.findIndex((f) => f.id === over.id)
+    const oldIndex = renderedFolders.findIndex((f) => f.id === active.id)
+    const newIndex = renderedFolders.findIndex((f) => f.id === over.id)
 
-    if (oldIndex !== -1 && newIndex !== -1) {
-      const reordered = arrayMove(localFolders, oldIndex, newIndex)
-      setLocalFolders(reordered)
+    if (oldIndex === -1 || newIndex === -1) {
+      setLocalFolders(null)
+      setActiveId(null)
+      return
+    }
 
-      const folderIds = reordered.map((f) => f.id)
-      optimisticReorderFolders(folderIds)
+    const reordered = arrayMove(renderedFolders, oldIndex, newIndex)
+    setLocalFolders(reordered)
 
-      if (user?.id) {
-        try {
-          await artworkFolderApis.reorderFolders({
-            sellerId: user.id,
-            folderIds,
-          })
-        } catch (error) {
-          setLocalFolders(folders)
-          optimisticReorderFolders(folders.map((f) => f.id))
-          onError?.('Failed to reorder folders')
-        }
+    const folderIds = reordered.map((f) => f.id)
+    optimisticReorderFolders(folderIds)
+
+    if (user?.id) {
+      try {
+        await artworkFolderApis.reorderFolders({
+          sellerId: user.id,
+          folderIds,
+        })
+        setLocalFolders(null)
+      } catch {
+        setLocalFolders(dedupedFolders)
+        optimisticReorderFolders(dedupedFolders.map((f) => f.id))
+        onError?.('Failed to reorder folders')
       }
     }
 
     setActiveId(null)
   }
 
-  const activeFolder = activeId ? localFolders.find((f) => f.id === activeId) : null
+  const activeFolder = activeId ? renderedFolders.find((f) => f.id === activeId) : null
 
   return (
     <DndContext
@@ -199,9 +221,9 @@ export const DraggableFolderGrid = ({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext items={localFolders.map((f) => f.id)} strategy={rectSortingStrategy}>
+      <SortableContext items={renderedFolders.map((f) => f.id)} strategy={rectSortingStrategy}>
         <div className="mt-4 mb-4 grid grid-cols-2 gap-4 lg:grid-cols-5">
-          {localFolders.map((folder) => (
+          {renderedFolders.map((folder) => (
             <SortableFolderItem
               key={folder.id}
               folder={folder}
