@@ -54,6 +54,7 @@ export * from './dtos/orders/resolve-dispute.dto';
 export * from './dtos/payments/create-payment-intent.dto';
 export * from './dtos/payments/get-transactions.dto';
 export * from './dtos/payments/invoices/create-invoice.dto';
+export * from './dtos/payments/invoices/order-invoice.dto';
 export * from './dtos/payments/invoices/save-invoice.dto';
 export * from './dtos/payments/invoices/update-invoice.dto';
 export * from './dtos/payments/payouts/create-payout.dto';

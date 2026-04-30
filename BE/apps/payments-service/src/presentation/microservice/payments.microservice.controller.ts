@@ -30,6 +30,7 @@ import {
   GetInvoiceByNumberQuery,
   GetInvoicesBySellerQuery,
   GetInvoicesByCollectorQuery,
+  GetOrderInvoiceQuery,
   // Payout Queries
   GetPayoutQuery,
   GetPayoutsBySellerQuery,
@@ -49,6 +50,7 @@ import {
   SaveInvoiceDTO,
   SendInvoiceToBuyerDTO,
 } from '../../domain/dtos/invoice';
+import { OrderInvoiceSourceOrderDto } from '@app/common';
 import { CreatePayoutDTO } from '../../domain/dtos/payout';
 import { RecordEthereumPaymentDTO } from '../../domain/dtos/payment';
 
@@ -179,6 +181,14 @@ export class PaymentsMicroserviceController {
   async getInvoiceByNumber(@Payload() data: { invoiceNumber: string }) {
     this.logger.debug(`Getting invoice by number: ${data.invoiceNumber}`);
     return this.queryBus.execute(new GetInvoiceByNumberQuery(data.invoiceNumber));
+  }
+
+  @MessagePattern({ cmd: 'get_or_materialize_order_invoice' })
+  async getOrMaterializeOrderInvoice(
+    @Payload() data: { order: OrderInvoiceSourceOrderDto },
+  ) {
+    this.logger.debug(`Getting order invoice for order: ${data.order.id}`);
+    return this.queryBus.execute(new GetOrderInvoiceQuery(data.order));
   }
 
   @MessagePattern({ cmd: 'send_invoice_to_buyer' })
