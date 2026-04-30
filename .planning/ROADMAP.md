@@ -519,7 +519,17 @@ Cross-cutting constraints:
   4. Developer can use print/download extraction controls and produce an invoice output that preserves layout, identifiers, totals, and readable spacing across desktop and mobile widths.
   5. Developer can trigger loading, unavailable, unauthorized, and retryable backend failure states and see clear inline UI that does not break order filters, pagination, or detail navigation.
   6. Developer can inspect frontend code and confirm monetary values and invoice identity come from backend DTOs, with no client-only recomputation or invented financial placeholders.
-**Plans:** TBD
+**Plans:** 2
+**Wave 1**
+- 31-01 — Core invoice presentation, availability helpers, detail panel, preview modal, and DTO-driven invoice document
+
+**Wave 2 *(blocked on Wave 1 completion)***
+- 31-02 — Orders list/detail integration, invoice loading/retry, panel focus, modal orchestration, and print/save extraction
+
+Cross-cutting constraints:
+- Invoice UI must derive invoice number, status, subtotal, tax, discount, shipping, total, parties, addresses, payment identifiers, and line items from `orderApis.getOrderInvoice` / `OrderInvoiceResponse`.
+- Authorization, not-found, and seller-redaction cases must render as non-disclosing unavailable or labeled missing/redacted data; the frontend must not infer private fields from order-page data.
+- Browser print/save-as-PDF must use `window.print()`, hide workspace chrome and controls, and print only the invoice document plus minimal Artium footer.
 **UI hint:** yes
 
 ### Phase 32: Order invoice validation and milestone closure
