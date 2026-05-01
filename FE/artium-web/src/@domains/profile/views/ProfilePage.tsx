@@ -9,6 +9,7 @@ import { Metadata } from '@/components/SEO/Metadata'
 
 // @domains - profile
 import { ArtworksSection } from '@domains/profile/components/ArtworksSection'
+import { MomentDeviceUploadComposer } from '@domains/profile/components/MomentDeviceUploadComposer'
 import { MomentsSection } from '@domains/profile/components/MomentsSection'
 import { MoodboardsSection } from '@domains/profile/components/MoodboardsSection'
 import { ProfileAboutSection } from '@domains/profile/components/ProfileAboutSection'
@@ -28,12 +29,12 @@ import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
 import { ProfileMoodboard, ProfileMoment, ProfileTabKey } from '@domains/profile/types'
 import profileApis from '@shared/apis/profileApis'
+import type { CreateMomentInput } from '@shared/apis/profileApis'
 import { mapMoodboardToProfileMoodboard, mapMomentToProfileMoment } from '@domains/profile/utils/profileApiMapper'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { Dialog, DialogContent } from '@shared/components/ui/dialog'
 import { Input } from '@shared/components/ui/input'
 import { Switch } from '@shared/components/ui/switch'
-import { cn } from '@shared/lib/utils'
 
 type ProfilePageViewProps = {
   username?: string | string[]
@@ -51,16 +52,6 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
   const [moodboardSuccess, setMoodboardSuccess] = useState<string | null>(null)
   const [createdMoments, setCreatedMoments] = useState<ProfileMoment[]>([])
   const [createdMoodboards, setCreatedMoodboards] = useState<ProfileMoodboard[]>([])
-  const [momentForm, setMomentForm] = useState({
-    mediaUrl: '',
-    mediaType: 'image' as 'image' | 'video',
-    thumbnailUrl: '',
-    caption: '',
-    location: '',
-    hashtags: '',
-    durationSeconds: '',
-    isPinned: false,
-  })
   const [moodboardForm, setMoodboardForm] = useState({
     title: '',
     description: '',
@@ -103,20 +94,6 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
     [createdMoodboards, profileData?.moodboards],
   )
 
-  const resetMomentForm = () => {
-    setMomentForm({
-      mediaUrl: '',
-      mediaType: 'image',
-      thumbnailUrl: '',
-      caption: '',
-      location: '',
-      hashtags: '',
-      durationSeconds: '',
-      isPinned: false,
-    })
-    setMomentError(null)
-  }
-
   const resetMoodboardForm = () => {
     setMoodboardForm({
       title: '',
@@ -136,45 +113,18 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
       .filter(Boolean)
       .map((item) => (item.startsWith('#') ? item.slice(1) : item))
 
-  const handleCreateMoment = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const handleCreateMoment = async (input: CreateMomentInput) => {
     if (!isAuthenticated || momentSubmitting) return
-
-    const mediaUrl = momentForm.mediaUrl.trim()
-    if (!mediaUrl) {
-      setMomentError('Please provide a media URL to publish your moment.')
-      return
-    }
-
-    const durationValue =
-      momentForm.mediaType === 'video' && momentForm.durationSeconds.trim()
-        ? Number(momentForm.durationSeconds)
-        : undefined
 
     setMomentSubmitting(true)
     setMomentError(null)
     setMomentSuccess(null)
 
-    const payload = {
-      mediaUrl,
-      mediaType: momentForm.mediaType,
-      thumbnailUrl:
-        momentForm.mediaType === 'video' && momentForm.thumbnailUrl.trim()
-          ? momentForm.thumbnailUrl.trim()
-          : undefined,
-      caption: momentForm.caption.trim() || undefined,
-      location: momentForm.location.trim() || undefined,
-      hashtags: parseTags(momentForm.hashtags),
-      durationSeconds: Number.isFinite(durationValue) ? durationValue : undefined,
-      isPinned: momentForm.isPinned,
-    }
-
     try {
-      const created = await profileApis.createMoment(payload)
+      const created = await profileApis.createMoment(input)
       setCreatedMoments((prev) => [mapMomentToProfileMoment(created), ...prev])
       setMomentSuccess('Moment published.')
       setIsMomentDialogOpen(false)
-      resetMomentForm()
     } catch (err) {
       setMomentError(err instanceof Error ? err.message : 'Failed to create moment.')
     } finally {
@@ -338,7 +288,8 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
                   <button
                     type="button"
                     onClick={() => {
-                      resetMomentForm()
+                      setMomentError(null)
+                      setMomentSuccess(null)
                       setIsMomentDialogOpen(true)
                     }}
                     className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
@@ -387,202 +338,21 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
         ) : null}
       </div>
 
-      <Dialog
-        open={isMomentDialogOpen}
-        onOpenChange={(open) => {
-          setIsMomentDialogOpen(open)
-          if (!open) {
-            resetMomentForm()
-            setMomentSubmitting(false)
-          }
-        }}
-      >
-        <DialogContent size="4xl" className="w-[95vw] rounded-3xl bg-white p-0">
-          <form onSubmit={handleCreateMoment} className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="flex flex-col justify-between gap-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-8 text-white">
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
-                  Moment
-                </p>
-                <h3 className="text-2xl font-semibold">Tell your story in motion</h3>
-                <p className="text-sm text-white/70">
-                  Paste a media URL and add a caption to publish instantly.
-                </p>
-              </div>
-              <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
-                {momentForm.mediaUrl ? (
-                  momentForm.mediaType === 'video' ? (
-                    <video
-                      src={momentForm.mediaUrl}
-                      poster={momentForm.thumbnailUrl || undefined}
-                      className="h-56 w-full object-cover"
-                      controls
-                    />
-                  ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={momentForm.mediaUrl}
-                      alt="Moment preview"
-                      className="h-56 w-full object-cover"
-                    />
-                  )
-                ) : (
-                  <div className="flex h-56 items-center justify-center text-sm text-white/60">
-                    Preview appears here
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4 px-6 py-8">
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-slate-700">Media URL</label>
-                <Input
-                  value={momentForm.mediaUrl}
-                  onChange={(event) =>
-                    setMomentForm((prev) => ({ ...prev, mediaUrl: event.target.value }))
-                  }
-                  placeholder="https://..."
-                  className="h-11 rounded-full"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setMomentForm((prev) => ({ ...prev, mediaType: 'image' }))}
-                  className={cn(
-                    'rounded-full px-4 py-2 text-sm font-semibold transition',
-                    momentForm.mediaType === 'image'
-                      ? 'bg-slate-900 text-white'
-                      : 'border border-slate-200 text-slate-600 hover:border-slate-300',
-                  )}
-                >
-                  Image
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMomentForm((prev) => ({ ...prev, mediaType: 'video' }))}
-                  className={cn(
-                    'rounded-full px-4 py-2 text-sm font-semibold transition',
-                    momentForm.mediaType === 'video'
-                      ? 'bg-slate-900 text-white'
-                      : 'border border-slate-200 text-slate-600 hover:border-slate-300',
-                  )}
-                >
-                  Video
-                </button>
-                <div className="ml-auto flex items-center gap-3">
-                  <span className="text-sm text-slate-600">Pin to profile</span>
-                  <Switch
-                    checked={momentForm.isPinned}
-                    onCheckedChange={(checked) =>
-                      setMomentForm((prev) => ({ ...prev, isPinned: checked }))
-                    }
-                  />
-                </div>
-              </div>
-
-              {momentForm.mediaType === 'video' ? (
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">
-                    Thumbnail URL (optional)
-                  </label>
-                  <Input
-                    value={momentForm.thumbnailUrl}
-                    onChange={(event) =>
-                      setMomentForm((prev) => ({ ...prev, thumbnailUrl: event.target.value }))
-                    }
-                    placeholder="https://..."
-                    className="h-11 rounded-full"
-                  />
-                </div>
-              ) : null}
-
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-slate-700">Caption</label>
-                <textarea
-                  value={momentForm.caption}
-                  onChange={(event) =>
-                    setMomentForm((prev) => ({ ...prev, caption: event.target.value }))
-                  }
-                  placeholder="Share the story behind the piece..."
-                  className="h-24 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">Location</label>
-                  <Input
-                    value={momentForm.location}
-                    onChange={(event) =>
-                      setMomentForm((prev) => ({ ...prev, location: event.target.value }))
-                    }
-                    placeholder="City, Country"
-                    className="h-11 rounded-full"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">
-                    Hashtags
-                  </label>
-                  <Input
-                    value={momentForm.hashtags}
-                    onChange={(event) =>
-                      setMomentForm((prev) => ({ ...prev, hashtags: event.target.value }))
-                    }
-                    placeholder="studio, oil, sketch"
-                    className="h-11 rounded-full"
-                  />
-                </div>
-              </div>
-
-              {momentForm.mediaType === 'video' ? (
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">
-                    Duration (seconds)
-                  </label>
-                  <Input
-                    value={momentForm.durationSeconds}
-                    onChange={(event) =>
-                      setMomentForm((prev) => ({ ...prev, durationSeconds: event.target.value }))
-                    }
-                    placeholder="e.g. 30"
-                    type="number"
-                    min={1}
-                    max={60}
-                    className="h-11 rounded-full"
-                  />
-                </div>
-              ) : null}
-
-              {momentError ? (
-                <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-600">
-                  {momentError}
-                </p>
-              ) : null}
-
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsMomentDialogOpen(false)}
-                  className="rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:border-slate-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={momentSubmitting}
-                  className="rounded-full bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {momentSubmitting ? 'Publishing...' : 'Publish moment'}
-                </button>
-              </div>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {isMomentDialogOpen ? (
+        <MomentDeviceUploadComposer
+          open={isMomentDialogOpen}
+          submitting={momentSubmitting}
+          errorMessage={momentError}
+          onOpenChange={(open) => {
+            setIsMomentDialogOpen(open)
+            if (!open) {
+              setMomentSubmitting(false)
+              setMomentError(null)
+            }
+          }}
+          onPublish={handleCreateMoment}
+        />
+      ) : null}
 
       <Dialog
         open={isMoodboardDialogOpen}

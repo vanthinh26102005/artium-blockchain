@@ -1,4 +1,4 @@
-import { ChangeEvent, DragEvent, FormEvent, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, DragEvent, FormEvent, useRef, useState } from 'react'
 
 import {
   AlertCircle,
@@ -58,26 +58,13 @@ export const MomentDeviceUploadComposer = ({
   onPublish,
 }: MomentDeviceUploadComposerProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const { state, mediaId, isUploading, canPublish, selectFile, retryUpload, resetUpload } =
+  const { state, mediaId, isUploading, canPublish, selectFile, retryUpload } =
     useProfileMomentUpload()
   const [caption, setCaption] = useState(emptyMetadata.caption)
   const [location, setLocation] = useState(emptyMetadata.location)
   const [hashtags, setHashtags] = useState(emptyMetadata.hashtags)
   const [isPinned, setIsPinned] = useState(emptyMetadata.isPinned)
   const [isDragging, setIsDragging] = useState(false)
-
-  useEffect(() => {
-    if (open) {
-      return
-    }
-
-    resetUpload()
-    setCaption(emptyMetadata.caption)
-    setLocation(emptyMetadata.location)
-    setHashtags(emptyMetadata.hashtags)
-    setIsPinned(emptyMetadata.isPinned)
-    setIsDragging(false)
-  }, [open, resetUpload])
 
   const openFilePicker = () => {
     fileInputRef.current?.click()
