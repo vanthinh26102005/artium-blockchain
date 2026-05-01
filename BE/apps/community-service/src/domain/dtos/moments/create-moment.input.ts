@@ -1,11 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MomentMediaType } from '@app/common';
 import {
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
   IsArray,
   IsBoolean,
   IsNumber,
@@ -24,29 +21,12 @@ export class CreateMomentInput {
   userId: string;
 
   @ApiProperty({
-    description: 'URL of the media (image or video)',
-    example: 'https://storage.example.com/moments/image.jpg',
+    description: 'Backend-issued uploaded community media ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @IsUrl()
+  @IsString()
   @IsNotEmpty()
-  mediaUrl: string;
-
-  @ApiProperty({
-    enum: MomentMediaType,
-    description: 'Type of media (image or video)',
-    example: MomentMediaType.IMAGE,
-  })
-  @IsEnum(MomentMediaType)
-  @IsNotEmpty()
-  mediaType: MomentMediaType;
-
-  @ApiPropertyOptional({
-    description: 'Thumbnail URL for video content',
-    example: 'https://storage.example.com/moments/thumbnail.jpg',
-  })
-  @IsOptional()
-  @IsUrl()
-  thumbnailUrl?: string | null;
+  mediaId: string;
 
   @ApiPropertyOptional({
     description: 'Caption for the moment',
