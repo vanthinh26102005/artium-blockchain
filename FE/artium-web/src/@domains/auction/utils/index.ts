@@ -1,1 +1,1 @@
-export { getAuctionTimeRemainingDisplay, type TimeRemainingDisplay } from './auctionTime'
+export { getAuctionTimeRemainingDisplay, type AuctionLotStatusKey, type TimeRemainingDisplay } from './auctionTime'

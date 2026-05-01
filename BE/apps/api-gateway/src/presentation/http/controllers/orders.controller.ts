@@ -45,6 +45,11 @@ type AuthorizedOrderObject = OrderObject & {
   items?: OrderItemAccessObject[];
 };
 
+const normalizeWalletAddress = (value?: string | null) =>
+  typeof value === 'string' && value.trim().length > 0
+    ? value.trim().toLowerCase()
+    : null;
+
 @ApiTags('Orders')
 @Controller('orders')
 export class OrdersController {
@@ -53,7 +58,11 @@ export class OrdersController {
     private readonly ordersClient: ClientProxy,
   ) {}
 
-  private async getAuthorizedOrder(id: string, userId?: string): Promise<AuthorizedOrderObject> {
+  private async getAuthorizedOrder(
+    id: string,
+    userId?: string,
+    walletAddress?: string | null,
+  ): Promise<AuthorizedOrderObject> {
     const order = await sendRpc<AuthorizedOrderObject>(
       this.ordersClient,
       { cmd: 'get_order_by_id' },
@@ -62,8 +71,15 @@ export class OrdersController {
 
     const isBuyer = order.collectorId === userId;
     const isSeller = order.items?.some((item) => item.sellerId === userId) ?? false;
+    const normalizedWalletAddress = normalizeWalletAddress(walletAddress);
+    const isBlockchainBuyer =
+      normalizedWalletAddress !== null &&
+      normalizeWalletAddress(order.buyerWallet) === normalizedWalletAddress;
+    const isBlockchainSeller =
+      normalizedWalletAddress !== null &&
+      normalizeWalletAddress(order.sellerWallet) === normalizedWalletAddress;
 
-    if (!isBuyer && !isSeller) {
+    if (!isBuyer && !isSeller && !isBlockchainBuyer && !isBlockchainSeller) {
       throw new NotFoundException('Order not found');
     }
 
@@ -116,7 +132,7 @@ export class OrdersController {
       { onChainOrderId },
     );
 
-    return this.getAuthorizedOrder(order.id, req.user?.id);
+    return this.getAuthorizedOrder(order.id, req.user?.id, req.user?.walletAddress);
   }
 
   @Get(':id/items')
@@ -127,7 +143,7 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'Order items retrieved' })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async getOrderItems(@Param('id') id: string, @Req() req: any) {
-    const order = await this.getAuthorizedOrder(id, req.user?.id);
+    const order = await this.getAuthorizedOrder(id, req.user?.id, req.user?.walletAddress);
     return order.items ?? [];
   }
 
@@ -139,7 +155,7 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'Order retrieved successfully', type: OrderObject })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async getOrderById(@Param('id') id: string, @Req() req: any) {
-    return this.getAuthorizedOrder(id, req.user?.id);
+    return this.getAuthorizedOrder(id, req.user?.id, req.user?.walletAddress);
   }
 
   @Patch(':id/cancel')

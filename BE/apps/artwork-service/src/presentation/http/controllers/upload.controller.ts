@@ -26,7 +26,14 @@ import {
   IsString,
 } from 'class-validator';
 import { GcsStorageService } from 'apps/artwork-service/src/domain';
+import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+
+const getImageExtension = (file?: Express.Multer.File, fallback = '.webp') =>
+  path.extname(file?.originalname ?? '').toLowerCase() || fallback;
+
+const createStoredImageFileName = (file?: Express.Multer.File) =>
+  `${uuidv4()}${getImageExtension(file)}`;
 
 class UploadArtworkImageDto {
   @IsString()
@@ -163,7 +170,7 @@ export class UploadController {
     try {
       const uploadResult = await this.gcsStorage.uploadFile(file, {
         folder: `artworks/${dto.sellerId}/${dto.artworkId}`,
-        fileName: `${uuidv4()}.webp`,
+        fileName: createStoredImageFileName(file),
         makePublic: true,
         metadata: {
           sellerId: dto.sellerId,
@@ -290,7 +297,7 @@ export class UploadController {
         files.map(async (file, index) => {
           const uploadResult = await this.gcsStorage.uploadFile(file, {
             folder: `artworks/${dto.sellerId}/${dto.artworkId}`,
-            fileName: `${uuidv4()}.webp`,
+            fileName: createStoredImageFileName(file),
             makePublic: true,
             metadata: {
               sellerId: dto.sellerId,
@@ -377,7 +384,7 @@ export class UploadController {
     try {
       const uploadResult = await this.gcsStorage.uploadFile(file, {
         folder: `avatars`,
-        fileName: `${dto.userId}.webp`,
+        fileName: `${dto.userId}${getImageExtension(file)}`,
         makePublic: true,
         metadata: {
           userId: dto.userId,

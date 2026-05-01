@@ -4,8 +4,7 @@ import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { AlertTriangle, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
-import { type DiscoverArtworkAuctionStatusKey } from '@domains/discover/mock/mockArtworks'
-import { getAuctionTimeRemainingDisplay } from '@domains/auction/utils'
+import { getAuctionTimeRemainingDisplay, type AuctionLotStatusKey } from '@domains/auction/utils'
 import { ConfirmedBidState } from './ConfirmedBidState'
 import { PendingBidState } from './PendingBidState'
 import { SubmittingBidState } from './SubmittingBidState'
@@ -18,24 +17,40 @@ import {
 
 export type AuctionBidLot = {
   artworkId: string
+  onChainOrderId: string
   title: string
   bidValue: number
+  minBidIncrementValue: number
   status: string
-  statusKey: DiscoverArtworkAuctionStatusKey
+  statusKey: AuctionLotStatusKey
   endsAt?: string
   imageSrc: string
   imageAlt: string
+}
+
+export type BidOrderStatusPayload = {
+  lot: AuctionBidLot
+  committedBidValue: number
+  transactionHash: string
+}
+
+type SubmitBidCallbacks = {
+  onTransactionHash: (transactionHash: string) => void
 }
 
 type BidEditingModalProps = {
   isOpen: boolean
   lot: AuctionBidLot | null
   onClose: () => void
+  onSubmitBid: (
+    input: { lot: AuctionBidLot; bidAmountEth: string },
+    callbacks: SubmitBidCallbacks,
+  ) => Promise<{ transactionHash: string }>
+  onViewOrderStatus?: (payload: BidOrderStatusPayload) => void
 }
 
 const MIN_BID_INCREMENT_ETH = 0.1
-const BID_INCREMENT_RATE = 0.05
-const MOCK_ETH_TO_USD = 2575
+const ESTIMATED_ETH_TO_USD = 2575
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -46,12 +61,10 @@ const headlineFont = {
   fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
 
-const statusBadgeClass: Record<DiscoverArtworkAuctionStatusKey, string> = {
+const statusBadgeClass: Record<AuctionLotStatusKey, string> = {
   active: 'bg-[#16a34a]',
   'ending-soon': 'bg-[#dc2626]',
   closed: 'bg-[#9ca3af]',
-  'newly-listed': 'bg-[#2563eb]',
-  paused: 'bg-[#eab308]',
 }
 
 const usdFormatter = new Intl.NumberFormat('en-US', {
@@ -62,24 +75,19 @@ const usdFormatter = new Intl.NumberFormat('en-US', {
 
 const formatPreciseEthDisplay = (value: number) => `${value.toFixed(2)} ETH`
 
-const formatUsdEstimate = (value: number) => usdFormatter.format(value * MOCK_ETH_TO_USD)
+const formatUsdEstimate = (value: number) => usdFormatter.format(value * ESTIMATED_ETH_TO_USD)
 
-const getMinimumNextBid = (currentBid: number) =>
-  Number((currentBid + Math.max(MIN_BID_INCREMENT_ETH, currentBid * BID_INCREMENT_RATE)).toFixed(2))
+const getMinimumNextBid = (currentBid: number, minBidIncrement: number) => {
+  const safeIncrement = Math.max(MIN_BID_INCREMENT_ETH, minBidIncrement)
+  return Number((currentBid > 0 ? currentBid + safeIncrement : safeIncrement).toFixed(6))
+}
 
-const getCompetingBid = (failedBid: number) =>
-  Number((failedBid + Math.max(0.12, failedBid * 0.014)).toFixed(2))
-
-const getBidModalStatusLabel = (statusKey: DiscoverArtworkAuctionStatusKey) => {
+const getBidModalStatusLabel = (statusKey: AuctionLotStatusKey) => {
   switch (statusKey) {
     case 'active':
       return 'Live Auction'
     case 'ending-soon':
       return 'Ending Soon'
-    case 'newly-listed':
-      return 'Newly Listed'
-    case 'paused':
-      return 'Paused'
     case 'closed':
       return 'Closed'
     default:
@@ -87,25 +95,31 @@ const getBidModalStatusLabel = (statusKey: DiscoverArtworkAuctionStatusKey) => {
   }
 }
 
-const getMockTransactionHash = (artworkId: string, bidValue: number) => {
-  const compactBidValue = bidValue.toFixed(2).replace('.', '')
-  return `0x${artworkId.replace(/[^a-zA-Z0-9]/g, '').slice(-4)}${compactBidValue}f89c`
-}
-
-export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) => {
+export const BidEditingModal = ({
+  isOpen,
+  lot,
+  onClose,
+  onSubmitBid,
+  onViewOrderStatus,
+}: BidEditingModalProps) => {
   const [viewState, setViewState] = useState<
     'editing' | 'submitting' | 'pending' | 'confirmed' | 'failed'
   >('editing')
   const [currentBidValue, setCurrentBidValue] = useState(() => lot?.bidValue ?? 0)
-  const minimumNextBid = getMinimumNextBid(currentBidValue)
-  const [bidAmount, setBidAmount] = useState(() => minimumNextBid.toFixed(2))
+  const [bidAmount, setBidAmount] = useState(() =>
+    getMinimumNextBid(
+      lot?.bidValue ?? 0,
+      lot?.minBidIncrementValue ?? MIN_BID_INCREMENT_ETH,
+    ).toFixed(2),
+  )
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [committedBidValue, setCommittedBidValue] = useState<number | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const [failedBidValue, setFailedBidValue] = useState<number | null>(null)
-  const lotStatusKey = lot?.statusKey
-  const lotArtworkId = lot?.artworkId
+  const [failureMessage, setFailureMessage] = useState<string | null>(null)
   const lotBidValue = lot?.bidValue ?? 0
+  const lotMinBidIncrement = lot?.minBidIncrementValue ?? MIN_BID_INCREMENT_ETH
+  const minimumNextBid = getMinimumNextBid(currentBidValue, lotMinBidIncrement)
 
   useEffect(() => {
     if (!isOpen) {
@@ -118,55 +132,6 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
 
     return () => window.clearInterval(intervalId)
   }, [isOpen])
-
-  useEffect(() => {
-    if (!isOpen || viewState !== 'submitting' || committedBidValue === null || !lotArtworkId) {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setTransactionHash(getMockTransactionHash(lotArtworkId, committedBidValue))
-      setViewState('pending')
-    }, 1400)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [committedBidValue, isOpen, lotArtworkId, viewState])
-
-  useEffect(() => {
-    if (!isOpen || viewState !== 'pending' || committedBidValue === null || lotStatusKey !== 'ending-soon') {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      const nextTopBid = getCompetingBid(committedBidValue)
-      setFailedBidValue(committedBidValue)
-      setCurrentBidValue(nextTopBid)
-      setBidAmount(getMinimumNextBid(nextTopBid).toFixed(2))
-      setViewState('failed')
-    }, 3200)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [committedBidValue, isOpen, lotStatusKey, viewState])
-
-  useEffect(() => {
-    if (
-      !isOpen ||
-      viewState !== 'pending' ||
-      committedBidValue === null ||
-      transactionHash === null ||
-      lotStatusKey === 'ending-soon'
-    ) {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setCurrentBidValue(committedBidValue)
-      setBidAmount(getMinimumNextBid(committedBidValue).toFixed(2))
-      setViewState('confirmed')
-    }, 2400)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [committedBidValue, isOpen, lotStatusKey, transactionHash, viewState])
 
   if (!lot) {
     return null
@@ -200,14 +165,40 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
     }
   }
 
-  const handlePlaceBid = () => {
+  const handlePlaceBid = async () => {
     if (!isBidValid) {
       return
     }
 
     setCommittedBidValue(bidAmountValue)
     setTransactionHash(null)
+    setFailureMessage(null)
     setViewState('submitting')
+
+    try {
+      const result = await onSubmitBid(
+        {
+          lot,
+          bidAmountEth: bidAmountValue.toFixed(18).replace(/\.?0+$/, ''),
+        },
+        {
+          onTransactionHash: (nextTransactionHash) => {
+            setTransactionHash(nextTransactionHash)
+            setViewState('pending')
+          },
+        },
+      )
+
+      setTransactionHash(result.transactionHash)
+      setCurrentBidValue(bidAmountValue)
+      setBidAmount(getMinimumNextBid(bidAmountValue, lotMinBidIncrement).toFixed(2))
+      setViewState('confirmed')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to submit bid transaction.'
+      setFailureMessage(message)
+      setFailedBidValue(bidAmountValue)
+      setViewState('failed')
+    }
   }
 
   const handleTryAgain = () => {
@@ -217,11 +208,12 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
   const handleCloseModal = () => {
     setViewState('editing')
     setCurrentBidValue(lotBidValue)
-    setBidAmount(getMinimumNextBid(lotBidValue).toFixed(2))
+    setBidAmount(getMinimumNextBid(lotBidValue, lotMinBidIncrement).toFixed(2))
     setElapsedSeconds(0)
     setCommittedBidValue(null)
     setTransactionHash(null)
     setFailedBidValue(null)
+    setFailureMessage(null)
     onClose()
   }
 
@@ -262,6 +254,16 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
         committedBidValue={committedBidValue}
         transactionHash={transactionHash}
         onClose={handleCloseModal}
+        onViewOrderStatus={
+          onViewOrderStatus
+            ? () =>
+                onViewOrderStatus({
+                  lot,
+                  committedBidValue,
+                  transactionHash,
+                })
+            : undefined
+        }
       />
     )
   }
@@ -312,8 +314,8 @@ export const BidEditingModal = ({ isOpen, lot, onClose }: BidEditingModalProps) 
 
                 <div className="mb-8 bg-[#f3f3f3] px-5 py-5">
                   <p className="text-sm leading-7 text-black/72">
-                    Another bidder has placed a higher bid while your transaction was being
-                    processed. Please increase your bid amount to continue.
+                    {failureMessage ??
+                      'The on-chain bid could not be completed. Review the transaction details and try again.'}
                   </p>
                 </div>
 

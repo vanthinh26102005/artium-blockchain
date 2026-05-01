@@ -1,6 +1,9 @@
 // react
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+// next
+import { useRouter } from 'next/router'
+
 // icons
 import { Search, X } from 'lucide-react'
 
@@ -37,6 +40,9 @@ export const QuickSellArtworkPickerModal = ({
     onClose,
     onSelect,
 }: QuickSellArtworkPickerModalProps) => {
+    // -- router --
+    const router = useRouter()
+
     // -- state --
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null)
@@ -119,20 +125,29 @@ export const QuickSellArtworkPickerModal = ({
     }, [selectedArtworkId, artworks])
 
     // -- handlers --
+    const resetPicker = useCallback(() => {
+        setSelectedArtworkId(null)
+        setSearchQuery('')
+    }, [])
+
     const handleDone = useCallback(() => {
         if (selectedArtwork) {
             onSelect(selectedArtwork)
             onClose()
-            setSelectedArtworkId(null)
-            setSearchQuery('')
+            resetPicker()
         }
-    }, [selectedArtwork, onSelect, onClose])
+    }, [selectedArtwork, onSelect, onClose, resetPicker])
 
     const handleBack = useCallback(() => {
         onClose()
-        setSelectedArtworkId(null)
-        setSearchQuery('')
-    }, [onClose])
+        resetPicker()
+    }, [onClose, resetPicker])
+
+    const handleUploadArtwork = useCallback(() => {
+        onClose()
+        resetPicker()
+        void router.push('/artworks/upload')
+    }, [onClose, resetPicker, router])
 
     // -- render --
     return (
@@ -273,11 +288,15 @@ export const QuickSellArtworkPickerModal = ({
                 {/* Footer */}
                 <div className="px-8 py-6 border-t border-[#E5E5E5]">
                     <p className="mb-5 text-center text-[13px] text-[#595959]">
-                        Can't find the artwork you are looking for?{' '}
-                        <span className="text-blue-600 underline cursor-pointer hover:text-blue-700">
-                            Upload
-                        </span>{' '}
-                        a new artwork.
+                        Can&apos;t find the artwork you are looking for?{' '}
+                        <button
+                            type="button"
+                            onClick={handleUploadArtwork}
+                            className="text-blue-600 underline hover:text-blue-700"
+                        >
+                            Upload a new artwork
+                        </button>
+                        .
                     </p>
 
                     <div className="flex justify-center gap-4">
@@ -303,4 +322,3 @@ export const QuickSellArtworkPickerModal = ({
         </Dialog>
     )
 }
-

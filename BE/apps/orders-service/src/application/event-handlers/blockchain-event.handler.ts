@@ -22,6 +22,36 @@ export class BlockchainEventHandler {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
   }
 
+  private getBlockchainEventMetadata(message: Record<string, unknown>) {
+    const txHash = typeof message.txHash === 'string' ? message.txHash : null;
+    const contractAddress =
+      typeof message.contractAddress === 'string' ? message.contractAddress : null;
+    const chainId = typeof message.chainId === 'string' ? message.chainId : null;
+
+    return {
+      ...(txHash ? { txHash } : {}),
+      ...(contractAddress ? { contractAddress } : {}),
+      ...(chainId ? { chainId } : {}),
+    };
+  }
+
+  private getBidAmountTotals(amountWei?: string) {
+    if (!amountWei || !/^\d+$/.test(amountWei)) {
+      return {};
+    }
+
+    const amountEth = Number(amountWei) / 1_000_000_000_000_000_000;
+    if (!Number.isFinite(amountEth)) {
+      return {};
+    }
+
+    const roundedAmount = Number(amountEth.toFixed(2));
+    return {
+      subtotal: roundedAmount,
+      totalAmount: roundedAmount,
+    };
+  }
+
   private parseUnixSecondsToDate(value?: string): Date | null {
     const seconds = Number(value);
     if (!Number.isFinite(seconds) || seconds <= 0) {
@@ -55,6 +85,7 @@ export class BlockchainEventHandler {
           sellerWallet: message.seller,
           escrowState: EscrowState.STARTED,
           estimatedDeliveryDate,
+          ...this.getBlockchainEventMetadata(message),
         });
         return;
       }
@@ -74,6 +105,7 @@ export class BlockchainEventHandler {
         sellerWallet: message.seller,
         escrowState: EscrowState.STARTED,
         estimatedDeliveryDate,
+        ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
       this.logger.error(`Failed to handle AuctionStarted: ${error.message}`, error.stack);
@@ -112,6 +144,8 @@ export class BlockchainEventHandler {
           buyerWallet: message.bidder,
           bidAmountWei: message.amount,
           escrowState: EscrowState.STARTED,
+          ...this.getBidAmountTotals(message.amount),
+          ...this.getBlockchainEventMetadata(message),
         });
         return;
       }
@@ -123,6 +157,8 @@ export class BlockchainEventHandler {
         paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
         paymentStatus: OrderPaymentStatus.UNPAID,
         escrowState: order.escrowState ?? EscrowState.STARTED,
+        ...this.getBidAmountTotals(message.amount),
+        ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
       this.logger.error(`Failed to handle NewBid: ${error.message}`, error.stack);
@@ -152,6 +188,8 @@ export class BlockchainEventHandler {
           buyerWallet: message.winner,
           bidAmountWei: message.amount,
           escrowState: EscrowState.ENDED,
+          ...this.getBidAmountTotals(message.amount),
+          ...this.getBlockchainEventMetadata(message),
         });
         return;
       }
@@ -171,6 +209,8 @@ export class BlockchainEventHandler {
         buyerWallet: message.winner,
         bidAmountWei: message.amount,
         escrowState: EscrowState.ENDED,
+        ...this.getBidAmountTotals(message.amount),
+        ...this.getBlockchainEventMetadata(message),
       });
 
       this.logger.log(`Order created for auction: ${message.orderId}`);
@@ -209,6 +249,7 @@ export class BlockchainEventHandler {
           onChainOrderId: message.orderId,
           escrowState: EscrowState.STARTED,
           estimatedDeliveryDate: this.parseUnixSecondsToDate(message.newEndTime),
+          ...this.getBlockchainEventMetadata(message),
         });
         return;
       }
@@ -216,6 +257,7 @@ export class BlockchainEventHandler {
       await this.orderRepo.update(order.id, {
         status: OrderStatus.AUCTION_ACTIVE,
         estimatedDeliveryDate: this.parseUnixSecondsToDate(message.newEndTime),
+        ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
       this.logger.error(`Failed to handle AuctionExtended: ${error.message}`, error.stack);
@@ -249,6 +291,7 @@ export class BlockchainEventHandler {
         trackingNumber: message.trackingHash,
         escrowState: EscrowState.SHIPPED,
         paymentStatus: OrderPaymentStatus.ESCROW,
+        ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
       this.logger.error(`Failed to handle ArtShipped: ${error.message}`, error.stack);
@@ -279,6 +322,7 @@ export class BlockchainEventHandler {
         deliveredAt: new Date(),
         escrowState: EscrowState.COMPLETED,
         paymentStatus: OrderPaymentStatus.RELEASED,
+        ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
       this.logger.error(`Failed to handle DeliveryConfirmed: ${error.message}`, error.stack);
@@ -308,7 +352,9 @@ export class BlockchainEventHandler {
       await this.orderRepo.update(order.id, {
         status: OrderStatus.DISPUTE_OPEN,
         escrowState: EscrowState.DISPUTED,
-        internalNotes: `Dispute reason: ${message.reason}`,
+        disputeReason: message.reason,
+        disputeOpenedAt: new Date(),
+        ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
       this.logger.error(`Failed to handle DisputeOpened: ${error.message}`, error.stack);
@@ -345,7 +391,12 @@ export class BlockchainEventHandler {
         status,
         escrowState,
         paymentStatus,
+        disputeResolvedAt: new Date(),
+        disputeResolutionNotes: message.favorBuyer
+          ? 'Resolved in favor of buyer'
+          : 'Resolved in favor of seller',
         ...(status === OrderStatus.DELIVERED ? { deliveredAt: new Date() } : {}),
+        ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
       this.logger.error(`Failed to handle DisputeResolved: ${error.message}`, error.stack);
@@ -377,6 +428,7 @@ export class BlockchainEventHandler {
         cancelledReason: message.reason,
         escrowState: EscrowState.CANCELLED,
         paymentStatus: OrderPaymentStatus.REFUNDED,
+        ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
       this.logger.error(`Failed to handle AuctionCancelled: ${error.message}`, error.stack);
@@ -414,6 +466,7 @@ export class BlockchainEventHandler {
           escrowState: EscrowState.CANCELLED,
           cancelledAt: new Date(),
           cancelledReason: 'Shipping timeout',
+          ...this.getBlockchainEventMetadata(message),
         });
         return;
       }
@@ -425,6 +478,7 @@ export class BlockchainEventHandler {
         escrowState: EscrowState.CANCELLED,
         cancelledAt: new Date(),
         cancelledReason: 'Shipping timeout',
+        ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
       this.logger.error(`Failed to handle ShippingTimeout: ${error.message}`, error.stack);
@@ -461,6 +515,7 @@ export class BlockchainEventHandler {
           sellerWallet: message.seller,
           escrowState: EscrowState.COMPLETED,
           deliveredAt: new Date(),
+          ...this.getBlockchainEventMetadata(message),
         });
         return;
       }
@@ -471,6 +526,7 @@ export class BlockchainEventHandler {
         sellerWallet: message.seller,
         escrowState: EscrowState.COMPLETED,
         deliveredAt: new Date(),
+        ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
       this.logger.error(`Failed to handle DeliveryTimeout: ${error.message}`, error.stack);

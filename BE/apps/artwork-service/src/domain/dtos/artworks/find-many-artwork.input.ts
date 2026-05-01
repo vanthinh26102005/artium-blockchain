@@ -1,6 +1,7 @@
 import { ArtworkStatus } from '@app/common';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class FindManyArtworkInput {
   @ApiPropertyOptional({
@@ -26,6 +27,23 @@ export class FindManyArtworkInput {
   @IsOptional()
   @IsEnum(ArtworkStatus)
   status?: ArtworkStatus;
+
+  @ApiPropertyOptional({
+    description: 'Filter by exact on-chain auction ID',
+    example: 'auction-0001',
+  })
+  @IsOptional()
+  @IsString()
+  onChainAuctionId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Only return artworks with an on-chain auction ID',
+    example: true,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  hasOnChainAuctionId?: boolean;
 
   @ApiPropertyOptional({
     description: 'Filter by folder ID (use "null" string for root inventory)',
