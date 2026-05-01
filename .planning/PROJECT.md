@@ -2,34 +2,34 @@
 
 ## What This Is
 
-Artium is an artwork marketplace with seller inventory management, buyer checkout, private order tracking, and blockchain-backed auction flows on Sepolia. The auction surface now supports public auction browsing, buyer bidding, and seller-side auction start orchestration from owned inventory with persisted lifecycle status.
+Artium is an artwork marketplace with seller inventory management, buyer checkout, private order tracking, creator profile storytelling, and blockchain-backed auction flows on Sepolia. The profile surface supports public artwork, moment, and moodboard browsing, and the next milestone focuses on making profile media creation use device uploads instead of pasted media links.
 
 ## Core Value
 
-Let artists and sellers run trustworthy auctions without bypassing ownership, eligibility, wallet, or lifecycle policy checks.
+Let artists and sellers present, sell, and manage artwork through trustworthy flows that preserve ownership, media, order, and lifecycle truth.
 
-## Current Milestone: v1.3 Order Invoice Preview and Export
+## Current Milestone: v1.4 Profile Moment and Moodboard Device Uploads
 
-**Goal:** Let authenticated buyers and sellers open a trustworthy invoice preview from the Orders workspace and extract a polished invoice document from canonical order/payment data.
+**Goal:** Let authenticated profile owners create moments and moodboards by uploading media from their device, with the UI aligned to the polished Orders workspace interaction patterns and backend media handling kept authoritative.
 
 **Target features:**
-- Backend order-invoice contract that exposes only authorized order-linked invoice data and reuses the existing payments-service invoice model instead of creating a duplicate invoice system.
-- Idempotent invoice materialization for completed order records where no linked invoice exists yet, with totals, artwork lines, buyer/seller context, payment identifiers, and lifecycle dates derived from backend truth.
-- Orders list and order detail invoice actions that clearly show when an invoice is available, loading, missing, or blocked by order/payment state.
-- Professional responsive invoice preview UI aligned with Artium order workspace patterns and invoice best practices, including printable/exportable layout, stable totals, identifiers, address/payment sections, and accessible controls.
-- Verification evidence across backend authorization, DTO mapping, frontend preview/export behavior, and TypeScript/lint/build checks.
+- Backend media upload contract for profile community content that accepts device files and returns stored media metadata for moments and moodboards without relying on pasted external URLs.
+- Moment creation flow where a profile owner uploads exactly one image or one video from their device, then creates the moment from the stored media URL, media type, optional thumbnail/poster, caption, and metadata.
+- Moodboard creation flow where a profile owner uploads multiple media items from their device, allowing images, moodboard/media references, or both where the existing data model can support it, with a stable cover selection.
+- Profile composer UI integrated into the existing profile pages and visually aligned with Orders workspace patterns: calm cards, clear states, accessible controls, loading/error/retry behavior, and responsive layouts.
+- Verification evidence across backend upload validation, community DTO mapping, frontend upload/composer behavior, responsive UI, and TypeScript/lint/build checks.
 
 ## Current State
 
-- The frontend orders domain lives under `FE/artium-web/src/@domains/orders` and currently provides private buyer/seller order lists, order detail, payment/shipping summaries, copyable payment identifiers, role-valid lifecycle actions, and invoice preview/export entry points.
-- The frontend invoice API and quick-sell invoice surfaces already exist separately under `FE/artium-web/src/@shared/apis/invoiceApis.ts` and `FE/artium-web/src/@domains/quick-sell`, but `/orders` does not yet expose invoice preview or extraction actions.
-- Phase 30 completed the backend order invoice bridge: `GET /orders/:id/invoice` authorizes through the existing private order policy, calls payments-service materialization only after authorization, redacts seller invoice responses, and exposes `orderApis.getOrderInvoice` for Phase 31.
-- Payments-service now reuses existing invoice persistence to read or idempotently materialize order-linked invoices with stable `INV-${orderNumber}` numbers, invoice items, totals, and payment transaction links.
-- Phase 31 completed the Orders invoice preview and extraction UI: order cards deep-link to the invoice panel, order detail lazily fetches `orderApis.getOrderInvoice`, the preview modal renders a backend DTO-driven invoice document, and browser print/save-as-PDF output is scoped to the invoice document.
+- The profile domain lives under `FE/artium-web/src/@domains/profile` and currently renders profile pages, moments, moment detail, moodboards, and owner edit/delete affordances.
+- `FE/artium-web/src/@shared/apis/profileApis.ts` currently creates moments and moodboards from URL fields (`mediaUrl`, `thumbnailUrl`, `coverImageUrl`) rather than device files.
+- `FE/artium-web/src/@shared/apis/artworkUploadApi.ts`, `FE/artium-web/src/@shared/hooks/useArtworkUpload.ts`, and `FE/artium-web/src/@shared/services/apiClient.ts` already provide multipart upload patterns for artwork images and avatars that can guide profile media upload work.
+- The backend community gateway currently validates moment and moodboard creation with URL fields in `BE/apps/api-gateway/src/presentation/http/controllers/community/moments.controller.ts` and `moodboards.controller.ts`; no profile community media upload endpoint exists yet.
+- The Orders workspace under `FE/artium-web/src/@domains/orders` provides the target UI quality reference: structured white cards, segmented controls, status chips, focus rings, empty/loading/error states, and responsive detail panels.
 
 ## Active Requirements
 
-- OINV-09 remains active for Phase 32 validation and milestone closure.
+- PMED-01 through PMED-11 are active for the v1.4 profile moment and moodboard device upload milestone.
 
 ## Validated Requirements
 
@@ -48,6 +48,10 @@ Let artists and sellers run trustworthy auctions without bypassing ownership, el
 - Order invoice preview must be generated from backend-authorized order/invoice data, not from client-only reconstruction of totals.
 - Orders UI may present invoice preview and export actions, but it must not bypass `/orders` access control or expose invoices across buyer/seller boundaries.
 - Reuse the existing payments-service invoice tables, invoice DTO concepts, and quick-sell presentation lessons where they fit; avoid creating a second invoice domain model inside the orders frontend.
+- Profile moment and moodboard creation must upload media from the user's device; pasted media links are not part of the v1.4 creation UX.
+- A moment accepts exactly one uploaded media asset: either one image or one video.
+- A moodboard accepts multiple uploaded media assets and may combine image media with existing moodboard/media references only where the backend model can represent them cleanly.
+- Profile media composer UI should borrow interaction quality from the Orders workspace: contained white surfaces, clear status feedback, accessible actions, and responsive layouts, without introducing a separate visual system.
 
 ## Evolution
 
@@ -67,4 +71,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state.
 
 ---
-*Last updated: 2026-04-30 after completing Phase 31 Orders invoice preview and extraction UI*
+*Last updated: 2026-05-01 after starting v1.4 Profile Moment and Moodboard Device Uploads*

@@ -1,7 +1,7 @@
 # Requirements: Artium Blockchain Marketplace
 
 **Defined:** 2026-04-21
-**Core Value:** Ship a reusable shared component layer that reduces duplication across domains without changing current user-facing UI or business logic.
+**Core Value:** Let artists and sellers present, sell, and manage artwork through trustworthy flows that preserve ownership, media, order, and lifecycle truth.
 
 ## v1 Requirements
 
@@ -155,6 +155,33 @@ Milestone focus: order-linked invoice preview and extraction from the authentica
 
 - [ ] **OINV-09**: Developers can verify invoice authorization, idempotent materialization, DTO mapping, frontend preview/extraction behavior, responsive UI, and TypeScript/lint/build checks with documented evidence before the milestone is closed.
 
+## v1.4 Requirements
+
+Milestone focus: profile moment and moodboard creation must use device uploads instead of pasted media links, with profile UI quality aligned to the existing Orders workspace.
+
+### Profile Media Upload Backend
+
+- [ ] **PMED-01**: Authenticated users can upload one profile moment media file from their device, accepting exactly one image or one video with server-side file type, size, ownership, and storage validation.
+- [ ] **PMED-02**: Authenticated users can upload multiple moodboard media files from their device, accepting a bounded set of image/media files with server-side file type, size, count, ownership, and storage validation.
+- [ ] **PMED-03**: Backend upload responses expose stable stored media metadata for community creation flows, including URL, secure URL when available, media type, original filename, size, and any thumbnail or poster metadata the backend can derive.
+- [ ] **PMED-04**: Community moment and moodboard creation continues to derive the creator identity from the authenticated user, not request body user IDs, and never trusts client-provided external media links as uploaded media proof.
+
+### Moment Device Upload Creation
+
+- [ ] **PMED-05**: Profile owners can create a moment from their profile using exactly one uploaded image or one uploaded video from their device, then submit caption, location, hashtags, pinning, duration, and tagged artwork metadata where supported.
+- [ ] **PMED-06**: Moment creation UI blocks submission until upload and validation are complete, shows progress/loading/error/retry states, and cleans up or clearly handles failed/replaced uploads without creating partial moments.
+
+### Moodboard Device Upload Creation
+
+- [ ] **PMED-07**: Profile owners can create a moodboard from their profile by uploading multiple media items from their device, allowing images, supported moodboard/media references, or both where the backend model supports them.
+- [ ] **PMED-08**: Moodboard creation UI supports cover selection, media reordering/removal before submit, title, description, privacy, collaboration, and tags without relying on pasted cover image links.
+- [ ] **PMED-09**: Moodboard creation persists enough media/cover metadata for profile overview, moodboard list, and moodboard detail pages to render uploaded content accurately.
+
+### Orders-Aligned Profile UI and Verification
+
+- [ ] **PMED-10**: Profile creation surfaces for moments and moodboards visually align with the Orders workspace UI patterns, including calm card structure, clear status chips or messages, accessible controls, responsive behavior, and polished empty/error states.
+- [ ] **PMED-11**: Developers can verify backend upload validation, community DTO mapping, frontend upload/composer behavior, responsive profile UI, and TypeScript/lint/build checks with documented evidence before closing the milestone.
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -226,6 +253,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OINV-07 | Phase 31 | Complete |
 | OINV-08 | Phase 31 | Complete |
 | OINV-09 | Phase 32 | Pending |
+| PMED-01 | Phase 33 | Pending |
+| PMED-02 | Phase 33 | Pending |
+| PMED-03 | Phase 33 | Pending |
+| PMED-04 | Phase 33 | Pending |
+| PMED-05 | Phase 34 | Pending |
+| PMED-06 | Phase 34 | Pending |
+| PMED-07 | Phase 35 | Pending |
+| PMED-08 | Phase 35 | Pending |
+| PMED-09 | Phase 35 | Pending |
+| PMED-10 | Phase 35 | Pending |
+| PMED-11 | Phase 35 | Pending |
 
 **Coverage:**
 - Active v1 + v1.1 requirements: 34 total
@@ -234,7 +272,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 - Omitted historical v1.2 requirements: 24 total
 - Active v1.3 requirements: 9 total
 - Mapped to phases: 9 ✓
+- Active v1.4 requirements: 11 total
+- Mapped to phases: 11 ✓
 
 ---
 *Requirements defined: 2026-04-21*
-*Last updated: 2026-04-30 after defining v1.3 order invoice preview and export requirements*
+*Last updated: 2026-05-01 after defining v1.4 profile moment and moodboard device upload requirements*

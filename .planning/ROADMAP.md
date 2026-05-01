@@ -2,7 +2,7 @@
 
 ## Overview
 
-This roadmap tracks sequential milestone work across the Artium platform. Earlier phases covered frontend standardization, checkout/order flows, seller auction creation, inventory actions, and backend contract cleanup. Current active work starts the v1.3 order invoice preview and export milestone at Phase 30.
+This roadmap tracks sequential milestone work across the Artium platform. Earlier phases covered frontend standardization, checkout/order flows, seller auction creation, inventory actions, backend contract cleanup, and order invoice preview/export. Current active work starts the v1.4 profile moment and moodboard device upload milestone at Phase 33.
 
 Phases 21-26 previously covered a v1.2 backend deployment strategy. On 2026-04-29, the user marked that scope intentionally redundant and omitted it from active milestone closure. Historical artifacts remain in `.planning/phases/`, but these phases are no longer blockers for active work. Current active work resumes at Phase 27.
 
@@ -34,6 +34,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 30: Order-linked invoice backend contract and materialization** - Expose authorization-safe order invoice reads and idempotently materialize missing invoices from canonical order/payment data (completed 2026-04-30)
 - [x] **Phase 31: Orders invoice preview and extraction UI** - Add invoice actions, preview, and print/download-ready extraction to the Orders workspace using a professional document layout (completed 2026-04-30)
 - [ ] **Phase 32: Order invoice validation and milestone closure** - Verify backend authorization, frontend behavior, responsive UI quality, extraction output, and milestone evidence
+- [ ] **Phase 33: Profile community media upload contract** - Add backend and frontend API support for authenticated device uploads for profile moments and moodboards
+- [ ] **Phase 34: Moment device upload composer** - Let profile owners create moments from exactly one uploaded image or video with Orders-aligned states and validation
+- [ ] **Phase 35: Moodboard multi-upload composer and profile polish** - Let profile owners create moodboards from multiple uploaded media items with cover selection, ordering, and responsive Orders-aligned UI
 
 ## Phase Details
 
@@ -182,7 +185,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Phases 21-26 are intentionally omitted/redundant as of 2026-04-29, so active work resumes at Phase 27. Phase 28 follows Phase 27 and focuses the next backend accuracy pass on the artwork upload draft flow. Phase 29 completes inventory edit/delete/profile visibility and auction handoff. v1.3 order invoice work proceeds 30 → 31 → 32.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independent. Phase 7 depends on Phase 6. Gap-closure phases execute 8 → 9 → 10 → 11 after the current checkout phases. Phase 12 follows Phase 11. Phase 13 follows Phase 12. Phase 14 follows Phase 13. Phase 15 follows Phase 14. Phase 16 follows Phase 15. Phase 17 follows Phase 16. Seller auction creation proceeds 18 → 18.1 → 19 → 19.1 → 20 after the buyer-facing auction read/bid flow exists. Phases 21-26 are intentionally omitted/redundant as of 2026-04-29, so active work resumes at Phase 27. Phase 28 follows Phase 27 and focuses the next backend accuracy pass on the artwork upload draft flow. Phase 29 completes inventory edit/delete/profile visibility and auction handoff. v1.3 order invoice work proceeds 30 → 31 → 32. v1.4 profile media upload work proceeds 33 → 34 → 35.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -215,6 +218,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 30. Order-linked invoice backend contract and materialization | 2/2 | Complete    | 2026-04-30 |
 | 31. Orders invoice preview and extraction UI | 2/2 | Complete    | 2026-04-30 |
 | 32. Order invoice validation and milestone closure | 0/TBD | Not started | - |
+| 33. Profile community media upload contract | 0/TBD | Not started | - |
+| 34. Moment device upload composer | 0/TBD | Not started | - |
+| 35. Moodboard multi-upload composer and profile polish | 0/TBD | Not started | - |
 
 ### Phase 12: Private order tracking and management for buyers and sellers
 
@@ -545,3 +551,56 @@ Cross-cutting constraints:
   5. Developer can open `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, and phase verification artifacts and see OINV-01 through OINV-09 fully mapped and evidenced.
 **Plans:** TBD
 **UI hint:** yes
+
+### Phase 33: Profile community media upload contract
+
+**Goal:** Add a clean authenticated media upload contract for profile community content so moments and moodboards can be created from device files instead of pasted media links.
+**Requirements:** PMED-01, PMED-02, PMED-03, PMED-04
+**Depends on:** Phase 32 can remain a v1.3 validation follow-up; implementation may start from current profile/community code if invoice validation is intentionally deferred.
+**Success Criteria** (what must be TRUE):
+  1. Developer can upload one moment media file from a device through an authenticated backend path and receive stored media metadata for either an image or a video.
+  2. Developer can upload a bounded set of moodboard media files from a device through an authenticated backend path and receive stored metadata for each accepted item.
+  3. Backend validates file type, size, count, and authenticated ownership before storage or community creation can reference the uploaded media.
+  4. Frontend profile API/upload modules expose typed functions for profile media upload while reusing existing shared `apiUpload` and structured error patterns.
+  5. Moment and moodboard creation still derive `userId` from the authenticated request and do not accept pasted external links as proof of uploaded profile media.
+**Plans:** TBD
+**UI hint:** no
+
+Cross-cutting constraints:
+- Reuse existing upload transport patterns from `FE/artium-web/src/@shared/services/apiClient.ts`, `FE/artium-web/src/@shared/apis/artworkUploadApi.ts`, and `FE/artium-web/src/@shared/hooks/useArtworkUpload.ts`.
+- Backend work should extend the current gateway/community-service model rather than bypassing it with client-only media URLs.
+- Upload responses must be DTO-backed and stable enough for the Phase 34 and Phase 35 composers.
+
+### Phase 34: Moment device upload composer
+
+**Goal:** Let a profile owner create a moment from exactly one uploaded image or one uploaded video, with polished upload states and a composer experience aligned to the Orders workspace.
+**Requirements:** PMED-05, PMED-06
+**Depends on:** Phase 33
+**Success Criteria** (what must be TRUE):
+  1. Profile owners can open a moment creation surface from the profile moments area and choose exactly one device file: either one image or one video.
+  2. The moment composer blocks submission until the upload succeeds and clearly handles uploading, uploaded, validation error, retry, replace, and submit states.
+  3. The created moment uses the uploaded media metadata for `mediaUrl`, `mediaType`, optional thumbnail/poster, caption, location, hashtags, pinning, duration, and tagged artwork fields where supported.
+  4. The composer and resulting profile/moment detail rendering preserve existing moment list/detail behavior, including image/video display, likes, comments, owner controls, and responsive layout.
+  5. The UI follows Orders workspace interaction quality: calm white panels, clear status messaging, accessible buttons, stable focus states, and no pasted-link creation path.
+**Plans:** TBD
+**UI hint:** yes
+
+### Phase 35: Moodboard multi-upload composer and profile polish
+
+**Goal:** Let a profile owner create moodboards from multiple uploaded media items, choose cover/order metadata, and verify the full profile media creation experience with Orders-aligned UI polish.
+**Requirements:** PMED-07, PMED-08, PMED-09, PMED-10, PMED-11
+**Depends on:** Phase 34
+**Success Criteria** (what must be TRUE):
+  1. Profile owners can open a moodboard creation surface from the profile moodboards area and upload multiple device media items in one flow.
+  2. The moodboard composer supports removing and reordering selected media, choosing a cover, setting title, description, privacy, collaboration, and tags, and submitting without pasted cover image links.
+  3. Uploaded moodboard media and cover metadata render correctly on profile overview, moodboard list, and moodboard detail pages using the existing moodboard card language.
+  4. The composer supports mixed images and supported moodboard/media references where the backend model can represent them cleanly; unsupported combinations fail with clear validation instead of silent data loss.
+  5. Moment and moodboard upload surfaces share consistent Orders-inspired states for empty, loading, invalid file, upload failure, retry, success, and disabled submit behavior across desktop and mobile.
+  6. Developer can run targeted backend checks plus `cd FE/artium-web && npx tsc --noemit`, targeted lint, and build checks, with verification evidence documented for PMED-01 through PMED-11.
+**Plans:** TBD
+**UI hint:** yes
+
+Cross-cutting constraints:
+- Do not create moodboards from arbitrary pasted URLs in the v1.4 UI.
+- Do not invent a separate visual system for profile media creation; reuse the restrained Orders workspace patterns where they fit.
+- If the existing backend cannot persist full moodboard media galleries yet, Phase 35 must close that contract gap rather than faking gallery state in frontend-only data.

@@ -1,25 +1,25 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Order Invoice Preview and Export
+milestone: v1.4
+milestone_name: Profile Moment and Moodboard Device Uploads
 status: ready_to_plan
-stopped_at: Phase 32 ready to plan
-last_updated: "2026-04-30T15:08:23.000Z"
-last_activity: 2026-04-30 -- Phase 31 complete; Phase 32 ready to plan
+stopped_at: Phase 33 ready to plan
+last_updated: "2026-05-01T00:27:31.916Z"
+last_activity: 2026-05-01 -- v1.4 roadmap created; Phase 33 ready to plan
 progress:
-  total_phases: 28
+  total_phases: 31
   completed_phases: 11
   total_plans: 32
   completed_plans: 42
-  percent: 39
+  percent: 35
 ---
 
 ## Current Position
 
-Phase: 32
+Phase: 33
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-04-30
+Last activity: 2026-05-01 -- v1.4 roadmap created; Phase 33 ready to plan
 
 ## Decisions
 
@@ -45,10 +45,14 @@ Last activity: 2026-04-30
 - Omit phases 21-26 from active milestone closure as redundant by user decision on 2026-04-29; keep historical artifacts, but resume active work at Phase 27.
 - v1.3 order invoice preview/export must reuse the existing payments-service invoice model with `order_id` instead of adding a duplicate invoice store in orders-service.
 - Order invoice preview and extraction must derive financial truth from backend-authorized order/invoice DTOs, not frontend-only recomputation.
+- v1.4 profile moment and moodboard creation must upload media from the user's device; pasted media links are outside the creation UX.
+- Moment creation accepts exactly one uploaded media asset: one image or one video.
+- Moodboard creation accepts multiple uploaded media assets and should support mixed media only where backend persistence can represent it cleanly.
+- Profile media composer UI should reuse Orders workspace interaction patterns rather than introducing a separate visual system.
 
 ## Last Session
 
-Stopped at: Phase 32 ready to plan
+Stopped at: Phase 33 ready to plan
 
 ### Quick Tasks Completed
 
@@ -82,10 +86,16 @@ Stopped at: Phase 32 ready to plan
 - Phase 30 added: Order-linked invoice backend contract and materialization
 - Phase 31 added: Orders invoice preview and extraction UI
 - Phase 32 added: Order invoice validation and milestone closure
+- Phase 33 added: Profile community media upload contract
+- Phase 34 added: Moment device upload composer
+- Phase 35 added: Moodboard multi-upload composer and profile polish
 
 **Planned Phase:** 30 (Order-linked invoice backend contract and materialization) — 2 plans ready — 2026-04-30
 **Planned Phase:** 31 (Orders invoice preview and extraction UI) — roadmap approved — 2026-04-30
 **Planned Phase:** 32 (Order invoice validation and milestone closure) — roadmap approved — 2026-04-30
+**Planned Phase:** 33 (Profile community media upload contract) — roadmap approved — 2026-05-01
+**Planned Phase:** 34 (Moment device upload composer) — roadmap approved — 2026-05-01
+**Planned Phase:** 35 (Moodboard multi-upload composer and profile polish) — roadmap approved — 2026-05-01
 
 **Planned Phase:** 28 (Artwork upload draft backend gap audit and contract cleanup) - 3 plans - 2026-04-29T14:58:47.943Z
 **Planned Phase:** 20 (Auction start orchestration and seller lifecycle status) — 4 plans — 2026-04-27T07:41:03.407Z
