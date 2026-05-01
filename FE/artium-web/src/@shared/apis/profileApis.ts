@@ -109,6 +109,19 @@ type MoodboardApiItem = {
   displayOrder: number
   createdAt: string
   updatedAt?: string | null
+  media?: MoodboardApiMediaItem[]
+}
+
+type MoodboardApiMediaItem = {
+  id: string
+  communityMediaId: string
+  mediaType: 'image' | 'video'
+  url: string
+  secureUrl?: string | null
+  thumbnailUrl?: string | null
+  durationSeconds?: number | null
+  displayOrder: number
+  isCover: boolean
 }
 
 type CommentAuthorApi = {
@@ -311,6 +324,7 @@ export type {
   CreateSellerProfileInput,
   CreateSellerProfileResponse,
   MomentApiItem,
+  MoodboardApiMediaItem,
   MoodboardApiItem,
   CommentApiItem,
   CreateMomentCommentInput,

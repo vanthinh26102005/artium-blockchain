@@ -15,6 +15,7 @@ import type {
   ProfileSalesStats,
   ProfileStats,
   ProfileUser,
+  ProfileMoodboardMedia,
   MomentDetail,
   MomentComment,
   MomentCommentAuthor,
@@ -25,6 +26,7 @@ const DEFAULT_AVATAR = '/images/logo-dark-mode.png'
 const DEFAULT_ARTWORK = '/images/placeholder-artwork.jpg'
 
 const ensureText = (value?: string | null) => (value ?? '').toString()
+const isNonEmptyUrl = (value?: string | null) => Boolean(value?.trim())
 
 const formatCurrency = (amount: number, currency?: string | null) => {
   const code = (currency ?? 'USD').toUpperCase()
@@ -216,17 +218,50 @@ export const mapProfileMomentToMomentCard = (
 export const mapMoodboardToProfileMoodboard = (
   moodboard: MoodboardApiItem,
   author: ProfileUser,
-): ProfileMoodboard => ({
-  id: moodboard.id,
-  title: moodboard.title,
-  author: author.displayName,
-  authorAvatarUrl: author.avatarUrl,
-  featuredArtist: undefined,
-  coverUrl: moodboard.coverImageUrl || DEFAULT_ARTWORK,
-  secondaryCoverUrl: undefined,
-  artworkCoverUrls: [],
-  isPrivate: moodboard.isPrivate,
-})
+): ProfileMoodboard => {
+  const mediaItems = (moodboard.media ?? [])
+    .slice()
+    .sort((left, right) => left.displayOrder - right.displayOrder)
+    .reduce<ProfileMoodboardMedia[]>((items, media) => {
+      const displayUrl = media.thumbnailUrl || media.secureUrl || media.url
+
+      if (!isNonEmptyUrl(displayUrl)) {
+        return items
+      }
+
+      items.push({
+        id: media.id,
+        communityMediaId: media.communityMediaId,
+        mediaType: media.mediaType,
+        url: media.url,
+        secureUrl: media.secureUrl ?? null,
+        thumbnailUrl: media.thumbnailUrl ?? null,
+        displayUrl,
+        durationSeconds: media.durationSeconds ?? null,
+        displayOrder: media.displayOrder,
+        isCover: Boolean(media.isCover),
+      })
+
+      return items
+    }, [])
+
+  const coverMedia = mediaItems.find((media) => media.isCover) ?? mediaItems[0]
+  const secondaryMedia = mediaItems.find((media) => media.id !== coverMedia?.id)
+  const uploadedCoverUrls = mediaItems.map((media) => media.displayUrl)
+
+  return {
+    id: moodboard.id,
+    title: moodboard.title,
+    author: author.displayName,
+    authorAvatarUrl: author.avatarUrl,
+    featuredArtist: undefined,
+    coverUrl: coverMedia?.displayUrl || moodboard.coverImageUrl || DEFAULT_ARTWORK,
+    secondaryCoverUrl: secondaryMedia?.displayUrl,
+    artworkCoverUrls: uploadedCoverUrls,
+    mediaItems,
+    isPrivate: moodboard.isPrivate,
+  }
+}
 
 const buildStats = (sellerProfile: SellerProfilePayload, totalArtworks: number): ProfileStats => ({
   artworks: totalArtworks,

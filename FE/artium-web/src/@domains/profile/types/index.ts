@@ -114,7 +114,21 @@ export type ProfileMoodboard = {
   coverUrl: string
   secondaryCoverUrl?: string
   artworkCoverUrls?: string[]
+  mediaItems?: ProfileMoodboardMedia[]
   isPrivate?: boolean
+}
+
+export type ProfileMoodboardMedia = {
+  id: string
+  communityMediaId: string
+  mediaType: ProfileUploadedMediaType
+  url: string
+  secureUrl?: string | null
+  thumbnailUrl?: string | null
+  displayUrl: string
+  durationSeconds?: number | null
+  displayOrder: number
+  isCover: boolean
 }
 
 export type ProfileSalesPoint = {

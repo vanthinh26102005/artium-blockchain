@@ -1,7 +1,11 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
 import { GetMoodboardQuery } from '../GetMoodboard.query';
-import { IMoodboardRepository, Moodboard } from '../../../../domain';
+import {
+  IMoodboardMediaRepository,
+  IMoodboardRepository,
+  Moodboard,
+} from '../../../../domain';
 
 @QueryHandler(GetMoodboardQuery)
 export class GetMoodboardHandler implements IQueryHandler<
@@ -13,6 +17,8 @@ export class GetMoodboardHandler implements IQueryHandler<
   constructor(
     @Inject(IMoodboardRepository)
     private readonly moodboardRepository: IMoodboardRepository,
+    @Inject(IMoodboardMediaRepository)
+    private readonly moodboardMediaRepository: IMoodboardMediaRepository,
   ) {}
 
   async execute(query: GetMoodboardQuery): Promise<Moodboard | null> {
@@ -25,6 +31,13 @@ export class GetMoodboardHandler implements IQueryHandler<
       return null;
     }
 
-    return moodboard;
+    const media = await this.moodboardMediaRepository.findByMoodboardId(
+      moodboard.id,
+    );
+
+    return {
+      ...moodboard,
+      media,
+    };
   }
 }
