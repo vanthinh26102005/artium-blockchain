@@ -1,7 +1,11 @@
+// react
+import { useMemo, useState } from 'react'
+
 // internal - components
 import { Metadata } from '@/components/SEO/Metadata'
 
 // @domains - profile
+import { MoodboardDeviceUploadComposer } from '@domains/profile/components/MoodboardDeviceUploadComposer'
 import { MoodboardsSection } from '@domains/profile/components/MoodboardsSection'
 import { ProfileHero } from '@domains/profile/components/ProfileHero'
 import {
@@ -13,6 +17,11 @@ import { ProfileTabs } from '@domains/profile/components/ProfileTabs'
 import { PROFILE_TABS } from '@domains/profile/constants/profileTabs'
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
+import profileApis from '@shared/apis/profileApis'
+import type { CreateMoodboardInput } from '@shared/apis/profileApis'
+import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import type { ProfileMoodboard } from '@domains/profile/types'
+import { mapMoodboardToProfileMoodboard } from '@domains/profile/utils/profileApiMapper'
 
 type ProfileMoodboardsPageViewProps = {
   username?: string | string[]
@@ -21,13 +30,24 @@ type ProfileMoodboardsPageViewProps = {
 export const ProfileMoodboardsPageView = ({
   username: _username,
 }: ProfileMoodboardsPageViewProps) => {
+  const [isMoodboardDialogOpen, setIsMoodboardDialogOpen] = useState(false)
+  const [moodboardSubmitting, setMoodboardSubmitting] = useState(false)
+  const [moodboardError, setMoodboardError] = useState<string | null>(null)
+  const [moodboardSuccess, setMoodboardSuccess] = useState<string | null>(null)
+  const [createdMoodboards, setCreatedMoodboards] = useState<ProfileMoodboard[]>([])
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
   const { data: baseData, user: fetchedUser, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
+  const authUser = useAuthStore((state) => state.user)
+  const isAuthenticated = Boolean(authUser?.id)
   const profileHandle = resolvedUsername || profileData?.user.username || usernameFromRoute || ''
   const canRenderProfile = !isLoading && !error && Boolean(profileData)
+  const moodboards = useMemo(
+    () => [...createdMoodboards, ...(profileData?.moodboards ?? [])],
+    [createdMoodboards, profileData?.moodboards],
+  )
   const pageTitle = profileData
     ? `${profileData.user.displayName} (@${resolvedUsername}) | Moodboards`
     : 'Profile Moodboards | Artium'
@@ -40,6 +60,28 @@ export const ProfileMoodboardsPageView = ({
         moodboards: `${baseHref}/moodboards`,
       }
     : undefined
+
+  const handleCreateMoodboard = async (input: CreateMoodboardInput) => {
+    if (!isAuthenticated || moodboardSubmitting || !profileData) return
+
+    setMoodboardSubmitting(true)
+    setMoodboardError(null)
+    setMoodboardSuccess(null)
+
+    try {
+      const created = await profileApis.createMoodboard(input)
+      setCreatedMoodboards((prev) => [
+        mapMoodboardToProfileMoodboard(created, profileData.user),
+        ...prev,
+      ])
+      setMoodboardSuccess('Moodboard created.')
+      setIsMoodboardDialogOpen(false)
+    } catch (err) {
+      setMoodboardError(err instanceof Error ? err.message : 'Failed to create moodboard.')
+    } finally {
+      setMoodboardSubmitting(false)
+    }
+  }
 
   return (
     <>
@@ -83,21 +125,52 @@ export const ProfileMoodboardsPageView = ({
                 </h2>
                 <p className="text-sm text-slate-500">All moodboards by this artist</p>
               </div>
-              <button className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:border-slate-400">
-                Create Moodboard
-              </button>
+              {isOwner ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMoodboardError(null)
+                    setMoodboardSuccess(null)
+                    setIsMoodboardDialogOpen(true)
+                  }}
+                  className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:border-slate-400"
+                >
+                  Create moodboard
+                </button>
+              ) : null}
             </div>
+            {moodboardSuccess ? (
+              <p className="mb-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {moodboardSuccess}
+              </p>
+            ) : null}
             <MoodboardsSection
-              moodboards={profileData.moodboards}
+              moodboards={moodboards}
               showSeeAll={false}
               title=""
               subtitle=""
               size="large"
               detailBaseHref={profileHandle ? `${baseHref}/moodboards` : undefined}
+              isOwner={isOwner}
             />
           </div>
         ) : null}
       </div>
+      {isMoodboardDialogOpen ? (
+        <MoodboardDeviceUploadComposer
+          open={isMoodboardDialogOpen}
+          submitting={moodboardSubmitting}
+          errorMessage={moodboardError}
+          onOpenChange={(open) => {
+            setIsMoodboardDialogOpen(open)
+            if (!open) {
+              setMoodboardSubmitting(false)
+              setMoodboardError(null)
+            }
+          }}
+          onCreate={handleCreateMoodboard}
+        />
+      ) : null}
     </>
   )
 }

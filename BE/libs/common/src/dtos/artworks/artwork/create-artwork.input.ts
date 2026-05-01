@@ -1,16 +1,22 @@
+import {
+  ArtworkImageInput,
+  ArtworkStatus,
+  Dimensions,
+  Weight,
+} from '@app/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsEnum,
+  IsInt,
+  IsNumber,
   IsOptional,
   IsString,
-  IsNumber,
   IsArray,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ArtworkStatus } from '../../../enums';
-import { Dimensions, Weight, ArtworkImageInput } from '../../../interfaces';
 
 export class CreateArtworkInput {
   @ApiProperty({
@@ -19,6 +25,14 @@ export class CreateArtworkInput {
   })
   @IsString()
   sellerId!: string;
+
+  @ApiPropertyOptional({
+    description: 'The name of the creator/artist',
+    example: 'Vincent van Gogh',
+  })
+  @IsOptional()
+  @IsString()
+  creatorName: string | null;
 
   @ApiProperty({
     description: 'The title of the artwork',
@@ -32,7 +46,6 @@ export class CreateArtworkInput {
     example: 'A beautiful painting of the night sky',
   })
   @IsOptional()
-  @IsString()
   description?: string;
 
   @ApiPropertyOptional({
@@ -40,7 +53,6 @@ export class CreateArtworkInput {
     example: 2023,
   })
   @IsOptional()
-  @IsNumber()
   creationYear?: number;
 
   @ApiPropertyOptional({
@@ -48,19 +60,20 @@ export class CreateArtworkInput {
     example: '1/100',
   })
   @IsOptional()
-  @IsString()
   editionRun?: string;
 
   @ApiPropertyOptional({
     description: 'Dimensions of the artwork',
-    type: () => Dimensions,
+    type: 'array',
+    items: { type: 'number' },
   })
   @IsOptional()
   dimensions?: Dimensions;
 
   @ApiPropertyOptional({
     description: 'Weight of the artwork',
-    type: () => Weight,
+    type: 'array',
+    items: { type: 'number' },
   })
   @IsOptional()
   weight?: Weight;
@@ -70,7 +83,6 @@ export class CreateArtworkInput {
     example: 'Oil on canvas',
   })
   @IsOptional()
-  @IsString()
   materials?: string;
 
   @ApiPropertyOptional({
@@ -78,7 +90,6 @@ export class CreateArtworkInput {
     example: 'New York, NY',
   })
   @IsOptional()
-  @IsString()
   location?: string;
 
   @ApiPropertyOptional({
@@ -86,16 +97,10 @@ export class CreateArtworkInput {
     example: '1500.00',
   })
   @IsOptional()
-  @IsString()
   price?: string;
 
-  @ApiPropertyOptional({
-    description: 'Currency code',
-    example: 'USD',
-    default: 'USD',
-  })
+  @ApiPropertyOptional({ description: 'Currency code', example: 'USD' })
   @IsOptional()
-  @IsString()
   currency?: string;
 
   @ApiPropertyOptional({
@@ -104,7 +109,6 @@ export class CreateArtworkInput {
     default: 1,
   })
   @IsOptional()
-  @IsNumber()
   quantity!: number;
 
   @ApiPropertyOptional({
@@ -130,7 +134,6 @@ export class CreateArtworkInput {
     example: '123e4567-e89b-12d3-a456-426614174001',
   })
   @IsOptional()
-  @IsString()
   folderId?: string;
 
   @ApiPropertyOptional({
@@ -138,11 +141,10 @@ export class CreateArtworkInput {
     type: [String],
   })
   @IsOptional()
-  @IsArray()
   tagIds?: string[];
 
   @ApiPropertyOptional({
-    description: 'Array of images associated with the artwork',
+    description: 'Array of artwork images',
     type: [ArtworkImageInput],
   })
   @IsOptional()
@@ -150,4 +152,47 @@ export class CreateArtworkInput {
   @ValidateNested({ each: true })
   @Type(() => ArtworkImageInput)
   images?: ArtworkImageInput[];
+
+  // ── Auction fields (on-chain integration) ──
+
+  @ApiPropertyOptional({
+    description: 'IPFS hash of artwork metadata for on-chain reference',
+    example: 'QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ',
+  })
+  @IsOptional()
+  @IsString()
+  ipfsMetadataHash?: string;
+
+  @ApiPropertyOptional({
+    description: 'Reserve price in wei (minimum acceptable bid)',
+    example: '1000000000000000000',
+  })
+  @IsOptional()
+  @IsString()
+  reservePrice?: string;
+
+  @ApiPropertyOptional({
+    description: 'Minimum bid increment in wei',
+    example: '100000000000000000',
+  })
+  @IsOptional()
+  @IsString()
+  minBidIncrement?: string;
+
+  @ApiPropertyOptional({
+    description: 'Auction duration in seconds',
+    example: 86400,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(60)
+  auctionDuration?: number;
+
+  @ApiPropertyOptional({
+    description: 'On-chain auction ID from the smart contract',
+    example: '0x...',
+  })
+  @IsOptional()
+  @IsString()
+  onChainAuctionId?: string;
 }

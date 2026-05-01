@@ -14,7 +14,7 @@ import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
 import profileApis from '@shared/apis/profileApis'
 import { mapMoodboardToProfileMoodboard } from '@domains/profile/utils/profileApiMapper'
 import { useEffect, useState } from 'react'
-import type { ProfileMoodboard } from '@domains/profile/types'
+import type { ProfileMoodboard, ProfileMoodboardMedia } from '@domains/profile/types'
 
 type ProfileMoodboardDetailPageViewProps = {
   username?: string | string[]
@@ -76,9 +76,11 @@ export const ProfileMoodboardDetailPageView = ({
   }, [moodboardIdFromRoute, profileData])
 
   const moodboard = selectedMoodboard
-  const artworks = profileData?.artworks.slice(0, 8) ?? []
-  const featuringArtist = artworks[0]?.artistName
-  const featuringSuffix = artworks.length > 1 ? ' and 1 other' : ''
+  const orderedMediaItems = (moodboard?.mediaItems ?? [])
+    .slice()
+    .sort((left, right) => left.displayOrder - right.displayOrder)
+  const coverMedia = orderedMediaItems.find((media) => media.isCover) ?? orderedMediaItems[0]
+  const relatedArtworks = profileData?.artworks.slice(0, 8) ?? []
   const pageTitle = profileData
     ? `${moodboard?.title || 'Moodboard'} | ${profileData.user.displayName}`
     : 'Moodboard | Artium'
@@ -128,30 +130,120 @@ export const ProfileMoodboardDetailPageView = ({
                       {moodboard?.author || profileData.user.displayName}
                     </span>
                   </div>
-                  {featuringArtist ? (
-                    <p className="mt-2 text-xs text-slate-500">
-                      Featuring {featuringArtist}
-                      {featuringSuffix}
-                    </p>
-                  ) : null}
                   <p className="mt-1 text-xs text-slate-400">@{resolvedUsername}</p>
                 </div>
               </div>
 
-              <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {artworks.map((artwork) => (
-                  <ProfileArtworkCard
-                    key={artwork.id}
-                    artwork={artwork}
-                    artist={profileData.user}
-                    showPrice={false}
-                  />
-                ))}
+              <div className="mt-10 space-y-10">
+                {orderedMediaItems.length > 0 ? (
+                  <section aria-label="Uploaded moodboard media" className="space-y-6">
+                    {coverMedia ? (
+                      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
+                        <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3">
+                          <p className="text-sm font-semibold text-slate-900">Cover</p>
+                          <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">
+                            Uploaded moodboard media
+                          </span>
+                        </div>
+                        <MoodboardMediaFrame media={coverMedia} priority />
+                      </div>
+                    ) : null}
+
+                    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                      {orderedMediaItems.map((media) => (
+                        <div
+                          key={media.id}
+                          className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+                        >
+                          <div className="relative">
+                            <MoodboardMediaFrame media={media} />
+                            {media.isCover ? (
+                              <span className="absolute top-3 left-3 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">
+                                Cover
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ) : (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-500">
+                    This moodboard does not have uploaded media available yet.
+                  </div>
+                )}
+
+                {relatedArtworks.length > 0 ? (
+                  <section className="space-y-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-slate-900">Related artworks</h2>
+                      <p className="text-sm text-slate-500">
+                        Existing profile artwork references, shown separately from uploaded moodboard media.
+                      </p>
+                    </div>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {relatedArtworks.map((artwork) => (
+                        <ProfileArtworkCard
+                          key={artwork.id}
+                          artwork={artwork}
+                          artist={profileData.user}
+                          showPrice={false}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ) : null}
               </div>
             </>
           ) : null}
         </div>
       </div>
     </>
+  )
+}
+
+type MoodboardMediaFrameProps = {
+  media: ProfileMoodboardMedia
+  priority?: boolean
+}
+
+const resolveMediaUrl = (media: ProfileMoodboardMedia) =>
+  media.secureUrl || media.url || media.displayUrl
+
+const MoodboardMediaFrame = ({ media, priority = false }: MoodboardMediaFrameProps) => {
+  const mediaUrl = resolveMediaUrl(media)
+  const poster = media.thumbnailUrl || undefined
+  const heightClass = priority ? 'h-[420px]' : 'h-72'
+
+  if (!mediaUrl) {
+    return (
+      <div className={`${heightClass} flex items-center justify-center bg-slate-100 text-sm text-slate-400`}>
+        Media unavailable
+      </div>
+    )
+  }
+
+  if (media.mediaType === 'video') {
+    return (
+      <video
+        src={mediaUrl}
+        poster={poster}
+        controls
+        className={`${heightClass} w-full bg-slate-950 object-contain`}
+      />
+    )
+  }
+
+  return (
+    <div className={`relative ${heightClass} bg-slate-100`}>
+      <Image
+        src={media.displayUrl}
+        alt="Moodboard uploaded media"
+        fill
+        priority={priority}
+        sizes={priority ? 'min(100vw, 1120px)' : '(min-width: 1024px) 33vw, 50vw'}
+        className="object-cover"
+      />
+    </div>
   )
 }

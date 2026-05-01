@@ -5,12 +5,14 @@ import {
   IMoodboardMediaRepository,
   IMoodboardRepository,
   Moodboard,
+  MoodboardMedia,
+  MoodboardObject,
 } from '../../../../domain';
 
 @QueryHandler(GetMoodboardQuery)
 export class GetMoodboardHandler implements IQueryHandler<
   GetMoodboardQuery,
-  Moodboard | null
+  MoodboardObject | null
 > {
   private readonly logger = new Logger(GetMoodboardHandler.name);
 
@@ -21,7 +23,7 @@ export class GetMoodboardHandler implements IQueryHandler<
     private readonly moodboardMediaRepository: IMoodboardMediaRepository,
   ) {}
 
-  async execute(query: GetMoodboardQuery): Promise<Moodboard | null> {
+  async execute(query: GetMoodboardQuery): Promise<MoodboardObject | null> {
     this.logger.debug(`Getting moodboard by ID: ${query.id}`);
 
     const moodboard = await this.moodboardRepository.findById(query.id);

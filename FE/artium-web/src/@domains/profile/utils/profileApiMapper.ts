@@ -118,23 +118,27 @@ export const enrichProfileUserWithSeller = (
 /**
  * Creates a minimal ProfileAbout from a UserPayload (non-seller users).
  */
-export const mapUserPayloadToProfileAbout = (_user: UserPayload): ProfileAbout => ({
-  biography: '',
-  websiteUrl: '',
-  instagram: '',
-  twitter: '',
-  profileCategories: [],
-  roles: [],
-  artisticVibes: [],
-  artisticValues: [],
-  artisticMediums: [],
-  connectionAffiliations: '',
-  connectionSeenAt: '',
-  connectionCurrently: '',
-  inspireVibes: [],
-  inspireValues: [],
-  inspireMediums: [],
-})
+export const mapUserPayloadToProfileAbout = (_user: UserPayload): ProfileAbout => {
+  void _user
+
+  return {
+    biography: '',
+    websiteUrl: '',
+    instagram: '',
+    twitter: '',
+    profileCategories: [],
+    roles: [],
+    artisticVibes: [],
+    artisticValues: [],
+    artisticMediums: [],
+    connectionAffiliations: '',
+    connectionSeenAt: '',
+    connectionCurrently: '',
+    inspireVibes: [],
+    inspireValues: [],
+    inspireMediums: [],
+  }
+}
 
 export const mapSellerProfileToProfileUser = (sellerProfile: SellerProfilePayload): ProfileUser => ({
   username: '',

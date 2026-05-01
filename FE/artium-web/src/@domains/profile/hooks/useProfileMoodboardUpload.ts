@@ -121,6 +121,15 @@ export const useProfileMoodboardUpload = () => {
     setQueueErrorMessage(null)
   }, [abortActiveUploads, setUploadItems])
 
+  useEffect(
+    () => () => {
+      uploadRunRef.current += 1
+      abortActiveUploads()
+      itemsRef.current.forEach(revokePreview)
+    },
+    [abortActiveUploads],
+  )
+
   const uploadItems = useCallback(
     async (queuedItems: ProfileMoodboardUploadItem[]) => {
       if (queuedItems.length === 0) {
@@ -376,8 +385,6 @@ export const useProfileMoodboardUpload = () => {
     },
     [uploadItems],
   )
-
-  useEffect(() => resetUpload, [resetUpload])
 
   const uploadedItems = useMemo(() => items.filter(isUploadedItem), [items])
   const resolvedCoverItem =

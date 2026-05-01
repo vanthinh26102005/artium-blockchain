@@ -1,5 +1,5 @@
 // react
-import { FormEvent, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 // third-party
 import { Film, Grid2X2, Sparkles } from 'lucide-react'
@@ -11,6 +11,7 @@ import { Metadata } from '@/components/SEO/Metadata'
 import { ArtworksSection } from '@domains/profile/components/ArtworksSection'
 import { MomentDeviceUploadComposer } from '@domains/profile/components/MomentDeviceUploadComposer'
 import { MomentsSection } from '@domains/profile/components/MomentsSection'
+import { MoodboardDeviceUploadComposer } from '@domains/profile/components/MoodboardDeviceUploadComposer'
 import { MoodboardsSection } from '@domains/profile/components/MoodboardsSection'
 import { ProfileAboutSection } from '@domains/profile/components/ProfileAboutSection'
 import { ProfileHero } from '@domains/profile/components/ProfileHero'
@@ -29,12 +30,9 @@ import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
 import { ProfileMoodboard, ProfileMoment, ProfileTabKey } from '@domains/profile/types'
 import profileApis from '@shared/apis/profileApis'
-import type { CreateMomentInput } from '@shared/apis/profileApis'
+import type { CreateMomentInput, CreateMoodboardInput } from '@shared/apis/profileApis'
 import { mapMoodboardToProfileMoodboard, mapMomentToProfileMoment } from '@domains/profile/utils/profileApiMapper'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
-import { Dialog, DialogContent } from '@shared/components/ui/dialog'
-import { Input } from '@shared/components/ui/input'
-import { Switch } from '@shared/components/ui/switch'
 
 type ProfilePageViewProps = {
   username?: string | string[]
@@ -52,14 +50,6 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
   const [moodboardSuccess, setMoodboardSuccess] = useState<string | null>(null)
   const [createdMoments, setCreatedMoments] = useState<ProfileMoment[]>([])
   const [createdMoodboards, setCreatedMoodboards] = useState<ProfileMoodboard[]>([])
-  const [moodboardForm, setMoodboardForm] = useState({
-    title: '',
-    description: '',
-    coverImageUrl: '',
-    tags: '',
-    isPrivate: false,
-    isCollaborative: false,
-  })
 
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
   const { data: baseData, user: fetchedUser, sellerProfile, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
@@ -94,25 +84,6 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
     [createdMoodboards, profileData?.moodboards],
   )
 
-  const resetMoodboardForm = () => {
-    setMoodboardForm({
-      title: '',
-      description: '',
-      coverImageUrl: '',
-      tags: '',
-      isPrivate: false,
-      isCollaborative: false,
-    })
-    setMoodboardError(null)
-  }
-
-  const parseTags = (value: string) =>
-    value
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .map((item) => (item.startsWith('#') ? item.slice(1) : item))
-
   const handleCreateMoment = async (input: CreateMomentInput) => {
     if (!isAuthenticated || momentSubmitting) return
 
@@ -132,41 +103,21 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
     }
   }
 
-  const handleCreateMoodboard = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!isAuthenticated || moodboardSubmitting) return
-
-    const title = moodboardForm.title.trim()
-    if (!title) {
-      setMoodboardError('Please add a title for your moodboard.')
-      return
-    }
+  const handleCreateMoodboard = async (input: CreateMoodboardInput) => {
+    if (!isAuthenticated || moodboardSubmitting || !profileData) return
 
     setMoodboardSubmitting(true)
     setMoodboardError(null)
     setMoodboardSuccess(null)
 
-    const payload = {
-      title,
-      description: moodboardForm.description.trim() || undefined,
-      coverImageUrl: moodboardForm.coverImageUrl.trim() || undefined,
-      isPrivate: moodboardForm.isPrivate,
-      isCollaborative: moodboardForm.isCollaborative,
-      tags: parseTags(moodboardForm.tags),
-    }
-
     try {
-      const created = await profileApis.createMoodboard(payload)
-      if (!profileData) {
-        return
-      }
+      const created = await profileApis.createMoodboard(input)
       setCreatedMoodboards((prev) => [
         mapMoodboardToProfileMoodboard(created, profileData.user),
         ...prev,
       ])
       setMoodboardSuccess('Moodboard created.')
       setIsMoodboardDialogOpen(false)
-      resetMoodboardForm()
     } catch (err) {
       setMoodboardError(err instanceof Error ? err.message : 'Failed to create moodboard.')
     } finally {
@@ -300,7 +251,8 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
                   <button
                     type="button"
                     onClick={() => {
-                      resetMoodboardForm()
+                      setMoodboardError(null)
+                      setMoodboardSuccess(null)
                       setIsMoodboardDialogOpen(true)
                     }}
                     className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
@@ -354,144 +306,21 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
         />
       ) : null}
 
-      <Dialog
-        open={isMoodboardDialogOpen}
-        onOpenChange={(open) => {
-          setIsMoodboardDialogOpen(open)
-          if (!open) {
-            resetMoodboardForm()
-            setMoodboardSubmitting(false)
-          }
-        }}
-      >
-        <DialogContent size="3xl" className="w-[95vw] rounded-3xl bg-white p-0">
-          <form onSubmit={handleCreateMoodboard} className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="flex flex-col gap-6 bg-slate-50 px-6 py-8">
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Moodboard
-                </p>
-                <h3 className="text-2xl font-semibold text-slate-900">
-                  Curate a new collection
-                </h3>
-                <p className="text-sm text-slate-600">
-                  Organize inspirations, themes, and references into a shareable board.
-                </p>
-              </div>
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                {moodboardForm.coverImageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={moodboardForm.coverImageUrl}
-                    alt="Moodboard cover preview"
-                    className="h-56 w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-56 items-center justify-center text-sm text-slate-400">
-                    Cover preview appears here
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4 px-6 py-8">
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-slate-700">Title</label>
-                <Input
-                  value={moodboardForm.title}
-                  onChange={(event) =>
-                    setMoodboardForm((prev) => ({ ...prev, title: event.target.value }))
-                  }
-                  placeholder="e.g. Minimalist textures"
-                  className="h-11 rounded-full"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-slate-700">Description</label>
-                <textarea
-                  value={moodboardForm.description}
-                  onChange={(event) =>
-                    setMoodboardForm((prev) => ({ ...prev, description: event.target.value }))
-                  }
-                  placeholder="Describe the mood or story..."
-                  className="h-24 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-slate-700">Cover image URL</label>
-                <Input
-                  value={moodboardForm.coverImageUrl}
-                  onChange={(event) =>
-                    setMoodboardForm((prev) => ({ ...prev, coverImageUrl: event.target.value }))
-                  }
-                  placeholder="https://..."
-                  className="h-11 rounded-full"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-slate-700">
-                  Tags 
-                </label>
-                <Input
-                  value={moodboardForm.tags}
-                  onChange={(event) =>
-                    setMoodboardForm((prev) => ({ ...prev, tags: event.target.value }))
-                  }
-                  placeholder="minimal, sculptural, light"
-                  className="h-11 rounded-full"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-6">
-                <label className="flex items-center gap-3 text-sm text-slate-600">
-                  <Switch
-                    checked={moodboardForm.isPrivate}
-                    onCheckedChange={(checked) =>
-                      setMoodboardForm((prev) => ({ ...prev, isPrivate: checked }))
-                    }
-                  />
-                  Private board
-                </label>
-                <label className="flex items-center gap-3 text-sm text-slate-600">
-                  <Switch
-                    checked={moodboardForm.isCollaborative}
-                    onCheckedChange={(checked) =>
-                      setMoodboardForm((prev) => ({ ...prev, isCollaborative: checked }))
-                    }
-                  />
-                  Allow collaborators
-                </label>
-              </div>
-
-              {moodboardError ? (
-                <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-600">
-                  {moodboardError}
-                </p>
-              ) : null}
-
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsMoodboardDialogOpen(false)}
-                  className="rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:border-slate-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={moodboardSubmitting}
-                  className="rounded-full bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {moodboardSubmitting ? 'Creating...' : 'Create moodboard'}
-                </button>
-              </div>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {isMoodboardDialogOpen ? (
+        <MoodboardDeviceUploadComposer
+          open={isMoodboardDialogOpen}
+          submitting={moodboardSubmitting}
+          errorMessage={moodboardError}
+          onOpenChange={(open) => {
+            setIsMoodboardDialogOpen(open)
+            if (!open) {
+              setMoodboardSubmitting(false)
+              setMoodboardError(null)
+            }
+          }}
+          onCreate={handleCreateMoodboard}
+        />
+      ) : null}
     </>
   )
 }

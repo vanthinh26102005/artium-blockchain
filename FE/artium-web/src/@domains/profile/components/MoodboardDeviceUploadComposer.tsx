@@ -1,4 +1,4 @@
-import { ChangeEvent, DragEvent, FormEvent, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, DragEvent, FormEvent, useRef, useState } from 'react'
 
 import {
   AlertCircle,
@@ -89,7 +89,6 @@ export const MoodboardDeviceUploadComposer = ({
     moveMedia,
     setCover,
     retryUpload,
-    resetUpload,
   } = useProfileMoodboardUpload()
   const [title, setTitle] = useState(EMPTY_METADATA.title)
   const [description, setDescription] = useState(EMPTY_METADATA.description)
@@ -97,20 +96,6 @@ export const MoodboardDeviceUploadComposer = ({
   const [isPrivate, setIsPrivate] = useState(EMPTY_METADATA.isPrivate)
   const [isCollaborative, setIsCollaborative] = useState(EMPTY_METADATA.isCollaborative)
   const [isDragging, setIsDragging] = useState(false)
-
-  useEffect(() => {
-    if (open) {
-      return
-    }
-
-    resetUpload()
-    setTitle(EMPTY_METADATA.title)
-    setDescription(EMPTY_METADATA.description)
-    setTags(EMPTY_METADATA.tags)
-    setIsPrivate(EMPTY_METADATA.isPrivate)
-    setIsCollaborative(EMPTY_METADATA.isCollaborative)
-    setIsDragging(false)
-  }, [open, resetUpload])
 
   const openFilePicker = () => {
     fileInputRef.current?.click()

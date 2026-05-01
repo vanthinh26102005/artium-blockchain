@@ -1,13 +1,13 @@
 // next
 import Image from 'next/image'
 import Link from 'next/link'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Film, Pencil, Trash2 } from 'lucide-react'
 
 // @shared - utils
 import { cn } from '@shared/lib/utils'
 
 // @domains - profile
-import { ProfileMoodboard } from '@domains/profile/types'
+import type { ProfileMoodboard, ProfileMoodboardMedia } from '@domains/profile/types'
 
 type MoodboardsSectionProps = {
   moodboards: ProfileMoodboard[]
@@ -109,10 +109,13 @@ type MoodboardCardProps = {
 
 const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }: MoodboardCardProps) => {
   const isLarge = size === 'large'
-  const coverUrls = board.artworkCoverUrls ?? []
-  const secondaryCover = coverUrls[1] || board.secondaryCoverUrl || board.coverUrl
-  const primaryCover = coverUrls[0] || board.coverUrl
-  const extraCoverCount = Math.max(0, coverUrls.length - 1)
+  const uploadedMedia = board.mediaItems ?? []
+  const coverMedia = uploadedMedia.find((media) => media.isCover) ?? uploadedMedia[0]
+  const secondaryMedia = uploadedMedia.find((media) => media.id !== coverMedia?.id)
+  const fallbackCoverUrls = (board.artworkCoverUrls ?? []).filter(Boolean)
+  const primaryCover = fallbackCoverUrls[0] || board.coverUrl
+  const secondaryCover = fallbackCoverUrls[1] || board.secondaryCoverUrl || board.coverUrl
+  const extraCoverCount = Math.max(0, (uploadedMedia.length || fallbackCoverUrls.length) - 1)
   const featuredSuffix = extraCoverCount > 0 ? ` +${extraCoverCount} other` : ''
   const authorAvatarUrl = board.authorAvatarUrl || 'https://placehold.co/64x64.png?text=HP'
   const sizeStyles = isLarge
@@ -146,12 +149,11 @@ const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }:
             sizeStyles.secondaryCoverClass,
           )}
         >
-          <Image
+          <MoodboardCoverTile
+            media={secondaryMedia}
             src={secondaryCover}
             alt={`${board.title} secondary`}
-            fill
             sizes="120px"
-            className="object-cover"
           />
         </div>
         <div
@@ -160,7 +162,12 @@ const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }:
             sizeStyles.primaryCoverClass,
           )}
         >
-          <Image src={primaryCover} alt={board.title} fill sizes="140px" className="object-cover" />
+          <MoodboardCoverTile
+            media={coverMedia}
+            src={primaryCover}
+            alt={board.title}
+            sizes="140px"
+          />
         </div>
         {board.isPrivate ? (
           <span className="absolute top-4 left-4 rounded-full bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white uppercase">
@@ -241,4 +248,35 @@ const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }:
       {cardBody}
     </Link>
   )
+}
+
+type MoodboardCoverTileProps = {
+  media?: ProfileMoodboardMedia
+  src?: string
+  alt: string
+  sizes: string
+}
+
+const resolveMoodboardCoverSrc = (media?: ProfileMoodboardMedia, fallbackSrc?: string) => {
+  if (media) {
+    if (media.thumbnailUrl) return media.thumbnailUrl
+    if (media.mediaType === 'image') return media.secureUrl || media.url || media.displayUrl
+    return null
+  }
+
+  return fallbackSrc?.trim() || null
+}
+
+const MoodboardCoverTile = ({ media, src, alt, sizes }: MoodboardCoverTileProps) => {
+  const imageSrc = resolveMoodboardCoverSrc(media, src)
+
+  if (!imageSrc) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
+        <Film className="h-5 w-5" />
+      </div>
+    )
+  }
+
+  return <Image src={imageSrc} alt={alt} fill sizes={sizes} className="object-cover" />
 }

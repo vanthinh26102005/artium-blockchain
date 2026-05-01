@@ -28,6 +28,6 @@ yarn.lock
 
 # Documentation files (local only)
 docs/Huonghan-Doan-New.pdf
-.env.compose
+**/.env.compose
 .env.prod
 **/gcs-service-account.json
