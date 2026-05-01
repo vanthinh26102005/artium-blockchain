@@ -14,7 +14,6 @@ import { IUserRepository } from '../../../domain';
  *
  * Validation:
  * - User must exist and not already have a seller profile
- * - Slug must be unique across all sellers
  * - Required fields must be provided
  *
  * Side Effects:
@@ -58,17 +57,6 @@ export class CreateSellerProfileHandler implements ICommandHandler<
       if (existingProfile) {
         this.logger.warn(`User ${userId} already has a seller profile`);
         throw RpcExceptionHelper.conflict('User already has a seller profile');
-      }
-
-      // Check if slug is already taken
-      const slugTaken = await this.sellerProfileRepository.isSlugTaken(
-        input.slug!,
-      );
-      if (slugTaken) {
-        this.logger.warn(`Slug already taken: ${input.slug}`);
-        throw RpcExceptionHelper.conflict(
-          'Slug is already taken. Please choose a different one.',
-        );
       }
 
       // Create the seller profile

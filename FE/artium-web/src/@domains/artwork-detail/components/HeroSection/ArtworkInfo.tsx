@@ -33,7 +33,6 @@ export const ArtworkInfo = ({ artwork }: ArtworkInfoProps) => {
 
     const handleMakeOffer = () => {
         // TODO: Implement make offer functionality
-        console.log('Make offer clicked')
     }
 
     return (
@@ -50,7 +49,7 @@ export const ArtworkInfo = ({ artwork }: ArtworkInfoProps) => {
                     <p className="mt-1 text-slate-600" style={{ fontFamily: 'Inter', fontSize: '16px', lineHeight: '100%', fontWeight: 400, letterSpacing: '0%' }}>
                         Created and listed by{' '}
                         <Link
-                            href={`/profile/${artwork.creator.username}`}
+                            href={artwork.creator.slug ? `/profile/${artwork.creator.slug}` : '#'}
                             className="inline-flex items-center gap-1 text-slate-900 hover:underline" style={{ fontFamily: 'Inter', fontSize: '14px', lineHeight: '20px', fontWeight: 500, letterSpacing: '0%' }}
                         >
                             {artwork.creator.displayName}

@@ -8,6 +8,7 @@ import { LoginByGoogleCommand } from '../LoginByGoogle.command';
 import {
   IUserRepository,
   LoginResponse,
+  RegistrationService,
   TokenService,
 } from 'apps/identity-service/src/domain';
 import { UserRole } from '@app/common';
@@ -26,6 +27,7 @@ export class LoginByGoogleHandler implements ICommandHandler<
     @Inject(IUserRepository) private readonly userRepository: IUserRepository,
     private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
+    private readonly registrationService: RegistrationService,
   ) {}
 
   async execute(command: LoginByGoogleCommand): Promise<LoginResponse> {
@@ -86,12 +88,17 @@ export class LoginByGoogleHandler implements ICommandHandler<
     } else {
       try {
         const randomPassword = crypto.randomBytes(16).toString('hex');
+        const slug = await this.registrationService.generateUniqueSlug(
+          fullName ?? email.split('@')[0],
+        );
 
         user = await this.userRepository.create({
           email,
           avatarUrl: avatarUrl ?? null,
           fullName: fullName ?? null,
+          slug,
           googleId,
+          walletAddress: null,
           password: randomPassword,
           isEmailVerified: true,
           roles: [UserRole.COLLECTOR],

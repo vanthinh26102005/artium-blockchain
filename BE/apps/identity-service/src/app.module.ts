@@ -20,18 +20,21 @@ import {
   DeleteSellerProfileHandler,
   GetFeaturedSellerProfilesHandler,
   GetSellerProfileByIdHandler,
-  GetSellerProfileBySlugHandler,
   GetSellerProfileByUserIdHandler,
   GetUserByIdHandler,
+  GetUserBySlugHandler,
+  GetWalletNonceHandler,
   InitiateUserRegistrationHandler,
   ListSellerProfilesHandler,
   LoginByEmailHandler,
   LoginByGoogleHandler,
+  LoginByWalletHandler,
   RequestPasswordResetHandler,
   StripeCustomerCreatedEventHandler,
   UpdatePaymentOnboardingHandler,
   UpdateProfileVisibilityHandler,
   UpdateSellerProfileHandler,
+  UpdateUserProfileHandler,
   UpdateVerificationStatusHandler,
   VerifyPasswordResetHandler,
 } from './application';
@@ -41,6 +44,7 @@ import {
   IRefreshTokenRepository,
   ISellerProfileRepository,
   IUserRepository,
+  NonceService,
   OtpService,
   RefreshToken,
   RegistrationService,
@@ -68,6 +72,7 @@ export const CommandHandlers = [
 
   LoginByEmailHandler,
   LoginByGoogleHandler,
+  LoginByWalletHandler,
 
   ConfirmNewPasswordHandler,
   RequestPasswordResetHandler,
@@ -79,14 +84,16 @@ export const CommandHandlers = [
   UpdateVerificationStatusHandler,
   UpdateProfileVisibilityHandler,
   UpdatePaymentOnboardingHandler,
+  UpdateUserProfileHandler,
 ];
 
 export const QueryHandlers = [
   GetUserByIdHandler,
+  GetUserBySlugHandler,
+  GetWalletNonceHandler,
 
   GetSellerProfileByIdHandler,
   GetSellerProfileByUserIdHandler,
-  GetSellerProfileBySlugHandler,
   ListSellerProfilesHandler,
   GetFeaturedSellerProfilesHandler,
 ];
@@ -102,6 +109,7 @@ export const InfrastructureServices = [
   OtpService,
   TokenService,
   RegistrationService,
+  NonceService,
 ];
 export const Controllers = [
   UsersController,

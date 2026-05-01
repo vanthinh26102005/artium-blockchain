@@ -1,10 +1,10 @@
 import {
-  type ReactNode,
   type TextareaHTMLAttributes,
   useMemo,
   useState,
 } from "react";
-import { Controller, useForm, type FieldError } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm, useWatch, type FieldError } from "react-hook-form";
 
 // @shared
 import { cn } from "@shared/lib/utils";
@@ -12,6 +12,7 @@ import { cn } from "@shared/lib/utils";
 // @domains - events
 import { type InviteEventFormValues } from "@domains/events/types/invitation";
 import type { HostingEvent } from "@domains/events/state/useHostingEventsStore";
+import { inviteEventFormSchema } from "@domains/events/validations/eventForm.schema";
 
 type InviteEventFormProps = {
   event: HostingEvent;
@@ -21,6 +22,7 @@ type InviteEventFormProps = {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
+const EMPTY_EMAILS: string[] = [];
 
 const parseEmails = (value: string) =>
   value
@@ -37,10 +39,10 @@ export function InviteEventForm({
   const {
     control,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<InviteEventFormValues>({
+    resolver: zodResolver(inviteEventFormSchema),
     defaultValues: {
       recipientEmails: [],
       personalMessage: "",
@@ -49,8 +51,9 @@ export function InviteEventForm({
     reValidateMode: "onChange",
   });
 
-  const recipientEmails = watch("recipientEmails") ?? [];
-  const personalMessage = watch("personalMessage") ?? "";
+  const watchedRecipientEmails = useWatch({ control, name: "recipientEmails" });
+  const recipientEmails = watchedRecipientEmails ?? EMPTY_EMAILS;
+  const personalMessage = useWatch({ control, name: "personalMessage" }) ?? "";
   const [emailInput, setEmailInput] = useState("");
 
   const invalidEmails = useMemo(
@@ -148,14 +151,6 @@ export function InviteEventForm({
           <Controller
             name="recipientEmails"
             control={control}
-            rules={{
-              validate: (value) =>
-                value && value.length > 0
-                  ? value.every((email) => EMAIL_PATTERN.test(email))
-                    ? true
-                    : "Please enter valid email addresses"
-                  : "At least one email is required",
-            }}
             render={({ field }) => (
               <div className="space-y-3">
                 <div className="flex flex-col gap-2 sm:flex-row">
@@ -288,10 +283,6 @@ const FieldHeader = ({ label, required, helper }: FieldHeaderProps) => {
   );
 };
 
-const FieldBlock = ({ children }: { children: ReactNode }) => {
-  return <div className="space-y-2">{children}</div>;
-};
-
 const FieldErrorMessage = ({
   error,
 }: {
@@ -336,7 +327,7 @@ const EventTextarea = ({
     <textarea
       {...props}
       className={cn(
-        "min-h-[120px] w-full rounded-[12px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none",
+        "min-h-[120px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none",
         className,
       )}
     />

@@ -19,6 +19,7 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "types": [
       "node",
       "express",
@@ -60,6 +61,12 @@
       ],
       "@app/rabbitmq/*": [
         "libs/rabbitmq/src/*"
+      ],
+      "@app/blockchain": [
+        "libs/blockchain/src"
+      ],
+      "@app/blockchain/*": [
+        "libs/blockchain/src/*"
       ],
       "apps/*": [
         "apps/*"

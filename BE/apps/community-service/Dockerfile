@@ -8,14 +8,17 @@ WORKDIR /app
 # Builder stage
 FROM base AS builder
 
+# Copy all package.json and workspace manifests
 COPY package.json yarn.lock ./
+COPY apps/community-service/package.json ./apps/community-service/package.json
+COPY libs ./libs
 RUN yarn install --frozen-lockfile
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
+COPY apps/community-service/tsconfig.json ./apps/community-service/tsconfig.json
 COPY apps/community-service ./apps/community-service
-COPY libs ./libs
 
-RUN yarn run build:community
+RUN yarn workspace @backend/community-service build
 
 
 

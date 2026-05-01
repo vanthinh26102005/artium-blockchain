@@ -8,14 +8,17 @@ WORKDIR /app
 # Builder stage
 FROM base AS builder
 
+# Copy all package.json and workspace manifests
 COPY package.json yarn.lock ./
+COPY apps/orders-service/package.json ./apps/orders-service/package.json
+COPY libs ./libs
 RUN yarn install --frozen-lockfile
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
+COPY apps/orders-service/tsconfig.app.json ./apps/orders-service/tsconfig.json
 COPY apps/orders-service ./apps/orders-service
-COPY libs ./libs
 
-RUN yarn run build:orders
+RUN yarn workspace @backend/orders-service build
 
 
 

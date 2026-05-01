@@ -12,7 +12,9 @@ import {
   EntityManager,
   FindOptionsOrder,
   FindOptionsWhere,
+  IsNull,
   Like,
+  Not,
   Repository,
   FindManyOptions as TypeOrmFindManyOptions,
   FindOneOptions as TypeOrmFindOneOptions,
@@ -103,19 +105,26 @@ export class ArtworkRepository implements IArtworkRepository {
       searchQuery?: string;
       minPrice?: number;
       maxPrice?: number;
+      hasOnChainAuctionId?: boolean;
     } = {},
     transactionManager?: EntityManager,
   ): Promise<[Artwork[], number]> {
-    const { where, orderBy, searchQuery, minPrice, maxPrice, ...rest } =
+    const { where, orderBy, searchQuery, minPrice, maxPrice, hasOnChainAuctionId, ...rest } =
       options;
 
+    const baseTypeOrmWhere: FindOptionsWhere<Artwork> = {
+      ...mapToTypeOrmWhere(where),
+      ...(hasOnChainAuctionId === true ? { onChainAuctionId: Not(IsNull()) } : {}),
+      ...(hasOnChainAuctionId === false ? { onChainAuctionId: IsNull() } : {}),
+    };
+
     let typeOrmWhere: FindOptionsWhere<Artwork> | FindOptionsWhere<Artwork>[] =
-      mapToTypeOrmWhere(where);
+      baseTypeOrmWhere;
 
     // Handle search query - search across title, description, materials, and creatorName
     if (searchQuery) {
       const searchPattern = `%${searchQuery}%`;
-      const baseWhere = mapToTypeOrmWhere(where);
+      const baseWhere = baseTypeOrmWhere;
 
       // Create an array of search conditions (OR logic)
       typeOrmWhere = [

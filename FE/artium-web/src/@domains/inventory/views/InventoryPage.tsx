@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 // next
+import { useRouter } from 'next/router'
 import { Plus } from 'lucide-react'
 
 // third-party
@@ -47,7 +48,7 @@ import {
   DEFAULT_INVENTORY_FILTERS,
   type InventoryFilters,
 } from '@domains/inventory/types/inventoryFilters'
-import { type InventoryArtwork } from '@domains/inventory/types/inventoryArtwork'
+import { type InventoryArtwork, type DragItemData } from '@domains/inventory/types/inventoryArtwork'
 import { type InventoryFolder } from '@domains/inventory/types/inventoryFolder'
 import { type InventoryViewMode } from '@domains/inventory/types/inventoryUi'
 import { mapArtworkToInventory } from '@domains/inventory/utils/inventoryApiMapper'
@@ -58,6 +59,9 @@ import { InventoryArtworkGridViewItem } from '@domains/inventory/components/Inve
 type FolderWithCount = InventoryFolder & { itemCount: number }
 
 export const InventoryPage = () => {
+  // -- hooks --
+  const router = useRouter()
+
   // -- state --
   const [searchName, setSearchName] = useState('')
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
@@ -77,9 +81,9 @@ export const InventoryPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [refreshToken, setRefreshToken] = useState(0)
 
-  // DnD state
+  // DnD state — properly typed for drag overlay
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [activeItem, setActiveItem] = useState<any>(null)
+  const [activeItem, setActiveItem] = useState<DragItemData | null>(null)
 
   const viewMode = useInventoryUiStore((state) => state.viewMode)
   const setViewMode = useInventoryUiStore((state) => state.setViewMode)
@@ -272,6 +276,10 @@ export const InventoryPage = () => {
       return
     }
 
+    // Capture previous state for rollback
+    const artwork = artworks.find((a) => a.id === artworkId)
+    const previousFolderId = artwork?.folderId ?? null
+
     // Optimistic update
     optimisticMoveArtwork(artworkId, folderId ?? undefined)
 
@@ -283,8 +291,9 @@ export const InventoryPage = () => {
       })
       setToastMessage('Artwork moved to folder')
     } catch (error) {
+      // Rollback optimistic update
+      optimisticMoveArtwork(artworkId, previousFolderId ?? undefined)
       setToastMessage('Failed to move artwork')
-      // Could revert here if needed
     }
   }
 
@@ -293,6 +302,10 @@ export const InventoryPage = () => {
       setToastMessage('Please log in to move folder.')
       return
     }
+
+    // Capture previous state for rollback
+    const folder = folders.find((f) => f.id === folderId)
+    const previousParentId = folder?.parentId ?? null
 
     // Optimistic update
     moveFolderToFolder(folderId, newParentId)
@@ -304,9 +317,10 @@ export const InventoryPage = () => {
       })
       setToastMessage(newParentId ? 'Folder moved successfully' : 'Folder moved to root')
     } catch (error) {
+      // Rollback optimistic update
+      moveFolderToFolder(folderId, previousParentId)
       const message = error instanceof Error ? error.message : 'Failed to move folder'
       setToastMessage(message)
-      // Revert would require knowing the original parentId
     }
   }
 
@@ -337,9 +351,7 @@ export const InventoryPage = () => {
   }
 
   const handleEditArtwork = (artwork: InventoryArtwork) => {
-    if (typeof window !== 'undefined') {
-      window.alert(`Edit "${artwork.title}" (stub)`)
-    }
+    router.push(`/artworks/${artwork.id}`)
   }
 
   const handleMoveArtwork = (artwork: InventoryArtwork) => {
@@ -531,7 +543,7 @@ export const InventoryPage = () => {
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string)
-    setActiveItem(event.active.data.current)
+    setActiveItem((event.active.data.current as DragItemData) ?? null)
   }
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -554,7 +566,11 @@ export const InventoryPage = () => {
       const artworkId = active.id as string
       const folderId = over.id as string
       
-      // Optimistic
+      // Capture previous state for rollback
+      const artwork = artworks.find((a) => a.id === artworkId)
+      const previousFolderId = artwork?.folderId
+      
+      // Optimistic update
       optimisticMoveArtwork(artworkId, folderId)
       
       try {
@@ -565,8 +581,9 @@ export const InventoryPage = () => {
         })
         setToastMessage('Artwork moved to folder')
       } catch (error) {
+        // Rollback optimistic update
+        optimisticMoveArtwork(artworkId, previousFolderId)
         setToastMessage('Failed to move artwork')
-        // Revert?
       }
     }
   }

@@ -8,14 +8,17 @@ WORKDIR /app
 # Builder stage
 FROM base AS builder
 
+# Copy all package.json and workspace manifests
 COPY package.json yarn.lock ./
+COPY apps/events-service/package.json ./apps/events-service/package.json
+COPY libs ./libs
 RUN yarn install --frozen-lockfile
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
+COPY apps/events-service/tsconfig.json ./apps/events-service/tsconfig.json
 COPY apps/events-service ./apps/events-service
-COPY libs ./libs
 
-RUN yarn run build:events
+RUN yarn workspace @backend/events-service build
 
 
 

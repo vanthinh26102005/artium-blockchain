@@ -1,12 +1,19 @@
+import { PaymentProvider } from '@app/common';
+
 export class PaymentFailedEvent {
   constructor(
-    public readonly transactionId: string,
-    public readonly userId: string,
-    public readonly stripePaymentIntentId: string,
-    public readonly amount: number,
-    public readonly currency: string,
-    public readonly failureReason: string,
-    public readonly failureCode?: string,
+    public readonly payload: {
+      transactionId: string;
+      userId: string;
+      amount: number;
+      currency: string;
+      failureReason: string;
+      provider: PaymentProvider;
+      failureCode?: string | null;
+      orderId?: string;
+      stripePaymentIntentId?: string | null;
+      txHash?: string | null;
+    },
   ) {}
 
   static getEventType(): string {
@@ -15,13 +22,7 @@ export class PaymentFailedEvent {
 
   toPayload(): Record<string, any> {
     return {
-      transactionId: this.transactionId,
-      userId: this.userId,
-      stripePaymentIntentId: this.stripePaymentIntentId,
-      amount: this.amount,
-      currency: this.currency,
-      failureReason: this.failureReason,
-      failureCode: this.failureCode,
+      ...this.payload,
       timestamp: new Date().toISOString(),
     };
   }

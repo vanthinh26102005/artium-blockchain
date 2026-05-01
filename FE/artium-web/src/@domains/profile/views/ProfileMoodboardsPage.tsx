@@ -8,7 +8,6 @@ import { ProfileTabs } from '@domains/profile/components/ProfileTabs'
 import { PROFILE_TABS } from '@domains/profile/constants/profileTabs'
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
-import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
 type ProfileMoodboardsPageViewProps = {
   username?: string | string[]
@@ -18,15 +17,21 @@ export const ProfileMoodboardsPageView = ({
   username: _username,
 }: ProfileMoodboardsPageViewProps) => {
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+  const { data: baseData, user: fetchedUser, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
+  const profileHandle = resolvedUsername || profileData.user.username || usernameFromRoute || ''
   const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Moodboards`
-  const baseHref = `/profile/${resolvedUsername}`
-  const authUser = useAuthStore((state) => state.user)
-  const isAuthenticated = Boolean(authUser?.id)
-  const isOwner = isAuthenticated && sellerProfile && authUser?.id === sellerProfile.userId
+  const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}` : ''
+  const tabHrefs = profileHandle
+    ? {
+        overview: baseHref,
+        artworks: `${baseHref}/artworks`,
+        moments: `${baseHref}/moments`,
+        moodboards: `${baseHref}/moodboards`,
+      }
+    : undefined
 
   return (
     <>
@@ -45,8 +50,8 @@ export const ProfileMoodboardsPageView = ({
             <ProfileHero
               user={profileData.user}
               stats={profileData.stats}
-              userId={sellerProfile?.userId}
-              isOwner={isOwner || false}
+              userId={fetchedUser?.id}
+              isOwner={isOwner}
             />
           )}
         </div>
@@ -54,12 +59,7 @@ export const ProfileMoodboardsPageView = ({
           <ProfileTabs
             tabs={PROFILE_TABS}
             activeTab="moodboards"
-            tabHrefs={{
-              overview: baseHref,
-              artworks: `${baseHref}/artworks`,
-              moments: `${baseHref}/moments`,
-              moodboards: `${baseHref}/moodboards`,
-            }}
+            tabHrefs={tabHrefs}
           />
         </div>
         <div className="container py-6">
@@ -80,7 +80,7 @@ export const ProfileMoodboardsPageView = ({
             title=""
             subtitle=""
             size="large"
-            detailBaseHref={`${baseHref}/moodboards`}
+            detailBaseHref={profileHandle ? `${baseHref}/moodboards` : undefined}
           />
         </div>
       </div>

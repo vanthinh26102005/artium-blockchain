@@ -3,9 +3,11 @@ import {
   ObjectType,
   ID,
   Float,
+  Int,
   registerEnumType,
 } from '@nestjs/graphql';
 import {
+  EscrowState,
   TransactionType,
   TransactionStatus,
   PaymentProvider,
@@ -16,6 +18,7 @@ registerEnumType(TransactionType, { name: 'TransactionType' });
 registerEnumType(TransactionStatus, { name: 'TransactionStatus' });
 registerEnumType(PaymentProvider, { name: 'PaymentProvider' });
 registerEnumType(PaymentMethodType, { name: 'PaymentMethodType' });
+registerEnumType(EscrowState, { name: 'EscrowState' });
 
 @ObjectType('PaymentTransaction')
 export class PaymentTransactionObject {
@@ -105,4 +108,24 @@ export class PaymentTransactionObject {
 
   @Field({ nullable: true })
   updatedAt?: Date;
+
+  // ── Blockchain / Escrow fields ──
+
+  @Field(() => Int, {
+    nullable: true,
+    description: 'On-chain escrow state (matches Solidity enum)',
+  })
+  escrowState?: EscrowState | null;
+
+  @Field({
+    nullable: true,
+    description: 'Blockchain transaction hash',
+  })
+  txHash?: string | null;
+
+  @Field({
+    nullable: true,
+    description: 'Ethereum wallet address',
+  })
+  walletAddress?: string | null;
 }

@@ -29,7 +29,7 @@ const selectVariants = cva('m-1', {
       secondary:
         'border-foreground/10 bg-secondary text-secondary-foreground hover:bg-secondary/80',
       destructive:
-        'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
+        'border-black bg-destructive text-destructive-foreground hover:bg-destructive/80',
       inverted: 'inverted',
     },
   },
@@ -135,7 +135,7 @@ interface SelectProps
   onPopoverClose?: () => void
 }
 
-export const Select = React.forwardRef<HTMLButtonElement, SelectProps & { portal?: boolean }>(
+export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { portal?: boolean }>(
   (
     {
       options,
@@ -329,4 +329,4 @@ export const Select = React.forwardRef<HTMLButtonElement, SelectProps & { portal
   },
 )
 
-Select.displayName = 'Select'
+SingleSelect.displayName = 'SingleSelect'

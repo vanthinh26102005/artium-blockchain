@@ -1,7 +1,7 @@
 // next
 import Image from 'next/image'
 import Link from 'next/link'
-import { Heart, MessageCircle, Play } from 'lucide-react'
+import { Heart, MessageCircle, Play, Pencil, Trash2 } from 'lucide-react'
 
 // @shared - utils
 import { cn } from '@shared/lib/utils'
@@ -18,6 +18,9 @@ type MomentsSectionProps = {
   showSeeAll?: boolean
   seeAllHref?: string
   detailBaseHref?: string
+  isOwner?: boolean
+  onEditMoment?: (moment: ProfileMoment) => void
+  onDeleteMoment?: (moment: ProfileMoment) => void
 }
 
 export const MomentsSection = ({
@@ -29,6 +32,9 @@ export const MomentsSection = ({
   showSeeAll = true,
   seeAllHref,
   detailBaseHref,
+  isOwner = false,
+  onEditMoment,
+  onDeleteMoment,
 }: MomentsSectionProps) => {
   const visibleMoments = limit ? moments.slice(0, limit) : moments
 
@@ -77,17 +83,48 @@ export const MomentsSection = ({
                     </div>
                   </div>
                 ) : null}
+                {/* Owner controls overlay */}
+                {isOwner && (
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    {onEditMoment && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          onEditMoment(moment)
+                        }}
+                        className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow hover:bg-white hover:text-blue-600"
+                        aria-label="Edit moment"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                    {onDeleteMoment && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          onDeleteMoment(moment)
+                        }}
+                        className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow hover:bg-white hover:text-red-600"
+                        aria-label="Delete moment"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="space-y-2 p-3">
                 <div className="flex items-center gap-3 text-slate-600">
                   <span className="inline-flex items-center gap-1">
-                    <Heart className="h-[15px] w-[15px] flex-shrink-0" />
+                    <Heart className="h-[15px] w-[15px] shrink-0" />
                     <span className="flex items-center text-[13px] leading-none tracking-wide">
                       {moment.likes}
                     </span>
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <MessageCircle className="h-[15px] w-[15px] flex-shrink-0" />
+                    <MessageCircle className="h-[15px] w-[15px] shrink-0" />
                     <span className="flex items-center text-[13px] leading-none tracking-wide">
                       {moment.comments}
                     </span>
@@ -103,7 +140,7 @@ export const MomentsSection = ({
               <Link
                 key={moment.id}
                 href={href}
-                className="max-w-[220px] min-w-[200px] flex-shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
+                className="group max-w-[220px] min-w-[200px] shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
               >
                 {cardContent}
               </Link>
@@ -113,7 +150,7 @@ export const MomentsSection = ({
           return (
             <div
               key={moment.id}
-              className="max-w-[220px] min-w-[200px] flex-shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
+              className="group max-w-[220px] min-w-[200px] shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
             >
               {cardContent}
             </div>

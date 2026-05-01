@@ -15,6 +15,13 @@ export class UserPayload {
   email: string;
 
   @ApiProperty({
+    example: 'duong-phuong-thinh',
+    required: false,
+    description: 'Unique URL-friendly identifier for the user profile',
+  })
+  slug: string | null;
+
+  @ApiProperty({
     example: 'Duong Phuong Thinh',
     required: false,
     description: 'Full name of the user',
@@ -34,6 +41,13 @@ export class UserPayload {
     description: 'Google OAuth ID if user logged in with Google',
   })
   googleId: string | null;
+
+  @ApiProperty({
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+    required: false,
+    description: 'Ethereum wallet address if user logged in with MetaMask',
+  })
+  walletAddress: string | null;
 
   @ApiProperty({
     example: true,

@@ -282,7 +282,7 @@ export const ArtworkGallery = ({ images, title }: ArtworkGalleryProps) => {
                                         'relative h-16 w-16 cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-200',
                                         index === currentIndex
                                             ? 'border-white'
-                                            : 'border-transparent opacity-60 hover:opacity-100',
+                                            : 'border-black opacity-60 hover:opacity-100',
                                     )}
                                 >
                                     <Image

@@ -16,6 +16,15 @@ export class ArtworkSeeder {
   ): Promise<void> {
     console.log('🎨 Starting Artwork Service seeding...');
 
+    if (!sellerIds.length) {
+      console.warn('⚠️  No seller IDs provided — skipping artwork seeding.');
+      return;
+    }
+    if (!userIds.length) {
+      console.warn('⚠️  No user IDs provided — using sellerIds as userIds fallback.');
+      userIds = [...sellerIds];
+    }
+
     const artworkRepo = dataSource.getRepository(Artwork);
     const folderRepo = dataSource.getRepository(ArtworkFolder);
     const tagRepo = dataSource.getRepository(Tag);
@@ -230,10 +239,193 @@ export class ArtworkSeeder {
       'Sydney',
     ];
 
+    // Curated Unsplash art photo IDs by category (160 photos)
+    const unsplashArtPhotos = [
+      // Abstract & Contemporary Painting
+      '1531056416665-266c4099c928',
+      '1541961017774-22349e4a1262',
+      '1552250575-e508473b090f',
+      '1602464729960-f95937746b68',
+      '1605721911519-3dfeb3be25e7',
+      '1615184697985-c9bde1b07da7',
+      '1618331833071-ce81bd50d300',
+      '1618331835717-801e976710b2',
+      '1622542796254-5b9c46ab0d2f',
+      '1664013263421-91e3a8101259',
+      '1673288397715-12c2fbb9f52b',
+      '1675378165346-5f6c3959f0d2',
+      '1675607288022-51e1f6f43c17',
+      '1541512416146-3cf58d6b27cc',
+      '1541542509806-6371b7b0a265',
+      '1533158388470-9a56699990c6',
+      '1533208087231-c3618eab623c',
+      '1531489956451-20957fab52f2',
+      // Art Gallery & Museum
+      '1507643179773-3e975d7ac515',
+      '1518998053901-5348d3961a04',
+      '1522878308970-972ec5eedc0d',
+      '1535385793343-27dff1413c5a',
+      '1554907984-15263bfd63bd',
+      '1564399580075-5dfe19c205f3',
+      '1565799515768-2dcfd834625c',
+      '1565876427310-0695a4ff03b7',
+      '1569084024058-1632922a4e1d',
+      '1569783721854-33a99b4c0bae',
+      '1582555172866-f73bb12a2ab3',
+      '1605429523419-d828acb941d9',
+      '1605999081451-4436bf1d0d88',
+      '1606819717115-9159c900370b',
+      '1661893375334-e2603ce341d7',
+      // Sculpture & Installation
+      '1447758902204-48010b87c24d',
+      '1558708369-4d0568d01adb',
+      '1563301323-094e5843a962',
+      '1578583556149-18b1a60eaf48',
+      '1616787877319-57efeee47581',
+      '1657134158394-1cd2869b0feb',
+      '1666714049946-7e7afdb95f5a',
+      '1683917067889-c88599491d5c',
+      '1687978879251-d4b6d88d7a7c',
+      '1709035347321-1af386b38330',
+      // Oil Painting & Fine Art
+      '1572392640988-ba48d1a74457',
+      '1578301978693-85fa9c0320b9',
+      '1578301996581-bf7caec556c0',
+      '1578926375605-eaf7559b1458',
+      '1579009420909-b837eefa4274',
+      '1579168133409-34acb719c8b6',
+      '1579783900882-c0d3dad7b119',
+      '1579783902915-f0b0de2c2eb3',
+      '1581592487771-132f53bd2b48',
+      '1582561424760-0321d75e81fa',
+      '1584278773680-8d940a213dcf',
+      '1586537049236-b212dc756931',
+      '1614189647266-8fbdad9c72de',
+      '1617103901487-3f2714ec9692',
+      '1669392157870-18a592a0876f',
+      '1669749216793-040be16ade1d',
+      '1688588426729-dc4f7bdb8fbe',
+      '1545989253-02cc26577f88',
+      // Watercolor
+      '1510832842230-87253f48d74f',
+      '1530903677198-7c9f3577a63e',
+      '1594136976553-38699ae9047c',
+      '1601049320268-42a9b275068c',
+      '1613206468203-fa00870edf79',
+      '1616169201999-0d80789e41c3',
+      '1628882836842-d5ffd7c7278e',
+      '1629197237725-e51c9b3b438e',
+      '1629654857513-1136aef1b10f',
+      '1630609083938-3acb39a06392',
+      '1635983723916-7e010ac4c641',
+      '1667502842264-9cdcdac36086',
+      '1667668223835-19c104de847d',
+      // Modern Art
+      '1531913764164-f85c52e6e654',
+      '1558522195-e1201b090344',
+      '1558865869-c93f6f8482af',
+      '1573221566340-81bdde00e00b',
+      '1573528822711-66c49506aee2',
+      '1577398628395-4ebd1f36731b',
+      '1580136607993-fd598cf5c4f5',
+      '1583407723467-9b2d22504831',
+      '1583591900414-7031eb309cb6',
+      '1594845281364-63dbe90f37f5',
+      '1604782666037-3c63d50052db',
+      '1612487528505-d2338264c821',
+      // Canvas & Palette
+      '1544867885-2333f61544ad',
+      '1577720580479-7d839d829c73',
+      '1577720643272-265f09367456',
+      '1579964789722-634d353d7f89',
+      '1579965342575-16428a7c8881',
+      '1599503613556-0f18b122d281',
+      '1599894019794-50339c9ad89c',
+      '1635141849017-c531949fb5b3',
+      '1667980898743-fcfe470b7d2a',
+      '1674815483633-5ad6882c7c92',
+      // Art Exhibition
+      '1503293050619-6048ffad0dc5',
+      '1563000215-e31a8ddcb2d0',
+      '1566954979172-eaba308acdf0',
+      '1584966393708-db43bab83773',
+      '1600903781679-7ea3cbc564c3',
+      '1603629242133-adaaa856147c',
+      '1656129974517-7da8bb940a1d',
+      '1661859228809-19c901979bcb',
+      '1661893951080-1c8d7f047b2a',
+      // Street Art & Murals
+      '1502210220257-b267d9c86214',
+      '1502229608059-f3e3aaa0137a',
+      '1508359530872-38d6d9d3bbe6',
+      '1542772144-515ddfae17e9',
+      '1570466668579-f4a450defa58',
+      '1571154375916-827c25fef967',
+      '1574521355290-c7bfcafd5c9d',
+      '1587658181846-33fefb67be33',
+      '1590732261664-0ff7e1aef21a',
+      '1591275800092-27cc3ade60e4',
+      '1601913463731-cfba9fd31ed3',
+      '1613168461287-6e529b708c76',
+      '1619811222144-80595d500cca',
+      '1691497456444-e993104860a7',
+      // Ceramic & Pottery
+      '1488977678660-dca8681ca872',
+      '1493106641515-6b5631de4bb9',
+      '1508269151431-a34449ca161d',
+      '1520408222757-6f9f95d87d5d',
+      '1572725350945-a2d24faa89b0',
+      '1590605095243-072811dbe64c',
+      '1595351298020-038700609878',
+      '1607556671927-78a6605e290b',
+      '1609881582722-4a8ab7cd54d8',
+      '1611013621103-91e10668a120',
+      '1620140036708-455ed5c0426a',
+      '1622691078858-58f9eb8825e0',
+      // Digital Art
+      '1597418895783-f7de85be2839',
+      '1636955890525-84c5fa482c85',
+      '1655834648155-f7a98ff3c49d',
+      '1658052408504-2ce6a8b11d2e',
+      '1661302827244-1538adcabef7',
+      '1661331782926-bb4a54aa691d',
+      '1661485110852-3adee9af31df',
+      '1661491876685-e6b99dde6ed2',
+      '1661521000832-cf960c10ff29',
+      '1704426882813-8acfff020487',
+      // Collage & Mixed Media
+      '1493972741200-51d407e0ee33',
+      '1551210414-d80dca9d11e1',
+      '1555964681-9e0c30ba9b05',
+      '1557759677-209e5b9103c5',
+      '1562448079-b5631888445f',
+      '1591788788660-5a345f363d7a',
+      '1622084169340-cab9cac7fb26',
+      '1696937059409-60900a43bc67',
+      // Pastel & Drawing
+      '1673514503551-82b1623632c3',
+      '1673514503556-5570044ad846',
+      '1703108088144-bc790a136c91',
+      '1703108089454-d3cca79d583a',
+    ];
+
+    const getUnsplashUrl = (photoId: string, w = 800, h = 600) =>
+      `https://images.unsplash.com/photo-${photoId}?w=${w}&h=${h}&fit=crop&q=80`;
+
+    // Each seller gets a distinct starting offset in the photo pool
+    const getSellerPhotoIndex = (sellerIdx: number, artworkOffset: number) => {
+      const start = sellerIdx * 5; // sellers start 5 photos apart (160 / 31 ≈ 5)
+      return (start + artworkOffset) % unsplashArtPhotos.length;
+    };
+
     const artworks: Artwork[] = [];
+    const sellerArtworkCounters: Record<string, number> = {};
 
     for (let i = 0; i < 200; i++) {
       const sellerId = sellerIds[i % sellerIds.length];
+      const sellerIdx = i % sellerIds.length;
+      sellerArtworkCounters[sellerId] = (sellerArtworkCounters[sellerId] || 0) + 1;
+      const artworkOffset = sellerArtworkCounters[sellerId] - 1;
       const title = `${artworkTitles[i % artworkTitles.length]}${i >= artworkTitles.length ? ` ${Math.floor(i / artworkTitles.length) + 1}` : ''}`;
       const material = materials[i % materials.length];
 
@@ -242,7 +434,7 @@ export class ArtworkSeeder {
       const hasDepth = i % 5 === 0; // 20% have depth (sculptures)
       const depth = hasDepth ? Math.floor(Math.random() * 30 + 5) : null;
 
-      const price = Math.floor(Math.random() * 10000 + 500); // $500-$10,500
+      const price = Math.floor(Math.random() * 1000 + 50); // $500-$10,500
       const status = [
         ArtworkStatus.DRAFT,
         ArtworkStatus.ACTIVE,
@@ -289,8 +481,8 @@ export class ArtworkSeeder {
             {
               id: `img_${i}_1`,
               publicId: `artworks/${sellerId}/${title.toLowerCase().replace(/\s+/g, '-')}-1`,
-              url: `https://picsum.photos/seed/${title.replace(/\s+/g, '')}/800/600`,
-              secureUrl: `https://picsum.photos/seed/${title.replace(/\s+/g, '')}/800/600`,
+              url: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset)]),
+              secureUrl: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset)]),
               format: 'jpg',
               width: 800,
               height: 600,
@@ -305,8 +497,8 @@ export class ArtworkSeeder {
                   {
                     id: `img_${i}_2`,
                     publicId: `artworks/${sellerId}/${title.toLowerCase().replace(/\s+/g, '-')}-2`,
-                    url: `https://picsum.photos/seed/${title.replace(/\s+/g, '')}2/800/600`,
-                    secureUrl: `https://picsum.photos/seed/${title.replace(/\s+/g, '')}2/800/600`,
+                    url: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset + 1)]),
+                    secureUrl: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset + 1)]),
                     format: 'jpg',
                     width: 800,
                     height: 600,
@@ -487,7 +679,7 @@ export class ArtworkSeeder {
           content: commentText,
           mediaUrl:
             i % 10 === 0
-              ? `https://picsum.photos/seed/comment${i}/400/300`
+              ? getUnsplashUrl(unsplashArtPhotos[(i + 30) % unsplashArtPhotos.length], 400, 300)
               : null,
           mentionedUserIds:
             i % 5 === 0 ? [userIds[(i + 1) % userIds.length]] : [],

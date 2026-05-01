@@ -49,7 +49,6 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
   } = useFollowUser({
     targetUserId,
     onFollowChange: (following) => {
-      console.log(`[ProfileHero] Follow status changed: ${following}`)
       setLocalFollowersCount((prev) => (following ? prev + 1 : Math.max(0, prev - 1)))
     },
   })

@@ -1,5 +1,12 @@
-import { AbstractEntity, OrderStatus } from '@app/common';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  AbstractEntity,
+  EscrowState,
+  OrderPaymentMethod,
+  OrderPaymentStatus,
+  OrderStatus,
+} from '@app/common';
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { OrderItem } from './order_items.entity';
 
 @Entity({ name: 'orders' })
 @Index(['collectorId', 'status'])
@@ -8,8 +15,8 @@ export class Order extends AbstractEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'order_id' })
   id!: string;
 
-  @Column({ name: 'collector_id', type: 'uuid' })
-  collectorId!: string;
+  @Column({ name: 'collector_id', type: 'uuid', nullable: true })
+  collectorId?: string | null;
 
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status!: OrderStatus;
@@ -115,15 +122,15 @@ export class Order extends AbstractEntity {
     length: 50,
     nullable: true,
   })
-  paymentMethod?: string | null;
+  paymentMethod?: OrderPaymentMethod | null;
 
   @Column({
     name: 'payment_status',
     type: 'varchar',
     length: 50,
-    default: 'UNPAID',
+    default: OrderPaymentStatus.UNPAID,
   })
-  paymentStatus!: string;
+  paymentStatus!: OrderPaymentStatus;
 
   @Column({ name: 'payment_intent_id', type: 'varchar', nullable: true })
   paymentIntentId?: string | null;
@@ -148,4 +155,43 @@ export class Order extends AbstractEntity {
 
   @Column({ name: 'delivered_at', type: 'timestamp', nullable: true })
   deliveredAt?: Date | null;
+
+  @Column({ name: 'on_chain_order_id', type: 'varchar', nullable: true, unique: true })
+  onChainOrderId?: string | null;
+
+  @Column({ name: 'contract_address', type: 'varchar', length: 42, nullable: true })
+  contractAddress?: string | null;
+
+  @Column({ name: 'chain_id', type: 'varchar', length: 32, nullable: true })
+  chainId?: string | null;
+
+  @Column({ name: 'escrow_state', type: 'smallint', nullable: true })
+  escrowState?: EscrowState | null;
+
+  @Column({ name: 'tx_hash', type: 'varchar', length: 66, nullable: true })
+  txHash?: string | null;
+
+  @Column({ name: 'seller_wallet', type: 'varchar', length: 42, nullable: true })
+  sellerWallet?: string | null;
+
+  @Column({ name: 'buyer_wallet', type: 'varchar', length: 42, nullable: true })
+  buyerWallet?: string | null;
+
+  @Column({ name: 'bid_amount_wei', type: 'varchar', length: 78, nullable: true })
+  bidAmountWei?: string | null;
+
+  @Column({ name: 'dispute_reason', type: 'text', nullable: true })
+  disputeReason?: string | null;
+
+  @Column({ name: 'dispute_opened_at', type: 'timestamp', nullable: true })
+  disputeOpenedAt?: Date | null;
+
+  @Column({ name: 'dispute_resolved_at', type: 'timestamp', nullable: true })
+  disputeResolvedAt?: Date | null;
+
+  @Column({ name: 'dispute_resolution_notes', type: 'text', nullable: true })
+  disputeResolutionNotes?: string | null;
+
+  @OneToMany(() => OrderItem, (item) => item.order)
+  items?: OrderItem[];
 }

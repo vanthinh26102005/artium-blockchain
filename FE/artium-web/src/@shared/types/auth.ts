@@ -1,11 +1,68 @@
+/**
+ * Canonical user payload aligned with BE identity-service.
+ *
+ * Primary fields match the BE UserPayload exactly.
+ * Legacy aliases (username, displayName) are derived from slug/fullName
+ * for backward compatibility across the FE codebase.
+ */
 export type UserPayload = {
   id: string
-  sub?: string
   email: string
-  username?: string | null
-  displayName?: string | null
+  slug: string | null
+  fullName: string | null
+  avatarUrl: string | null
   roles: string[]
-  avatarUrl?: string | null
+  isEmailVerified: boolean
+  walletAddress: string | null
+  googleId: string | null
+  isActive: boolean
+  lastLogin: string | null
+  stripeCustomerId: string | null
+
+  /** @deprecated Use `slug` instead. Kept for backward compatibility. */
+  username: string | null
+  /** @deprecated Use `fullName` instead. Kept for backward compatibility. */
+  displayName: string | null
+  /** JWT subject claim — present only when decoded from token. */
+  sub?: string
+}
+
+/**
+ * Normalizes a raw BE user response into the full UserPayload shape,
+ * populating legacy aliases from the primary BE fields.
+ */
+export function normalizeUserPayload(raw: Record<string, unknown>): UserPayload {
+  const slug = (raw.slug as string) ?? null
+  const fullName = (raw.fullName as string) ?? null
+
+  return {
+    id: raw.id as string,
+    email: raw.email as string,
+    slug,
+    fullName,
+    avatarUrl: (raw.avatarUrl as string) ?? null,
+    roles: (raw.roles as string[]) ?? [],
+    isEmailVerified: (raw.isEmailVerified as boolean) ?? false,
+    walletAddress: (raw.walletAddress as string) ?? null,
+    googleId: (raw.googleId as string) ?? null,
+    isActive: (raw.isActive as boolean) ?? true,
+    lastLogin: (raw.lastLogin as string) ?? null,
+    stripeCustomerId: (raw.stripeCustomerId as string) ?? null,
+    username: slug ?? (raw.username as string) ?? null,
+    displayName: fullName ?? (raw.displayName as string) ?? null,
+    sub: (raw.sub as string) ?? undefined,
+  }
+}
+
+/**
+ * Normalizes a login response, ensuring the embedded user is fully shaped.
+ */
+export function normalizeLoginResponse(raw: Record<string, unknown>): LoginResponse {
+  return {
+    accessToken: raw.accessToken as string,
+    refreshToken: raw.refreshToken as string,
+    user: normalizeUserPayload(raw.user as Record<string, unknown>),
+  }
 }
 
 export type LoginResponse = {
@@ -54,4 +111,13 @@ export type RequestPasswordResetResponse = {
 export type VerifyPasswordResetResponse = {
   resetToken: string
   success: boolean
+}
+
+export type WalletNonceResponse = {
+  nonce: string
+}
+
+export type LoginByWalletPayload = {
+  message: string
+  signature: string
 }

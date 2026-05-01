@@ -16,7 +16,8 @@ import Image from "next/image";
 
 // third-party
 import { Check, ChevronDown, X } from "lucide-react";
-import { Controller, useForm, type FieldError } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm, useWatch, type FieldError } from "react-hook-form";
 
 // @shared - utils
 import { cn } from "@shared/lib/utils";
@@ -38,21 +39,14 @@ import {
   VISIBILITY_OPTIONS,
 } from "@domains/events/constants/eventFormOptions";
 import { useTimeZoneOptions } from "@domains/events/hooks/useTimeZoneOptions";
-
-export type CreateEventFormValues = {
-  title: string;
-  startDateTime: string;
-  endDateTime: string;
-  timeZone: string;
-  locationType: "in-person" | "online";
-  types: string[];
-  address: string;
-  venueDetails: string;
-  onlineUrl: string;
-  visibility: "public" | "private";
-  description: string;
-  coverImage: File | null;
-};
+import {
+  ALLOWED_IMAGE_TYPES,
+  DESCRIPTION_LIMIT,
+  TITLE_LIMIT,
+  VENUE_LIMIT,
+  createEventFormSchema,
+  type CreateEventFormValues,
+} from "@domains/events/validations/eventForm.schema";
 
 type CreateEventFormProps = {
   onCancel: () => void;
@@ -62,11 +56,7 @@ type CreateEventFormProps = {
   mode?: "create" | "edit";
 };
 
-const TITLE_LIMIT = 255;
-const VENUE_LIMIT = 255;
-const DESCRIPTION_LIMIT = 10000;
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
-const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg"];
+export type { CreateEventFormValues } from "@domains/events/validations/eventForm.schema";
 
 const formatDateTimeLocal = (date: Date) => {
   const yyyy = date.getFullYear();
@@ -99,24 +89,24 @@ export const CreateEventForm = ({
   }, []);
 
   // -- state --
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const formContainerRef = useRef<HTMLDivElement | null>(null);
   const { options: timeZoneOptions, isLoading } = useTimeZoneOptions();
-  const [hasExistingCover, setHasExistingCover] = useState(
-    Boolean(initialCoverImageUrl),
-  );
+  const requireCoverImage = !initialCoverImageUrl;
 
   const {
     register,
     control,
     handleSubmit,
     setValue,
-    watch,
-    reset,
     formState: { errors, isSubmitting },
   } = useForm<CreateEventFormValues>({
+    resolver: zodResolver(
+      createEventFormSchema({
+        requireCoverImage,
+      }),
+    ),
     defaultValues: {
       title: "",
       startDateTime: defaultDateTimes.startDateTime,
@@ -136,45 +126,35 @@ export const CreateEventForm = ({
     reValidateMode: "onChange",
   });
 
-  const titleValue = watch("title") ?? "";
-  const venueValue = watch("venueDetails") ?? "";
-  const descriptionValue = watch("description") ?? "";
-  const locationType = watch("locationType");
-  const coverImage = watch("coverImage");
-  const timeZoneValue = watch("timeZone");
+  const titleValue = useWatch({ control, name: "title" }) ?? "";
+  const venueValue = useWatch({ control, name: "venueDetails" }) ?? "";
+  const descriptionValue = useWatch({ control, name: "description" }) ?? "";
+  const locationType = useWatch({ control, name: "locationType" });
+  const coverImage = useWatch({ control, name: "coverImage" });
+  const timeZoneValue = useWatch({ control, name: "timeZone" });
 
   // -- effects --
   useEffect(() => {
-    register("coverImage", {
-      validate: (file) => {
-        if (hasExistingCover) {
-          return true;
-        }
-        if (!file) {
-          return "Cover image is required";
-        }
-        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-          return "Only PNG or JPG files are allowed";
-        }
-        return file.size <= MAX_IMAGE_SIZE
-          ? true
-          : "Max file size is 2MB";
-      },
-    });
-  }, [register, hasExistingCover]);
+    register("coverImage");
+  }, [register]);
+
+  const previewUrl = useMemo(() => {
+    if (coverImage) {
+      return URL.createObjectURL(coverImage);
+    }
+
+    return initialCoverImageUrl || null;
+  }, [coverImage, initialCoverImageUrl]);
 
   useEffect(() => {
-    if (coverImage) {
-      const url = URL.createObjectURL(coverImage);
-      setPreviewUrl(url);
-      setHasExistingCover(true);
-      return () => {
-        URL.revokeObjectURL(url);
-      };
+    if (!coverImage || !previewUrl) {
+      return;
     }
-    setPreviewUrl(initialCoverImageUrl || null);
-    setHasExistingCover(Boolean(initialCoverImageUrl));
-  }, [coverImage, initialCoverImageUrl]);
+
+    return () => {
+      URL.revokeObjectURL(previewUrl);
+    };
+  }, [coverImage, previewUrl]);
 
   useEffect(() => {
     if (!timeZoneOptions.length || timeZoneValue) {
@@ -245,8 +225,6 @@ export const CreateEventForm = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-    setPreviewUrl(null);
-    setHasExistingCover(false);
   };
 
   const handleSubmitForm = useCallback(
@@ -293,10 +271,18 @@ export const CreateEventForm = ({
     }
   }, []);
 
+  useEffect(() => {
+    if (Object.keys(errors).length === 0) {
+      return;
+    }
+
+    scrollToFirstError(errors as Record<string, unknown>);
+  }, [errors, scrollToFirstError]);
+
   // -- render --
   return (
     <form
-      onSubmit={handleSubmit(handleSubmitForm, scrollToFirstError)}
+      onSubmit={handleSubmit(handleSubmitForm)}
       className="flex max-h-[75vh] flex-col overflow-hidden"
     >
       <div ref={formContainerRef} className="min-h-0 flex-1 space-y-6 overflow-y-auto px-8 pb-8 pt-6">
@@ -309,29 +295,17 @@ export const CreateEventForm = ({
           <EventInput
             placeholder="Enter event title"
             maxLength={TITLE_LIMIT}
-            {...register("title", {
-              required: "Event title is required",
-              maxLength: {
-                value: TITLE_LIMIT,
-                message: `Max ${TITLE_LIMIT} characters`,
-              },
-            })}
+            {...register("title")}
           />
           <FieldErrorMessage error={errors.title} />
         </FieldBlock>
 
         <FieldBlock>
           <FieldHeader label="Type" required />
-          <Controller
-            name="types"
-            control={control}
-            rules={{
-              validate: (value) =>
-                value && value.length > 0
-                  ? true
-                  : "Event type is required",
-            }}
-            render={({ field }) => (
+            <Controller
+              name="types"
+              control={control}
+              render={({ field }) => (
               <div data-field="types">
                 <TypeMultiSelect
                   options={EVENT_TYPE_OPTIONS}
@@ -351,7 +325,6 @@ export const CreateEventForm = ({
             <Controller
               name="startDateTime"
               control={control}
-              rules={{ required: "Start date is required" }}
               render={({ field }) => (
                 <div data-field="startDateTime">
                   <DateTimePicker
@@ -369,18 +342,6 @@ export const CreateEventForm = ({
             <Controller
               name="endDateTime"
               control={control}
-              rules={{
-                required: "End date is required",
-                validate: (value) => {
-                  const start = watch("startDateTime");
-                  if (start && value) {
-                    return new Date(value) > new Date(start)
-                      ? true
-                      : "End date must be after start";
-                  }
-                  return true;
-                },
-              }}
               render={({ field }) => (
                 <div data-field="endDateTime">
                   <DateTimePicker
@@ -404,7 +365,6 @@ export const CreateEventForm = ({
               <Controller
                 name="timeZone"
                 control={control}
-                rules={{ required: "Time zone is required" }}
                 render={({ field }) => (
                   <TimeZoneSelect
                     options={timeZoneOptions}
@@ -424,21 +384,21 @@ export const CreateEventForm = ({
           <FieldHeader label="Location" required />
           <div className="flex flex-wrap gap-6">
             <EventRadioLabel>
-              <input
-                type="radio"
-                value="in-person"
-                className="h-4 w-4 accent-blue-600"
-                {...register("locationType", { required: "Location is required" })}
-              />
+                <input
+                  type="radio"
+                  value="in-person"
+                  className="h-4 w-4 accent-blue-600"
+                  {...register("locationType")}
+                />
               In-person
             </EventRadioLabel>
             <EventRadioLabel>
-              <input
-                type="radio"
-                value="online"
-                className="h-4 w-4 accent-blue-600"
-                {...register("locationType", { required: "Location is required" })}
-              />
+                <input
+                  type="radio"
+                  value="online"
+                  className="h-4 w-4 accent-blue-600"
+                  {...register("locationType")}
+                />
               Online
             </EventRadioLabel>
           </div>
@@ -447,15 +407,10 @@ export const CreateEventForm = ({
 
         {locationType === "online" ? (
           <FieldBlock>
-            <EventInput
-              placeholder="https://www.example.com"
-              {...register("onlineUrl", {
-                validate: (value) =>
-                  locationType === "online" && !value
-                    ? "Event URL is required"
-                    : true,
-              })}
-            />
+              <EventInput
+                placeholder="https://www.example.com"
+                {...register("onlineUrl")}
+              />
             <FieldErrorMessage error={errors.onlineUrl} />
           </FieldBlock>
         ) : (
@@ -463,12 +418,7 @@ export const CreateEventForm = ({
             <FieldBlock>
               <EventInput
                 placeholder="Search address"
-                {...register("address", {
-                  validate: (value) =>
-                    locationType === "in-person" && !value
-                      ? "Address is required"
-                      : true,
-                })}
+                {...register("address")}
               />
               <FieldErrorMessage error={errors.address} />
             </FieldBlock>
@@ -478,12 +428,7 @@ export const CreateEventForm = ({
                   placeholder="Venue details (Optional)"
                   maxLength={VENUE_LIMIT}
                   className="pr-14"
-                  {...register("venueDetails", {
-                    maxLength: {
-                      value: VENUE_LIMIT,
-                      message: `Max ${VENUE_LIMIT} characters`,
-                    },
-                  })}
+                  {...register("venueDetails")}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
                   {venueValue.length}/{VENUE_LIMIT}
@@ -499,12 +444,12 @@ export const CreateEventForm = ({
           <div className="flex flex-wrap gap-6">
             {VISIBILITY_OPTIONS.map((option) => (
               <EventRadioLabel key={option.value}>
-                <input
-                  type="radio"
-                  value={option.value}
-                  className="h-4 w-4 accent-blue-600"
-                  {...register("visibility", { required: "Visibility is required" })}
-                />
+                  <input
+                    type="radio"
+                    value={option.value}
+                    className="h-4 w-4 accent-blue-600"
+                    {...register("visibility")}
+                  />
                 {option.label}
               </EventRadioLabel>
             ))}
@@ -522,13 +467,7 @@ export const CreateEventForm = ({
             rows={5}
             placeholder="Tell people a little more about your event"
             maxLength={DESCRIPTION_LIMIT}
-            {...register("description", {
-              required: "Description is required",
-              maxLength: {
-                value: DESCRIPTION_LIMIT,
-                message: `Max ${DESCRIPTION_LIMIT} characters`,
-              },
-            })}
+            {...register("description")}
           />
           <FieldErrorMessage error={errors.description} />
         </FieldBlock>

@@ -8,6 +8,7 @@ export type ArtworkDetailImage = {
 }
 
 export type ArtworkDetailCreator = User & {
+    slug?: string | null
     verified?: boolean
     buyers?: number
     worksSold?: number

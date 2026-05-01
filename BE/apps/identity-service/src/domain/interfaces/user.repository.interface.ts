@@ -30,8 +30,18 @@ export interface IUserRepository extends IRepository<User, string> {
     transactionManager?: EntityManager,
   ): Promise<User | null>;
 
+  findByWalletAddress(
+    walletAddress: string,
+    transactionManager?: EntityManager,
+  ): Promise<User | null>;
+
   findByStripeCustomerId(
     stripeCustomerId: string,
+    transactionManager?: EntityManager,
+  ): Promise<User | null>;
+
+  findBySlug(
+    slug: string,
     transactionManager?: EntityManager,
   ): Promise<User | null>;
 

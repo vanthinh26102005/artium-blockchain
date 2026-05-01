@@ -4,6 +4,7 @@ import { signOut } from 'next-auth/react'
 
 // @shared - types
 import type { UserPayload } from '@shared/types/auth'
+import { markSkipGoogleBridge } from '../services/browserAuthState'
 
 const AUTH_STORAGE_KEY = 'artium.auth-storage'
 
@@ -12,6 +13,8 @@ type AuthPayload = {
   refreshToken: string
   user: UserPayload
 }
+
+type PersistedAuthPayload = Pick<AuthPayload, 'accessToken' | 'user'>
 
 type AuthState = {
   accessToken: string | null
@@ -42,13 +45,14 @@ const readStoredAuth = () => {
   }
 
   try {
-    return JSON.parse(rawAuth) as AuthPayload
+    return JSON.parse(rawAuth) as PersistedAuthPayload
   } catch {
+    window.localStorage.removeItem(AUTH_STORAGE_KEY)
     return null
   }
 }
 
-const writeStoredAuth = (payload: AuthPayload) => {
+const writeStoredAuth = (payload: PersistedAuthPayload) => {
   if (!isBrowser()) {
     return
   }
@@ -75,7 +79,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   isHydrated: false,
   setAuth: ({ accessToken, refreshToken, user }) => {
-    writeStoredAuth({ accessToken, refreshToken, user })
+    writeStoredAuth({ accessToken, user })
 
     set({
       accessToken,
@@ -109,16 +113,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({
       accessToken: storedAuth.accessToken ?? null,
-      refreshToken: storedAuth.refreshToken ?? null,
+      refreshToken: null,
       user: storedAuth.user ?? null,
       isAuthenticated: getIsAuthenticated(storedAuth.user ?? null, storedAuth.accessToken ?? null),
       isHydrated: true,
     })
   },
   refreshMe: async () => {
-    const { accessToken, refreshToken, user: currentUser } = get()
+    const { accessToken } = get()
 
-    if (!accessToken || !refreshToken) {
+    if (!accessToken) {
       return
     }
 
@@ -126,15 +130,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { default: usersApi } = await import('@shared/apis/usersApi')
       const user = await usersApi.getMe()
       if (!user || (!user.id && !user.email)) {
-        if (currentUser) {
-          return
-        }
-
         get().clearAuth()
         return
       }
 
-      writeStoredAuth({ accessToken, refreshToken, user })
+      writeStoredAuth({ accessToken, user })
 
       set({
         user,
@@ -146,18 +146,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           ? (error as { status?: number }).status
           : undefined
 
-      if ((status === 401 || status === 403) && !currentUser) {
+      if (status === 401 || status === 403) {
         get().clearAuth()
       }
     }
   },
   logout: async () => {
-    get().clearAuth()
-
     if (isBrowser()) {
-      await signOut({ redirect: false })
-      window.location.assign('/login')
+      markSkipGoogleBridge()
+
+      try {
+        await signOut({ redirect: false })
+      } finally {
+        get().clearAuth()
+        window.location.assign('/login?loggedOut=1')
+      }
+      return
     }
+
+    get().clearAuth()
   },
 }))
 

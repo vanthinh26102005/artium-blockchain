@@ -18,13 +18,13 @@ export class CreateStripeCustomerDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({
-    description: 'User ID in the system',
+  @ApiPropertyOptional({
+    description: 'User ID in the system (injected from auth token, not required in request body)',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsUUID()
-  userId: string;
+  userId?: string;
 
   @ApiPropertyOptional({
     description: 'Customer full name',

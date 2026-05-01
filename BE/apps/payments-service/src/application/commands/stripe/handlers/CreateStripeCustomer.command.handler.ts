@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Inject, Logger, HttpException } from '@nestjs/common';
+import { Inject, Logger, HttpException, NotFoundException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { RpcExceptionHelper } from '@app/common';
 import { CreateStripeCustomerCommand } from '../CreateStripeCustomer.command';
@@ -30,14 +30,82 @@ export class CreateStripeCustomerHandler implements ICommandHandler<CreateStripe
     );
 
     try {
-      // Check if customer already exists
+      // Check if customer already exists — return it (idempotent)
       const existingCustomer = await this.stripeCustomerRepo.findByUserId(
         data.userId,
       );
       if (existingCustomer) {
-        throw RpcExceptionHelper.conflict(
-          `Stripe customer already exists for user: ${data.userId}`,
+        try {
+          await this.stripeService.retrieveCustomer(existingCustomer.stripeId);
+        } catch (error) {
+          if (!(error instanceof NotFoundException)) {
+            throw error;
+          }
+
+          this.logger.warn(
+            `Stored Stripe customer ${existingCustomer.stripeId} missing for user: ${data.userId}, creating replacement`,
+          );
+
+          const replacementCustomer = await this.stripeService.createCustomer(
+            data.email,
+            data.name,
+            {
+              userId: data.userId,
+              ...data.metadata,
+            },
+          );
+
+          const updatedCustomer = await this.stripeCustomerRepo.update(
+            existingCustomer.id,
+            {
+              stripeId: replacementCustomer.id,
+              email: replacementCustomer.email!,
+              name: replacementCustomer.name || null,
+              isActive: true,
+            },
+          );
+
+          if (!updatedCustomer) {
+            throw new Error(
+              `Failed to update local Stripe customer for user: ${data.userId}`,
+            );
+          }
+
+          const replacementEvent = new StripeCustomerCreatedEvent(
+            data.userId,
+            replacementCustomer.id,
+            replacementCustomer.email!,
+            replacementCustomer.name || undefined,
+          );
+
+          await this.outboxService.createOutboxMessage({
+            aggregateType: 'User',
+            aggregateId: data.userId,
+            eventType: StripeCustomerCreatedEvent.getEventType(),
+            payload: replacementEvent.toPayload(),
+            exchange: ExchangeName.PAYMENT_EVENTS,
+            routingKey: RoutingKey.STRIPE_CUSTOMER_CREATED,
+          });
+
+          this.logger.log(
+            `Replacement StripeCustomerCreatedEvent published for user: ${data.userId}`,
+          );
+
+          return {
+            stripeCustomerId: replacementCustomer.id,
+            email: replacementCustomer.email!,
+            name: replacementCustomer.name || undefined,
+          };
+        }
+
+        this.logger.log(
+          `Stripe customer already exists for user: ${data.userId}, returning existing: ${existingCustomer.stripeId}`,
         );
+        return {
+          stripeCustomerId: existingCustomer.stripeId,
+          email: existingCustomer.email,
+          name: existingCustomer.name || undefined,
+        };
       }
 
       const metadata: Record<string, string> = {

@@ -160,7 +160,7 @@ export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
             {/* Error message */}
             {error && (
                 <div className="flex items-center gap-2 mt-3 p-3 rounded-lg bg-red-50 text-red-600">
-                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                    <AlertCircle className="h-4 w-4 shrink-0" />
                     <p className="text-sm">{error}</p>
                 </div>
             )}

@@ -1,3 +1,4 @@
+import { JwtAuthGuard } from '@app/auth';
 import { ArtworkImageInput } from '@app/common';
 import {
   Body,
@@ -7,11 +8,13 @@ import {
   Post,
   UploadedFile,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,
@@ -68,6 +71,8 @@ export class UploadController {
   ) {}
 
   @Post('artwork-image')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
@@ -150,6 +155,8 @@ export class UploadController {
   }
 
   @Post('artwork-images')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @UseInterceptors(FilesInterceptor('files', 10))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
@@ -225,6 +232,8 @@ export class UploadController {
   }
 
   @Post('avatar')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({

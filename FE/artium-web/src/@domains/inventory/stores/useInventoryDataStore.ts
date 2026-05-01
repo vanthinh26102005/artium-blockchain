@@ -184,11 +184,17 @@ export const useInventoryDataStore = create<InventoryDataState>()(
     {
       name: 'inventory-data-storage',
       version: 2,
-      migrate: (state, version) => {
+      migrate: (persistedState: unknown, version) => {
         if (version < 2) {
-          return { ...(state as any), artworks: [], folders: [] }
+          // Migration from v1: ensure artworks/folders arrays exist
+          const state = persistedState as Partial<InventoryDataState> | undefined
+          return { 
+            ...state, 
+            artworks: state?.artworks ?? [], 
+            folders: state?.folders ?? [] 
+          } as InventoryDataState
         }
-        return state
+        return persistedState as InventoryDataState
       },
     },
   ),

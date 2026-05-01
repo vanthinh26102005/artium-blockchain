@@ -13,30 +13,51 @@ export type ArtworkApiItem = {
   id: string
   sellerId: string
   title: string
+  description?: string | null
   creatorName?: string | null
   displayStatus?: 'Draft' | 'Hidden'
   status?: string
-  createdAt?: string
-  updatedAt?: string
+  creationYear?: number | null
+  editionRun?: string | null
+  materials?: string | null
+  location?: string | null
   price?: number | string | null
   currency?: string | null
-  materials?: string | null
+  quantity?: number
+  isPublished?: boolean
+  createdAt?: string
+  updatedAt?: string
   dimensions?: {
     width?: number
     height?: number
     depth?: number
     unit?: string
   } | null
+  weight?: {
+    value?: number
+    unit?: string
+  } | null
   thumbnailUrl?: string | null
   images?: ArtworkImage[]
   folder?: ArtworkFolderRef | null
   folderId?: string | null
+  viewCount?: number
+  likeCount?: number
+  commentCount?: number
+  moodboardCount?: number
+  ipfsMetadataHash?: string | null
+  reservePrice?: string | null
+  minBidIncrement?: string | null
+  auctionDuration?: number | null
+  onChainAuctionId?: string | null
 }
 
 export type ListArtworksParams = {
   sellerId?: string
   folderId?: string | null
   status?: string
+  onChainAuctionId?: string
+  hasOnChainAuctionId?: boolean
   q?: string
   skip?: number
   take?: number
@@ -182,6 +203,13 @@ const artworkApis = {
     return normalizeArtworkPage(response)
   },
   getArtworkById: (id: string) => apiWithBase<ArtworkApiItem | null>(`/artworks/${id}`),
+  getArtworkByOnChainAuctionId: async (onChainAuctionId: string) => {
+    const artworks = await artworkApis.listArtworks({
+      onChainAuctionId,
+      take: 1,
+    })
+    return artworks[0] ?? null
+  },
   createArtwork: (input: CreateArtworkInput) =>
     apiWithBase<ArtworkApiItem>('/artworks', {
       method: 'POST',

@@ -1,4 +1,4 @@
-import { AbstractEntity } from '@app/common';
+import { AbstractEntity, EscrowState } from '@app/common';
 import {
   PaymentProvider,
   TransactionStatus,
@@ -161,4 +161,53 @@ export class PaymentTransaction extends AbstractEntity {
 
   @Column({ name: 'completed_at', type: 'timestamp', nullable: true })
   completedAt?: Date | null;
+
+  @Column({
+    name: 'confirmation_attempts',
+    type: 'integer',
+    default: 0,
+  })
+  confirmationAttempts?: number | null;
+
+  @Column({ name: 'next_confirmation_at', type: 'timestamp', nullable: true })
+  nextConfirmationAt?: Date | null;
+
+  @Column({ name: 'confirmation_started_at', type: 'timestamp', nullable: true })
+  confirmationStartedAt?: Date | null;
+
+  @Column({ name: 'last_confirmation_error', type: 'text', nullable: true })
+  lastConfirmationError?: string | null;
+
+  @Column({ name: 'confirmed_block_number', type: 'varchar', length: 32, nullable: true })
+  confirmedBlockNumber?: string | null;
+
+  // ── Blockchain/escrow fields ──
+
+  @Column({
+    name: 'escrow_state',
+    type: 'enum',
+    enum: EscrowState,
+    nullable: true,
+    comment: 'On-chain escrow state for blockchain transactions',
+  })
+  escrowState?: EscrowState | null;
+
+  @Column({
+    name: 'tx_hash',
+    type: 'varchar',
+    length: 66,
+    nullable: true,
+    unique: true, // unique: true enforces idempotency at DB level
+    comment: 'Blockchain transaction hash',
+  })
+  txHash?: string | null;
+
+  @Column({
+    name: 'wallet_address',
+    type: 'varchar',
+    length: 42,
+    nullable: true,
+    comment: 'Ethereum wallet address',
+  })
+  walletAddress?: string | null;
 }

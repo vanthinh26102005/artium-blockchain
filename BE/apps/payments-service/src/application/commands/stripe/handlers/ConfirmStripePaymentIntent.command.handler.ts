@@ -9,9 +9,6 @@ import { IStripeCustomerRepository } from '../../../../domain/interfaces/stripe-
 import { IInvoiceRepository } from '../../../../domain/interfaces';
 import { PaymentTransaction } from '../../../../domain/entities/payment-transaction.entity';
 import { TransactionStatus } from '@app/common';
-import { OutboxService } from '@app/outbox';
-import { ExchangeName, RoutingKey } from '@app/rabbitmq';
-import { PaymentSucceededEvent } from '../../../../domain/events';
 
 @CommandHandler(ConfirmStripePaymentIntentCommand)
 export class ConfirmStripePaymentIntentHandler implements ICommandHandler<ConfirmStripePaymentIntentCommand> {
@@ -25,7 +22,6 @@ export class ConfirmStripePaymentIntentHandler implements ICommandHandler<Confir
     private readonly stripeCustomerRepo: IStripeCustomerRepository,
     @Inject(IInvoiceRepository)
     private readonly invoiceRepo: IInvoiceRepository,
-    private readonly outboxService: OutboxService,
   ) {}
 
   async execute(
@@ -90,30 +86,6 @@ export class ConfirmStripePaymentIntentHandler implements ICommandHandler<Confir
             transaction.id,
           );
         }
-
-        const event = new PaymentSucceededEvent(
-          transaction.id,
-          transaction.userId,
-          paymentIntent.id,
-          paymentIntent.latest_charge as string,
-          Number(transaction.amount),
-          transaction.currency,
-          transaction.orderId || undefined,
-          transaction.invoiceId || undefined,
-        );
-
-        await this.outboxService.createOutboxMessage({
-          aggregateType: 'PaymentTransaction',
-          aggregateId: transaction.id,
-          eventType: PaymentSucceededEvent.getEventType(),
-          payload: event.toPayload(),
-          exchange: ExchangeName.PAYMENT_EVENTS,
-          routingKey: RoutingKey.PAYMENT_SUCCEEDED,
-        });
-
-        this.logger.log(
-          `PaymentSucceededEvent published for transaction: ${transaction.id}`,
-        );
       }
 
       this.logger.log(

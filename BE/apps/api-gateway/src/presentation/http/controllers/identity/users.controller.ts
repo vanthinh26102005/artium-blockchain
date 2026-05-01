@@ -5,9 +5,11 @@ import {
   EmailLoginInput,
   GetUserProfileDto,
   GoogleLoginInput,
+  UpdateUserProfileInput,
   LoginEmailDto,
   LoginGoogleDto,
   LoginResponse,
+  LoginWalletDto,
   PasswordResetConfirmDto,
   PasswordResetRequestDto,
   PasswordResetVerifyDto,
@@ -31,6 +33,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -40,6 +43,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -73,7 +77,69 @@ export class UserController {
     return sendRpc<UserPayload>(
       this.identityClient,
       { cmd: 'get_user_profile' },
-      { user: req.user },
+      { user: { id: req.user.id } },
+    );
+  }
+
+  @Put('users/me')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Update current user profile',
+    description: 'Updates the profile of the currently authenticated user',
+  })
+  @ApiBody({
+    type: UpdateUserProfileInput,
+    description: 'Fields to update',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile updated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Slug already taken',
+  })
+  async updateUserProfile(
+    @Request() req: Express.Request & { user: GetUserProfileDto['user'] },
+    @Body() input: UpdateUserProfileInput,
+  ) {
+    return sendRpc(
+      this.identityClient,
+      { cmd: 'update_user_profile' },
+      { userId: req.user.id, input },
+    );
+  }
+
+  @Get('users/slug/:slug')
+  @ApiOperation({
+    summary: 'Get user by slug',
+    description: 'Retrieves public profile information for a user by their unique slug',
+  })
+  @ApiParam({
+    name: 'slug',
+    description: 'The unique URL-friendly identifier of the user',
+    type: 'string',
+    example: 'duong-phuong-thinh',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User retrieved successfully',
+    type: UserPayload,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
+  async getUserBySlug(@Param('slug') slug: string) {
+    return sendRpc<UserPayload>(
+      this.identityClient,
+      { cmd: 'get_user_by_slug' },
+      { slug },
     );
   }
 
@@ -175,6 +241,38 @@ export class UserController {
       this.identityClient,
       { cmd: 'login_google' },
       loginInput,
+    );
+  }
+
+  @Post('auth/wallet')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with Ethereum wallet (SIWE)' })
+  @ApiBody({ type: LoginWalletDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful - Returns user data and access tokens',
+    type: LoginResponse,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid SIWE message format' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired nonce / signature' })
+  async loginWallet(@Body() input: LoginWalletDto) {
+    return sendRpc<LoginResponse>(
+      this.identityClient,
+      { cmd: 'login_wallet' },
+      input,
+    );
+  }
+
+  @Get('auth/wallet/nonce')
+  @ApiOperation({ summary: 'Get nonce for wallet login' })
+  @ApiQuery({ name: 'address', required: true, type: String })
+  @ApiResponse({ status: 200, description: 'Nonce generated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid Ethereum address format' })
+  async getWalletNonce(@Query('address') address: string) {
+    return sendRpc<{ nonce: string }>(
+      this.identityClient,
+      { cmd: 'get_wallet_nonce' },
+      { address },
     );
   }
 
@@ -293,7 +391,7 @@ export class UserController {
     description: 'Invalid or expired reset token',
   })
   async verifyPasswordReset(@Body() input: PasswordResetVerifyDto) {
-    return sendRpc<{ valid: boolean }>(
+    return sendRpc<{ success: boolean; resetToken: string }>(
       this.identityClient,
       { cmd: 'password_reset_verify' },
       input,

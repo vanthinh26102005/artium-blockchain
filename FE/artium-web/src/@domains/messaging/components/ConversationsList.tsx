@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { MessageCircle, Clock } from 'lucide-react'
 import type { Conversation } from '@/types/messaging'
 import { formatDistanceToNow } from 'date-fns'
-import { UserAvatar } from './UserAvatar'
+import { UserAvatar } from '@/@shared/components/ui/user-avatar'
 
 type ConversationsListProps = {
   conversations: Conversation[]
@@ -56,9 +56,8 @@ export const ConversationsList = ({
             <button
               key={conversation.id}
               onClick={() => onSelectConversation(conversation.id)}
-              className={`w-full border-b border-slate-100 px-4 py-3 text-left transition-colors hover:bg-slate-50 ${
-                isSelected ? 'bg-primary/5 border-l-2 border-l-primary' : ''
-              }`}
+              className={`w-full border-b border-slate-100 px-4 py-3 text-left transition-colors hover:bg-slate-50 ${isSelected ? 'bg-primary/5 border-l-2 border-l-primary' : ''
+                }`}
             >
               <div className="flex items-start gap-3">
                 <UserAvatar src={conversation.imageUrl} name={conversation.name} size="md" />
@@ -66,14 +65,13 @@ export const ConversationsList = ({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <h3
-                      className={`truncate text-sm font-semibold ${
-                        hasUnread ? 'text-slate-900' : 'text-slate-700'
-                      }`}
+                      className={`truncate text-sm font-semibold ${hasUnread ? 'text-slate-900' : 'text-slate-700'
+                        }`}
                     >
                       {conversation.name || 'Conversation'}
                     </h3>
                     {conversation.lastMessageAt && (
-                      <span className="flex-shrink-0 text-xs text-slate-500">
+                      <span className="shrink-0 text-xs text-slate-500">
                         {formatDistanceToNow(new Date(conversation.lastMessageAt), {
                           addSuffix: false,
                         })}
@@ -84,9 +82,8 @@ export const ConversationsList = ({
                   <div className="mt-1 flex items-center gap-1">
                     {conversation.lastMessageContent ? (
                       <p
-                        className={`truncate text-xs ${
-                          hasUnread ? 'font-medium text-slate-700' : 'text-slate-500'
-                        }`}
+                        className={`truncate text-xs ${hasUnread ? 'font-medium text-slate-700' : 'text-slate-500'
+                          }`}
                       >
                         {conversation.lastMessageContent}
                       </p>

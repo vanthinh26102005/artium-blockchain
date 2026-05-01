@@ -76,7 +76,7 @@ export const useCreateQuickSellInvoice = (): UseCreateQuickSellInvoiceReturn => 
             return sum + (basePrice * item.discountPercent) / 100
           }, 0),
           shipping: 0,
-          taxPercent: draft.isApplySalesTax ? draft.taxPercent : 0,
+          taxPercent: draft.isApplySalesTax ? (draft.taxPercent ?? 0) : 0,
           tax: 0,
           total: response.totalAmount,
           createdAt: new Date().toISOString(),

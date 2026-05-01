@@ -1,6 +1,7 @@
 // next
 import Image from 'next/image'
 import Link from 'next/link'
+import { Pencil, Trash2 } from 'lucide-react'
 
 // @shared - utils
 import { cn } from '@shared/lib/utils'
@@ -17,6 +18,9 @@ type MoodboardsSectionProps = {
   seeAllHref?: string
   size?: 'compact' | 'large'
   detailBaseHref?: string
+  isOwner?: boolean
+  onEditMoodboard?: (moodboard: ProfileMoodboard) => void
+  onDeleteMoodboard?: (moodboard: ProfileMoodboard) => void
 }
 
 export const MoodboardsSection = ({
@@ -28,6 +32,9 @@ export const MoodboardsSection = ({
   seeAllHref,
   size = 'compact',
   detailBaseHref,
+  isOwner = false,
+  onEditMoodboard,
+  onDeleteMoodboard,
 }: MoodboardsSectionProps) => {
   const isLarge = size === 'large'
   const hasHeaderContent = Boolean(title || subtitle || showSeeAll)
@@ -59,6 +66,9 @@ export const MoodboardsSection = ({
             board={board}
             size={size}
             href={detailBaseHref ? `${detailBaseHref}/${board.id}` : undefined}
+            isOwner={isOwner}
+            onEdit={onEditMoodboard}
+            onDelete={onDeleteMoodboard}
           />
         ))}
       </div>
@@ -92,9 +102,12 @@ type MoodboardCardProps = {
   board: ProfileMoodboard
   size: 'compact' | 'large'
   href?: string
+  isOwner?: boolean
+  onEdit?: (board: ProfileMoodboard) => void
+  onDelete?: (board: ProfileMoodboard) => void
 }
 
-const MoodboardCard = ({ board, size, href }: MoodboardCardProps) => {
+const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }: MoodboardCardProps) => {
   const isLarge = size === 'large'
   const coverUrls = board.artworkCoverUrls ?? []
   const secondaryCover = coverUrls[1] || board.secondaryCoverUrl || board.coverUrl
@@ -104,25 +117,25 @@ const MoodboardCard = ({ board, size, href }: MoodboardCardProps) => {
   const authorAvatarUrl = board.authorAvatarUrl || 'https://placehold.co/64x64.png?text=HP'
   const sizeStyles = isLarge
     ? {
-        secondaryCoverClass: 'left-20 bottom-20 h-32 w-26',
-        primaryCoverClass: 'left-28 bottom-12 h-48 w-35',
-        coverHeightClass: 'h-44 sm:h-48',
-        cardWidthClass: 'w-[220px]',
-        contentPaddingClass: 'px-4 pb-5 pt-4',
-        titleClassName: 'text-[15px]',
-      }
+      secondaryCoverClass: 'left-20 bottom-20 h-32 w-26',
+      primaryCoverClass: 'left-28 bottom-12 h-48 w-35',
+      coverHeightClass: 'h-44 sm:h-48',
+      cardWidthClass: 'w-[220px]',
+      contentPaddingClass: 'px-4 pb-5 pt-4',
+      titleClassName: 'text-[15px]',
+    }
     : {
-        secondaryCoverClass: 'left-20 bottom-12 h-30 w-24',
-        primaryCoverClass: 'left-28 bottom-6 h-45 w-32',
-        coverHeightClass: 'h-40',
-        cardWidthClass: 'w-[200px] flex-shrink-0',
-        contentPaddingClass: 'px-3 pb-4 pt-3',
-        titleClassName: '',
-      }
+      secondaryCoverClass: 'left-20 bottom-12 h-30 w-24',
+      primaryCoverClass: 'left-28 bottom-6 h-45 w-32',
+      coverHeightClass: 'h-40',
+      cardWidthClass: 'w-[200px] shrink-0',
+      contentPaddingClass: 'px-3 pb-4 pt-3',
+      titleClassName: '',
+    }
   const cardBody = (
     <div
       className={cn(
-        'overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md',
+        'group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md',
         'w-full',
       )}
     >
@@ -154,10 +167,41 @@ const MoodboardCard = ({ board, size, href }: MoodboardCardProps) => {
             Private
           </span>
         ) : null}
+        {/* Owner controls overlay */}
+        {isOwner && (onEdit || onDelete) && (
+          <div className="absolute top-4 right-4 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            {onEdit && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onEdit(board)
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow hover:bg-white hover:text-blue-600"
+                aria-label="Edit moodboard"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onDelete(board)
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow hover:bg-white hover:text-red-600"
+                aria-label="Delete moodboard"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
       <div className={cn('space-y-1.5', sizeStyles.contentPaddingClass)}>
         <div className="flex items-center gap-2">
-          <div className="relative h-7 w-7 flex-shrink-0 overflow-hidden rounded-full bg-slate-200">
+          <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-slate-200">
             <Image
               src={authorAvatarUrl}
               alt={board.author}

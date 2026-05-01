@@ -4,6 +4,7 @@ import {
   Logger,
   BadRequestException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import Stripe from 'stripe';
 
@@ -35,7 +36,7 @@ export class StripeService {
   ): Promise<Stripe.PaymentIntent> {
     try {
       const params: Stripe.PaymentIntentCreateParams = {
-        amount: Math.round(amount * 100),
+        amount: Math.round(amount),
         currency: currency.toLowerCase(),
         automatic_payment_methods: {
           enabled: true,
@@ -68,7 +69,7 @@ export class StripeService {
   ): Promise<Stripe.PaymentIntent> {
     try {
       const params: Stripe.PaymentIntentConfirmParams = {
-        return_url: returnUrl || 'https://artium.app/payments/complete',
+        return_url: returnUrl || 'https://localhost:3000/payments/complete',
       };
       if (paymentMethodId) params.payment_method = paymentMethodId;
 
@@ -152,15 +153,36 @@ export class StripeService {
 
   async retrieveCustomer(customerId: string): Promise<Stripe.Customer> {
     try {
-      const customer = (await this.stripe.customers.retrieve(
+      const customer = await this.stripe.customers.retrieve(
         customerId,
-      )) as Stripe.Customer;
-      return customer;
+      );
+
+      if ('deleted' in customer && customer.deleted) {
+        throw new NotFoundException(
+          `Stripe customer retrieval failed: Customer ${customerId} does not exist`,
+        );
+      }
+
+      return customer as Stripe.Customer;
     } catch (error) {
       this.logger.error(
         `Failed to retrieve customer: ${customerId}`,
         error.stack,
       );
+
+      if (
+        error instanceof Stripe.errors.StripeInvalidRequestError &&
+        error.code === 'resource_missing'
+      ) {
+        throw new NotFoundException(
+          `Stripe customer retrieval failed: ${error.message}`,
+        );
+      }
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       throw new InternalServerErrorException(
         `Stripe customer retrieval failed: ${error.message}`,
       );

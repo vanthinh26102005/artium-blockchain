@@ -12,6 +12,7 @@ export * from './enums/otp-context.enum';
 export * from './interfaces/refresh-token.repository.interface';
 export * from './interfaces/seller-profile.repository.interface';
 export * from './interfaces/user.repository.interface';
+export * from './services/nonce.service';
 export * from './services/otp.service';
 export * from './services/registration.service';
 export * from './services/token.service';

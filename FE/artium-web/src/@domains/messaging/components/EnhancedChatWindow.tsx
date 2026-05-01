@@ -5,6 +5,7 @@ import type { Message } from '@/types/messaging'
 import { MessageActions } from './MessageActions'
 import { MessageReactions } from './MessageReactions'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
+import { ImageLightbox } from './ImageLightbox'
 
 type EnhancedChatWindowProps = {
   messages: Message[]

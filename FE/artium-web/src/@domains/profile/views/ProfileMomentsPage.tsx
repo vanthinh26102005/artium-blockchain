@@ -9,7 +9,6 @@ import { PROFILE_TABS } from '@domains/profile/constants/profileTabs'
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
 import { mapProfileMomentToMomentCard } from '@domains/profile/utils/profileApiMapper'
-import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
 type ProfileMomentsPageViewProps = {
   username?: string | string[]
@@ -17,19 +16,25 @@ type ProfileMomentsPageViewProps = {
 
 export const ProfileMomentsPageView = ({ username: _username }: ProfileMomentsPageViewProps) => {
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, sellerProfile, isLoading, error, resolvedUsername } = useProfileOverview({
+  const { data: baseData, user: fetchedUser, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
+  const profileHandle = resolvedUsername || profileData.user.username || usernameFromRoute || ''
   const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Moments`
-  const baseHref = `/profile/${resolvedUsername}`
-  const useProfileBaseHref = profileData.moments.length > 0
+  const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}` : ''
+  const tabHrefs = profileHandle
+    ? {
+        overview: baseHref,
+        artworks: `${baseHref}/artworks`,
+        moments: `${baseHref}/moments`,
+        moodboards: `${baseHref}/moodboards`,
+      }
+    : undefined
+  const useProfileBaseHref = profileData.moments.length > 0 && Boolean(profileHandle)
   const moments = profileData.moments.map((moment) =>
     mapProfileMomentToMomentCard(moment, profileData.user),
   )
-  const authUser = useAuthStore((state) => state.user)
-  const isAuthenticated = Boolean(authUser?.id)
-  const isOwner = isAuthenticated && sellerProfile && authUser?.id === sellerProfile.userId
 
   return (
     <>
@@ -48,8 +53,8 @@ export const ProfileMomentsPageView = ({ username: _username }: ProfileMomentsPa
             <ProfileHero
               user={profileData.user}
               stats={profileData.stats}
-              userId={sellerProfile?.userId}
-              isOwner={isOwner || false}
+              userId={fetchedUser?.id}
+              isOwner={isOwner}
             />
           )}
         </div>
@@ -57,12 +62,7 @@ export const ProfileMomentsPageView = ({ username: _username }: ProfileMomentsPa
           <ProfileTabs
             tabs={PROFILE_TABS}
             activeTab="moments"
-            tabHrefs={{
-              overview: baseHref,
-              artworks: `${baseHref}/artworks`,
-              moments: `${baseHref}/moments`,
-              moodboards: `${baseHref}/moodboards`,
-            }}
+            tabHrefs={tabHrefs}
           />
         </div>
         <div className="container py-6">

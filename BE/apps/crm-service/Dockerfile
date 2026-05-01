@@ -8,14 +8,17 @@ WORKDIR /app
 # Builder stage
 FROM base AS builder
 
+# Copy all package.json and workspace manifests
 COPY package.json yarn.lock ./
+COPY apps/Z/package.json ./apps/crm-service/package.json
+COPY libs ./libs
 RUN yarn install --frozen-lockfile
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
+COPY apps/crm-service/tsconfig.json ./apps/crm-service/tsconfig.json
 COPY apps/crm-service ./apps/crm-service
-COPY libs ./libs
 
-RUN yarn run build:crm
+RUN yarn workspace @backend/crm-service build
 
 
 

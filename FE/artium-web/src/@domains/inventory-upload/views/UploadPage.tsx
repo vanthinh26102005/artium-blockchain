@@ -150,7 +150,7 @@ export const UploadPage = () => {
       try {
         setIsSubmitting(true)
         const artwork = await submit(user.id)
-        
+
         if (artwork) {
           // Success! Navigate to inventory or artwork detail
           allowNavigationRef.current = true
@@ -207,7 +207,7 @@ export const UploadPage = () => {
         {step === 1 ? <Step1Layout /> : <Step2Layout />}
       </UploadWizardShell>
       <Dialog open={isExitOpen} onOpenChange={setIsExitOpen}>
-        <DialogContent size="4xl" className="overflow-hidden rounded-[32px] bg-white p-0">
+        <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">
           <div className="px-8 py-6">
             <h2 className="text-[22px] font-bold text-[#191414] uppercase">Exit Draft?</h2>
             <p className="mt-4 text-[18px] text-[#191414]">
@@ -239,7 +239,7 @@ export const UploadPage = () => {
           resetSubmit()
         }
       }}>
-        <DialogContent size="4xl" className="overflow-hidden rounded-[32px] bg-white p-0">
+        <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">
           <div className="px-8 py-6">
             {progress && (
               <SubmissionProgress
@@ -250,7 +250,7 @@ export const UploadPage = () => {
                 error={error}
               />
             )}
-            
+
             {completedArtwork && !submitting && (
               <div className="mt-6 flex justify-end gap-3">
                 <button

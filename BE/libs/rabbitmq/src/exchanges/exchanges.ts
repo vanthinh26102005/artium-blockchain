@@ -4,6 +4,7 @@ export const ExchangeName = {
   USER_EVENTS: 'user.events.exchange',
   NOTIFICATION_EVENTS: 'notification.events.exchange',
   PAYMENT_EVENTS: 'payment.events.exchange',
+  BLOCKCHAIN_EVENTS: 'blockchain.events.exchange',
 };
 
 export const Exchanges: RabbitMQExchangeConfig[] = [
@@ -22,6 +23,11 @@ export const Exchanges: RabbitMQExchangeConfig[] = [
   },
   {
     name: ExchangeName.PAYMENT_EVENTS,
+    type: 'topic',
+    options: { durable: true },
+  },
+  {
+    name: ExchangeName.BLOCKCHAIN_EVENTS,
     type: 'topic',
     options: { durable: true },
   },

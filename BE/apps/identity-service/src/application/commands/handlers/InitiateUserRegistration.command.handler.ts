@@ -33,7 +33,7 @@ export class InitiateUserRegistrationHandler implements ICommandHandler<Initiate
       const otp = await this.otpService.generateAndStoreOtp(
         OtpContext.USER_REGISTRATION,
         email,
-        { email, firstName, password: hashedPassword },
+        { email, fullName: firstName, password: hashedPassword },
       );
       this.logger.debug(`Generated OTP ${otp} for email: ${email}`);
 

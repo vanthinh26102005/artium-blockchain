@@ -1,6 +1,8 @@
 // next
 import Image from 'next/image'
 
+import { Button } from '@shared/components/ui/button'
+
 type SocialAuthButtonsProps = {
   onGoogleClick?: () => void
   isGoogleLoading?: boolean
@@ -10,15 +12,18 @@ export const SocialAuthButtons = ({
   onGoogleClick,
   isGoogleLoading = false,
 }: SocialAuthButtonsProps) => {
+  const isGoogleDisabled = isGoogleLoading || !onGoogleClick
+
   // -- render --
   return (
     <div className="inline-flex w-full flex-col gap-3 sm:flex-row sm:gap-4">
       {/* google */}
-      <button
+      <Button
         type="button"
+        variant="ghost"
         onClick={onGoogleClick}
-        disabled={isGoogleLoading}
-        className="flex flex-1 items-center justify-center gap-3 rounded-[32px] border border-black/10 px-5 py-3 text-sm font-semibold text-[#191414] transition hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isGoogleDisabled}
+        className="flex flex-1 gap-3 rounded-4xl border border-black/10 px-5 py-3 text-sm font-semibold text-kokushoku-black hover:bg-black/5 hover:text-kokushoku-black disabled:opacity-60"
       >
         <Image
           src="/images/auth/google-icon-logo-svgrepo-com.svg"
@@ -27,16 +32,18 @@ export const SocialAuthButtons = ({
           height={24}
         />
         <span>{isGoogleLoading ? 'Connecting...' : 'Google'}</span>
-      </button>
+      </Button>
 
       {/* apple */}
-      <button
+      <Button
         type="button"
-        className="flex flex-1 items-center justify-center gap-3 rounded-[32px] border border-black/10 px-5 py-3 text-sm font-semibold text-[#191414] transition hover:bg-black/5"
+        variant="ghost"
+        disabled
+        className="flex flex-1 gap-3 rounded-4xl border border-black/10 px-5 py-3 text-sm font-semibold text-kokushoku-black hover:bg-black/5 hover:text-kokushoku-black disabled:opacity-60"
       >
         <Image src="/images/auth/apple-svgrepo-com.svg" alt="Apple" width={24} height={24} />
         <span className="pt-1">Apple</span>
-      </button>
+      </Button>
     </div>
   )
 }
