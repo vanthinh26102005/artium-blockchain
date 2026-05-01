@@ -144,7 +144,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
       return
     }
 
-    const isMobile = window.matchMedia('(max-width: 767px)').matches
+    const isMobile = window.matchMedia('(max-width: 1023px)').matches
     const targetInput = isMobile ? mobileInputRef.current : desktopInputRef.current
     targetInput?.focus()
   }, [isSearchOpen])
@@ -245,13 +245,15 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
     .join(' ')
 
   const desktopSearchClasses = [
-    'hidden md:flex items-center transition-all duration-300',
-    isSearchVisible ? 'ml-3 w-[360px] opacity-100' : 'ml-0 w-0 opacity-0 pointer-events-none',
+    'hidden min-w-0 items-center transition-all duration-300 lg:flex',
+    isSearchVisible
+      ? 'ml-2 w-[320px] opacity-100 xl:w-[360px]'
+      : 'ml-0 w-0 opacity-0 pointer-events-none',
     showResults ? 'overflow-visible' : 'overflow-hidden',
   ].join(' ')
 
   const mobileSearchClasses = [
-    'md:hidden transition-all duration-300',
+    'transition-all duration-300 lg:hidden',
     isSearchVisible ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0 pointer-events-none',
     showResults ? 'overflow-visible' : 'overflow-hidden',
   ].join(' ')
@@ -272,6 +274,14 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   const logoSrc = useWhiteNav
     ? '/images/logo/logo-and-text-dark-mode.png'
     : '/images/logo/logo-and-text-light-mode.png'
+  const navClasses = [
+    'hidden shrink-0 items-center gap-4 text-[12px]! font-semibold tracking-[0.14em] uppercase 2xl:gap-6 2xl:tracking-[0.2em]',
+    shouldShowSearch ? '2xl:flex' : 'xl:flex',
+  ].join(' ')
+  const compactMenuClasses = ['shrink-0', shouldShowSearch ? '2xl:hidden' : 'xl:hidden'].join(' ')
+  const headerIconButtonClasses = useWhiteNav
+    ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
+    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
 
   const createMenuItems = [
     {
@@ -302,19 +312,19 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
         fontFamily: '"ABC Monument Grotesk", "Segoe UI", Tahoma, sans-serif',
       }}
     >
-      <div className="mx-auto flex min-h-20 w-full flex-wrap items-center justify-between gap-4 px-6 py-4 sm:px-4 lg:px-6">
-        <div className="flex min-w-0 flex-wrap items-center gap-6">
-          <Link href="/" className="flex items-center">
+      <div className="mx-auto flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3 sm:min-h-20 sm:px-6 sm:py-4 lg:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-3 lg:gap-4 xl:gap-6">
+          <Link href="/" className="flex shrink-0 items-center">
             <Image
               src={logoSrc}
               alt="Artium"
               width={140}
               height={36}
-              className="h-7 w-auto sm:h-8"
+              className="h-7 w-auto shrink-0 sm:h-8"
               priority
             />
           </Link>
-          <nav className="flex flex-wrap items-center gap-6 text-[14px]! font-semibold tracking-[0.2em] uppercase sm:gap-8 sm:text-xs">
+          <nav className={navClasses}>
             {navLinks.map((link) => {
               const isActive = router.pathname === link.href
               return (
@@ -344,13 +354,13 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   aria-label="Toggle search"
                   aria-expanded={isSearchVisible}
                   onClick={() => setIsSearchOpen(true)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/80 text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+                  className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border shadow-sm transition ${headerIconButtonClasses}`}
                 >
                   <Search className="h-4 w-4" />
                 </button>
               ) : null}
               <div className={desktopSearchClasses}>
-                <div className="relative w-full">
+                <div className="relative w-full min-w-0">
                   <div className="flex h-11 w-full items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-4 text-sm text-slate-900">
                     <button
                       type="button"
@@ -476,19 +486,15 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
             </>
           ) : null}
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {/* Mobile Hamburger Menu */}
-          <div className="md:hidden">
+          <div className={compactMenuClasses}>
             <DropdownMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
                   aria-label="Open menu"
-                  className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${
-                    isLandingVariant
-                      ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
-                  }`}
+                  className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${headerIconButtonClasses}`}
                 >
                   <Menu className="h-5 w-5" />
                 </button>
@@ -616,22 +622,18 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
               <button
                 type="button"
                 onClick={() => router.push('/artist/invoices/create')}
-                className="hidden cursor-pointer items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-[16px] font-semibold text-white shadow-sm transition hover:bg-blue-700 md:inline-flex"
+                className="hidden cursor-pointer items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-[16px] font-semibold text-white shadow-sm transition hover:bg-blue-700 lg:inline-flex"
               >
                 <DollarSign className="h-4 w-4" />
                 Quick Sell
               </button>
-              <div className="hidden md:inline-flex">
+              <div className="hidden lg:inline-flex">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
                       aria-label="Create"
-                      className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${
-                        isLandingVariant
-                          ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
-                      }`}
+                      className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${headerIconButtonClasses}`}
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -677,28 +679,24 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
               <button
                 type="button"
                 aria-label="Notifications"
-                className={`hidden h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition md:inline-flex ${
-                  isLandingVariant
-                    ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
-                }`}
+                className={`hidden h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition lg:inline-flex ${headerIconButtonClasses}`}
               >
                 <Bell className="h-4 w-4" />
               </button>
               <Link
                 href={`/profile/${encodeURIComponent(profileHandle)}`}
-                className={`hidden cursor-pointer items-center gap-2 text-base font-semibold md:inline-flex ${
-                  isLandingVariant ? 'text-white' : 'text-slate-700 hover:text-slate-900'
+                className={`hidden min-w-0 cursor-pointer items-center gap-2 text-base font-semibold lg:inline-flex ${
+                  useWhiteNav ? 'text-white' : 'text-slate-700 hover:text-slate-900'
                 }`}
               >
-                <span>@{profileLabel}</span>
+                <span className="max-w-[120px] truncate xl:max-w-[160px]">@{profileLabel}</span>
                 <Image
                   src={avatarUrl}
                   alt={profileLabel}
                   width={40}
                   height={40}
                   className={`h-10 w-10 rounded-full object-cover ${
-                    isLandingVariant ? 'border border-white/30' : 'border border-slate-200'
+                    useWhiteNav ? 'border border-white/30' : 'border border-slate-200'
                   }`}
                 />
               </Link>
@@ -710,8 +708,8 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 onClick={() => {
                   router.push('/login')
                 }}
-                className={`hidden cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition md:inline-flex ${
-                  isLandingVariant
+                className={`hidden cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition lg:inline-flex ${
+                  useWhiteNav
                     ? 'border border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
                     : 'border border-slate-200 bg-white text-slate-800 hover:border-slate-300'
                 }`}
@@ -723,8 +721,8 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 onClick={() => {
                   router.push('/')
                 }}
-                className={`hidden cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition md:inline-flex ${
-                  isLandingVariant
+                className={`hidden cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition lg:inline-flex ${
+                  useWhiteNav
                     ? 'bg-white text-black hover:bg-white/90'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}

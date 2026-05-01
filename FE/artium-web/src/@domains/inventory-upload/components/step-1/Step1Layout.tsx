@@ -154,7 +154,10 @@ const Step1LeftColumn = ({ className }: Step1ColumnProps) => {
 
   const canAddMore = media.additionalImages.length < UPLOAD_MEDIA_RULES.MAX_ADDITIONAL_IMAGES
   const isEmptyState = !media.coverImage && media.additionalImages.length === 0
-  const artistProfile = artistProfileResult?.userId === user?.id ? artistProfileResult.profile : null
+  const artistProfile =
+    artistProfileResult && artistProfileResult.userId === user?.id
+      ? artistProfileResult.profile
+      : null
   const walletLabel = shortenWalletAddress(user?.walletAddress)
   const artistName =
     artistProfile?.displayName?.trim() ||
