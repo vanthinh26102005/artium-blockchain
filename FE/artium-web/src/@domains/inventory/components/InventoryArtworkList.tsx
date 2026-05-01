@@ -41,6 +41,14 @@ import { type InventoryFolder } from '@domains/inventory/types/inventoryFolder'
 
 type FolderWithCount = InventoryFolder & { itemCount: number }
 
+const formatInventoryPrice = (price?: number) => {
+  if (typeof price !== 'number') {
+    return 'Not priced'
+  }
+
+  return `US$${price.toLocaleString('en-US')}`
+}
+
 type InventoryArtworkListProps = {
   artworks: InventoryArtwork[]
   folders?: FolderWithCount[]
@@ -103,6 +111,10 @@ export const InventoryArtworkList = ({
       rootFolders: childMap.get(null) || [],
       childFoldersMap: childMap,
     }
+  }, [folders])
+
+  const folderNameById = useMemo(() => {
+    return new Map(folders.map((folder) => [folder.id, folder.name]))
   }, [folders])
 
   // Group artworks by folder
@@ -270,90 +282,145 @@ export const InventoryArtworkList = ({
     const isSelected = selectedIds.includes(artwork.id)
     const isDragging = draggedArtworkId === artwork.id
     const visibilityLabel = artwork.status === 'Hidden' ? 'Hidden in profile' : 'Draft'
+    const folderLabel = artwork.folderId ? folderNameById.get(artwork.folderId) : 'Uncategorized'
+    const lifecycleLabel = artwork.auctionLifecycle ? 'Auction status' : 'Listing status'
+    const lifecycleValue = artwork.auctionLifecycle ? null : 'Not listed'
+
+    const handleOpenArtwork = () => {
+      onOpenDetails(artwork)
+    }
+
+    const handleArtworkKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        handleOpenArtwork()
+      }
+    }
 
     return (
       <div
         key={artwork.id}
         draggable
+        role="button"
+        tabIndex={0}
+        onClick={handleOpenArtwork}
+        onKeyDown={handleArtworkKeyDown}
         onDragStart={handleArtworkDragStart(artwork.id)}
         onDragEnd={handleArtworkDragEnd}
-        style={{ marginLeft: nestLevel > 0 ? `${nestLevel * 24}px` : undefined }}
+        style={{ marginLeft: nestLevel > 0 ? `${nestLevel * 20}px` : undefined }}
         className={cn(
-          'group flex items-center gap-4 rounded-xl border bg-white px-4 py-3 transition-all',
-          isSelected ? 'border-primary/30 bg-primary/5' : 'border-slate-100 hover:border-slate-200',
+          'group flex cursor-pointer flex-col gap-5 rounded-[28px] border bg-white p-5 transition outline-none md:flex-row md:items-start md:justify-between',
+          isSelected
+            ? 'border-blue-300 ring-2 ring-blue-500/15'
+            : 'border-slate-200 hover:border-slate-300 hover:shadow-sm focus-visible:border-blue-300 focus-visible:ring-2 focus-visible:ring-blue-500/20',
           isDragging && 'opacity-50 shadow-lg',
         )}
       >
-        {/* Drag handle */}
-        <button
-          type="button"
-          className="cursor-grab text-slate-300 transition hover:text-slate-500 active:cursor-grabbing"
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          <GripVertical className="h-4 w-4" />
-        </button>
+        <div className="flex min-w-0 gap-4">
+          <div className="flex shrink-0 items-start gap-3">
+            <button
+              type="button"
+              aria-label={`Drag ${artwork.title}`}
+              className="mt-7 cursor-grab text-slate-300 transition hover:text-slate-500 active:cursor-grabbing"
+              onClick={(event) => event.stopPropagation()}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <GripVertical className="h-4 w-4" />
+            </button>
 
-        {/* Checkbox */}
-        <Checkbox
-          checked={isSelected}
-          onCheckedChange={() => toggle(artwork.id)}
-          className="h-5 w-5"
-        />
-
-        {/* Thumbnail */}
-        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-          {artwork.thumbnailUrl ? (
-            <Image
-              src={artwork.thumbnailUrl}
-              alt={artwork.title}
-              fill
-              className="object-cover"
-              sizes="56px"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <ImageIcon className="h-6 w-6 text-slate-300" />
+            <div
+              className="mt-7"
+              onClick={(event) => event.stopPropagation()}
+              onPointerDown={(event) => event.stopPropagation()}
+            >
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => toggle(artwork.id)}
+                aria-label={`Select ${artwork.title}`}
+                className="h-5 w-5 border-slate-300 bg-white data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
+              />
             </div>
-          )}
-        </div>
 
-        {/* Info */}
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-semibold text-slate-900">{artwork.title}</h3>
-          <p className="truncate text-xs text-slate-500">
-            {artwork.creatorName || 'Unknown Artist'}
-            {artwork.price && ` • $${artwork.price.toLocaleString()}`}
-          </p>
-        </div>
-
-        {/* Status badge */}
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <div
-            className={cn(
-              'rounded-full px-3 py-1 text-xs font-medium uppercase tracking-[0.12em]',
-              artwork.status === 'Draft' && 'bg-amber-50 text-amber-700',
-              artwork.status === 'Hidden' && 'bg-slate-100 text-slate-600',
-            )}
-          >
-            {visibilityLabel}
+            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+              {artwork.thumbnailUrl ? (
+                <Image
+                  src={artwork.thumbnailUrl}
+                  alt={artwork.title}
+                  fill
+                  className="object-cover transition duration-300 group-hover:scale-105"
+                  sizes="80px"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <ImageIcon className="h-7 w-7 text-slate-300" />
+                </div>
+              )}
+            </div>
           </div>
-          {artwork.auctionLifecycle ? (
-            <OrderStatusBadge status={artwork.auctionLifecycle.status} />
-          ) : null}
+
+          <div className="min-w-0 pt-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="truncate text-lg font-semibold text-slate-900 transition group-hover:text-blue-700">
+                {artwork.title}
+              </h3>
+              <span
+                className={cn(
+                  'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em]',
+                  artwork.status === 'Hidden'
+                    ? 'bg-slate-100 text-slate-600'
+                    : 'bg-amber-50 text-amber-700',
+                )}
+              >
+                {visibilityLabel}
+              </span>
+              {artwork.auctionLifecycle ? (
+                <OrderStatusBadge status={artwork.auctionLifecycle.status} />
+              ) : null}
+            </div>
+            <p className="mt-1 truncate text-sm text-slate-900">
+              {artwork.creatorName || 'Unknown artist'}
+            </p>
+            <p className="mt-2 text-sm text-slate-500">
+              {folderLabel ?? 'Uncategorized'} • {formatInventoryPrice(artwork.price)}
+            </p>
+          </div>
         </div>
 
-        {/* Actions */}
-        <InventoryArtworkActionMenu
-          artwork={artwork}
-          onOpenDetails={onOpenDetails}
-          onEdit={onEdit}
-          onToggleProfileVisibility={onToggleProfileVisibility}
-          onMove={onMove}
-          onStartAuction={onStartAuction}
-          onDelete={onDelete}
-          triggerClassName="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 opacity-0 transition group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-600"
-          contentClassName="w-64 rounded-xl border-slate-200 bg-white p-2"
-        />
+        <div className="flex shrink-0 items-center justify-between gap-5 md:block md:text-right">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Price
+            </p>
+            <p className="mt-1 text-lg font-semibold text-slate-900">
+              {formatInventoryPrice(artwork.price)}
+            </p>
+          </div>
+          <div className="md:mt-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              {lifecycleLabel}
+            </p>
+            {artwork.auctionLifecycle ? (
+              <div className="mt-1 flex justify-end">
+                <OrderStatusBadge status={artwork.auctionLifecycle.status} />
+              </div>
+            ) : (
+              <p className="mt-1 text-sm font-semibold text-slate-600">{lifecycleValue}</p>
+            )}
+          </div>
+          <div className="md:mt-4">
+            <InventoryArtworkActionMenu
+              artwork={artwork}
+              onOpenDetails={onOpenDetails}
+              onEdit={onEdit}
+              onToggleProfileVisibility={onToggleProfileVisibility}
+              onMove={onMove}
+              onStartAuction={onStartAuction}
+              onDelete={onDelete}
+              triggerClassName="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20"
+              contentClassName="w-64 rounded-2xl border-slate-200 bg-white p-2 shadow-lg"
+            />
+          </div>
+        </div>
       </div>
     )
   }
@@ -379,12 +446,16 @@ export const InventoryArtworkList = ({
           onDragEnd={handleFolderDragEnd}
           style={{ marginLeft: nestLevel > 0 ? `${nestLevel * 24}px` : undefined }}
           className={cn(
-            'group relative flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition-all border-black',
+            'group relative flex items-center gap-3 rounded-[24px] border bg-white px-4 py-4 transition-all',
             isDragging && 'opacity-50',
-            isDragOver && 'border-blue-400 bg-blue-50',
-            isDropTarget && 'border-green-400 bg-green-50 ring-2 ring-green-200',
-            isFolderDropTarget && 'border-violet-400 bg-violet-50 ring-2 ring-violet-200',
-            !isDragging && !isDragOver && !isDropTarget && !isFolderDropTarget,
+            isDragOver && 'border-blue-300 bg-blue-50',
+            isDropTarget && 'border-emerald-300 bg-emerald-50 ring-2 ring-emerald-200',
+            isFolderDropTarget && 'border-violet-300 bg-violet-50 ring-2 ring-violet-200',
+            !isDragging &&
+              !isDragOver &&
+              !isDropTarget &&
+              !isFolderDropTarget &&
+              'border-slate-200 hover:border-slate-300 hover:shadow-sm',
           )}
         >
           {/* Drop zone overlay for artwork/folder drops */}
@@ -409,16 +480,13 @@ export const InventoryArtworkList = ({
 
           {/* Nested indicator */}
           {nestLevel > 0 && (
-            <CornerDownRight className="relative z-10 h-4 w-4 text-orange-400" />
+            <CornerDownRight className="relative z-10 h-4 w-4 text-slate-300" />
           )}
 
           {/* Drag handle */}
           <button
             type="button"
-            className={cn(
-              "relative z-10 cursor-grab transition active:cursor-grabbing",
-              nestLevel > 0 ? 'text-orange-400 hover:text-orange-600' : 'text-amber-400 hover:text-amber-600'
-            )}
+            className="relative z-10 cursor-grab text-slate-300 transition hover:text-slate-500 active:cursor-grabbing"
             onMouseDown={(e) => e.stopPropagation()}
           >
             <GripVertical className="h-4 w-4" />
@@ -428,10 +496,7 @@ export const InventoryArtworkList = ({
           <button
             type="button"
             onClick={() => toggleFolderExpanded(folder.id)}
-            className={cn(
-              "relative z-10 flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-amber-200/50",
-              nestLevel > 0 ? 'text-orange-600' : 'text-amber-600'
-            )}
+            className="relative z-10 flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
           >
             {isExpanded ? (
               <ChevronDown className="h-5 w-5" />
@@ -441,14 +506,11 @@ export const InventoryArtworkList = ({
           </button>
 
           {/* Folder icon */}
-          <div className={cn(
-            "relative z-10 flex h-10 w-10 items-center justify-center rounded-xl",
-            nestLevel > 0 ? 'bg-orange-100' : 'bg-amber-100'
-          )}>
+          <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
             {isExpanded ? (
-              <FolderOpen className={cn("h-5 w-5", nestLevel > 0 ? 'text-orange-600' : 'text-amber-600')} />
+              <FolderOpen className="h-5 w-5 text-blue-600" />
             ) : (
-              <Folder className={cn("h-5 w-5", nestLevel > 0 ? 'text-orange-600' : 'text-amber-600')} />
+              <Folder className="h-5 w-5 text-blue-600" />
             )}
           </div>
 
@@ -585,17 +647,33 @@ export const InventoryArtworkList = ({
       {/* Root Folders */}
       {rootFolders.map((folder, index) => renderFolderRow(folder, index, 0))}
 
-      {/* Separator if both folders and root artworks exist */}
-      {rootFolders.length > 0 && rootArtworks.length > 0 && (
+      {/* Uncategorized section for root-level artworks */}
+      {rootFolders.length > 0 && (
         <div className="flex items-center gap-4 py-2">
           <div className="h-px flex-1 bg-slate-200" />
-          <span className="text-xs font-medium text-slate-400">Uncategorized</span>
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Uncategorized
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              {rootArtworks.length} artwork{rootArtworks.length === 1 ? '' : 's'}
+            </p>
+          </div>
           <div className="h-px flex-1 bg-slate-200" />
         </div>
       )}
 
       {/* Root level artworks (not in any folder) */}
       {rootArtworks.map((artwork) => renderArtworkRow(artwork, 0))}
+
+      {rootFolders.length > 0 && rootArtworks.length === 0 && (
+        <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center">
+          <h3 className="text-base font-semibold text-slate-900">No uncategorized artworks</h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Artworks that are not in a folder will appear here.
+          </p>
+        </div>
+      )}
 
       {/* Empty state */}
       {rootFolders.length === 0 && artworks.length === 0 && (

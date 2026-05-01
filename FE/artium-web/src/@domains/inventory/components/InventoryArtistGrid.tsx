@@ -9,8 +9,11 @@ type InventoryArtistGridProps = {
 export const InventoryArtistGrid = ({ artists }: InventoryArtistGridProps) => {
   if (artists.length === 0) {
     return (
-      <div className="rounded-2xl border border-black/10 bg-white py-10 text-center text-base text-slate-500">
-        No artists found.
+      <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 px-5 py-10 text-center">
+        <h3 className="text-base font-semibold text-slate-900">No followed artists found</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Follow artists from their profiles to keep them here.
+        </p>
       </div>
     )
   }

@@ -5,4 +5,9 @@ export type InventoryArtist = {
   artworkCount: number
   artworkThumbnails: string[] // Array of artwork thumbnail URLs
   isVerified?: boolean
+  profileHref: string
+  followedAt?: string | null
+  location?: string
+  bio?: string
+  isMutual?: boolean
 }

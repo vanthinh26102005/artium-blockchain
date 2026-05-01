@@ -68,8 +68,6 @@ export const InventoryToolbar = ({
   onSearchChange,
   viewMode,
   onViewModeChange,
-  filteredCount,
-  totalCount,
   idsOnPage,
   onMoveSelected,
   onOpenExport,
@@ -242,9 +240,9 @@ export const InventoryToolbar = ({
               activeTab === 'artists'
                 ? 'bg-slate-100 text-slate-900'
                 : 'text-slate-700 hover:text-slate-900'
-            }`}
+              }`}
           >
-            Artists
+            Followed artists
           </button>
         </div>
       )}

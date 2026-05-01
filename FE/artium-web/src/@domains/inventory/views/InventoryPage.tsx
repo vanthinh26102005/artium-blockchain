@@ -26,6 +26,9 @@ import { Metadata } from '@/components/SEO/Metadata'
 import { Button } from '@shared/components/ui/button'
 import artworkApis from '@shared/apis/artworkApis'
 import artworkFolderApis from '@shared/apis/artworkFolderApis'
+import followersApis, { type FollowerObject } from '@shared/apis/followersApis'
+import profileApis from '@shared/apis/profileApis'
+import usersApi from '@shared/apis/usersApi'
 
 // @domains - inventory
 import { InventoryArtistGrid } from '@domains/inventory/components/InventoryArtistGrid'
@@ -40,7 +43,6 @@ import { InventoryToolbar } from '@domains/inventory/components/InventoryToolbar
 import { UploadArtworkMenu } from '@domains/inventory/components/menus/UploadArtworkMenu'
 import { useDebounce } from '@domains/inventory/hooks/useDebounce'
 import { useInventoryBootstrap } from '@domains/inventory/hooks/useInventoryBootstrap'
-import { mockInventoryArtists } from '@domains/inventory/mock/mockInventoryArtists'
 import { useInventoryDataStore } from '@domains/inventory/stores/useInventoryDataStore'
 import { useInventorySelectionStore } from '@domains/inventory/stores/useInventorySelectionStore'
 import { useInventoryUiStore } from '@domains/inventory/stores/useInventoryUiStore'
@@ -49,8 +51,10 @@ import {
   type InventoryFilters,
 } from '@domains/inventory/types/inventoryFilters'
 import { type InventoryArtwork, type DragItemData } from '@domains/inventory/types/inventoryArtwork'
+import { type InventoryArtist } from '@domains/inventory/types/inventoryArtist'
 import { type InventoryFolder } from '@domains/inventory/types/inventoryFolder'
 import { type InventoryViewMode } from '@domains/inventory/types/inventoryUi'
+import { mapFollowedArtistToInventory } from '@domains/inventory/utils/inventoryArtistMapper'
 import { mapArtworkToInventory } from '@domains/inventory/utils/inventoryApiMapper'
 import {
   getAuctionHandoffHref,
@@ -62,6 +66,49 @@ import { InventoryFolderCard } from '@domains/inventory/components/InventoryFold
 import { InventoryArtworkGridViewItem } from '@domains/inventory/components/InventoryArtworkGridViewItem'
 
 type FolderWithCount = InventoryFolder & { itemCount: number }
+
+const FOLLOWED_ARTIST_ARTWORK_PREVIEW_LIMIT = 4
+
+const loadFollowedArtist = async (relationship: FollowerObject): Promise<InventoryArtist> => {
+  const followedUserId = relationship.followedUserId
+  const [userResult, sellerProfileResult, artworksResult] = await Promise.allSettled([
+    usersApi.getUserById(followedUserId),
+    profileApis.getSellerProfileByUserId(followedUserId),
+    artworkApis.listArtworksPaginated({
+      sellerId: followedUserId,
+      isPublished: true,
+      skip: 0,
+      take: FOLLOWED_ARTIST_ARTWORK_PREVIEW_LIMIT,
+    }),
+  ])
+
+  const user = userResult.status === 'fulfilled' ? userResult.value : null
+  const sellerProfile =
+    sellerProfileResult.status === 'fulfilled' ? sellerProfileResult.value : null
+  const artworksPage =
+    artworksResult.status === 'fulfilled'
+      ? artworksResult.value
+      : {
+          data: [],
+          pagination: {
+            total: 0,
+            skip: 0,
+            take: 0,
+            totalPages: 1,
+            currentPage: 1,
+            hasNext: false,
+            hasPrev: false,
+          },
+        }
+
+  return mapFollowedArtistToInventory({
+    relationship,
+    user,
+    sellerProfile,
+    artworks: artworksPage.data,
+    artworkTotal: artworksPage.pagination.total,
+  })
+}
 
 export const InventoryPage = () => {
   // -- hooks --
@@ -84,6 +131,11 @@ export const InventoryPage = () => {
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const [followedArtists, setFollowedArtists] = useState<InventoryArtist[]>([])
+  const [followedArtistsTotal, setFollowedArtistsTotal] = useState(0)
+  const [followedArtistsTotalPages, setFollowedArtistsTotalPages] = useState(1)
+  const [isFollowedArtistsLoading, setIsFollowedArtistsLoading] = useState(false)
+  const [followedArtistsError, setFollowedArtistsError] = useState<string | null>(null)
   const [isDeletingArtwork, setIsDeletingArtwork] = useState(false)
   const [refreshToken, setRefreshToken] = useState(0)
 
@@ -94,7 +146,6 @@ export const InventoryPage = () => {
   const viewMode = useInventoryUiStore((state) => state.viewMode)
   const setViewMode = useInventoryUiStore((state) => state.setViewMode)
   const activeTab = useInventoryUiStore((state) => state.activeTab)
-  const setActiveTab = useInventoryUiStore((state) => state.setActiveTab)
   const user = useAuthStore((state) => state.user)
   const artworks = useInventoryDataStore((state) => state.artworks)
   const setArtworks = useInventoryDataStore((state) => state.setArtworks)
@@ -149,15 +200,23 @@ export const InventoryPage = () => {
 
   const filteredArtists = useMemo(() => {
     if (!normalizedSearchName) {
-      return mockInventoryArtists
+      return followedArtists
     }
 
-    return mockInventoryArtists.filter((artist) =>
-      artist.name.toLowerCase().includes(normalizedSearchName),
+    return followedArtists.filter((artist) =>
+      [artist.name, artist.location, artist.bio]
+        .filter(Boolean)
+        .some((value) => value!.toLowerCase().includes(normalizedSearchName)),
     )
-  }, [normalizedSearchName])
+  }, [followedArtists, normalizedSearchName])
 
   const idsOnPage = useMemo(() => artworks.map((artwork) => artwork.id), [artworks])
+  const uncategorizedArtworks = useMemo(
+    () => artworks.filter((artwork) => !artwork.folderId),
+    [artworks],
+  )
+  const gridArtworks =
+    viewMode === 'grid' && foldersWithCounts.length > 0 ? uncategorizedArtworks : artworks
 
   useEffect(() => {
     setPage(1)
@@ -240,6 +299,70 @@ export const InventoryPage = () => {
     user?.id,
   ])
 
+  useEffect(() => {
+    if (!user?.id) {
+      setFollowedArtists([])
+      setFollowedArtistsTotal(0)
+      setFollowedArtistsTotalPages(1)
+      setIsFollowedArtistsLoading(false)
+      setFollowedArtistsError(null)
+      return
+    }
+
+    if (activeTab !== 'artists') {
+      setIsFollowedArtistsLoading(false)
+      return
+    }
+
+    let isActive = true
+    const currentUserId = user.id
+    setIsFollowedArtistsLoading(true)
+    setFollowedArtistsError(null)
+
+    const loadFollowedArtists = async () => {
+      try {
+        const relationships = await followersApis.getFollowing(currentUserId, {
+          skip: (page - 1) * pageSize,
+          take: pageSize + 1,
+        })
+        const hasNextPage = relationships.length > pageSize
+        const pageRelationships = relationships.slice(0, pageSize)
+        const artists = await Promise.all(pageRelationships.map(loadFollowedArtist))
+
+        if (!isActive) {
+          return
+        }
+
+        setFollowedArtists(artists)
+        const estimatedTotal =
+          (page - 1) * pageSize + pageRelationships.length + (hasNextPage ? 1 : 0)
+        setFollowedArtistsTotal(estimatedTotal)
+        setFollowedArtistsTotalPages(Math.max(1, page + (hasNextPage ? 1 : 0)))
+      } catch (error) {
+        if (!isActive) {
+          return
+        }
+
+        setFollowedArtists([])
+        setFollowedArtistsTotal(0)
+        setFollowedArtistsTotalPages(1)
+        setFollowedArtistsError(
+          error instanceof Error ? error.message : 'Failed to load followed artists.',
+        )
+      } finally {
+        if (isActive) {
+          setIsFollowedArtistsLoading(false)
+        }
+      }
+    }
+
+    void loadFollowedArtists()
+
+    return () => {
+      isActive = false
+    }
+  }, [activeTab, page, pageSize, user?.id])
+
   // -- handlers --
   const handleSearchChange = (value: string) => {
     setSearchName(value)
@@ -298,7 +421,7 @@ export const InventoryPage = () => {
         sellerId: user.id,
       })
       setToastMessage('Artwork moved to folder')
-    } catch (error) {
+    } catch {
       // Rollback optimistic update
       optimisticMoveArtwork(artworkId, previousFolderId ?? undefined)
       setToastMessage('Failed to move artwork')
@@ -333,6 +456,8 @@ export const InventoryPage = () => {
   }
 
   const handleCreateFolder = async (name: string, _description: string) => {
+    void _description
+
     if (!user?.id) {
       setToastMessage('Please log in to create a folder.')
       return
@@ -572,7 +697,7 @@ export const InventoryPage = () => {
         sellerId: user.id,
         folderIds: newOrderIds,
       })
-    } catch (error) {
+    } catch {
       setToastMessage('Failed to save folder order')
       // Revert by reordering back
       reorderFolders(newIndex, oldIndex)
@@ -618,7 +743,7 @@ export const InventoryPage = () => {
           sellerId: user.id,
         })
         setToastMessage('Artwork moved to folder')
-      } catch (error) {
+      } catch {
         // Rollback optimistic update
         optimisticMoveArtwork(artworkId, previousFolderId)
         setToastMessage('Failed to move artwork')
@@ -699,9 +824,20 @@ export const InventoryPage = () => {
             {activeTab === 'artists' ? (
               <>
                 {/* artists view */}
-                {isLoading ? (
-                  <div className="mt-4 rounded-2xl border border-black/10 bg-white py-10 text-center text-base text-slate-500">
-                    Loading...
+                {followedArtistsError ? (
+                  <div className="mt-4 rounded-[24px] border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+                    {followedArtistsError}
+                  </div>
+                ) : null}
+
+                {isFollowedArtistsLoading ? (
+                  <div className="mt-4 space-y-4">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="h-32 animate-pulse rounded-[28px] border border-slate-200 bg-slate-50"
+                      />
+                    ))}
                   </div>
                 ) : viewMode === 'list' ? (
                   <div className="mt-4">
@@ -715,12 +851,16 @@ export const InventoryPage = () => {
 
                 <div className="mt-4">
                   <Pagination
-                    page={1}
-                    totalPages={1}
-                    total={filteredArtists.length}
-                    pageSize={20}
-                    onPageChange={() => {}}
-                    onPageSizeChange={() => {}}
+                    page={page}
+                    totalPages={
+                      normalizedSearchName
+                        ? Math.max(1, Math.ceil(filteredArtists.length / pageSize))
+                        : followedArtistsTotalPages
+                    }
+                    total={normalizedSearchName ? filteredArtists.length : followedArtistsTotal}
+                    pageSize={pageSize}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
                   />
                 </div>
               </>
@@ -742,15 +882,42 @@ export const InventoryPage = () => {
                   </div>
                 ) : viewMode === 'grid' ? (
                   <div className="mt-4">
-                    <InventoryArtworkGrid
-                      artworks={artworks}
-                      onEdit={handleEditArtwork}
-                      onMove={handleMoveArtwork}
-                      onDelete={handleOpenDeleteModal}
-                      onOpenDetails={handleOpenDetails}
-                      onToggleProfileVisibility={handleToggleProfileVisibility}
-                      onStartAuction={handleStartAuction}
-                    />                    
+                    {foldersWithCounts.length > 0 ? (
+                      <div className="mb-3 flex items-center gap-4">
+                        <div className="h-px flex-1 bg-slate-200" />
+                        <div className="text-center">
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                            Uncategorized
+                          </p>
+                          <p className="mt-1 text-sm text-slate-500">
+                            {uncategorizedArtworks.length} artwork
+                            {uncategorizedArtworks.length === 1 ? '' : 's'}
+                          </p>
+                        </div>
+                        <div className="h-px flex-1 bg-slate-200" />
+                      </div>
+                    ) : null}
+
+                    {foldersWithCounts.length > 0 && uncategorizedArtworks.length === 0 ? (
+                      <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center">
+                        <h3 className="text-base font-semibold text-slate-900">
+                          No uncategorized artworks
+                        </h3>
+                        <p className="mt-1 text-sm text-slate-500">
+                          Artworks that are not in a folder will appear here.
+                        </p>
+                      </div>
+                    ) : (
+                      <InventoryArtworkGrid
+                        artworks={gridArtworks}
+                        onEdit={handleEditArtwork}
+                        onMove={handleMoveArtwork}
+                        onDelete={handleOpenDeleteModal}
+                        onOpenDetails={handleOpenDetails}
+                        onToggleProfileVisibility={handleToggleProfileVisibility}
+                        onStartAuction={handleStartAuction}
+                      />
+                    )}
                   </div>
                 ) : (
                   <div className="mt-4">

@@ -12,6 +12,7 @@ export const mockInventoryArtists: InventoryArtist[] = [
       'https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=400',
     ],
     isVerified: false,
+    profileHref: '/profile/artist-1',
   },
   {
     id: 'artist-2',
@@ -19,6 +20,7 @@ export const mockInventoryArtists: InventoryArtist[] = [
     artworkCount: 1,
     artworkThumbnails: [],
     isVerified: true,
+    profileHref: '/profile/artist-2',
   },
   {
     id: 'artist-3',
@@ -26,5 +28,6 @@ export const mockInventoryArtists: InventoryArtist[] = [
     artworkCount: 1,
     artworkThumbnails: [],
     isVerified: true,
+    profileHref: '/profile/artist-3',
   },
 ]
