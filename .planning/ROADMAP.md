@@ -218,7 +218,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phase 6 is independe
 | 30. Order-linked invoice backend contract and materialization | 2/2 | Complete    | 2026-04-30 |
 | 31. Orders invoice preview and extraction UI | 2/2 | Complete    | 2026-04-30 |
 | 32. Order invoice validation and milestone closure | 0/TBD | Not started | - |
-| 33. Profile community media upload contract | 0/TBD | Not started | - |
+| 33. Profile community media upload contract | 3/3 | Planned | 2026-05-01 |
 | 34. Moment device upload composer | 0/TBD | Not started | - |
 | 35. Moodboard multi-upload composer and profile polish | 0/TBD | Not started | - |
 
@@ -563,13 +563,27 @@ Cross-cutting constraints:
   3. Backend validates file type, size, count, and authenticated ownership before storage or community creation can reference the uploaded media.
   4. Frontend profile API/upload modules expose typed functions for profile media upload while reusing existing shared `apiUpload` and structured error patterns.
   5. Moment and moodboard creation still derive `userId` from the authenticated request and do not accept pasted external links as proof of uploaded profile media.
-**Plans:** TBD
+**Plans:**
+
+**Wave 1**
+- `33-01` - Backend community media upload contract and pending media records
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- `33-02` - Media ID creation proof for moments and moodboards
+
+**Wave 3** *(blocked on Wave 1 and Wave 2 completion)*
+- `33-03` - Frontend profile upload API helpers and media ID request types
+
 **UI hint:** no
 
 Cross-cutting constraints:
 - Reuse existing upload transport patterns from `FE/artium-web/src/@shared/services/apiClient.ts`, `FE/artium-web/src/@shared/apis/artworkUploadApi.ts`, and `FE/artium-web/src/@shared/hooks/useArtworkUpload.ts`.
 - Backend work should extend the current gateway/community-service model rather than bypassing it with client-only media URLs.
 - Upload responses must be DTO-backed and stable enough for the Phase 34 and Phase 35 composers.
+- Public upload routes stay under `/community/uploads/...`.
+- Uploaded media storage paths use `community/{userId}/moments` and `community/{userId}/moodboards`.
+- Moment upload accepts exactly one image or video; moodboard upload accepts 1 to 10 files.
+- Create APIs consume backend-issued `mediaId` values and do not trust arbitrary external URLs as uploaded media proof.
 
 ### Phase 34: Moment device upload composer
 
