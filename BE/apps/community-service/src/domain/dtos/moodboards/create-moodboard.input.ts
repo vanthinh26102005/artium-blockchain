@@ -3,7 +3,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
   IsArray,
   IsBoolean,
   MaxLength,
@@ -39,12 +38,21 @@ export class CreateMoodboardInput {
   description?: string | null;
 
   @ApiPropertyOptional({
-    description: 'Cover image URL',
-    example: 'https://storage.example.com/moodboards/cover.jpg',
+    description: 'Ordered backend-issued uploaded community media IDs',
+    example: ['media-uuid-1', 'media-uuid-2'],
   })
   @IsOptional()
-  @IsUrl()
-  coverImageUrl?: string | null;
+  @IsArray()
+  @IsString({ each: true })
+  mediaIds?: string[] | null;
+
+  @ApiPropertyOptional({
+    description: 'Uploaded community media ID to use as the cover',
+    example: 'media-uuid-1',
+  })
+  @IsOptional()
+  @IsString()
+  coverMediaId?: string | null;
 
   @ApiPropertyOptional({
     description: 'Whether the moodboard is private',

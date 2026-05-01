@@ -29,7 +29,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
   MaxLength,
 } from 'class-validator';
 import { MICROSERVICES } from '../../../../config';
@@ -62,11 +61,20 @@ class CreateMoodboardBody {
   description?: string;
 
   @ApiPropertyOptional({
-    description: 'Cover image URL',
+    description: 'Ordered backend-issued uploaded community media IDs',
+    type: [String],
   })
   @IsOptional()
-  @IsUrl()
-  coverImageUrl?: string;
+  @IsArray()
+  @IsString({ each: true })
+  mediaIds?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Uploaded community media ID to use as the cover',
+  })
+  @IsOptional()
+  @IsString()
+  coverMediaId?: string;
 
   @ApiPropertyOptional({
     description: 'Whether the moodboard is private',

@@ -7,6 +7,7 @@ export * from './moment-tagged-artwork.entity';
 export * from './moment-view.entity';
 export * from './moments.entity';
 export * from './moodboard-collaborator.entity';
+export * from './moodboard-media.entity';
 export * from './moodboard_artworks.entity';
 export * from './moodboards.entity';
 export * from './testimonials.entity';

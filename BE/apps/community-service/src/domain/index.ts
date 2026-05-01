@@ -11,6 +11,7 @@ export {
   CreateMoodboardInput,
   UpdateMoodboardInput,
   AddArtworkToMoodboardInput,
+  MoodboardMediaObject,
   MoodboardObject,
   // Followers
   FollowUserInput,

@@ -1,4 +1,50 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { CommunityMediaType } from '@app/common';
+
+export class MoodboardMediaObject {
+  @ApiProperty({
+    description: 'Uploaded moodboard media row ID',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'Pending community media record consumed by this row',
+  })
+  communityMediaId: string;
+
+  @ApiProperty({ enum: CommunityMediaType })
+  mediaType: CommunityMediaType;
+
+  @ApiProperty({
+    description: 'Public URL for the media',
+  })
+  url: string;
+
+  @ApiPropertyOptional({
+    description: 'Secure URL for the media',
+  })
+  secureUrl?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Thumbnail or poster URL when available',
+  })
+  thumbnailUrl?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Video duration in seconds when available',
+  })
+  durationSeconds?: number | null;
+
+  @ApiProperty({
+    description: 'Display order inside the moodboard',
+  })
+  displayOrder: number;
+
+  @ApiProperty({
+    description: 'Whether this item is the moodboard cover',
+  })
+  isCover: boolean;
+}
 
 export class MoodboardObject {
   @ApiProperty({
@@ -76,6 +122,12 @@ export class MoodboardObject {
     type: [String],
   })
   tags?: string[] | null;
+
+  @ApiPropertyOptional({
+    description: 'Uploaded media items in display order',
+    type: [MoodboardMediaObject],
+  })
+  media?: MoodboardMediaObject[];
 
   @ApiProperty({
     description: 'Display order for sorting',
