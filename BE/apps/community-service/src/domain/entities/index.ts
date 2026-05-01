@@ -1,5 +1,6 @@
 export * from './activity-feed.entity';
 export * from './comment.entity';
+export * from './community-media.entity';
 export * from './followers.entity';
 export * from './like.entity';
 export * from './moment-tagged-artwork.entity';

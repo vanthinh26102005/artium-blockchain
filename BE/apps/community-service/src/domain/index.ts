@@ -33,3 +33,4 @@ export {
 
 // Interfaces
 export * from './interfaces';
+export * from './services';

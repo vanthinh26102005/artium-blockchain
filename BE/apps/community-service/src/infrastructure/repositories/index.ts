@@ -1,3 +1,4 @@
+export * from './community-media.repository';
 export * from './moment.repository';
 export * from './moodboard.repository';
 export * from './follower.repository';

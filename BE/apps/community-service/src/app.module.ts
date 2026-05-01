@@ -22,6 +22,9 @@ import {
   Like,
   Testimonial,
   ActivityFeed,
+  CommunityMedia,
+  CommunityMediaStorageService,
+  ICommunityMediaRepository,
   IMomentRepository,
   IMoodboardRepository,
   IMoodboardArtworkRepository,
@@ -37,6 +40,7 @@ import {
   FollowerRepository,
   CommentRepository,
   LikeRepository,
+  CommunityMediaRepository,
 } from './infrastructure';
 
 import {
@@ -52,6 +56,8 @@ import {
   UnfollowUserHandler,
   CreateCommentHandler,
   SetLikeStatusHandler,
+  UploadCommunityMomentMediaHandler,
+  UploadCommunityMoodboardMediaHandler,
 } from './application';
 
 import {
@@ -71,6 +77,7 @@ import {
   FollowersMicroserviceController,
   CommentsMicroserviceController,
   LikesMicroserviceController,
+  CommunityMediaMicroserviceController,
   HealthController,
 } from './presentation';
 
@@ -90,6 +97,8 @@ export const CommandHandlers = [
 
   CreateCommentHandler,
   SetLikeStatusHandler,
+  UploadCommunityMomentMediaHandler,
+  UploadCommunityMoodboardMediaHandler,
 ];
 
 export const QueryHandlers = [
@@ -108,6 +117,7 @@ export const QueryHandlers = [
 
 export const Repositories = [
   { provide: IMomentRepository, useClass: MomentRepository },
+  { provide: ICommunityMediaRepository, useClass: CommunityMediaRepository },
   { provide: IMoodboardRepository, useClass: MoodboardRepository },
   {
     provide: IMoodboardArtworkRepository,
@@ -120,6 +130,7 @@ export const Repositories = [
 
 export const Services = [
   { provide: ITransactionService, useClass: TransactionService },
+  CommunityMediaStorageService,
 ];
 
 export const Controllers = [
@@ -129,6 +140,7 @@ export const Controllers = [
   FollowersMicroserviceController,
   CommentsMicroserviceController,
   LikesMicroserviceController,
+  CommunityMediaMicroserviceController,
 ];
 
 @Module({
@@ -151,6 +163,7 @@ export const Controllers = [
       Like,
       Testimonial,
       ActivityFeed,
+      CommunityMedia,
       OutboxEntity,
     ]),
 
