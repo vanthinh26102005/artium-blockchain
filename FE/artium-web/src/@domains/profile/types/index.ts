@@ -87,6 +87,24 @@ export type MomentComment = {
   status?: 'pending' | 'error'
 }
 
+export type ProfileUploadedMediaStatus = 'pending' | 'consumed' | 'rejected' | 'deleted'
+
+export type ProfileUploadedMediaType = 'image' | 'video'
+
+export type ProfileUploadedMedia = {
+  mediaId: string
+  url: string
+  secureUrl: string
+  mediaType: ProfileUploadedMediaType
+  mimeType: string
+  originalFilename: string
+  size: number
+  status: ProfileUploadedMediaStatus
+  durationSeconds?: number | null
+  thumbnailUrl?: string | null
+  createdAt: string | Date
+}
+
 export type ProfileMoodboard = {
   id: string
   title: string

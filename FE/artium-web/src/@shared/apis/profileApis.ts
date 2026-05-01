@@ -8,7 +8,7 @@ type SellerProfilePayload = {
   displayName: string
   bio?: string | null
   profileImageUrl?: string | null
-  coverImageUrl?: string | null
+  coverImageUrl?: null | string
   websiteUrl?: string | null
   location?: string | null
   instagramUrl?: string | null
@@ -43,7 +43,7 @@ type UpdateSellerProfileInput = {
   displayName?: string
   bio?: string | null
   profileImageUrl?: string | null
-  coverImageUrl?: string | null
+  coverImageUrl?: null | string
   websiteUrl?: string | null
   location?: string | null
   instagramUrl?: string | null
@@ -75,9 +75,9 @@ type UpdateSellerProfileResponse = {
 type MomentApiItem = {
   id: string
   userId: string
-  mediaUrl: string
+  mediaUrl: (string & {})
   mediaType: 'image' | 'video'
-  thumbnailUrl?: string | null
+  thumbnailUrl?: null | string
   caption?: string | null
   isPinned: boolean
   isArchived: boolean
@@ -97,7 +97,7 @@ type MoodboardApiItem = {
   userId: string
   title: string
   description?: string | null
-  coverImageUrl?: string | null
+  coverImageUrl?: null | string
   isPrivate: boolean
   artworkCount: number
   likeCount: number
@@ -153,9 +153,7 @@ type LikeStatusResponse = {
 }
 
 type CreateMomentInput = {
-  mediaUrl: string
-  mediaType: 'image' | 'video'
-  thumbnailUrl?: string
+  mediaId: string
   caption?: string
   isPinned?: boolean
   location?: string
@@ -167,7 +165,8 @@ type CreateMomentInput = {
 type CreateMoodboardInput = {
   title: string
   description?: string
-  coverImageUrl?: string
+  mediaIds?: string[]
+  coverMediaId?: string
   isPrivate?: boolean
   isCollaborative?: boolean
   tags?: string[]
@@ -178,7 +177,7 @@ type CreateSellerProfileInput = {
   displayName: string
   bio?: string | null
   profileImageUrl?: string | null
-  coverImageUrl?: string | null
+  coverImageUrl?: null | string
   websiteUrl?: string | null
   location?: string | null
 }
