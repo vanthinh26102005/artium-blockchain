@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { Check, X } from 'lucide-react'
 import { type CSSProperties } from 'react'
+import { WALLET_TARGET_CHAIN } from '@domains/auth/constants/wallet'
 import {
   Dialog,
   DialogOverlay,
@@ -36,7 +37,7 @@ const formatTransactionHash = (value: string) => `${value.slice(0, 7)}...${value
 const formatEthDisplay = (value: number) => value.toFixed(2)
 
 const getTransactionUrl = (transactionHash: string) =>
-  `https://etherscan.io/tx/${encodeURIComponent(transactionHash)}`
+  `${WALLET_TARGET_CHAIN.blockExplorerUrl.replace(/\/$/, '')}/tx/${encodeURIComponent(transactionHash)}`
 
 export const ConfirmedBidState = ({
   isOpen,

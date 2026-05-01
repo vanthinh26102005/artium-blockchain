@@ -5,19 +5,13 @@ import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google'
 import { useRouter } from 'next/router'
 import { AlertCircle, ArrowLeft, ExternalLink, LoaderCircle, Receipt, ShieldCheck, Wallet } from 'lucide-react'
 import { WALLET_TARGET_CHAIN } from '@domains/auth/constants/wallet'
-import { getMockOnChainOrderRecord } from '@domains/orders/mock/mockOnChainOrders'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import artworkApis, { type ArtworkApiItem } from '@shared/apis/artworkApis'
 import orderApis, { OrderItemResponse, OrderResponse } from '@shared/apis/orderApis'
 import type { ApiError } from '@shared/services/apiClient'
 
 type OnChainOrderDetailPageViewProps = {
   onChainOrderId: string
-  isDemoMode?: boolean
-  demoArtworkId?: string
-  demoArtworkTitle?: string
-  demoArtworkImageUrl?: string
-  demoBidEth?: string
-  demoTransactionHash?: string
 }
 
 type StatusTone = 'neutral' | 'dark' | 'success' | 'warning' | 'danger'
@@ -262,96 +256,6 @@ const getUserLabel = (order: OrderResponse, role: 'seller' | 'buyer') => {
   return wallet ? shortenHash(wallet, 8, 4).toUpperCase() : role === 'seller' ? 'SELLER_NODE' : 'COLLECTOR_NODE'
 }
 
-const getTrimmedValue = (value?: string | null) => {
-  if (typeof value !== 'string') {
-    return null
-  }
-
-  const normalized = value.trim()
-  return normalized.length > 0 ? normalized : null
-}
-
-const formatEthStringToWei = (value?: string | null) => {
-  const normalized = getTrimmedValue(value)
-
-  if (!normalized || !/^\d+(\.\d+)?$/.test(normalized)) {
-    return null
-  }
-
-  const [wholePart, fractionPart = ''] = normalized.split('.')
-  const whole = wholePart.replace(/^0+(?=\d)/, '') || '0'
-  const fraction = fractionPart.slice(0, 18).padEnd(18, '0')
-
-  return `${whole}${fraction}`.replace(/^0+(?=\d)/, '') || '0'
-}
-
-const applyDemoBidSnapshot = ({
-  order,
-  items,
-  demoArtworkId,
-  demoArtworkTitle,
-  demoArtworkImageUrl,
-  demoBidEth,
-  demoTransactionHash,
-}: {
-  order: OrderResponse
-  items: OrderItemResponse[]
-  demoArtworkId?: string
-  demoArtworkTitle?: string
-  demoArtworkImageUrl?: string
-  demoBidEth?: string
-  demoTransactionHash?: string
-}) => {
-  const artworkId = getTrimmedValue(demoArtworkId)
-  const artworkTitle = getTrimmedValue(demoArtworkTitle)
-  const artworkImageUrl = getTrimmedValue(demoArtworkImageUrl)
-  const bidEth = getTrimmedValue(demoBidEth)
-  const transactionHash = getTrimmedValue(demoTransactionHash)
-  const parsedBidValue = bidEth ? Number.parseFloat(bidEth) : Number.NaN
-  const hasBidValue = Number.isFinite(parsedBidValue) && parsedBidValue >= 0
-  const discountAmount = Number.isFinite(Number(order.discountAmount ?? 0))
-    ? Number(order.discountAmount ?? 0)
-    : 0
-  const totalAmount = hasBidValue
-    ? Number(
-        (parsedBidValue + order.shippingCost + order.taxAmount - discountAmount).toFixed(2),
-      )
-    : order.totalAmount
-  const bidAmountWei = formatEthStringToWei(bidEth)
-
-  return {
-    order: {
-      ...order,
-      ...(transactionHash ? { txHash: transactionHash } : {}),
-      ...(hasBidValue
-        ? {
-            subtotal: parsedBidValue,
-            totalAmount,
-          }
-        : {}),
-      ...(bidAmountWei ? { bidAmountWei } : {}),
-    },
-    items: items.map((item, index) => {
-      if (index !== 0) {
-        return item
-      }
-
-      return {
-        ...item,
-        ...(artworkId ? { artworkId } : {}),
-        ...(artworkTitle
-          ? {
-              artworkTitle,
-              artworkDescription: `A preserved artwork snapshot captured from the live auction bid flow for "${artworkTitle}".`,
-            }
-          : {}),
-        ...(artworkImageUrl ? { artworkImageUrl } : {}),
-        ...(hasBidValue ? { priceAtPurchase: parsedBidValue } : {}),
-      }
-    }),
-  }
-}
-
 const getEstimatedCompletion = (order: OrderResponse) =>
   order.estimatedDeliveryDate || order.deliveredAt || order.shippedAt || order.confirmedAt || order.createdAt
 
@@ -475,20 +379,13 @@ const PageShell = ({
   </div>
 )
 
-export const OnChainOrderDetailPageView = ({
-  onChainOrderId,
-  isDemoMode = false,
-  demoArtworkId,
-  demoArtworkTitle,
-  demoArtworkImageUrl,
-  demoBidEth,
-  demoTransactionHash,
-}: OnChainOrderDetailPageViewProps) => {
+export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetailPageViewProps) => {
   const router = useRouter()
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const isHydrated = useAuthStore((state) => state.isHydrated)
   const [order, setOrder] = useState<OrderResponse | null>(null)
   const [items, setItems] = useState<OrderItemResponse[]>([])
+  const [artwork, setArtwork] = useState<ArtworkApiItem | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
@@ -496,36 +393,6 @@ export const OnChainOrderDetailPageView = ({
 
   useEffect(() => {
     if (!onChainOrderId) {
-      return
-    }
-
-    if (isDemoMode) {
-      const mockRecord = getMockOnChainOrderRecord(onChainOrderId)
-
-      if (!mockRecord) {
-        setOrder(null)
-        setItems([])
-        setError(null)
-        setNotFound(true)
-        setIsLoading(false)
-        return
-      }
-
-      const demoRecord = applyDemoBidSnapshot({
-        order: mockRecord.order,
-        items: mockRecord.items,
-        demoArtworkId,
-        demoArtworkTitle,
-        demoArtworkImageUrl,
-        demoBidEth,
-        demoTransactionHash,
-      })
-
-      setOrder(demoRecord.order)
-      setItems(demoRecord.items)
-      setError(null)
-      setNotFound(false)
-      setIsLoading(false)
       return
     }
 
@@ -537,6 +404,7 @@ export const OnChainOrderDetailPageView = ({
     if (!isAuthenticated) {
       setOrder(null)
       setItems([])
+      setArtwork(null)
       setError(null)
       setNotFound(false)
       setIsLoading(false)
@@ -558,6 +426,10 @@ export const OnChainOrderDetailPageView = ({
         }
 
         const nextItems = await orderApis.getOrderItems(nextOrder.id)
+        const fallbackArtwork =
+          nextItems.length === 0
+            ? await artworkApis.getArtworkByOnChainAuctionId(nextOrder.onChainOrderId || onChainOrderId)
+            : null
 
         if (cancelled) {
           return
@@ -565,6 +437,7 @@ export const OnChainOrderDetailPageView = ({
 
         setOrder(nextOrder)
         setItems(nextItems)
+        setArtwork(fallbackArtwork)
       } catch (caughtError) {
         if (cancelled) {
           return
@@ -573,6 +446,7 @@ export const OnChainOrderDetailPageView = ({
         const apiError = caughtError as ApiError
         setOrder(null)
         setItems([])
+        setArtwork(null)
 
         if (apiError.status === 404) {
           setNotFound(true)
@@ -593,30 +467,27 @@ export const OnChainOrderDetailPageView = ({
       cancelled = true
     }
   }, [
-    demoArtworkId,
-    demoArtworkImageUrl,
-    demoArtworkTitle,
-    demoBidEth,
-    demoTransactionHash,
     isAuthenticated,
-    isDemoMode,
     isHydrated,
     onChainOrderId,
     retryCount,
   ])
 
   const primaryItem = items[0]
-  const artworkTitle = primaryItem?.artworkTitle || 'Artwork Snapshot Pending'
+  const fallbackArtworkImage =
+    artwork?.thumbnailUrl || artwork?.images?.[0]?.secureUrl || artwork?.images?.[0]?.url || null
+  const artworkTitle = primaryItem?.artworkTitle || artwork?.title || 'Artwork Snapshot Pending'
   const artworkDescription =
     primaryItem?.artworkDescription ||
+    artwork?.description ||
     'A preserved snapshot of the artwork and transaction metadata at the moment the order was created.'
-  const artworkImageUrl = primaryItem?.artworkImageUrl || PLACEHOLDER_ARTWORK
+  const artworkImageUrl = primaryItem?.artworkImageUrl || fallbackArtworkImage || PLACEHOLDER_ARTWORK
   const txHref = getExplorerHref('tx', order?.txHash)
   const contractHref = getExplorerHref('address', order?.contractAddress)
   const sellerHref = getExplorerHref('address', order?.sellerWallet)
   const buyerHref = getExplorerHref('address', order?.buyerWallet)
   const shippingAddressLines = getAddressLines(order?.shippingAddress)
-  if (isLoading || (!isDemoMode && !isHydrated)) {
+  if (isLoading || !isHydrated) {
     return (
       <PageShell>
         <StatePanel
@@ -628,7 +499,7 @@ export const OnChainOrderDetailPageView = ({
     )
   }
 
-  if (!isDemoMode && !isAuthenticated) {
+  if (!isAuthenticated) {
     return (
       <PageShell>
         <StatePanel
@@ -731,7 +602,6 @@ export const OnChainOrderDetailPageView = ({
             </span>
             <StatusChip label={formatOrderStatus(order.status).replace(/\s+/g, '_').toUpperCase()} tone={statusTone} />
             <StatusChip label={formatEscrowState(order.escrowState).replace(/\s+/g, '_').toUpperCase()} tone={statusTone} />
-            {isDemoMode ? <StatusChip label="DEMO_DATA" tone="warning" /> : null}
           </div>
 
           <button
@@ -768,7 +638,7 @@ export const OnChainOrderDetailPageView = ({
       <div className="grid grid-cols-1 gap-12 md:grid-cols-12">
         <div className="space-y-16 md:col-span-7">
           <section id="collections" className="group relative aspect-[4/5] overflow-hidden bg-[#f3f3f3]">
-            {/* The artwork image can come from API storage or data URIs in demo mode, so a plain img keeps it robust. */}
+            {/* The artwork image can come from API storage or a data URI, so a plain img keeps it robust. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={artworkImageUrl}
@@ -868,7 +738,7 @@ export const OnChainOrderDetailPageView = ({
                 </div>
               </div>
               <span className="text-[0.625rem] font-bold tracking-[0.08em] uppercase text-black">
-                {isDemoMode ? 'DEMO_WHITELISTED' : 'WHITELISTED_ENTITY'}
+                WHITELISTED_ENTITY
               </span>
             </div>
           </section>

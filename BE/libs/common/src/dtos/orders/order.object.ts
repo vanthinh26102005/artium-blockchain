@@ -112,6 +112,12 @@ export class OrderObject {
   contractAddress?: string | null;
 
   @ApiPropertyOptional({
+    description: 'Blockchain chain ID that produced the order event',
+    example: '11155111',
+  })
+  chainId?: string | null;
+
+  @ApiPropertyOptional({
     description: 'On-chain escrow state',
     enum: EscrowState,
   })

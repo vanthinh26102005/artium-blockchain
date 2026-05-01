@@ -3,35 +3,37 @@ import { Space_Grotesk } from 'next/font/google'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ChevronDown, Grid2X2, LayoutList, ShieldCheck } from 'lucide-react'
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import {
-  mockArtworks,
-  type DiscoverArtwork,
-  type DiscoverArtworkAuctionStatusKey,
-} from '@domains/discover/mock/mockArtworks'
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import {
   BidEditingModal,
   type AuctionBidLot,
-  type BidOrderStatusPayload,
 } from '@domains/auction/components'
+import { type AuctionLotStatusKey } from '@domains/auction/utils'
+import { placeBidOnAuction, readAuctionState, type AuctionContractState } from '@domains/auction/services/auctionContract'
+import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import artworkApis, { type ArtworkApiItem } from '@shared/apis/artworkApis'
+import orderApis from '@shared/apis/orderApis'
+import type { ApiError } from '@shared/services/apiClient'
 import { Metadata } from '@/components/SEO/Metadata'
 
 type AuctionLot = AuctionBidLot & {
   categoryKey: AuctionCategoryKey
   statusTone: 'live' | 'muted'
+  endTimestamp: number | null
 }
 
-type AuctionCategoryKey = 'all' | 'architectural' | 'sculpture' | 'digital' | 'installation'
+type AuctionCategoryKey = 'all'
 
 type AuctionStatusKey =
   | 'all'
   | 'active'
   | 'ending-soon'
   | 'closed'
-  | 'newly-listed'
-  | 'paused'
 
-type AuctionLotStatusKey = DiscoverArtworkAuctionStatusKey
+type SubmitBidInput = {
+  lot: AuctionBidLot
+  bidAmountEth: string
+}
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -47,11 +49,7 @@ const bodyFont = {
 } satisfies CSSProperties
 
 const categoryOptions: Array<{ key: AuctionCategoryKey; label: string; helper: string }> = [
-  { key: 'all', label: 'ALL WORKS', helper: 'Show every category' },
-  { key: 'architectural', label: 'ARCHITECTURAL', helper: 'Built-form studies and facades' },
-  { key: 'sculpture', label: 'SCULPTURE', helper: 'Objects, forms, and physical studies' },
-  { key: 'digital', label: 'DIGITAL', helper: 'Synthetic and virtual compositions' },
-  { key: 'installation', label: 'INSTALLATION', helper: 'Spatial and large-scale works' },
+  { key: 'all', label: 'ALL ON-CHAIN WORKS', helper: 'Show every contract-backed auction' },
 ]
 
 const statusOptions: Array<{ key: AuctionStatusKey; label: string; helper: string }> = [
@@ -59,35 +57,22 @@ const statusOptions: Array<{ key: AuctionStatusKey; label: string; helper: strin
   { key: 'active', label: 'ACTIVE BIDDING', helper: 'Lots currently accepting bids' },
   { key: 'ending-soon', label: 'ENDING SOON', helper: 'Auctions closing shortly' },
   { key: 'closed', label: 'CLOSED', helper: 'Completed auctions' },
-  { key: 'newly-listed', label: 'NEWLY LISTED', helper: 'Freshly opened lots' },
-  { key: 'paused', label: 'PAUSED / RESERVE', helper: 'Paused or reserve not met' },
 ]
 
-const MIN_ETH = 0.5
+const MIN_ETH = 0
 const MAX_ETH = 50
 const ITEMS_PER_PAGE = 24
-
-const lotCategoryCycle: AuctionCategoryKey[] = [
-  'architectural',
-  'sculpture',
-  'digital',
-  'installation',
-]
 
 const auctionStatusTone: Record<AuctionLotStatusKey, AuctionLot['statusTone']> = {
   active: 'live',
   'ending-soon': 'live',
   closed: 'muted',
-  'newly-listed': 'muted',
-  paused: 'muted',
 }
 
 const auctionStatusPriority: Record<AuctionLotStatusKey, number> = {
   active: 0,
   'ending-soon': 1,
-  'newly-listed': 2,
-  paused: 3,
-  closed: 4,
+  closed: 2,
 }
 
 const formatBidDisplay = (value: number) => {
@@ -95,52 +80,15 @@ const formatBidDisplay = (value: number) => {
   return `${Number.isInteger(normalizedValue) ? normalizedValue.toFixed(0) : normalizedValue.toFixed(1)} ETH`
 }
 
-const hasAuction = (
-  artwork: DiscoverArtwork,
-): artwork is DiscoverArtwork & { auction: NonNullable<DiscoverArtwork['auction']> } =>
-  Boolean(artwork.auction)
-
-const lots: AuctionLot[] = mockArtworks
-  .filter(hasAuction)
-  .sort((leftArtwork, rightArtwork) => {
-    const priorityDelta =
-      auctionStatusPriority[leftArtwork.auction.statusKey] -
-      auctionStatusPriority[rightArtwork.auction.statusKey]
-
-    if (priorityDelta !== 0) {
-      return priorityDelta
-    }
-
-    return rightArtwork.auction.currentBidEth - leftArtwork.auction.currentBidEth
-  })
-  .map((artwork, index) => {
-    return {
-      artworkId: artwork.id,
-      title: artwork.title,
-      bidValue: artwork.auction.currentBidEth,
-      categoryKey: lotCategoryCycle[index % lotCategoryCycle.length],
-      status: artwork.auction.statusLabel,
-      statusKey: artwork.auction.statusKey,
-      endsAt: artwork.auction.endsAt,
-      statusTone: auctionStatusTone[artwork.auction.statusKey],
-      imageSrc: artwork.imageMedium,
-      imageAlt: `Artwork preview of ${artwork.title} by ${artwork.creator.fullName}`,
-    }
-  })
-
 const statusBadgeClass: Record<AuctionLotStatusKey, string> = {
   active: 'bg-[#16a34a]',
   'ending-soon': 'bg-[#dc2626]',
   closed: 'bg-[#9ca3af]',
-  'newly-listed': 'bg-[#2563eb]',
-  paused: 'bg-[#eab308]',
 }
 
 const lotActionLabel: Record<AuctionLotStatusKey, string> = {
   active: 'Place Bid',
   'ending-soon': 'Place Bid',
-  'newly-listed': 'Enter Auction',
-  paused: 'View Artwork',
   closed: 'View Results',
 }
 
@@ -174,24 +122,87 @@ const formatEthDisplay = (value: number) => {
 const isBidActionStatus = (statusKey: AuctionLotStatusKey) =>
   statusKey === 'active' || statusKey === 'ending-soon'
 
-const demoOrderIds = ['42', '314', '9001'] as const
+const getArtworkImage = (artwork: ArtworkApiItem) =>
+  artwork.thumbnailUrl ||
+  artwork.images?.[0]?.secureUrl ||
+  artwork.images?.[0]?.url ||
+  'https://picsum.photos/seed/on-chain-auction/800/1000'
 
-const getDemoOrderIdForLot = (lot: AuctionBidLot) => {
-  const hash = Array.from(lot.artworkId).reduce((sum, char) => sum + char.charCodeAt(0), 0)
-  return demoOrderIds[hash % demoOrderIds.length]
+const formatRemainingStatus = (endTimestamp: number | null, statusKey: AuctionLotStatusKey) => {
+  if (statusKey === 'closed') {
+    return 'Closed'
+  }
+
+  if (!endTimestamp) {
+    return 'Live now'
+  }
+
+  const remainingSeconds = Math.max(0, Math.ceil((endTimestamp - Date.now()) / 1000))
+  if (remainingSeconds <= 0) {
+    return 'Closed'
+  }
+
+  const hours = Math.floor(remainingSeconds / 3600)
+  const minutes = Math.floor((remainingSeconds % 3600) / 60)
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m remaining`
+  }
+
+  return `${Math.max(1, minutes)}m remaining`
 }
 
-const buildDemoOrderQuery = ({ lot, committedBidValue, transactionHash }: BidOrderStatusPayload) => ({
-  demo: '1',
-  demoArtworkId: lot.artworkId,
-  demoArtworkTitle: lot.title,
-  demoArtworkImageUrl: lot.imageSrc,
-  demoBidEth: committedBidValue.toFixed(2),
-  demoTransactionHash: transactionHash,
-})
+const getStatusKeyFromAuction = (auction: AuctionContractState): AuctionLotStatusKey => {
+  if (auction.state !== 0) {
+    return 'closed'
+  }
+
+  const endTimestamp = Number(auction.endTime) * 1000
+  const remainingSeconds = Math.ceil((endTimestamp - Date.now()) / 1000)
+
+  if (!Number.isFinite(endTimestamp) || remainingSeconds <= 0) {
+    return 'closed'
+  }
+
+  return remainingSeconds <= 3600 ? 'ending-soon' : 'active'
+}
+
+const mapArtworkToLot = (artwork: ArtworkApiItem, auction: AuctionContractState): AuctionLot | null => {
+  if (!artwork.onChainAuctionId || !auction.exists) {
+    return null
+  }
+
+  const statusKey = getStatusKeyFromAuction(auction)
+  const endTimestamp = Number(auction.endTime) > 0 ? Number(auction.endTime) * 1000 : null
+  const endsAt = endTimestamp ? new Date(endTimestamp).toISOString() : undefined
+
+  return {
+    artworkId: artwork.id,
+    onChainOrderId: artwork.onChainAuctionId,
+    title: artwork.title,
+    bidValue: auction.highestBidEth,
+    minBidIncrementValue: auction.minBidIncrementEth,
+    categoryKey: 'all',
+    status: formatRemainingStatus(endTimestamp, statusKey),
+    statusKey,
+    endsAt,
+    endTimestamp,
+    statusTone: auctionStatusTone[statusKey],
+    imageSrc: getArtworkImage(artwork),
+    imageAlt: `Artwork preview of ${artwork.title}${artwork.creatorName ? ` by ${artwork.creatorName}` : ''}`,
+  }
+}
+
+const wait = (delayMs: number) => new Promise((resolve) => window.setTimeout(resolve, delayMs))
+
+const isNotFoundApiError = (error: unknown) => (error as ApiError | undefined)?.status === 404
 
 const LiveAuctionPage = () => {
   const router = useRouter()
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const [lots, setLots] = useState<AuctionLot[]>([])
+  const [isLoadingLots, setIsLoadingLots] = useState(true)
+  const [lotsError, setLotsError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isMobileViewport, setIsMobileViewport] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<AuctionCategoryKey>('all')
@@ -232,6 +243,54 @@ const LiveAuctionPage = () => {
   const maxPercent = ((draftMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMinPercent = ((mobileAppliedMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMaxPercent = ((mobileAppliedMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
+
+  const loadAuctionLots = useCallback(async () => {
+    setIsLoadingLots(true)
+    setLotsError(null)
+
+    try {
+      const artworks = await artworkApis.listArtworks({
+        status: 'IN_AUCTION',
+        hasOnChainAuctionId: true,
+        take: 100,
+      })
+      const auctionResults = await Promise.allSettled(
+        artworks
+          .filter((artwork) => Boolean(artwork.onChainAuctionId))
+          .map(async (artwork) => {
+            const auction = await readAuctionState(artwork.onChainAuctionId as string)
+            return mapArtworkToLot(artwork, auction)
+          }),
+      )
+      const nextLots = auctionResults
+        .flatMap((result) => (result.status === 'fulfilled' && result.value ? [result.value] : []))
+        .sort((leftLot, rightLot) => {
+          const priorityDelta =
+            auctionStatusPriority[leftLot.statusKey] - auctionStatusPriority[rightLot.statusKey]
+
+          if (priorityDelta !== 0) {
+            return priorityDelta
+          }
+
+          if (leftLot.endTimestamp && rightLot.endTimestamp) {
+            return leftLot.endTimestamp - rightLot.endTimestamp
+          }
+
+          return rightLot.bidValue - leftLot.bidValue
+        })
+
+      setLots(nextLots)
+    } catch (error) {
+      setLots([])
+      setLotsError(error instanceof Error ? error.message : 'Unable to load on-chain auctions.')
+    } finally {
+      setIsLoadingLots(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadAuctionLots()
+  }, [loadAuctionLots])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -422,9 +481,13 @@ const LiveAuctionPage = () => {
   const footerLabel = hasActiveFilters
     ? `Page ${safeCurrentPage} of ${totalPages} • ${visibleLots.length} matching lots`
     : `Page ${safeCurrentPage} of ${totalPages} • ${lots.length} total lots`
-  const emptyStateMessage = hasActiveFilters
-    ? 'No auctions match the selected filters.'
-    : 'No live auctions are available right now.'
+  const emptyStateMessage = lotsError
+    ? lotsError
+    : isLoadingLots
+      ? 'Loading on-chain auctions.'
+      : hasActiveFilters
+        ? 'No auctions match the selected filters.'
+        : 'No live auctions are available right now.'
 
   const scrollResultsToTop = () => {
     if (typeof window === 'undefined') {
@@ -461,6 +524,43 @@ const LiveAuctionPage = () => {
     }
 
     setSelectedBidLot(lot)
+  }
+
+  const waitForIndexedOrder = async (onChainOrderId: string) => {
+    for (let attempt = 0; attempt < 15; attempt += 1) {
+      try {
+        await orderApis.getOrderByOnChainId(onChainOrderId)
+        return
+      } catch (error) {
+        if (!isNotFoundApiError(error)) {
+          throw error
+        }
+      }
+
+      await wait(2000)
+    }
+
+    throw new Error('Bid confirmed on-chain, but the order is still waiting for backend indexing.')
+  }
+
+  const handleSubmitBid = async (
+    { lot, bidAmountEth }: SubmitBidInput,
+    callbacks: { onTransactionHash: (transactionHash: string) => void },
+  ) => {
+    if (!isAuthenticated) {
+      throw new Error('Sign in with the bidding wallet before placing an on-chain bid.')
+    }
+
+    const result = await placeBidOnAuction({
+      orderId: lot.onChainOrderId,
+      amountEth: bidAmountEth,
+      onTransactionHash: callbacks.onTransactionHash,
+    })
+
+    await waitForIndexedOrder(lot.onChainOrderId)
+    void loadAuctionLots()
+
+    return result
   }
 
   return (
@@ -1241,11 +1341,9 @@ const LiveAuctionPage = () => {
           lot={selectedBidLot}
           isOpen={Boolean(selectedBidLot)}
           onClose={() => setSelectedBidLot(null)}
+          onSubmitBid={handleSubmitBid}
           onViewOrderStatus={(payload) => {
-            void router.push({
-              pathname: `/orders/on-chain/${getDemoOrderIdForLot(payload.lot)}`,
-              query: buildDemoOrderQuery(payload),
-            })
+            void router.push(`/orders/on-chain/${encodeURIComponent(payload.lot.onChainOrderId)}`)
           }}
         />
 

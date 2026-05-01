@@ -82,8 +82,8 @@ export type OrderResponse = {
   paymentMethod?: string | null
   paymentIntentId?: string | null
   paymentTransactionId?: string | null
-  shippingAddress?: Record<string, unknown> | null
-  billingAddress?: Record<string, unknown> | null
+  shippingAddress?: ShippingAddressRequest | null
+  billingAddress?: ShippingAddressRequest | null
   customerNotes: string | null
   internalNotes?: string | null
   cancelledReason?: string | null
@@ -93,6 +93,7 @@ export type OrderResponse = {
   deliveredAt?: string | null
   onChainOrderId?: string | null
   contractAddress?: string | null
+  chainId?: string | null
   escrowState?: number | null
   txHash?: string | null
   sellerWallet?: string | null
@@ -102,6 +103,7 @@ export type OrderResponse = {
   disputeOpenedAt?: string | null
   disputeResolvedAt?: string | null
   disputeResolutionNotes?: string | null
+  items?: OrderItemResponse[]
   createdAt: string
   updatedAt?: string
 }
@@ -157,7 +159,7 @@ const orderApis = {
   },
   
   getOrderByOnChainId: async (onChainOrderId: string): Promise<OrderResponse> => {
-    return apiFetch<OrderResponse>(`/orders/on-chain/${onChainOrderId}`)
+    return apiFetch<OrderResponse>(`/orders/on-chain/${encodeURIComponent(onChainOrderId)}`)
   },
 
   getOrderItems: async (orderId: string): Promise<OrderItemResponse[]> => {

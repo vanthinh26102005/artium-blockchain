@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { ArtworkStatus } from '../../../enums/artwork-status.enum';
 
 export class GetArtworksQueryDto {
@@ -32,12 +33,32 @@ export class GetArtworksQueryDto {
   status?: ArtworkStatus;
 
   @ApiProperty({
+    description: 'Filter by an exact on-chain auction ID',
+    example: 'auction-0001',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  onChainAuctionId?: string;
+
+  @ApiProperty({
+    description: 'Only return artworks that have an on-chain auction ID',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  hasOnChainAuctionId?: boolean;
+
+  @ApiProperty({
     description: 'Filter by minimum price',
     example: 0,
     required: false,
     minimum: 0,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   minPrice?: number;
@@ -49,6 +70,7 @@ export class GetArtworksQueryDto {
     minimum: 0,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   maxPrice?: number;
@@ -60,6 +82,7 @@ export class GetArtworksQueryDto {
     minimum: 0,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   skip?: number;
@@ -71,6 +94,7 @@ export class GetArtworksQueryDto {
     minimum: 1,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(1)
   take?: number;

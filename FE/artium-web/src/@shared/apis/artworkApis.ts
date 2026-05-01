@@ -45,12 +45,19 @@ export type ArtworkApiItem = {
   likeCount?: number
   commentCount?: number
   moodboardCount?: number
+  ipfsMetadataHash?: string | null
+  reservePrice?: string | null
+  minBidIncrement?: string | null
+  auctionDuration?: number | null
+  onChainAuctionId?: string | null
 }
 
 export type ListArtworksParams = {
   sellerId?: string
   folderId?: string | null
   status?: string
+  onChainAuctionId?: string
+  hasOnChainAuctionId?: boolean
   q?: string
   skip?: number
   take?: number
@@ -196,6 +203,13 @@ const artworkApis = {
     return normalizeArtworkPage(response)
   },
   getArtworkById: (id: string) => apiWithBase<ArtworkApiItem | null>(`/artworks/${id}`),
+  getArtworkByOnChainAuctionId: async (onChainAuctionId: string) => {
+    const artworks = await artworkApis.listArtworks({
+      onChainAuctionId,
+      take: 1,
+    })
+    return artworks[0] ?? null
+  },
   createArtwork: (input: CreateArtworkInput) =>
     apiWithBase<ArtworkApiItem>('/artworks', {
       method: 'POST',

@@ -162,6 +162,9 @@ export class Order extends AbstractEntity {
   @Column({ name: 'contract_address', type: 'varchar', length: 42, nullable: true })
   contractAddress?: string | null;
 
+  @Column({ name: 'chain_id', type: 'varchar', length: 32, nullable: true })
+  chainId?: string | null;
+
   @Column({ name: 'escrow_state', type: 'smallint', nullable: true })
   escrowState?: EscrowState | null;
 

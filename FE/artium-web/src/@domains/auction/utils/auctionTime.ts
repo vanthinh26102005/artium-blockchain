@@ -1,4 +1,4 @@
-import { type DiscoverArtworkAuctionStatusKey } from '@domains/discover/mock/mockArtworks'
+export type AuctionLotStatusKey = 'active' | 'ending-soon' | 'closed'
 
 type TimeRemainingDisplayTone = {
   className: string
@@ -14,7 +14,7 @@ export type TimeRemainingDisplay = {
 
 type AuctionTimeInput = {
   status: string
-  statusKey: DiscoverArtworkAuctionStatusKey
+  statusKey: AuctionLotStatusKey
   endsAt?: string
   elapsedSeconds?: number
 }
@@ -52,7 +52,7 @@ const formatCountdown = (remainingSeconds: number) => {
 
 const getInitialRemainingSeconds = (
   status: string,
-  statusKey: DiscoverArtworkAuctionStatusKey,
+  statusKey: AuctionLotStatusKey,
   endsAt?: string,
 ) => {
   if (endsAt) {
@@ -79,7 +79,7 @@ const getInitialRemainingSeconds = (
 const getTimeRemainingLabel = (
   remainingSeconds: number | null,
   status: string,
-  statusKey: DiscoverArtworkAuctionStatusKey,
+  statusKey: AuctionLotStatusKey,
 ) => {
   if (statusKey === 'closed') {
     return 'Closed'
@@ -106,7 +106,7 @@ const getTimeRemainingLabel = (
 
 const getTimeRemainingTone = (
   remainingSeconds: number | null,
-  statusKey: DiscoverArtworkAuctionStatusKey,
+  statusKey: AuctionLotStatusKey,
 ): TimeRemainingDisplayTone => {
   if (statusKey !== 'ending-soon' || remainingSeconds === null) {
     return {
@@ -136,7 +136,7 @@ const getTimeRemainingTone = (
 }
 
 const getAuctionEndNote = (
-  statusKey: DiscoverArtworkAuctionStatusKey,
+  statusKey: AuctionLotStatusKey,
   remainingSeconds: number | null,
 ) => {
   if (statusKey === 'ending-soon') {

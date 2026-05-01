@@ -10,6 +10,7 @@ export interface IArtworkRepository extends IRepository<Artwork, string> {
       searchQuery?: string;
       minPrice?: number;
       maxPrice?: number;
+      hasOnChainAuctionId?: boolean;
     },
     transactionManager?: EntityManager,
   ): Promise<[Artwork[], number]>;
