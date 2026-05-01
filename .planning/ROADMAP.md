@@ -596,7 +596,14 @@ Cross-cutting constraints:
   3. The created moment uses the uploaded media metadata for `mediaUrl`, `mediaType`, optional thumbnail/poster, caption, location, hashtags, pinning, duration, and tagged artwork fields where supported.
   4. The composer and resulting profile/moment detail rendering preserve existing moment list/detail behavior, including image/video display, likes, comments, owner controls, and responsive layout.
   5. The UI follows Orders workspace interaction quality: calm white panels, clear status messaging, accessible buttons, stable focus states, and no pasted-link creation path.
-**Plans:** TBD
+**Plans:**
+- Wave 1: `34-01` - Build the profile moment upload hook and Orders-style device upload composer.
+- Wave 2 *(blocked on Wave 1 completion)*: `34-02` - Integrate the composer into `ProfilePage.tsx`, remove the pasted-link modal path, and run frontend verification.
+
+Cross-cutting constraints:
+- Creation must submit backend-issued `mediaId` proof, not client-provided media URLs.
+- Upload, retry, replace, and close behavior must preserve or reset composer state according to Phase 34 context decisions D-01 through D-16.
+- The visible composer must follow the approved Orders-style UI contract in `34-UI-SPEC.md`.
 **UI hint:** yes
 
 ### Phase 35: Moodboard multi-upload composer and profile polish
