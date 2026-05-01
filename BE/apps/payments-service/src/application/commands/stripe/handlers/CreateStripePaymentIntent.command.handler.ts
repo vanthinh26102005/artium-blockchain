@@ -35,7 +35,7 @@ export class CreateStripePaymentIntentHandler implements ICommandHandler<CreateS
 
   async execute(
     command: CreateStripePaymentIntentCommand,
-  ): Promise<PaymentTransaction> {
+  ): Promise<PaymentTransaction & { clientSecret: string }> {
     const { data } = command;
 
     this.logger.log(
@@ -81,6 +81,12 @@ export class CreateStripePaymentIntentHandler implements ICommandHandler<CreateS
         data.stripePaymentMethodId,
         data.description,
       );
+
+      if (!paymentIntent.client_secret) {
+        throw RpcExceptionHelper.internalError(
+          'Stripe did not return a client secret for this payment intent.',
+        );
+      }
 
       const platformFee = data.amount * PLATFORM_FEE_RATE;
       const netAmount = data.amount - platformFee;
@@ -136,7 +142,10 @@ export class CreateStripePaymentIntentHandler implements ICommandHandler<CreateS
       this.logger.log(
         `Stripe payment intent created successfully: ${paymentIntent.id}, transaction: ${transaction.id}`,
       );
-      return transaction;
+      return {
+        ...transaction,
+        clientSecret: paymentIntent.client_secret,
+      };
     } catch (error) {
       this.logger.error('Failed to create Stripe payment intent', error.stack);
       if (error instanceof RpcException) {

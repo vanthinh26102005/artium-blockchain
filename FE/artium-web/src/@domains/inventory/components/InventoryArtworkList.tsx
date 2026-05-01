@@ -44,6 +44,7 @@ type FolderWithCount = InventoryFolder & { itemCount: number }
 type InventoryArtworkListProps = {
   artworks: InventoryArtwork[]
   folders?: FolderWithCount[]
+  forceFlatList?: boolean
   onEdit: (artwork: InventoryArtwork) => void
   onDelete: (artwork: InventoryArtwork) => void
   onMove: (artwork: InventoryArtwork) => void
@@ -59,6 +60,7 @@ type InventoryArtworkListProps = {
 export const InventoryArtworkList = ({
   artworks,
   folders = [],
+  forceFlatList = false,
   onEdit,
   onDelete,
   onMove,
@@ -294,7 +296,7 @@ export const InventoryArtworkList = ({
         />
 
         {/* Thumbnail */}
-        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100">
           {artwork.thumbnailUrl ? (
             <Image
               src={artwork.thumbnailUrl}
@@ -402,9 +404,9 @@ export const InventoryArtworkList = ({
             isDropTarget && 'border-green-400 bg-green-50 ring-2 ring-green-200',
             isFolderDropTarget && 'border-violet-400 bg-violet-50 ring-2 ring-violet-200',
             !isDragging && !isDragOver && !isDropTarget && !isFolderDropTarget &&
-              (nestLevel > 0
-                ? 'border-transparent bg-gradient-to-r from-orange-50 to-yellow-50 hover:from-orange-100 hover:to-yellow-100'
-                : 'border-transparent bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100'),
+            (nestLevel > 0
+              ? 'border-black bg-gradient-to-r from-orange-50 to-yellow-50 hover:from-orange-100 hover:to-yellow-100'
+              : 'border-black bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100'),
           )}
         >
           {/* Drop zone overlay for artwork/folder drops */}
@@ -578,6 +580,28 @@ export const InventoryArtworkList = ({
   }
 
   // -- render --
+  // When forceFlatList is true, render all artworks as a flat list without folder grouping
+  if (forceFlatList) {
+    return (
+      <div className="space-y-3">
+        {artworks.map((artwork) => renderArtworkRow(artwork, 0))}
+
+        {/* Empty state */}
+        {artworks.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+              <ImageIcon className="h-6 w-6 text-slate-400" />
+            </div>
+            <h3 className="text-base font-semibold text-slate-900">No artworks in this folder</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Move artworks here or upload new ones
+            </p>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-3">
       {/* Root Folders */}

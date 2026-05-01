@@ -1,7 +1,9 @@
 // react
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 // stripe
 import { loadStripe, type Stripe, type StripeElements } from '@stripe/stripe-js'
@@ -22,7 +24,7 @@ import invoiceApis from '@shared/apis/invoiceApis'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
 // types & utils
-import type { CheckoutInvoice, CheckoutDraft, CheckoutBuyerAddress } from '../types/checkoutTypes'
+import type { CheckoutInvoice, CheckoutDraft } from '../types/checkoutTypes'
 import { defaultCheckoutDraft } from '../types/checkoutTypes'
 import {
     getInvoiceFromStorage,
@@ -34,6 +36,10 @@ import {
 } from '../utils/checkoutStorage'
 import { calculateMockShipping, calculateMockTax, isAddressValidForPricing } from '../utils/mockPricingServices'
 import { mapInvoiceResponseToCheckoutInvoice } from '../utils/mapInvoiceResponse'
+import {
+    quickSellCheckoutFormSchema,
+    type QuickSellCheckoutFormValues,
+} from '../validations/quickSellCheckout.schema'
 
 type QuickSellCheckoutPageViewProps = {
     invoiceCode: string
@@ -46,7 +52,6 @@ export const QuickSellCheckoutPageView = ({
     invoiceCode,
     isBuyerMode = false,
     isPending = false,
-    quickSellInvoiceJustCreated = false,
 }: QuickSellCheckoutPageViewProps) => {
     // -- router --
     const router = useRouter()
@@ -59,11 +64,24 @@ export const QuickSellCheckoutPageView = ({
     // -- state --
     const [isLoading, setIsLoading] = useState(true)
     const [invoice, setInvoice] = useState<CheckoutInvoice | null>(null)
-    const [checkoutDraft, setCheckoutDraft] = useState<CheckoutDraft>(defaultCheckoutDraft)
     const [showCancelModal, setShowCancelModal] = useState(false)
     const [clientSecret, setClientSecret] = useState<string | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
     const [paymentError, setPaymentError] = useState<string | null>(null)
+    const checkoutForm = useForm<QuickSellCheckoutFormValues>({
+        resolver: zodResolver(quickSellCheckoutFormSchema),
+        defaultValues: {
+            address: defaultCheckoutDraft.address,
+            deliveryMethod: 'pickup',
+            paymentCountry: 'VN',
+        },
+        mode: 'onChange',
+    })
+    const watchedAddress = useWatch({ control: checkoutForm.control, name: 'address' })
+    const checkoutAddress: CheckoutDraft['address'] = useMemo(() => ({
+        ...defaultCheckoutDraft.address,
+        ...watchedAddress,
+    }), [watchedAddress])
 
     const stripePromise = useMemo(() => {
         const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -83,14 +101,19 @@ export const QuickSellCheckoutPageView = ({
                 if (!isMounted) return
                 setInvoice(mappedInvoice)
                 saveInvoiceToStorage(mappedInvoice)
-            } catch (err) {
+            } catch {
                 const storedInvoice = getInvoiceFromStorage(invoiceCode)
                 if (storedInvoice && isMounted) {
                     setInvoice(storedInvoice)
                 }
             } finally {
                 const storedDraft = getCheckoutDraft(invoiceCode)
-                if (storedDraft && isMounted) setCheckoutDraft(storedDraft)
+                if (storedDraft && isMounted) {
+                    checkoutForm.reset({
+                        ...checkoutForm.getValues(),
+                        address: storedDraft.address,
+                    })
+                }
                 if (isMounted) setIsLoading(false)
             }
         }
@@ -102,7 +125,7 @@ export const QuickSellCheckoutPageView = ({
         return () => {
             isMounted = false
         }
-    }, [invoiceCode])
+    }, [checkoutForm, invoiceCode])
 
     // -- effect: handle pending state from payment return --
     useEffect(() => {
@@ -127,7 +150,42 @@ export const QuickSellCheckoutPageView = ({
         }
     }, [isPending, invoice, invoiceCode, router])
 
-    // -- totals calculation --
+    useEffect(() => {
+        const nextDraft: CheckoutDraft = {
+            address: checkoutAddress,
+            shippingFee: 0,
+            taxPercent: 0,
+            taxAmount: 0,
+        }
+
+        if (invoice && isAddressValidForPricing(checkoutAddress)) {
+            const subtotalAfterDiscount = invoice.subtotal - invoice.discountTotal
+            const shippingFee = calculateMockShipping(checkoutAddress, subtotalAfterDiscount)
+            const { ratePercent, taxAmount } = calculateMockTax(
+                checkoutAddress.postalCode,
+                checkoutAddress.state,
+                subtotalAfterDiscount,
+                shippingFee,
+            )
+
+            nextDraft.shippingFee = shippingFee
+            nextDraft.taxPercent = ratePercent
+            nextDraft.taxAmount = taxAmount
+        }
+
+        saveCheckoutDraft(invoiceCode, nextDraft)
+    }, [checkoutAddress, invoice, invoiceCode])
+
+    useEffect(() => {
+        if (!paymentError) return
+
+        const subscription = checkoutForm.watch(() => {
+            setPaymentError(null)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [checkoutForm, paymentError])
+
     const totals = useMemo(() => {
         if (!invoice) return { subtotal: 0, discountTotal: 0, shipping: 0, taxPercent: 0, tax: 0, total: 0 }
 
@@ -139,11 +197,11 @@ export const QuickSellCheckoutPageView = ({
         let taxPercent = 0
         let tax = 0
 
-        if (isAddressValidForPricing(checkoutDraft.address)) {
-            shipping = calculateMockShipping(checkoutDraft.address, subtotalAfterDiscount)
+        if (isAddressValidForPricing(checkoutAddress)) {
+            shipping = calculateMockShipping(checkoutAddress, subtotalAfterDiscount)
             const taxResult = calculateMockTax(
-                checkoutDraft.address.postalCode,
-                checkoutDraft.address.state,
+                checkoutAddress.postalCode,
+                checkoutAddress.state,
                 subtotalAfterDiscount,
                 shipping,
             )
@@ -159,32 +217,7 @@ export const QuickSellCheckoutPageView = ({
             tax,
             total: subtotalAfterDiscount + shipping + tax
         }
-    }, [invoice, checkoutDraft.address])
-
-    // -- handlers --
-    const handleAddressChange = useCallback((address: CheckoutBuyerAddress) => {
-        setCheckoutDraft(prev => {
-            const newDraft = { ...prev, address }
-
-            // Recalculate shipping/tax if address is valid
-            if (isAddressValidForPricing(address) && invoice) {
-                const subtotalAfterDiscount = invoice.subtotal - invoice.discountTotal
-                const shippingFee = calculateMockShipping(address, subtotalAfterDiscount)
-                const { ratePercent, taxAmount } = calculateMockTax(
-                    address.postalCode,
-                    address.state,
-                    subtotalAfterDiscount,
-                    shippingFee,
-                )
-                newDraft.shippingFee = shippingFee
-                newDraft.taxPercent = ratePercent
-                newDraft.taxAmount = taxAmount
-            }
-
-            saveCheckoutDraft(invoiceCode, newDraft)
-            return newDraft
-        })
-    }, [invoice, invoiceCode])
+    }, [checkoutAddress, invoice])
 
     const handleSendInvoice = () => {
         alert('Invoice sent!')
@@ -218,10 +251,17 @@ export const QuickSellCheckoutPageView = ({
             return
         }
 
-        const draftEmail = checkoutDraft.address.email?.trim()
+        const isFormValid = await checkoutForm.trigger()
+        if (!isFormValid) {
+            setPaymentError('Please complete contact and shipping details to continue.')
+            return
+        }
+
+        const checkoutValues = checkoutForm.getValues()
+        const draftEmail = checkoutValues.address.email?.trim()
         const buyerEmail = draftEmail || invoice.buyer?.email || user?.email
-        const buyerName = checkoutDraft.address.firstName || checkoutDraft.address.lastName
-            ? `${checkoutDraft.address.firstName} ${checkoutDraft.address.lastName}`.trim()
+        const buyerName = checkoutValues.address.firstName || checkoutValues.address.lastName
+            ? `${checkoutValues.address.firstName} ${checkoutValues.address.lastName}`.trim()
             : invoice.buyer?.name || user?.username || undefined
 
         if (!buyerEmail) {
@@ -280,9 +320,7 @@ export const QuickSellCheckoutPageView = ({
         stripePromise,
         isAuthenticated,
         router,
-        checkoutDraft.address.email,
-        checkoutDraft.address.firstName,
-        checkoutDraft.address.lastName,
+        checkoutForm,
         clientSecret,
         user?.email,
         user?.username,
@@ -356,10 +394,11 @@ export const QuickSellCheckoutPageView = ({
                             <div className="absolute inset-0 z-10 flex items-center justify-center">
                                 <span className="bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium">Buyer View Preview</span>
                             </div>
-                            <QuickSellCheckoutMainContent
-                                address={checkoutDraft.address}
-                                onAddressChange={handleAddressChange}
-                            />
+                            <FormProvider {...checkoutForm}>
+                                <QuickSellCheckoutMainContent
+                                    paymentError={paymentError}
+                                />
+                            </FormProvider>
                         </div>
                     </div>
                 }
@@ -388,35 +427,35 @@ export const QuickSellCheckoutPageView = ({
                             </div>
                         )}
 
-                        <QuickSellCheckoutMainContent
-                            address={checkoutDraft.address}
-                            onAddressChange={handleAddressChange}
-                            paymentElement={
-                                stripePromise && clientSecret ? (
-                                    <Elements stripe={stripePromise} options={{ clientSecret }}>
-                                        <ElementsConsumer>
-                                            {({ stripe, elements }) => {
-                                                if (stripe) stripeRef.current = stripe
-                                                if (elements) elementsRef.current = elements
-                                                return <PaymentElement />
-                                            }}
-                                        </ElementsConsumer>
-                                    </Elements>
-                                ) : null
-                            }
-                            paymentPlaceholder={
-                                !stripePromise ? (
-                                    <div className="rounded-2xl border border-[#E5E5E5] bg-[#FCFCFC] p-4 text-[13px] text-[#595959]">
-                                        Stripe is not configured yet. Please try again later.
-                                    </div>
-                                ) : (
-                                    <div className="rounded-2xl border border-[#E5E5E5] bg-[#FCFCFC] p-4 text-[13px] text-[#595959]">
-                                        Click “Pay Now” to start the secure checkout.
-                                    </div>
-                                )
-                            }
-                            paymentError={paymentError}
-                        />
+                        <FormProvider {...checkoutForm}>
+                            <QuickSellCheckoutMainContent
+                                paymentElement={
+                                    stripePromise && clientSecret ? (
+                                        <Elements stripe={stripePromise} options={{ clientSecret }}>
+                                            <ElementsConsumer>
+                                                {({ stripe, elements }) => {
+                                                    if (stripe) stripeRef.current = stripe
+                                                    if (elements) elementsRef.current = elements
+                                                    return <PaymentElement />
+                                                }}
+                                            </ElementsConsumer>
+                                        </Elements>
+                                    ) : null
+                                }
+                                paymentPlaceholder={
+                                    !stripePromise ? (
+                                        <div className="rounded-2xl border border-[#E5E5E5] bg-[#FCFCFC] p-4 text-[13px] text-[#595959]">
+                                            Stripe is not configured yet. Please try again later.
+                                        </div>
+                                    ) : (
+                                        <div className="rounded-2xl border border-[#E5E5E5] bg-[#FCFCFC] p-4 text-[13px] text-[#595959]">
+                                            Click “Pay Now” to start the secure checkout.
+                                        </div>
+                                    )
+                                }
+                                paymentError={paymentError}
+                            />
+                        </FormProvider>
                     </div>
                 }
                 footer={
@@ -440,13 +479,13 @@ export const QuickSellCheckoutPageView = ({
             />
 
             <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
-                <DialogContent size="4xl" className="overflow-hidden rounded-[32px] bg-white p-0">
+                <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">
                     <div className="px-8 py-6">
                         <h2 className="text-[22px] font-bold text-[#191414] uppercase">
                             ARE YOU SURE YOU WANT TO EXIT?
                         </h2>
                         <p className="mt-4 text-[18px] text-[#191414]">
-                            If you leave this page, your information won't be saved
+                            If you leave this page, your information won&apos;t be saved
                         </p>
                     </div>
                     <div className="grid grid-cols-2 border-t border-black/10 text-[18px] font-semibold">

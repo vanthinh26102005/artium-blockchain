@@ -22,7 +22,7 @@ const QuickSellCreateInvoicePageView = dynamic(
 
 const CreateInvoiceRoute: NextPageWithLayout = () => {
     // -- auth --
-    useRequireAuth()
+    const { canRenderProtected } = useRequireAuth()
 
     // -- router --
     const router = useRouter()
@@ -33,6 +33,10 @@ const CreateInvoiceRoute: NextPageWithLayout = () => {
     // -- handlers --
 
     // -- render --
+    if (!canRenderProtected) {
+        return null
+    }
+
     return (
         <>
             <Metadata title="Create Invoice | Artium" />

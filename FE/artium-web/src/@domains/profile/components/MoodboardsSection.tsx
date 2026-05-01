@@ -117,21 +117,21 @@ const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }:
   const authorAvatarUrl = board.authorAvatarUrl || 'https://placehold.co/64x64.png?text=HP'
   const sizeStyles = isLarge
     ? {
-        secondaryCoverClass: 'left-20 bottom-20 h-32 w-26',
-        primaryCoverClass: 'left-28 bottom-12 h-48 w-35',
-        coverHeightClass: 'h-44 sm:h-48',
-        cardWidthClass: 'w-[220px]',
-        contentPaddingClass: 'px-4 pb-5 pt-4',
-        titleClassName: 'text-[15px]',
-      }
+      secondaryCoverClass: 'left-20 bottom-20 h-32 w-26',
+      primaryCoverClass: 'left-28 bottom-12 h-48 w-35',
+      coverHeightClass: 'h-44 sm:h-48',
+      cardWidthClass: 'w-[220px]',
+      contentPaddingClass: 'px-4 pb-5 pt-4',
+      titleClassName: 'text-[15px]',
+    }
     : {
-        secondaryCoverClass: 'left-20 bottom-12 h-30 w-24',
-        primaryCoverClass: 'left-28 bottom-6 h-45 w-32',
-        coverHeightClass: 'h-40',
-        cardWidthClass: 'w-[200px] flex-shrink-0',
-        contentPaddingClass: 'px-3 pb-4 pt-3',
-        titleClassName: '',
-      }
+      secondaryCoverClass: 'left-20 bottom-12 h-30 w-24',
+      primaryCoverClass: 'left-28 bottom-6 h-45 w-32',
+      coverHeightClass: 'h-40',
+      cardWidthClass: 'w-[200px] shrink-0',
+      contentPaddingClass: 'px-3 pb-4 pt-3',
+      titleClassName: '',
+    }
   const cardBody = (
     <div
       className={cn(
@@ -201,7 +201,7 @@ const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }:
       </div>
       <div className={cn('space-y-1.5', sizeStyles.contentPaddingClass)}>
         <div className="flex items-center gap-2">
-          <div className="relative h-7 w-7 flex-shrink-0 overflow-hidden rounded-full bg-slate-200">
+          <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-slate-200">
             <Image
               src={authorAvatarUrl}
               alt={board.author}

@@ -1,5 +1,7 @@
 import type { HostingEvent } from "@domains/events/state/useHostingEventsStore";
 
+export type { InviteEventFormValues } from "@domains/events/validations/eventForm.schema";
+
 /**
  * Invitation status lifecycle
  */
@@ -16,14 +18,6 @@ export type EventInvitation = {
   sentAt: string; // ISO string
   openedAt?: string;
   respondedAt?: string;
-};
-
-/**
- * Form values for invite event form
- */
-export type InviteEventFormValues = {
-  recipientEmails: string[];
-  personalMessage?: string;
 };
 
 /**

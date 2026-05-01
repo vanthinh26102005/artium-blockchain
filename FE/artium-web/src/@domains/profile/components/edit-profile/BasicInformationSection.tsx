@@ -100,10 +100,7 @@ export const BasicInformationSection = ({
             </label>
             <input
               id="username"
-              {...register('username', {
-                required: 'Username is required.',
-                validate: (value) => value.trim().length > 0 || 'Username is required.',
-              })}
+              {...register('username')}
               maxLength={30}
               className={getInputClasses(showErrors && !!errors.username)}
             />
@@ -126,10 +123,7 @@ export const BasicInformationSection = ({
             </label>
             <input
               id="firstName"
-              {...register('firstName', {
-                required: 'First name is required.',
-                validate: (value) => value.trim().length > 0 || 'First name is required.',
-              })}
+              {...register('firstName')}
               maxLength={30}
               className={getInputClasses(showErrors && !!errors.firstName)}
             />
@@ -240,7 +234,7 @@ export const BasicInformationSection = ({
                   classNames={{
                     control: (state) =>
                       [
-                        'flex min-h-[48px] w-full items-center rounded-2xl border bg-white px-4 py-3 shadow-sm transition',
+                        'flex min-h-12 w-full items-center rounded-2xl border bg-white px-4 py-3 shadow-sm transition',
                         state.isFocused
                           ? 'border-slate-300 ring-2 ring-slate-200'
                           : 'border-slate-200',

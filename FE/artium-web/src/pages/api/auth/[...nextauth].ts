@@ -1,10 +1,10 @@
-import NextAuth, { type NextAuthOptions } from 'next-auth'
+import NextAuth, { type AuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: googleClientId ?? '',
@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token.idToken) {
-        session.idToken = token.idToken as string
+        session.idToken = token.idToken
       }
 
       return session
@@ -41,6 +41,6 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
+} satisfies AuthOptions
 
 export default NextAuth(authOptions)

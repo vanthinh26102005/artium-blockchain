@@ -31,7 +31,7 @@ export const QuickSellCheckoutSidebar = ({
     const buyerName = invoice.buyer?.name || 'Buyer'
     const buyerEmail = invoice.buyer?.email || ''
 
-    const cardClass = "rounded-[24px] bg-white p-6 border border-black/5"
+    const cardClass = "rounded-3xl bg-white p-6 border border-black/5"
 
     return (
         <div className="flex flex-col gap-4">
@@ -58,7 +58,7 @@ export const QuickSellCheckoutSidebar = ({
                 <div className={cardClass}>
                     <div className="flex gap-4">
                         {/* Artwork Image */}
-                        <div className="w-[100px] h-[100px] shrink-0 overflow-hidden rounded-[12px] bg-[#F5F5F5]">
+                        <div className="w-25 h-[100px] shrink-0 overflow-hidden rounded-xl bg-[#F5F5F5]">
                             {artworkItem.type === 'artwork' && artworkItem.artworkImageUrl ? (
                                 <img
                                     src={artworkItem.artworkImageUrl}
@@ -125,7 +125,7 @@ export const QuickSellCheckoutSidebar = ({
             </div>
 
             {/* Trust Section */}
-            <div className="rounded-[24px] border border-black/5 bg-[#FAFAFA] p-5">
+            <div className="rounded-3xl border border-black/5 bg-[#FAFAFA] p-5">
                 <div className="flex items-start gap-3">
                     <Shield className="h-5 w-5 text-[#989898] shrink-0 mt-0.5" />
                     <div>

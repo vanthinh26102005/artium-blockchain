@@ -1,7 +1,5 @@
-// third-party
 import { AlertCircle } from 'lucide-react'
 
-// @shared - utils
 import { cn } from '@shared/lib/utils'
 
 type FormErrorMessageProps = {
@@ -11,12 +9,11 @@ type FormErrorMessageProps = {
 }
 
 export const FormErrorMessage = ({ id, message, visible = true }: FormErrorMessageProps) => {
-  // -- render --
   return (
     <div
       id={id}
       className={cn(
-        'flex min-h-[22px] items-center gap-2 text-sm font-semibold text-[#FF4337]',
+        'flex min-h-5.5 items-center gap-2 text-sm font-semibold text-auth-error',
         !visible && 'opacity-0',
       )}
       aria-live="polite"

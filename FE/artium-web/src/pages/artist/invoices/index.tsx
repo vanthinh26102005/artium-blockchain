@@ -22,9 +22,13 @@ const QuickSellInvoicesListView = dynamic(
 
 const InvoicesIndexPage: NextPageWithLayout = () => {
     // -- auth --
-    useRequireAuth()
+    const { canRenderProtected } = useRequireAuth()
 
     // -- render --
+    if (!canRenderProtected) {
+        return null
+    }
+
     return (
         <>
             <Metadata title="Invoices | Artium" description="Manage your art sales invoices." />

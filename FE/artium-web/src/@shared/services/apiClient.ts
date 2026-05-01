@@ -81,6 +81,11 @@ export const apiFetch = async <T>(path: string, options?: ApiFetchOptions): Prom
     const message = getErrorMessage(data, response.statusText || 'Request failed')
     const error = new Error(message) as ApiError
     error.status = response.status
+
+    if (auth && (response.status === 401 || response.status === 403)) {
+      useAuthStore.getState().clearAuth()
+    }
+
     throw error
   }
 

@@ -38,9 +38,6 @@ export const AboutMeSection = ({ register, control, errors, showErrors }: AboutM
   const { field: profileCategoriesField } = useController({
     control,
     name: 'profileCategories',
-    rules: {
-      validate: (value) => (value && value.length > 0 ? true : 'Pick at least one option.'),
-    },
   })
   const { field: rolesField } = useController({ control, name: 'roles' })
   const profileCategories = profileCategoriesField.value ?? []

@@ -26,7 +26,7 @@ export const MomentArtworkSection = ({ artwork, username }: MomentArtworkSection
           className="block rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
         >
           <div className="flex gap-3">
-            <div className="relative h-32 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
+            <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl bg-slate-100">
               <Image
                 src={artwork.coverUrl}
                 alt={artwork.title}

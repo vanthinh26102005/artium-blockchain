@@ -153,7 +153,7 @@ const PublicPortfolioPage: NextPageWithLayout = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Enter your email to stay in the loop"
-                                className="flex-1 rounded-full border border-slate-200 px-4 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="flex-1 rounded-full border border-slate-200 px-4 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-black"
                             />
                         </div>
                         <button className="w-full rounded-full bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800 transition-colors">

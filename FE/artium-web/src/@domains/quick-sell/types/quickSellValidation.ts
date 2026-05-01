@@ -1,7 +1,9 @@
-// Quick Sell - Form Validation Schema
-// Uses native validation (no zod/yup in repo) - manual validation
-
 import type { QuickSellInvoiceDraft, QuickSellLineItem } from './quickSellDraft'
+import {
+  quickSellBuyerInfoSchema,
+  quickSellInvoiceFormSchema,
+  quickSellLineItemSchema,
+} from '../validations/quickSellInvoice.schema'
 
 export type ValidationError = {
   field: string
@@ -13,114 +15,63 @@ export type ValidationResult = {
   errors: ValidationError[]
 }
 
-// Validate a single line item
 export const validateLineItem = (item: QuickSellLineItem, index: number): ValidationError[] => {
-  const errors: ValidationError[] = []
+  const result = quickSellLineItemSchema.safeParse(item)
+
+  if (result.success) {
+    return []
+  }
+
   const prefix = `items.${index}`
-
-  // Price validation
-  if (item.price < 0) {
-    errors.push({
-      field: `${prefix}.price`,
-      message: 'Price must be 0 or greater',
-    })
-  }
-
-  // Quantity validation
-  if (item.quantity < 1) {
-    errors.push({
-      field: `${prefix}.quantity`,
-      message: 'Quantity must be at least 1',
-    })
-  }
-
-  // Discount validation
-  if (item.discountPercent < 0 || item.discountPercent > 100) {
-    errors.push({
-      field: `${prefix}.discountPercent`,
-      message: 'Discount must be between 0 and 100',
-    })
-  }
-
-  // Custom item title validation
-  if (item.type === 'custom' && !item.title.trim()) {
-    errors.push({
-      field: `${prefix}.title`,
-      message: 'Title is required for custom items',
-    })
-  }
-
-  return errors
+  return result.error.issues.map((issue) => ({
+    field: issue.path.length > 0 ? `${prefix}.${issue.path.join('.')}` : prefix,
+    message: issue.message,
+  }))
 }
 
-// Validate buyer info
 export const validateBuyerInfo = (buyer: QuickSellInvoiceDraft['buyer']): ValidationError[] => {
-  const errors: ValidationError[] = []
-
-  if (!buyer.email.trim()) {
-    errors.push({
-      field: 'buyer.email',
-      message: 'Email is required',
-    })
-    return errors
+  const result = quickSellBuyerInfoSchema.safeParse(buyer)
+  if (result.success) {
+    return []
   }
 
-  // Email format validation (optional but if provided must be valid)
-  if (buyer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyer.email)) {
-    errors.push({
-      field: 'buyer.email',
-      message: 'Please enter a valid email address',
-    })
-  }
-
-  return errors
+  return result.error.issues.map((issue) => ({
+    field: issue.path.length > 0 ? `buyer.${issue.path.join('.')}` : 'buyer',
+    message: issue.message,
+  }))
 }
 
-// Validate tax settings
 export const validateTaxSettings = (draft: QuickSellInvoiceDraft): ValidationError[] => {
-  const errors: ValidationError[] = []
+  const result = quickSellInvoiceFormSchema.pick({
+    isApplySalesTax: true,
+    taxPercent: true,
+    taxZipCode: true,
+    shippingFee: true,
+    buyer: true,
+    items: true,
+    isArtistHandlesShipping: true,
+  }).safeParse(draft)
 
-  if (draft.isApplySalesTax) {
-    if (draft.taxPercent < 0 || draft.taxPercent > 100) {
-      errors.push({
-        field: 'taxPercent',
-        message: 'Tax percent must be between 0 and 100',
-      })
-    }
+  if (result.success) {
+    return []
   }
 
-  if (draft.shippingFee < 0) {
-    errors.push({
-      field: 'shippingFee',
-      message: 'Shipping fee must be 0 or greater',
-    })
-  }
-
-  return errors
+  return result.error.issues
+    .filter((issue) => issue.path[0] === 'taxPercent' || issue.path[0] === 'shippingFee')
+    .map((issue) => ({
+      field: issue.path.join('.'),
+      message: issue.message,
+    }))
 }
 
-// Full validation of invoice draft
 export const validateInvoiceDraft = (draft: QuickSellInvoiceDraft): ValidationResult => {
-  const errors: ValidationError[] = []
-
-  // Must have at least 1 item
-  if (draft.items.length === 0) {
-    errors.push({
-      field: 'items',
-      message: 'At least one item is required',
-    })
-  }
-
-  // Validate each item
-  draft.items.forEach((item, index) => {
-    errors.push(...validateLineItem(item, index))
-  })
-
-  // Validate buyer info
-  errors.push(...validateBuyerInfo(draft.buyer))
-
-  // Validate tax settings
-  errors.push(...validateTaxSettings(draft))
+  const result = quickSellInvoiceFormSchema.safeParse(draft)
+  const errors = result.success
+    ? []
+    : result.error.issues.map((issue) => ({
+      field: issue.path.join('.'),
+      message: issue.message,
+    }))
 
   return {
     isValid: errors.length === 0,
@@ -128,21 +79,6 @@ export const validateInvoiceDraft = (draft: QuickSellInvoiceDraft): ValidationRe
   }
 }
 
-// Check if draft can be submitted (minimum requirements)
 export const canSubmitDraft = (draft: QuickSellInvoiceDraft): boolean => {
-  // Must have at least 1 item
-  if (draft.items.length === 0) return false
-
-  if (!draft.buyer.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.buyer.email)) {
-    return false
-  }
-
-  // All items must have valid prices
-  for (const item of draft.items) {
-    if (item.price < 0 || item.quantity < 1) return false
-    if (item.discountPercent < 0 || item.discountPercent > 100) return false
-    if (item.type === 'custom' && !item.title.trim()) return false
-  }
-
-  return true
+  return quickSellInvoiceFormSchema.safeParse(draft).success
 }

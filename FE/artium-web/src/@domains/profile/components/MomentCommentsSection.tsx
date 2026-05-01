@@ -1,5 +1,6 @@
 // react
-import { useState, type FormEvent } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm, useWatch } from 'react-hook-form'
 
 // next
 import Image from 'next/image'
@@ -9,6 +10,10 @@ import { cn } from '@shared/lib/utils'
 
 // @domains - profile
 import { MomentComment } from '@domains/profile/types'
+import {
+  commentFormSchema,
+  type CommentFormValues,
+} from '@domains/profile/validations/profileForms.schema'
 
 // local
 import { CollapsibleSection } from './CollapsibleSection'
@@ -17,7 +22,6 @@ type MomentCommentsSectionProps = {
   comments?: MomentComment[]
   currentUser?: MomentComment['author']
   onAddComment?: (content: string) => void
-  momentId: string
   isLoading?: boolean
   isSubmitting?: boolean
   error?: string | null
@@ -28,23 +32,35 @@ export const MomentCommentsSection = ({
   comments = [],
   currentUser,
   onAddComment,
-  momentId,
   isLoading = false,
   isSubmitting = false,
   error,
   disabled = false,
 }: MomentCommentsSectionProps) => {
-  const [draft, setDraft] = useState('')
-  const trimmedDraft = draft.trim()
-  const canSubmit = trimmedDraft.length > 0 && !isSubmitting && !disabled
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    control,
+  } = useForm<CommentFormValues>({
+    resolver: zodResolver(commentFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      content: '',
+    },
+  })
+  const draft = useWatch({ control, name: 'content' }) ?? ''
+  const canSubmit = draft.trim().length > 0 && !isSubmitting && !disabled
+  const commentField = register('content')
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const handleCommentSubmit = ({ content }: CommentFormValues) => {
     if (!canSubmit || !onAddComment) {
       return
     }
-    onAddComment(trimmedDraft)
-    setDraft('')
+    onAddComment(content.trim())
+    reset()
   }
 
   return (
@@ -76,7 +92,7 @@ export const MomentCommentsSection = ({
               key={comment.id}
               className={cn('flex gap-3', comment.status === 'pending' && 'opacity-60')}
             >
-              <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-slate-200">
+              <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-200">
                 <Image
                   src={comment.author.avatarUrl}
                   alt={comment.author.displayName}
@@ -113,8 +129,8 @@ export const MomentCommentsSection = ({
       )}
 
       <div className="mt-4 border-t border-slate-200 pt-4">
-        <form className="flex gap-3" onSubmit={handleSubmit}>
-          <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-slate-200">
+        <form className="flex gap-3" onSubmit={handleSubmit(handleCommentSubmit)}>
+          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-200">
             {currentUser?.avatarUrl ? (
               <Image
                 src={currentUser.avatarUrl}
@@ -127,15 +143,14 @@ export const MomentCommentsSection = ({
           </div>
           <input
             type="text"
-            name={`comment-${momentId}`}
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
             placeholder={disabled ? 'Sign in to comment.' : 'Add a comment...'}
             disabled={disabled}
             className={cn(
               'flex-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none',
+              errors.content && 'border-rose-400 focus:border-rose-500 focus:ring-rose-100',
               disabled && 'cursor-not-allowed bg-slate-100 text-slate-400',
             )}
+            {...commentField}
           />
           <button
             type="submit"
@@ -145,6 +160,9 @@ export const MomentCommentsSection = ({
             {isSubmitting ? 'Posting...' : 'Post'}
           </button>
         </form>
+        {errors.content?.message ? (
+          <p className="mt-2 text-sm text-rose-500">{errors.content.message}</p>
+        ) : null}
       </div>
     </CollapsibleSection>
   )

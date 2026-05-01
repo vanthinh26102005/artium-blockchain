@@ -99,7 +99,7 @@ export const EventFiltersBar = ({
             </div>
 
             {/* Search Input - On top on mobile, right side on desktop */}
-            <div className="relative order-1 w-full md:order-2 md:ml-auto md:min-w-[160px] md:max-w-[400px] md:flex-1">
+            <div className="relative order-1 w-full md:order-2 md:ml-auto md:min-w-[160px] md:max-w-100 md:flex-1">
                 <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
                     type="text"

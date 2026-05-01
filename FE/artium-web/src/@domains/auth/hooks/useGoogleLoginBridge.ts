@@ -11,7 +11,9 @@ import { signOut, useSession } from 'next-auth/react'
 import usersApi from '@shared/apis/usersApi'
 
 // @domains - auth
+import { consumeSkipGoogleBridge } from '@domains/auth/services/browserAuthState'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { getSafeNextPath } from '@domains/auth/utils/authRedirect'
 
 type GoogleBridgeState = {
   isLoading: boolean
@@ -20,14 +22,6 @@ type GoogleBridgeState = {
 
 type SessionWithIdToken = {
   idToken?: string
-}
-
-const getNextPath = (next?: string | string[]) => {
-  if (typeof next === 'string' && next.trim().length > 0) {
-    return next
-  }
-
-  return '/'
 }
 
 export const useGoogleLoginBridge = (): GoogleBridgeState => {
@@ -53,13 +47,23 @@ export const useGoogleLoginBridge = (): GoogleBridgeState => {
     }
 
     hasHandledRef.current = true
-    setIsLoading(true)
 
     const bridgeLogin = async () => {
+      setIsLoading(true)
+
+      if (consumeSkipGoogleBridge()) {
+        try {
+          await signOut({ redirect: false })
+        } finally {
+          setIsLoading(false)
+        }
+        return
+      }
+
       try {
         const response = await usersApi.loginWithGoogle({ idToken })
         setAuth(response)
-        const nextPath = getNextPath(router.query.next)
+        const nextPath = getSafeNextPath(router.query.next, '/')
         await router.replace(nextPath)
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Google login failed.'

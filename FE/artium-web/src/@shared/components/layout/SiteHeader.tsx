@@ -2,12 +2,23 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Bell, DollarSign, FileText, ImagePlus, Plus, Search, Video, User } from 'lucide-react'
+import {
+  Bell,
+  DollarSign,
+  FileText,
+  ImagePlus,
+  Menu,
+  Plus,
+  Search,
+  User,
+  Video,
+} from 'lucide-react'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@shared/components/ui/dropdown-menu'
 import { profileApis, type SellerProfilePayload } from '@shared/apis/profileApis'
@@ -31,6 +42,19 @@ const shortenWalletAddress = (address?: string | null) => {
 
 const isWalletLocalEmail = (email?: string | null) => Boolean(email?.endsWith('@wallet.local'))
 
+const getUsableAvatarUrl = (avatarUrl?: string | null) => {
+  const trimmed = avatarUrl?.trim()
+  if (
+    !trimmed ||
+    trimmed === '/images/logo-dark-mode.png' ||
+    trimmed === '/images/default-avatar.png'
+  ) {
+    return null
+  }
+
+  return trimmed
+}
+
 type SiteHeaderProps = {
   variant?: 'default' | 'landing'
 }
@@ -46,6 +70,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [isPostMomentModalOpen, setIsPostMomentModalOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const desktopInputRef = useRef<HTMLInputElement>(null)
   const mobileInputRef = useRef<HTMLInputElement>(null)
   const searchResultsRef = useRef<HTMLDivElement>(null)
@@ -119,7 +144,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
       return
     }
 
-    const isMobile = window.matchMedia('(max-width: 767px)').matches
+    const isMobile = window.matchMedia('(max-width: 1023px)').matches
     const targetInput = isMobile ? mobileInputRef.current : desktopInputRef.current
     targetInput?.focus()
   }, [isSearchOpen])
@@ -190,7 +215,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
       return 'bg-white border-b border-slate-200 shadow-sm backdrop-blur-none'
     }
     // Completely transparent at top
-    return 'bg-transparent! border-transparent shadow-none backdrop-blur-none'
+    return 'bg-transparent! border-black shadow-none backdrop-blur-none'
   }
 
   // Marketing header class for non-landing, non-editorial, non-auth routes
@@ -200,7 +225,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
       : isMarketingRoute
         ? shouldForceHeaderBorder
           ? 'bg-white border-b border-slate-200 shadow-[0_4px_12px_rgba(15,23,42,0.08)]'
-          : 'bg-transparent border-b border-transparent'
+          : 'bg-transparent border-b border-black'
         : 'bg-white/70 border-b border-white/40 shadow-[0_6px_20px_rgba(15,23,42,0.06)]'
 
   const headerClasses = [
@@ -208,25 +233,27 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
     isLandingVariant
       ? isScrolled
         ? 'bg-black border-b border-white/10 text-white shadow-[0_8px_30px_rgba(0,0,0,0.45)]'
-        : 'bg-transparent border-b border-transparent text-white'
+        : 'bg-transparent border-b border-black text-white'
       : isAuthRoute
-        ? 'bg-transparent border-b border-transparent shadow-none backdrop-blur-none'
+        ? 'bg-transparent border-b border-black shadow-none backdrop-blur-none'
         : 'backdrop-blur-2xl backdrop-saturate-150',
     !isLandingVariant &&
-    !isAuthRoute &&
-    (isTransparentHeaderPage ? getTransparentHeaderClasses() : marketingHeaderClass),
+      !isAuthRoute &&
+      (isTransparentHeaderPage ? getTransparentHeaderClasses() : marketingHeaderClass),
   ]
     .filter(Boolean)
     .join(' ')
 
   const desktopSearchClasses = [
-    'hidden md:flex items-center transition-all duration-300',
-    isSearchVisible ? 'ml-3 w-[360px] opacity-100' : 'ml-0 w-0 opacity-0 pointer-events-none',
+    'hidden min-w-0 items-center transition-all duration-300 lg:flex',
+    isSearchVisible
+      ? 'ml-2 w-[320px] opacity-100 xl:w-[360px]'
+      : 'ml-0 w-0 opacity-0 pointer-events-none',
     showResults ? 'overflow-visible' : 'overflow-hidden',
   ].join(' ')
 
   const mobileSearchClasses = [
-    'md:hidden transition-all duration-300',
+    'transition-all duration-300 lg:hidden',
     isSearchVisible ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0 pointer-events-none',
     showResults ? 'overflow-visible' : 'overflow-hidden',
   ].join(' ')
@@ -239,11 +266,22 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
     walletLabel ??
     (isWalletLocalEmail(user?.email) ? null : user?.email) ??
     'user'
-  const avatarUrl = user?.avatarUrl ?? '/images/logo-dark-mode.png'
   const useWhiteNav = isLandingVariant || isAuthRoute || (isTransparentHeaderPage && !isScrolled)
+  const avatarFallbackUrl = useWhiteNav
+    ? '/images/logo/logo-dark-mode.png'
+    : '/images/logo/logo-light-mode.png'
+  const avatarUrl = getUsableAvatarUrl(user?.avatarUrl) || avatarFallbackUrl
   const logoSrc = useWhiteNav
     ? '/images/logo/logo-and-text-dark-mode.png'
     : '/images/logo/logo-and-text-light-mode.png'
+  const navClasses = [
+    'hidden shrink-0 items-center gap-4 text-[12px]! font-semibold tracking-[0.14em] uppercase 2xl:gap-6 2xl:tracking-[0.2em]',
+    shouldShowSearch ? '2xl:flex' : 'xl:flex',
+  ].join(' ')
+  const compactMenuClasses = ['shrink-0', shouldShowSearch ? '2xl:hidden' : 'xl:hidden'].join(' ')
+  const headerIconButtonClasses = useWhiteNav
+    ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
+    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
 
   const createMenuItems = [
     {
@@ -274,33 +312,34 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
         fontFamily: '"ABC Monument Grotesk", "Segoe UI", Tahoma, sans-serif',
       }}
     >
-      <div className="mx-auto flex min-h-20 w-full flex-wrap items-center justify-between gap-4 px-6 py-4 sm:px-4 lg:px-6">
-        <div className="flex min-w-0 flex-wrap items-center gap-6">
-          <Link href="/" className="flex items-center">
+      <div className="mx-auto flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3 sm:min-h-20 sm:px-6 sm:py-4 lg:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-3 lg:gap-4 xl:gap-6">
+          <Link href="/" className="flex shrink-0 items-center">
             <Image
               src={logoSrc}
               alt="Artium"
               width={140}
               height={36}
-              className="h-7 w-auto sm:h-8"
+              className="h-7 w-auto shrink-0 sm:h-8"
               priority
             />
           </Link>
-          <nav className="flex flex-wrap items-center gap-6 text-[14px]! font-semibold tracking-[0.2em] uppercase sm:gap-8 sm:text-xs">
+          <nav className={navClasses}>
             {navLinks.map((link) => {
               const isActive = router.pathname === link.href
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`rounded-full px-4 py-2 transition-colors ${useWhiteNav
-                    ? isActive
-                      ? 'text-white'
-                      : 'text-white/70 hover:bg-white/20 hover:text-white'
-                    : isActive
-                      ? 'bg-slate-100 text-slate-900'
-                      : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
-                    }`}
+                  className={`rounded-full px-4 py-2 transition-colors ${
+                    useWhiteNav
+                      ? isActive
+                        ? 'text-white'
+                        : 'text-white/70 hover:bg-white/20 hover:text-white'
+                      : isActive
+                        ? 'bg-slate-100 text-slate-900'
+                        : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -315,13 +354,13 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   aria-label="Toggle search"
                   aria-expanded={isSearchVisible}
                   onClick={() => setIsSearchOpen(true)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/80 text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+                  className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border shadow-sm transition ${headerIconButtonClasses}`}
                 >
                   <Search className="h-4 w-4" />
                 </button>
               ) : null}
               <div className={desktopSearchClasses}>
-                <div className="relative w-full">
+                <div className="relative w-full min-w-0">
                   <div className="flex h-11 w-full items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-4 text-sm text-slate-900">
                     <button
                       type="button"
@@ -353,10 +392,10 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   {showResults && searchResults && searchResults.length > 0 && (
                     <div
                       ref={searchResultsRef}
-                      className="absolute left-0 right-0 top-full z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+                      className="absolute top-full right-0 left-0 z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
                     >
                       <div className="border-b border-slate-200 bg-slate-50 px-4 py-2">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                        <div className="text-xs font-semibold tracking-wide text-slate-600 uppercase">
                           Artists
                         </div>
                       </div>
@@ -367,7 +406,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                             type="button"
                             onClick={() => {
                               const slug = resolvedSlugs[profile.userId] || profile.userId
-                              console.log('[SiteHeader] Navigating to profile:', slug, profile.displayName)
+                              console.log(
+                                '[SiteHeader] Navigating to profile:',
+                                slug,
+                                profile.displayName,
+                              )
                               router.push(`/profile/${encodeURIComponent(slug)}`)
                               setIsSearchOpen(false)
                               setShowResults(false)
@@ -388,12 +431,14 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                                 <User className="h-5 w-5 text-slate-500" />
                               </div>
                             )}
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-slate-900 truncate">
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate font-semibold text-slate-900">
                                 {profile.displayName}
                               </div>
                               {profile.location && (
-                                <div className="text-sm text-slate-500 truncate">{profile.location}</div>
+                                <div className="truncate text-sm text-slate-500">
+                                  {profile.location}
+                                </div>
                               )}
                             </div>
                             {profile.isVerified && (
@@ -416,111 +461,243 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                       </div>
                     </div>
                   )}
-                  {showResults && searchQuery.trim() && searchResults && searchResults.length === 0 && !isSearching && (
-                    <div
-                      ref={searchResultsRef}
-                      className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl"
-                    >
-                      <div className="px-4 py-8 text-center">
-                        <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-                          <Search className="h-6 w-6 text-slate-400" />
-                        </div>
-                        <div className="text-sm font-medium text-slate-900">No artists found</div>
-                        <div className="mt-1 text-sm text-slate-500">
-                          Try searching with a different name
+                  {showResults &&
+                    searchQuery.trim() &&
+                    searchResults &&
+                    searchResults.length === 0 &&
+                    !isSearching && (
+                      <div
+                        ref={searchResultsRef}
+                        className="absolute top-full right-0 left-0 z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl"
+                      >
+                        <div className="px-4 py-8 text-center">
+                          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                            <Search className="h-6 w-6 text-slate-400" />
+                          </div>
+                          <div className="text-sm font-medium text-slate-900">No artists found</div>
+                          <div className="mt-1 text-sm text-slate-500">
+                            Try searching with a different name
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               </div>
             </>
           ) : null}
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* Mobile Hamburger Menu */}
+          <div className={compactMenuClasses}>
+            <DropdownMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open menu"
+                  className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${headerIconButtonClasses}`}
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] p-2">
+                {user ? (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push('/artist/invoices/create')
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                    >
+                      <DollarSign className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Quick Sell</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push('/artworks/upload')
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                    >
+                      <ImagePlus className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Upload Inventory</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setIsPostMomentModalOpen(true)
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                    >
+                      <Video className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Post a Moment</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push('/artist/invoices/create')
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                    >
+                      <FileText className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Create Invoice</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="my-1" />
+                    {navLinks.map((link) => (
+                      <DropdownMenuItem
+                        key={link.href}
+                        onClick={() => {
+                          router.push(link.href)
+                          setIsMobileMenuOpen(false)
+                        }}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      >
+                        {link.label}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator className="my-1" />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        // TODO: Implement notifications navigation/action
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                    >
+                      <Bell className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Notifications</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/profile/${encodeURIComponent(profileHandle)}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      >
+                        <User className="h-5 w-5 text-slate-700" />
+                        <span className="font-semibold text-slate-900">@{profileLabel}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    {navLinks.map((link) => (
+                      <DropdownMenuItem
+                        key={link.href}
+                        onClick={() => {
+                          router.push(link.href)
+                          setIsMobileMenuOpen(false)
+                        }}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      >
+                        {link.label}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator className="my-1" />
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/login"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      >
+                        <span className="font-semibold text-slate-900">Login</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      >
+                        <span className="font-semibold text-slate-900">Get Started</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Desktop Actions */}
           {user ? (
             <>
               <button
                 type="button"
                 onClick={() => router.push('/artist/invoices/create')}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-[16px] font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                className="hidden cursor-pointer items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-[16px] font-semibold text-white shadow-sm transition hover:bg-blue-700 lg:inline-flex"
               >
                 <DollarSign className="h-4 w-4" />
                 Quick Sell
               </button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label="Create"
-                    className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${isLandingVariant
-                      ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
-                      }`}
+              <div className="hidden lg:inline-flex">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Create"
+                      className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${headerIconButtonClasses}`}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="center"
+                    sideOffset={12}
+                    className="w-[320px] max-w-[calc(100vw-2rem)] rounded-3xl! border border-slate-200 bg-white p-3 shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:w-[360px]"
                   >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="center"
-                  sideOffset={12}
-                  className="w-[320px] max-w-[calc(100vw-2rem)] rounded-3xl! border border-slate-200 bg-white p-3 shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:w-[360px]"
-                >
-                  <div className="flex flex-col gap-3">
-                    {createMenuItems.map((item) => {
-                      const Icon = item.icon
-                      return (
-                        <DropdownMenuItem
-                          key={item.title}
-                          onSelect={() => {
-                            if (item.action) {
-                              item.action()
-                            } else if (item.href) {
-                              router.push(item.href)
-                            }
-                          }}
-                          className="flex w-full cursor-pointer items-start gap-4 rounded-2xl! border border-slate-200/80 bg-white px-4 py-3 text-left text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50/60 hover:shadow-md focus:bg-white"
-                        >
-                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
-                            <Icon className="h-5 w-5" />
-                          </span>
-                          <span className="flex flex-col gap-1">
-                            <span className="text-base leading-tight font-semibold text-slate-900">
-                              {item.title}
+                    <div className="flex flex-col gap-3">
+                      {createMenuItems.map((item) => {
+                        const Icon = item.icon
+                        return (
+                          <DropdownMenuItem
+                            key={item.title}
+                            onSelect={() => {
+                              if (item.action) {
+                                item.action()
+                              } else if (item.href) {
+                                router.push(item.href)
+                              }
+                            }}
+                            className="flex w-full cursor-pointer items-start gap-4 rounded-2xl! border border-slate-200/80 bg-white px-4 py-3 text-left text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50/60 hover:shadow-md focus:bg-white"
+                          >
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                              <Icon className="h-5 w-5" />
                             </span>
-                            <span className="text-sm leading-snug text-slate-500">
-                              {item.description}
+                            <span className="flex flex-col gap-1">
+                              <span className="text-base leading-tight font-semibold text-slate-900">
+                                {item.title}
+                              </span>
+                              <span className="text-sm leading-snug text-slate-500">
+                                {item.description}
+                              </span>
                             </span>
-                          </span>
-                        </DropdownMenuItem>
-                      )
-                    })}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                          </DropdownMenuItem>
+                        )
+                      })}
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               <button
                 type="button"
                 aria-label="Notifications"
-                className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition ${isLandingVariant
-                  ? 'border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900'
-                  }`}
+                className={`hidden h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition lg:inline-flex ${headerIconButtonClasses}`}
               >
                 <Bell className="h-4 w-4" />
               </button>
               <Link
                 href={`/profile/${encodeURIComponent(profileHandle)}`}
-                className={`hidden cursor-pointer items-center gap-2 text-base font-semibold sm:inline-flex ${isLandingVariant ? 'text-white' : 'text-slate-700 hover:text-slate-900'
-                  }`}
+                className={`hidden min-w-0 cursor-pointer items-center gap-2 text-base font-semibold lg:inline-flex ${
+                  useWhiteNav ? 'text-white' : 'text-slate-700 hover:text-slate-900'
+                }`}
               >
-                <span>@{profileLabel}</span>
+                <span className="max-w-[120px] truncate xl:max-w-[160px]">@{profileLabel}</span>
                 <Image
                   src={avatarUrl}
                   alt={profileLabel}
                   width={40}
                   height={40}
-                  className={`h-10 w-10 rounded-full object-cover ${isLandingVariant ? 'border border-white/30' : 'border border-slate-200'
-                    }`}
+                  className={`h-10 w-10 rounded-full object-cover ${
+                    useWhiteNav ? 'border border-white/30' : 'border border-slate-200'
+                  }`}
                 />
               </Link>
             </>
@@ -531,10 +708,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 onClick={() => {
                   router.push('/login')
                 }}
-                className={`cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition ${isLandingVariant
-                  ? 'border border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
-                  : 'border border-slate-200 bg-white text-slate-800 hover:border-slate-300'
-                  }`}
+                className={`hidden cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition lg:inline-flex ${
+                  useWhiteNav
+                    ? 'border border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
+                    : 'border border-slate-200 bg-white text-slate-800 hover:border-slate-300'
+                }`}
               >
                 Login
               </button>
@@ -543,10 +721,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 onClick={() => {
                   router.push('/')
                 }}
-                className={`cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition ${isLandingVariant
-                  ? 'bg-white text-black hover:bg-white/90'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
+                className={`hidden cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition lg:inline-flex ${
+                  useWhiteNav
+                    ? 'bg-white text-black hover:bg-white/90'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
               >
                 Get Started
               </button>
@@ -587,9 +766,9 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 )}
               </div>
               {showResults && searchResults && searchResults.length > 0 && (
-                <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                <div className="absolute top-full right-0 left-0 z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
                   <div className="border-b border-slate-200 bg-slate-50 px-4 py-2">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    <div className="text-xs font-semibold tracking-wide text-slate-600 uppercase">
                       Artists
                     </div>
                   </div>
@@ -600,7 +779,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                         type="button"
                         onClick={() => {
                           const slug = resolvedSlugs[profile.userId] || profile.userId
-                          console.log('[SiteHeader Mobile] Navigating to profile:', slug, profile.displayName)
+                          console.log(
+                            '[SiteHeader Mobile] Navigating to profile:',
+                            slug,
+                            profile.displayName,
+                          )
                           router.push(`/profile/${encodeURIComponent(slug)}`)
                           setIsSearchOpen(false)
                           setShowResults(false)
@@ -621,12 +804,14 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                             <User className="h-5 w-5 text-slate-500" />
                           </div>
                         )}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-slate-900 truncate">
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate font-semibold text-slate-900">
                             {profile.displayName}
                           </div>
                           {profile.location && (
-                            <div className="text-sm text-slate-500 truncate">{profile.location}</div>
+                            <div className="truncate text-sm text-slate-500">
+                              {profile.location}
+                            </div>
                           )}
                         </div>
                         {profile.isVerified && (
@@ -649,19 +834,23 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   </div>
                 </div>
               )}
-              {showResults && searchQuery.trim() && searchResults && searchResults.length === 0 && !isSearching && (
-                <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                  <div className="px-4 py-8 text-center">
-                    <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-                      <Search className="h-6 w-6 text-slate-400" />
-                    </div>
-                    <div className="text-sm font-medium text-slate-900">No artists found</div>
-                    <div className="mt-1 text-sm text-slate-500">
-                      Try searching with a different name
+              {showResults &&
+                searchQuery.trim() &&
+                searchResults &&
+                searchResults.length === 0 &&
+                !isSearching && (
+                  <div className="absolute top-full right-0 left-0 z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                    <div className="px-4 py-8 text-center">
+                      <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                        <Search className="h-6 w-6 text-slate-400" />
+                      </div>
+                      <div className="text-sm font-medium text-slate-900">No artists found</div>
+                      <div className="mt-1 text-sm text-slate-500">
+                        Try searching with a different name
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
         </div>

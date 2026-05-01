@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Inject,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -23,17 +24,26 @@ import {
 import { MICROSERVICES } from '../../../config';
 import { JwtAuthGuard, Roles, RolesGuard } from '@app/auth';
 import {
+  ConfirmDeliveryDto,
   CreateOrderDto,
   GetOrdersDto,
-  OrderObject,
-  UpdateOrderDto,
   MarkShippedDto,
-  ConfirmDeliveryDto,
   OpenDisputeDto,
+  OrderObject,
+  OrdersWorkspaceScope,
   ResolveDisputeDto,
+  UpdateOrderDto,
   UserRole,
 } from '@app/common';
 import { sendRpc } from '../utils';
+
+type OrderItemAccessObject = {
+  sellerId?: string | null;
+};
+
+type AuthorizedOrderObject = OrderObject & {
+  items?: OrderItemAccessObject[];
+};
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -42,6 +52,23 @@ export class OrdersController {
     @Inject(MICROSERVICES.ORDERS_SERVICE)
     private readonly ordersClient: ClientProxy,
   ) {}
+
+  private async getAuthorizedOrder(id: string, userId?: string): Promise<AuthorizedOrderObject> {
+    const order = await sendRpc<AuthorizedOrderObject>(
+      this.ordersClient,
+      { cmd: 'get_order_by_id' },
+      { id },
+    );
+
+    const isBuyer = order.collectorId === userId;
+    const isSeller = order.items?.some((item) => item.sellerId === userId) ?? false;
+
+    if (!isBuyer && !isSeller) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return order;
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -59,8 +86,16 @@ export class OrdersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all orders' })
   @ApiResponse({ status: 200, description: 'Orders retrieved successfully', type: [OrderObject] })
-  async getOrders(@Query() filters: GetOrdersDto) {
-    return sendRpc(this.ordersClient, { cmd: 'get_orders' }, filters);
+  async getOrders(@Query() filters: GetOrdersDto, @Req() req: any) {
+    const scope = filters.scope ?? OrdersWorkspaceScope.BUYER;
+    const userId = req.user?.id;
+
+    return sendRpc(this.ordersClient, { cmd: 'get_orders' }, {
+      ...filters,
+      scope,
+      buyerId: scope === OrdersWorkspaceScope.BUYER ? userId : undefined,
+      sellerId: scope === OrdersWorkspaceScope.SELLER ? userId : undefined,
+    });
   }
 
   @Get('on-chain/:onChainOrderId')
@@ -74,8 +109,14 @@ export class OrdersController {
   })
   @ApiResponse({ status: 200, description: 'Order retrieved successfully', type: OrderObject })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async getOrderByOnChainId(@Param('onChainOrderId') onChainOrderId: string) {
-    return sendRpc(this.ordersClient, { cmd: 'get_order_by_onchain_id' }, { onChainOrderId });
+  async getOrderByOnChainId(@Param('onChainOrderId') onChainOrderId: string, @Req() req: any) {
+    const order = await sendRpc<OrderObject>(
+      this.ordersClient,
+      { cmd: 'get_order_by_onchain_id' },
+      { onChainOrderId },
+    );
+
+    return this.getAuthorizedOrder(order.id, req.user?.id);
   }
 
   @Get(':id/items')
@@ -85,8 +126,9 @@ export class OrdersController {
   @ApiParam({ name: 'id', type: 'string', description: 'Order ID' })
   @ApiResponse({ status: 200, description: 'Order items retrieved' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async getOrderItems(@Param('id') id: string) {
-    return sendRpc(this.ordersClient, { cmd: 'get_order_items' }, { orderId: id });
+  async getOrderItems(@Param('id') id: string, @Req() req: any) {
+    const order = await this.getAuthorizedOrder(id, req.user?.id);
+    return order.items ?? [];
   }
 
   @Get(':id')
@@ -96,8 +138,8 @@ export class OrdersController {
   @ApiParam({ name: 'id', type: 'string', description: 'Order ID' })
   @ApiResponse({ status: 200, description: 'Order retrieved successfully', type: OrderObject })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async getOrderById(@Param('id') id: string) {
-    return sendRpc(this.ordersClient, { cmd: 'get_order_by_id' }, { id });
+  async getOrderById(@Param('id') id: string, @Req() req: any) {
+    return this.getAuthorizedOrder(id, req.user?.id);
   }
 
   @Patch(':id/cancel')

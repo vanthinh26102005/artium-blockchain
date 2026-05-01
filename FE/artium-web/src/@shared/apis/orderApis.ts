@@ -6,6 +6,8 @@ export type OrderItemRequest = {
   artworkId: string
   quantity: number
   price: number
+  artworkTitle?: string
+  artworkImageUrl?: string | null
 }
 
 export type ShippingAddressRequest = {
@@ -21,6 +23,7 @@ export type CreateOrderRequest = {
   sellerId: string
   items: OrderItemRequest[]
   shippingAddress?: ShippingAddressRequest
+  shippingCost?: number
   notes?: string
 }
 
@@ -43,6 +46,20 @@ export type OrderItemResponse = {
   payoutAt?: string | null
   createdAt?: string
   updatedAt?: string
+}
+
+export type OrderScope = 'buyer' | 'seller'
+
+export type GetMyOrdersInput = {
+  scope: OrderScope
+  status?: string
+  skip?: number
+  take?: number
+}
+
+export type PaginatedOrdersResponse = {
+  data: OrderResponse[]
+  total: number
 }
 
 export type OrderResponse = {
@@ -94,6 +111,35 @@ export type OrdersListResponse = {
   total: number
 }
 
+export type MarkShippedRequest = {
+  carrier: string
+  trackingNumber: string
+  shippingMethod?: string
+}
+
+export type ConfirmDeliveryRequest = {
+  notes?: string
+}
+
+export type OpenDisputeRequest = {
+  reason: string
+}
+
+const buildQueryString = (params: Record<string, string | number | undefined>) => {
+  const searchParams = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === '') {
+      return
+    }
+
+    searchParams.set(key, String(value))
+  })
+
+  const queryString = searchParams.toString()
+  return queryString.length > 0 ? `?${queryString}` : ''
+}
+
 // --- API Functions ---
 
 const orderApis = {
@@ -105,12 +151,13 @@ const orderApis = {
     return apiFetch<OrderResponse>(`/orders/${id}`)
   },
 
+  getMyOrders: async ({ scope, status, skip, take }: GetMyOrdersInput): Promise<PaginatedOrdersResponse> => {
+    const query = buildQueryString({ scope, status, skip, take })
+    return apiFetch<PaginatedOrdersResponse>(`/orders${query}`)
+  },
+  
   getOrderByOnChainId: async (onChainOrderId: string): Promise<OrderResponse> => {
     return apiFetch<OrderResponse>(`/orders/on-chain/${onChainOrderId}`)
-  },
-
-  getMyOrders: async (): Promise<OrdersListResponse> => {
-    return apiFetch<OrdersListResponse>('/orders')
   },
 
   getOrderItems: async (orderId: string): Promise<OrderItemResponse[]> => {
@@ -121,6 +168,27 @@ const orderApis = {
     return apiFetch<OrderResponse>(`/orders/${id}/cancel`, {
       method: 'PATCH',
       body: JSON.stringify({ reason }),
+    })
+  },
+
+  markShipped: async (id: string, data: MarkShippedRequest): Promise<OrderResponse> => {
+    return apiFetch<OrderResponse>(`/orders/${id}/ship`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  },
+
+  confirmDelivery: async (id: string, data: ConfirmDeliveryRequest): Promise<OrderResponse> => {
+    return apiFetch<OrderResponse>(`/orders/${id}/confirm-delivery`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  },
+
+  openDispute: async (id: string, data: OpenDisputeRequest): Promise<OrderResponse> => {
+    return apiFetch<OrderResponse>(`/orders/${id}/dispute`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
     })
   },
 }

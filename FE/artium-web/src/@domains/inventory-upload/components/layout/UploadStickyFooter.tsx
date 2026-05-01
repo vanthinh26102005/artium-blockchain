@@ -57,7 +57,7 @@ export const UploadStickyFooter = ({
             type="button"
             onClick={onNext}
             disabled={isNextDisabled}
-            className="bg-primary flex h-[40px] flex-1 items-center justify-center rounded-full border border-transparent px-6 text-[14px] font-semibold whitespace-nowrap text-white hover:shadow disabled:opacity-40 lg:h-[44px] lg:flex-none"
+            className="bg-primary flex h-[40px] flex-1 items-center justify-center rounded-full border border-black px-6 text-[14px] font-semibold whitespace-nowrap text-white hover:shadow disabled:opacity-40 lg:h-[44px] lg:flex-none"
           >
             {isLastStep ? 'Publish Artwork' : 'Continue'}
           </Button>

@@ -434,7 +434,7 @@ export class ArtworkSeeder {
       const hasDepth = i % 5 === 0; // 20% have depth (sculptures)
       const depth = hasDepth ? Math.floor(Math.random() * 30 + 5) : null;
 
-      const price = Math.floor(Math.random() * 10000 + 500); // $500-$10,500
+      const price = Math.floor(Math.random() * 1000 + 50); // $500-$10,500
       const status = [
         ArtworkStatus.DRAFT,
         ArtworkStatus.ACTIVE,

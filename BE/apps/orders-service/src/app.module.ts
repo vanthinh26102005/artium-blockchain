@@ -42,7 +42,10 @@ import {
   GetOrderItemsHandler,
 } from './application';
 
-import { BlockchainEventHandler } from './application/event-handlers';
+import {
+  BlockchainEventHandler,
+  PaymentEventHandler,
+} from './application/event-handlers';
 
 import { OrdersMicroserviceController } from './presentation/microservice';
 
@@ -74,6 +77,7 @@ export const Services = [
 
 export const EventHandlers = [
   BlockchainEventHandler,
+  PaymentEventHandler,
 ];
 
 export const Controllers = [

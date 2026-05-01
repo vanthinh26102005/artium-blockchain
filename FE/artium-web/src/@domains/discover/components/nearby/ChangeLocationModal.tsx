@@ -1,9 +1,19 @@
 // react
 import { useEffect, useMemo, useState } from 'react'
-import { createPortal } from 'react-dom'
 
 // third-party
-import { Search, X } from 'lucide-react'
+import { Search } from 'lucide-react'
+
+// @shared - components
+import { Button } from '@shared/components/ui/button'
+import { Dialog, DialogContent } from '@shared/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@shared/components/ui/select'
 
 const radiusOptions = [1, 5, 10, 20, 50, 100]
 const locationSuggestions = [
@@ -31,7 +41,6 @@ export const ChangeLocationModal = ({
   onApply,
 }: ChangeLocationModalProps) => {
   // -- state --
-  const [isMounted, setIsMounted] = useState(false)
   const [locationInput, setLocationInput] = useState(location)
   const [selectedLocation, setSelectedLocation] = useState(location)
   const [radius, setRadius] = useState(radiusMiles)
@@ -58,10 +67,6 @@ export const ChangeLocationModal = ({
   }
 
   useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  useEffect(() => {
     if (!isOpen) {
       return
     }
@@ -71,55 +76,14 @@ export const ChangeLocationModal = ({
     setRadius(radiusMiles)
   }, [isOpen, location, radiusMiles])
 
-  useEffect(() => {
-    if (!isOpen) {
-      return
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
-
   // -- render --
-  if (!isOpen || !isMounted) {
-    return null
-  }
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 py-6"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose()
-        }
-      }}
-    >
-      {/* modal */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl"
-      >
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent size="xl" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
         {/* header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">Change Location</h2>
-            <p className="mt-1 text-sm text-slate-500">Update your city and distance radius.</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="rounded-full border border-slate-200 p-2 text-slate-500 hover:text-slate-700"
-          >
-            <X className="h-4 w-4" />
-          </button>
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900">Change Location</h2>
+          <p className="mt-1 text-sm text-slate-500">Update your city and distance radius.</p>
         </div>
 
         {/* form */}
@@ -167,39 +131,38 @@ export const ChangeLocationModal = ({
           {/* radius */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700">Radius</label>
-            <select
-              value={radius}
-              onChange={(event) => setRadius(Number(event.target.value))}
-              className="w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
-            >
-              {radiusOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option} miles
-                </option>
-              ))}
-            </select>
+            <Select value={String(radius)} onValueChange={(value) => setRadius(Number(value))}>
+              <SelectTrigger className="h-9 rounded-full border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {radiusOptions.map((option) => (
+                  <SelectItem key={option} value={String(option)}>
+                    {option} miles
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
         {/* actions */}
         <div className="mt-6 flex items-center justify-end gap-3">
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={onClose}
-            className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700"
+            className="rounded-full border-slate-200 px-5 text-sm font-semibold text-slate-700"
           >
             Cancel
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={handleApply}
-            className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white"
+            className="rounded-full bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700"
           >
             Apply
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>,
-    document.body,
+      </DialogContent>
+    </Dialog>
   )
 }

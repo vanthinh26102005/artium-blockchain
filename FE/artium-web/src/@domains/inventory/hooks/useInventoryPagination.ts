@@ -17,8 +17,6 @@ type InventoryPaginationResult = {
 
 const clampPage = (page: number, totalPages: number) => Math.min(Math.max(page, 1), totalPages)
 
-const getRandomDelay = () => 200 + Math.floor(Math.random() * 150)
-
 export const useInventoryPagination = (
   items: InventoryArtwork[],
   initialPageSize = 20,
@@ -26,7 +24,8 @@ export const useInventoryPagination = (
 ): InventoryPaginationResult => {
   const [page, setPageState] = useState(initialPage)
   const [pageSize, setPageSizeState] = useState(initialPageSize)
-  const [isLoading, setIsLoading] = useState(false)
+  // isLoading kept for API compatibility but no longer used for fake delays
+  const [isLoading] = useState(false)
 
   const total = items.length
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize])
@@ -40,17 +39,6 @@ export const useInventoryPagination = (
   useEffect(() => {
     setPageState((current) => clampPage(current, totalPages))
   }, [totalPages, items])
-
-  useEffect(() => {
-    setIsLoading(true)
-    const timeoutId = setTimeout(() => {
-      setIsLoading(false)
-    }, getRandomDelay())
-
-    return () => {
-      clearTimeout(timeoutId)
-    }
-  }, [page, pageSize, items])
 
   const setPage = useCallback(
     (nextPage: number) => {

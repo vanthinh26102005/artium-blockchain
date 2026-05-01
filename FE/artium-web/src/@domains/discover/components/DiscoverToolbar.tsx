@@ -120,11 +120,10 @@ export const DiscoverToolbar = ({
                     aria-label="Search by image"
                     aria-pressed={isImageSearch}
                     onClick={onToggleImageSearch}
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border transition ${
-                      isImageSearch
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border transition ${isImageSearch
                         ? 'border-slate-900 bg-slate-900 text-white'
-                        : 'border-transparent text-slate-500 hover:text-slate-700'
-                    }`}
+                        : 'border-black text-slate-500 hover:text-slate-700'
+                      }`}
                   >
                     {/* image search */}
                     <Camera className="h-4 w-4" />

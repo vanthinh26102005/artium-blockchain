@@ -72,4 +72,4 @@ async function bootstrap() {
   logger.log(`🛡️ Global exception filter and validation enabled`);
 }
 
-bootstrap();
+void bootstrap();

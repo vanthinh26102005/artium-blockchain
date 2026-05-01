@@ -95,7 +95,7 @@ export const MessagingView = () => {
         {/* Main Content */}
         <div className="flex h-[calc(100%-80px)]">
           {/* Conversations List */}
-          <div className="w-80 flex-shrink-0 border-r border-slate-200 bg-white">
+          <div className="w-80 shrink-0 border-r border-slate-200 bg-white">
             {/* Search */}
             <div className="border-b border-slate-200 p-4">
               <SearchBar value={searchQuery} onChange={setSearchQuery} />

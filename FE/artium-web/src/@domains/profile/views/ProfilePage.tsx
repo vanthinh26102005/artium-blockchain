@@ -71,9 +71,18 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
   const isAuthenticated = Boolean(authUser?.id)
 
   const profileData = profileDataWithDraft
+  const profileHandle = resolvedUsername || profileData.user.username || usernameFromRoute || ''
 
   const pageTitle = `${profileData.user.displayName} (@${resolvedUsername}) | Artium`
-  const baseHref = `/profile/${encodeURIComponent(resolvedUsername)}`
+  const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}` : ''
+  const tabHrefs = profileHandle
+    ? {
+        overview: baseHref,
+        artworks: `${baseHref}/artworks`,
+        moments: `${baseHref}/moments`,
+        moodboards: `${baseHref}/moodboards`,
+      }
+    : undefined
   const moments = useMemo(
     () => [...createdMoments, ...profileData.moments],
     [createdMoments, profileData.moments],
@@ -211,7 +220,7 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
         return (
           <MoodboardsSection
             moodboards={moodboards}
-            detailBaseHref={`${baseHref}/moodboards`}
+            detailBaseHref={profileHandle ? `${baseHref}/moodboards` : undefined}
             isOwner={isOwner}
           />
         )
@@ -222,25 +231,25 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
             <ArtworksSection
               artworks={profileData.artworks}
               limit={5}
-              seeAllHref={`${baseHref}/artworks`}
+              seeAllHref={profileHandle ? `${baseHref}/artworks` : undefined}
               isOwner={isOwner}
             />
             <MomentsSection
               moments={moments}
               limit={6}
-              seeAllHref={`${baseHref}/moments`}
-              detailBaseHref={`${baseHref}/moments`}
+              seeAllHref={profileHandle ? `${baseHref}/moments` : undefined}
+              detailBaseHref={profileHandle ? `${baseHref}/moments` : undefined}
               isOwner={isOwner}
             />
             <MoodboardsSection
               moodboards={moodboards}
-              seeAllHref={`${baseHref}/moodboards`}
-              detailBaseHref={`${baseHref}/moodboards`}
+              seeAllHref={profileHandle ? `${baseHref}/moodboards` : undefined}
+              detailBaseHref={profileHandle ? `${baseHref}/moodboards` : undefined}
               isOwner={isOwner}
             />
             <ProfileAboutSection
               about={profileData.about}
-              editHref={`/profile/${encodeURIComponent(resolvedUsername)}/edit`}
+              editHref={profileHandle ? `/profile/${encodeURIComponent(profileHandle)}/edit` : '/'}
             />
             {sellerProfile ? (
               <ProfileSalesStatsSection
@@ -326,18 +335,13 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
           </div>
         ) : null}
         <div className="container">
-          <ProfileTabs
-            tabs={PROFILE_TABS}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            tabHrefs={{
-              overview: baseHref,
-              artworks: `${baseHref}/artworks`,
-              moments: `${baseHref}/moments`,
-              moodboards: `${baseHref}/moodboards`,
-            }}
-          />
-        </div>
+            <ProfileTabs
+              tabs={PROFILE_TABS}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              tabHrefs={tabHrefs}
+            />
+          </div>
         <div className="container px-4 py-6 sm:px-6">{renderTabContent()}</div>
       </div>
 
