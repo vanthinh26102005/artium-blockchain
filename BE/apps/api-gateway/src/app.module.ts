@@ -25,6 +25,7 @@ import { AuctionGateway } from './presentation/http/gateways/auction.gateway';
 import { EventsController } from './presentation/http/controllers/events/events.controller';
 import { CommunityMomentsController } from './presentation/http/controllers/community/moments.controller';
 import { CommunityMoodboardsController } from './presentation/http/controllers/community/moodboards.controller';
+import { CommunityUploadsController } from './presentation/http/controllers/community/uploads.controller';
 import { FollowersController } from './presentation/http/controllers/community/followers.controller';
 
 @Module({
@@ -89,6 +90,7 @@ import { FollowersController } from './presentation/http/controllers/community/f
     MessagingController,
     NotificationsController,
     EventsController,
+    CommunityUploadsController,
     CommunityMomentsController,
     CommunityMoodboardsController,
     FollowersController,
