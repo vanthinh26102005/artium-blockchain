@@ -19,6 +19,7 @@ type ConfirmedBidStateProps = {
   committedBidValue: number
   transactionHash: string
   onClose: () => void
+  onViewOrderStatus?: () => void
 }
 
 const spaceGrotesk = Space_Grotesk({
@@ -45,6 +46,7 @@ export const ConfirmedBidState = ({
   committedBidValue,
   transactionHash,
   onClose,
+  onViewOrderStatus,
 }: ConfirmedBidStateProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -133,14 +135,35 @@ export const ConfirmedBidState = ({
               </div>
 
               <div className="w-full space-y-4">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-[#5f5e5e]"
-                  style={headlineFont}
-                >
-                  Done
-                </button>
+                {onViewOrderStatus ? (
+                  <button
+                    type="button"
+                    onClick={onViewOrderStatus}
+                    className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-[#5f5e5e]"
+                    style={headlineFont}
+                  >
+                    View Order Status
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-[#5f5e5e]"
+                    style={headlineFont}
+                  >
+                    Done
+                  </button>
+                )}
+                {onViewOrderStatus ? (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="inline-flex w-full items-center justify-center py-2 text-[11px] font-bold tracking-[0.15em] text-black/58 uppercase transition hover:text-black"
+                    style={headlineFont}
+                  >
+                    Stay Here
+                  </button>
+                ) : null}
                 <a
                   href={getTransactionUrl(transactionHash)}
                   target="_blank"
