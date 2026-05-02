@@ -7,6 +7,7 @@ metadata:
     {{- include "artium-backend.labels" . | nindent 4 }}
 data:
   NODE_ENV: {{ .Values.config.nodeEnv | quote }}
+  API_GLOBAL_PREFIX: {{ .Values.config.apiGlobalPrefix | default "" | quote }}
   DB_STRATEGY: {{ .Values.config.dbStrategy | quote }}
   DB_SYNCHRONIZE: {{ .Values.config.dbSynchronize | quote }}
   SHARED_DB_HOST: {{ .Values.config.postgresql.host | quote }}
