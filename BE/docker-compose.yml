@@ -346,6 +346,7 @@ services:
       - ./apps/api-gateway/.env.compose
     environment:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in environment}
+      NODE_ENV: ${NODE_ENV:-development}
     volumes:
       - .:/app
       - gateway_node_modules:/app/node_modules

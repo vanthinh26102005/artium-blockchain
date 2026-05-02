@@ -65,7 +65,7 @@ web:
   replicaCount: 1
   port: 3000
   env:
-    NEXT_PUBLIC_API_URL: "https://dg.pthinh.io.vn/api"
+    NEXT_PUBLIC_API_URL: "https://dg.pthinh.io.vn"
     NEXT_PUBLIC_WS_URL: "https://dg.pthinh.io.vn"
     NEXT_PUBLIC_WEB_BASE_URL: "https://dg.pthinh.io.vn"
     NEXTAUTH_URL: "https://dg.pthinh.io.vn"
@@ -167,6 +167,7 @@ config:
   dbStrategy: SHARED
   dbSynchronize: "false"
   nodeEnv: production
+  apiGlobalPrefix: ""
   rabbitmq:
     host: artium-backend-rabbitmq
     port: 5672
