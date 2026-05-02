@@ -52,9 +52,14 @@ const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnP
   // -- state --
   const media = useUploadArtworkStore((state) => state.media)
   const errors = useUploadArtworkStore((state) => state.errors)
+  const touched = useUploadArtworkStore((state) => state.touched)
+  const hasSubmitted = useUploadArtworkStore((state) => state.hasSubmitted)
+  
   const setCoverImage = useUploadArtworkStore((state) => state.setCoverImage)
   const addImages = useUploadArtworkStore((state) => state.addAdditionalImages)
   const removeImage = useUploadArtworkStore((state) => state.removeAdditionalImage)
+
+  const shouldShowError = (field: string) => Boolean(errors[field]) && (hasSubmitted || touched[field])
 
   // -- refs --
   const coverInputRef = useRef<HTMLInputElement>(null)
@@ -269,10 +274,10 @@ const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnP
             </div>
           </div>
         )}
-        {errors['media.coverImage'] ? (
+        {shouldShowError('media.coverImage') ? (
           <p className="mt-3 text-sm text-red-600">{errors['media.coverImage']}</p>
         ) : null}
-        {errors['media.additionalImages'] ? (
+        {shouldShowError('media.additionalImages') ? (
           <p className="mt-2 text-sm text-red-600">{errors['media.additionalImages']}</p>
         ) : null}
         <p className="mt-3 text-sm text-[#898788]">
@@ -312,20 +317,29 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
   const listing = useUploadArtworkStore((state) => state.listing)
   const locations = useUploadArtworkStore((state) => state.locations)
   const errors = useUploadArtworkStore((state) => state.errors)
+  const touched = useUploadArtworkStore((state) => state.touched)
+  const hasSubmitted = useUploadArtworkStore((state) => state.hasSubmitted)
+  
   const setField = useUploadArtworkStore((state) => state.setField)
   const addLocation = useUploadArtworkStore((state) => state.addLocation)
   const clearLocationDraft = useUploadArtworkStore((state) => state.clearLocationDraft)
   const addCustomTag = useUploadArtworkStore((state) => state.addCustomTag)
   const removeCustomTag = useUploadArtworkStore((state) => state.removeCustomTag)
   const clearCustomTags = useUploadArtworkStore((state) => state.clearCustomTags)
+  const markFieldTouched = useUploadArtworkStore((state) => state.markFieldTouched)
+  
   const [locationSearch, setLocationSearch] = useState('')
   const [tagSearch, setTagSearch] = useState('')
   const [isLocationOpen, setIsLocationOpen] = useState(false)
   const [isTagOpen, setIsTagOpen] = useState(false)
   const [isLocationFormOpen, setIsLocationFormOpen] = useState(false)
   const [isTagFormOpen, setIsTagFormOpen] = useState(false)
+  
   const locationNameRef = useRef<HTMLInputElement>(null)
   const tagInputRef = useRef<HTMLInputElement>(null)
+
+  const shouldShowError = (field: string) => Boolean(errors[field]) && (hasSubmitted || touched[field])
+
   const inputBaseClassName = 'h-[52px] text-[15px] lg:h-14 lg:text-[16px]'
   const textareaBaseClassName = 'min-h-[140px] text-[15px] lg:min-h-[160px] lg:text-[16px]'
   const labelClassName =
@@ -365,10 +379,12 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
             <Input
               value={details.title}
               onChange={(event) => setField('details.title', event.target.value)}
+              onBlur={() => markFieldTouched('details.title')}
               placeholder="Enter a title"
               className={cn('mt-2', inputBaseClassName)}
+              aria-invalid={shouldShowError('details.title')}
             />
-            {errors['details.title'] ? (
+            {shouldShowError('details.title') ? (
               <p className="mt-2 text-sm text-red-600">{errors['details.title']}</p>
             ) : null}
           </div>
@@ -377,6 +393,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
             <Textarea
               value={details.description}
               onChange={(event) => setField('details.description', event.target.value)}
+              onBlur={() => markFieldTouched('details.description')}
               placeholder="Share a brief description"
               className={cn('mt-2', textareaBaseClassName)}
             />
@@ -392,10 +409,12 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
               <Input
                 value={details.year}
                 onChange={(event) => setField('details.year', event.target.value)}
+                onBlur={() => markFieldTouched('details.year')}
                 placeholder="2024"
                 className={cn('mt-2', inputBaseClassName)}
+                aria-invalid={shouldShowError('details.year')}
               />
-              {errors['details.year'] ? (
+              {shouldShowError('details.year') ? (
                 <p className="mt-2 text-sm text-red-600">{errors['details.year']}</p>
               ) : null}
             </div>
@@ -404,6 +423,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
               <Input
                 value={details.editionRun}
                 onChange={(event) => setField('details.editionRun', event.target.value)}
+                onBlur={() => markFieldTouched('details.editionRun')}
                 placeholder="1 of 12"
                 className={cn('mt-2', inputBaseClassName)}
               />
@@ -437,27 +457,33 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
                 <Input
                   value={details.dimensions.height}
                   onChange={(event) => setField('details.dimensions.height', event.target.value)}
+                  onBlur={() => markFieldTouched('details.dimensions.height')}
                   placeholder="Height"
                   className={inputBaseClassName}
+                  aria-invalid={shouldShowError('details.dimensions.height')}
                 />
                 <span className="text-xs text-black/40">x</span>
                 <Input
                   value={details.dimensions.width}
                   onChange={(event) => setField('details.dimensions.width', event.target.value)}
+                  onBlur={() => markFieldTouched('details.dimensions.width')}
                   placeholder="Width"
                   className={inputBaseClassName}
+                  aria-invalid={shouldShowError('details.dimensions.width')}
                 />
                 <span className="text-xs text-black/40">x</span>
                 <Input
                   value={details.dimensions.depth}
                   onChange={(event) => setField('details.dimensions.depth', event.target.value)}
+                  onBlur={() => markFieldTouched('details.dimensions.depth')}
                   placeholder="Depth"
                   className={inputBaseClassName}
+                  aria-invalid={shouldShowError('details.dimensions.depth')}
                 />
               </div>
-              {errors['details.dimensions.height'] ||
-                errors['details.dimensions.width'] ||
-                errors['details.dimensions.depth'] ? (
+              {shouldShowError('details.dimensions.height') ||
+                shouldShowError('details.dimensions.width') ||
+                shouldShowError('details.dimensions.depth') ? (
                 <p className="mt-2 text-sm text-red-600">
                   {errors['details.dimensions.height'] ||
                     errors['details.dimensions.width'] ||
@@ -489,10 +515,12 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
               <Input
                 value={details.weight.value}
                 onChange={(event) => setField('details.weight.value', event.target.value)}
+                onBlur={() => markFieldTouched('details.weight.value')}
                 placeholder={`Weight (${details.weight.unit})`}
                 className={cn('mt-3', inputBaseClassName)}
+                aria-invalid={shouldShowError('details.weight.value')}
               />
-              {errors['details.weight.value'] ? (
+              {shouldShowError('details.weight.value') ? (
                 <p className="mt-2 text-sm text-red-600">{errors['details.weight.value']}</p>
               ) : null}
             </div>
@@ -502,6 +530,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
             <Input
               value={details.materials}
               onChange={(event) => setField('details.materials', event.target.value)}
+              onBlur={() => markFieldTouched('details.materials')}
               placeholder="Oil on canvas"
               className={cn('mt-2', inputBaseClassName)}
             />
@@ -736,10 +765,12 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
               <Input
                 value={listing.price}
                 onChange={(event) => setField('listing.price', event.target.value)}
+                onBlur={() => markFieldTouched('listing.price')}
                 placeholder="US$"
                 className={cn('mt-2', inputBaseClassName)}
+                aria-invalid={shouldShowError('listing.price')}
               />
-              {errors['listing.price'] ? (
+              {shouldShowError('listing.price') ? (
                 <p className="mt-2 text-sm text-red-600">{errors['listing.price']}</p>
               ) : null}
             </div>
@@ -750,10 +781,12 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
               <Input
                 value={listing.quantity}
                 onChange={(event) => setField('listing.quantity', event.target.value)}
+                onBlur={() => markFieldTouched('listing.quantity')}
                 placeholder="1"
                 className={cn('mt-2', inputBaseClassName)}
+                aria-invalid={shouldShowError('listing.quantity')}
               />
-              {errors['listing.quantity'] ? (
+              {shouldShowError('listing.quantity') ? (
                 <p className="mt-2 text-sm text-red-600">{errors['listing.quantity']}</p>
               ) : null}
             </div>
@@ -962,6 +995,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
         <Textarea
           value={details.deliveryNote}
           onChange={(event) => setField('details.deliveryNote', event.target.value)}
+          onBlur={() => markFieldTouched('details.deliveryNote')}
           placeholder="Share a note..."
           className={cn('mt-4', textareaBaseClassName)}
         />

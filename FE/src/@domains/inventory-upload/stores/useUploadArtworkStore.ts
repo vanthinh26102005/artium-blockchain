@@ -48,6 +48,8 @@ type UploadArtworkState = {
   hydrationError: string | null
   errors: UploadValidationErrors
   touched: Record<string, boolean>
+  hasSubmitted: boolean
+  markFieldTouched: (path: string) => void
   setStep: (step: UploadStep) => void
   nextStep: () => boolean
   prevStep: () => void
@@ -84,6 +86,7 @@ type UploadArtworkState = {
   }
   rehydrateMediaFiles: () => void
   revokeMediaPreviews: () => void
+  setHasSubmitted: (hasSubmitted: boolean) => void
 }
 
 const createLocalId = () => {
@@ -289,15 +292,22 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
       hydrationError: null,
       errors: {},
       touched: {},
-      setStep: (step) => set({ step: Math.max(1, Math.min(2, step)) as UploadStep }),
+      hasSubmitted: false,
+      markFieldTouched: (path: string) =>
+        set((state) => ({
+          touched: { ...state.touched, [path]: true },
+        })),
+      setHasSubmitted: (hasSubmitted) => set({ hasSubmitted }),
+      setStep: (step) => set({ step: Math.max(1, Math.min(2, step)) as UploadStep, hasSubmitted: false }),
       nextStep: () => {
+        set({ hasSubmitted: true })
         const { step } = get()
         const isValid = get().validateStep(step)
         if (!isValid) {
           return false
         }
         if (step < 2) {
-          set({ step: 2 })
+          set({ step: 2, hasSubmitted: false })
           return true
         }
         get().clearDirty()
@@ -306,6 +316,7 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
       prevStep: () =>
         set((state) => ({
           step: Math.max(1, state.step - 1) as UploadStep,
+          hasSubmitted: false
         })),
       setField: (path, value) =>
         set((state) => {
@@ -815,6 +826,7 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           hydrationError: null,
           errors: {},
           touched: {},
+          hasSubmitted: false,
         })
       },
       hydrateFromQuery: (draftId) =>

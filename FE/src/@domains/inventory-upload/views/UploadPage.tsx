@@ -39,9 +39,7 @@ export const UploadPage = () => {
   const resetDraft = useUploadArtworkStore((state) => state.resetDraft)
   const nextStep = useUploadArtworkStore((state) => state.nextStep)
   const prevStep = useUploadArtworkStore((state) => state.prevStep)
-  const getStepStatus = useUploadArtworkStore((state) => state.getStepStatus)
   const clearDirty = useUploadArtworkStore((state) => state.clearDirty)
-  const validateStep = useUploadArtworkStore((state) => state.validateStep)
   const revokeMediaPreviews = useUploadArtworkStore((state) => state.revokeMediaPreviews)
 
   const [isExitOpen, setIsExitOpen] = useState(false)
@@ -59,8 +57,6 @@ export const UploadPage = () => {
     completedArtwork,
     reset: resetSubmit,
   } = useArtworkSubmit()
-
-  const stepStatus = getStepStatus(step)
 
   const {
     isDraftLoading,
@@ -105,10 +101,6 @@ export const UploadPage = () => {
   useEffect(() => {
     return () => revokeMediaPreviews()
   }, [revokeMediaPreviews])
-
-  useEffect(() => {
-    validateStep(step)
-  }, [step, validateStep])
 
   // -- handlers --
   const handlePrevStep = () => {
@@ -201,7 +193,7 @@ export const UploadPage = () => {
         onPrev={handlePrevStep}
         onNext={handleNextStep}
         isNextDisabled={
-          !stepStatus.isValid || isDraftLoading || !!hydrationError || submitting || isSubmitting
+          isDraftLoading || !!hydrationError || submitting || isSubmitting
         }
       >
         {isDraftLoading ? (

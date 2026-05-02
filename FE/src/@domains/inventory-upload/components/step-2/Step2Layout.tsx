@@ -113,18 +113,24 @@ const Step2RightColumn = ({ className }: Step2ColumnProps) => {
   const media = useUploadArtworkStore((state) => state.media)
   const story = useUploadArtworkStore((state) => state.story)
   const errors = useUploadArtworkStore((state) => state.errors)
+  const touched = useUploadArtworkStore((state) => state.touched)
+  const hasSubmitted = useUploadArtworkStore((state) => state.hasSubmitted)
+  
   const setMomentVideo = useUploadArtworkStore((state) => state.setMomentVideo)
   const setField = useUploadArtworkStore((state) => state.setField)
   const trivias = useUploadArtworkStore((state) => state.story.trivia)
   const addTrivia = useUploadArtworkStore((state) => state.addTrivia)
   const updateTrivia = useUploadArtworkStore((state) => state.updateTrivia)
   const removeTrivia = useUploadArtworkStore((state) => state.removeTrivia)
+  const markFieldTouched = useUploadArtworkStore((state) => state.markFieldTouched)
+
+  const shouldShowError = (field: string) => Boolean(errors[field]) && (hasSubmitted || touched[field])
 
   return (
     <div className={cn('space-y-4 lg:space-y-8', className)}>
       <VideoPicker
         video={media.momentVideo ?? undefined}
-        error={errors['media.momentVideo']}
+        error={shouldShowError('media.momentVideo') ? errors['media.momentVideo'] : undefined}
         accept={UPLOAD_MEDIA_RULES.VIDEO_ACCEPT}
         maxSizeLabel={`${UPLOAD_MEDIA_RULES.MAX_VIDEO_SIZE_MB}MB`}
         title="Artwork moments"
@@ -133,8 +139,14 @@ const Step2RightColumn = ({ className }: Step2ColumnProps) => {
         mode="moments"
         caption={story.moment.caption}
         videoType={story.moment.type}
-        onCaptionChange={(value) => setField('story.moment.caption', value)}
-        onVideoTypeChange={(value) => setField('story.moment.type', value)}
+        onCaptionChange={(value) => {
+          setField('story.moment.caption', value)
+          markFieldTouched('story.moment.caption')
+        }}
+        onVideoTypeChange={(value) => {
+          setField('story.moment.type', value)
+          markFieldTouched('story.moment.type')
+        }}
         onSelect={setMomentVideo}
         onRemove={() => setMomentVideo(null)}
       />
@@ -143,7 +155,8 @@ const Step2RightColumn = ({ className }: Step2ColumnProps) => {
         <p className={SECTION_TITLE_CLASSNAME}>Quick facts</p>
         <div className="mt-4 space-y-4">
           {trivias.map((trivia, index) => {
-            const answerError = errors[`story.trivia.${trivia.id}.answer`]
+            const answerErrorKey = `story.trivia.${trivia.id}.answer`
+            const hasAnswerError = shouldShowError(answerErrorKey)
             const isQuestionPlaceholder = !trivia.question
             return (
               <div key={trivia.id} className="rounded-2xl border border-black/10 bg-[#FDFDFD] p-4">
@@ -201,10 +214,12 @@ const Step2RightColumn = ({ className }: Step2ColumnProps) => {
                   <Textarea
                     value={trivia.answer}
                     onChange={(event) => updateTrivia(trivia.id, 'answer', event.target.value)}
+                    onBlur={() => markFieldTouched(answerErrorKey)}
                     placeholder="Share more context..."
                     className={TEXTAREA_BASE_CLASSNAME}
+                    aria-invalid={hasAnswerError}
                   />
-                  {answerError ? <p className="mt-2 text-sm text-red-600">{answerError}</p> : null}
+                  {hasAnswerError ? <p className="mt-2 text-sm text-red-600">{errors[answerErrorKey]}</p> : null}
                 </div>
               </div>
             )
