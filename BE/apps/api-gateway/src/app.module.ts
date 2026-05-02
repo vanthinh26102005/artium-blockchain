@@ -13,6 +13,7 @@ import { UserController } from './presentation/http/controllers/identity/users.c
 import { MessagingController } from './presentation/http/controllers/messaging.controller';
 import { NotificationsController } from './presentation/http/controllers/notification/notifications.controller';
 import { OrdersController } from './presentation/http/controllers/orders.controller';
+import { AuctionsController } from './presentation/http/controllers/auctions.controller';
 import { PaymentsController } from './presentation/http/controllers/payment/payments.controller';
 import { InvoicesController } from './presentation/http/controllers/payment/invoices.controller';
 import { PayoutsController } from './presentation/http/controllers/payment/payouts.controller';
@@ -20,9 +21,11 @@ import { QuickSellInvoicesController } from './presentation/http/controllers/pay
 import { TagsController } from './presentation/http/controllers/artwork/tags.controller';
 import { UploadController } from './presentation/http/controllers/artwork/upload.controller';
 import { MessagingGateway } from './presentation/http/gateways/messaging.gateway';
+import { AuctionGateway } from './presentation/http/gateways/auction.gateway';
 import { EventsController } from './presentation/http/controllers/events/events.controller';
 import { CommunityMomentsController } from './presentation/http/controllers/community/moments.controller';
 import { CommunityMoodboardsController } from './presentation/http/controllers/community/moodboards.controller';
+import { CommunityUploadsController } from './presentation/http/controllers/community/uploads.controller';
 import { FollowersController } from './presentation/http/controllers/community/followers.controller';
 
 @Module({
@@ -82,14 +85,16 @@ import { FollowersController } from './presentation/http/controllers/community/f
     PayoutsController,
     QuickSellInvoicesController,
 
+    AuctionsController,
     OrdersController,
     MessagingController,
     NotificationsController,
     EventsController,
+    CommunityUploadsController,
     CommunityMomentsController,
     CommunityMoodboardsController,
     FollowersController,
   ],
-  providers: [MessagingGateway],
+  providers: [MessagingGateway, AuctionGateway],
 })
 export class ApiGatewayModule {}

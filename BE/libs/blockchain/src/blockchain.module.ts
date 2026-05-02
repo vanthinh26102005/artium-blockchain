@@ -25,7 +25,10 @@ export class BlockchainModule {
       imports: [
         ConfigModule,
         OutboxModule,
-        TypeOrmModule.forFeature([BlockchainEventCursor, BlockchainProcessedEvent]),
+        TypeOrmModule.forFeature([
+          BlockchainEventCursor,
+          BlockchainProcessedEvent,
+        ]),
       ],
       providers: [
         {
@@ -69,11 +72,7 @@ export class BlockchainModule {
             logger.log(
               `Binding contract at address: ${config.contractAddress}`,
             );
-            return new ethers.Contract(
-              config.contractAddress,
-              ABI,
-              provider,
-            );
+            return new ethers.Contract(config.contractAddress, ABI, provider);
           },
         },
         EscrowContractService,

@@ -16,13 +16,18 @@ import {
   MomentTaggedArtwork,
   Moodboard,
   MoodboardArtwork,
+  MoodboardMedia,
   MoodboardCollaborator,
   Follower,
   Comment,
   Like,
   Testimonial,
   ActivityFeed,
+  CommunityMedia,
+  CommunityMediaStorageService,
+  ICommunityMediaRepository,
   IMomentRepository,
+  IMoodboardMediaRepository,
   IMoodboardRepository,
   IMoodboardArtworkRepository,
   IFollowerRepository,
@@ -34,9 +39,11 @@ import {
   MomentRepository,
   MoodboardRepository,
   MoodboardArtworkRepository,
+  MoodboardMediaRepository,
   FollowerRepository,
   CommentRepository,
   LikeRepository,
+  CommunityMediaRepository,
 } from './infrastructure';
 
 import {
@@ -52,12 +59,15 @@ import {
   UnfollowUserHandler,
   CreateCommentHandler,
   SetLikeStatusHandler,
+  UploadCommunityMomentMediaHandler,
+  UploadCommunityMoodboardMediaHandler,
 } from './application';
 
 import {
   GetMomentHandler,
   ListUserMomentsHandler,
   GetMoodboardHandler,
+  ListArtworkMoodboardIdsForUserHandler,
   ListUserMoodboardsHandler,
   GetFollowersHandler,
   GetFollowingHandler,
@@ -71,6 +81,7 @@ import {
   FollowersMicroserviceController,
   CommentsMicroserviceController,
   LikesMicroserviceController,
+  CommunityMediaMicroserviceController,
   HealthController,
 } from './presentation';
 
@@ -90,6 +101,8 @@ export const CommandHandlers = [
 
   CreateCommentHandler,
   SetLikeStatusHandler,
+  UploadCommunityMomentMediaHandler,
+  UploadCommunityMoodboardMediaHandler,
 ];
 
 export const QueryHandlers = [
@@ -97,6 +110,7 @@ export const QueryHandlers = [
   ListUserMomentsHandler,
 
   GetMoodboardHandler,
+  ListArtworkMoodboardIdsForUserHandler,
   ListUserMoodboardsHandler,
 
   GetFollowersHandler,
@@ -108,7 +122,9 @@ export const QueryHandlers = [
 
 export const Repositories = [
   { provide: IMomentRepository, useClass: MomentRepository },
+  { provide: ICommunityMediaRepository, useClass: CommunityMediaRepository },
   { provide: IMoodboardRepository, useClass: MoodboardRepository },
+  { provide: IMoodboardMediaRepository, useClass: MoodboardMediaRepository },
   {
     provide: IMoodboardArtworkRepository,
     useClass: MoodboardArtworkRepository,
@@ -120,6 +136,7 @@ export const Repositories = [
 
 export const Services = [
   { provide: ITransactionService, useClass: TransactionService },
+  CommunityMediaStorageService,
 ];
 
 export const Controllers = [
@@ -129,6 +146,7 @@ export const Controllers = [
   FollowersMicroserviceController,
   CommentsMicroserviceController,
   LikesMicroserviceController,
+  CommunityMediaMicroserviceController,
 ];
 
 @Module({
@@ -145,12 +163,14 @@ export const Controllers = [
       MomentTaggedArtwork,
       Moodboard,
       MoodboardArtwork,
+      MoodboardMedia,
       MoodboardCollaborator,
       Follower,
       Comment,
       Like,
       Testimonial,
       ActivityFeed,
+      CommunityMedia,
       OutboxEntity,
     ]),
 

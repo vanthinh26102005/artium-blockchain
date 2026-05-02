@@ -40,11 +40,15 @@ export class RegistrationService {
       .replace(/^-+|-+$/g, '')
       .slice(0, 75);
 
-    const slug = candidate.length >= 3
-      ? candidate
-      : `user-${candidate || Math.floor(1000 + Math.random() * 9000)}`;
+    const slug =
+      candidate.length >= 3
+        ? candidate
+        : `user-${candidate || Math.floor(1000 + Math.random() * 9000)}`;
 
-    const existing = await this.userRepository.findBySlug(slug, transactionManager);
+    const existing = await this.userRepository.findBySlug(
+      slug,
+      transactionManager,
+    );
     if (!existing) return slug;
 
     const maxAttempts = 10;

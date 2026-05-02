@@ -1,7 +1,10 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CreateCommentCommand, ListCommentsByEntityQuery } from '../../application';
+import {
+  CreateCommentCommand,
+  ListCommentsByEntityQuery,
+} from '../../application';
 import {
   CommentObject,
   CommentableType,

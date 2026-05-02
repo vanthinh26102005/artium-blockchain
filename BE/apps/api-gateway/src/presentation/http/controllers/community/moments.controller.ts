@@ -23,16 +23,14 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { MomentMediaType, UserPayload } from '@app/common';
+import { UserPayload } from '@app/common';
 import {
   IsArray,
   IsBoolean,
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  IsUrl,
   Max,
   MaxLength,
   Min,
@@ -130,28 +128,12 @@ class SetLikeStatusBody {
 
 class CreateMomentBody {
   @ApiProperty({
-    description: 'URL of the media (image or video)',
-    example: 'https://storage.example.com/moments/image.jpg',
+    description: 'Backend-issued uploaded community media ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @IsUrl()
+  @IsString()
   @IsNotEmpty()
-  mediaUrl!: string;
-
-  @ApiProperty({
-    enum: MomentMediaType,
-    description: 'Type of media',
-    example: MomentMediaType.IMAGE,
-  })
-  @IsEnum(MomentMediaType)
-  @IsNotEmpty()
-  mediaType!: MomentMediaType;
-
-  @ApiPropertyOptional({
-    description: 'Thumbnail URL for video content',
-  })
-  @IsOptional()
-  @IsUrl()
-  thumbnailUrl?: string;
+  mediaId!: string;
 
   @ApiPropertyOptional({
     description: 'Caption for the moment',
@@ -294,10 +276,14 @@ export class CommunityMomentsController {
     @Body() body: CreateMomentBody,
     @Request() req: Express.Request & { user: UserPayload },
   ) {
-    return sendRpc(this.communityClient, { cmd: 'create_moment' }, {
-      userId: req.user?.id,
-      ...body,
-    });
+    return sendRpc(
+      this.communityClient,
+      { cmd: 'create_moment' },
+      {
+        userId: req.user?.id,
+        ...body,
+      },
+    );
   }
 
   @Get(':id/comments')
@@ -372,7 +358,10 @@ export class CommunityMomentsController {
 
     return comments.map((comment) => ({
       ...comment,
-      author: this.buildCommentAuthor(comment.userId, userMap.get(comment.userId)),
+      author: this.buildCommentAuthor(
+        comment.userId,
+        userMap.get(comment.userId),
+      ),
     }));
   }
 

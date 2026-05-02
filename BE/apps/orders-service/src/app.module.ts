@@ -9,6 +9,7 @@ import { BlockchainModule } from '@app/blockchain';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import {
@@ -16,19 +17,23 @@ import {
   OrderItem,
   ShoppingCart,
   CartItem,
+  AuctionStartAttempt,
 } from './domain/entities';
 
 import {
+  IAuctionStartAttemptRepository,
   IOrderRepository,
   IOrderItemRepository,
 } from './domain/interfaces';
 
 import {
+  AuctionStartAttemptRepository,
   OrderRepository,
   OrderItemRepository,
 } from './infrastructure/repositories';
 
 import {
+  AttachSellerAuctionStartTxHandler,
   CreateOrderHandler,
   UpdateOrderStatusHandler,
   CancelOrderHandler,
@@ -36,10 +41,16 @@ import {
   ConfirmDeliveryHandler,
   OpenDisputeHandler,
   ResolveDisputeHandler,
+  GetAuctionByIdHandler,
+  GetArtworkOrderLocksHandler,
+  GetAuctionsHandler,
   GetOrdersHandler,
   GetOrderByIdHandler,
   GetOrderByOnChainIdHandler,
   GetOrderItemsHandler,
+  GetSellerAuctionStartStatusHandler,
+  StartSellerAuctionHandler,
+  SellerAuctionLifecycleOutboxService,
 } from './application';
 
 import {
@@ -51,6 +62,8 @@ import { OrdersMicroserviceController } from './presentation/microservice';
 
 export const CommandHandlers = [
   CreateOrderHandler,
+  StartSellerAuctionHandler,
+  AttachSellerAuctionStartTxHandler,
   UpdateOrderStatusHandler,
   CancelOrderHandler,
   MarkShippedHandler,
@@ -60,29 +73,42 @@ export const CommandHandlers = [
 ];
 
 export const QueryHandlers = [
+  GetAuctionsHandler,
+  GetAuctionByIdHandler,
+  GetArtworkOrderLocksHandler,
   GetOrdersHandler,
   GetOrderByIdHandler,
   GetOrderByOnChainIdHandler,
   GetOrderItemsHandler,
+  GetSellerAuctionStartStatusHandler,
 ];
 
 export const Repositories = [
   { provide: IOrderRepository, useClass: OrderRepository },
   { provide: IOrderItemRepository, useClass: OrderItemRepository },
+  {
+    provide: IAuctionStartAttemptRepository,
+    useClass: AuctionStartAttemptRepository,
+  },
 ];
 
 export const Services = [
   { provide: ITransactionService, useClass: TransactionService },
+  SellerAuctionLifecycleOutboxService,
 ];
 
-export const EventHandlers = [
-  BlockchainEventHandler,
-  PaymentEventHandler,
-];
+export const EventHandlers = [BlockchainEventHandler, PaymentEventHandler];
 
-export const Controllers = [
-  OrdersMicroserviceController,
-];
+export const Controllers = [OrdersMicroserviceController];
+
+const ArtworkServiceClient = {
+  name: 'ARTWORK_SERVICE',
+  transport: Transport.TCP as const,
+  options: {
+    host: process.env.ARTWORK_SERVICE_HOST || 'localhost',
+    port: parseInt(process.env.ARTWORK_SERVICE_PORT || '3102', 10),
+  },
+};
 
 @Module({
   imports: [
@@ -97,12 +123,14 @@ export const Controllers = [
       OrderItem,
       ShoppingCart,
       CartItem,
+      AuctionStartAttempt,
       OutboxEntity,
     ]),
 
     OutboxModule,
     AppRabbitMQModule,
     CqrsModule,
+    ClientsModule.register([ArtworkServiceClient]),
     BlockchainModule.forRoot(),
   ],
   controllers: [...Controllers],

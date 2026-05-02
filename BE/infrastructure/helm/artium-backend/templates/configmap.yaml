@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "artium-backend.fullname" . }}-runtime
+  namespace: {{ .Values.namespace.name | quote }}
+  labels:
+    {{- include "artium-backend.labels" . | nindent 4 }}
+data:
+  NODE_ENV: {{ .Values.config.nodeEnv | quote }}
+  API_GLOBAL_PREFIX: {{ .Values.config.apiGlobalPrefix | default "" | quote }}
+  DB_STRATEGY: {{ .Values.config.dbStrategy | quote }}
+  DB_SYNCHRONIZE: {{ .Values.config.dbSynchronize | quote }}
+  SHARED_DB_HOST: {{ .Values.config.postgresql.host | quote }}
+  SHARED_DB_PORT: {{ .Values.config.postgresql.port | quote }}
+  SHARED_DB_USERNAME: {{ .Values.postgresql.auth.username | quote }}
+  SHARED_DB_NAME: {{ .Values.postgresql.auth.database | quote }}
+  REDIS_HOST: {{ .Values.config.redis.host | quote }}
+  REDIS_PORT: {{ .Values.config.redis.port | quote }}
+  MICROSERVICE_HOST: "0.0.0.0"
+  API_GATEWAY_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "api-gateway") | quote }}
+  IDENTITY_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "identity-service") | quote }}
+  IDENTITY_SERVICE_HOST: {{ include "artium-backend.serviceName" (dict "root" . "name" "identity-service") | quote }}
+  IDENTITY_SERVICE_PORT: {{ index .Values.services "identity-service" "ports" "tcp" | quote }}
+  ARTWORK_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "artwork-service") | quote }}
+  ARTWORK_SERVICE_HOST: {{ include "artium-backend.serviceName" (dict "root" . "name" "artwork-service") | quote }}
+  ARTWORK_SERVICE_PORT: {{ index .Values.services "artwork-service" "ports" "tcp" | quote }}
+  PAYMENTS_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "payments-service") | quote }}
+  PAYMENTS_SERVICE_HOST: {{ include "artium-backend.serviceName" (dict "root" . "name" "payments-service") | quote }}
+  PAYMENTS_SERVICE_PORT: {{ index .Values.services "payments-service" "ports" "tcp" | quote }}
+  ORDERS_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "orders-service") | quote }}
+  ORDERS_SERVICE_HOST: {{ include "artium-backend.serviceName" (dict "root" . "name" "orders-service") | quote }}
+  ORDERS_SERVICE_PORT: {{ index .Values.services "orders-service" "ports" "tcp" | quote }}
+  MESSAGING_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "messaging-service") | quote }}
+  MESSAGING_SERVICE_HOST: {{ include "artium-backend.serviceName" (dict "root" . "name" "messaging-service") | quote }}
+  MESSAGING_SERVICE_PORT: {{ index .Values.services "messaging-service" "ports" "tcp" | quote }}
+  NOTIFICATIONS_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "notifications-service") | quote }}
+  NOTIFICATIONS_SERVICE_HOST: {{ include "artium-backend.serviceName" (dict "root" . "name" "notifications-service") | quote }}
+  NOTIFICATIONS_SERVICE_PORT: "3106"
+  EVENTS_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "events-service") | quote }}
+  EVENTS_SERVICE_HOST: {{ include "artium-backend.serviceName" (dict "root" . "name" "events-service") | quote }}
+  EVENTS_SERVICE_PORT: {{ index .Values.services "events-service" "ports" "tcp" | quote }}
+  COMMUNITY_SERVICE: {{ include "artium-backend.serviceName" (dict "root" . "name" "community-service") | quote }}
+  COMMUNITY_SERVICE_HOST: {{ include "artium-backend.serviceName" (dict "root" . "name" "community-service") | quote }}
+  COMMUNITY_SERVICE_PORT: {{ index .Values.services "community-service" "ports" "tcp" | quote }}

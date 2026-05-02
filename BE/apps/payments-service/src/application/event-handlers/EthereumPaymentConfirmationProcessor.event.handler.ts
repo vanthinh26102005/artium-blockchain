@@ -18,7 +18,10 @@ export class EthereumPaymentConfirmationProcessorEventHandler {
     queue: 'payments-service.ethereum.confirmation-requested',
     queueOptions: { durable: true },
   })
-  async handleConfirmationRequested(message: { transactionId?: string; txHash?: string }) {
+  async handleConfirmationRequested(message: {
+    transactionId?: string;
+    txHash?: string;
+  }) {
     if (!message.transactionId) {
       this.logger.warn('Ethereum confirmation message missing transactionId');
       return;

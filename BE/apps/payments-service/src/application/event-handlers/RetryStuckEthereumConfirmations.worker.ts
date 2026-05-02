@@ -7,7 +7,9 @@ import { EthereumPaymentConfirmationRequestedEvent } from '../../domain/events';
 
 @Injectable()
 export class RetryStuckEthereumConfirmationsWorker {
-  private readonly logger = new Logger(RetryStuckEthereumConfirmationsWorker.name);
+  private readonly logger = new Logger(
+    RetryStuckEthereumConfirmationsWorker.name,
+  );
   private readonly leaseMs = 60_000;
   private readonly batchSize = 20;
 
@@ -19,11 +21,24 @@ export class RetryStuckEthereumConfirmationsWorker {
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   async rescheduleReadyTransactions() {
+    const isEnabled = (
+      process.env.ETHEREUM_CONFIRMATION_RETRY_ENABLED ?? 'true'
+    )
+      .trim()
+      .toLowerCase();
+    if (isEnabled === 'false') {
+      this.logger.debug(
+        'RetryStuckEthereumConfirmationsWorker disabled by ETHEREUM_CONFIRMATION_RETRY_ENABLED=false',
+      );
+      return;
+    }
+
     const staleAfter = new Date(Date.now() - this.leaseMs);
-    const transactions = await this.transactionRepo.findEthereumTransactionsReadyForConfirmation(
-      this.batchSize,
-      staleAfter,
-    );
+    const transactions =
+      await this.transactionRepo.findEthereumTransactionsReadyForConfirmation(
+        this.batchSize,
+        staleAfter,
+      );
 
     if (transactions.length === 0) {
       return;

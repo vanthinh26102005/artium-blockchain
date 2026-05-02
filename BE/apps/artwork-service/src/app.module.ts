@@ -4,6 +4,7 @@ import {
   TransactionService,
 } from '@app/common';
 import { OutboxEntity, OutboxModule } from '@app/outbox';
+import { AppRabbitMQModule } from '@app/rabbitmq';
 import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -11,20 +12,25 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import {
   Artwork,
+  ArtworkAuctionLifecycleSnapshot,
   ArtworkComment,
   ArtworkCommentLike,
   ArtworkFolder,
   ArtworkLike,
   ArtworkTag,
   GcsStorageService,
+  IArtworkAuctionLifecycleRepository,
   IArtworkFolderRepository,
+  IArtworkLikeRepository,
   IArtworkRepository,
   ITagRepository,
   Tag,
 } from './domain';
 
 import {
+  ArtworkAuctionLifecycleRepository,
   ArtworkFolderRepository,
+  ArtworkLikeRepository,
   ArtworkRepository,
   TagRepository,
 } from './infrastructure';
@@ -52,6 +58,7 @@ import {
   CountArtworksInFolderHandler,
   CreateArtworkFolderHandler,
   CreateArtworkHandler,
+  CreateArtworkDraftHandler,
   CreateDefaultRootFolderHandler,
   CreateTagHandler,
   DeleteArtworkFolderHandler,
@@ -62,22 +69,30 @@ import {
   FindArtworksInFolderHandler,
   GetArtworkFolderHandler,
   GetArtworkHandler,
+  GetArtworkUploadDraftHandler,
   GetFolderTreeHandler,
+  IsArtworkLikedHandler,
   GetTagHandler,
   ListArtworkFoldersHandler,
   ListArtworksHandler,
+  ListSellerAuctionArtworkCandidatesHandler,
   ListTagsHandler,
   MarkArtworkAsSoldHandler,
+  MarkArtworkInAuctionHandler,
   MoveArtworkFolderHandler,
   RemoveImagesFromArtworkHandler,
   ReorderFoldersHandler,
+  SaveArtworkDraftHandler,
   SearchArtworksHandler,
   SearchTagsHandler,
+  SetArtworkLikeStatusHandler,
+  SubmitArtworkDraftHandler,
   ToggleFolderVisibilityHandler,
   UpdateArtworkFolderHandler,
   UpdateArtworkHandler,
   UpdateArtworkImagesHandler,
   UpdateTagHandler,
+  SellerAuctionLifecycleEventHandler,
 } from './application';
 import { SeederModule } from './db/seeder.module';
 import { SeederService } from './db/seeder.service';
@@ -96,10 +111,15 @@ export const CommandHandlers = [
   BulkMoveArtworksHandler,
   BulkUpdateArtworkStatusHandler,
   CreateArtworkHandler,
+  CreateArtworkDraftHandler,
   DeleteArtworkHandler,
   DuplicateArtworkHandler,
+  MarkArtworkInAuctionHandler,
   MarkArtworkAsSoldHandler,
   RemoveImagesFromArtworkHandler,
+  SaveArtworkDraftHandler,
+  SetArtworkLikeStatusHandler,
+  SubmitArtworkDraftHandler,
   UpdateArtworkHandler,
   UpdateArtworkImagesHandler,
 
@@ -118,7 +138,10 @@ export const QueryHandlers = [
   CountArtworksByStatusHandler,
   FindArtworksByTagsHandler,
   GetArtworkHandler,
+  GetArtworkUploadDraftHandler,
+  IsArtworkLikedHandler,
   ListArtworksHandler,
+  ListSellerAuctionArtworkCandidatesHandler,
   SearchArtworksHandler,
 
   GetTagHandler,
@@ -129,7 +152,12 @@ export const QueryHandlers = [
 export const Repositories = [
   { provide: ITagRepository, useClass: TagRepository },
   { provide: IArtworkFolderRepository, useClass: ArtworkFolderRepository },
+  {
+    provide: IArtworkAuctionLifecycleRepository,
+    useClass: ArtworkAuctionLifecycleRepository,
+  },
   { provide: IArtworkRepository, useClass: ArtworkRepository },
+  { provide: IArtworkLikeRepository, useClass: ArtworkLikeRepository },
 ];
 
 export const Services = [
@@ -149,6 +177,8 @@ export const Controllers = [
   UploadMicroserviceController,
 ];
 
+export const EventHandlers = [SellerAuctionLifecycleEventHandler];
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -159,6 +189,7 @@ export const Controllers = [
     DynamicDatabaseModule.forRoot('artwork'),
     TypeOrmModule.forFeature([
       Artwork,
+      ArtworkAuctionLifecycleSnapshot,
       ArtworkFolder,
       ArtworkTag,
       ArtworkComment,
@@ -169,6 +200,7 @@ export const Controllers = [
     ]),
 
     OutboxModule,
+    AppRabbitMQModule,
     CqrsModule,
     SeederModule,
   ],
@@ -178,6 +210,7 @@ export const Controllers = [
     ...QueryHandlers,
     ...Repositories,
     ...Services,
+    ...EventHandlers,
   ],
   exports: [ConfigModule],
 })

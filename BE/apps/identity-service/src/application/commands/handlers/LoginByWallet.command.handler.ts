@@ -25,9 +25,10 @@ type ParsedSiweMessage = {
 };
 
 @CommandHandler(LoginByWalletCommand)
-export class LoginByWalletHandler
-  implements ICommandHandler<LoginByWalletCommand, LoginResponse>
-{
+export class LoginByWalletHandler implements ICommandHandler<
+  LoginByWalletCommand,
+  LoginResponse
+> {
   private readonly logger = new Logger(LoginByWalletHandler.name);
   private static readonly ALLOWED_CHAIN_IDS_DEFAULT = '31337,11155111';
   private static readonly MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
@@ -146,7 +147,10 @@ export class LoginByWalletHandler
 
   private validateSiweContext(parsed: ParsedSiweMessage) {
     const now = Date.now();
-    if (parsed.issuedAt.getTime() > now + LoginByWalletHandler.MAX_CLOCK_SKEW_MS) {
+    if (
+      parsed.issuedAt.getTime() >
+      now + LoginByWalletHandler.MAX_CLOCK_SKEW_MS
+    ) {
       throw RpcExceptionHelper.unauthorized(
         'Invalid SIWE message: issued-at is in the future.',
       );
@@ -175,8 +179,10 @@ export class LoginByWalletHandler
       throw RpcExceptionHelper.unauthorized('SIWE URI mismatch.');
     }
 
-    const allowedChainIds = (process.env.SIWE_ALLOWED_CHAIN_IDS ??
-      LoginByWalletHandler.ALLOWED_CHAIN_IDS_DEFAULT)
+    const allowedChainIds = (
+      process.env.SIWE_ALLOWED_CHAIN_IDS ??
+      LoginByWalletHandler.ALLOWED_CHAIN_IDS_DEFAULT
+    )
       .split(',')
       .map((item) => Number(item.trim()))
       .filter((item) => Number.isInteger(item) && item > 0);

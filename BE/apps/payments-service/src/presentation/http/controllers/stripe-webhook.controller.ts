@@ -211,7 +211,8 @@ export class StripeWebhookController {
         provider: PaymentProvider.STRIPE,
         orderId: transaction.orderId || undefined,
         stripePaymentIntentId: paymentIntent.id,
-        failureReason: paymentIntent.last_payment_error?.message || 'Payment failed',
+        failureReason:
+          paymentIntent.last_payment_error?.message || 'Payment failed',
         failureCode: paymentIntent.last_payment_error?.code,
       });
 

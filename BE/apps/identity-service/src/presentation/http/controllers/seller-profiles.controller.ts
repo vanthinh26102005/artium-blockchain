@@ -18,6 +18,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { RpcException } from '@nestjs/microservices';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -483,6 +484,16 @@ export class SellerProfilesController {
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
+      }
+
+      if (error instanceof RpcException) {
+        const rpcError = error.getError() as {
+          statusCode?: number;
+          message?: string;
+          errors?: unknown;
+        };
+        const statusCode = rpcError.statusCode ?? HttpStatus.BAD_REQUEST;
+        throw new HttpException(rpcError, statusCode);
       }
 
       this.logger.error(

@@ -118,7 +118,8 @@ export class UserController {
   @Get('users/slug/:slug')
   @ApiOperation({
     summary: 'Get user by slug',
-    description: 'Retrieves public profile information for a user by their unique slug',
+    description:
+      'Retrieves public profile information for a user by their unique slug',
   })
   @ApiParam({
     name: 'slug',
@@ -254,7 +255,10 @@ export class UserController {
     type: LoginResponse,
   })
   @ApiResponse({ status: 400, description: 'Invalid SIWE message format' })
-  @ApiResponse({ status: 401, description: 'Invalid or expired nonce / signature' })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid or expired nonce / signature',
+  })
   async loginWallet(@Body() input: LoginWalletDto) {
     return sendRpc<LoginResponse>(
       this.identityClient,

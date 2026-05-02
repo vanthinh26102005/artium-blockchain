@@ -57,8 +57,7 @@ const toNumber = (value: unknown): number => {
   return Number.isNaN(num) ? 0 : num;
 };
 
-const roundToTwo = (value: number): number =>
-  Math.round(value * 100) / 100;
+const roundToTwo = (value: number): number => Math.round(value * 100) / 100;
 
 const formatCurrency = (value: number, currency: string): string => {
   try {
@@ -83,9 +82,7 @@ const formatDate = (value?: Date | string | null): string | undefined => {
 };
 
 @CommandHandler(SendInvoiceToBuyerCommand)
-export class SendInvoiceToBuyerHandler
-  implements ICommandHandler<SendInvoiceToBuyerCommand>
-{
+export class SendInvoiceToBuyerHandler implements ICommandHandler<SendInvoiceToBuyerCommand> {
   private readonly logger = new Logger(SendInvoiceToBuyerHandler.name);
 
   constructor(
@@ -96,7 +93,9 @@ export class SendInvoiceToBuyerHandler
     private readonly outboxService: OutboxService,
   ) {}
 
-  async execute(command: SendInvoiceToBuyerCommand): Promise<{ success: true }> {
+  async execute(
+    command: SendInvoiceToBuyerCommand,
+  ): Promise<{ success: true }> {
     const {
       invoiceId,
       invoiceNumber,
@@ -239,9 +238,7 @@ export class SendInvoiceToBuyerHandler
               ...(resolvedInvoiceNumber
                 ? { invoiceNumber: resolvedInvoiceNumber }
                 : {}),
-              ...(resolvedInvoiceUrl
-                ? { invoiceUrl: resolvedInvoiceUrl }
-                : {}),
+              ...(resolvedInvoiceUrl ? { invoiceUrl: resolvedInvoiceUrl } : {}),
               ...(buyerName ? { buyerName } : {}),
               ...(buyerEmail ? { buyerEmail } : {}),
               ...(buyerPhone ? { buyerPhone } : {}),

@@ -1,4 +1,6 @@
+export * from './community-media.repository.interface';
 export * from './moment.repository.interface';
+export * from './moodboard-media.repository.interface';
 export * from './moodboard.repository.interface';
 export * from './follower.repository.interface';
 export * from './comment.repository.interface';

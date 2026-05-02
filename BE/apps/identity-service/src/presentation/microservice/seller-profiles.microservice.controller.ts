@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
-import { UserRole } from '@app/common';
+import { RpcExceptionHelper, UserRole } from '@app/common';
 import {
   CreateSellerProfileCommand,
   DeleteSellerProfileCommand,
@@ -104,23 +104,18 @@ export class SellerProfilesMicroserviceController {
   async createSellerProfile(
     @Payload() payload: CreateSellerProfileInputType & { user: UserPayload },
   ): Promise<CreateSellerProfileResponse> {
-    const userId = payload.user?.id;
+    const { user, ...input } = payload;
+    const userId = user?.id;
 
-    const defaultInput = {
-      ...payload,
-      userId,
-      stripeAccountId: null,
-      paypalMerchantId: null,
-      stripeOnboardingComplete: false,
-      paypalOnboardingComplete: false,
-      isActive: true,
-      isVerified: false,
-      verifiedAt: null,
-      isFeatured: false,
-    };
+    if (!userId) {
+      throw RpcExceptionHelper.unauthorized('Authenticated user is required');
+    }
 
     const result = await this.commandBus.execute(
-      new CreateSellerProfileCommand(defaultInput),
+      new CreateSellerProfileCommand({
+        ...input,
+        userId,
+      }),
     );
 
     return {

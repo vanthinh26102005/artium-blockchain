@@ -4,9 +4,10 @@ import { GetWalletNonceQuery } from '../GetWalletNonce.query';
 import { NonceService } from 'apps/identity-service/src/domain';
 
 @QueryHandler(GetWalletNonceQuery)
-export class GetWalletNonceHandler
-  implements IQueryHandler<GetWalletNonceQuery, { nonce: string }>
-{
+export class GetWalletNonceHandler implements IQueryHandler<
+  GetWalletNonceQuery,
+  { nonce: string }
+> {
   constructor(private readonly nonceService: NonceService) {}
 
   async execute(query: GetWalletNonceQuery): Promise<{ nonce: string }> {

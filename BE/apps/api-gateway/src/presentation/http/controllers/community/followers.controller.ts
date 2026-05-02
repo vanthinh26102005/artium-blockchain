@@ -103,7 +103,8 @@ export class FollowersController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Follow a user',
-    description: 'Create a follow relationship between the authenticated user and another user',
+    description:
+      'Create a follow relationship between the authenticated user and another user',
   })
   @ApiBody({ type: FollowUserBody })
   @ApiResponse({
@@ -280,7 +281,8 @@ export class FollowersController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Check if current user is following another user',
-    description: 'Returns whether the authenticated user is following the specified user',
+    description:
+      'Returns whether the authenticated user is following the specified user',
   })
   @ApiParam({
     name: 'userId',

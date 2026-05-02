@@ -1,0 +1,40 @@
+{{- range $name, $service := .Values.services }}
+{{- if and $service.enabled (gt (int (default 1 $service.replicaCount)) 1) }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "artium-backend.serviceName" (dict "root" $ "name" $name) }}
+  namespace: {{ $.Values.namespace.name | quote }}
+  labels:
+    {{- include "artium-backend.labels" $ | nindent 4 }}
+    artium.io/workload: {{ $name | quote }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      {{- include "artium-backend.selectorLabels" $ | nindent 6 }}
+      artium.io/workload: {{ $name | quote }}
+      artium.io/workload-kind: api
+{{- end }}
+{{- end }}
+{{- range $name, $worker := .Values.workers }}
+{{- if and $worker.enabled (gt (int (default 1 $worker.replicaCount)) 1) }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "artium-backend.serviceName" (dict "root" $ "name" (printf "%s-worker" $name)) }}
+  namespace: {{ $.Values.namespace.name | quote }}
+  labels:
+    {{- include "artium-backend.labels" $ | nindent 4 }}
+    artium.io/workload: {{ $name | quote }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      {{- include "artium-backend.selectorLabels" $ | nindent 6 }}
+      artium.io/workload: {{ $name | quote }}
+      artium.io/workload-kind: worker
+{{- end }}
+{{- end }}

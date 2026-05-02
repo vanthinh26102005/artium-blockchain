@@ -49,6 +49,7 @@ import {
   GetInvoicesByCollectorHandler,
   GetEthereumQuoteHandler,
   GetInvoicesBySellerHandler,
+  GetOrderInvoiceHandler,
   GetPaymentMethodsHandler,
   GetPaymentTransactionHandler,
   GetPayoutHandler,
@@ -122,6 +123,7 @@ export const QueryHandlers = [
   GetInvoiceByNumberHandler,
   GetInvoicesBySellerHandler,
   GetInvoicesByCollectorHandler,
+  GetOrderInvoiceHandler,
 
   GetEthereumQuoteHandler,
   GetPaymentTransactionHandler,

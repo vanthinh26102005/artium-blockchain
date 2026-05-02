@@ -1,11 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, Logger, HttpException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import {
-  RpcExceptionHelper,
-  OrderStatus,
-  EscrowState,
-} from '@app/common';
+import { RpcExceptionHelper, OrderStatus, EscrowState } from '@app/common';
 import { ResolveDisputeCommand } from '../ResolveDispute.command';
 import { Order } from '../../../domain/entities';
 import { IOrderRepository } from '../../../domain/interfaces';
@@ -23,7 +19,9 @@ export class ResolveDisputeHandler implements ICommandHandler<ResolveDisputeComm
   async execute(command: ResolveDisputeCommand): Promise<Order | null> {
     try {
       const { orderId, dto } = command;
-      this.logger.log(`Resolving dispute for order: ${orderId} (favorBuyer=${dto.favorBuyer})`);
+      this.logger.log(
+        `Resolving dispute for order: ${orderId} (favorBuyer=${dto.favorBuyer})`,
+      );
 
       const order = await this.orderRepo.findById(orderId);
       if (!order) {

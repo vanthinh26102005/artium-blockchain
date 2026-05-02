@@ -8,6 +8,28 @@ import {
   RpcExceptionInterceptor,
 } from './presentation/http/interceptors';
 
+const normalizeGlobalPrefix = (prefix?: string): string => {
+  const normalized = prefix?.trim().replace(/^\/+|\/+$/g, '') ?? '';
+
+  if (!normalized || normalized === 'false' || normalized === 'none') {
+    return '';
+  }
+
+  return normalized;
+};
+
+const resolveApiGlobalPrefix = (): string => {
+  if (process.env.NODE_ENV === 'production') {
+    return '';
+  }
+
+  if (process.env.API_GLOBAL_PREFIX !== undefined) {
+    return normalizeGlobalPrefix(process.env.API_GLOBAL_PREFIX);
+  }
+
+  return 'api';
+};
+
 async function bootstrap() {
   const logger = new Logger('ApiGateway');
 
@@ -16,7 +38,20 @@ async function bootstrap() {
     rawBody: true,
   });
 
-  app.setGlobalPrefix('api');
+  const apiGlobalPrefix = resolveApiGlobalPrefix();
+  const routeBasePath = apiGlobalPrefix ? `/${apiGlobalPrefix}` : '';
+  const serviceRoute = (serviceName: string) =>
+    `${routeBasePath}/${serviceName}`;
+
+  if (apiGlobalPrefix) {
+    app.setGlobalPrefix(apiGlobalPrefix);
+  }
+
+  logger.log(
+    apiGlobalPrefix
+      ? `API global prefix enabled: /${apiGlobalPrefix}`
+      : 'API global prefix disabled',
+  );
 
   app.enableCors({
     origin: true,
@@ -47,12 +82,12 @@ async function bootstrap() {
     .setDescription(
       'Centralized API Gateway for Artium microservices\n\n' +
         '## Available Services\n' +
-        '- **Identity Service**: `/api/identity/*` - [View Docs](/api-docs/identity)\n' +
-        '- **Artwork Service**: `/api/artwork/*` - [View Docs](/api-docs/artwork)\n' +
-        '- **Payments Service**: `/api/payments/*` - [View Docs](/api-docs/payments)\n' +
-        '- **Orders Service**: `/api/orders/*` - [View Docs](/api-docs/orders)\n' +
-        '- **Messaging Service**: `/api/messaging/*` - [View Docs](/api-docs/messaging)\n' +
-        '- **Notifications Service**: `/api/notifications/*` - [View Docs](/api-docs/notifications)',
+        `- **Identity Service**: \`${serviceRoute('identity')}/*\` - [View Docs](/api-docs/identity)\n` +
+        `- **Artwork Service**: \`${serviceRoute('artwork')}/*\` - [View Docs](/api-docs/artwork)\n` +
+        `- **Payments Service**: \`${serviceRoute('payments')}/*\` - [View Docs](/api-docs/payments)\n` +
+        `- **Orders Service**: \`${serviceRoute('orders')}/*\` - [View Docs](/api-docs/orders)\n` +
+        `- **Messaging Service**: \`${serviceRoute('messaging')}/*\` - [View Docs](/api-docs/messaging)\n` +
+        `- **Notifications Service**: \`${serviceRoute('notifications')}/*\` - [View Docs](/api-docs/notifications)`,
     )
     .setVersion('1.0')
     .addBearerAuth()
@@ -98,7 +133,7 @@ async function bootstrap() {
 
     serviceDocument.paths = Object.fromEntries(
       Object.entries(serviceDocument.paths).filter(([path]) =>
-        path.startsWith(`/api/${serviceName}`),
+        path.startsWith(serviceRoute(serviceName)),
       ),
     );
 

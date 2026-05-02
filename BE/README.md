@@ -45,14 +45,15 @@ To get started with this project, you will need to have [Node.js](https://nodejs
 
 2.  **Set up environment variables**:
 
-    Copy the `.env.example` file to `.env` and fill in the required environment variables for each service.
+    Copy the `.env.example` file to `.env` and fill in the shared secret values.
+    Docker Compose reads service defaults from `apps/<service>/.env.compose`, while each service still receives its owned secrets explicitly from `docker-compose.yml`.
 
 3.  **Start the infrastructure**:
 
     This will start the required databases and other infrastructure components using Docker.
 
     ```sh
-    yarn docker:up
+    yarn docker:up:shared
     ```
 
 4.  **Run all services in development mode**:
@@ -92,7 +93,7 @@ To get started with this project, you will need to have [Node.js](https://nodejs
 
 ### Infrastructure (Docker)
 
-- `yarn docker:up`: Starts the development infrastructure using Docker Compose.
+- `yarn docker:up:shared`: Starts the development stack with the shared database profile.
 - `yarn docker:down`: Stops the development infrastructure.
 
 ### Code Quality & Testing

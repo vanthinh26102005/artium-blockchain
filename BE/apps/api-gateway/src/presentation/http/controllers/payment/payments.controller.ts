@@ -56,8 +56,15 @@ export class PaymentsController {
   })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async createPaymentIntent(@Body() data: CreatePaymentIntentDto, @Req() req: any) {
-    return sendRpc(this.paymentsClient, { cmd: 'create_payment_intent' }, { ...data, userId: req.user?.id });
+  async createPaymentIntent(
+    @Body() data: CreatePaymentIntentDto,
+    @Req() req: any,
+  ) {
+    return sendRpc(
+      this.paymentsClient,
+      { cmd: 'create_payment_intent' },
+      { ...data, userId: req.user?.id },
+    );
   }
 
   @Post('stripe/payment-intent/confirm')
@@ -92,7 +99,10 @@ export class PaymentsController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 409, description: 'Customer already exists' })
-  async createStripeCustomer(@Body() data: CreateStripeCustomerDto, @Req() req: any) {
+  async createStripeCustomer(
+    @Body() data: CreateStripeCustomerDto,
+    @Req() req: any,
+  ) {
     return sendRpc(
       this.paymentsClient,
       { cmd: 'create_stripe_customer' },
@@ -244,7 +254,10 @@ export class PaymentsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a Sepolia MetaMask quote for checkout' })
-  @ApiResponse({ status: 200, description: 'Ethereum quote generated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Ethereum quote generated successfully',
+  })
   @ApiResponse({ status: 400, description: 'Invalid quote input' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getEthereumQuote(@Query() query: GetEthereumQuoteDto) {

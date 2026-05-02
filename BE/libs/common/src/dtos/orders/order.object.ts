@@ -16,7 +16,10 @@ export class OrderObject {
   @ApiProperty({ description: 'Order status', enum: OrderStatus })
   status: OrderStatus;
 
-  @ApiProperty({ description: 'Unique order number', example: 'AUC-1713000000-A1B2C3' })
+  @ApiProperty({
+    description: 'Unique order number',
+    example: 'AUC-1713000000-A1B2C3',
+  })
   orderNumber: string;
 
   @ApiProperty({ description: 'Subtotal before tax/shipping' })

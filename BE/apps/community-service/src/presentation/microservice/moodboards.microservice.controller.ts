@@ -8,6 +8,7 @@ import {
   AddArtworkToMoodboardCommand,
   RemoveArtworkFromMoodboardCommand,
   GetMoodboardQuery,
+  ListArtworkMoodboardIdsForUserQuery,
   ListUserMoodboardsQuery,
 } from '../../application';
 import {
@@ -82,6 +83,18 @@ export class MoodboardsMicroserviceController {
     );
     return this.queryBus.execute(
       new ListUserMoodboardsQuery(data.userId, data.options),
+    );
+  }
+
+  @MessagePattern({ cmd: 'list_artwork_moodboard_ids_for_user' })
+  async listArtworkMoodboardIdsForUser(
+    @Payload() data: { userId: string; artworkId: string },
+  ): Promise<string[]> {
+    this.logger.log(
+      `[Microservice] Listing moodboards for user ${data.userId} containing artwork ${data.artworkId}`,
+    );
+    return this.queryBus.execute(
+      new ListArtworkMoodboardIdsForUserQuery(data.userId, data.artworkId),
     );
   }
 

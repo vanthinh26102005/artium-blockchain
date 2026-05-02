@@ -1,0 +1,237 @@
+global:
+  environment: production
+  clusterDomain: cluster.local
+  imagePullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+namespace:
+  create: true
+  name: artium
+
+ingress:
+  enabled: false
+  className: ""
+  host: ""
+  tls:
+    enabled: false
+    secretName: ""
+
+images:
+  api-gateway:
+    repository: ghcr.io/artium/api-gateway
+    tag: "__SET_IMMUTABLE_TAG__"
+    digest: ""
+  identity-service:
+    repository: ghcr.io/artium/identity-service
+    tag: "__SET_IMMUTABLE_TAG__"
+    digest: ""
+  artwork-service:
+    repository: ghcr.io/artium/artwork-service
+    tag: "__SET_IMMUTABLE_TAG__"
+    digest: ""
+  payments-service:
+    repository: ghcr.io/artium/payments-service
+    tag: "__SET_IMMUTABLE_TAG__"
+    digest: ""
+  orders-service:
+    repository: ghcr.io/artium/orders-service
+    tag: "__SET_IMMUTABLE_TAG__"
+    digest: ""
+  messaging-service:
+    repository: ghcr.io/artium/messaging-service
+    tag: "__SET_IMMUTABLE_TAG__"
+    digest: ""
+  notifications-service:
+    repository: ghcr.io/artium/notifications-service
+    tag: "__SET_IMMUTABLE_TAG__"
+    digest: ""
+  events-service:
+    repository: ghcr.io/artium/events-service
+    tag: "__SET_IMMUTABLE_TAG__"
+    digest: ""
+  community-service:
+    repository: ghcr.io/artium/community-service
+    tag: "__SET_IMMUTABLE_TAG__"
+    digest: ""
+  web:
+    repository: ghcr.io/artium/artium-web
+    tag: "__SET_IMMUTABLE_TAG__"
+    digest: ""
+
+web:
+  enabled: true
+  type: ClusterIP
+  replicaCount: 1
+  port: 3000
+  env:
+    NEXT_PUBLIC_API_URL: "https://dg.pthinh.io.vn"
+    NEXT_PUBLIC_WS_URL: "https://dg.pthinh.io.vn"
+    NEXT_PUBLIC_WEB_BASE_URL: "https://dg.pthinh.io.vn"
+    NEXTAUTH_URL: "https://dg.pthinh.io.vn"
+    NEXT_PUBLIC_COOKIE_DOMAIN: "dg.pthinh.io.vn"
+
+services:
+  api-gateway:
+    enabled: true
+    type: ClusterIP
+    replicaCount: 1
+    command: ["node", "dist/apps/api-gateway/main.js"]
+    ports:
+      http: 8081
+  identity-service:
+    enabled: true
+    type: ClusterIP
+    replicaCount: 1
+    command: ["node", "dist/apps/identity-service/main.js"]
+    ports:
+      http: 3001
+      tcp: 3101
+  artwork-service:
+    enabled: true
+    type: ClusterIP
+    replicaCount: 1
+    command: ["node", "dist/apps/artwork-service/main.js"]
+    ports:
+      http: 3003
+      tcp: 3102
+  payments-service:
+    enabled: true
+    type: ClusterIP
+    replicaCount: 1
+    command: ["node", "dist/apps/payments-service/main.js"]
+    ports:
+      http: 3005
+      tcp: 3103
+  orders-service:
+    enabled: true
+    type: ClusterIP
+    replicaCount: 1
+    command: ["node", "dist/apps/orders-service/main.js"]
+    ports:
+      http: 3004
+      tcp: 3104
+  messaging-service:
+    enabled: true
+    type: ClusterIP
+    replicaCount: 1
+    command: ["node", "dist/apps/messaging-service/main.js"]
+    ports:
+      http: 3004
+      tcp: 3105
+  notifications-service:
+    enabled: true
+    type: ClusterIP
+    replicaCount: 1
+    command: ["node", "dist/apps/notifications-service/main.js"]
+    ports:
+      http: 3006
+  events-service:
+    enabled: true
+    type: ClusterIP
+    replicaCount: 1
+    command: ["node", "dist/apps/events-service/main.js"]
+    ports:
+      tcp: 3107
+  community-service:
+    enabled: true
+    type: ClusterIP
+    replicaCount: 1
+    command: ["node", "dist/apps/community-service/main.js"]
+    ports:
+      tcp: 3109
+
+workers:
+  outbox:
+    enabled: true
+    runsInService: api-gateway
+    replicaCount: 1
+    enableFlag: OUTBOX_PROCESSOR_ENABLED
+  blockchain-listener:
+    enabled: true
+    runsInService: orders-service
+    replicaCount: 1
+    enableFlag: BLOCKCHAIN_LISTENER_ENABLED
+  ethereum-confirmation-retry:
+    enabled: true
+    runsInService: payments-service
+    replicaCount: 1
+    enableFlag: ETHEREUM_CONFIRMATION_RETRY_ENABLED
+  notification-processor:
+    enabled: true
+    runsInService: notifications-service
+    replicaCount: 1
+    enableFlag: NOTIFICATION_PROCESSOR_ENABLED
+
+config:
+  dbStrategy: SHARED
+  dbSynchronize: "false"
+  nodeEnv: production
+  apiGlobalPrefix: ""
+  rabbitmq:
+    host: artium-backend-rabbitmq
+    port: 5672
+  redis:
+    host: artium-backend-redis-master
+    port: 6379
+  postgresql:
+    host: artium-backend-postgresql
+    port: 5432
+
+sealedSecrets:
+  enabled: false
+  name: artium-backend-secrets
+
+postgresql:
+  enabled: true
+  auth:
+    existingSecret: artium-backend-secrets
+    username: artium
+    database: artium
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+    resourcesPreset: "none"
+  networkPolicy:
+    enabled: true
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    existingSecret: artium-backend-secrets
+    existingSecretPasswordKey: redis-password
+  master:
+    persistence:
+      enabled: true
+      size: 4Gi
+    resourcesPreset: "none"
+  networkPolicy:
+    enabled: true
+
+rabbitmq:
+  enabled: true
+  auth:
+    existingPasswordSecret: artium-backend-secrets
+    existingSecretPasswordKey: rabbitmq-password
+    username: artium
+  persistence:
+    enabled: true
+    size: 8Gi
+  resourcesPreset: "none"
+  networkPolicy:
+    enabled: true
+
+networkPolicy:
+  enabled: false
+
+observability:
+  metrics:
+    enabled: false
+
+validation:
+  kubeconform:
+    enabled: true
+  realClusterDryRun:
+    enabled: true

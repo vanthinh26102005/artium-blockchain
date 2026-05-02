@@ -245,7 +245,11 @@ export class IdentitySeeder {
         .replace(/^-|-$/g, '')
         .slice(0, maxLength);
 
-    const generateUserSlug = (firstName: string, lastName: string, index: number): string => {
+    const generateUserSlug = (
+      firstName: string,
+      lastName: string,
+      index: number,
+    ): string => {
       let slug = createSlug([firstName, lastName]) || `user-${index}`;
       if (usedUserSlugs.has(slug)) {
         slug = `${slug}-${index}`;

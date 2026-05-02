@@ -8,9 +8,7 @@ import { IOrderRepository } from '../../../domain/interfaces';
 import { isValidTransition } from '../../../domain/constants';
 
 @CommandHandler(UpdateOrderStatusCommand)
-export class UpdateOrderStatusHandler
-  implements ICommandHandler<UpdateOrderStatusCommand>
-{
+export class UpdateOrderStatusHandler implements ICommandHandler<UpdateOrderStatusCommand> {
   private readonly logger = new Logger(UpdateOrderStatusHandler.name);
 
   constructor(

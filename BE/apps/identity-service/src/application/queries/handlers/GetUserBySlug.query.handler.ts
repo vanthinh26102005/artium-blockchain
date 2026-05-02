@@ -5,9 +5,10 @@ import { GetUserBySlugQuery } from '../GetUserBySlug.query';
 import { IUserRepository, User } from 'apps/identity-service/src/domain';
 
 @QueryHandler(GetUserBySlugQuery)
-export class GetUserBySlugHandler
-  implements IQueryHandler<GetUserBySlugQuery, User | null>
-{
+export class GetUserBySlugHandler implements IQueryHandler<
+  GetUserBySlugQuery,
+  User | null
+> {
   private readonly logger = new Logger(GetUserBySlugHandler.name);
 
   constructor(

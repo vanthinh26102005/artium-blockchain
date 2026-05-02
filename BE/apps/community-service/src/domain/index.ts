@@ -11,6 +11,7 @@ export {
   CreateMoodboardInput,
   UpdateMoodboardInput,
   AddArtworkToMoodboardInput,
+  MoodboardMediaObject,
   MoodboardObject,
   // Followers
   FollowUserInput,
@@ -33,3 +34,4 @@ export {
 
 // Interfaces
 export * from './interfaces';
+export * from './services';

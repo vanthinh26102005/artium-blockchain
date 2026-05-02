@@ -56,7 +56,14 @@ export class NewMessageEventHandler {
     },
   })
   async handle(event: NewMessageEventPayload) {
-    const { messageId, senderId, recipientId, conversationId, content, hasMedia } = event;
+    const {
+      messageId,
+      senderId,
+      recipientId,
+      conversationId,
+      content,
+      hasMedia,
+    } = event;
 
     this.logger.log(
       `Processing new message notification: messageId=${messageId}, recipientId=${recipientId}`,
@@ -68,12 +75,11 @@ export class NewMessageEventHandler {
       const senderName = senderId; // Should be fetched from identity service
       const recipientEmail = `${recipientId}@example.com`; // Should be fetched from identity service
 
-      const messagePreview = content.length > 50 
-        ? `${content.substring(0, 50)}...` 
-        : content;
+      const messagePreview =
+        content.length > 50 ? `${content.substring(0, 50)}...` : content;
 
-      const displayContent = hasMedia 
-        ? 'Sent you a media file' 
+      const displayContent = hasMedia
+        ? 'Sent you a media file'
         : messagePreview;
 
       await this.transactionService.execute(async (manager) => {

@@ -1,12 +1,10 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
-import { ArtworkStatus } from '@app/common';
+import { ArtworkStatus, SellerAuctionStartStatusObject } from '@app/common';
 import { ListArtworksQuery } from '../ListArtworks.query';
-import {
-  IArtworkRepository,
-  PaginatedResponse,
-  ArtworkObject,
-} from 'apps/artwork-service/src/domain';
+import { IArtworkRepository } from '../../../../domain/interfaces/artwork.repository.interface';
+import { IArtworkAuctionLifecycleRepository } from '../../../../domain/interfaces/artwork-auction-lifecycle.repository.interface';
+import { PaginatedResponse } from '../../../../domain/dtos/common/paginated-response.dto';
 
 @QueryHandler(ListArtworksQuery)
 export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
@@ -14,6 +12,8 @@ export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
 
   constructor(
     @Inject(IArtworkRepository) private readonly repo: IArtworkRepository,
+    @Inject(IArtworkAuctionLifecycleRepository)
+    private readonly lifecycleRepo: IArtworkAuctionLifecycleRepository,
   ) {}
 
   private getDisplayStatus(status: ArtworkStatus): 'Draft' | 'Hidden' {
@@ -44,6 +44,7 @@ export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
         q,
         minPrice,
         maxPrice,
+        includeSellerAuctionLifecycle,
         hasOnChainAuctionId,
         ...restOptions
       } = query.options;
@@ -85,10 +86,27 @@ export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
         hasOnChainAuctionId,
       });
 
+      const shouldIncludeAuctionLifecycle =
+        includeSellerAuctionLifecycle === true &&
+        typeof restOptions.sellerId === 'string' &&
+        restOptions.sellerId.length > 0;
+      const sellerIdForLifecycle = shouldIncludeAuctionLifecycle
+        ? restOptions.sellerId
+        : null;
+
+      const auctionLifecycleByArtworkId = sellerIdForLifecycle
+        ? await this.safeLoadAuctionLifecycleByArtworkId(
+            sellerIdForLifecycle,
+            artworks,
+            reqId,
+          )
+        : new Map<string, SellerAuctionStartStatusObject | null>();
+
       const artworkObjects = artworks.map((artwork) => ({
         ...artwork,
         thumbnailUrl: artwork.images?.[0]?.secureUrl || null,
         displayStatus: this.getDisplayStatus(artwork.status),
+        auctionLifecycle: auctionLifecycleByArtworkId.get(artwork.id) ?? null,
       }));
 
       return PaginatedResponse.create(artworkObjects, total, skip, take);
@@ -96,5 +114,37 @@ export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
       this.logger.error(`[${reqId}] list failed`, err.stack || err);
       throw err;
     }
+  }
+
+  private async safeLoadAuctionLifecycleByArtworkId(
+    sellerId: string,
+    artworks: Array<{ id: string }>,
+    reqId: string,
+  ): Promise<Map<string, SellerAuctionStartStatusObject | null>> {
+    try {
+      return await this.loadAuctionLifecycleByArtworkId(sellerId, artworks);
+    } catch (err) {
+      const error = err as Error;
+      this.logger.warn(
+        `[${reqId}] auction lifecycle enrichment unavailable for seller=${sellerId}: ${
+          error.message || err
+        }`,
+      );
+      return new Map<string, SellerAuctionStartStatusObject | null>();
+    }
+  }
+
+  private async loadAuctionLifecycleByArtworkId(
+    sellerId: string,
+    artworks: Array<{ id: string }>,
+  ): Promise<Map<string, SellerAuctionStartStatusObject | null>> {
+    const lifecycles = await this.lifecycleRepo.findBySellerAndArtworkIds(
+      sellerId,
+      artworks.map((artwork) => artwork.id),
+    );
+
+    return new Map(
+      lifecycles.map((lifecycle) => [lifecycle.artworkId, lifecycle] as const),
+    );
   }
 }

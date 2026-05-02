@@ -1,0 +1,139 @@
+{{/* Worker catalog: outbox, blockchain-listener, ethereum-confirmation-retry, notification-processor. */}}
+{{/* Image mapping: outbox -> api-gateway, blockchain-listener -> orders-service, ethereum-confirmation-retry -> payments-service, notification-processor -> notifications-service. */}}
+{{- range $name, $worker := .Values.workers }}
+{{- if $worker.enabled }}
+{{- $serviceName := $worker.runsInService }}
+{{- $service := index $.Values.services $serviceName }}
+{{- $image := index $.Values.images $serviceName }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "artium-backend.serviceName" (dict "root" $ "name" (printf "%s-worker" $name)) }}
+  namespace: {{ $.Values.namespace.name | quote }}
+  labels:
+    {{- include "artium-backend.labels" $ | nindent 4 }}
+    artium.io/workload: {{ $name | quote }}
+    artium.io/workload-kind: worker
+  annotations:
+    artium.io/scale-guardrail: "replicas-above-1-require-locking-leader-election-or-idempotency"
+spec:
+  replicas: {{ default 1 $worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "artium-backend.selectorLabels" $ | nindent 6 }}
+      artium.io/workload: {{ $name | quote }}
+      artium.io/workload-kind: worker
+  template:
+    metadata:
+      labels:
+        {{- include "artium-backend.selectorLabels" $ | nindent 8 }}
+        artium.io/workload: {{ $name | quote }}
+        artium.io/workload-kind: worker
+      annotations:
+        artium.io/scale-guardrail: "replicas-above-1-require-locking-leader-election-or-idempotency"
+    spec:
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $name }}
+          image: {{ include "artium-backend.image" (dict "image" $image) | quote }}
+          imagePullPolicy: {{ $.Values.global.imagePullPolicy | quote }}
+          {{- with $service.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            {{- with $service.ports.http }}
+            - name: http
+              containerPort: {{ . }}
+            {{- end }}
+            {{- with $service.ports.tcp }}
+            - name: tcp
+              containerPort: {{ . }}
+            {{- end }}
+          env:
+            {{- if ne $worker.enableFlag "OUTBOX_PROCESSOR_ENABLED" }}
+            - name: OUTBOX_PROCESSOR_ENABLED
+              value: "false"
+            {{- end }}
+            {{- if ne $worker.enableFlag "BLOCKCHAIN_LISTENER_ENABLED" }}
+            - name: BLOCKCHAIN_LISTENER_ENABLED
+              value: "false"
+            {{- end }}
+            {{- if ne $worker.enableFlag "ETHEREUM_CONFIRMATION_RETRY_ENABLED" }}
+            - name: ETHEREUM_CONFIRMATION_RETRY_ENABLED
+              value: "false"
+            {{- end }}
+            {{- if ne $worker.enableFlag "NOTIFICATION_PROCESSOR_ENABLED" }}
+            - name: NOTIFICATION_PROCESSOR_ENABLED
+              value: "false"
+            {{- end }}
+            - name: {{ $worker.enableFlag }}
+              value: "true"
+            - name: DB_STRATEGY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "artium-backend.fullname" $ }}-runtime
+                  key: DB_STRATEGY
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "artium-backend.fullname" $ }}-runtime
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "artium-backend.fullname" $ }}-runtime
+                  key: REDIS_PORT
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.sealedSecrets.name | quote }}
+                  key: {{ $.Values.rabbitmq.auth.existingSecretPasswordKey | quote }}
+            - name: RABBITMQ_URI
+              value: {{ printf "amqp://%s:$(RABBITMQ_PASSWORD)@%s:%v" $.Values.rabbitmq.auth.username $.Values.config.rabbitmq.host $.Values.config.rabbitmq.port | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "artium-backend.fullname" $ }}-runtime
+            - secretRef:
+                name: {{ $.Values.sealedSecrets.name | quote }}
+          resources:
+            {{- toYaml (default dict $worker.resources) | nindent 12 }}
+          startupProbe:
+            {{- if $service.ports.http }}
+            httpGet:
+              path: /health
+              port: http
+            {{- else }}
+            tcpSocket:
+              port: tcp
+            {{- end }}
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            {{- if $service.ports.http }}
+            httpGet:
+              path: /health
+              port: http
+            {{- else }}
+            tcpSocket:
+              port: tcp
+            {{- end }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            {{- if $service.ports.http }}
+            httpGet:
+              path: /health
+              port: http
+            {{- else }}
+            tcpSocket:
+              port: tcp
+            {{- end }}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+{{- end }}
+{{- end }}

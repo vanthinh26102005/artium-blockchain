@@ -1,13 +1,28 @@
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { Injectable, Logger, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { ExchangeName, RoutingKey } from '@app/rabbitmq';
 import {
   EscrowState,
+  PayoutStatus,
+  RpcExceptionHelper,
   OrderPaymentMethod,
   OrderPaymentStatus,
   OrderStatus,
+  SellerAuctionStartStatus,
 } from '@app/common';
-import { IOrderRepository } from '../../domain/interfaces';
+import {
+  IAuctionStartAttemptRepository,
+  IOrderItemRepository,
+  IOrderRepository,
+} from '../../domain/interfaces';
+import { AuctionStartAttempt, Order } from '../../domain/entities';
+import { SellerAuctionLifecycleOutboxService } from '../services';
+
+const ARTWORK_SERVICE_CLIENT = 'ARTWORK_SERVICE';
+const ARTWORK_RPC_TIMEOUT_MS = 30_000;
 
 @Injectable()
 export class BlockchainEventHandler {
@@ -16,6 +31,13 @@ export class BlockchainEventHandler {
   constructor(
     @Inject(IOrderRepository)
     private readonly orderRepo: IOrderRepository,
+    @Inject(IOrderItemRepository)
+    private readonly orderItemRepo: IOrderItemRepository,
+    @Inject(IAuctionStartAttemptRepository)
+    private readonly startAttemptRepo: IAuctionStartAttemptRepository,
+    @Inject(ARTWORK_SERVICE_CLIENT)
+    private readonly artworkClient: ClientProxy,
+    private readonly lifecycleOutbox: SellerAuctionLifecycleOutboxService,
   ) {}
 
   private generateOrderNumber(prefix = 'AUC') {
@@ -25,8 +47,11 @@ export class BlockchainEventHandler {
   private getBlockchainEventMetadata(message: Record<string, unknown>) {
     const txHash = typeof message.txHash === 'string' ? message.txHash : null;
     const contractAddress =
-      typeof message.contractAddress === 'string' ? message.contractAddress : null;
-    const chainId = typeof message.chainId === 'string' ? message.chainId : null;
+      typeof message.contractAddress === 'string'
+        ? message.contractAddress
+        : null;
+    const chainId =
+      typeof message.chainId === 'string' ? message.chainId : null;
 
     return {
       ...(txHash ? { txHash } : {}),
@@ -74,8 +99,25 @@ export class BlockchainEventHandler {
     this.logger.log(`Auction started: ${message.orderId}`);
 
     try {
-      const existing = await this.orderRepo.findByOnChainOrderId(message.orderId);
-      const estimatedDeliveryDate = this.parseUnixSecondsToDate(message.endTime);
+      const existing = await this.orderRepo.findByOnChainOrderId(
+        message.orderId,
+      );
+      const estimatedDeliveryDate = this.parseUnixSecondsToDate(
+        message.endTime,
+      );
+      const startAttempt = await this.startAttemptRepo.findByOrderId(
+        message.orderId,
+      );
+
+      if (startAttempt) {
+        await this.promoteStartAttempt(
+          startAttempt,
+          message,
+          estimatedDeliveryDate,
+          existing,
+        );
+        return;
+      }
 
       if (existing) {
         await this.orderRepo.update(existing.id, {
@@ -108,9 +150,147 @@ export class BlockchainEventHandler {
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
-      this.logger.error(`Failed to handle AuctionStarted: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle AuctionStarted: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
+  }
+
+  private async promoteStartAttempt(
+    attempt: AuctionStartAttempt,
+    message: { orderId: string; seller: string; endTime: string },
+    estimatedDeliveryDate: Date | null,
+    existingOrder: Order | null,
+  ) {
+    const order = existingOrder
+      ? await this.orderRepo.update(existingOrder.id, {
+          status: OrderStatus.AUCTION_ACTIVE,
+          paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+          paymentStatus: OrderPaymentStatus.UNPAID,
+          onChainOrderId: message.orderId,
+          contractAddress:
+            attempt.contractAddress ?? existingOrder.contractAddress ?? null,
+          sellerWallet: message.seller,
+          txHash: attempt.txHash ?? existingOrder.txHash ?? null,
+          escrowState: EscrowState.STARTED,
+          estimatedDeliveryDate,
+        })
+      : await this.orderRepo.create({
+          collectorId: null,
+          orderNumber: attempt.orderId,
+          status: OrderStatus.AUCTION_ACTIVE,
+          subtotal: 0,
+          totalAmount: 0,
+          shippingCost: 0,
+          taxAmount: 0,
+          currency: 'ETH',
+          paymentStatus: OrderPaymentStatus.UNPAID,
+          paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+          onChainOrderId: message.orderId,
+          contractAddress: attempt.contractAddress ?? null,
+          txHash: attempt.txHash ?? null,
+          sellerWallet: message.seller,
+          escrowState: EscrowState.STARTED,
+          estimatedDeliveryDate,
+        });
+
+    if (!order) {
+      throw RpcExceptionHelper.internalError(
+        'Failed to promote seller auction start into an order projection',
+      );
+    }
+
+    await this.ensureAuctionOrderItem(order.id, attempt);
+    const updatedAttempt = await this.startAttemptRepo.update(attempt.id, {
+      status: SellerAuctionStartStatus.AUCTION_ACTIVE,
+      walletAddress: message.seller,
+      retryAllowed: false,
+      editAllowed: false,
+      walletActionRequired: false,
+      reasonCode: null,
+      reasonMessage: null,
+      activatedAt: attempt.activatedAt ?? new Date(),
+    });
+    if (updatedAttempt) {
+      await this.lifecycleOutbox.queueAttemptSnapshot(updatedAttempt);
+    }
+    await this.markArtworkInAuction(attempt);
+  }
+
+  private async ensureAuctionOrderItem(
+    orderId: string,
+    attempt: AuctionStartAttempt,
+  ) {
+    const existingItems = await this.orderItemRepo.findByOrderId(orderId);
+    const matchedItem =
+      existingItems.find((item) => item.artworkId === attempt.artworkId) ??
+      existingItems[0] ??
+      null;
+
+    if (!matchedItem) {
+      await this.orderItemRepo.create({
+        orderId,
+        artworkId: attempt.artworkId,
+        sellerId: attempt.sellerId,
+        priceAtPurchase: 0,
+        quantity: 1,
+        currency: 'ETH',
+        artworkTitle: attempt.artworkTitle,
+        artworkImageUrl: attempt.thumbnailUrl ?? null,
+        artworkDescription: null,
+        platformFee: null,
+        sellerPayoutAmount: null,
+        payoutStatus: PayoutStatus.PENDING,
+        payoutAt: null,
+      });
+      return;
+    }
+
+    const nextItemPatch: Record<string, unknown> = {};
+    if (matchedItem.artworkId !== attempt.artworkId) {
+      nextItemPatch.artworkId = attempt.artworkId;
+    }
+    if (matchedItem.sellerId !== attempt.sellerId) {
+      nextItemPatch.sellerId = attempt.sellerId;
+    }
+    if (matchedItem.artworkTitle !== attempt.artworkTitle) {
+      nextItemPatch.artworkTitle = attempt.artworkTitle;
+    }
+    if (
+      (matchedItem.artworkImageUrl ?? null) !== (attempt.thumbnailUrl ?? null)
+    ) {
+      nextItemPatch.artworkImageUrl = attempt.thumbnailUrl ?? null;
+    }
+    if (matchedItem.currency !== 'ETH') {
+      nextItemPatch.currency = 'ETH';
+    }
+    if (matchedItem.quantity !== 1) {
+      nextItemPatch.quantity = 1;
+    }
+    if (Number(matchedItem.priceAtPurchase) !== 0) {
+      nextItemPatch.priceAtPurchase = 0;
+    }
+
+    if (Object.keys(nextItemPatch).length > 0) {
+      await this.orderItemRepo.update(matchedItem.id, nextItemPatch);
+    }
+  }
+
+  private async markArtworkInAuction(attempt: AuctionStartAttempt) {
+    await firstValueFrom(
+      this.artworkClient
+        .send(
+          { cmd: 'mark_artwork_in_auction' },
+          {
+            artworkId: attempt.artworkId,
+            sellerId: attempt.sellerId,
+            onChainAuctionId: attempt.orderId,
+          },
+        )
+        .pipe(timeout(ARTWORK_RPC_TIMEOUT_MS)),
+    );
   }
 
   @RabbitSubscribe({
@@ -161,7 +341,10 @@ export class BlockchainEventHandler {
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
-      this.logger.error(`Failed to handle NewBid: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle NewBid: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -177,9 +360,13 @@ export class BlockchainEventHandler {
     winner: string;
     amount: string;
   }) {
-    this.logger.log(`Auction ended: ${message.orderId}, winner: ${message.winner}`);
+    this.logger.log(
+      `Auction ended: ${message.orderId}, winner: ${message.winner}`,
+    );
     try {
-      const existing = await this.orderRepo.findByOnChainOrderId(message.orderId);
+      const existing = await this.orderRepo.findByOnChainOrderId(
+        message.orderId,
+      );
       if (existing) {
         await this.orderRepo.update(existing.id, {
           status: OrderStatus.ESCROW_HELD,
@@ -215,7 +402,10 @@ export class BlockchainEventHandler {
 
       this.logger.log(`Order created for auction: ${message.orderId}`);
     } catch (error) {
-      this.logger.error(`Failed to handle AuctionEnded: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle AuctionEnded: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -230,7 +420,9 @@ export class BlockchainEventHandler {
     orderId: string;
     newEndTime: string;
   }) {
-    this.logger.log(`Auction extended: ${message.orderId} -> ${message.newEndTime}`);
+    this.logger.log(
+      `Auction extended: ${message.orderId} -> ${message.newEndTime}`,
+    );
 
     try {
       const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
@@ -248,7 +440,9 @@ export class BlockchainEventHandler {
           paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
           onChainOrderId: message.orderId,
           escrowState: EscrowState.STARTED,
-          estimatedDeliveryDate: this.parseUnixSecondsToDate(message.newEndTime),
+          estimatedDeliveryDate: this.parseUnixSecondsToDate(
+            message.newEndTime,
+          ),
           ...this.getBlockchainEventMetadata(message),
         });
         return;
@@ -260,7 +454,10 @@ export class BlockchainEventHandler {
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
-      this.logger.error(`Failed to handle AuctionExtended: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle AuctionExtended: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -294,7 +491,10 @@ export class BlockchainEventHandler {
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
-      this.logger.error(`Failed to handle ArtShipped: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle ArtShipped: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -305,10 +505,7 @@ export class BlockchainEventHandler {
     queue: 'orders-service.blockchain.delivery-confirmed',
     queueOptions: { durable: true },
   })
-  async handleDeliveryConfirmed(message: {
-    orderId: string;
-    winner: string;
-  }) {
+  async handleDeliveryConfirmed(message: { orderId: string; winner: string }) {
     this.logger.log(`Delivery confirmed for auction: ${message.orderId}`);
     try {
       const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
@@ -325,7 +522,10 @@ export class BlockchainEventHandler {
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
-      this.logger.error(`Failed to handle DeliveryConfirmed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle DeliveryConfirmed: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -357,7 +557,10 @@ export class BlockchainEventHandler {
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
-      this.logger.error(`Failed to handle DisputeOpened: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle DisputeOpened: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -373,7 +576,9 @@ export class BlockchainEventHandler {
     arbiter: string;
     favorBuyer: boolean;
   }) {
-    this.logger.log(`Dispute resolved for auction: ${message.orderId}, favorBuyer: ${message.favorBuyer}`);
+    this.logger.log(
+      `Dispute resolved for auction: ${message.orderId}, favorBuyer: ${message.favorBuyer}`,
+    );
     try {
       const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
       if (!order) {
@@ -381,8 +586,12 @@ export class BlockchainEventHandler {
         return;
       }
 
-      const status = message.favorBuyer ? OrderStatus.REFUNDED : OrderStatus.DELIVERED;
-      const escrowState = message.favorBuyer ? EscrowState.CANCELLED : EscrowState.COMPLETED;
+      const status = message.favorBuyer
+        ? OrderStatus.REFUNDED
+        : OrderStatus.DELIVERED;
+      const escrowState = message.favorBuyer
+        ? EscrowState.CANCELLED
+        : EscrowState.COMPLETED;
       const paymentStatus = message.favorBuyer
         ? OrderPaymentStatus.REFUNDED
         : OrderPaymentStatus.RELEASED;
@@ -395,11 +604,16 @@ export class BlockchainEventHandler {
         disputeResolutionNotes: message.favorBuyer
           ? 'Resolved in favor of buyer'
           : 'Resolved in favor of seller',
-        ...(status === OrderStatus.DELIVERED ? { deliveredAt: new Date() } : {}),
+        ...(status === OrderStatus.DELIVERED
+          ? { deliveredAt: new Date() }
+          : {}),
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
-      this.logger.error(`Failed to handle DisputeResolved: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle DisputeResolved: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -410,10 +624,7 @@ export class BlockchainEventHandler {
     queue: 'orders-service.blockchain.auction-cancelled',
     queueOptions: { durable: true },
   })
-  async handleAuctionCancelled(message: {
-    orderId: string;
-    reason: string;
-  }) {
+  async handleAuctionCancelled(message: { orderId: string; reason: string }) {
     this.logger.log(`Auction cancelled: ${message.orderId}`);
     try {
       const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
@@ -431,7 +642,10 @@ export class BlockchainEventHandler {
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
-      this.logger.error(`Failed to handle AuctionCancelled: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle AuctionCancelled: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -442,10 +656,7 @@ export class BlockchainEventHandler {
     queue: 'orders-service.blockchain.shipping-timeout',
     queueOptions: { durable: true },
   })
-  async handleShippingTimeout(message: {
-    orderId: string;
-    buyer: string;
-  }) {
+  async handleShippingTimeout(message: { orderId: string; buyer: string }) {
     this.logger.log(`Shipping timeout: ${message.orderId}`);
     try {
       const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
@@ -481,7 +692,10 @@ export class BlockchainEventHandler {
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
-      this.logger.error(`Failed to handle ShippingTimeout: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle ShippingTimeout: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -492,10 +706,7 @@ export class BlockchainEventHandler {
     queue: 'orders-service.blockchain.delivery-timeout',
     queueOptions: { durable: true },
   })
-  async handleDeliveryTimeout(message: {
-    orderId: string;
-    seller: string;
-  }) {
+  async handleDeliveryTimeout(message: { orderId: string; seller: string }) {
     this.logger.log(`Delivery timeout: ${message.orderId}`);
     try {
       const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
@@ -529,7 +740,10 @@ export class BlockchainEventHandler {
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {
-      this.logger.error(`Failed to handle DeliveryTimeout: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle DeliveryTimeout: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }

@@ -1,0 +1,50 @@
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+ARG NEXT_PUBLIC_API_URL=https://api.dgpthinh.io.vn
+ARG NEXT_PUBLIC_WS_URL=https://dgpthinh.io.vn
+ARG NEXT_PUBLIC_WEB_BASE_URL=https://dgpthinh.io.vn
+ARG NEXTAUTH_URL=https://dgpthinh.io.vn
+ARG NEXT_PUBLIC_COOKIE_DOMAIN=dgpthinh.io.vn
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_PLATFORM_ETH_WALLET
+ARG NEXT_PUBLIC_ETH_CHAIN_ID=11155111
+ARG NEXT_PUBLIC_ETH_CHAIN_NAME=Sepolia
+ARG NEXT_PUBLIC_ETH_RPC_URL
+ARG NEXT_PUBLIC_ETH_BLOCK_EXPLORER_URL=https://sepolia.etherscan.io
+
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
+ENV NEXT_PUBLIC_WEB_BASE_URL=$NEXT_PUBLIC_WEB_BASE_URL
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
+ENV NEXT_PUBLIC_COOKIE_DOMAIN=$NEXT_PUBLIC_COOKIE_DOMAIN
+ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_PLATFORM_ETH_WALLET=$NEXT_PUBLIC_PLATFORM_ETH_WALLET
+ENV NEXT_PUBLIC_ETH_CHAIN_ID=$NEXT_PUBLIC_ETH_CHAIN_ID
+ENV NEXT_PUBLIC_ETH_CHAIN_NAME=$NEXT_PUBLIC_ETH_CHAIN_NAME
+ENV NEXT_PUBLIC_ETH_RPC_URL=$NEXT_PUBLIC_ETH_RPC_URL
+ENV NEXT_PUBLIC_ETH_BLOCK_EXPLORER_URL=$NEXT_PUBLIC_ETH_BLOCK_EXPLORER_URL
+
+RUN npm run build
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=3000
+
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/next.config.ts ./next.config.ts
+
+EXPOSE 3000
+CMD ["npm", "run", "start"]

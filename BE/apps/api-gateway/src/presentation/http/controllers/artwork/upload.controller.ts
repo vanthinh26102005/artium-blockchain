@@ -1,11 +1,12 @@
 import { JwtAuthGuard } from '@app/auth';
-import { ArtworkImageInput } from '@app/common';
+import { ArtworkImageInput, UserPayload } from '@app/common';
 import {
   Body,
   Controller,
   Inject,
   Logger,
   Post,
+  Request,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -33,10 +34,6 @@ import { MICROSERVICES } from 'apps/api-gateway/src/config';
 import { sendRpc } from '../../utils';
 
 class UploadArtworkImageDto {
-  @IsString()
-  @IsNotEmpty()
-  sellerId: string;
-
   @IsString()
   @IsNotEmpty()
   artworkId: string;
@@ -89,10 +86,6 @@ export class UploadController {
           format: 'binary',
           description: 'Image file to upload',
         },
-        sellerId: {
-          type: 'string',
-          description: 'Seller ID',
-        },
         artworkId: {
           type: 'string',
           description: 'Artwork ID',
@@ -110,7 +103,7 @@ export class UploadController {
           description: 'Display order',
         },
       },
-      required: ['file', 'sellerId', 'artworkId'],
+      required: ['file', 'artworkId'],
     },
   })
   @ApiResponse({
@@ -131,26 +124,27 @@ export class UploadController {
     },
   })
   async uploadArtworkImage(
+    @Request() req: { user: UserPayload },
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: UploadArtworkImageDto,
   ): Promise<ArtworkImageInput> {
     const logger = new Logger('ApiGatewayUpload');
     logger.log('Received uploadArtworkImage request', {
-      sellerId: dto.sellerId,
+      sellerId: req.user.id,
       artworkId: dto.artworkId,
       fileOriginalName: file?.originalname,
       fileSize: file?.size,
       dto: JSON.stringify(dto),
     });
 
-    if (dto.sellerId === 'undefined' || dto.artworkId === 'undefined') {
+    if (req.user.id === 'undefined' || dto.artworkId === 'undefined') {
       throw new Error('sellerId or artworkId is "undefined" string');
     }
 
     return sendRpc<ArtworkImageInput>(
       this.artworkClient,
       { cmd: 'upload_artwork_image' },
-      { ...dto, file },
+      { ...dto, sellerId: req.user.id, user: req.user, file },
     );
   }
 
@@ -176,16 +170,12 @@ export class UploadController {
           },
           description: 'Image files to upload (max 10)',
         },
-        sellerId: {
-          type: 'string',
-          description: 'Seller ID',
-        },
         artworkId: {
           type: 'string',
           description: 'Artwork ID',
         },
       },
-      required: ['files', 'sellerId', 'artworkId'],
+      required: ['files', 'artworkId'],
     },
   })
   @ApiResponse({
@@ -209,25 +199,26 @@ export class UploadController {
     },
   })
   async uploadArtworkImages(
+    @Request() req: { user: UserPayload },
     @UploadedFiles() files: Express.Multer.File[],
     @Body() dto: UploadArtworkImageDto,
   ): Promise<ArtworkImageInput[]> {
     const logger = new Logger('ApiGatewayUpload');
     logger.log('Received uploadArtworkImages request', {
-      sellerId: dto.sellerId,
+      sellerId: req.user.id,
       artworkId: dto.artworkId,
       filesCount: files?.length,
       dto: JSON.stringify(dto),
     });
 
-    if (dto.sellerId === 'undefined' || dto.artworkId === 'undefined') {
+    if (req.user.id === 'undefined' || dto.artworkId === 'undefined') {
       throw new Error('sellerId or artworkId is "undefined" string');
     }
 
     return sendRpc<ArtworkImageInput[]>(
       this.artworkClient,
       { cmd: 'upload_artwork_images' },
-      { ...dto, files },
+      { ...dto, sellerId: req.user.id, user: req.user, files },
     );
   }
 

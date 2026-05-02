@@ -1,8 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
-import { RpcExceptionHelper } from '@app/common';
+import { RpcExceptionHelper, SellerAuctionStartStatus } from '@app/common';
 import { UpdateArtworkCommand } from '../UpdateArtwork.command';
-import { IArtworkRepository } from 'apps/artwork-service/src/domain';
+import { IArtworkAuctionLifecycleRepository } from '../../../../domain/interfaces/artwork-auction-lifecycle.repository.interface';
+import { IArtworkRepository } from '../../../../domain/interfaces/artwork.repository.interface';
 
 @CommandHandler(UpdateArtworkCommand)
 export class UpdateArtworkHandler implements ICommandHandler<UpdateArtworkCommand> {
@@ -10,6 +11,8 @@ export class UpdateArtworkHandler implements ICommandHandler<UpdateArtworkComman
 
   constructor(
     @Inject(IArtworkRepository) private readonly repo: IArtworkRepository,
+    @Inject(IArtworkAuctionLifecycleRepository)
+    private readonly lifecycleRepo: IArtworkAuctionLifecycleRepository,
   ) {}
 
   async execute(command: UpdateArtworkCommand) {
@@ -24,6 +27,26 @@ export class UpdateArtworkHandler implements ICommandHandler<UpdateArtworkComman
         throw RpcExceptionHelper.notFound(`Artwork ${command.id} not found`);
       }
 
+      if (!command.user?.id) {
+        throw RpcExceptionHelper.forbidden('Authenticated seller is required');
+      }
+
+      if (existingArtwork.sellerId !== command.user.id) {
+        throw RpcExceptionHelper.forbidden(
+          'Artwork does not belong to the authenticated seller',
+        );
+      }
+
+      const lifecycle = await this.lifecycleRepo.findBySellerAndArtworkId(
+        command.user.id,
+        command.id,
+      );
+      if (this.isLifecycleLocked(lifecycle)) {
+        throw RpcExceptionHelper.conflict(
+          'Artwork is locked by auction lifecycle',
+        );
+      }
+
       // Update artwork with new data (exclude images - use separate image handlers)
       const { images, ...updateData } = command.input;
       const updated = await this.repo.update(command.id, updateData);
@@ -33,5 +56,26 @@ export class UpdateArtworkHandler implements ICommandHandler<UpdateArtworkComman
       this.logger.error(`[${reqId}] update failed`, err.stack || err);
       throw err;
     }
+  }
+
+  private isLifecycleLocked(
+    lifecycle: {
+      status: SellerAuctionStartStatus;
+      editAllowed?: boolean;
+    } | null,
+  ): boolean {
+    if (!lifecycle) {
+      return false;
+    }
+
+    if (lifecycle.status === SellerAuctionStartStatus.START_FAILED) {
+      return lifecycle.editAllowed !== true;
+    }
+
+    return [
+      SellerAuctionStartStatus.PENDING_START,
+      SellerAuctionStartStatus.AUCTION_ACTIVE,
+      SellerAuctionStartStatus.RETRY_AVAILABLE,
+    ].includes(lifecycle.status);
   }
 }

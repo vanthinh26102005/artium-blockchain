@@ -1,5 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Inject, Logger, HttpException, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Logger,
+  HttpException,
+  NotFoundException,
+} from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { RpcExceptionHelper } from '@app/common';
 import { CreateStripeCustomerCommand } from '../CreateStripeCustomer.command';

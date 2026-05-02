@@ -222,7 +222,10 @@ export class FollowerRepository implements IFollowerRepository {
     followedUserId: string,
     manager?: EntityManager,
   ): Promise<boolean> {
-    return this.exists({ followingUserId: followingUserId, followedUserId }, manager);
+    return this.exists(
+      { followingUserId: followingUserId, followedUserId },
+      manager,
+    );
   }
 
   async checkMutualFollow(

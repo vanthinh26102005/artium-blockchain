@@ -1,8 +1,12 @@
 import { JwtAuthGuard } from '@app/auth';
 import {
   ArtworkObject,
+  ArtworkUploadDraftObject,
   CreateArtworkInput,
+  CreateArtworkDraftInput,
   GetArtworksQueryDto,
+  SaveArtworkDraftInput,
+  SubmitArtworkDraftInput,
   UpdateArtworkInput,
   UserPayload,
   ArtworkImageInput,
@@ -32,12 +36,23 @@ import {
   ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
+  ApiProperty,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { IsBoolean } from 'class-validator';
 import { MICROSERVICES } from '../../../../config';
 import { sendRpc } from '../../utils';
+
+class SetArtworkLikeStatusBody {
+  @ApiProperty({
+    description: 'Whether the current user likes this artwork',
+    example: true,
+  })
+  @IsBoolean()
+  liked!: boolean;
+}
 
 @ApiTags('Artwork')
 @Controller('artwork')
@@ -103,6 +118,64 @@ export class ArtworkController {
     );
   }
 
+  @Get(':id/likes/me')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check if current user likes an artwork' })
+  @ApiParam({
+    name: 'id',
+    description: 'The unique identifier of the artwork',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Artwork like status retrieved successfully',
+  })
+  async getArtworkLikeStatus(
+    @Param('id') id: string,
+    @Request() req: { user: UserPayload },
+  ) {
+    const liked = await sendRpc<boolean>(
+      this.artworkClient,
+      { cmd: 'is_artwork_liked' },
+      { userId: req.user?.id, artworkId: id },
+    );
+
+    return { liked };
+  }
+
+  @Put(':id/likes')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Set like status for an artwork' })
+  @ApiParam({
+    name: 'id',
+    description: 'The unique identifier of the artwork',
+    type: 'string',
+  })
+  @ApiBody({ type: SetArtworkLikeStatusBody })
+  @ApiResponse({
+    status: 200,
+    description: 'Artwork like status updated successfully',
+  })
+  async setArtworkLikeStatus(
+    @Param('id') id: string,
+    @Body() body: SetArtworkLikeStatusBody,
+    @Request() req: { user: UserPayload },
+  ) {
+    return sendRpc(
+      this.artworkClient,
+      { cmd: 'set_artwork_like_status' },
+      {
+        userId: req.user?.id,
+        artworkId: id,
+        liked: body.liked,
+      },
+    );
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -159,6 +232,133 @@ export class ArtworkController {
       this.artworkClient,
       { cmd: 'create_artwork' },
       { ...data, user: req.user },
+    );
+  }
+
+  @Post('drafts/:draftArtworkId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create artwork upload draft',
+    description:
+      'Creates or returns an authenticated seller-owned draft for the upload flow.',
+  })
+  @ApiParam({
+    name: 'draftArtworkId',
+    description: 'Client route draft artwork identifier',
+    type: 'string',
+  })
+  @ApiBody({ type: CreateArtworkDraftInput })
+  @ApiResponse({
+    status: 200,
+    description: 'Draft created or returned successfully',
+    type: ArtworkUploadDraftObject,
+  })
+  async createArtworkUploadDraft(
+    @Param('draftArtworkId') draftArtworkId: string,
+    @Request() req: { user: UserPayload },
+    @Body() data: CreateArtworkDraftInput,
+  ) {
+    return sendRpc<ArtworkUploadDraftObject>(
+      this.artworkClient,
+      { cmd: 'create_artwork_upload_draft' },
+      { draftArtworkId, data, user: req.user },
+    );
+  }
+
+  @Get('drafts/:draftArtworkId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get artwork upload draft',
+    description: 'Loads an authenticated seller-owned upload draft.',
+  })
+  @ApiParam({
+    name: 'draftArtworkId',
+    description: 'Draft artwork identifier',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Draft retrieved successfully',
+    type: ArtworkUploadDraftObject,
+  })
+  @ApiNotFoundResponse({ description: 'Draft not found' })
+  async getArtworkUploadDraft(
+    @Param('draftArtworkId') draftArtworkId: string,
+    @Request() req: { user: UserPayload },
+  ) {
+    return sendRpc<ArtworkUploadDraftObject>(
+      this.artworkClient,
+      { cmd: 'get_artwork_upload_draft' },
+      { draftArtworkId, user: req.user },
+    );
+  }
+
+  @Put('drafts/:draftArtworkId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save artwork upload draft',
+    description: 'Updates authenticated seller-owned upload draft fields.',
+  })
+  @ApiParam({
+    name: 'draftArtworkId',
+    description: 'Draft artwork identifier',
+    type: 'string',
+  })
+  @ApiBody({ type: SaveArtworkDraftInput })
+  @ApiResponse({
+    status: 200,
+    description: 'Draft saved successfully',
+    type: ArtworkUploadDraftObject,
+  })
+  @ApiNotFoundResponse({ description: 'Draft not found' })
+  async saveArtworkUploadDraft(
+    @Param('draftArtworkId') draftArtworkId: string,
+    @Request() req: { user: UserPayload },
+    @Body() data: SaveArtworkDraftInput,
+  ) {
+    return sendRpc<ArtworkUploadDraftObject>(
+      this.artworkClient,
+      { cmd: 'save_artwork_upload_draft' },
+      { draftArtworkId, data, user: req.user },
+    );
+  }
+
+  @Post('drafts/:draftArtworkId/submit')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Submit artwork upload draft',
+    description:
+      'Validates and transitions an authenticated seller-owned draft into its final lifecycle state.',
+  })
+  @ApiParam({
+    name: 'draftArtworkId',
+    description: 'Draft artwork identifier',
+    type: 'string',
+  })
+  @ApiBody({ type: SubmitArtworkDraftInput })
+  @ApiResponse({
+    status: 200,
+    description: 'Draft submitted successfully',
+    type: ArtworkUploadDraftObject,
+  })
+  @ApiNotFoundResponse({ description: 'Draft not found' })
+  async submitArtworkUploadDraft(
+    @Param('draftArtworkId') draftArtworkId: string,
+    @Request() req: { user: UserPayload },
+    @Body() data: SubmitArtworkDraftInput,
+  ) {
+    return sendRpc<ArtworkUploadDraftObject>(
+      this.artworkClient,
+      { cmd: 'submit_artwork_upload_draft' },
+      { draftArtworkId, data, user: req.user },
     );
   }
 
@@ -303,7 +503,8 @@ export class ArtworkController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Bulk move artworks to folder',
-    description: 'Moves multiple artworks to a folder (or root when folderId is null).',
+    description:
+      'Moves multiple artworks to a folder (or root when folderId is null).',
   })
   @ApiBody({ type: BulkMoveArtworksInput })
   @ApiResponse({

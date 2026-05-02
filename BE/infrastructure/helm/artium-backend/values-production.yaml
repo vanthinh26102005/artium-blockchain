@@ -1,0 +1,235 @@
+namespace:
+  name: artium-prod
+  create: false
+
+ingress:
+  enabled: true
+  className: nginx
+  host: "dg.pthinh.io.vn"
+  tls:
+    enabled: true
+    secretName: artium-gateway-tls
+
+sealedSecrets:
+  enabled: false
+
+networkPolicy:
+  enabled: true
+
+imagePullSecrets:
+  - name: ghcr-pull-secret
+
+config:
+  dbSynchronize: "true"
+
+images:
+  api-gateway:
+    repository: ghcr.io/nouu188/api-gateway
+    tag: "20260428-k8sfix2"
+    digest: ""
+  identity-service:
+    repository: ghcr.io/nouu188/identity-service
+    tag: "20260428-k8sfix2"
+    digest: ""
+  artwork-service:
+    repository: ghcr.io/nouu188/artwork-service
+    tag: "20260428-k8sfix2"
+    digest: ""
+  payments-service:
+    repository: ghcr.io/nouu188/payments-service
+    tag: "20260428-k8sfix2"
+    digest: ""
+  orders-service:
+    repository: ghcr.io/nouu188/orders-service
+    tag: "20260428-k8sfix2"
+    digest: ""
+  messaging-service:
+    repository: ghcr.io/nouu188/messaging-service
+    tag: "20260428-k8sfix2"
+    digest: ""
+  notifications-service:
+    repository: ghcr.io/nouu188/notifications-service
+    tag: "20260428-k8sfix2"
+    digest: ""
+  events-service:
+    repository: ghcr.io/nouu188/events-service
+    tag: "20260428-k8sfix2"
+    digest: ""
+  community-service:
+    repository: ghcr.io/nouu188/community-service
+    tag: "20260428-k8sfix2"
+    digest: ""
+  web:
+    repository: ghcr.io/nouu188/artium-web
+    tag: "20260428-k8sfix2"
+    digest: ""
+
+web:
+  enabled: true
+  replicaCount: 1
+  env:
+    NEXT_PUBLIC_API_URL: "https://dg.pthinh.io.vn"
+    NEXT_PUBLIC_WS_URL: "https://dg.pthinh.io.vn"
+    NEXT_PUBLIC_WEB_BASE_URL: "https://dg.pthinh.io.vn"
+    NEXTAUTH_URL: "https://dg.pthinh.io.vn"
+    NEXT_PUBLIC_COOKIE_DOMAIN: "dg.pthinh.io.vn"
+  resources:
+    requests:
+      cpu: 150m
+      memory: 384Mi
+    limits:
+      cpu: 750m
+      memory: 768Mi
+
+services:
+  api-gateway:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 150m
+        memory: 256Mi
+      limits:
+        cpu: 750m
+        memory: 512Mi
+  identity-service:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 500m
+        memory: 384Mi
+  artwork-service:
+    resources:
+      requests:
+        cpu: 125m
+        memory: 256Mi
+      limits:
+        cpu: 750m
+        memory: 512Mi
+  payments-service:
+    resources:
+      requests:
+        cpu: 125m
+        memory: 256Mi
+      limits:
+        cpu: 750m
+        memory: 512Mi
+  orders-service:
+    resources:
+      requests:
+        cpu: 125m
+        memory: 256Mi
+      limits:
+        cpu: 750m
+        memory: 512Mi
+  messaging-service:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 500m
+        memory: 384Mi
+  notifications-service:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 500m
+        memory: 384Mi
+  events-service:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 500m
+        memory: 384Mi
+  community-service:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 500m
+        memory: 384Mi
+
+workers:
+  outbox:
+    resources:
+      requests:
+        cpu: 75m
+        memory: 160Mi
+      limits:
+        cpu: 400m
+        memory: 320Mi
+  blockchain-listener:
+    resources:
+      requests:
+        cpu: 75m
+        memory: 160Mi
+      limits:
+        cpu: 400m
+        memory: 320Mi
+  ethereum-confirmation-retry:
+    resources:
+      requests:
+        cpu: 75m
+        memory: 160Mi
+      limits:
+        cpu: 400m
+        memory: 320Mi
+  notification-processor:
+    resources:
+      requests:
+        cpu: 75m
+        memory: 160Mi
+      limits:
+        cpu: 400m
+        memory: 320Mi
+
+postgresql:
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+  networkPolicy:
+    enabled: true
+
+redis:
+  master:
+    persistence:
+      enabled: true
+      size: 4Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+  networkPolicy:
+    enabled: true
+
+rabbitmq:
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  networkPolicy:
+    enabled: true

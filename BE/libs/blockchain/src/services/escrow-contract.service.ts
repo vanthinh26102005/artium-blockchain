@@ -1,7 +1,10 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ethers, Contract, TransactionResponse } from 'ethers';
 import { EscrowState } from '@app/common';
-import { ESCROW_CONTRACT, PLATFORM_SIGNER } from '../interfaces/blockchain-config.interface';
+import {
+  ESCROW_CONTRACT,
+  PLATFORM_SIGNER,
+} from '../interfaces/blockchain-config.interface';
 
 export interface AuctionCoreDto {
   seller: string;
@@ -70,6 +73,22 @@ export class EscrowContractService {
   async getPlatformFeeBps(): Promise<number> {
     const fee = await this.contract.platformFeeBps();
     return Number(fee);
+  }
+
+  encodeCreateAuctionCalldata(
+    orderId: string,
+    duration: bigint,
+    reservePrice: bigint,
+    minBidIncrement: bigint,
+    ipfsHash: string,
+  ): string {
+    return this.contract.interface.encodeFunctionData('createAuction', [
+      orderId,
+      duration,
+      reservePrice,
+      minBidIncrement,
+      ipfsHash,
+    ]);
   }
 
   async createAuction(

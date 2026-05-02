@@ -63,9 +63,7 @@ async function bootstrap() {
 
     await app.listen(port);
 
-    logger.log(
-      `Orders Service (HTTP) is running on: http://localhost:${port}`,
-    );
+    logger.log(`Orders Service (HTTP) is running on: http://localhost:${port}`);
     logger.log(`Swagger UI: http://localhost:${port}/api`);
     logger.log(
       `Orders Service (Microservice) running on: TCP localhost:${microservicePort}`,

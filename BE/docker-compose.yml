@@ -9,7 +9,7 @@ services:
     profiles: ["shared"]
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "1"
+      POSTGRES_PASSWORD: ${SHARED_DB_PASSWORD:-1}
       POSTGRES_DB: artium_global
       TZ: Asia/Ho_Chi_Minh
     ports:
@@ -31,7 +31,7 @@ services:
     profiles: ["isolated"]
     environment:
       POSTGRES_USER: identity_user
-      POSTGRES_PASSWORD: "1"
+      POSTGRES_PASSWORD: ${IDENTITY_DB_PASSWORD:-1}
       POSTGRES_DB: identity_db
       TZ: Asia/Ho_Chi_Minh
     ports:
@@ -151,7 +151,7 @@ services:
     profiles: ["isolated"]
     environment:
       POSTGRES_USER: payments_user
-      POSTGRES_PASSWORD: "1"
+      POSTGRES_PASSWORD: ${PAYMENTS_DB_PASSWORD:-1}
       POSTGRES_DB: payments_db
       TZ: Asia/Ho_Chi_Minh
     ports:
@@ -160,6 +160,36 @@ services:
       - postgres_payments_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U payments_user -d payments_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "768M"
+        reservations:
+          cpus: "0.50"
+          memory: "512M"
+    networks:
+      - infra_network
+
+  db-orders:
+    image: postgres:17
+    container_name: db-orders
+    profiles: ["isolated"]
+    environment:
+      POSTGRES_USER: orders_user
+      POSTGRES_PASSWORD: ${ORDERS_DB_PASSWORD:-1}
+      POSTGRES_DB: orders_db
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5440:5432"
+    volumes:
+      - postgres_orders_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orders_user -d orders_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -244,8 +274,8 @@ services:
       dockerfile: ./infrastructure/docker/rabbitmq/Dockerfile
     container_name: rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: myuser
-      RABBITMQ_DEFAULT_PASS: mypassword
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-myuser}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-mypassword}
       TZ: Asia/Ho_Chi_Minh
     ports:
       - "5672:5672"
@@ -312,26 +342,11 @@ services:
     command: yarn dev:gateway
     ports:
       - "8081:8081"
+    env_file:
+      - ./apps/api-gateway/.env.compose
     environment:
-      PORT: 8081
-      IDENTITY_SERVICE_HOST: identity-service
-      IDENTITY_SERVICE_PORT: 3101
-      ARTWORK_SERVICE_HOST: artwork-service
-      ARTWORK_SERVICE_PORT: 3102
-      PAYMENTS_SERVICE_HOST: payments-service
-      PAYMENTS_SERVICE_PORT: 3103
-      ORDERS_SERVICE_HOST: orders-service
-      ORDERS_SERVICE_PORT: 3104
-      MESSAGING_SERVICE_HOST: messaging-service
-      MESSAGING_SERVICE_PORT: 3105
-      NOTIFICATIONS_SERVICE_HOST: notifications-service
-      NOTIFICATIONS_SERVICE_PORT: 3106
-      EVENTS_SERVICE_HOST: events-service
-      EVENTS_SERVICE_PORT: 3107
-      COMMUNITY_SERVICE_HOST: community-service
-      COMMUNITY_SERVICE_PORT: 3109
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in environment}
-      TZ: Asia/Ho_Chi_Minh
+      NODE_ENV: ${NODE_ENV:-development}
     volumes:
       - .:/app
       - gateway_node_modules:/app/node_modules
@@ -339,6 +354,7 @@ services:
       - identity-service
       - artwork-service
       - payments-service
+      - orders-service
       - messaging-service
       - notifications-service
       - events-service
@@ -357,33 +373,14 @@ services:
     command: yarn dev:identity
     ports:
       - "3001:3001"
+    env_file:
+      - ./apps/identity-service/.env.compose
     environment:
-      PORT: 3001
-      MICROSERVICE_PORT: 3101
-      MICROSERVICE_HOST: 0.0.0.0
-      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
-      DB_SYNCHRONIZE: "true"
-      SHARED_DB_HOST: db-shared
-      SHARED_DB_PORT: 5432
-      SHARED_DB_USERNAME: postgres
-      SHARED_DB_PASSWORD: "1"
-      SHARED_DB_NAME: artium_global
-      DB_HOST: db-identity
-      DB_PORT: 5432
-      DB_USER: identity_user
-      DB_PASS: "1"
-      DB_NAME: identity_db
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in environment}
-      JWT_EXPIRES_IN: 1d
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      SIWE_ALLOWED_CHAIN_IDS: 11155111
-      SIWE_DOMAIN: localhost:3000
-      SIWE_URI: http://localhost:3000
-      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
-      TZ: Asia/Ho_Chi_Minh
+      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
     volumes:
       - .:/app
       - identity_node_modules:/app/node_modules
@@ -402,33 +399,11 @@ services:
     command: yarn dev:notifications
     ports:
       - "3006:3006"
+    env_file:
+      - ./apps/notifications-service/.env.compose
     environment:
-      PORT: 3006
-      MICROSERVICE_PORT: 3106
-      MICROSERVICE_HOST: 0.0.0.0
-      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
-      DB_SYNCHRONIZE: "true"
-      SHARED_DB_HOST: db-shared
-      SHARED_DB_PORT: 5432
-      SHARED_DB_USERNAME: postgres
-      SHARED_DB_PASSWORD: "1"
-      SHARED_DB_NAME: artium_global
-      DB_HOST: db-notifications
-      DB_PORT: 5432
-      DB_USER: notifications_user
-      DB_PASS: "1"
-      DB_NAME: notifications_db
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      GOOGLE_CLIENT_ID: 873456140774-gi4pt3aq0m3gpd5f10uv4ivv59lvbgej.apps.googleusercontent.com
-      GOOGLE_CLIENT_SECRET: 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
-      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
-      SMTP_HOST: mailhog
-      SMTP_PORT: 1025
-      SMTP_USER: ""
-      SMTP_PASS: ""
-      SMTP_FROM: noreply@artium.com
-      TZ: Asia/Ho_Chi_Minh
+      SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
+      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
     volumes:
       - .:/app
       - notifications_node_modules:/app/node_modules
@@ -452,7 +427,11 @@ services:
     ports:
       - "3002:3002"
       # TCP microservice port (internal only for API Gateway)
+    env_file:
+      - ./apps/artwork-service/.env.compose
     environment:
+      SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
+      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
       PORT: 3002
       MICROSERVICE_PORT: 3102
       MICROSERVICE_HOST: 0.0.0.0
@@ -461,7 +440,6 @@ services:
       SHARED_DB_HOST: db-shared
       SHARED_DB_PORT: 5432
       SHARED_DB_USERNAME: postgres
-      SHARED_DB_PASSWORD: "1"
       SHARED_DB_NAME: artium_global
       DB_HOST: db-artwork
       DB_PORT: 5432
@@ -470,7 +448,6 @@ services:
       DB_NAME: artwork_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
       TZ: Asia/Ho_Chi_Minh
       GCS_PROJECT_ID: artworkmanagement
       GCS_BUCKET_NAME: artwork_uit
@@ -501,27 +478,14 @@ services:
     command: yarn dev:orders
     ports:
       - "3004:3004"
+    env_file:
+      - ./apps/orders-service/.env.compose
     environment:
-      PORT: 3004
-      MICROSERVICE_PORT: 3104
-      MICROSERVICE_HOST: 0.0.0.0
-      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
-      DB_SYNCHRONIZE: "true"
-      SHARED_DB_HOST: db-shared
-      SHARED_DB_PORT: 5432
-      SHARED_DB_USERNAME: postgres
-      SHARED_DB_PASSWORD: "1"
-      SHARED_DB_NAME: artium_global
-      DB_HOST: db-orders
-      DB_PORT: 5432
-      DB_USER: orders_user
-      DB_PASS: "1"
-      DB_NAME: orders_db
+      SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
       PLATFORM_PRIVATE_KEY: ${PLATFORM_PRIVATE_KEY:?PLATFORM_PRIVATE_KEY must be set in environment}
       CONTRACT_ADDRESS: ${CONTRACT_ADDRESS:?CONTRACT_ADDRESS must be set in environment}
       BLOCKCHAIN_RPC_URL: ${BLOCKCHAIN_RPC_URL:?BLOCKCHAIN_RPC_URL must be set in environment}
-      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
-      TZ: Asia/Ho_Chi_Minh
+      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
     volumes:
       - .:/app
       - orders_node_modules:/app/node_modules
@@ -540,31 +504,11 @@ services:
     ports:
       - "3005:3005"
       # TCP microservice port (internal only for API Gateway)
+    env_file:
+      - ./apps/messaging-service/.env.compose
     environment:
-      PORT: 3005
-      MICROSERVICE_PORT: 3105
-      MICROSERVICE_HOST: 0.0.0.0
-      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
-      DB_SYNCHRONIZE: "true"
-      SHARED_DB_HOST: db-shared
-      SHARED_DB_PORT: 5432
-      SHARED_DB_USERNAME: postgres
-      SHARED_DB_PASSWORD: "1"
-      SHARED_DB_NAME: artium_global
-      DB_HOST: db-messaging
-      DB_PORT: 5432
-      DB_USER: messaging_user
-      DB_PASS: "1"
-      DB_NAME: messaging_db
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
-      TZ: Asia/Ho_Chi_Minh
-      GCS_PROJECT_ID: artworkmanagement
-      GCS_BUCKET_NAME: artwork_uit
-      GCS_KEY_FILE: /app/config/gcs-service-account.json
-      MAX_FILE_SIZE_MB: 10
-      ALLOWED_FILE_TYPES: image/jpeg,image/png,image/webp,image/jpg,image/gif,video/mp4,video/webm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
+      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
     volumes:
       - .:/app
       - messaging_node_modules:/app/node_modules
@@ -586,31 +530,16 @@ services:
     command: yarn dev:payments
     ports:
       - "3003:3003"
+    env_file:
+      - ./apps/payments-service/.env.compose
     environment:
-      PORT: 3003
-      MICROSERVICE_PORT: 3103
-      MICROSERVICE_HOST: 0.0.0.0
-      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
-      DB_SYNCHRONIZE: "true"
-      SHARED_DB_HOST: db-shared
-      SHARED_DB_PORT: 5432
-      SHARED_DB_USERNAME: postgres
-      SHARED_DB_PASSWORD: "1"
-      SHARED_DB_NAME: artium_global
-      DB_HOST: db-payments
-      DB_PORT: 5432
-      DB_USER: payments_user
-      DB_PASS: "1"
-      DB_NAME: payments_db
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
+      SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
+      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
       STRIPE_API_KEY: ${STRIPE_API_KEY:?STRIPE_API_KEY must be set in environment}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?STRIPE_WEBHOOK_SECRET must be set in environment}
       PLATFORM_PRIVATE_KEY: ${PLATFORM_PRIVATE_KEY:?PLATFORM_PRIVATE_KEY must be set in environment}
       PLATFORM_ETH_WALLET: ${PLATFORM_ETH_WALLET:?PLATFORM_ETH_WALLET must be set in environment}
       ETHEREUM_QUOTE_SIGNING_SECRET: ${ETHEREUM_QUOTE_SIGNING_SECRET:?ETHEREUM_QUOTE_SIGNING_SECRET must be set in environment}
-      TZ: Asia/Ho_Chi_Minh
     volumes:
       - .:/app
       - payments_node_modules:/app/node_modules
@@ -631,26 +560,11 @@ services:
     command: yarn dev:events
     ports:
       - "3007:3007"
+    env_file:
+      - ./apps/events-service/.env.compose
     environment:
-      PORT: 3007
-      MICROSERVICE_PORT: 3107
-      MICROSERVICE_HOST: 0.0.0.0
-      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
-      DB_SYNCHRONIZE: "true"
-      SHARED_DB_HOST: db-shared
-      SHARED_DB_PORT: 5432
-      SHARED_DB_USERNAME: postgres
-      SHARED_DB_PASSWORD: "1"
-      SHARED_DB_NAME: artium_global
-      DB_HOST: db-events
-      DB_PORT: 5432
-      DB_USER: events_user
-      DB_PASS: "1"
-      DB_NAME: events_db
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
-      TZ: Asia/Ho_Chi_Minh
+      SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
+      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
     volumes:
       - .:/app
       - events_node_modules:/app/node_modules
@@ -671,29 +585,15 @@ services:
     command: yarn dev:community
     ports:
       - "3009:3009"
+    env_file:
+      - ./apps/community-service/.env.compose
     environment:
-      PORT: 3009
-      MICROSERVICE_PORT: 3109
-      MICROSERVICE_HOST: 0.0.0.0
-      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
-      DB_SYNCHRONIZE: "true"
-      SHARED_DB_HOST: db-shared
-      SHARED_DB_PORT: 5432
-      SHARED_DB_USERNAME: postgres
-      SHARED_DB_PASSWORD: "1"
-      SHARED_DB_NAME: artium_global
-      DB_HOST: db-community
-      DB_PORT: 5432
-      DB_USER: community_user
-      DB_PASS: "1"
-      DB_NAME: community_db
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      RABBITMQ_URI: amqp://myuser:mypassword@rabbitmq:5672
-      TZ: Asia/Ho_Chi_Minh
+      SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
+      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
     volumes:
       - .:/app
       - community_node_modules:/app/node_modules
+      - ./config/gcs-service-account.json:/app/config/gcs-service-account.json:ro
     depends_on:
       rabbitmq:
         condition: service_healthy

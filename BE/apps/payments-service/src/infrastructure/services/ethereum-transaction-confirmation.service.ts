@@ -22,19 +22,27 @@ export class EthereumTransactionConfirmationService {
   private readonly confirmationRpcUrls: string[];
 
   constructor(private readonly configService: ConfigService) {
-    const chainId = this.configService.get<string>('BLOCKCHAIN_CONFIRMATION_CHAIN_ID') ?? '11155111';
+    const chainId =
+      this.configService.get<string>('BLOCKCHAIN_CONFIRMATION_CHAIN_ID') ??
+      '11155111';
     const minConfirmations = Number(
-      this.configService.get<string>('WALLET_CONFIRMATION_MIN_CONFIRMATIONS') ?? '1',
+      this.configService.get<string>('WALLET_CONFIRMATION_MIN_CONFIRMATIONS') ??
+        '1',
     );
     const privateKey = this.configService.get<string>('PLATFORM_PRIVATE_KEY');
-    const configuredWallet = this.configService.get<string>('PLATFORM_ETH_WALLET');
+    const configuredWallet = this.configService.get<string>(
+      'PLATFORM_ETH_WALLET',
+    );
 
     this.requiredChainId = BigInt(chainId);
     this.requiredChainIdNumber = Number(this.requiredChainId);
     this.requiredConfirmations =
-      Number.isFinite(minConfirmations) && minConfirmations > 0 ? minConfirmations : 1;
+      Number.isFinite(minConfirmations) && minConfirmations > 0
+        ? minConfirmations
+        : 1;
     this.platformWalletAddress = (
-      configuredWallet ?? (privateKey ? new ethers.Wallet(privateKey).address : '')
+      configuredWallet ??
+      (privateKey ? new ethers.Wallet(privateKey).address : '')
     ).toLowerCase();
     this.confirmationRpcUrls = this.resolveConfirmationRpcUrls();
   }
@@ -76,11 +84,8 @@ export class EthereumTransactionConfirmationService {
     }
 
     try {
-      const {
-        chainTransaction,
-        receipt,
-        latestBlockNumber,
-      } = await this.loadTransactionState(transaction.txHash);
+      const { chainTransaction, receipt, latestBlockNumber } =
+        await this.loadTransactionState(transaction.txHash);
 
       if (!chainTransaction || !receipt) {
         return {
@@ -102,7 +107,8 @@ export class EthereumTransactionConfirmationService {
       if (toAddress !== this.platformWalletAddress) {
         return {
           kind: 'invalid',
-          reason: 'Wallet transaction destination does not match the platform wallet.',
+          reason:
+            'Wallet transaction destination does not match the platform wallet.',
           failureCode: 'wrong_destination',
         };
       }
@@ -111,7 +117,8 @@ export class EthereumTransactionConfirmationService {
       if (fromAddress !== transaction.walletAddress.toLowerCase()) {
         return {
           kind: 'invalid',
-          reason: 'Wallet transaction sender does not match the recorded wallet.',
+          reason:
+            'Wallet transaction sender does not match the recorded wallet.',
           failureCode: 'wrong_sender',
         };
       }
@@ -119,7 +126,8 @@ export class EthereumTransactionConfirmationService {
       if (chainTransaction.value !== BigInt(expectedWeiHex)) {
         return {
           kind: 'invalid',
-          reason: 'Wallet transaction amount does not match the quoted wei amount.',
+          reason:
+            'Wallet transaction amount does not match the quoted wei amount.',
           failureCode: 'wrong_amount',
         };
       }
@@ -172,11 +180,9 @@ export class EthereumTransactionConfirmationService {
   }
 
   private createProvider(rpcUrl: string): ethers.JsonRpcProvider {
-    return new ethers.JsonRpcProvider(
-      rpcUrl,
-      this.requiredChainIdNumber,
-      { staticNetwork: ethers.Network.from(this.requiredChainIdNumber) },
-    );
+    return new ethers.JsonRpcProvider(rpcUrl, this.requiredChainIdNumber, {
+      staticNetwork: ethers.Network.from(this.requiredChainIdNumber),
+    });
   }
 
   private async loadTransactionState(txHash: string): Promise<{
@@ -190,11 +196,12 @@ export class EthereumTransactionConfirmationService {
       const provider = this.createProvider(rpcUrl);
 
       try {
-        const [chainTransaction, receipt, latestBlockNumber] = await Promise.all([
-          provider.getTransaction(txHash),
-          provider.getTransactionReceipt(txHash),
-          provider.getBlockNumber(),
-        ]);
+        const [chainTransaction, receipt, latestBlockNumber] =
+          await Promise.all([
+            provider.getTransaction(txHash),
+            provider.getTransactionReceipt(txHash),
+            provider.getBlockNumber(),
+          ]);
 
         return {
           chainTransaction,

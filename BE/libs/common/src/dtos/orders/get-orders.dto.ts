@@ -1,4 +1,8 @@
-import { EscrowState, OrderPaymentMethod, OrderStatus } from '@app/common/enums';
+import {
+  EscrowState,
+  OrderPaymentMethod,
+  OrderStatus,
+} from '@app/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
@@ -20,7 +24,8 @@ export class GetOrdersDto {
   scope?: OrdersWorkspaceScope;
 
   @ApiProperty({
-    description: 'Internal buyer ID filter. Overwritten by authenticated workspace scope.',
+    description:
+      'Internal buyer ID filter. Overwritten by authenticated workspace scope.',
     example: '123e4567-e89b-12d3-a456-426614174000',
     required: false,
   })
@@ -29,7 +34,8 @@ export class GetOrdersDto {
   buyerId?: string;
 
   @ApiProperty({
-    description: 'Internal seller ID filter. Overwritten by authenticated workspace scope.',
+    description:
+      'Internal seller ID filter. Overwritten by authenticated workspace scope.',
     example: '987fcdeb-51a2-43d1-b789-012345678901',
     required: false,
   })

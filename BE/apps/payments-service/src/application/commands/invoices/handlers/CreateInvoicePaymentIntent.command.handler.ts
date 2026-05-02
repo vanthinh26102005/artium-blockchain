@@ -41,9 +41,7 @@ const toNumber = (value: unknown): number => {
 };
 
 @CommandHandler(CreateInvoicePaymentIntentCommand)
-export class CreateInvoicePaymentIntentHandler
-  implements ICommandHandler<CreateInvoicePaymentIntentCommand>
-{
+export class CreateInvoicePaymentIntentHandler implements ICommandHandler<CreateInvoicePaymentIntentCommand> {
   private readonly logger = new Logger(CreateInvoicePaymentIntentHandler.name);
 
   constructor(
@@ -176,10 +174,7 @@ export class CreateInvoicePaymentIntentHandler
             manager,
           );
 
-          if (
-            !invoice.collectorId ||
-            invoice.customerEmail !== resolvedEmail
-          ) {
+          if (!invoice.collectorId || invoice.customerEmail !== resolvedEmail) {
             await this.invoiceRepo.update(
               invoice.id,
               {

@@ -8,7 +8,10 @@ export const IMoodboardRepository = Symbol('IMoodboardRepository');
 
 export interface IMoodboardRepository extends IRepository<Moodboard, string> {
   create(
-    data: CreateMoodboardInput | Omit<Moodboard, 'id' | 'createdAt'>,
+    data:
+      | CreateMoodboardInput
+      | Omit<Moodboard, 'id' | 'createdAt'>
+      | Partial<Moodboard>,
     transactionManager?: EntityManager,
   ): Promise<Moodboard>;
 

@@ -2,11 +2,21 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
 import { HandleStripeWebhookCommand } from '../HandleStripeWebhook.command';
 import { StripeService } from '../../../../infrastructure/services/stripe.service';
-import { IPaymentTransactionRepository, IInvoiceRepository } from '../../../../domain/interfaces';
+import {
+  IPaymentTransactionRepository,
+  IInvoiceRepository,
+} from '../../../../domain/interfaces';
 import { OutboxService } from '@app/outbox';
 import { ExchangeName, RoutingKey } from '@app/rabbitmq';
-import { PaymentProvider, RpcExceptionHelper, TransactionStatus } from '@app/common';
-import { PaymentSucceededEvent, PaymentFailedEvent } from '../../../../domain/events';
+import {
+  PaymentProvider,
+  RpcExceptionHelper,
+  TransactionStatus,
+} from '@app/common';
+import {
+  PaymentSucceededEvent,
+  PaymentFailedEvent,
+} from '../../../../domain/events';
 
 @CommandHandler(HandleStripeWebhookCommand)
 export class HandleStripeWebhookHandler implements ICommandHandler<HandleStripeWebhookCommand> {
@@ -21,7 +31,9 @@ export class HandleStripeWebhookHandler implements ICommandHandler<HandleStripeW
     private readonly outboxService: OutboxService,
   ) {}
 
-  async execute(command: HandleStripeWebhookCommand): Promise<{ received: boolean }> {
+  async execute(
+    command: HandleStripeWebhookCommand,
+  ): Promise<{ received: boolean }> {
     const { data } = command;
     let event: any;
 
@@ -52,14 +64,22 @@ export class HandleStripeWebhookHandler implements ICommandHandler<HandleStripeW
     return { received: true };
   }
 
-  private async handlePaymentIntentSucceeded(paymentIntent: any): Promise<void> {
-    const transaction = await this.transactionRepo.findByStripePaymentIntentId(paymentIntent.id);
+  private async handlePaymentIntentSucceeded(
+    paymentIntent: any,
+  ): Promise<void> {
+    const transaction = await this.transactionRepo.findByStripePaymentIntentId(
+      paymentIntent.id,
+    );
     if (!transaction) {
-      this.logger.warn(`No transaction found for payment intent: ${paymentIntent.id}`);
+      this.logger.warn(
+        `No transaction found for payment intent: ${paymentIntent.id}`,
+      );
       return;
     }
     if (transaction.status === TransactionStatus.SUCCEEDED) {
-      this.logger.debug(`Transaction ${transaction.id} already succeeded — idempotent skip`);
+      this.logger.debug(
+        `Transaction ${transaction.id} already succeeded — idempotent skip`,
+      );
       return;
     }
 
@@ -95,17 +115,24 @@ export class HandleStripeWebhookHandler implements ICommandHandler<HandleStripeW
       routingKey: RoutingKey.PAYMENT_SUCCEEDED,
     });
 
-    this.logger.log(`PaymentSucceeded (webhook) published for transaction: ${transaction.id}`);
+    this.logger.log(
+      `PaymentSucceeded (webhook) published for transaction: ${transaction.id}`,
+    );
   }
 
   private async handlePaymentIntentFailed(paymentIntent: any): Promise<void> {
-    const transaction = await this.transactionRepo.findByStripePaymentIntentId(paymentIntent.id);
+    const transaction = await this.transactionRepo.findByStripePaymentIntentId(
+      paymentIntent.id,
+    );
     if (!transaction) {
-      this.logger.warn(`No transaction found for payment intent: ${paymentIntent.id}`);
+      this.logger.warn(
+        `No transaction found for payment intent: ${paymentIntent.id}`,
+      );
       return;
     }
 
-    const failureReason = paymentIntent.last_payment_error?.message ?? 'Payment failed';
+    const failureReason =
+      paymentIntent.last_payment_error?.message ?? 'Payment failed';
     const failureCode = paymentIntent.last_payment_error?.code ?? null;
 
     await this.transactionRepo.update(transaction.id, {
@@ -135,6 +162,8 @@ export class HandleStripeWebhookHandler implements ICommandHandler<HandleStripeW
       routingKey: RoutingKey.PAYMENT_FAILED,
     });
 
-    this.logger.log(`PaymentFailed (webhook) published for transaction: ${transaction.id}`);
+    this.logger.log(
+      `PaymentFailed (webhook) published for transaction: ${transaction.id}`,
+    );
   }
 }

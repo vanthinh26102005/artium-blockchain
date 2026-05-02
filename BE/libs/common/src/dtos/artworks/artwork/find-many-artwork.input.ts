@@ -1,5 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { ArtworkStatus } from '../../../enums';
 
 @InputType()
@@ -19,6 +19,11 @@ export class FindManyArtworkInput {
   @IsEnum(ArtworkStatus)
   status?: ArtworkStatus;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
+
   @Field(() => Int, { nullable: true })
   @IsOptional()
   skip?: number;
@@ -26,4 +31,9 @@ export class FindManyArtworkInput {
   @Field(() => Int, { nullable: true })
   @IsOptional()
   take?: number;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  includeSellerAuctionLifecycle?: boolean;
 }

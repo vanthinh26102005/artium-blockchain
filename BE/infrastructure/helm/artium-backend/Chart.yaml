@@ -1,0 +1,19 @@
+apiVersion: v2
+name: artium-backend
+description: Artium backend production Kubernetes foundation
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: postgresql
+    alias: postgresql
+    version: 18.5.23
+    repository: oci://registry-1.docker.io/bitnamicharts
+  - name: redis
+    alias: redis
+    version: 24.1.2
+    repository: oci://registry-1.docker.io/bitnamicharts
+  - name: rabbitmq
+    alias: rabbitmq
+    version: 16.0.14
+    repository: oci://registry-1.docker.io/bitnamicharts

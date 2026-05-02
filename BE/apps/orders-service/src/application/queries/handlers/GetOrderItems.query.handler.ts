@@ -4,7 +4,10 @@ import { RpcException } from '@nestjs/microservices';
 import { RpcExceptionHelper } from '@app/common';
 import { GetOrderItemsQuery } from '../GetOrderItems.query';
 import { OrderItem } from '../../../domain/entities';
-import { IOrderRepository, IOrderItemRepository } from '../../../domain/interfaces';
+import {
+  IOrderRepository,
+  IOrderItemRepository,
+} from '../../../domain/interfaces';
 
 @QueryHandler(GetOrderItemsQuery)
 export class GetOrderItemsHandler implements IQueryHandler<GetOrderItemsQuery> {

@@ -41,6 +41,12 @@ export interface IOrderRepository extends IRepository<Order, string> {
     transactionManager?: EntityManager,
   ): Promise<{ data: Order[]; total: number }>;
 
+  findActiveArtworkLocks(
+    sellerId: string,
+    artworkIds: string[],
+    transactionManager?: EntityManager,
+  ): Promise<string[]>;
+
   findWithItems(
     orderId: string,
     transactionManager?: EntityManager,

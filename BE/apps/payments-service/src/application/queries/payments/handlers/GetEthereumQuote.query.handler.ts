@@ -7,14 +7,14 @@ import { EthereumQuoteService } from '../../../../infrastructure/services/ethere
 
 @Injectable()
 @QueryHandler(GetEthereumQuoteQuery)
-export class GetEthereumQuoteHandler
-  implements IQueryHandler<GetEthereumQuoteQuery>
-{
+export class GetEthereumQuoteHandler implements IQueryHandler<GetEthereumQuoteQuery> {
   constructor(private readonly ethereumQuoteService: EthereumQuoteService) {}
 
   async execute(query: GetEthereumQuoteQuery) {
     if (!Number.isFinite(query.usdAmount) || query.usdAmount <= 0) {
-      throw RpcExceptionHelper.badRequest('usdAmount must be a positive number');
+      throw RpcExceptionHelper.badRequest(
+        'usdAmount must be a positive number',
+      );
     }
 
     try {

@@ -6,9 +6,7 @@ import { Event } from '../../../domain/entities';
 import { DeleteEventCommand } from '../DeleteEvent.command';
 
 @CommandHandler(DeleteEventCommand)
-export class DeleteEventHandler
-  implements ICommandHandler<DeleteEventCommand>
-{
+export class DeleteEventHandler implements ICommandHandler<DeleteEventCommand> {
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,

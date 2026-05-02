@@ -10,7 +10,11 @@ import {
   GetEventsByCreatorQuery,
   GetPublicEventsQuery,
 } from '../../application';
-import { CreateEventDto, UpdateEventDto, SendEventInvitationsDto } from '../../domain';
+import {
+  CreateEventDto,
+  UpdateEventDto,
+  SendEventInvitationsDto,
+} from '../../domain';
 
 @Controller()
 export class EventsMicroserviceController {
@@ -30,7 +34,11 @@ export class EventsMicroserviceController {
   @MessagePattern({ cmd: 'update_event' })
   async updateEvent(
     @Payload()
-    data: { eventId: string; userId: string; payload: UpdateEventDto },
+    data: {
+      eventId: string;
+      userId: string;
+      payload: UpdateEventDto;
+    },
   ) {
     this.logger.debug(`Updating event: ${data.eventId}`);
     return this.commandBus.execute(

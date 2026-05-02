@@ -7,9 +7,7 @@ import { Order } from '../../../domain/entities';
 import { IOrderRepository } from '../../../domain/interfaces';
 
 @QueryHandler(GetOrderByOnChainIdQuery)
-export class GetOrderByOnChainIdHandler
-  implements IQueryHandler<GetOrderByOnChainIdQuery>
-{
+export class GetOrderByOnChainIdHandler implements IQueryHandler<GetOrderByOnChainIdQuery> {
   private readonly logger = new Logger(GetOrderByOnChainIdHandler.name);
 
   constructor(

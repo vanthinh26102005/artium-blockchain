@@ -15,9 +15,10 @@ import {
 } from '../../../../domain';
 
 @CommandHandler(SetLikeStatusCommand)
-export class SetLikeStatusHandler
-  implements ICommandHandler<SetLikeStatusCommand, LikeStatusResult>
-{
+export class SetLikeStatusHandler implements ICommandHandler<
+  SetLikeStatusCommand,
+  LikeStatusResult
+> {
   private readonly logger = new Logger(SetLikeStatusHandler.name);
 
   constructor(

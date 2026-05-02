@@ -1,8 +1,10 @@
-import { UpdateArtworkInput } from 'apps/artwork-service/src/domain';
+import { UserPayload } from '@app/common';
+import { UpdateArtworkInput } from '../../../domain';
 
 export class UpdateArtworkCommand {
   constructor(
     public readonly id: string,
     public readonly input: UpdateArtworkInput,
+    public readonly user?: UserPayload,
   ) {}
 }

@@ -17,6 +17,16 @@ export class OutboxProcessor {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async handleCron() {
+    const isEnabled = (process.env.OUTBOX_PROCESSOR_ENABLED ?? 'true')
+      .trim()
+      .toLowerCase();
+    if (isEnabled === 'false') {
+      this.logger.debug(
+        'OutboxProcessor disabled by OUTBOX_PROCESSOR_ENABLED=false',
+      );
+      return;
+    }
+
     const now = new Date();
 
     let messages: OutboxEntity[];

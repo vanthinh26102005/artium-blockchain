@@ -1,53 +1,40 @@
 services:
   identity-service:
-    environment:
-      DB_STRATEGY: SHARED
     depends_on:
       db-shared:
         condition: service_healthy
 
   notifications-service:
-    environment:
-      DB_STRATEGY: SHARED
     depends_on:
       db-shared:
         condition: service_healthy
 
   artwork-service:
-    environment:
-      DB_STRATEGY: SHARED
+    depends_on:
+      db-shared:
+        condition: service_healthy
+
+  orders-service:
     depends_on:
       db-shared:
         condition: service_healthy
 
   messaging-service:
-    environment:
-      DB_STRATEGY: SHARED
     depends_on:
       db-shared:
         condition: service_healthy
 
   payments-service:
-    environment:
-      DB_STRATEGY: SHARED
     depends_on:
       db-shared:
         condition: service_healthy
 
   events-service:
-    environment:
-      DB_STRATEGY: SHARED
     depends_on:
       db-shared:
         condition: service_healthy
 
   community-service:
-    environment:
-      DB_STRATEGY: SHARED
     depends_on:
       db-shared:
         condition: service_healthy
-
-  api-gateway:
-    environment:
-      DB_STRATEGY: SHARED

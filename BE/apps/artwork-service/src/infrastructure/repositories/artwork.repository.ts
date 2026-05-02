@@ -24,6 +24,32 @@ import { Artwork, IArtworkRepository } from '../../domain';
 @Injectable()
 export class ArtworkRepository implements IArtworkRepository {
   private readonly logger = new Logger(ArtworkRepository.name);
+  private readonly filterableArtworkFields = new Set([
+    'id',
+    'sellerId',
+    'creatorName',
+    'title',
+    'description',
+    'creationYear',
+    'editionRun',
+    'materials',
+    'location',
+    'price',
+    'currency',
+    'quantity',
+    'status',
+    'isPublished',
+    'folderId',
+    'viewCount',
+    'likeCount',
+    'commentCount',
+    'moodboardCount',
+    'ipfsMetadataHash',
+    'reservePrice',
+    'minBidIncrement',
+    'auctionDuration',
+    'onChainAuctionId',
+  ]);
 
   constructor(
     @InjectRepository(Artwork)
@@ -34,6 +60,23 @@ export class ArtworkRepository implements IArtworkRepository {
     return transactionManager
       ? transactionManager.getRepository(Artwork)
       : this.ormRepository;
+  }
+
+  private sanitizeArtworkWhere(where?: Record<string, unknown>) {
+    if (!where) {
+      return {};
+    }
+
+    return Object.entries(where).reduce<Record<string, unknown>>(
+      (acc, [key, value]) => {
+        if (this.filterableArtworkFields.has(key)) {
+          acc[key] = value;
+        }
+
+        return acc;
+      },
+      {},
+    );
   }
 
   async create(
@@ -105,16 +148,31 @@ export class ArtworkRepository implements IArtworkRepository {
       searchQuery?: string;
       minPrice?: number;
       maxPrice?: number;
+      includeSellerAuctionLifecycle?: unknown;
       hasOnChainAuctionId?: boolean;
     } = {},
     transactionManager?: EntityManager,
   ): Promise<[Artwork[], number]> {
-    const { where, orderBy, searchQuery, minPrice, maxPrice, hasOnChainAuctionId, ...rest } =
-      options;
+    const {
+      where,
+      orderBy,
+      searchQuery,
+      minPrice,
+      maxPrice,
+      includeSellerAuctionLifecycle: _includeSellerAuctionLifecycle,
+      hasOnChainAuctionId,
+      ...rest
+    } = options;
+
+    const safeWhere = this.sanitizeArtworkWhere(
+      where as Record<string, unknown> | undefined,
+    );
 
     const baseTypeOrmWhere: FindOptionsWhere<Artwork> = {
-      ...mapToTypeOrmWhere(where),
-      ...(hasOnChainAuctionId === true ? { onChainAuctionId: Not(IsNull()) } : {}),
+      ...mapToTypeOrmWhere(safeWhere as WhereOperator<Artwork>),
+      ...(hasOnChainAuctionId === true
+        ? { onChainAuctionId: Not(IsNull()) }
+        : {}),
       ...(hasOnChainAuctionId === false ? { onChainAuctionId: IsNull() } : {}),
     };
 
@@ -181,6 +239,15 @@ export class ArtworkRepository implements IArtworkRepository {
     }
 
     return (repo as any).exists({ where: typeOrmWhere });
+  }
+
+  async incrementLikeCount(
+    artworkId: string,
+    increment: number,
+    transactionManager?: EntityManager,
+  ): Promise<void> {
+    const repo = this.getRepo(transactionManager);
+    await repo.increment({ id: artworkId }, 'likeCount', increment);
   }
 
   async createMany(

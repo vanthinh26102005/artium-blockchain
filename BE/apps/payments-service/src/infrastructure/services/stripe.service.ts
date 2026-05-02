@@ -153,9 +153,7 @@ export class StripeService {
 
   async retrieveCustomer(customerId: string): Promise<Stripe.Customer> {
     try {
-      const customer = await this.stripe.customers.retrieve(
-        customerId,
-      );
+      const customer = await this.stripe.customers.retrieve(customerId);
 
       if ('deleted' in customer && customer.deleted) {
         throw new NotFoundException(

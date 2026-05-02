@@ -5,7 +5,13 @@ import {
   OrderPaymentStatus,
   OrderStatus,
 } from '@app/common';
-import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { OrderItem } from './order_items.entity';
 
 @Entity({ name: 'orders' })
@@ -156,10 +162,20 @@ export class Order extends AbstractEntity {
   @Column({ name: 'delivered_at', type: 'timestamp', nullable: true })
   deliveredAt?: Date | null;
 
-  @Column({ name: 'on_chain_order_id', type: 'varchar', nullable: true, unique: true })
+  @Column({
+    name: 'on_chain_order_id',
+    type: 'varchar',
+    nullable: true,
+    unique: true,
+  })
   onChainOrderId?: string | null;
 
-  @Column({ name: 'contract_address', type: 'varchar', length: 42, nullable: true })
+  @Column({
+    name: 'contract_address',
+    type: 'varchar',
+    length: 42,
+    nullable: true,
+  })
   contractAddress?: string | null;
 
   @Column({ name: 'chain_id', type: 'varchar', length: 32, nullable: true })
@@ -171,13 +187,23 @@ export class Order extends AbstractEntity {
   @Column({ name: 'tx_hash', type: 'varchar', length: 66, nullable: true })
   txHash?: string | null;
 
-  @Column({ name: 'seller_wallet', type: 'varchar', length: 42, nullable: true })
+  @Column({
+    name: 'seller_wallet',
+    type: 'varchar',
+    length: 42,
+    nullable: true,
+  })
   sellerWallet?: string | null;
 
   @Column({ name: 'buyer_wallet', type: 'varchar', length: 42, nullable: true })
   buyerWallet?: string | null;
 
-  @Column({ name: 'bid_amount_wei', type: 'varchar', length: 78, nullable: true })
+  @Column({
+    name: 'bid_amount_wei',
+    type: 'varchar',
+    length: 78,
+    nullable: true,
+  })
   bidAmountWei?: string | null;
 
   @Column({ name: 'dispute_reason', type: 'text', nullable: true })

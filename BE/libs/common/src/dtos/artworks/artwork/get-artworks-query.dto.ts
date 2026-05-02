@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { ArtworkStatus } from '../../../enums/artwork-status.enum';
 
 export class GetArtworksQueryDto {
@@ -31,6 +38,16 @@ export class GetArtworksQueryDto {
   @IsOptional()
   @IsEnum(ArtworkStatus)
   status?: ArtworkStatus;
+
+  @ApiProperty({
+    description: 'Filter by public profile visibility',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isPublished?: boolean;
 
   @ApiProperty({
     description: 'Filter by an exact on-chain auction ID',
@@ -118,4 +135,15 @@ export class GetArtworksQueryDto {
   @IsOptional()
   @IsString()
   sortOrder?: string;
+
+  @ApiProperty({
+    description:
+      'Include seller-only auction start lifecycle enrichment for authenticated workspace views',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  includeSellerAuctionLifecycle?: boolean;
 }

@@ -12,9 +12,7 @@ import {
 } from '../../../domain/utils/event-mapper';
 
 @CommandHandler(UpdateEventCommand)
-export class UpdateEventHandler
-  implements ICommandHandler<UpdateEventCommand>
-{
+export class UpdateEventHandler implements ICommandHandler<UpdateEventCommand> {
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
@@ -67,10 +65,12 @@ export class UpdateEventHandler
     }
 
     if (data.startTime !== undefined && data.endTime !== undefined) {
-      if (event.startTime && event.endTime && event.endTime <= event.startTime) {
-        throw RpcExceptionHelper.badRequest(
-          'endTime must be after startTime',
-        );
+      if (
+        event.startTime &&
+        event.endTime &&
+        event.endTime <= event.startTime
+      ) {
+        throw RpcExceptionHelper.badRequest('endTime must be after startTime');
       }
     }
 
@@ -103,7 +103,8 @@ export class UpdateEventHandler
     }
 
     if (data.registrationDeadline !== undefined) {
-      event.registrationDeadline = parseDate(data.registrationDeadline) ?? undefined;
+      event.registrationDeadline =
+        parseDate(data.registrationDeadline) ?? undefined;
     }
 
     if (data.isFree !== undefined) {

@@ -7,7 +7,7 @@ export const IMomentRepository = Symbol('IMomentRepository');
 
 export interface IMomentRepository extends IRepository<Moment, string> {
   create(
-    data: Omit<CreateMomentInput, 'taggedArtworkIds'>,
+    data: Omit<CreateMomentInput, 'taggedArtworkIds'> | Partial<Moment>,
     transactionManager?: EntityManager,
   ): Promise<Moment>;
 

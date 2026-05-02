@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ArtworkImage, ArtworkStatus, Weight, Dimensions } from '@app/common';
+import {
+  ArtworkImage,
+  ArtworkStatus,
+  SellerAuctionStartStatusObject,
+  Weight,
+  Dimensions,
+} from '@app/common';
 import { ArtworkFolderObject } from '../artwork-folder/artwork-folder.object';
 import { TagObject } from '../tags/tag.object';
 
@@ -178,4 +184,11 @@ export class ArtworkObject {
     example: '0x...',
   })
   onChainAuctionId?: string;
+
+  @ApiPropertyOptional({
+    type: () => SellerAuctionStartStatusObject,
+    description:
+      'Seller-only auction lifecycle state for authenticated workspace inventory surfaces',
+  })
+  auctionLifecycle?: SellerAuctionStartStatusObject | null;
 }

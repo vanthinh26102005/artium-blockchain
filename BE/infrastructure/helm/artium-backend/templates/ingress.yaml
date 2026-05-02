@@ -1,0 +1,39 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "artium-backend.fullname" . }}-gateway
+  namespace: {{ .Values.namespace.name | quote }}
+  labels:
+    {{- include "artium-backend.labels" . | nindent 4 }}
+  annotations:
+    artium.io/ingress-className: {{ .Values.ingress.className | quote }}
+spec:
+  ingressClassName: {{ .Values.ingress.className | quote }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host | quote }}
+      secretName: {{ default "artium-gateway-tls" .Values.ingress.tls.secretName | quote }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          {{- range $path := list "/api" "/api-docs" "/socket.io" "/messaging" "/auction" }}
+          - path: {{ $path | quote }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "artium-backend.serviceName" (dict "root" $ "name" "api-gateway") }}
+                port:
+                  number: 8081
+          {{- end }}
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "artium-backend.serviceName" (dict "root" $ "name" (ternary "web" "api-gateway" $.Values.web.enabled)) }}
+                port:
+                  number: {{ ternary $.Values.web.port 8081 $.Values.web.enabled }}
+{{- end }}
