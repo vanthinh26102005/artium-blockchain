@@ -10,9 +10,7 @@ import { AuctionStartAttempt } from '../../../domain/entities';
 import { IAuctionStartAttemptRepository } from '../../../domain/interfaces';
 
 @QueryHandler(GetSellerAuctionStartStatusQuery)
-export class GetSellerAuctionStartStatusHandler
-  implements IQueryHandler<GetSellerAuctionStartStatusQuery>
-{
+export class GetSellerAuctionStartStatusHandler implements IQueryHandler<GetSellerAuctionStartStatusQuery> {
   private readonly logger = new Logger(GetSellerAuctionStartStatusHandler.name);
 
   constructor(
@@ -68,7 +66,11 @@ export class GetSellerAuctionStartStatusHandler
       walletActionRequired: attempt.walletActionRequired,
       submittedTermsSnapshot: attempt.termsSnapshot,
       activatedAt: attempt.activatedAt?.toISOString() ?? null,
-      updatedAt: (attempt.updatedAt ?? attempt.createdAt ?? new Date()).toISOString(),
+      updatedAt: (
+        attempt.updatedAt ??
+        attempt.createdAt ??
+        new Date()
+      ).toISOString(),
       transactionRequest:
         shouldIncludeWalletRequest && attempt.contractAddress
           ? {

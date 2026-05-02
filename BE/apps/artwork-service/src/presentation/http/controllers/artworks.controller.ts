@@ -1614,9 +1614,7 @@ export class ArtworksController {
       },
     },
   })
-  async bulkDeleteArtworks(
-    @Body() body: BulkDeleteArtworksInput,
-  ) {
+  async bulkDeleteArtworks(@Body() body: BulkDeleteArtworksInput) {
     const requestId = uuidv4();
     this.logger.log(
       `[ArtworksController] [ReqID: ${requestId}] - Bulk deleting artworks`,
@@ -1725,9 +1723,7 @@ export class ArtworksController {
       },
     },
   })
-  async bulkUpdateArtworkStatus(
-    @Body() body: BulkUpdateArtworkStatusInput,
-  ) {
+  async bulkUpdateArtworkStatus(@Body() body: BulkUpdateArtworkStatusInput) {
     const requestId = uuidv4();
     this.logger.log(
       `[ArtworksController] [ReqID: ${requestId}] - Bulk updating artwork status`,

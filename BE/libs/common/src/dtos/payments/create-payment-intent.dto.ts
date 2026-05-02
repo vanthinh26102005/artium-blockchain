@@ -31,7 +31,8 @@ export class CreatePaymentIntentDto {
   currency: string;
 
   @ApiPropertyOptional({
-    description: 'User ID making the payment (injected from auth token, not required in request body)',
+    description:
+      'User ID making the payment (injected from auth token, not required in request body)',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsOptional()

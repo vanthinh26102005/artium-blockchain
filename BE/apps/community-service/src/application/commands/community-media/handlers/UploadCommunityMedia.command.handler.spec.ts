@@ -101,7 +101,9 @@ describe('UploadCommunityMedia handlers', () => {
         ),
       ),
     ).rejects.toMatchObject({
-      error: expect.objectContaining({ message: expect.stringContaining('Invalid file type') }),
+      error: expect.objectContaining({
+        message: expect.stringContaining('Invalid file type'),
+      }),
     });
   });
 
@@ -114,7 +116,9 @@ describe('UploadCommunityMedia handlers', () => {
         ),
       ),
     ).rejects.toMatchObject({
-      error: expect.objectContaining({ message: expect.stringContaining('Image size exceeds') }),
+      error: expect.objectContaining({
+        message: expect.stringContaining('Image size exceeds'),
+      }),
     });
 
     await expect(
@@ -129,7 +133,9 @@ describe('UploadCommunityMedia handlers', () => {
         ),
       ),
     ).rejects.toMatchObject({
-      error: expect.objectContaining({ message: expect.stringContaining('Video size exceeds') }),
+      error: expect.objectContaining({
+        message: expect.stringContaining('Video size exceeds'),
+      }),
     });
   });
 

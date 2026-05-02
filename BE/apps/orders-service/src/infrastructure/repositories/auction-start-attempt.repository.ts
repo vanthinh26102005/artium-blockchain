@@ -11,9 +11,7 @@ import { AuctionStartAttempt } from '../../domain/entities';
 import { IAuctionStartAttemptRepository } from '../../domain/interfaces';
 
 @Injectable()
-export class AuctionStartAttemptRepository
-  implements IAuctionStartAttemptRepository
-{
+export class AuctionStartAttemptRepository implements IAuctionStartAttemptRepository {
   constructor(
     @InjectRepository(AuctionStartAttempt)
     private readonly ormRepository: Repository<AuctionStartAttempt>,
@@ -46,7 +44,10 @@ export class AuctionStartAttemptRepository
     return this.findById(id, transactionManager);
   }
 
-  async delete(id: string, transactionManager?: EntityManager): Promise<boolean> {
+  async delete(
+    id: string,
+    transactionManager?: EntityManager,
+  ): Promise<boolean> {
     const repo = this.getRepo(transactionManager);
     const result = await repo.delete({ id });
     return (result.affected ?? 0) > 0;

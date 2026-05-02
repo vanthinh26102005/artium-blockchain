@@ -15,7 +15,9 @@ export class GetOrdersHandler implements IQueryHandler<GetOrdersQuery> {
     private readonly orderRepo: IOrderRepository,
   ) {}
 
-  async execute(query: GetOrdersQuery): Promise<{ data: Order[]; total: number }> {
+  async execute(
+    query: GetOrdersQuery,
+  ): Promise<{ data: Order[]; total: number }> {
     try {
       const { filters } = query;
       this.logger.log(
@@ -24,24 +26,22 @@ export class GetOrdersHandler implements IQueryHandler<GetOrdersQuery> {
 
       // sellerId requires a join through order_items
       if (filters.sellerId) {
-        return this.orderRepo.findBySellerIdViaItems(
-          filters.sellerId,
-          {
-            skip: filters.skip,
-            take: filters.take ?? 20,
-            status: filters.status,
-            onChainOrderId: filters.onChainOrderId,
-            escrowState: filters.escrowState,
-            paymentMethod: filters.paymentMethod,
-          },
-        );
+        return this.orderRepo.findBySellerIdViaItems(filters.sellerId, {
+          skip: filters.skip,
+          take: filters.take ?? 20,
+          status: filters.status,
+          onChainOrderId: filters.onChainOrderId,
+          escrowState: filters.escrowState,
+          paymentMethod: filters.paymentMethod,
+        });
       }
 
       const where: Record<string, any> = {};
       if (filters.buyerId) where.collectorId = filters.buyerId;
       if (filters.status) where.status = filters.status;
       if (filters.onChainOrderId) where.onChainOrderId = filters.onChainOrderId;
-      if (filters.escrowState !== undefined) where.escrowState = filters.escrowState;
+      if (filters.escrowState !== undefined)
+        where.escrowState = filters.escrowState;
       if (filters.paymentMethod) where.paymentMethod = filters.paymentMethod;
 
       const take = filters.take ?? 20;

@@ -170,7 +170,9 @@ export class ArtworkRepository implements IArtworkRepository {
 
     const baseTypeOrmWhere: FindOptionsWhere<Artwork> = {
       ...mapToTypeOrmWhere(safeWhere as WhereOperator<Artwork>),
-      ...(hasOnChainAuctionId === true ? { onChainAuctionId: Not(IsNull()) } : {}),
+      ...(hasOnChainAuctionId === true
+        ? { onChainAuctionId: Not(IsNull()) }
+        : {}),
       ...(hasOnChainAuctionId === false ? { onChainAuctionId: IsNull() } : {}),
     };
 

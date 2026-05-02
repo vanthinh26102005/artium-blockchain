@@ -5,9 +5,7 @@ import { Event } from '../../../domain/entities';
 import { GetEventsByCreatorQuery } from '../GetEventsByCreator.query';
 
 @QueryHandler(GetEventsByCreatorQuery)
-export class GetEventsByCreatorHandler
-  implements IQueryHandler<GetEventsByCreatorQuery>
-{
+export class GetEventsByCreatorHandler implements IQueryHandler<GetEventsByCreatorQuery> {
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,

@@ -28,7 +28,8 @@ export class CancelOrderHandler implements ICommandHandler<CancelOrderCommand> {
 
       // Buyer (collectorId) or seller (via items) can cancel
       const isBuyer = order.collectorId === userId;
-      const isSeller = order.items?.some((item) => item.sellerId === userId) ?? false;
+      const isSeller =
+        order.items?.some((item) => item.sellerId === userId) ?? false;
       if (!isBuyer && !isSeller) {
         throw RpcExceptionHelper.forbidden(
           'Only the buyer or seller of this order can cancel it.',

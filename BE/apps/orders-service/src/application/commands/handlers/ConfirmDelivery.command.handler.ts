@@ -24,7 +24,9 @@ export class ConfirmDeliveryHandler implements ICommandHandler<ConfirmDeliveryCo
   async execute(command: ConfirmDeliveryCommand): Promise<Order | null> {
     try {
       const { orderId, userId, data } = command;
-      this.logger.log(`Confirming delivery for order: ${orderId} by user: ${userId}`);
+      this.logger.log(
+        `Confirming delivery for order: ${orderId} by user: ${userId}`,
+      );
 
       const order = await this.orderRepo.findById(orderId);
       if (!order) {

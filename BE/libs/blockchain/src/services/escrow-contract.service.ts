@@ -1,7 +1,10 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ethers, Contract, TransactionResponse } from 'ethers';
 import { EscrowState } from '@app/common';
-import { ESCROW_CONTRACT, PLATFORM_SIGNER } from '../interfaces/blockchain-config.interface';
+import {
+  ESCROW_CONTRACT,
+  PLATFORM_SIGNER,
+} from '../interfaces/blockchain-config.interface';
 
 export interface AuctionCoreDto {
   seller: string;

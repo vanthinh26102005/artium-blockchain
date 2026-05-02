@@ -31,7 +31,7 @@ npm run dev               # http://localhost:3000
 ## Smart Contracts
 
 ```bash
-cd BE/smart-contracts
+cd contracts
 npm install
 npx hardhat node          # Local Ethereum network
 npx hardhat test          # Run contract tests

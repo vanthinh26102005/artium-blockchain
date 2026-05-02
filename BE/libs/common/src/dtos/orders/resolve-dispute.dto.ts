@@ -1,9 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class ResolveDisputeDto {
   @ApiProperty({
-    description: 'Whether the dispute is resolved in favor of the buyer (true) or seller (false)',
+    description:
+      'Whether the dispute is resolved in favor of the buyer (true) or seller (false)',
     example: true,
   })
   @IsBoolean()
@@ -17,6 +24,8 @@ export class ResolveDisputeDto {
   })
   @IsOptional()
   @IsString()
-  @MaxLength(2000, { message: 'Resolution notes must not exceed 2000 characters' })
+  @MaxLength(2000, {
+    message: 'Resolution notes must not exceed 2000 characters',
+  })
   resolutionNotes?: string;
 }

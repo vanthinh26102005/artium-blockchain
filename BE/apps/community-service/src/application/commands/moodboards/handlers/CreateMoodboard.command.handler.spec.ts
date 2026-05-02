@@ -63,11 +63,12 @@ describe('CreateMoodboardHandler', () => {
     };
 
     moodboardMediaRepository = {
-      createManyForMoodboard: jest.fn(async (_moodboardId: string, items: any[]) =>
-        items.map((item, index) => ({
-          id: `row-${index + 1}`,
-          ...item,
-        })),
+      createManyForMoodboard: jest.fn(
+        async (_moodboardId: string, items: any[]) =>
+          items.map((item, index) => ({
+            id: `row-${index + 1}`,
+            ...item,
+          })),
       ),
     };
 
@@ -104,7 +105,9 @@ describe('CreateMoodboardHandler', () => {
       }),
       {},
     );
-    expect(moodboardMediaRepository.createManyForMoodboard).toHaveBeenCalledWith(
+    expect(
+      moodboardMediaRepository.createManyForMoodboard,
+    ).toHaveBeenCalledWith(
       'moodboard-1',
       expect.arrayContaining([
         expect.objectContaining({
@@ -148,7 +151,9 @@ describe('CreateMoodboardHandler', () => {
       }),
       {},
     );
-    expect(moodboardMediaRepository.createManyForMoodboard).toHaveBeenCalledWith(
+    expect(
+      moodboardMediaRepository.createManyForMoodboard,
+    ).toHaveBeenCalledWith(
       'moodboard-1',
       expect.arrayContaining([
         expect.objectContaining({
@@ -209,7 +214,9 @@ describe('CreateMoodboardHandler', () => {
       }),
     );
 
-    expect(moodboardMediaRepository.createManyForMoodboard).toHaveBeenCalledWith(
+    expect(
+      moodboardMediaRepository.createManyForMoodboard,
+    ).toHaveBeenCalledWith(
       'moodboard-1',
       [
         expect.objectContaining({

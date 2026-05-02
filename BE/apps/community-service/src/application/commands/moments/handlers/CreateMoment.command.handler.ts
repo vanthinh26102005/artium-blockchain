@@ -39,7 +39,9 @@ export class CreateMomentHandler implements ICommandHandler<
         throw RpcExceptionHelper.badRequest('Uploaded media ID is required');
       }
 
-      const media = await this.communityMediaRepository.findById(command.input.mediaId);
+      const media = await this.communityMediaRepository.findById(
+        command.input.mediaId,
+      );
 
       if (!media) {
         throw RpcExceptionHelper.badRequest('Uploaded media not found');
@@ -82,7 +84,11 @@ export class CreateMomentHandler implements ICommandHandler<
       };
 
       const moment = await this.momentRepository.create(momentInput);
-      await this.communityMediaRepository.markConsumed(media.id, 'moment', moment.id);
+      await this.communityMediaRepository.markConsumed(
+        media.id,
+        'moment',
+        moment.id,
+      );
 
       this.logger.log(`[${reqId}] Moment created successfully`, {
         momentId: moment.id,

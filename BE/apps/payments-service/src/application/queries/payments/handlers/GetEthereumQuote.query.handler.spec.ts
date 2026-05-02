@@ -31,25 +31,22 @@ describe('GetEthereumQuoteHandler', () => {
 
   beforeEach(() => {
     ethereumQuoteService.createQuote = jest.fn();
-    handler = new GetEthereumQuoteHandler(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ethereumQuoteService as any,
-    );
+    handler = new GetEthereumQuoteHandler(ethereumQuoteService as any);
   });
 
   it('returns a quote for a valid usd amount', async () => {
     ethereumQuoteService.createQuote = jest.fn(async () => quote);
 
-    await expect(handler.execute(new GetEthereumQuoteQuery(125.5))).resolves.toEqual(
-      quote,
-    );
+    await expect(
+      handler.execute(new GetEthereumQuoteQuery(125.5)),
+    ).resolves.toEqual(quote);
     expect(ethereumQuoteService.createQuote).toHaveBeenCalledWith(125.5);
   });
 
   it('rejects invalid usd amounts before calling the quote service', async () => {
-    await expect(handler.execute(new GetEthereumQuoteQuery(0))).rejects.toBeInstanceOf(
-      RpcException,
-    );
+    await expect(
+      handler.execute(new GetEthereumQuoteQuery(0)),
+    ).rejects.toBeInstanceOf(RpcException);
     expect(ethereumQuoteService.createQuote).not.toHaveBeenCalled();
   });
 
@@ -58,8 +55,8 @@ describe('GetEthereumQuoteHandler', () => {
       throw new Error('coinbase unavailable');
     });
 
-    await expect(handler.execute(new GetEthereumQuoteQuery(125.5))).rejects.toBeInstanceOf(
-      RpcException,
-    );
+    await expect(
+      handler.execute(new GetEthereumQuoteQuery(125.5)),
+    ).rejects.toBeInstanceOf(RpcException);
   });
 });

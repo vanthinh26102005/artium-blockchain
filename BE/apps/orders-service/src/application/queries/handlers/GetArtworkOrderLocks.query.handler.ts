@@ -8,9 +8,7 @@ export type ArtworkOrderLocksResult = {
 };
 
 @QueryHandler(GetArtworkOrderLocksQuery)
-export class GetArtworkOrderLocksHandler
-  implements IQueryHandler<GetArtworkOrderLocksQuery>
-{
+export class GetArtworkOrderLocksHandler implements IQueryHandler<GetArtworkOrderLocksQuery> {
   private readonly logger = new Logger(GetArtworkOrderLocksHandler.name);
 
   constructor(

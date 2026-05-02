@@ -254,10 +254,14 @@ export class CommunityMoodboardsController {
     @Body() body: CreateMoodboardBody,
     @Request() req: Express.Request & { user: UserPayload },
   ) {
-    return sendRpc(this.communityClient, { cmd: 'create_moodboard' }, {
-      userId: req.user?.id,
-      ...body,
-    });
+    return sendRpc(
+      this.communityClient,
+      { cmd: 'create_moodboard' },
+      {
+        userId: req.user?.id,
+        ...body,
+      },
+    );
   }
 
   @Get('artwork/:artworkId/me')

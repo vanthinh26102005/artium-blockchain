@@ -5,9 +5,7 @@ import { IArtworkRepository } from '../../../../domain/interfaces/artwork.reposi
 import { GetArtworkUploadDraftQuery } from '../GetArtworkUploadDraft.query';
 
 @QueryHandler(GetArtworkUploadDraftQuery)
-export class GetArtworkUploadDraftHandler
-  implements IQueryHandler<GetArtworkUploadDraftQuery>
-{
+export class GetArtworkUploadDraftHandler implements IQueryHandler<GetArtworkUploadDraftQuery> {
   private readonly logger = new Logger(GetArtworkUploadDraftHandler.name);
 
   constructor(

@@ -21,9 +21,7 @@ import {
 import { PaymentTransaction } from '../../../../domain/entities/payment-transaction.entity';
 
 @QueryHandler(GetOrderInvoiceQuery)
-export class GetOrderInvoiceHandler
-  implements IQueryHandler<GetOrderInvoiceQuery>
-{
+export class GetOrderInvoiceHandler implements IQueryHandler<GetOrderInvoiceQuery> {
   private readonly logger = new Logger(GetOrderInvoiceHandler.name);
 
   constructor(
@@ -68,7 +66,10 @@ export class GetOrderInvoiceHandler
         refreshedTransactions,
       );
     } catch (error) {
-      const duplicateInvoice = await this.findExistingAfterDuplicate(error, query);
+      const duplicateInvoice = await this.findExistingAfterDuplicate(
+        error,
+        query,
+      );
       if (duplicateInvoice) {
         const paymentTransactions = await this.transactionRepo.findByOrderId(
           query.sourceOrder.id,

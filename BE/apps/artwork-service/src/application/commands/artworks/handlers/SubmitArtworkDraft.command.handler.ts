@@ -6,9 +6,7 @@ import { IArtworkRepository } from '../../../../domain/interfaces/artwork.reposi
 import { SubmitArtworkDraftCommand } from '../SubmitArtworkDraft.command';
 
 @CommandHandler(SubmitArtworkDraftCommand)
-export class SubmitArtworkDraftHandler
-  implements ICommandHandler<SubmitArtworkDraftCommand>
-{
+export class SubmitArtworkDraftHandler implements ICommandHandler<SubmitArtworkDraftCommand> {
   private readonly logger = new Logger(SubmitArtworkDraftHandler.name);
 
   constructor(

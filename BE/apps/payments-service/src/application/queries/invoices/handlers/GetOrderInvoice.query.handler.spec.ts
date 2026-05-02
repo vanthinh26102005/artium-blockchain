@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { InvoiceStatus, PaymentProvider, TransactionStatus, TransactionType } from '@app/common';
+import {
+  InvoiceStatus,
+  PaymentProvider,
+  TransactionStatus,
+  TransactionType,
+} from '@app/common';
 
 import { GetOrderInvoiceQuery } from '../GetOrderInvoice.query';
 import { GetOrderInvoiceHandler } from './GetOrderInvoice.query.handler';
@@ -122,8 +127,8 @@ describe('GetOrderInvoiceHandler', () => {
     invoiceItemRepo.createMany = jest.fn();
     transactionRepo.findByOrderId = jest.fn(async () => [paymentTransaction]);
     transactionRepo.update = jest.fn();
-    transactionService.execute = jest.fn(async (work: (manager: never) => unknown) =>
-      work(manager),
+    transactionService.execute = jest.fn(
+      async (work: (manager: never) => unknown) => work(manager),
     );
 
     handler = new GetOrderInvoiceHandler(

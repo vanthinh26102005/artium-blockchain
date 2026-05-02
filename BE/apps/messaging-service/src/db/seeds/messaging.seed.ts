@@ -32,8 +32,7 @@ export class MessagingSeeder {
     // Get schema name if in SHARED mode
     const options = dataSource.options;
 
-    const schema =
-      'schema' in options ? options.schema : undefined;
+    const schema = 'schema' in options ? options.schema : undefined;
 
     // Helper to safely truncate a table (skips if table doesn't exist)
     const safeTruncate = async (tableName: string) => {
@@ -300,7 +299,7 @@ export class MessagingSeeder {
       for (let i = 0; i < messageCount; i++) {
         const senderId =
           participantUserIds[
-          Math.floor(Math.random() * participantUserIds.length)
+            Math.floor(Math.random() * participantUserIds.length)
           ];
 
         let content: string;
@@ -311,7 +310,7 @@ export class MessagingSeeder {
         if (i === 0) {
           content =
             messageTemplates.greetings[
-            Math.floor(Math.random() * messageTemplates.greetings.length)
+              Math.floor(Math.random() * messageTemplates.greetings.length)
             ];
         } else if (conversation.type === ConversationType.INQUIRY) {
           if (i % 2 === 0) {
@@ -319,40 +318,49 @@ export class MessagingSeeder {
             if (inquiryType === 0) {
               content =
                 messageTemplates.artworkInquiry[
-                Math.floor(
-                  Math.random() * messageTemplates.artworkInquiry.length,
-                )
+                  Math.floor(
+                    Math.random() * messageTemplates.artworkInquiry.length,
+                  )
                 ];
             } else if (inquiryType === 1) {
               content =
                 messageTemplates.priceNegotiation[
-                Math.floor(
-                  Math.random() * messageTemplates.priceNegotiation.length,
-                )
+                  Math.floor(
+                    Math.random() * messageTemplates.priceNegotiation.length,
+                  )
                 ];
             } else {
               content =
                 messageTemplates.shipping[
-                Math.floor(Math.random() * messageTemplates.shipping.length)
+                  Math.floor(Math.random() * messageTemplates.shipping.length)
                 ];
             }
           } else {
             content =
               messageTemplates.responses[
-              Math.floor(Math.random() * messageTemplates.responses.length)
+                Math.floor(Math.random() * messageTemplates.responses.length)
               ];
           }
         } else {
           content =
             messageTemplates.casual[
-            Math.floor(Math.random() * messageTemplates.casual.length)
+              Math.floor(Math.random() * messageTemplates.casual.length)
             ];
         }
 
         // 10% chance of image message
         if (Math.random() < 0.1) {
           messageType = MessageType.IMAGE;
-          const artPhotoIds = ['1531056416665-266c4099c928', '1579783902915-f0b0de2c2eb3', '1541961017774-22349e4a1262', '1618331833071-ce81bd50d300', '1578926375605-eaf7559b1458', '1563301323-094e5843a962', '1572392640988-ba48d1a74457', '1584278773680-8d940a213dcf'];
+          const artPhotoIds = [
+            '1531056416665-266c4099c928',
+            '1579783902915-f0b0de2c2eb3',
+            '1541961017774-22349e4a1262',
+            '1618331833071-ce81bd50d300',
+            '1578926375605-eaf7559b1458',
+            '1563301323-094e5843a962',
+            '1572392640988-ba48d1a74457',
+            '1584278773680-8d940a213dcf',
+          ];
           mediaUrl = `https://images.unsplash.com/photo-${artPhotoIds[i % artPhotoIds.length]}?w=800&h=600&fit=crop&q=80`;
         }
 
@@ -393,11 +401,11 @@ export class MessagingSeeder {
           for (let r = 0; r < numReactions; r++) {
             const reactorId =
               participantUserIds[
-              Math.floor(Math.random() * participantUserIds.length)
+                Math.floor(Math.random() * participantUserIds.length)
               ];
             const emoji =
               messageTemplates.reactions[
-              Math.floor(Math.random() * messageTemplates.reactions.length)
+                Math.floor(Math.random() * messageTemplates.reactions.length)
               ];
 
             // Avoid duplicate reactions from same user

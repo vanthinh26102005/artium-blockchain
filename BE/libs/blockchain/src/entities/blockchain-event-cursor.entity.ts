@@ -1,4 +1,10 @@
-import { CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn, Column } from 'typeorm';
+import {
+  CreateDateColumn,
+  Entity,
+  PrimaryColumn,
+  UpdateDateColumn,
+  Column,
+} from 'typeorm';
 
 @Entity('blockchain_event_cursor')
 export class BlockchainEventCursor {

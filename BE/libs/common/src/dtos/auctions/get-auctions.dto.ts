@@ -14,14 +14,20 @@ export class GetAuctionsDto {
   @IsEnum(AuctionCategoryKey)
   category?: AuctionCategoryKey;
 
-  @ApiPropertyOptional({ description: 'Minimum current bid in ETH', minimum: 0 })
+  @ApiPropertyOptional({
+    description: 'Minimum current bid in ETH',
+    minimum: 0,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   minBidEth?: number;
 
-  @ApiPropertyOptional({ description: 'Maximum current bid in ETH', minimum: 0 })
+  @ApiPropertyOptional({
+    description: 'Maximum current bid in ETH',
+    minimum: 0,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
@@ -35,14 +41,19 @@ export class GetAuctionsDto {
   @Min(0)
   skip?: number;
 
-  @ApiPropertyOptional({ description: 'Maximum number of records to return', minimum: 1 })
+  @ApiPropertyOptional({
+    description: 'Maximum number of records to return',
+    minimum: 1,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
   take?: number;
 
-  @ApiPropertyOptional({ description: 'Optional text query reserved for future auction search' })
+  @ApiPropertyOptional({
+    description: 'Optional text query reserved for future auction search',
+  })
   @IsOptional()
   @IsString()
   q?: string;

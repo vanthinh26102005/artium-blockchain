@@ -7,9 +7,7 @@ import { Invoice } from '../../../../domain/entities';
 import { IInvoiceRepository } from '../../../../domain/interfaces';
 
 @QueryHandler(GetInvoiceByNumberQuery)
-export class GetInvoiceByNumberHandler
-  implements IQueryHandler<GetInvoiceByNumberQuery>
-{
+export class GetInvoiceByNumberHandler implements IQueryHandler<GetInvoiceByNumberQuery> {
   private readonly logger = new Logger(GetInvoiceByNumberHandler.name);
 
   constructor(

@@ -22,7 +22,9 @@ export class OpenDisputeHandler implements ICommandHandler<OpenDisputeCommand> {
   async execute(command: OpenDisputeCommand): Promise<Order | null> {
     try {
       const { orderId, userId, dto } = command;
-      this.logger.log(`Opening dispute for order: ${orderId} by user: ${userId}`);
+      this.logger.log(
+        `Opening dispute for order: ${orderId} by user: ${userId}`,
+      );
 
       const order = await this.orderRepo.findById(orderId);
       if (!order) {
@@ -44,7 +46,8 @@ export class OpenDisputeHandler implements ICommandHandler<OpenDisputeCommand> {
 
       // Enforce the 14-day dispute window from shipment date
       if (order.shippedAt) {
-        const deadlineMs = order.shippedAt.getTime() + DISPUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+        const deadlineMs =
+          order.shippedAt.getTime() + DISPUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000;
         if (Date.now() > deadlineMs) {
           throw RpcExceptionHelper.badRequest(
             `Dispute window has expired. Disputes must be opened within ${DISPUTE_WINDOW_DAYS} days of shipment.`,

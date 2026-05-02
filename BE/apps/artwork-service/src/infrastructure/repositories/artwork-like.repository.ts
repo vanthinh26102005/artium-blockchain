@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-import {
-  ArtworkLike,
-  IArtworkLikeRepository,
-} from '../../domain';
+import { ArtworkLike, IArtworkLikeRepository } from '../../domain';
 
 @Injectable()
 export class ArtworkLikeRepository implements IArtworkLikeRepository {

@@ -2,10 +2,7 @@ import { CommunityMediaStatus, CommunityMediaUploadContext } from '@app/common';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, In, Repository } from 'typeorm';
-import {
-  CommunityMedia,
-  ICommunityMediaRepository,
-} from '../../domain';
+import { CommunityMedia, ICommunityMediaRepository } from '../../domain';
 
 @Injectable()
 export class CommunityMediaRepository implements ICommunityMediaRepository {

@@ -1,19 +1,17 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
 import { ITransactionService, RpcExceptionHelper } from '@app/common';
-import {
-  IArtworkLikeRepository,
-  IArtworkRepository,
-} from '../../../../domain';
+import { IArtworkLikeRepository, IArtworkRepository } from '../../../../domain';
 import {
   ArtworkLikeStatusResult,
   SetArtworkLikeStatusCommand,
 } from '../SetArtworkLikeStatus.command';
 
 @CommandHandler(SetArtworkLikeStatusCommand)
-export class SetArtworkLikeStatusHandler
-  implements ICommandHandler<SetArtworkLikeStatusCommand, ArtworkLikeStatusResult>
-{
+export class SetArtworkLikeStatusHandler implements ICommandHandler<
+  SetArtworkLikeStatusCommand,
+  ArtworkLikeStatusResult
+> {
   private readonly logger = new Logger(SetArtworkLikeStatusHandler.name);
 
   constructor(
@@ -127,7 +125,7 @@ export class SetArtworkLikeStatusHandler
           changed: removed,
           likeCount: removed
             ? Math.max((artwork.likeCount ?? 0) - 1, 0)
-            : artwork.likeCount ?? 0,
+            : (artwork.likeCount ?? 0),
         };
       });
     } catch (error: any) {

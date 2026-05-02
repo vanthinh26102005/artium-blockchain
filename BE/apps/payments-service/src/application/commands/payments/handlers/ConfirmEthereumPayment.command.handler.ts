@@ -6,12 +6,16 @@ import { PaymentProvider, TransactionStatus } from '@app/common';
 import { ConfirmEthereumPaymentCommand } from '../ConfirmEthereumPayment.command';
 import { IPaymentTransactionRepository } from '../../../../domain/interfaces';
 import { EthereumTransactionConfirmationService } from '../../../../infrastructure/services/ethereum-transaction-confirmation.service';
-import { PaymentFailedEvent, PaymentSucceededEvent } from '../../../../domain/events';
+import {
+  PaymentFailedEvent,
+  PaymentSucceededEvent,
+} from '../../../../domain/events';
 
 @CommandHandler(ConfirmEthereumPaymentCommand)
-export class ConfirmEthereumPaymentHandler
-  implements ICommandHandler<ConfirmEthereumPaymentCommand, void>
-{
+export class ConfirmEthereumPaymentHandler implements ICommandHandler<
+  ConfirmEthereumPaymentCommand,
+  void
+> {
   private readonly logger = new Logger(ConfirmEthereumPaymentHandler.name);
   private readonly attemptLeaseMs = 60_000;
 
@@ -23,9 +27,13 @@ export class ConfirmEthereumPaymentHandler
   ) {}
 
   async execute(command: ConfirmEthereumPaymentCommand): Promise<void> {
-    const transaction = await this.transactionRepo.findById(command.transactionId);
+    const transaction = await this.transactionRepo.findById(
+      command.transactionId,
+    );
     if (!transaction) {
-      this.logger.warn(`Ethereum transaction not found: ${command.transactionId}`);
+      this.logger.warn(
+        `Ethereum transaction not found: ${command.transactionId}`,
+      );
       return;
     }
 
@@ -60,18 +68,22 @@ export class ConfirmEthereumPaymentHandler
       return;
     }
 
-    const latestTransaction = await this.transactionRepo.findById(transaction.id);
+    const latestTransaction = await this.transactionRepo.findById(
+      transaction.id,
+    );
     if (!latestTransaction) {
       return;
     }
 
-    const result = await this.confirmationService.confirmTransaction(latestTransaction);
+    const result =
+      await this.confirmationService.confirmTransaction(latestTransaction);
 
     if (result.kind === 'confirmed') {
-      const updated = await this.transactionRepo.markEthereumTransactionSucceeded(
-        latestTransaction.id,
-        result.blockNumber,
-      );
+      const updated =
+        await this.transactionRepo.markEthereumTransactionSucceeded(
+          latestTransaction.id,
+          result.blockNumber,
+        );
 
       if (updated?.status !== TransactionStatus.SUCCEEDED) {
         return;
@@ -158,7 +170,10 @@ export class ConfirmEthereumPaymentHandler
 
   private computeNextRetryAt(attempts: number): Date {
     const boundedAttempts = Math.max(1, attempts);
-    const backoffMs = Math.min(30_000 * 2 ** (boundedAttempts - 1), 10 * 60_000);
+    const backoffMs = Math.min(
+      30_000 * 2 ** (boundedAttempts - 1),
+      10 * 60_000,
+    );
     return new Date(Date.now() + backoffMs);
   }
 }

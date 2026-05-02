@@ -55,9 +55,7 @@ export class ArtworkMicroserviceController {
   }
 
   @MessagePattern({ cmd: 'is_artwork_liked' })
-  async isArtworkLiked(
-    @Payload() data: { userId: string; artworkId: string },
-  ) {
+  async isArtworkLiked(@Payload() data: { userId: string; artworkId: string }) {
     return this.queryBus.execute(
       new IsArtworkLikedQuery(data.userId, data.artworkId),
     );
@@ -82,7 +80,11 @@ export class ArtworkMicroserviceController {
   @MessagePattern({ cmd: 'mark_artwork_in_auction' })
   async markArtworkInAuction(
     @Payload()
-    data: { artworkId: string; sellerId: string; onChainAuctionId: string },
+    data: {
+      artworkId: string;
+      sellerId: string;
+      onChainAuctionId: string;
+    },
   ) {
     return this.commandBus.execute(
       new MarkArtworkInAuctionCommand(
@@ -157,12 +159,16 @@ export class ArtworkMicroserviceController {
     data: { id: string } & UpdateArtworkInput & { user?: UserPayload },
   ) {
     const { id, user, ...updateData } = data;
-    return this.commandBus.execute(new UpdateArtworkCommand(id, updateData, user));
+    return this.commandBus.execute(
+      new UpdateArtworkCommand(id, updateData, user),
+    );
   }
 
   @MessagePattern({ cmd: 'delete_artwork' })
   async deleteArtwork(@Payload() data: { id: string; user?: UserPayload }) {
-    return this.commandBus.execute(new DeleteArtworkCommand(data.id, data.user));
+    return this.commandBus.execute(
+      new DeleteArtworkCommand(data.id, data.user),
+    );
   }
 
   @MessagePattern({ cmd: 'bulk_move_artworks' })
@@ -203,7 +209,12 @@ export class ArtworkMicroserviceController {
 
   @MessagePattern({ cmd: 'add_images_to_artwork' })
   async addImagesToArtwork(
-    @Payload() data: { id: string; images: ArtworkImageInput[]; user?: UserPayload },
+    @Payload()
+    data: {
+      id: string;
+      images: ArtworkImageInput[];
+      user?: UserPayload;
+    },
   ) {
     return this.commandBus.execute(
       new AddImagesToArtworkCommand(data.id, data.images),

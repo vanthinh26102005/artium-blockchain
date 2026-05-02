@@ -59,7 +59,10 @@ export class UpdateArtworkHandler implements ICommandHandler<UpdateArtworkComman
   }
 
   private isLifecycleLocked(
-    lifecycle: { status: SellerAuctionStartStatus; editAllowed?: boolean } | null,
+    lifecycle: {
+      status: SellerAuctionStartStatus;
+      editAllowed?: boolean;
+    } | null,
   ): boolean {
     if (!lifecycle) {
       return false;

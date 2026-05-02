@@ -12,9 +12,7 @@ import {
 } from '../../../domain/utils/event-mapper';
 
 @CommandHandler(CreateEventCommand)
-export class CreateEventHandler
-  implements ICommandHandler<CreateEventCommand>
-{
+export class CreateEventHandler implements ICommandHandler<CreateEventCommand> {
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
@@ -34,9 +32,7 @@ export class CreateEventHandler
     const startTime = parseDate(data.startTime ?? null);
     const endTime = parseDate(data.endTime ?? null);
     if (startTime && endTime && endTime <= startTime) {
-      throw RpcExceptionHelper.badRequest(
-        'endTime must be after startTime',
-      );
+      throw RpcExceptionHelper.badRequest('endTime must be after startTime');
     }
 
     const status = normalizeEventStatus(data.status);

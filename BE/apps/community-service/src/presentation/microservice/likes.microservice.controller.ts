@@ -30,7 +30,11 @@ export class LikesMicroserviceController {
   @MessagePattern({ cmd: 'is_liked' })
   async isLiked(
     @Payload()
-    data: { userId: string; likeableType: LikeableType; likeableId: string },
+    data: {
+      userId: string;
+      likeableType: LikeableType;
+      likeableId: string;
+    },
   ): Promise<boolean> {
     this.logger.log(
       `[Microservice] Checking like status for ${data.likeableType}:${data.likeableId}`,

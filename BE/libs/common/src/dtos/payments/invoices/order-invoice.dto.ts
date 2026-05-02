@@ -163,10 +163,16 @@ export class OrderInvoiceObject {
   })
   billingAddress?: OrderInvoiceAddressObject | Record<string, any> | null;
 
-  @ApiProperty({ description: 'Payment details', type: OrderInvoicePaymentObject })
+  @ApiProperty({
+    description: 'Payment details',
+    type: OrderInvoicePaymentObject,
+  })
   payment: OrderInvoicePaymentObject;
 
-  @ApiProperty({ description: 'Invoice line items', type: [OrderInvoiceItemObject] })
+  @ApiProperty({
+    description: 'Invoice line items',
+    type: [OrderInvoiceItemObject],
+  })
   items: OrderInvoiceItemObject[];
 
   @ApiProperty({ description: 'Invoice creation timestamp' })
@@ -309,7 +315,10 @@ export class OrderInvoiceSourceOrderDto {
   @ApiPropertyOptional({ description: 'Billing address' })
   billingAddress?: Record<string, any> | null;
 
-  @ApiProperty({ description: 'Source order items', type: [OrderInvoiceSourceItemDto] })
+  @ApiProperty({
+    description: 'Source order items',
+    type: [OrderInvoiceSourceItemDto],
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => OrderInvoiceSourceItemDto)

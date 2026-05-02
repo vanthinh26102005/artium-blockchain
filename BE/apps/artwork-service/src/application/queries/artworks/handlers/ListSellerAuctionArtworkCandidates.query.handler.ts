@@ -73,9 +73,7 @@ const RECOVERY_COPY: Record<
 };
 
 @QueryHandler(ListSellerAuctionArtworkCandidatesQuery)
-export class ListSellerAuctionArtworkCandidatesHandler
-  implements IQueryHandler<ListSellerAuctionArtworkCandidatesQuery>
-{
+export class ListSellerAuctionArtworkCandidatesHandler implements IQueryHandler<ListSellerAuctionArtworkCandidatesQuery> {
   private readonly logger = new Logger(
     ListSellerAuctionArtworkCandidatesHandler.name,
   );
@@ -126,7 +124,9 @@ export class ListSellerAuctionArtworkCandidatesHandler
       onChainAuctionId: artwork.onChainAuctionId ?? null,
       isEligible: reasonCodes.length === 0,
       reasonCodes,
-      recoveryActions: reasonCodes.map((reasonCode) => RECOVERY_COPY[reasonCode]),
+      recoveryActions: reasonCodes.map(
+        (reasonCode) => RECOVERY_COPY[reasonCode],
+      ),
     };
   }
 

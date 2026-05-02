@@ -27,7 +27,9 @@ describe('GetSellerAuctionStartStatusHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    escrowContractService.encodeCreateAuctionCalldata.mockReturnValue('0xfeedface');
+    escrowContractService.encodeCreateAuctionCalldata.mockReturnValue(
+      '0xfeedface',
+    );
     handler = new GetSellerAuctionStartStatusHandler(
       startAttemptRepo as never,
       escrowContractService as never,
@@ -35,10 +37,14 @@ describe('GetSellerAuctionStartStatusHandler', () => {
   });
 
   it('returns null when no persisted start attempt exists', async () => {
-    startAttemptRepo.findLatestBySellerAndArtwork.mockResolvedValue(null as never);
+    startAttemptRepo.findLatestBySellerAndArtwork.mockResolvedValue(
+      null as never,
+    );
 
     await expect(
-      handler.execute(new GetSellerAuctionStartStatusQuery('seller-1', 'artwork-1')),
+      handler.execute(
+        new GetSellerAuctionStartStatusQuery('seller-1', 'artwork-1'),
+      ),
     ).resolves.toBeNull();
   });
 
@@ -88,7 +94,9 @@ describe('GetSellerAuctionStartStatusHandler', () => {
       contractAddress: '0x00000000000000000000000000000000000000aa',
       data: '0xfeedface',
     });
-    expect(escrowContractService.encodeCreateAuctionCalldata).toHaveBeenCalledWith(
+    expect(
+      escrowContractService.encodeCreateAuctionCalldata,
+    ).toHaveBeenCalledWith(
       'AUC-001',
       BigInt(72 * 60 * 60),
       BigInt('1500000000000000000'),
@@ -140,6 +148,8 @@ describe('GetSellerAuctionStartStatusHandler', () => {
     expect(result?.walletActionRequired).toBe(false);
     expect(result?.txHash).toBe('0xabc');
     expect(result?.transactionRequest).toBeNull();
-    expect(escrowContractService.encodeCreateAuctionCalldata).not.toHaveBeenCalled();
+    expect(
+      escrowContractService.encodeCreateAuctionCalldata,
+    ).not.toHaveBeenCalled();
   });
 });

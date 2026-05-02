@@ -38,7 +38,9 @@ export class SellerAuctionStartTermsSnapshotObject {
   @ApiProperty({ description: 'Payment disclosure shown to buyers' })
   paymentDisclosure!: string;
 
-  @ApiProperty({ description: 'Seller acknowledgement of post-activation locking' })
+  @ApiProperty({
+    description: 'Seller acknowledgement of post-activation locking',
+  })
   economicsLockedAcknowledged!: boolean;
 }
 
@@ -46,7 +48,9 @@ export class SellerAuctionStartWalletRequestObject {
   @ApiProperty({ description: 'Escrow contract address' })
   contractAddress!: string;
 
-  @ApiProperty({ description: 'Encoded calldata for ArtAuctionEscrow.createAuction(...)' })
+  @ApiProperty({
+    description: 'Encoded calldata for ArtAuctionEscrow.createAuction(...)',
+  })
   data!: string;
 }
 
@@ -60,7 +64,9 @@ export class SellerAuctionStartStatusObject {
   @ApiProperty({ description: 'Artwork UUID' })
   artworkId!: string;
 
-  @ApiProperty({ description: 'Canonical on-chain order ID for this seller auction start' })
+  @ApiProperty({
+    description: 'Canonical on-chain order ID for this seller auction start',
+  })
   orderId!: string;
 
   @ApiProperty({ enum: SellerAuctionStartStatus })
@@ -78,7 +84,9 @@ export class SellerAuctionStartStatusObject {
   @ApiPropertyOptional({ description: 'Escrow contract address' })
   contractAddress?: string | null;
 
-  @ApiPropertyOptional({ description: 'Blockchain transaction hash once available' })
+  @ApiPropertyOptional({
+    description: 'Blockchain transaction hash once available',
+  })
   txHash?: string | null;
 
   @ApiPropertyOptional({ description: 'Seller wallet bound to this attempt' })
@@ -87,16 +95,25 @@ export class SellerAuctionStartStatusObject {
   @ApiPropertyOptional({ enum: SellerAuctionStartFailureReason })
   reasonCode?: SellerAuctionStartFailureReason | null;
 
-  @ApiPropertyOptional({ description: 'Seller-facing failure or guidance message' })
+  @ApiPropertyOptional({
+    description: 'Seller-facing failure or guidance message',
+  })
   reasonMessage?: string | null;
 
-  @ApiProperty({ description: 'Whether a retry can reuse this canonical attempt' })
+  @ApiProperty({
+    description: 'Whether a retry can reuse this canonical attempt',
+  })
   retryAllowed!: boolean;
 
-  @ApiProperty({ description: 'Whether seller must return to editable terms before trying again' })
+  @ApiProperty({
+    description:
+      'Whether seller must return to editable terms before trying again',
+  })
   editAllowed!: boolean;
 
-  @ApiProperty({ description: 'Whether the UI should keep prompting for wallet action' })
+  @ApiProperty({
+    description: 'Whether the UI should keep prompting for wallet action',
+  })
   walletActionRequired!: boolean;
 
   @ApiPropertyOptional({ type: () => SellerAuctionStartWalletRequestObject })
@@ -105,7 +122,9 @@ export class SellerAuctionStartStatusObject {
   @ApiProperty({ type: () => SellerAuctionStartTermsSnapshotObject })
   submittedTermsSnapshot!: SellerAuctionStartTermsSnapshotObject;
 
-  @ApiPropertyOptional({ description: 'Activation timestamp once the auction is live' })
+  @ApiPropertyOptional({
+    description: 'Activation timestamp once the auction is live',
+  })
   activatedAt?: string | null;
 
   @ApiProperty({ description: 'Attempt last-update timestamp' })
@@ -126,7 +145,8 @@ export class AttachSellerAuctionStartTxDto {
 
   @ApiProperty({
     description: 'Submitted createAuction transaction hash',
-    example: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+    example:
+      '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
   })
   @IsString()
   @IsNotEmpty()

@@ -378,8 +378,12 @@ export class PaymentTransactionRepository implements IPaymentTransactionReposito
     const repo = this.getRepo(transactionManager);
     return repo
       .createQueryBuilder('transaction')
-      .where('transaction.provider = :provider', { provider: PaymentProvider.ETHEREUM })
-      .andWhere('transaction.status = :status', { status: TransactionStatus.PROCESSING })
+      .where('transaction.provider = :provider', {
+        provider: PaymentProvider.ETHEREUM,
+      })
+      .andWhere('transaction.status = :status', {
+        status: TransactionStatus.PROCESSING,
+      })
       .andWhere('transaction.next_confirmation_at IS NOT NULL')
       .andWhere('transaction.next_confirmation_at <= :now', { now: new Date() })
       .andWhere(

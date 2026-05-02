@@ -5,9 +5,10 @@ import { IArtworkLikeRepository } from '../../../../domain';
 import { IsArtworkLikedQuery } from '../IsArtworkLiked.query';
 
 @QueryHandler(IsArtworkLikedQuery)
-export class IsArtworkLikedHandler
-  implements IQueryHandler<IsArtworkLikedQuery, boolean>
-{
+export class IsArtworkLikedHandler implements IQueryHandler<
+  IsArtworkLikedQuery,
+  boolean
+> {
   private readonly logger = new Logger(IsArtworkLikedHandler.name);
 
   constructor(

@@ -33,9 +33,14 @@ export class StartSellerAuctionDto {
     description: 'Reserve price in ETH string form when reservePolicy is set',
     example: '1.25',
   })
-  @ValidateIf((value: StartSellerAuctionDto) => value.reservePolicy === SellerAuctionReservePolicy.SET)
+  @ValidateIf(
+    (value: StartSellerAuctionDto) =>
+      value.reservePolicy === SellerAuctionReservePolicy.SET,
+  )
   @IsString()
-  @Matches(ETH_AMOUNT_PATTERN, { message: 'Reserve price must be a valid ETH amount' })
+  @Matches(ETH_AMOUNT_PATTERN, {
+    message: 'Reserve price must be a valid ETH amount',
+  })
   reservePriceEth?: string | null;
 
   @ApiProperty({
@@ -58,7 +63,8 @@ export class StartSellerAuctionDto {
   durationHours!: number;
 
   @ApiProperty({
-    description: 'Seller-authored shipping and fulfillment disclosure shown to buyers',
+    description:
+      'Seller-authored shipping and fulfillment disclosure shown to buyers',
   })
   @IsString()
   @IsNotEmpty()
@@ -72,7 +78,8 @@ export class StartSellerAuctionDto {
   paymentDisclosure!: string;
 
   @ApiProperty({
-    description: 'Seller acknowledgement that auction economics lock after activation',
+    description:
+      'Seller acknowledgement that auction economics lock after activation',
   })
   @IsBoolean()
   economicsLockedAcknowledged!: boolean;

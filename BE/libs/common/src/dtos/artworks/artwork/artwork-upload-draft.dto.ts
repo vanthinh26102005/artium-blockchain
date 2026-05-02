@@ -149,5 +149,4 @@ export class ArtworkUploadDraftObject extends ArtworkObject {
     description: 'Tag IDs associated with this draft',
   })
   tagIds?: string[];
-
 }

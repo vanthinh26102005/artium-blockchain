@@ -276,10 +276,14 @@ export class CommunityMomentsController {
     @Body() body: CreateMomentBody,
     @Request() req: Express.Request & { user: UserPayload },
   ) {
-    return sendRpc(this.communityClient, { cmd: 'create_moment' }, {
-      userId: req.user?.id,
-      ...body,
-    });
+    return sendRpc(
+      this.communityClient,
+      { cmd: 'create_moment' },
+      {
+        userId: req.user?.id,
+        ...body,
+      },
+    );
   }
 
   @Get(':id/comments')
@@ -354,7 +358,10 @@ export class CommunityMomentsController {
 
     return comments.map((comment) => ({
       ...comment,
-      author: this.buildCommentAuthor(comment.userId, userMap.get(comment.userId)),
+      author: this.buildCommentAuthor(
+        comment.userId,
+        userMap.get(comment.userId),
+      ),
     }));
   }
 

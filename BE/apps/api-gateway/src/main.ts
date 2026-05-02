@@ -40,7 +40,8 @@ async function bootstrap() {
 
   const apiGlobalPrefix = resolveApiGlobalPrefix();
   const routeBasePath = apiGlobalPrefix ? `/${apiGlobalPrefix}` : '';
-  const serviceRoute = (serviceName: string) => `${routeBasePath}/${serviceName}`;
+  const serviceRoute = (serviceName: string) =>
+    `${routeBasePath}/${serviceName}`;
 
   if (apiGlobalPrefix) {
     app.setGlobalPrefix(apiGlobalPrefix);

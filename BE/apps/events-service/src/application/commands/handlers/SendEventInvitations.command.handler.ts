@@ -49,7 +49,9 @@ const formatTimeRange = (
   return endTime ? `${startTime} - ${endTime}` : startTime;
 };
 
-const buildLocationLine = (event: Event): { label?: string; detail?: string } => {
+const buildLocationLine = (
+  event: Event,
+): { label?: string; detail?: string } => {
   const location = event.location;
   if (!location) return {};
 
@@ -79,9 +81,7 @@ const buildLocationLine = (event: Event): { label?: string; detail?: string } =>
 };
 
 @CommandHandler(SendEventInvitationsCommand)
-export class SendEventInvitationsHandler
-  implements ICommandHandler<SendEventInvitationsCommand>
-{
+export class SendEventInvitationsHandler implements ICommandHandler<SendEventInvitationsCommand> {
   private readonly logger = new Logger(SendEventInvitationsHandler.name);
 
   constructor(
@@ -129,8 +129,7 @@ export class SendEventInvitationsHandler
     );
     const locationLine = buildLocationLine(event);
 
-    const senderName =
-      data.senderName?.trim() || 'Artium Event Host';
+    const senderName = data.senderName?.trim() || 'Artium Event Host';
     const senderEmail = data.senderEmail?.trim();
     const messageHtml = data.message
       ? data.message.replace(/\r?\n/g, '<br/>')

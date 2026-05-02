@@ -9,6 +9,8 @@ export class OpenDisputeDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'Dispute reason is required' })
-  @MaxLength(2000, { message: 'Dispute reason must not exceed 2000 characters' })
+  @MaxLength(2000, {
+    message: 'Dispute reason must not exceed 2000 characters',
+  })
   reason: string;
 }

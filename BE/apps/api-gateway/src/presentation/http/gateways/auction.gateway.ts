@@ -20,7 +20,9 @@ type AuctionRoomPayload = {
     credentials: true,
   },
 })
-export class AuctionGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class AuctionGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 

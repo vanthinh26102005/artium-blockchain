@@ -9,9 +9,10 @@ import {
 import { IUserRepository } from '../../../domain/interfaces/user.repository.interface';
 
 @CommandHandler(UpdateUserProfileCommand)
-export class UpdateUserProfileHandler
-  implements ICommandHandler<UpdateUserProfileCommand, UpdateUserProfileResult>
-{
+export class UpdateUserProfileHandler implements ICommandHandler<
+  UpdateUserProfileCommand,
+  UpdateUserProfileResult
+> {
   private readonly logger = new Logger(UpdateUserProfileHandler.name);
 
   constructor(

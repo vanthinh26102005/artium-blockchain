@@ -1,4 +1,8 @@
-import { DynamicDatabaseModule, ITransactionService, TransactionService } from '@app/common';
+import {
+  DynamicDatabaseModule,
+  ITransactionService,
+  TransactionService,
+} from '@app/common';
 import { OutboxEntity, OutboxModule } from '@app/outbox';
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';

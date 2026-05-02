@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager, FindOptionsOrder } from 'typeorm';
 import { Order } from '../../domain/entities';
-import { IOrderRepository, SellerOrderListOptions } from '../../domain/interfaces';
+import {
+  IOrderRepository,
+  SellerOrderListOptions,
+} from '../../domain/interfaces';
 import {
   OrderStatus,
   FindManyOptions,

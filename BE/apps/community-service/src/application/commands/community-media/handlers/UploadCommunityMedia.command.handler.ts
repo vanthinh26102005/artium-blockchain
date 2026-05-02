@@ -28,13 +28,10 @@ export const MAX_MOODBOARD_FILES = 10;
 export const MAX_VIDEO_DURATION_SECONDS = 60;
 
 @CommandHandler(UploadCommunityMomentMediaCommand)
-export class UploadCommunityMomentMediaHandler
-  implements
-    ICommandHandler<
-      UploadCommunityMomentMediaCommand,
-      CommunityMediaUploadResponseDto
-    >
-{
+export class UploadCommunityMomentMediaHandler implements ICommandHandler<
+  UploadCommunityMomentMediaCommand,
+  CommunityMediaUploadResponseDto
+> {
   private readonly logger = new Logger(UploadCommunityMomentMediaHandler.name);
 
   constructor(
@@ -61,10 +58,7 @@ export class UploadCommunityMomentMediaHandler
       file: command.file,
       uploadContext: CommunityMediaUploadContext.MOMENT,
       mediaType,
-      durationSeconds: resolveDuration(
-        command.file,
-        command.durationSeconds,
-      ),
+      durationSeconds: resolveDuration(command.file, command.durationSeconds),
     });
 
     this.logger.log('Uploaded moment community media', {
@@ -77,13 +71,10 @@ export class UploadCommunityMomentMediaHandler
 }
 
 @CommandHandler(UploadCommunityMoodboardMediaCommand)
-export class UploadCommunityMoodboardMediaHandler
-  implements
-    ICommandHandler<
-      UploadCommunityMoodboardMediaCommand,
-      CommunityMediaUploadResponseDto[]
-    >
-{
+export class UploadCommunityMoodboardMediaHandler implements ICommandHandler<
+  UploadCommunityMoodboardMediaCommand,
+  CommunityMediaUploadResponseDto[]
+> {
   private readonly logger = new Logger(
     UploadCommunityMoodboardMediaHandler.name,
   );
@@ -112,7 +103,10 @@ export class UploadCommunityMoodboardMediaHandler
     const durations = parseDurationMap(command.durationSecondsByFileName);
     const media = await Promise.all(
       command.files.map((file) => {
-        const durationSeconds = resolveDuration(file, durations[file.originalname]);
+        const durationSeconds = resolveDuration(
+          file,
+          durations[file.originalname],
+        );
         const mediaType = validateFile(file, durationSeconds ?? undefined);
         return uploadAndPersistMedia({
           repository: this.communityMediaRepository,

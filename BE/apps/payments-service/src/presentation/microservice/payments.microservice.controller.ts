@@ -144,9 +144,7 @@ export class PaymentsMicroserviceController {
     this.logger.debug(
       `Creating invoice payment intent for user: ${data.userId}`,
     );
-    return this.commandBus.execute(
-      new CreateInvoicePaymentIntentCommand(data),
-    );
+    return this.commandBus.execute(new CreateInvoicePaymentIntentCommand(data));
   }
 
   @MessagePattern({ cmd: 'save_invoice' })
@@ -180,7 +178,9 @@ export class PaymentsMicroserviceController {
   @MessagePattern({ cmd: 'get_invoice_by_number' })
   async getInvoiceByNumber(@Payload() data: { invoiceNumber: string }) {
     this.logger.debug(`Getting invoice by number: ${data.invoiceNumber}`);
-    return this.queryBus.execute(new GetInvoiceByNumberQuery(data.invoiceNumber));
+    return this.queryBus.execute(
+      new GetInvoiceByNumberQuery(data.invoiceNumber),
+    );
   }
 
   @MessagePattern({ cmd: 'get_or_materialize_order_invoice' })
@@ -243,7 +243,9 @@ export class PaymentsMicroserviceController {
 
   @MessagePattern({ cmd: 'get_ethereum_quote' })
   async getEthereumQuote(@Payload() data: { usdAmount: number }) {
-    this.logger.debug(`Generating Ethereum quote for USD amount: ${data.usdAmount}`);
+    this.logger.debug(
+      `Generating Ethereum quote for USD amount: ${data.usdAmount}`,
+    );
     return this.queryBus.execute(new GetEthereumQuoteQuery(data.usdAmount));
   }
 }

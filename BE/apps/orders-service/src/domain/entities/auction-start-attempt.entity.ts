@@ -43,7 +43,12 @@ export class AuctionStartAttempt extends AbstractEntity {
   @Column({ name: 'artwork_title', type: 'varchar', length: 500 })
   artworkTitle!: string;
 
-  @Column({ name: 'creator_name', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'creator_name',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   creatorName?: string | null;
 
   @Column({
@@ -54,13 +59,29 @@ export class AuctionStartAttempt extends AbstractEntity {
   })
   thumbnailUrl?: string | null;
 
-  @Column({ name: 'wallet_address', type: 'varchar', length: 42, nullable: true })
+  @Column({
+    name: 'wallet_address',
+    type: 'varchar',
+    length: 42,
+    nullable: true,
+  })
   walletAddress?: string | null;
 
-  @Column({ name: 'contract_address', type: 'varchar', length: 42, nullable: true })
+  @Column({
+    name: 'contract_address',
+    type: 'varchar',
+    length: 42,
+    nullable: true,
+  })
   contractAddress?: string | null;
 
-  @Column({ name: 'tx_hash', type: 'varchar', length: 66, nullable: true, unique: true })
+  @Column({
+    name: 'tx_hash',
+    type: 'varchar',
+    length: 66,
+    nullable: true,
+    unique: true,
+  })
   txHash?: string | null;
 
   @Column({

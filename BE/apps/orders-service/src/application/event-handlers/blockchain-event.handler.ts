@@ -47,8 +47,11 @@ export class BlockchainEventHandler {
   private getBlockchainEventMetadata(message: Record<string, unknown>) {
     const txHash = typeof message.txHash === 'string' ? message.txHash : null;
     const contractAddress =
-      typeof message.contractAddress === 'string' ? message.contractAddress : null;
-    const chainId = typeof message.chainId === 'string' ? message.chainId : null;
+      typeof message.contractAddress === 'string'
+        ? message.contractAddress
+        : null;
+    const chainId =
+      typeof message.chainId === 'string' ? message.chainId : null;
 
     return {
       ...(txHash ? { txHash } : {}),

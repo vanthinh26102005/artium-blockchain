@@ -46,12 +46,18 @@ export class UsersMicroserviceController {
   ): Promise<UserPayload> {
     const userId = data?.user?.id;
     if (!userId) {
-      throw new RpcException({ statusCode: 401, message: 'User ID is required' });
+      throw new RpcException({
+        statusCode: 401,
+        message: 'User ID is required',
+      });
     }
 
     const user = await this.queryBus.execute(new GetUserByIdQuery(userId));
     if (!user) {
-      throw new RpcException({ statusCode: 404, message: `User with ID ${userId} not found` });
+      throw new RpcException({
+        statusCode: 404,
+        message: `User with ID ${userId} not found`,
+      });
     }
 
     const { password: _password, ...safeUser } = user;

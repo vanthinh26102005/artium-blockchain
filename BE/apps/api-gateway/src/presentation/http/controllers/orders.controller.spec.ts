@@ -110,7 +110,9 @@ describe('OrdersController', () => {
       2,
       paymentsClientMock,
       { cmd: 'get_or_materialize_order_invoice' },
-      expect.objectContaining({ order: expect.objectContaining({ id: 'order-1' }) }),
+      expect.objectContaining({
+        order: expect.objectContaining({ id: 'order-1' }),
+      }),
     );
   });
 

@@ -42,11 +42,13 @@ describe('CreateMomentHandler', () => {
 
     communityMediaRepository = {
       findById: jest.fn(async () => makeMedia()),
-      markConsumed: jest.fn(async () => makeMedia({
-        status: CommunityMediaStatus.CONSUMED,
-        consumedByType: 'moment',
-        consumedById: 'moment-1',
-      })),
+      markConsumed: jest.fn(async () =>
+        makeMedia({
+          status: CommunityMediaStatus.CONSUMED,
+          consumedByType: 'moment',
+          consumedById: 'moment-1',
+        }),
+      ),
     };
 
     handler = new CreateMomentHandler(

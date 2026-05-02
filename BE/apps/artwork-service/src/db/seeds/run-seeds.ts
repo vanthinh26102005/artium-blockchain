@@ -178,15 +178,22 @@ async function main() {
       realSellerIds = sellerRows.map((r) => r.user_id);
 
       await identityDs.destroy();
-      console.log(`✅ Found ${realUserIds.length} users and ${realSellerIds.length} sellers from identity DB\n`);
+      console.log(
+        `✅ Found ${realUserIds.length} users and ${realSellerIds.length} sellers from identity DB\n`,
+      );
     } catch (err) {
-      console.warn('⚠️  Could not connect to identity database:', (err as Error).message);
+      console.warn(
+        '⚠️  Could not connect to identity database:',
+        (err as Error).message,
+      );
     }
 
     if (realSellerIds.length > 0) {
       await runArtworkSeeds(dataSource, realUserIds, realSellerIds);
     } else {
-      console.log('⚠️  No real sellers found. Using mock UUIDs (artworks will not reference real users).\n');
+      console.log(
+        '⚠️  No real sellers found. Using mock UUIDs (artworks will not reference real users).\n',
+      );
       const mockUserIds = Array.from({ length: 60 }, () => uuidv4());
       const mockSellerIds = Array.from({ length: 31 }, () => uuidv4());
       await runArtworkSeeds(dataSource, mockUserIds, mockSellerIds);

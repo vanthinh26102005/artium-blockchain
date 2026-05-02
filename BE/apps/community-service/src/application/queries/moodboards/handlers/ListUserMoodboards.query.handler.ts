@@ -28,15 +28,15 @@ export class ListUserMoodboardsHandler implements IQueryHandler<
 
     const moodboards = options.includePrivate
       ? await this.moodboardRepository.findByUserId(query.userId, {
-        skip: options.skip,
-        take: options.take ?? 20,
-        orderBy: { displayOrder: 'asc', createdAt: 'desc' },
-      })
+          skip: options.skip,
+          take: options.take ?? 20,
+          orderBy: { displayOrder: 'asc', createdAt: 'desc' },
+        })
       : await this.moodboardRepository.findPublicByUserId(query.userId, {
-        skip: options.skip,
-        take: options.take ?? 20,
-        orderBy: { displayOrder: 'asc', createdAt: 'desc' },
-      });
+          skip: options.skip,
+          take: options.take ?? 20,
+          orderBy: { displayOrder: 'asc', createdAt: 'desc' },
+        });
 
     return Promise.all(
       moodboards.map(async (moodboard) => ({

@@ -1,9 +1,10 @@
 import { Bucket, File, Storage } from '@google-cloud/storage';
+import { CommunityMediaUploadContext, RpcExceptionHelper } from '@app/common';
 import {
-  CommunityMediaUploadContext,
-  RpcExceptionHelper,
-} from '@app/common';
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -175,7 +176,9 @@ export class CommunityMediaStorageService {
       };
     } catch (error) {
       this.logger.error(`[${requestId}] Community media upload failed`, error);
-      throw RpcExceptionHelper.internalError('Failed to upload community media');
+      throw RpcExceptionHelper.internalError(
+        'Failed to upload community media',
+      );
     }
   }
 

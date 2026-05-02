@@ -126,9 +126,13 @@ export class EventsController {
   @ApiOperation({ summary: 'Get events hosted by current user' })
   @ApiResponse({ status: 200, description: 'Events retrieved successfully' })
   async getHostingEvents(@Req() req: any) {
-    return sendRpc(this.eventsClient, { cmd: 'get_events_by_creator' }, {
-      creatorId: req.user?.id,
-    });
+    return sendRpc(
+      this.eventsClient,
+      { cmd: 'get_events_by_creator' },
+      {
+        creatorId: req.user?.id,
+      },
+    );
   }
 
   @Post()
@@ -139,21 +143,25 @@ export class EventsController {
   @ApiResponse({ status: 201, description: 'Event created successfully' })
   async createEvent(@Req() req: any, @Body() payload: EventFormRequest) {
     const primaryType = normalizeType(payload.types?.[0]);
-    return sendRpc(this.eventsClient, { cmd: 'create_event' }, {
-      creatorId: req.user?.id,
-      title: payload.title,
-      description: payload.description,
-      type: primaryType,
-      status: EventStatus.PUBLISHED,
-      startTime: payload.startDateTime,
-      endTime: payload.endDateTime,
-      timezone: payload.timeZone,
-      location: buildLocation(payload),
-      isPublic: payload.visibility === 'public',
-      inviteOnly: payload.visibility === 'private',
-      tags: payload.types ?? [],
-      coverImageUrl: payload.coverImageUrl ?? undefined,
-    });
+    return sendRpc(
+      this.eventsClient,
+      { cmd: 'create_event' },
+      {
+        creatorId: req.user?.id,
+        title: payload.title,
+        description: payload.description,
+        type: primaryType,
+        status: EventStatus.PUBLISHED,
+        startTime: payload.startDateTime,
+        endTime: payload.endDateTime,
+        timezone: payload.timeZone,
+        location: buildLocation(payload),
+        isPublic: payload.visibility === 'public',
+        inviteOnly: payload.visibility === 'private',
+        tags: payload.types ?? [],
+        coverImageUrl: payload.coverImageUrl ?? undefined,
+      },
+    );
   }
 
   @Patch(':id')
@@ -169,24 +177,28 @@ export class EventsController {
     @Body() payload: EventFormRequest,
   ) {
     const primaryType = normalizeType(payload.types?.[0]);
-    return sendRpc(this.eventsClient, { cmd: 'update_event' }, {
-      eventId,
-      userId: req.user?.id,
-      payload: {
-        title: payload.title,
-        description: payload.description,
-        type: primaryType,
-        status: EventStatus.PUBLISHED,
-        startTime: payload.startDateTime,
-        endTime: payload.endDateTime,
-        timezone: payload.timeZone,
-        location: buildLocation(payload),
-        isPublic: payload.visibility === 'public',
-        inviteOnly: payload.visibility === 'private',
-        tags: payload.types ?? [],
-        coverImageUrl: payload.coverImageUrl ?? undefined,
+    return sendRpc(
+      this.eventsClient,
+      { cmd: 'update_event' },
+      {
+        eventId,
+        userId: req.user?.id,
+        payload: {
+          title: payload.title,
+          description: payload.description,
+          type: primaryType,
+          status: EventStatus.PUBLISHED,
+          startTime: payload.startDateTime,
+          endTime: payload.endDateTime,
+          timezone: payload.timeZone,
+          location: buildLocation(payload),
+          isPublic: payload.visibility === 'public',
+          inviteOnly: payload.visibility === 'private',
+          tags: payload.types ?? [],
+          coverImageUrl: payload.coverImageUrl ?? undefined,
+        },
       },
-    });
+    );
   }
 
   @Delete(':id')
@@ -196,10 +208,14 @@ export class EventsController {
   @ApiParam({ name: 'id', type: 'string', description: 'Event ID' })
   @ApiResponse({ status: 200, description: 'Event deleted successfully' })
   async deleteEvent(@Req() req: any, @Param('id') eventId: string) {
-    return sendRpc(this.eventsClient, { cmd: 'delete_event' }, {
-      eventId,
-      userId: req.user?.id,
-    });
+    return sendRpc(
+      this.eventsClient,
+      { cmd: 'delete_event' },
+      {
+        eventId,
+        userId: req.user?.id,
+      },
+    );
   }
 
   @Post(':id/invitations')
@@ -217,14 +233,18 @@ export class EventsController {
     @Param('id') eventId: string,
     @Body() payload: EventInvitationRequest,
   ) {
-    return sendRpc(this.eventsClient, { cmd: 'send_event_invitations' }, {
-      eventId,
-      senderId: req.user?.id,
-      senderName: payload.senderName,
-      senderEmail: payload.senderEmail,
-      recipients: payload.recipients,
-      message: payload.message,
-      eventUrl: payload.eventUrl,
-    });
+    return sendRpc(
+      this.eventsClient,
+      { cmd: 'send_event_invitations' },
+      {
+        eventId,
+        senderId: req.user?.id,
+        senderName: payload.senderName,
+        senderEmail: payload.senderEmail,
+        recipients: payload.recipients,
+        message: payload.message,
+        eventUrl: payload.eventUrl,
+      },
+    );
   }
 }

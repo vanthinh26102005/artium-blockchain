@@ -25,7 +25,9 @@ export class AuctionArtworkDisplayObject {
   @ApiProperty({ description: 'Artist, seller, or creator display name' })
   creatorName!: string;
 
-  @ApiProperty({ description: 'Primary artwork image URL for the auction card' })
+  @ApiProperty({
+    description: 'Primary artwork image URL for the auction card',
+  })
   imageSrc!: string;
 
   @ApiProperty({ description: 'Accessible image alternative text' })
@@ -36,7 +38,9 @@ export class AuctionArtworkDisplayObject {
 }
 
 export class AuctionReadObject {
-  @ApiProperty({ description: 'Stable auction identifier used by API and socket rooms' })
+  @ApiProperty({
+    description: 'Stable auction identifier used by API and socket rooms',
+  })
   auctionId!: string;
 
   @ApiProperty({ description: 'On-chain order ID from ArtAuctionEscrow' })
@@ -54,7 +58,9 @@ export class AuctionReadObject {
   @ApiProperty({ description: 'Current highest bid in wei' })
   currentBidWei!: string;
 
-  @ApiProperty({ description: 'Current highest bid in ETH for presentation filtering' })
+  @ApiProperty({
+    description: 'Current highest bid in ETH for presentation filtering',
+  })
   currentBidEth!: number;
 
   @ApiProperty({ description: 'Minimum valid next bid in wei' })
@@ -69,7 +75,9 @@ export class AuctionReadObject {
   @ApiProperty({ description: 'Auction end time as ISO-8601 string' })
   endsAt!: string;
 
-  @ApiProperty({ description: 'Server time as ISO-8601 string for countdown calibration' })
+  @ApiProperty({
+    description: 'Server time as ISO-8601 string for countdown calibration',
+  })
   serverTime!: string;
 
   @ApiPropertyOptional({ description: 'Current highest bidder wallet address' })
@@ -78,7 +86,9 @@ export class AuctionReadObject {
   @ApiPropertyOptional({ description: 'Seller wallet address' })
   sellerWallet?: string | null;
 
-  @ApiPropertyOptional({ description: 'Last relevant blockchain transaction hash' })
+  @ApiPropertyOptional({
+    description: 'Last relevant blockchain transaction hash',
+  })
   txHash?: string | null;
 
   @ApiProperty({ type: () => AuctionArtworkDisplayObject })

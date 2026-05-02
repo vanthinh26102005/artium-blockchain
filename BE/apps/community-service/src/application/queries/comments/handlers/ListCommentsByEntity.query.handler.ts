@@ -4,9 +4,10 @@ import { ListCommentsByEntityQuery } from '../ListCommentsByEntity.query';
 import { Comment, ICommentRepository } from '../../../../domain';
 
 @QueryHandler(ListCommentsByEntityQuery)
-export class ListCommentsByEntityHandler
-  implements IQueryHandler<ListCommentsByEntityQuery, Comment[]>
-{
+export class ListCommentsByEntityHandler implements IQueryHandler<
+  ListCommentsByEntityQuery,
+  Comment[]
+> {
   private readonly logger = new Logger(ListCommentsByEntityHandler.name);
 
   constructor(
@@ -26,11 +27,15 @@ export class ListCommentsByEntityHandler
       where.isDeleted = false;
     }
 
-    return this.commentRepository.findByEntity(query.commentableType, query.commentableId, {
-      where,
-      skip: options.skip,
-      take: options.take ?? 50,
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.commentRepository.findByEntity(
+      query.commentableType,
+      query.commentableId,
+      {
+        where,
+        skip: options.skip,
+        take: options.take ?? 50,
+        orderBy: { createdAt: 'desc' },
+      },
+    );
   }
 }

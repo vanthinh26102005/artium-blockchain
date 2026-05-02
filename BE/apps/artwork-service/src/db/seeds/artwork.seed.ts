@@ -21,7 +21,9 @@ export class ArtworkSeeder {
       return;
     }
     if (!userIds.length) {
-      console.warn('⚠️  No user IDs provided — using sellerIds as userIds fallback.');
+      console.warn(
+        '⚠️  No user IDs provided — using sellerIds as userIds fallback.',
+      );
       userIds = [...sellerIds];
     }
 
@@ -424,7 +426,8 @@ export class ArtworkSeeder {
     for (let i = 0; i < 200; i++) {
       const sellerId = sellerIds[i % sellerIds.length];
       const sellerIdx = i % sellerIds.length;
-      sellerArtworkCounters[sellerId] = (sellerArtworkCounters[sellerId] || 0) + 1;
+      sellerArtworkCounters[sellerId] =
+        (sellerArtworkCounters[sellerId] || 0) + 1;
       const artworkOffset = sellerArtworkCounters[sellerId] - 1;
       const title = `${artworkTitles[i % artworkTitles.length]}${i >= artworkTitles.length ? ` ${Math.floor(i / artworkTitles.length) + 1}` : ''}`;
       const material = materials[i % materials.length];
@@ -481,8 +484,16 @@ export class ArtworkSeeder {
             {
               id: `img_${i}_1`,
               publicId: `artworks/${sellerId}/${title.toLowerCase().replace(/\s+/g, '-')}-1`,
-              url: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset)]),
-              secureUrl: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset)]),
+              url: getUnsplashUrl(
+                unsplashArtPhotos[
+                  getSellerPhotoIndex(sellerIdx, artworkOffset)
+                ],
+              ),
+              secureUrl: getUnsplashUrl(
+                unsplashArtPhotos[
+                  getSellerPhotoIndex(sellerIdx, artworkOffset)
+                ],
+              ),
               format: 'jpg',
               width: 800,
               height: 600,
@@ -497,8 +508,16 @@ export class ArtworkSeeder {
                   {
                     id: `img_${i}_2`,
                     publicId: `artworks/${sellerId}/${title.toLowerCase().replace(/\s+/g, '-')}-2`,
-                    url: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset + 1)]),
-                    secureUrl: getUnsplashUrl(unsplashArtPhotos[getSellerPhotoIndex(sellerIdx, artworkOffset + 1)]),
+                    url: getUnsplashUrl(
+                      unsplashArtPhotos[
+                        getSellerPhotoIndex(sellerIdx, artworkOffset + 1)
+                      ],
+                    ),
+                    secureUrl: getUnsplashUrl(
+                      unsplashArtPhotos[
+                        getSellerPhotoIndex(sellerIdx, artworkOffset + 1)
+                      ],
+                    ),
                     format: 'jpg',
                     width: 800,
                     height: 600,
@@ -679,7 +698,11 @@ export class ArtworkSeeder {
           content: commentText,
           mediaUrl:
             i % 10 === 0
-              ? getUnsplashUrl(unsplashArtPhotos[(i + 30) % unsplashArtPhotos.length], 400, 300)
+              ? getUnsplashUrl(
+                  unsplashArtPhotos[(i + 30) % unsplashArtPhotos.length],
+                  400,
+                  300,
+                )
               : null,
           mentionedUserIds:
             i % 5 === 0 ? [userIds[(i + 1) % userIds.length]] : [],

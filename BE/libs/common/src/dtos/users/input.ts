@@ -135,7 +135,10 @@ export class UpdateUserProfileInput {
   @IsString()
   slug?: string | null;
 
-  @ApiProperty({ required: false, example: 'https://cdn.artium.com/avatar.jpg' })
+  @ApiProperty({
+    required: false,
+    example: 'https://cdn.artium.com/avatar.jpg',
+  })
   @IsOptional()
   @IsString()
   avatarUrl?: string | null;

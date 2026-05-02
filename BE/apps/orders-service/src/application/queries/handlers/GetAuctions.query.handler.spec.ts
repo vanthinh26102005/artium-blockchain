@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { AuctionStatusKey, EscrowState, OrderPaymentMethod, OrderStatus } from '@app/common';
+import {
+  AuctionStatusKey,
+  EscrowState,
+  OrderPaymentMethod,
+  OrderStatus,
+} from '@app/common';
 
 jest.mock(
   '@app/blockchain',
@@ -64,7 +69,9 @@ describe('GetAuctionsHandler', () => {
     orderRepo.count.mockResolvedValue(1 as never);
     orderRepo.findWithItems.mockResolvedValue(null as never);
 
-    const result = await handler.execute(new GetAuctionsQuery({ take: 20, skip: 0 }));
+    const result = await handler.execute(
+      new GetAuctionsQuery({ take: 20, skip: 0 }),
+    );
 
     expect(orderRepo.find).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -110,7 +117,9 @@ describe('GetAuctionsHandler', () => {
       items: [],
     } as never);
 
-    const result = await handler.execute(new GetAuctionsQuery({ take: 20, skip: 0 }));
+    const result = await handler.execute(
+      new GetAuctionsQuery({ take: 20, skip: 0 }),
+    );
 
     expect(result.data).toHaveLength(0);
     expect(result.total).toBe(1);

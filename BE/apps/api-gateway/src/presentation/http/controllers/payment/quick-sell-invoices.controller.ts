@@ -20,7 +20,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@app/auth';
-import { CreateInvoiceDto, InvoiceStatusDto, UpdateInvoiceDto } from '@app/common';
+import {
+  CreateInvoiceDto,
+  InvoiceStatusDto,
+  UpdateInvoiceDto,
+} from '@app/common';
 import { MICROSERVICES } from '../../../../config';
 import { sendRpc } from '../../utils';
 
@@ -157,8 +161,7 @@ const toNumber = (value: unknown): number => {
   return Number.isNaN(num) ? 0 : num;
 };
 
-const roundToTwo = (value: number): number =>
-  Math.round(value * 100) / 100;
+const roundToTwo = (value: number): number => Math.round(value * 100) / 100;
 
 const addDays = (date: Date, days: number): Date => {
   const result = new Date(date);
@@ -205,24 +208,26 @@ const mapInvoiceToQuickSellResponse = (
       const itemType: QuickSellInvoiceItemResponse['type'] = item.artworkId
         ? 'Artium-artwork'
         : 'custom-item';
-    const quantity = item.quantity || 1;
-    const unitPrice = toNumber(item.unitPrice);
-    const lineTotal = unitPrice * quantity;
-    const discountAmount = toNumber(item.discountAmount);
-    const discountPercentage =
-      lineTotal > 0 ? roundToTwo((discountAmount / lineTotal) * 100) : 0;
+      const quantity = item.quantity || 1;
+      const unitPrice = toNumber(item.unitPrice);
+      const lineTotal = unitPrice * quantity;
+      const discountAmount = toNumber(item.discountAmount);
+      const discountPercentage =
+        lineTotal > 0 ? roundToTwo((discountAmount / lineTotal) * 100) : 0;
 
-    return {
-      id: item.id,
-      type: itemType,
-      salePrice: roundToTwo(unitPrice),
-      quantity,
-      discountPercentage,
-      description: item.description,
-      ...(item.artworkId ? { artworkId: item.artworkId } : {}),
-      ...(item.artworkTitle ? { artworkName: item.artworkTitle } : {}),
-      ...(item.artworkImageUrl ? { artworkImageUrl: item.artworkImageUrl } : {}),
-    };
+      return {
+        id: item.id,
+        type: itemType,
+        salePrice: roundToTwo(unitPrice),
+        quantity,
+        discountPercentage,
+        description: item.description,
+        ...(item.artworkId ? { artworkId: item.artworkId } : {}),
+        ...(item.artworkTitle ? { artworkName: item.artworkTitle } : {}),
+        ...(item.artworkImageUrl
+          ? { artworkImageUrl: item.artworkImageUrl }
+          : {}),
+      };
     },
   );
 
@@ -239,10 +244,7 @@ const mapInvoiceToQuickSellResponse = (
     invoice.customerEmail ||
     '';
   const collectorPhone = extractNoteValue(invoice.notes, 'Buyer phone:');
-  const collectorMessage = extractNoteValue(
-    invoice.notes,
-    'Buyer message:',
-  );
+  const collectorMessage = extractNoteValue(invoice.notes, 'Buyer message:');
 
   const collector =
     collectorName || collectorEmail || collectorPhone || collectorMessage
@@ -410,7 +412,11 @@ export class QuickSellInvoicesController {
 
   @Get('code/:invoiceCode')
   @ApiOperation({ summary: 'Get quick-sell invoice by code' })
-  @ApiParam({ name: 'invoiceCode', type: 'string', description: 'Invoice code' })
+  @ApiParam({
+    name: 'invoiceCode',
+    type: 'string',
+    description: 'Invoice code',
+  })
   @ApiResponse({
     status: 200,
     description: 'Invoice retrieved successfully',
@@ -451,14 +457,18 @@ export class QuickSellInvoicesController {
       throw new BadRequestException('email is required');
     }
 
-    await sendRpc(this.paymentsClient, { cmd: 'send_invoice_to_buyer' }, {
-      invoiceNumber: invoiceCode,
-      recipientEmail: email,
-      recipientName: payload?.name,
-      message: payload?.message,
-      invoiceUrl: payload?.invoiceUrl,
-      senderId: req.user?.id,
-    });
+    await sendRpc(
+      this.paymentsClient,
+      { cmd: 'send_invoice_to_buyer' },
+      {
+        invoiceNumber: invoiceCode,
+        recipientEmail: email,
+        recipientName: payload?.name,
+        message: payload?.message,
+        invoiceUrl: payload?.invoiceUrl,
+        senderId: req.user?.id,
+      },
+    );
 
     return { success: true };
   }
@@ -482,12 +492,16 @@ export class QuickSellInvoicesController {
     @Param('invoiceCode') invoiceCode: string,
     @Body() payload: QuickSellCreatePaymentIntentRequest,
   ) {
-    return sendRpc(this.paymentsClient, { cmd: 'create_invoice_payment_intent' }, {
-      invoiceNumber: invoiceCode,
-      userId: req.user?.id,
-      buyerEmail: payload?.email,
-      buyerName: payload?.name,
-    });
+    return sendRpc(
+      this.paymentsClient,
+      { cmd: 'create_invoice_payment_intent' },
+      {
+        invoiceNumber: invoiceCode,
+        userId: req.user?.id,
+        buyerEmail: payload?.email,
+        buyerName: payload?.name,
+      },
+    );
   }
 
   @Delete(':id')
@@ -500,7 +514,11 @@ export class QuickSellInvoicesController {
     description: 'Invoice cancelled successfully',
   })
   async cancelInvoice(@Param('id') invoiceId: string) {
-    await sendRpc(this.paymentsClient, { cmd: 'cancel_invoice' }, { invoiceId });
+    await sendRpc(
+      this.paymentsClient,
+      { cmd: 'cancel_invoice' },
+      { invoiceId },
+    );
     return { success: true };
   }
 }

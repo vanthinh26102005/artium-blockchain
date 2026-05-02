@@ -8,9 +8,10 @@ import {
 } from '../../../../domain';
 
 @QueryHandler(ListArtworkMoodboardIdsForUserQuery)
-export class ListArtworkMoodboardIdsForUserHandler
-  implements IQueryHandler<ListArtworkMoodboardIdsForUserQuery, string[]>
-{
+export class ListArtworkMoodboardIdsForUserHandler implements IQueryHandler<
+  ListArtworkMoodboardIdsForUserQuery,
+  string[]
+> {
   private readonly logger = new Logger(
     ListArtworkMoodboardIdsForUserHandler.name,
   );
@@ -22,9 +23,7 @@ export class ListArtworkMoodboardIdsForUserHandler
     private readonly moodboardArtworkRepository: IMoodboardArtworkRepository,
   ) {}
 
-  async execute(
-    query: ListArtworkMoodboardIdsForUserQuery,
-  ): Promise<string[]> {
+  async execute(query: ListArtworkMoodboardIdsForUserQuery): Promise<string[]> {
     if (!query.userId) {
       throw RpcExceptionHelper.badRequest('userId is required');
     }

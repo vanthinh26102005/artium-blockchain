@@ -5,9 +5,7 @@ import { IArtworkRepository } from '../../../../domain/interfaces/artwork.reposi
 import { MarkArtworkInAuctionCommand } from '../MarkArtworkInAuction.command';
 
 @CommandHandler(MarkArtworkInAuctionCommand)
-export class MarkArtworkInAuctionHandler
-  implements ICommandHandler<MarkArtworkInAuctionCommand>
-{
+export class MarkArtworkInAuctionHandler implements ICommandHandler<MarkArtworkInAuctionCommand> {
   private readonly logger = new Logger(MarkArtworkInAuctionHandler.name);
 
   constructor(
@@ -16,7 +14,9 @@ export class MarkArtworkInAuctionHandler
 
   async execute(command: MarkArtworkInAuctionCommand) {
     const reqId = `markArtworkInAuction:${command.artworkId}:${command.onChainAuctionId}`;
-    this.logger.log(`[${reqId}] promoting artwork into authoritative in-auction state`);
+    this.logger.log(
+      `[${reqId}] promoting artwork into authoritative in-auction state`,
+    );
 
     const artwork = await this.repo.findById(command.artworkId);
     if (!artwork) {

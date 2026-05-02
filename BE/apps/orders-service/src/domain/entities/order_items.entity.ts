@@ -1,5 +1,12 @@
 import { AbstractEntity, PayoutStatus } from '@app/common';
-import { Column, Entity, Index, ManyToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  JoinColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Order } from './orders.entity';
 
 @Entity({ name: 'order_items' })

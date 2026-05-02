@@ -6,9 +6,7 @@ import { Event } from '../../../domain/entities';
 import { GetPublicEventsQuery } from '../GetPublicEvents.query';
 
 @QueryHandler(GetPublicEventsQuery)
-export class GetPublicEventsHandler
-  implements IQueryHandler<GetPublicEventsQuery>
-{
+export class GetPublicEventsHandler implements IQueryHandler<GetPublicEventsQuery> {
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,

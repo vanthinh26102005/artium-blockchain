@@ -39,12 +39,19 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     private readonly escrowContractService: EscrowContractService,
   ) {}
 
-  async execute(query: GetAuctionsQuery): Promise<{ data: AuctionReadObject[]; total: number }> {
+  async execute(
+    query: GetAuctionsQuery,
+  ): Promise<{ data: AuctionReadObject[]; total: number }> {
     try {
       const { filters } = query;
-      this.logger.log(`Getting auctions with filters: ${JSON.stringify(filters)}`);
+      this.logger.log(
+        `Getting auctions with filters: ${JSON.stringify(filters)}`,
+      );
 
-      const take = Math.min(filters.take ?? DEFAULT_AUCTION_TAKE, MAX_AUCTION_TAKE);
+      const take = Math.min(
+        filters.take ?? DEFAULT_AUCTION_TAKE,
+        MAX_AUCTION_TAKE,
+      );
       const skip = filters.skip ?? 0;
       const blockchainWhere = {
         paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
@@ -64,26 +71,39 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
       ]);
 
       const auctions = await Promise.all(
-        orders.map(async (order, index) => this.toAuctionReadObject(order, filters, index)),
+        orders.map(async (order, index) =>
+          this.toAuctionReadObject(order, filters, index),
+        ),
       );
-      const filtered = auctions.filter((auction): auction is AuctionReadObject => {
-        if (!auction) {
-          return false;
-        }
-        if (filters.status && auction.statusKey !== filters.status) {
-          return false;
-        }
-        if (filters.category && auction.artwork.categoryKey !== filters.category) {
-          return false;
-        }
-        if (filters.minBidEth !== undefined && auction.currentBidEth < filters.minBidEth) {
-          return false;
-        }
-        if (filters.maxBidEth !== undefined && auction.currentBidEth > filters.maxBidEth) {
-          return false;
-        }
-        return true;
-      });
+      const filtered = auctions.filter(
+        (auction): auction is AuctionReadObject => {
+          if (!auction) {
+            return false;
+          }
+          if (filters.status && auction.statusKey !== filters.status) {
+            return false;
+          }
+          if (
+            filters.category &&
+            auction.artwork.categoryKey !== filters.category
+          ) {
+            return false;
+          }
+          if (
+            filters.minBidEth !== undefined &&
+            auction.currentBidEth < filters.minBidEth
+          ) {
+            return false;
+          }
+          if (
+            filters.maxBidEth !== undefined &&
+            auction.currentBidEth > filters.maxBidEth
+          ) {
+            return false;
+          }
+          return true;
+        },
+      );
 
       return { data: filtered, total };
     } catch (error) {
@@ -103,7 +123,8 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     filters: GetAuctionsDto,
     index: number,
   ): Promise<AuctionReadObject | null> {
-    const orderWithItems = (await this.orderRepo.findWithItems(order.id)) ?? order;
+    const orderWithItems =
+      (await this.orderRepo.findWithItems(order.id)) ?? order;
     const item = orderWithItems.items?.[0];
     const onChainOrderId = orderWithItems.onChainOrderId;
 
@@ -112,11 +133,21 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     }
 
     const chainAuction = await this.getOnChainAuction(orderWithItems);
-    const currentBidWei = this.resolveCurrentBidWei(orderWithItems, chainAuction);
-    const minBidIncrementWei = chainAuction?.minBidIncrement?.toString() ?? DEFAULT_MIN_INCREMENT_WEI;
-    const minimumNextBidWei = (BigInt(currentBidWei) + BigInt(minBidIncrementWei)).toString();
+    const currentBidWei = this.resolveCurrentBidWei(
+      orderWithItems,
+      chainAuction,
+    );
+    const minBidIncrementWei =
+      chainAuction?.minBidIncrement?.toString() ?? DEFAULT_MIN_INCREMENT_WEI;
+    const minimumNextBidWei = (
+      BigInt(currentBidWei) + BigInt(minBidIncrementWei)
+    ).toString();
     const endsAt = this.resolveEndsAt(orderWithItems, chainAuction);
-    const statusKey = this.resolveStatusKey(orderWithItems, chainAuction, endsAt);
+    const statusKey = this.resolveStatusKey(
+      orderWithItems,
+      chainAuction,
+      endsAt,
+    );
     const categoryKey = this.resolveCategory(filters, index);
     const title = item.artworkTitle.trim();
     const imageSrc = item.artworkImageUrl?.trim() ?? '';
@@ -134,21 +165,29 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
       minBidIncrementWei,
       endsAt,
       serverTime: new Date().toISOString(),
-      highestBidder: this.normalizeAddress(chainAuction?.highestBidder ?? orderWithItems.buyerWallet),
-      sellerWallet: this.normalizeAddress(chainAuction?.seller ?? orderWithItems.sellerWallet),
+      highestBidder: this.normalizeAddress(
+        chainAuction?.highestBidder ?? orderWithItems.buyerWallet,
+      ),
+      sellerWallet: this.normalizeAddress(
+        chainAuction?.seller ?? orderWithItems.sellerWallet,
+      ),
       txHash: orderWithItems.txHash ?? null,
       artwork: {
         artworkId: item.artworkId,
         title,
         creatorName: orderWithItems.sellerWallet ?? 'Artium seller',
         imageSrc,
-        imageAlt: imageSrc ? `Artwork preview of ${title}` : `Auction lot ${onChainOrderId}`,
+        imageAlt: imageSrc
+          ? `Artwork preview of ${title}`
+          : `Auction lot ${onChainOrderId}`,
         categoryKey,
       },
     };
   }
 
-  private async getOnChainAuction(order: Order): Promise<AuctionCoreDto | null> {
+  private async getOnChainAuction(
+    order: Order,
+  ): Promise<AuctionCoreDto | null> {
     if (!order.onChainOrderId) {
       return null;
     }
@@ -163,7 +202,10 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     }
   }
 
-  private resolveCurrentBidWei(order: Order, chainAuction: AuctionCoreDto | null) {
+  private resolveCurrentBidWei(
+    order: Order,
+    chainAuction: AuctionCoreDto | null,
+  ) {
     return chainAuction?.highestBid?.toString() ?? order.bidAmountWei ?? '0';
   }
 
@@ -171,7 +213,11 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     if (chainAuction?.endTime) {
       return new Date(Number(chainAuction.endTime) * 1000).toISOString();
     }
-    return (order.estimatedDeliveryDate ?? order.createdAt ?? new Date()).toISOString();
+    return (
+      order.estimatedDeliveryDate ??
+      order.createdAt ??
+      new Date()
+    ).toISOString();
   }
 
   private resolveStatusKey(
@@ -189,7 +235,10 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     ) {
       return AuctionStatusKey.CLOSED;
     }
-    if (escrowState === EscrowState.ENDED || escrowState === EscrowState.SHIPPED) {
+    if (
+      escrowState === EscrowState.ENDED ||
+      escrowState === EscrowState.SHIPPED
+    ) {
       return AuctionStatusKey.CLOSED;
     }
     if (escrowState === EscrowState.DISPUTED) {

@@ -503,7 +503,8 @@ export class ArtworkController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Bulk move artworks to folder',
-    description: 'Moves multiple artworks to a folder (or root when folderId is null).',
+    description:
+      'Moves multiple artworks to a folder (or root when folderId is null).',
   })
   @ApiBody({ type: BulkMoveArtworksInput })
   @ApiResponse({

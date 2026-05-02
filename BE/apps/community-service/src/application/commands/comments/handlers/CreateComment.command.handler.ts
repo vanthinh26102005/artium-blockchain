@@ -10,9 +10,10 @@ import {
 } from '../../../../domain';
 
 @CommandHandler(CreateCommentCommand)
-export class CreateCommentHandler
-  implements ICommandHandler<CreateCommentCommand, Comment>
-{
+export class CreateCommentHandler implements ICommandHandler<
+  CreateCommentCommand,
+  Comment
+> {
   private readonly logger = new Logger(CreateCommentHandler.name);
 
   constructor(
@@ -93,7 +94,9 @@ export class CreateCommentHandler
           );
         }
 
-        this.logger.log(`[${reqId}] Comment created`, { commentId: comment.id });
+        this.logger.log(`[${reqId}] Comment created`, {
+          commentId: comment.id,
+        });
 
         return comment;
       });

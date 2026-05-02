@@ -44,10 +44,14 @@ export class CommunityMediaUploadResponseDto {
   @ApiProperty({ enum: CommunityMediaStatus })
   status!: CommunityMediaStatus;
 
-  @ApiPropertyOptional({ description: 'Video duration in seconds when available' })
+  @ApiPropertyOptional({
+    description: 'Video duration in seconds when available',
+  })
   durationSeconds?: number | null;
 
-  @ApiPropertyOptional({ description: 'Thumbnail or poster URL when available' })
+  @ApiPropertyOptional({
+    description: 'Thumbnail or poster URL when available',
+  })
   thumbnailUrl?: string | null;
 
   @ApiProperty({ description: 'Upload creation timestamp' })
@@ -56,7 +60,8 @@ export class CommunityMediaUploadResponseDto {
 
 export class UploadCommunityMomentMediaDto {
   @ApiPropertyOptional({
-    description: 'Client-observed video duration in seconds. Backend remains authoritative when it can verify duration.',
+    description:
+      'Client-observed video duration in seconds. Backend remains authoritative when it can verify duration.',
   })
   @IsOptional()
   @IsNumber()
@@ -66,7 +71,8 @@ export class UploadCommunityMomentMediaDto {
 
 export class UploadCommunityMoodboardMediaDto {
   @ApiPropertyOptional({
-    description: 'Optional per-file duration metadata keyed by original filename',
+    description:
+      'Optional per-file duration metadata keyed by original filename',
     type: 'object',
     additionalProperties: { type: 'number' },
   })

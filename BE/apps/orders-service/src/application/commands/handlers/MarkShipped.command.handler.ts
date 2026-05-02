@@ -1,11 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, Logger, HttpException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import {
-  RpcExceptionHelper,
-  OrderStatus,
-  EscrowState,
-} from '@app/common';
+import { RpcExceptionHelper, OrderStatus, EscrowState } from '@app/common';
 import { MarkShippedCommand } from '../MarkShipped.command';
 import { Order } from '../../../domain/entities';
 import { IOrderRepository } from '../../../domain/interfaces';
@@ -23,7 +19,9 @@ export class MarkShippedHandler implements ICommandHandler<MarkShippedCommand> {
   async execute(command: MarkShippedCommand): Promise<Order | null> {
     try {
       const { orderId, userId, data } = command;
-      this.logger.log(`Marking order as shipped: ${orderId} by user: ${userId}`);
+      this.logger.log(
+        `Marking order as shipped: ${orderId} by user: ${userId}`,
+      );
 
       const order = await this.orderRepo.findWithItems(orderId);
       if (!order) {
@@ -31,7 +29,8 @@ export class MarkShippedHandler implements ICommandHandler<MarkShippedCommand> {
       }
 
       // Only the seller can mark as shipped
-      const isSeller = order.items?.some((item) => item.sellerId === userId) ?? false;
+      const isSeller =
+        order.items?.some((item) => item.sellerId === userId) ?? false;
       if (!isSeller) {
         throw RpcExceptionHelper.forbidden(
           'Only the seller of this order can mark it as shipped.',

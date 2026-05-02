@@ -230,7 +230,7 @@ export class BlockchainEventListenerService
       await this.catchUpToLatestBlock();
     } catch (err) {
       this.logger.error(
-        `Initial backfill failed (RPC error - restart service to retry): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
+        `Initial backfill failed (RPC error - restart service to retry): ${err?.shortMessage ?? (err as Error)?.message}`,
       );
     }
 
@@ -242,7 +242,7 @@ export class BlockchainEventListenerService
         await this.catchUpToLatestBlock();
       } catch (err) {
         this.logger.error(
-          `Post-registration backfill failed (RPC error): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
+          `Post-registration backfill failed (RPC error): ${err?.shortMessage ?? (err as Error)?.message}`,
         );
       }
 
@@ -306,7 +306,7 @@ export class BlockchainEventListenerService
         await this.catchUpToLatestBlock();
       } catch (err) {
         this.logger.error(
-          `Polling backfill failed (RPC error): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
+          `Polling backfill failed (RPC error): ${err?.shortMessage ?? (err as Error)?.message}`,
         );
       } finally {
         this.isPollingCatchUp = false;
@@ -348,7 +348,7 @@ export class BlockchainEventListenerService
       await this.catchUpToLatestBlock();
     } catch (err) {
       this.logger.error(
-        `Polling backfill failed (RPC error): ${(err as any)?.shortMessage ?? (err as Error)?.message}`,
+        `Polling backfill failed (RPC error): ${err?.shortMessage ?? (err as Error)?.message}`,
       );
     } finally {
       this.isPollingCatchUp = false;
@@ -371,8 +371,7 @@ export class BlockchainEventListenerService
     }
 
     const lastArg = args[args.length - 1] as Record<string, any> | undefined;
-    const eventLog =
-      lastArg && 'log' in lastArg ? lastArg.log : lastArg;
+    const eventLog = lastArg && 'log' in lastArg ? lastArg.log : lastArg;
 
     if (
       !eventLog ||
@@ -384,8 +383,7 @@ export class BlockchainEventListenerService
     }
 
     return {
-      eventArgs:
-        lastArg && 'log' in lastArg ? args.slice(0, -1) : args,
+      eventArgs: lastArg && 'log' in lastArg ? args.slice(0, -1) : args,
       meta: {
         txHash: eventLog.transactionHash,
         logIndex: eventLog.index,
@@ -423,10 +421,13 @@ export class BlockchainEventListenerService
       .createQueryBuilder()
       .update()
       .set({ lastProcessedBlock: String(blockNumber) })
-      .where('listenerId = :id AND CAST(lastProcessedBlock AS BIGINT) < :block', {
-        id: LISTENER_ID,
-        block: blockNumber,
-      })
+      .where(
+        'listenerId = :id AND CAST(lastProcessedBlock AS BIGINT) < :block',
+        {
+          id: LISTENER_ID,
+          block: blockNumber,
+        },
+      )
       .execute();
   }
 
@@ -488,7 +489,11 @@ export class BlockchainEventListenerService
       }
 
       const eventName = parsedLog?.name;
-      if (!parsedLog || !eventName || !SUPPORTED_EVENT_NAMES.includes(eventName)) {
+      if (
+        !parsedLog ||
+        !eventName ||
+        !SUPPORTED_EVENT_NAMES.includes(eventName)
+      ) {
         continue;
       }
 
@@ -522,10 +527,7 @@ export class BlockchainEventListenerService
     try {
       return await this.fetchLogsWithRetry(fromBlock, toBlock);
     } catch (error) {
-      if (
-        fromBlock >= toBlock ||
-        !this.isRetryableRpcError(error)
-      ) {
+      if (fromBlock >= toBlock || !this.isRetryableRpcError(error)) {
         throw error;
       }
 
@@ -552,7 +554,10 @@ export class BlockchainEventListenerService
         toBlock,
       });
     } catch (error) {
-      if (attempt >= this.rpcRetryAttempts || !this.isRetryableRpcError(error)) {
+      if (
+        attempt >= this.rpcRetryAttempts ||
+        !this.isRetryableRpcError(error)
+      ) {
         throw error;
       }
 
@@ -566,7 +571,8 @@ export class BlockchainEventListenerService
   }
 
   private isRetryableRpcError(error: unknown): boolean {
-    const message = `${(error as any)?.shortMessage ?? ''} ${(error as any)?.message ?? ''}`.toLowerCase();
+    const message =
+      `${(error as any)?.shortMessage ?? ''} ${(error as any)?.message ?? ''}`.toLowerCase();
     return (
       message.includes('too many requests') ||
       message.includes('missing response for request') ||

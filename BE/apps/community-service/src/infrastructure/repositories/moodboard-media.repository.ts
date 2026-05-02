@@ -11,9 +11,7 @@ export class MoodboardMediaRepository implements IMoodboardMediaRepository {
   ) {}
 
   private getRepo(manager?: EntityManager): Repository<MoodboardMedia> {
-    return manager
-      ? manager.getRepository(MoodboardMedia)
-      : this.ormRepository;
+    return manager ? manager.getRepository(MoodboardMedia) : this.ormRepository;
   }
 
   async createManyForMoodboard(

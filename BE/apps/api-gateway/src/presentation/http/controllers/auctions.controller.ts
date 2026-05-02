@@ -82,7 +82,11 @@ export class AuctionsController {
     sellerId: string,
   ): Promise<{ user: UserPayload; sellerProfile: SellerProfilePayload }> {
     const [user, sellerProfile] = await Promise.all([
-      sendRpc<UserPayload>(this.identityClient, { cmd: 'get_user_by_id' }, { userId: sellerId }),
+      sendRpc<UserPayload>(
+        this.identityClient,
+        { cmd: 'get_user_by_id' },
+        { userId: sellerId },
+      ),
       sendRpc<SellerProfilePayload>(
         this.identityClient,
         { cmd: 'get_seller_profile_by_user_id' },
@@ -192,7 +196,9 @@ export class AuctionsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SELLER)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'List seller-owned artwork candidates for auction creation' })
+  @ApiOperation({
+    summary: 'List seller-owned artwork candidates for auction creation',
+  })
   @ApiResponse({
     status: 200,
     description: 'Seller auction artwork candidates retrieved successfully',
@@ -225,7 +231,9 @@ export class AuctionsController {
     );
 
     if (!candidate) {
-      throw new NotFoundException('Selected artwork was not found for this seller.');
+      throw new NotFoundException(
+        'Selected artwork was not found for this seller.',
+      );
     }
     if (!candidate.isEligible) {
       throw new ConflictException(
@@ -269,7 +277,9 @@ export class AuctionsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SELLER)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Attach the seller wallet transaction to a start attempt' })
+  @ApiOperation({
+    summary: 'Attach the seller wallet transaction to a start attempt',
+  })
   @ApiParam({
     name: 'attemptId',
     type: 'string',
@@ -303,7 +313,9 @@ export class AuctionsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SELLER)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get persisted seller auction start status for an artwork' })
+  @ApiOperation({
+    summary: 'Get persisted seller auction start status for an artwork',
+  })
   @ApiParam({
     name: 'artworkId',
     type: 'string',

@@ -18,14 +18,14 @@ Escrow contract for physical art auctions with dispute resolution.
 ## Local Development
 
 ```bash
-cd BE/smart-contracts
+cd contracts
 npm install
 npx hardhat compile
 npx hardhat node              # Local node
 npx hardhat test              # Run tests
-npx hardhat run scripts/deploy.js --network localhost
+npx hardhat run scripts/deploy.ts --network localhost
 ```
 
 ## Deployment
 
-See `BE/smart-contracts/Local_deployment.md` for detailed deployment steps to Sepolia testnet.
+See `contracts/README.md` and the deployment scripts in `contracts/scripts/` for contract details and deployment entry points.

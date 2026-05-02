@@ -66,7 +66,10 @@ describe('ListSellerAuctionArtworkCandidatesHandler', () => {
     [ArtworkStatus.SOLD, SellerAuctionArtworkEligibilityReason.SOLD],
     [ArtworkStatus.DELETED, SellerAuctionArtworkEligibilityReason.DELETED],
     [ArtworkStatus.RESERVED, SellerAuctionArtworkEligibilityReason.RESERVED],
-    [ArtworkStatus.IN_AUCTION, SellerAuctionArtworkEligibilityReason.IN_AUCTION],
+    [
+      ArtworkStatus.IN_AUCTION,
+      SellerAuctionArtworkEligibilityReason.IN_AUCTION,
+    ],
     [ArtworkStatus.DRAFT, SellerAuctionArtworkEligibilityReason.NOT_ACTIVE],
     [ArtworkStatus.INACTIVE, SellerAuctionArtworkEligibilityReason.NOT_ACTIVE],
   ])('blocks %s lifecycle as %s', async (status, reasonCode) => {
@@ -112,20 +115,23 @@ describe('ListSellerAuctionArtworkCandidatesHandler', () => {
       { creatorName: '   ' },
       SellerAuctionArtworkEligibilityReason.MISSING_METADATA,
     ],
-  ])('blocks intrinsic metadata issue %o as %s', async (overrides, reasonCode) => {
-    repo.findManyBySellerId.mockResolvedValue([
-      artwork(overrides as Partial<Artwork>),
-    ] as never);
+  ])(
+    'blocks intrinsic metadata issue %o as %s',
+    async (overrides, reasonCode) => {
+      repo.findManyBySellerId.mockResolvedValue([
+        artwork(overrides as Partial<Artwork>),
+      ] as never);
 
-    const result = await handler.execute(
-      new ListSellerAuctionArtworkCandidatesQuery(sellerId),
-    );
+      const result = await handler.execute(
+        new ListSellerAuctionArtworkCandidatesQuery(sellerId),
+      );
 
-    expect(result.eligibleCount).toBe(0);
-    expect(result.blockedCount).toBe(1);
-    expect(result.blocked[0].reasonCodes).toContain(reasonCode);
-    expect(result.blocked[0].recoveryActions).toEqual(
-      expect.arrayContaining([expect.objectContaining({ reasonCode })]),
-    );
-  });
+      expect(result.eligibleCount).toBe(0);
+      expect(result.blockedCount).toBe(1);
+      expect(result.blocked[0].reasonCodes).toContain(reasonCode);
+      expect(result.blocked[0].recoveryActions).toEqual(
+        expect.arrayContaining([expect.objectContaining({ reasonCode })]),
+      );
+    },
+  );
 });

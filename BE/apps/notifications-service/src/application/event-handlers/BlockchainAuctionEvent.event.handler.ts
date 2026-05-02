@@ -109,7 +109,10 @@ export class BlockchainAuctionEventHandler {
         );
       });
     } catch (error) {
-      this.logger.error(`Failed to handle AuctionStarted notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle AuctionStarted notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -126,20 +129,29 @@ export class BlockchainAuctionEventHandler {
     bidder: string;
     amount: string;
   }) {
-    this.logger.log(`New bid notification: orderId=${event.orderId}, bidder=${event.bidder}`);
+    this.logger.log(
+      `New bid notification: orderId=${event.orderId}, bidder=${event.bidder}`,
+    );
     try {
       await this.transactionService.execute(async (manager) => {
         await this.createNotificationWithOutbox(
           NotificationTriggerEvent.AUCTION_BID_PLACED,
           'New Bid Placed',
           `A new bid of ${event.amount} wei was placed on auction ${event.orderId}.`,
-          { onChainOrderId: event.orderId, bidder: event.bidder, amount: event.amount },
+          {
+            onChainOrderId: event.orderId,
+            bidder: event.bidder,
+            amount: event.amount,
+          },
           'auction-bid-placed',
           manager,
         );
       });
     } catch (error) {
-      this.logger.error(`Failed to handle NewBid notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle NewBid notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -163,13 +175,20 @@ export class BlockchainAuctionEventHandler {
           NotificationTriggerEvent.AUCTION_ENDED,
           'Auction Ended',
           `Auction ${event.orderId} has ended. Winner: ${event.winner} with bid of ${event.amount} wei.`,
-          { onChainOrderId: event.orderId, winner: event.winner, amount: event.amount },
+          {
+            onChainOrderId: event.orderId,
+            winner: event.winner,
+            amount: event.amount,
+          },
           'auction-ended',
           manager,
         );
       });
     } catch (error) {
-      this.logger.error(`Failed to handle AuctionEnded notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle AuctionEnded notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -193,13 +212,20 @@ export class BlockchainAuctionEventHandler {
           NotificationTriggerEvent.AUCTION_SHIPPED,
           'Artwork Shipped',
           `The artwork from auction ${event.orderId} has been shipped. Tracking: ${event.trackingHash}`,
-          { onChainOrderId: event.orderId, seller: event.seller, trackingHash: event.trackingHash },
+          {
+            onChainOrderId: event.orderId,
+            seller: event.seller,
+            trackingHash: event.trackingHash,
+          },
           'auction-shipped',
           manager,
         );
       });
     } catch (error) {
-      this.logger.error(`Failed to handle ArtShipped notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle ArtShipped notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -211,11 +237,10 @@ export class BlockchainAuctionEventHandler {
     queueOptions: DLX_QUEUE_OPTIONS,
     errorHandler,
   })
-  async handleDeliveryConfirmed(event: {
-    orderId: string;
-    winner: string;
-  }) {
-    this.logger.log(`Delivery confirmed notification: orderId=${event.orderId}`);
+  async handleDeliveryConfirmed(event: { orderId: string; winner: string }) {
+    this.logger.log(
+      `Delivery confirmed notification: orderId=${event.orderId}`,
+    );
     try {
       await this.transactionService.execute(async (manager) => {
         await this.createNotificationWithOutbox(
@@ -228,7 +253,10 @@ export class BlockchainAuctionEventHandler {
         );
       });
     } catch (error) {
-      this.logger.error(`Failed to handle DeliveryConfirmed notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle DeliveryConfirmed notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -252,13 +280,20 @@ export class BlockchainAuctionEventHandler {
           NotificationTriggerEvent.AUCTION_DISPUTE_OPENED,
           'Dispute Opened',
           `A dispute has been opened for auction ${event.orderId}. Reason: ${event.reason}`,
-          { onChainOrderId: event.orderId, buyer: event.buyer, reason: event.reason },
+          {
+            onChainOrderId: event.orderId,
+            buyer: event.buyer,
+            reason: event.reason,
+          },
           'auction-dispute-opened',
           manager,
         );
       });
     } catch (error) {
-      this.logger.error(`Failed to handle DisputeOpened notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle DisputeOpened notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -283,13 +318,20 @@ export class BlockchainAuctionEventHandler {
           NotificationTriggerEvent.AUCTION_DISPUTE_RESOLVED,
           'Dispute Resolved',
           `Dispute for auction ${event.orderId} has been resolved. Outcome: ${outcome}.`,
-          { onChainOrderId: event.orderId, arbiter: event.arbiter, favorBuyer: event.favorBuyer },
+          {
+            onChainOrderId: event.orderId,
+            arbiter: event.arbiter,
+            favorBuyer: event.favorBuyer,
+          },
           'auction-dispute-resolved',
           manager,
         );
       });
     } catch (error) {
-      this.logger.error(`Failed to handle DisputeResolved notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle DisputeResolved notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -301,10 +343,7 @@ export class BlockchainAuctionEventHandler {
     queueOptions: DLX_QUEUE_OPTIONS,
     errorHandler,
   })
-  async handleAuctionCancelled(event: {
-    orderId: string;
-    reason: string;
-  }) {
+  async handleAuctionCancelled(event: { orderId: string; reason: string }) {
     this.logger.log(`Auction cancelled notification: orderId=${event.orderId}`);
     try {
       await this.transactionService.execute(async (manager) => {
@@ -318,7 +357,10 @@ export class BlockchainAuctionEventHandler {
         );
       });
     } catch (error) {
-      this.logger.error(`Failed to handle AuctionCancelled notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle AuctionCancelled notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -330,10 +372,7 @@ export class BlockchainAuctionEventHandler {
     queueOptions: DLX_QUEUE_OPTIONS,
     errorHandler,
   })
-  async handleShippingTimeout(event: {
-    orderId: string;
-    buyer: string;
-  }) {
+  async handleShippingTimeout(event: { orderId: string; buyer: string }) {
     this.logger.log(`Shipping timeout notification: orderId=${event.orderId}`);
     try {
       await this.transactionService.execute(async (manager) => {
@@ -347,7 +386,10 @@ export class BlockchainAuctionEventHandler {
         );
       });
     } catch (error) {
-      this.logger.error(`Failed to handle ShippingTimeout notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle ShippingTimeout notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -359,10 +401,7 @@ export class BlockchainAuctionEventHandler {
     queueOptions: DLX_QUEUE_OPTIONS,
     errorHandler,
   })
-  async handleDeliveryTimeout(event: {
-    orderId: string;
-    seller: string;
-  }) {
+  async handleDeliveryTimeout(event: { orderId: string; seller: string }) {
     this.logger.log(`Delivery timeout notification: orderId=${event.orderId}`);
     try {
       await this.transactionService.execute(async (manager) => {
@@ -376,7 +415,10 @@ export class BlockchainAuctionEventHandler {
         );
       });
     } catch (error) {
-      this.logger.error(`Failed to handle DeliveryTimeout notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to handle DeliveryTimeout notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }

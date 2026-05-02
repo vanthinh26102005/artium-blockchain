@@ -58,7 +58,10 @@ export class CreateMoodboardHandler implements ICommandHandler<
         );
       }
 
-      if (command.input.coverMediaId && !mediaIds.includes(command.input.coverMediaId)) {
+      if (
+        command.input.coverMediaId &&
+        !mediaIds.includes(command.input.coverMediaId)
+      ) {
         throw RpcExceptionHelper.badRequest(
           'coverMediaId must be included in mediaIds',
         );
@@ -72,7 +75,9 @@ export class CreateMoodboardHandler implements ICommandHandler<
       const orderedMedia = mediaIds.map((mediaId) => {
         const media = mediaById.get(mediaId);
         if (!media) {
-          throw RpcExceptionHelper.badRequest('Uploaded moodboard media not found');
+          throw RpcExceptionHelper.badRequest(
+            'Uploaded moodboard media not found',
+          );
         }
         this.assertUsableMoodboardMedia(media, command.input.userId);
         return media;
@@ -81,51 +86,61 @@ export class CreateMoodboardHandler implements ICommandHandler<
       const coverMediaId = command.input.coverMediaId ?? orderedMedia[0]?.id;
       const coverMedia = coverMediaId ? mediaById.get(coverMediaId) : undefined;
 
-      const moodboard = await this.transactionService.execute(async (manager) => {
-        const { mediaIds: _mediaIds, coverMediaId: _coverMediaId, ...input } =
-          command.input;
-        const moodboardInput = {
-          ...input,
-          coverImageUrl: coverMedia?.url ?? null,
-          artworkCount: 0,
-          likeCount: 0,
-          viewCount: 0,
-          shareCount: 0,
-          displayOrder: 0,
-          isPrivate: command.input.isPrivate ?? false,
-          isCollaborative: command.input.isCollaborative ?? false,
-        };
+      const moodboard = await this.transactionService.execute(
+        async (manager) => {
+          const {
+            mediaIds: _mediaIds,
+            coverMediaId: _coverMediaId,
+            ...input
+          } = command.input;
+          const moodboardInput = {
+            ...input,
+            coverImageUrl: coverMedia?.url ?? null,
+            artworkCount: 0,
+            likeCount: 0,
+            viewCount: 0,
+            shareCount: 0,
+            displayOrder: 0,
+            isPrivate: command.input.isPrivate ?? false,
+            isCollaborative: command.input.isCollaborative ?? false,
+          };
 
-        const createdMoodboard = await this.moodboardRepository.create(
-          moodboardInput,
-          manager,
-        );
-
-        if (orderedMedia.length) {
-          await this.moodboardMediaRepository.createManyForMoodboard(
-            createdMoodboard.id,
-            orderedMedia.map((media, index) => ({
-              communityMediaId: media.id,
-              mediaType: media.mediaType,
-              url: media.url,
-              secureUrl: media.secureUrl,
-              thumbnailUrl: media.thumbnailUrl,
-              durationSeconds: media.durationSeconds,
-              displayOrder: index,
-              isCover: media.id === coverMediaId,
-            })),
+          const createdMoodboard = await this.moodboardRepository.create(
+            moodboardInput,
             manager,
           );
 
-          await Promise.all(
-            orderedMedia.map((media) =>
-              this.communityMediaRepository.markConsumed(media.id, 'moodboard', createdMoodboard.id, manager),
-            ),
-          );
-        }
+          if (orderedMedia.length) {
+            await this.moodboardMediaRepository.createManyForMoodboard(
+              createdMoodboard.id,
+              orderedMedia.map((media, index) => ({
+                communityMediaId: media.id,
+                mediaType: media.mediaType,
+                url: media.url,
+                secureUrl: media.secureUrl,
+                thumbnailUrl: media.thumbnailUrl,
+                durationSeconds: media.durationSeconds,
+                displayOrder: index,
+                isCover: media.id === coverMediaId,
+              })),
+              manager,
+            );
 
-        return createdMoodboard;
-      });
+            await Promise.all(
+              orderedMedia.map((media) =>
+                this.communityMediaRepository.markConsumed(
+                  media.id,
+                  'moodboard',
+                  createdMoodboard.id,
+                  manager,
+                ),
+              ),
+            );
+          }
+
+          return createdMoodboard;
+        },
+      );
 
       this.logger.log(`[${reqId}] Moodboard created successfully`, {
         moodboardId: moodboard.id,

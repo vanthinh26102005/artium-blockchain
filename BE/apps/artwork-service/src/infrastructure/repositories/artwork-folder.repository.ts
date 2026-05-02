@@ -1,8 +1,10 @@
-import { FindManyOptions, FindOneOptions, WhereOperator, RpcExceptionHelper } from '@app/common';
 import {
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+  FindManyOptions,
+  FindOneOptions,
+  WhereOperator,
+  RpcExceptionHelper,
+} from '@app/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { mapToTypeOrmWhere, SortDirection } from '@app/common';
 import {
@@ -171,7 +173,10 @@ export class ArtworkFolderRepository implements IArtworkFolderRepository {
     });
 
     // Build tree structure manually
-    const folderMap = new Map<string, ArtworkFolder & { children: ArtworkFolder[] }>();
+    const folderMap = new Map<
+      string,
+      ArtworkFolder & { children: ArtworkFolder[] }
+    >();
     const roots: (ArtworkFolder & { children: ArtworkFolder[] })[] = [];
 
     // First pass: create map with empty children arrays
@@ -218,7 +223,9 @@ export class ArtworkFolderRepository implements IArtworkFolderRepository {
     });
 
     if (!folderToMove) {
-      throw RpcExceptionHelper.notFound(`Folder with ID ${folderId} not found.`);
+      throw RpcExceptionHelper.notFound(
+        `Folder with ID ${folderId} not found.`,
+      );
     }
 
     let newParent: ArtworkFolder | null = null;
@@ -233,7 +240,9 @@ export class ArtworkFolderRepository implements IArtworkFolderRepository {
       }
 
       if (newParent.id === folderId) {
-        throw RpcExceptionHelper.badRequest(`Cannot move a folder into itself.`);
+        throw RpcExceptionHelper.badRequest(
+          `Cannot move a folder into itself.`,
+        );
       }
     }
 
@@ -253,7 +262,10 @@ export class ArtworkFolderRepository implements IArtworkFolderRepository {
     if (!folder) return;
 
     // Get all descendant folder IDs recursively
-    const descendantIds = await this.getDescendantIds(folderId, transactionManager);
+    const descendantIds = await this.getDescendantIds(
+      folderId,
+      transactionManager,
+    );
     const allFolderIds = [folderId, ...descendantIds];
 
     // Delete all folders (cascade will handle artworks if configured)
@@ -269,7 +281,10 @@ export class ArtworkFolderRepository implements IArtworkFolderRepository {
 
     for (const child of children) {
       descendantIds.push(child.id);
-      const childDescendants = await this.getDescendantIds(child.id, transactionManager);
+      const childDescendants = await this.getDescendantIds(
+        child.id,
+        transactionManager,
+      );
       descendantIds.push(...childDescendants);
     }
 
@@ -297,7 +312,10 @@ export class ArtworkFolderRepository implements IArtworkFolderRepository {
     if (!folder) return 0;
 
     // Get all descendant folder IDs
-    const descendantIds = await this.getDescendantIds(folderId, transactionManager);
+    const descendantIds = await this.getDescendantIds(
+      folderId,
+      transactionManager,
+    );
     const folderIds = [folderId, ...descendantIds];
 
     // Count artworks in all folders including the parent
