@@ -1,5 +1,5 @@
 // @domains - inventory
-import { type InventoryFolder } from '@domains/inventory/types/inventoryFolder'
+import { type InventoryFolder } from '@domains/inventory/features/folders/types/inventoryFolder'
 
 export const mockInventoryFolders: InventoryFolder[] = [
   {

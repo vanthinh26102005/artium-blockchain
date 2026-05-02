@@ -1,4 +1,4 @@
-import { type InventoryArtist } from '@domains/inventory/types/inventoryArtist'
+import { type InventoryArtist } from '@domains/inventory/features/artists/types/inventoryArtist'
 
 export const mockInventoryArtists: InventoryArtist[] = [
   {

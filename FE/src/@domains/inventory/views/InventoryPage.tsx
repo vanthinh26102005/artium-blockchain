@@ -8,140 +8,62 @@ import { Plus } from 'lucide-react'
 // third-party
 import {
   DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
   MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
   closestCenter,
 } from '@dnd-kit/core'
-import { arrayMove } from '@dnd-kit/sortable'
 
 // internal - components
 import { Metadata } from '@/components/SEO/Metadata'
 
 // @shared - components
 import { Button } from '@shared/components/ui/button'
-import artworkApis from '@shared/apis/artworkApis'
-import artworkFolderApis from '@shared/apis/artworkFolderApis'
-import followersApis, { type FollowerObject } from '@shared/apis/followersApis'
-import profileApis from '@shared/apis/profileApis'
-import usersApi from '@shared/apis/usersApi'
 
 // @domains - inventory
-import { InventoryArtistGrid } from '@domains/inventory/components/InventoryArtistGrid'
-import { InventoryArtistList } from '@domains/inventory/components/InventoryArtistList'
-import { InventoryArtworkGrid } from '@domains/inventory/components/InventoryArtworkGrid'
-import { InventoryArtworkList } from '@domains/inventory/components/InventoryArtworkList'
-import { InventoryFolderGrid } from '@domains/inventory/components/InventoryFolderGrid'
-import { InventoryPageModals } from '@domains/inventory/components/InventoryPageModals'
-import { Pagination } from '@domains/inventory/components/Pagination'
-import { InventoryArtworkDetailsPanel } from '@domains/inventory/components/modals/InventoryArtworkDetailsPanel'
-import { InventoryToolbar } from '@domains/inventory/components/InventoryToolbar'
-import { UploadArtworkMenu } from '@domains/inventory/components/menus/UploadArtworkMenu'
-import { useDebounce } from '@domains/inventory/hooks/useDebounce'
-import { useInventoryBootstrap } from '@domains/inventory/hooks/useInventoryBootstrap'
-import { useInventoryDataStore } from '@domains/inventory/stores/useInventoryDataStore'
-import { useInventorySelectionStore } from '@domains/inventory/stores/useInventorySelectionStore'
-import { useInventoryUiStore } from '@domains/inventory/stores/useInventoryUiStore'
+import { InventoryArtistGrid } from '@domains/inventory/features/artists/components/InventoryArtistGrid'
+import { InventoryArtistList } from '@domains/inventory/features/artists/components/InventoryArtistList'
+import { InventoryArtworkGrid } from '@domains/inventory/features/artworks/components/InventoryArtworkGrid'
+import { InventoryArtworkList } from '@domains/inventory/features/artworks/components/InventoryArtworkList'
+import { InventoryFolderGrid } from '@domains/inventory/features/folders/components/InventoryFolderGrid'
+import { InventoryPageModals } from '@domains/inventory/core/components/InventoryPageModals'
+import { Pagination } from '@domains/inventory/core/components/Pagination'
+import { InventoryArtworkDetailsPanel } from '@domains/inventory/features/artworks/modals/InventoryArtworkDetailsPanel'
+import { InventoryToolbar } from '@domains/inventory/core/components/InventoryToolbar'
+import { UploadArtworkMenu } from '@domains/inventory/core/components/menus/UploadArtworkMenu'
+import { useDebounce } from '@domains/inventory/core/hooks/useDebounce'
+import { useInventoryBootstrap } from '@domains/inventory/core/hooks/useInventoryBootstrap'
+import { useInventoryDataStore } from '@domains/inventory/core/stores/useInventoryDataStore'
+import { useInventorySelectionStore } from '@domains/inventory/core/stores/useInventorySelectionStore'
+import { useInventoryUiStore } from '@domains/inventory/core/stores/useInventoryUiStore'
 import {
   DEFAULT_INVENTORY_FILTERS,
   type InventoryFilters,
-} from '@domains/inventory/types/inventoryFilters'
-import { type InventoryArtwork, type DragItemData } from '@domains/inventory/types/inventoryArtwork'
-import { type InventoryArtist } from '@domains/inventory/types/inventoryArtist'
-import { type InventoryFolder } from '@domains/inventory/types/inventoryFolder'
-import { type InventoryViewMode } from '@domains/inventory/types/inventoryUi'
-import { mapFollowedArtistToInventory } from '@domains/inventory/utils/inventoryArtistMapper'
-import { mapArtworkToInventory } from '@domains/inventory/utils/inventoryApiMapper'
-import {
-  getAuctionHandoffHref,
-  getEditArtworkHref,
-  getProfileVisibilityPatch,
-} from '@domains/inventory/utils/inventoryArtworkActions'
+} from '@domains/inventory/core/types/inventoryFilters'
+import { type InventoryFolder } from '@domains/inventory/features/folders/types/inventoryFolder'
+import { type InventoryViewMode } from '@domains/inventory/core/types/inventoryUi'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
-import { InventoryFolderCard } from '@domains/inventory/components/InventoryFolderCard'
-import { InventoryArtworkGridViewItem } from '@domains/inventory/components/InventoryArtworkGridViewItem'
+import { InventoryFolderCard } from '@domains/inventory/features/folders/components/InventoryFolderCard'
+import { InventoryArtworkGridViewItem } from '@domains/inventory/features/artworks/components/InventoryArtworkGridViewItem'
+import { useFollowedArtists } from '@domains/inventory/features/artists/hooks/useFollowedArtists'
+import { useInventoryArtworks } from '@domains/inventory/features/artworks/hooks/useInventoryArtworks'
+import { useArtworkActions } from '@domains/inventory/features/artworks/hooks/useArtworkActions'
+import { useFolderActions } from '@domains/inventory/features/folders/hooks/useFolderActions'
+import { useInventoryDnd } from '@domains/inventory/core/hooks/useInventoryDnd'
+import { DragOverlay } from '@dnd-kit/core'
 
 type FolderWithCount = InventoryFolder & { itemCount: number }
 
-const FOLLOWED_ARTIST_ARTWORK_PREVIEW_LIMIT = 4
-
-const loadFollowedArtist = async (relationship: FollowerObject): Promise<InventoryArtist> => {
-  const followedUserId = relationship.followedUserId
-  const [userResult, sellerProfileResult, artworksResult] = await Promise.allSettled([
-    usersApi.getUserById(followedUserId),
-    profileApis.getSellerProfileByUserId(followedUserId),
-    artworkApis.listArtworksPaginated({
-      sellerId: followedUserId,
-      isPublished: true,
-      skip: 0,
-      take: FOLLOWED_ARTIST_ARTWORK_PREVIEW_LIMIT,
-    }),
-  ])
-
-  const user = userResult.status === 'fulfilled' ? userResult.value : null
-  const sellerProfile =
-    sellerProfileResult.status === 'fulfilled' ? sellerProfileResult.value : null
-  const artworksPage =
-    artworksResult.status === 'fulfilled'
-      ? artworksResult.value
-      : {
-          data: [],
-          pagination: {
-            total: 0,
-            skip: 0,
-            take: 0,
-            totalPages: 1,
-            currentPage: 1,
-            hasNext: false,
-            hasPrev: false,
-          },
-        }
-
-  return mapFollowedArtistToInventory({
-    relationship,
-    user,
-    sellerProfile,
-    artworks: artworksPage.data,
-    artworkTotal: artworksPage.pagination.total,
-  })
-}
-
 export const InventoryPage = () => {
-  // -- hooks --
-  const router = useRouter()
-
   // -- state --
   const [searchName, setSearchName] = useState('')
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
-  const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false)
-  const [deleteTarget, setDeleteTarget] = useState<InventoryArtwork | null>(null)
-  const [moveTarget, setMoveTarget] = useState<InventoryArtwork | null>(null)
-  const [renameFolderTarget, setRenameFolderTarget] = useState<InventoryFolder | null>(null)
-  const [deleteFolderTarget, setDeleteFolderTarget] = useState<InventoryFolder | null>(null)
-  const [hideFolderTarget, setHideFolderTarget] = useState<InventoryFolder | null>(null)
-  const [detailsTarget, setDetailsTarget] = useState<InventoryArtwork | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [filters, setFilters] = useState<InventoryFilters>(DEFAULT_INVENTORY_FILTERS)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
-  const [total, setTotal] = useState(0)
-  const [totalPages, setTotalPages] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
-  const [followedArtists, setFollowedArtists] = useState<InventoryArtist[]>([])
-  const [followedArtistsTotal, setFollowedArtistsTotal] = useState(0)
-  const [followedArtistsTotalPages, setFollowedArtistsTotalPages] = useState(1)
-  const [isFollowedArtistsLoading, setIsFollowedArtistsLoading] = useState(false)
-  const [followedArtistsError, setFollowedArtistsError] = useState<string | null>(null)
-  const [isDeletingArtwork, setIsDeletingArtwork] = useState(false)
   const [refreshToken, setRefreshToken] = useState(0)
-
-  // DnD state — properly typed for drag overlay
-  const [activeId, setActiveId] = useState<string | null>(null)
-  const [activeItem, setActiveItem] = useState<DragItemData | null>(null)
 
   const viewMode = useInventoryUiStore((state) => state.viewMode)
   const setViewMode = useInventoryUiStore((state) => state.setViewMode)
@@ -164,6 +86,69 @@ export const InventoryPage = () => {
   const setMany = useInventorySelectionStore((state) => state.setMany)
   const { error: bootstrapError } = useInventoryBootstrap({
     includeArtworks: false,
+  })
+
+  const {
+    followedArtists,
+    followedArtistsTotal,
+    followedArtistsTotalPages,
+    isFollowedArtistsLoading,
+    followedArtistsError,
+  } = useFollowedArtists(user?.id, page, pageSize, activeTab === 'artists')
+
+  const debouncedSearchName = useDebounce(searchName, 400)
+  const normalizedSearchName = debouncedSearchName.trim().toLowerCase()
+
+  const {
+    total,
+    totalPages,
+    isLoading: isArtworksLoading,
+    error: artworksError,
+  } = useInventoryArtworks(
+    user?.id,
+    page,
+    pageSize,
+    debouncedSearchName,
+    filters,
+    activeTab === 'artworks',
+    refreshToken,
+    setArtworks,
+    setMany
+  )
+
+  const artworkActions = useArtworkActions({
+    user,
+    selectedIds,
+    setMany,
+    setToastMessage,
+    onArtworkUpdated: (artwork) => {
+      updateArtwork(artwork)
+      setRefreshToken((r) => r + 1)
+    },
+    onArtworkDeleted: (id) => {
+      removeArtwork(id)
+      setRefreshToken((r) => r + 1)
+    },
+    onArtworkMoved: (id, folderId) => moveArtwork(id, folderId ?? undefined),
+    artworks,
+  })
+
+  const folderActions = useFolderActions({
+    user,
+    setToastMessage,
+    onFolderCreated: addFolder,
+    onFolderRenamed: renameFolder,
+    onFolderDeleted: removeFolder,
+    onFolderHidden: setFolderHidden,
+  })
+
+  const { activeId, activeItem, handleDragStart, handleDragEnd } = useInventoryDnd({
+    user,
+    artworks,
+    folders,
+    reorderFolders,
+    optimisticMoveArtwork,
+    setToastMessage,
   })
 
   const sensors = useSensors(
@@ -195,9 +180,6 @@ export const InventoryPage = () => {
     [folders, folderCounts],
   )
 
-  const debouncedSearchName = useDebounce(searchName, 400)
-  const normalizedSearchName = debouncedSearchName.trim().toLowerCase()
-
   const filteredArtists = useMemo(() => {
     if (!normalizedSearchName) {
       return followedArtists
@@ -222,147 +204,6 @@ export const InventoryPage = () => {
     setPage(1)
   }, [debouncedSearchName, filters, activeTab])
 
-  useEffect(() => {
-    if (!user?.id) {
-      setArtworks([])
-      setTotal(0)
-      setTotalPages(1)
-      setMany([])
-      setIsLoading(false)
-      return
-    }
-
-    if (activeTab !== 'artworks') {
-      setIsLoading(false)
-      return
-    }
-
-    let isActive = true
-    setIsLoading(true)
-
-    const loadArtworks = async () => {
-      try {
-        const response = await artworkApis.listArtworksPaginated({
-          sellerId: user.id,
-          includeSellerAuctionLifecycle: true,
-          q: debouncedSearchName || undefined,
-          status: filters.status,
-          minPrice: filters.minPrice,
-          maxPrice: filters.maxPrice,
-          skip: (page - 1) * pageSize,
-          take: pageSize,
-        })
-
-        if (!isActive) {
-          return
-        }
-
-        const mappedArtworks = response.data.map(mapArtworkToInventory)
-        setArtworks(mappedArtworks)
-        setTotal(response.pagination.total)
-        const nextTotalPages = Math.max(1, response.pagination.totalPages)
-        setTotalPages(nextTotalPages)
-        if (page > nextTotalPages) {
-          setPage(nextTotalPages)
-        }
-        setMany([])
-      } catch (error) {
-        if (!isActive) {
-          return
-        }
-
-        setArtworks([])
-        setTotal(0)
-        setTotalPages(1)
-        setToastMessage(error instanceof Error ? error.message : 'Failed to load artworks.')
-      } finally {
-        if (isActive) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    void loadArtworks()
-
-    return () => {
-      isActive = false
-    }
-  }, [
-    activeTab,
-    debouncedSearchName,
-    filters,
-    page,
-    pageSize,
-    refreshToken,
-    setArtworks,
-    setMany,
-    user?.id,
-  ])
-
-  useEffect(() => {
-    if (!user?.id) {
-      setFollowedArtists([])
-      setFollowedArtistsTotal(0)
-      setFollowedArtistsTotalPages(1)
-      setIsFollowedArtistsLoading(false)
-      setFollowedArtistsError(null)
-      return
-    }
-
-    if (activeTab !== 'artists') {
-      setIsFollowedArtistsLoading(false)
-      return
-    }
-
-    let isActive = true
-    const currentUserId = user.id
-    setIsFollowedArtistsLoading(true)
-    setFollowedArtistsError(null)
-
-    const loadFollowedArtists = async () => {
-      try {
-        const relationships = await followersApis.getFollowing(currentUserId, {
-          skip: (page - 1) * pageSize,
-          take: pageSize + 1,
-        })
-        const hasNextPage = relationships.length > pageSize
-        const pageRelationships = relationships.slice(0, pageSize)
-        const artists = await Promise.all(pageRelationships.map(loadFollowedArtist))
-
-        if (!isActive) {
-          return
-        }
-
-        setFollowedArtists(artists)
-        const estimatedTotal =
-          (page - 1) * pageSize + pageRelationships.length + (hasNextPage ? 1 : 0)
-        setFollowedArtistsTotal(estimatedTotal)
-        setFollowedArtistsTotalPages(Math.max(1, page + (hasNextPage ? 1 : 0)))
-      } catch (error) {
-        if (!isActive) {
-          return
-        }
-
-        setFollowedArtists([])
-        setFollowedArtistsTotal(0)
-        setFollowedArtistsTotalPages(1)
-        setFollowedArtistsError(
-          error instanceof Error ? error.message : 'Failed to load followed artists.',
-        )
-      } finally {
-        if (isActive) {
-          setIsFollowedArtistsLoading(false)
-        }
-      }
-    }
-
-    void loadFollowedArtists()
-
-    return () => {
-      isActive = false
-    }
-  }, [activeTab, page, pageSize, user?.id])
-
   // -- handlers --
   const handleSearchChange = (value: string) => {
     setSearchName(value)
@@ -384,14 +225,6 @@ export const InventoryPage = () => {
     setIsExportModalOpen(false)
   }
 
-  const handleOpenCreateFolder = () => {
-    setIsCreateFolderOpen(true)
-  }
-
-  const handleCloseCreateFolder = () => {
-    setIsCreateFolderOpen(false)
-  }
-
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage)
   }
@@ -402,353 +235,30 @@ export const InventoryPage = () => {
   }
 
   const handleMoveArtworkToFolder = async (artworkId: string, folderId: string | null) => {
-    if (!user?.id) {
-      setToastMessage('Please log in to move artwork.')
-      return
-    }
-
-    // Capture previous state for rollback
-    const artwork = artworks.find((a) => a.id === artworkId)
-    const previousFolderId = artwork?.folderId ?? null
-
-    // Optimistic update
-    optimisticMoveArtwork(artworkId, folderId ?? undefined)
-
-    try {
-      await artworkApis.bulkMoveArtworks({
-        artworkIds: [artworkId],
-        folderId: folderId,
-        sellerId: user.id,
-      })
-      setToastMessage('Artwork moved to folder')
-    } catch {
-      // Rollback optimistic update
-      optimisticMoveArtwork(artworkId, previousFolderId ?? undefined)
-      setToastMessage('Failed to move artwork')
-    }
+    artworkActions.handleMoveArtwork(artworks.find(a => a.id === artworkId)!)
+    artworkActions.handleConfirmMove(folderId ?? undefined)
   }
 
   const handleMoveFolderToFolder = async (folderId: string, newParentId: string | null) => {
-    if (!user?.id) {
-      setToastMessage('Please log in to move folder.')
-      return
-    }
+    // Handled by API calls similar to the previous inline logic or by extending folder actions
+    // For simplicity, preserving the direct api call logic here since it's specific to the tree
+    import('@shared/apis/artworkFolderApis').then(({ default: artworkFolderApis }) => {
+      const folder = folders.find((f) => f.id === folderId)
+      const previousParentId = folder?.parentId ?? null
 
-    // Capture previous state for rollback
-    const folder = folders.find((f) => f.id === folderId)
-    const previousParentId = folder?.parentId ?? null
+      moveFolderToFolder(folderId, newParentId)
 
-    // Optimistic update
-    moveFolderToFolder(folderId, newParentId)
-
-    try {
-      await artworkFolderApis.moveFolder(folderId, {
+      artworkFolderApis.moveFolder(folderId, {
         folderId,
         newParentId,
+      }).then(() => {
+        setToastMessage(newParentId ? 'Folder moved successfully' : 'Folder moved to root')
+      }).catch((error) => {
+        moveFolderToFolder(folderId, previousParentId)
+        const message = error instanceof Error ? error.message : 'Failed to move folder'
+        setToastMessage(message)
       })
-      setToastMessage(newParentId ? 'Folder moved successfully' : 'Folder moved to root')
-    } catch (error) {
-      // Rollback optimistic update
-      moveFolderToFolder(folderId, previousParentId)
-      const message = error instanceof Error ? error.message : 'Failed to move folder'
-      setToastMessage(message)
-    }
-  }
-
-  const handleCreateFolder = async (name: string, _description: string) => {
-    void _description
-
-    if (!user?.id) {
-      setToastMessage('Please log in to create a folder.')
-      return
-    }
-
-    try {
-      const created = await artworkFolderApis.createFolder({
-        sellerId: user.id,
-        name,
-      })
-      const newFolder: InventoryFolder = {
-        id: created.id,
-        name: created.name,
-        isHidden: created.isHidden ?? false,
-      }
-      addFolder(newFolder)
-      setToastMessage('Folder created successfully.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create folder.'
-      setToastMessage(message)
-    } finally {
-      setIsCreateFolderOpen(false)
-    }
-  }
-
-  const handleEditArtwork = (artwork: InventoryArtwork) => {
-    void router.push(getEditArtworkHref(artwork))
-  }
-
-  const handleMoveArtwork = (artwork: InventoryArtwork) => {
-    setMoveTarget(artwork)
-  }
-
-  const handleToggleProfileVisibility = async (artwork: InventoryArtwork) => {
-    try {
-      const response = await artworkApis.updateArtwork(
-        artwork.id,
-        getProfileVisibilityPatch(artwork),
-      )
-      const updatedArtwork = mapArtworkToInventory(response)
-      updateArtwork(updatedArtwork)
-      setDetailsTarget((current) => (current?.id === updatedArtwork.id ? updatedArtwork : current))
-      setRefreshToken((value) => value + 1)
-      setToastMessage('Profile visibility updated.')
-    } catch (error) {
-      const message =
-        error instanceof Error && error.message
-          ? error.message
-          : 'We could not update this artwork. Try again.'
-      setToastMessage(message)
-    }
-  }
-
-  const handleStartAuction = (artwork: InventoryArtwork) => {
-    void router.push(getAuctionHandoffHref(artwork))
-  }
-
-  const handleOpenDeleteModal = (artwork: InventoryArtwork) => {
-    setDeleteTarget(artwork)
-  }
-
-  const handleCloseDeleteModal = () => {
-    setDeleteTarget(null)
-  }
-
-  const handleConfirmDelete = async () => {
-    if (!deleteTarget) {
-      return
-    }
-
-    const deletedId = deleteTarget.id
-    setIsDeletingArtwork(true)
-    try {
-      await artworkApis.deleteArtwork(deletedId)
-      removeArtwork(deletedId)
-      setMany(selectedIds.filter((id) => id !== deletedId))
-      setDetailsTarget((current) => (current?.id === deletedId ? null : current))
-      setRefreshToken((value) => value + 1)
-      setToastMessage('Artwork deleted successfully.')
-    } catch (error) {
-      const message =
-        error instanceof Error && error.message
-          ? error.message
-          : 'We could not delete this artwork. Try again.'
-      setToastMessage(message)
-    } finally {
-      setIsDeletingArtwork(false)
-      setDeleteTarget(null)
-    }
-  }
-
-  const handleCloseMoveModal = () => {
-    setMoveTarget(null)
-  }
-
-  const handleConfirmMove = async (folderId?: string) => {
-    if (!moveTarget) {
-      return
-    }
-
-    if (!user?.id) {
-      setToastMessage('Please log in to move artwork.')
-      return
-    }
-
-    const targetId = moveTarget.id
-    try {
-      await artworkApis.bulkMoveArtworks({
-        artworkIds: [targetId],
-        folderId: folderId ?? null,
-        sellerId: user.id,
-      })
-      moveArtwork(targetId, folderId)
-      setMany(selectedIds.filter((id) => id !== targetId))
-      setToastMessage('Artwork moved successfully.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to move artwork.'
-      setToastMessage(message)
-    } finally {
-      setMoveTarget(null)
-    }
-  }
-
-  const handleMoveSelected = () => {
-    const target = artworks.find((artwork) => selectedIds.includes(artwork.id))
-
-    if (target) {
-      setMoveTarget(target)
-    }
-  }
-
-  const handleOpenDetails = (artwork: InventoryArtwork) => {
-    setDetailsTarget(artwork)
-  }
-
-  const handleCloseDetails = () => {
-    setDetailsTarget(null)
-  }
-
-  const handleOpenRenameFolder = (folder: InventoryFolder) => {
-    setRenameFolderTarget(folder)
-  }
-
-  const handleCloseRenameFolder = () => {
-    setRenameFolderTarget(null)
-  }
-
-  const handleSaveRenameFolder = async (name: string) => {
-    if (!renameFolderTarget) {
-      return
-    }
-
-    try {
-      await artworkFolderApis.updateFolder(renameFolderTarget.id, { name })
-      renameFolder(renameFolderTarget.id, name)
-      setToastMessage('Folder renamed successfully.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to rename folder.'
-      setToastMessage(message)
-    } finally {
-      setRenameFolderTarget(null)
-    }
-  }
-
-  const handleOpenDeleteFolder = (folder: InventoryFolder) => {
-    setDeleteFolderTarget(folder)
-  }
-
-  const handleCloseDeleteFolder = () => {
-    setDeleteFolderTarget(null)
-  }
-
-  const handleConfirmDeleteFolder = async () => {
-    if (!deleteFolderTarget) {
-      return
-    }
-
-    try {
-      await artworkFolderApis.deleteFolder(deleteFolderTarget.id)
-      removeFolder(deleteFolderTarget.id)
-      setToastMessage('Folder deleted successfully.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete folder.'
-      setToastMessage(message)
-    } finally {
-      setDeleteFolderTarget(null)
-    }
-  }
-
-  const handleOpenHideFolder = (folder: InventoryFolder) => {
-    setHideFolderTarget(folder)
-  }
-
-  const handleCloseHideFolder = () => {
-    setHideFolderTarget(null)
-  }
-
-  const handleConfirmHideFolder = async () => {
-    if (!hideFolderTarget) {
-      return
-    }
-
-    if (!user?.id) {
-      setToastMessage('Please log in to hide a folder.')
-      return
-    }
-
-    try {
-      await artworkFolderApis.toggleVisibility(hideFolderTarget.id, {
-        sellerId: user.id,
-        isHidden: true,
-      })
-      setFolderHidden(hideFolderTarget.id, true)
-      setToastMessage('Folder hidden successfully.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to hide folder.'
-      setToastMessage(message)
-    } finally {
-      setHideFolderTarget(null)
-    }
-  }
-
-  const handleReorderFolders = async (oldIndex: number, newIndex: number) => {
-    if (!user?.id) {
-      setToastMessage('Please log in to reorder folders.')
-      return
-    }
-
-    // Optimistic update
-    reorderFolders(oldIndex, newIndex)
-
-    // API call
-    try {
-      const newFolders = arrayMove(folders, oldIndex, newIndex)
-      const newOrderIds = newFolders.map((f) => f.id)
-      await artworkFolderApis.reorderFolders({
-        sellerId: user.id,
-        folderIds: newOrderIds,
-      })
-    } catch {
-      setToastMessage('Failed to save folder order')
-      // Revert by reordering back
-      reorderFolders(newIndex, oldIndex)
-    }
-  }
-
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string)
-    setActiveItem((event.active.data.current as DragItemData) ?? null)
-  }
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event
-    setActiveId(null)
-    setActiveItem(null)
-
-    if (!over || !user?.id) return
-
-    const activeType = active.data.current?.type
-    const overType = over.data.current?.type
-
-    if (activeType === 'Folder' && overType === 'Folder') {
-      if (active.id !== over.id) {
-        const oldIndex = folders.findIndex((f) => f.id === active.id)
-        const newIndex = folders.findIndex((f) => f.id === over.id)
-        await handleReorderFolders(oldIndex, newIndex)
-      }
-    } else if (activeType === 'Artwork' && overType === 'Folder') {
-      const artworkId = active.id as string
-      const folderId = over.id as string
-
-      // Capture previous state for rollback
-      const artwork = artworks.find((a) => a.id === artworkId)
-      const previousFolderId = artwork?.folderId
-
-      // Optimistic update
-      optimisticMoveArtwork(artworkId, folderId)
-
-      try {
-        await artworkApis.bulkMoveArtworks({
-          artworkIds: [artworkId],
-          folderId,
-          sellerId: user.id,
-        })
-        setToastMessage('Artwork moved to folder')
-      } catch {
-        // Rollback optimistic update
-        optimisticMoveArtwork(artworkId, previousFolderId)
-        setToastMessage('Failed to move artwork')
-      }
-    }
+    })
   }
 
   useEffect(() => {
@@ -758,8 +268,10 @@ export const InventoryPage = () => {
   }, [bootstrapError])
 
   useEffect(() => {
-    setPage(1)
-  }, [debouncedSearchName, setPage])
+    if (artworksError) {
+      setToastMessage(artworksError)
+    }
+  }, [artworksError])
 
   useEffect(() => {
     if (!toastMessage) {
@@ -793,7 +305,7 @@ export const InventoryPage = () => {
               variant="outline"
               size="lg"
               className="border-primary! text-primary! hover:bg-primary/10! border font-bold!"
-              onClick={handleOpenCreateFolder}
+              onClick={folderActions.handleOpenCreateFolder}
             >
               <Plus className="h-4 w-4" />
               New folder
@@ -813,7 +325,7 @@ export const InventoryPage = () => {
               filteredCount={total}
               totalCount={total}
               idsOnPage={idsOnPage}
-              onMoveSelected={handleMoveSelected}
+              onMoveSelected={artworkActions.handleMoveSelected}
               onOpenExport={handleOpenExportModal}
               filters={filters}
               onApplyFilters={handleApplyFilters}
@@ -870,13 +382,13 @@ export const InventoryPage = () => {
                 {viewMode === 'grid' && foldersWithCounts.length > 0 ? (
                   <InventoryFolderGrid
                     folders={foldersWithCounts}
-                    onRename={handleOpenRenameFolder}
-                    onDelete={handleOpenDeleteFolder}
-                    onHide={handleOpenHideFolder}
+                    onRename={folderActions.handleOpenRenameFolder}
+                    onDelete={folderActions.handleOpenDeleteFolder}
+                    onHide={folderActions.handleOpenHideFolder}
                   />
                 ) : null}
 
-                {isLoading ? (
+                {isArtworksLoading ? (
                   <div className="rounded-2xl border border-black/10 bg-white py-10 text-center text-base text-slate-500">
                     Loading...
                   </div>
@@ -910,12 +422,12 @@ export const InventoryPage = () => {
                     ) : (
                       <InventoryArtworkGrid
                         artworks={gridArtworks}
-                        onEdit={handleEditArtwork}
-                        onMove={handleMoveArtwork}
-                        onDelete={handleOpenDeleteModal}
-                        onOpenDetails={handleOpenDetails}
-                        onToggleProfileVisibility={handleToggleProfileVisibility}
-                        onStartAuction={handleStartAuction}
+                        onEdit={artworkActions.handleEditArtwork}
+                        onMove={artworkActions.handleMoveArtwork}
+                        onDelete={artworkActions.handleOpenDeleteModal}
+                        onOpenDetails={artworkActions.handleOpenDetails}
+                        onToggleProfileVisibility={artworkActions.handleToggleProfileVisibility}
+                        onStartAuction={artworkActions.handleStartAuction}
                       />
                     )}
                   </div>
@@ -924,16 +436,16 @@ export const InventoryPage = () => {
                     <InventoryArtworkList
                       artworks={artworks}
                       folders={foldersWithCounts}
-                      onEdit={handleEditArtwork}
-                      onMove={handleMoveArtwork}
-                      onDelete={handleOpenDeleteModal}
-                      onOpenDetails={handleOpenDetails}
-                      onToggleProfileVisibility={handleToggleProfileVisibility}
-                      onStartAuction={handleStartAuction}
-                      onRenameFolder={handleOpenRenameFolder}
-                      onDeleteFolder={handleOpenDeleteFolder}
-                      onHideFolder={handleOpenHideFolder}
-                      onReorderFolders={handleReorderFolders}
+                      onEdit={artworkActions.handleEditArtwork}
+                      onMove={artworkActions.handleMoveArtwork}
+                      onDelete={artworkActions.handleOpenDeleteModal}
+                      onOpenDetails={artworkActions.handleOpenDetails}
+                      onToggleProfileVisibility={artworkActions.handleToggleProfileVisibility}
+                      onStartAuction={artworkActions.handleStartAuction}
+                      onRenameFolder={folderActions.handleOpenRenameFolder}
+                      onDeleteFolder={folderActions.handleOpenDeleteFolder}
+                      onHideFolder={folderActions.handleOpenHideFolder}
+                      onReorderFolders={reorderFolders}
                       onMoveArtworkToFolder={handleMoveArtworkToFolder}
                       onMoveFolderToFolder={handleMoveFolderToFolder}
                     />
@@ -983,37 +495,37 @@ export const InventoryPage = () => {
 
       {/* modals */}
       <InventoryArtworkDetailsPanel
-        isOpen={Boolean(detailsTarget)}
-        artwork={detailsTarget}
-        onClose={handleCloseDetails}
-        onEdit={handleEditArtwork}
-        onDelete={handleOpenDeleteModal}
-        onToggleProfileVisibility={handleToggleProfileVisibility}
+        isOpen={Boolean(artworkActions.detailsTarget)}
+        artwork={artworkActions.detailsTarget}
+        onClose={artworkActions.handleCloseDetails}
+        onEdit={artworkActions.handleEditArtwork}
+        onDelete={artworkActions.handleOpenDeleteModal}
+        onToggleProfileVisibility={artworkActions.handleToggleProfileVisibility}
       />
       <InventoryPageModals
-        isCreateFolderOpen={isCreateFolderOpen}
-        onCloseCreateFolder={handleCloseCreateFolder}
-        onCreateFolder={handleCreateFolder}
+        isCreateFolderOpen={folderActions.isCreateFolderOpen}
+        onCloseCreateFolder={folderActions.handleCloseCreateFolder}
+        onCreateFolder={folderActions.handleCreateFolder}
         isExportModalOpen={isExportModalOpen}
         onCloseExportModal={handleCloseExportModal}
         onExport={() => setToastMessage('Export started.')}
-        deleteTarget={deleteTarget}
-        isDeletingArtwork={isDeletingArtwork}
-        onCloseDeleteModal={handleCloseDeleteModal}
-        onConfirmDelete={handleConfirmDelete}
-        renameFolderTarget={renameFolderTarget}
-        onCloseRenameFolder={handleCloseRenameFolder}
-        onSaveRenameFolder={handleSaveRenameFolder}
-        deleteFolderTarget={deleteFolderTarget}
-        onCloseDeleteFolder={handleCloseDeleteFolder}
-        onConfirmDeleteFolder={handleConfirmDeleteFolder}
-        hideFolderTarget={hideFolderTarget}
-        onCloseHideFolder={handleCloseHideFolder}
-        onConfirmHideFolder={handleConfirmHideFolder}
-        moveTarget={moveTarget}
+        deleteTarget={artworkActions.deleteTarget}
+        isDeletingArtwork={artworkActions.isDeletingArtwork}
+        onCloseDeleteModal={artworkActions.handleCloseDeleteModal}
+        onConfirmDelete={artworkActions.handleConfirmDelete}
+        renameFolderTarget={folderActions.renameFolderTarget}
+        onCloseRenameFolder={folderActions.handleCloseRenameFolder}
+        onSaveRenameFolder={folderActions.handleSaveRenameFolder}
+        deleteFolderTarget={folderActions.deleteFolderTarget}
+        onCloseDeleteFolder={folderActions.handleCloseDeleteFolder}
+        onConfirmDeleteFolder={folderActions.handleConfirmDeleteFolder}
+        hideFolderTarget={folderActions.hideFolderTarget}
+        onCloseHideFolder={folderActions.handleCloseHideFolder}
+        onConfirmHideFolder={folderActions.handleConfirmHideFolder}
+        moveTarget={artworkActions.moveTarget}
         folders={folders}
-        onCloseMoveModal={handleCloseMoveModal}
-        onConfirmMove={handleConfirmMove}
+        onCloseMoveModal={artworkActions.handleCloseMoveModal}
+        onConfirmMove={artworkActions.handleConfirmMove}
         toastMessage={toastMessage}
         onCloseToast={() => setToastMessage(null)}
       />

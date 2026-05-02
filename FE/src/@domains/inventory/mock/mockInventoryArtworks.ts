@@ -1,5 +1,5 @@
 // @domains - inventory
-import { type InventoryArtwork } from '@domains/inventory/types/inventoryArtwork'
+import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
 
 export const mockInventoryArtworks: InventoryArtwork[] = [
   {
