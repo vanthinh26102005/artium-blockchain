@@ -10,8 +10,6 @@ import { Metadata } from '@/components/SEO/Metadata'
 // @shared - components
 import { Dialog, DialogContent } from '@shared/components/ui/dialog'
 import { Button } from '@shared/components/ui/button'
-import type { ApiError } from '@shared/services/apiClient'
-import artworkApis from '@shared/apis/artworkApis'
 import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis'
 
 // @domains - inventory upload
@@ -23,19 +21,10 @@ import { useUploadArtworkStore } from '@domains/inventory-upload/stores/useUploa
 import { useArtworkSubmit } from '@domains/inventory-upload/hooks/useArtworkSubmit'
 import { resolveUploadCreatorName } from '@domains/inventory-upload/utils/artistIdentity'
 import { useAuthStore } from '@/@domains/auth/stores/useAuthStore'
+import { useUploadDraftInit } from '@domains/inventory-upload/hooks/useUploadDraftInit'
+import { useUploadNavigationBlocker } from '@domains/inventory-upload/hooks/useUploadNavigationBlocker'
 
 const TOTAL_STEPS = 2
-
-const createDraftArtworkId = () => {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID()
-  }
-
-  return `draft-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
-}
-
-const getQueryParam = (value: string | string[] | undefined) =>
-  Array.isArray(value) ? value[0] : value
 
 export const UploadPage = () => {
   // -- router --
@@ -47,11 +36,6 @@ export const UploadPage = () => {
   // -- state --
   const step = useUploadArtworkStore((state) => state.step)
   const draftId = useUploadArtworkStore((state) => state.draftId)
-  const isDirty = useUploadArtworkStore((state) => state.isDirty)
-  const hydrateFromQuery = useUploadArtworkStore((state) => state.hydrateFromQuery)
-  const hydrateFromBackendDraft = useUploadArtworkStore((state) => state.hydrateFromBackendDraft)
-  const hydrationError = useUploadArtworkStore((state) => state.hydrationError)
-  const setHydrationError = useUploadArtworkStore((state) => state.setHydrationError)
   const resetDraft = useUploadArtworkStore((state) => state.resetDraft)
   const nextStep = useUploadArtworkStore((state) => state.nextStep)
   const prevStep = useUploadArtworkStore((state) => state.prevStep)
@@ -62,15 +46,8 @@ export const UploadPage = () => {
 
   const [isExitOpen, setIsExitOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isDraftLoading, setIsDraftLoading] = useState(false)
-  const [retryCount, setRetryCount] = useState(0)
   const [sellerProfile, setSellerProfile] = useState<SellerProfilePayload | null>(null)
   const allowNavigationRef = useRef(false)
-  const generatedDraftIdRef = useRef<string | null>(null)
-  const lastHydratedDraftIdRef = useRef<string | null>(null)
-  const lastHydratedArtworkIdRef = useRef<string | null>(null)
-  const artworkIdParam = getQueryParam(router.query.artworkId)
-  const isEditingArtwork = Boolean(artworkIdParam)
 
   // -- submission --
   const {
@@ -84,6 +61,17 @@ export const UploadPage = () => {
   } = useArtworkSubmit()
 
   const stepStatus = getStepStatus(step)
+
+  const {
+    isDraftLoading,
+    isEditingArtwork,
+    artworkIdParam,
+    hydrationError,
+    handleRetryDraftLoad,
+    handleStartNewDraft,
+  } = useUploadDraftInit(allowNavigationRef)
+
+  useUploadNavigationBlocker(allowNavigationRef)
 
   // -- effects --
   useEffect(() => {
@@ -115,215 +103,12 @@ export const UploadPage = () => {
   }, [user?.id])
 
   useEffect(() => {
-    if (!router.isReady) {
-      return
-    }
-
-    const artworkIdParam = getQueryParam(router.query.artworkId)
-    const legacyDraftParam = router.query.draft
-    const draftArtworkIdQuery = router.query.draftArtworkId ?? legacyDraftParam
-    const draftArtworkIdParam = getQueryParam(draftArtworkIdQuery)
-
-    if (artworkIdParam) {
-      if (lastHydratedArtworkIdRef.current === artworkIdParam) {
-        return
-      }
-
-      let isCancelled = false
-      const loadArtwork = async () => {
-        hydrateFromQuery(artworkIdParam)
-        setHydrationError(null)
-        setIsDraftLoading(true)
-        generatedDraftIdRef.current = null
-        lastHydratedDraftIdRef.current = null
-
-        try {
-          const artwork = await artworkApis.getArtworkById(artworkIdParam)
-
-          if (isCancelled) {
-            return
-          }
-
-          if (!artwork) {
-            setHydrationError('This artwork is not available for your account.')
-            return
-          }
-
-          hydrateFromBackendDraft(artwork)
-          lastHydratedArtworkIdRef.current = artworkIdParam
-        } catch (err) {
-          if (isCancelled) {
-            return
-          }
-
-          const apiError = err as ApiError
-          const message =
-            apiError.status === 401
-              ? 'Please log in again to continue editing this artwork.'
-              : apiError.status === 403 || apiError.status === 404
-                ? 'This artwork is not available for your account.'
-                : apiError.message || 'We could not load this artwork. Please try again.'
-          setHydrationError(message)
-        } finally {
-          if (!isCancelled) {
-            setIsDraftLoading(false)
-          }
-        }
-      }
-
-      loadArtwork()
-
-      return () => {
-        isCancelled = true
-      }
-    }
-
-    if (
-      !router.query.draftArtworkId &&
-      typeof draftArtworkIdParam === 'string' &&
-      draftArtworkIdParam
-    ) {
-      const nextQuery = { ...router.query }
-      delete nextQuery.draft
-      nextQuery.draftArtworkId = draftArtworkIdParam
-
-      allowNavigationRef.current = true
-      router
-        .replace(
-          {
-            pathname: router.pathname,
-            query: nextQuery,
-          },
-          undefined,
-          { shallow: true },
-        )
-        .finally(() => {
-          allowNavigationRef.current = false
-        })
-      return
-    }
-
-    if (!draftArtworkIdParam) {
-      const nextDraftId = createDraftArtworkId()
-      generatedDraftIdRef.current = nextDraftId
-      lastHydratedDraftIdRef.current = null
-      lastHydratedArtworkIdRef.current = null
-      allowNavigationRef.current = true
-      router
-        .replace(
-          {
-            pathname: router.pathname,
-            query: { ...router.query, draftArtworkId: nextDraftId },
-          },
-          undefined,
-          { shallow: true },
-        )
-        .finally(() => {
-          allowNavigationRef.current = false
-        })
-      return
-    }
-
-    if (lastHydratedDraftIdRef.current === draftArtworkIdParam) {
-      return
-    }
-
-    let isCancelled = false
-    const loadDraft = async () => {
-      const isGeneratedDraft = generatedDraftIdRef.current === draftArtworkIdParam
-      hydrateFromQuery(draftArtworkIdParam)
-      setHydrationError(null)
-      setIsDraftLoading(true)
-
-      try {
-        const draft = isGeneratedDraft
-          ? await artworkApis.createUploadDraft(draftArtworkIdParam)
-          : await artworkApis.getUploadDraft(draftArtworkIdParam)
-
-        if (isCancelled) {
-          return
-        }
-
-        hydrateFromBackendDraft(draft)
-        lastHydratedDraftIdRef.current = draftArtworkIdParam
-        generatedDraftIdRef.current = null
-      } catch (err) {
-        if (isCancelled) {
-          return
-        }
-
-        const apiError = err as ApiError
-        const message =
-          apiError.status === 401
-            ? 'Please log in again to continue editing this draft.'
-            : apiError.status === 403 || apiError.status === 404
-              ? 'This draft is not available for your account. Start a new upload or open one of your drafts.'
-              : apiError.message || 'We could not load this draft. Please try again.'
-        setHydrationError(message)
-      } finally {
-        if (!isCancelled) {
-          setIsDraftLoading(false)
-        }
-      }
-    }
-
-    loadDraft()
-
-    return () => {
-      isCancelled = true
-    }
-  }, [
-    hydrateFromBackendDraft,
-    hydrateFromQuery,
-    retryCount,
-    router,
-    router.isReady,
-    router.pathname,
-    router.query,
-    router.replace,
-    setHydrationError,
-  ])
-
-  useEffect(() => {
     return () => revokeMediaPreviews()
   }, [revokeMediaPreviews])
 
   useEffect(() => {
     validateStep(step)
   }, [step, validateStep])
-
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!isDirty) {
-        return
-      }
-      event.preventDefault()
-      event.returnValue = ''
-    }
-
-    const handleRouteChangeStart = () => {
-      if (!isDirty || allowNavigationRef.current) {
-        return
-      }
-      const shouldLeave = window.confirm(
-        'You have unsaved changes. Are you sure you want to leave this page?',
-      )
-      if (shouldLeave) {
-        clearDirty()
-        return
-      }
-      router.events.emit('routeChangeError')
-      throw new Error('Route change aborted.')
-    }
-
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    router.events.on('routeChangeStart', handleRouteChangeStart)
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-      router.events.off('routeChangeStart', handleRouteChangeStart)
-    }
-  }, [clearDirty, isDirty, router.events])
 
   // -- handlers --
   const handlePrevStep = () => {
@@ -334,17 +119,18 @@ export const UploadPage = () => {
     // If on step 2 (final step), submit the artwork
     if (step === TOTAL_STEPS) {
       if (!user || !user.id) {
-        setHydrationError('Please log in to submit artwork.')
+        // Fallback alert instead of setting unmanaged hydration error state directly on UI without hook sync
+        alert('Please log in to submit artwork.')
         return
       }
 
       if (isEditingArtwork && !artworkIdParam) {
-        setHydrationError('Artwork id is missing. Refresh the page and try again.')
+        alert('Artwork id is missing. Refresh the page and try again.')
         return
       }
 
       if (!isEditingArtwork && !draftId) {
-        setHydrationError('Draft artwork id is missing. Refresh the page and try again.')
+        alert('Draft artwork id is missing. Refresh the page and try again.')
         return
       }
 
@@ -401,37 +187,6 @@ export const UploadPage = () => {
     resetDraft()
     setIsExitOpen(false)
     router.push('/inventory')
-  }
-
-  const handleRetryDraftLoad = () => {
-    lastHydratedDraftIdRef.current = null
-    lastHydratedArtworkIdRef.current = null
-    setRetryCount((count) => count + 1)
-  }
-
-  const handleStartNewDraft = () => {
-    const nextDraftId = createDraftArtworkId()
-    generatedDraftIdRef.current = nextDraftId
-    lastHydratedDraftIdRef.current = null
-    lastHydratedArtworkIdRef.current = null
-    resetDraft()
-    setHydrationError(null)
-    const nextQuery = { ...router.query }
-    delete nextQuery.artworkId
-    nextQuery.draftArtworkId = nextDraftId
-    allowNavigationRef.current = true
-    router
-      .replace(
-        {
-          pathname: router.pathname,
-          query: nextQuery,
-        },
-        undefined,
-        { shallow: true },
-      )
-      .finally(() => {
-        allowNavigationRef.current = false
-      })
   }
 
   // -- render --
