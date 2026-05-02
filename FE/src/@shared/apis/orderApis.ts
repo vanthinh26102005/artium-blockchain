@@ -40,7 +40,13 @@ export type OrderItemResponse = {
   currency: string
   artworkTitle: string
   artworkImageUrl?: string | null
+  artworkDescription?: string | null
+  platformFee?: string | null
+  sellerPayoutAmount?: string | null
   payoutStatus: string
+  payoutAt?: string | null
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type OrderScope = 'buyer' | 'seller'
@@ -59,39 +65,54 @@ export type PaginatedOrdersResponse = {
 
 export type OrderResponse = {
   id: string
-  collectorId: string
+  collectorId?: string | null
   orderNumber: string
   status: string
   subtotal: number
   shippingCost: number
   taxAmount: number
-  discountAmount: number
+  discountAmount?: number | null
   totalAmount: number
   currency: string
-  paymentStatus: string
-  paymentMethod: string | null
-  paymentIntentId: string | null
-  paymentTransactionId: string | null
-  shippingAddress: ShippingAddressRequest | null
-  billingAddress?: ShippingAddressRequest | null
+  promoCode?: string | null
   shippingMethod?: string | null
   trackingNumber?: string | null
   carrier?: string | null
+  estimatedDeliveryDate?: string | null
+  paymentStatus: string
+  paymentMethod?: string | null
+  paymentIntentId?: string | null
+  paymentTransactionId?: string | null
+  shippingAddress?: ShippingAddressRequest | null
+  billingAddress?: ShippingAddressRequest | null
   customerNotes: string | null
+  internalNotes?: string | null
   cancelledReason?: string | null
+  cancelledAt?: string | null
   confirmedAt?: string | null
   shippedAt?: string | null
   deliveredAt?: string | null
-  cancelledAt?: string | null
+  onChainOrderId?: string | null
+  contractAddress?: string | null
+  chainId?: string | null
+  escrowState?: number | null
+  txHash?: string | null
+  sellerWallet?: string | null
+  buyerWallet?: string | null
+  bidAmountWei?: string | null
   disputeReason?: string | null
   disputeOpenedAt?: string | null
   disputeResolvedAt?: string | null
-  onChainOrderId?: string | null
-  txHash?: string | null
   sellerAuctionLifecycle?: SellerAuctionStartStatusResponse | null
+  disputeResolutionNotes?: string | null
   items?: OrderItemResponse[]
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
+}
+
+export type OrdersListResponse = {
+  data: OrderResponse[]
+  total: number
 }
 
 export type OrderInvoiceAddressResponse = {
@@ -190,6 +211,10 @@ const orderApis = {
 
   getMyOrders: async ({ scope, status, skip, take }: GetMyOrdersInput): Promise<PaginatedOrdersResponse> => {
     return apiFetch<PaginatedOrdersResponse>(withQuery('/orders', { scope, status, skip, take }))
+  },
+
+  getOrderByOnChainId: async (onChainOrderId: string): Promise<OrderResponse> => {
+    return apiFetch<OrderResponse>(`/orders/on-chain/${encodeURIComponent(onChainOrderId)}`)
   },
 
   getOrderItems: async (orderId: string): Promise<OrderItemResponse[]> => {

@@ -431,6 +431,31 @@ services:
     environment:
       SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
       RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
+      PORT: 3002
+      MICROSERVICE_PORT: 3102
+      MICROSERVICE_HOST: 0.0.0.0
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      DB_SYNCHRONIZE: "true"
+      SHARED_DB_HOST: db-shared
+      SHARED_DB_PORT: 5432
+      SHARED_DB_USERNAME: postgres
+      SHARED_DB_NAME: artium_global
+      DB_HOST: db-artwork
+      DB_PORT: 5432
+      DB_USER: artwork_user
+      DB_PASS: "1"
+      DB_NAME: artwork_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TZ: Asia/Ho_Chi_Minh
+      GCS_PROJECT_ID: artworkmanagement
+      GCS_BUCKET_NAME: artwork_uit
+      GCS_KEY_FILE: /app/config/gcs-service-account.json
+      MAX_FILE_SIZE_MB: 10
+      ALLOWED_IMAGE_TYPES: image/jpeg,image/png,image/webp,image/gif,image/jpg
+      IMAGE_QUALITY: 85
+      IMAGE_MAX_WIDTH: 2000
+      IMAGE_MAX_HEIGHT: 2000
     volumes:
       - .:/app
       - artwork_node_modules:/app/node_modules

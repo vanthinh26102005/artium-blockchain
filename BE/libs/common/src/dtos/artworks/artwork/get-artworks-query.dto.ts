@@ -50,12 +50,32 @@ export class GetArtworksQueryDto {
   isPublished?: boolean;
 
   @ApiProperty({
+    description: 'Filter by an exact on-chain auction ID',
+    example: 'auction-0001',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  onChainAuctionId?: string;
+
+  @ApiProperty({
+    description: 'Only return artworks that have an on-chain auction ID',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  hasOnChainAuctionId?: boolean;
+
+  @ApiProperty({
     description: 'Filter by minimum price',
     example: 0,
     required: false,
     minimum: 0,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   minPrice?: number;
@@ -67,6 +87,7 @@ export class GetArtworksQueryDto {
     minimum: 0,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   maxPrice?: number;
@@ -78,6 +99,7 @@ export class GetArtworksQueryDto {
     minimum: 0,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   skip?: number;
@@ -89,6 +111,7 @@ export class GetArtworksQueryDto {
     minimum: 1,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(1)
   take?: number;

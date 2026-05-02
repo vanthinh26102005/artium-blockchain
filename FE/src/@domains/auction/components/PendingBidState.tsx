@@ -36,7 +36,7 @@ const formatTransactionHash = (value: string) => `${value.slice(0, 7)}...${value
 const formatEthDisplay = (value: number) => `${value.toFixed(2)} ETH`
 
 const getTransactionUrl = (transactionHash: string) =>
-  `${WALLET_TARGET_CHAIN.blockExplorerUrl}/tx/${encodeURIComponent(transactionHash)}`
+  `${WALLET_TARGET_CHAIN.blockExplorerUrl.replace(/\/$/, '')}/tx/${encodeURIComponent(transactionHash)}`
 
 export const PendingBidState = ({
   isOpen,

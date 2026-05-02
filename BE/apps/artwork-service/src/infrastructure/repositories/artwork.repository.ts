@@ -12,7 +12,9 @@ import {
   EntityManager,
   FindOptionsOrder,
   FindOptionsWhere,
+  IsNull,
   Like,
+  Not,
   Repository,
   FindManyOptions as TypeOrmFindManyOptions,
   FindOneOptions as TypeOrmFindOneOptions,
@@ -147,6 +149,7 @@ export class ArtworkRepository implements IArtworkRepository {
       minPrice?: number;
       maxPrice?: number;
       includeSellerAuctionLifecycle?: unknown;
+      hasOnChainAuctionId?: boolean;
     } = {},
     transactionManager?: EntityManager,
   ): Promise<[Artwork[], number]> {
@@ -157,6 +160,7 @@ export class ArtworkRepository implements IArtworkRepository {
       minPrice,
       maxPrice,
       includeSellerAuctionLifecycle: _includeSellerAuctionLifecycle,
+      hasOnChainAuctionId,
       ...rest
     } = options;
 
@@ -164,13 +168,19 @@ export class ArtworkRepository implements IArtworkRepository {
       where as Record<string, unknown> | undefined,
     );
 
+    const baseTypeOrmWhere: FindOptionsWhere<Artwork> = {
+      ...mapToTypeOrmWhere(safeWhere as WhereOperator<Artwork>),
+      ...(hasOnChainAuctionId === true ? { onChainAuctionId: Not(IsNull()) } : {}),
+      ...(hasOnChainAuctionId === false ? { onChainAuctionId: IsNull() } : {}),
+    };
+
     let typeOrmWhere: FindOptionsWhere<Artwork> | FindOptionsWhere<Artwork>[] =
-      mapToTypeOrmWhere(safeWhere as WhereOperator<Artwork>);
+      baseTypeOrmWhere;
 
     // Handle search query - search across title, description, materials, and creatorName
     if (searchQuery) {
       const searchPattern = `%${searchQuery}%`;
-      const baseWhere = mapToTypeOrmWhere(safeWhere as WhereOperator<Artwork>);
+      const baseWhere = baseTypeOrmWhere;
 
       // Create an array of search conditions (OR logic)
       typeOrmWhere = [

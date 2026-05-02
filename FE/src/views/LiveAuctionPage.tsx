@@ -1,9 +1,10 @@
 import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { ChevronDown, Grid2X2, LayoutList, ShieldCheck } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { BidEditingModal } from '@domains/auction/components'
+import { BidEditingModal, type BidOrderStatusPayload } from '@domains/auction/components'
 import { useAuctionLots } from '@domains/auction/hooks/useAuctionLots'
 import { useAuctionRealtime } from '@domains/auction/hooks/useAuctionRealtime'
 import type {
@@ -104,6 +105,7 @@ const isBidActionStatus = (statusKey: AuctionLotStatusKey) =>
   statusKey === 'active' || statusKey === 'ending-soon'
 
 const LiveAuctionPage = () => {
+  const router = useRouter()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isMobileViewport, setIsMobileViewport] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<AuctionCategoryKey>('all')
@@ -423,6 +425,14 @@ const LiveAuctionPage = () => {
     }
 
     setSelectedBidLot(lot)
+  }
+
+  const handleViewOrderStatus = ({ lot }: BidOrderStatusPayload) => {
+    if (!lot.onChainOrderId) {
+      return
+    }
+
+    void router.push(`/orders/on-chain/${encodeURIComponent(lot.onChainOrderId)}`)
   }
 
   return (
@@ -1242,6 +1252,7 @@ const LiveAuctionPage = () => {
           isOpen={Boolean(selectedBidLot)}
           onClose={() => setSelectedBidLot(null)}
           onRefreshLot={refreshAuctionById}
+          onViewOrderStatus={handleViewOrderStatus}
         />
 
       </div>

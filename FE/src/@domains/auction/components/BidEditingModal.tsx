@@ -37,11 +37,18 @@ export type AuctionBidLot = {
   contractAddress?: string | null
 }
 
+export type BidOrderStatusPayload = {
+  lot: AuctionBidLot
+  committedBidValue: number
+  transactionHash: string
+}
+
 type BidEditingModalProps = {
   isOpen: boolean
   lot: AuctionBidLot | null
   onClose: () => void
   onRefreshLot?: (auctionId: string) => Promise<AuctionBidLot>
+  onViewOrderStatus?: (payload: BidOrderStatusPayload) => void
 }
 
 const MIN_BID_INCREMENT_ETH = 0.1
@@ -97,7 +104,13 @@ const getBidModalStatusLabel = (statusKey: AuctionBidLotStatusKey) => {
 
 const normalizeWalletAddress = (value?: string | null) => value?.trim().toLowerCase() ?? null
 
-export const BidEditingModal = ({ isOpen, lot, onClose, onRefreshLot }: BidEditingModalProps) => {
+export const BidEditingModal = ({
+  isOpen,
+  lot,
+  onClose,
+  onRefreshLot,
+  onViewOrderStatus,
+}: BidEditingModalProps) => {
   const [viewState, setViewState] = useState<
     'editing' | 'submitting' | 'pending' | 'confirmed' | 'failed'
   >('editing')
@@ -396,6 +409,16 @@ export const BidEditingModal = ({ isOpen, lot, onClose, onRefreshLot }: BidEditi
         committedBidValue={committedBidValue}
         transactionHash={transactionHash}
         onClose={handleCloseModal}
+        onViewOrderStatus={
+          onViewOrderStatus
+            ? () =>
+                onViewOrderStatus({
+                  lot,
+                  committedBidValue,
+                  transactionHash,
+                })
+            : undefined
+        }
       />
     )
   }

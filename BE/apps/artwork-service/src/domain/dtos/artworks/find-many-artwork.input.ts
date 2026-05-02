@@ -38,6 +38,23 @@ export class FindManyArtworkInput {
   isPublished?: boolean;
 
   @ApiPropertyOptional({
+    description: 'Filter by exact on-chain auction ID',
+    example: 'auction-0001',
+  })
+  @IsOptional()
+  @IsString()
+  onChainAuctionId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Only return artworks with an on-chain auction ID',
+    example: true,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  hasOnChainAuctionId?: boolean;
+
+  @ApiPropertyOptional({
     description: 'Filter by folder ID (use "null" string for root inventory)',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })

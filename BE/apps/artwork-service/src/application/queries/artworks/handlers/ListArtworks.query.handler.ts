@@ -45,6 +45,7 @@ export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
         minPrice,
         maxPrice,
         includeSellerAuctionLifecycle,
+        hasOnChainAuctionId,
         ...restOptions
       } = query.options;
 
@@ -82,6 +83,7 @@ export class ListArtworksHandler implements IQueryHandler<ListArtworksQuery> {
         searchQuery: q,
         minPrice,
         maxPrice,
+        hasOnChainAuctionId,
       });
 
       const shouldIncludeAuctionLifecycle =

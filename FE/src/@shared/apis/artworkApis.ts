@@ -61,6 +61,11 @@ export type ArtworkApiItem = {
   commentCount?: number
   moodboardCount?: number
   auctionLifecycle?: SellerAuctionStartStatusResponse | null
+  ipfsMetadataHash?: string | null
+  reservePrice?: string | null
+  minBidIncrement?: string | null
+  auctionDuration?: number | null
+  onChainAuctionId?: string | null
 }
 
 export type ArtworkLikeStatusResponse = {
@@ -74,6 +79,8 @@ export type ListArtworksParams = {
   folderId?: string | null
   status?: string
   isPublished?: boolean
+  onChainAuctionId?: string
+  hasOnChainAuctionId?: boolean
   q?: string
   skip?: number
   take?: number
@@ -227,6 +234,13 @@ const artworkApis = {
   },
   getArtworkById: (id: string) =>
     apiFetch<ArtworkApiItem | null>(`/artwork/${encodePathSegment(id)}`),
+  getArtworkByOnChainAuctionId: async (onChainAuctionId: string) => {
+    const artworks = await artworkApis.listArtworks({
+      onChainAuctionId,
+      take: 1,
+    })
+    return artworks[0] ?? null
+  },
   getArtworkLikeStatus: (id: string) =>
     apiFetch<{ liked: boolean }>(`/artwork/${encodePathSegment(id)}/likes/me`, {
       auth: true,

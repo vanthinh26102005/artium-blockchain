@@ -5,12 +5,19 @@ import {
 } from '@app/common';
 import { Controller, Inject, Logger } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
-import { randomUUID } from 'crypto';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { GcsStorageService } from '../../domain/services/gcs-storage.service';
 import {
   IArtworkRepository,
   type IArtworkRepository as ArtworkRepositoryContract,
 } from '../../domain/interfaces/artwork.repository.interface';
+
+const getImageExtension = (file?: Express.Multer.File, fallback = '.webp') =>
+  path.extname(file?.originalname ?? '').toLowerCase() || fallback;
+
+const createStoredImageFileName = (file?: Express.Multer.File) =>
+  `${uuidv4()}${getImageExtension(file)}`;
 
 interface UploadArtworkImageDto {
   sellerId: string;
@@ -87,7 +94,7 @@ export class UploadMicroserviceController {
 
     const uploadResult = await this.gcsStorage.uploadFile(dto.file, {
       folder: `artworks/${dto.sellerId}/${dto.artworkId}`,
-      fileName: `${randomUUID()}.webp`,
+      fileName: createStoredImageFileName(dto.file),
       makePublic: true,
       metadata: {
         sellerId: dto.sellerId,
@@ -150,7 +157,7 @@ export class UploadMicroserviceController {
       dto.files.map(async (file, index) => {
         const uploadResult = await this.gcsStorage.uploadFile(file, {
           folder: `artworks/${dto.sellerId}/${dto.artworkId}`,
-          fileName: `${randomUUID()}.webp`,
+          fileName: createStoredImageFileName(file),
           makePublic: true,
           metadata: {
             sellerId: dto.sellerId,
@@ -183,7 +190,7 @@ export class UploadMicroserviceController {
 
     const uploadResult = await this.gcsStorage.uploadFile(dto.file, {
       folder: `avatars`,
-      fileName: `${dto.userId}.webp`,
+      fileName: `${dto.userId}${getImageExtension(dto.file)}`,
       makePublic: true,
       metadata: {
         userId: dto.userId,

@@ -28,6 +28,25 @@ export interface UploadResult {
   createdAt: Date;
 }
 
+interface SerializedBuffer {
+  type: 'Buffer';
+  data: number[];
+}
+
+const isSerializedBuffer = (value: unknown): value is SerializedBuffer =>
+  typeof value === 'object' &&
+  value !== null &&
+  'type' in value &&
+  'data' in value &&
+  (value as { type: unknown }).type === 'Buffer' &&
+  Array.isArray((value as { data: unknown }).data);
+
+const isErrorWithCode = (error: unknown, code: number): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'code' in error &&
+  (error as { code: unknown }).code === code;
+
 @Injectable()
 export class GcsStorageService {
   private readonly logger = new Logger(GcsStorageService.name);
@@ -73,18 +92,14 @@ export class GcsStorageService {
     );
 
     // Handle potential buffer serialization issues
-    if (!Buffer.isBuffer(buffer)) {
-      if (
-        typeof buffer === 'object' &&
-        buffer !== null &&
-        (buffer as any).type === 'Buffer' &&
-        Array.isArray((buffer as any).data)
-      ) {
+    const incomingBuffer: unknown = buffer;
+    if (!Buffer.isBuffer(incomingBuffer)) {
+      if (isSerializedBuffer(incomingBuffer)) {
         this.logger.warn(`[${requestId}] converting JSON buffer to Buffer`);
-        buffer = Buffer.from((buffer as any).data);
+        buffer = Buffer.from(incomingBuffer.data);
       } else {
         this.logger.warn(
-          `[${requestId}] buffer argument is not a Buffer and does not look like a serialized Buffer. Received: ${typeof buffer}`,
+          `[${requestId}] buffer argument is not a Buffer and does not look like a serialized Buffer. Received: ${typeof incomingBuffer}`,
         );
       }
     }
@@ -116,10 +131,10 @@ export class GcsStorageService {
       if (options.makePublic) {
         try {
           await file.makePublic();
-        } catch (aclError: any) {
+        } catch (aclError: unknown) {
           // Ignore error 400 - occurs when bucket has uniform bucket-level access enabled
           // In this case, public access is controlled at bucket level, not per-object
-          if (aclError?.code !== 400) {
+          if (!isErrorWithCode(aclError, 400)) {
             throw aclError;
           }
           this.logger.debug(
@@ -241,7 +256,7 @@ export class GcsStorageService {
     const allowedTypes = this.configService
       .get<string>(
         'ALLOWED_IMAGE_TYPES',
-        'image/jpeg,image/png,image/webp,image/jpg',
+        'image/jpeg,image/png,image/webp,image/gif,image/jpg',
       )
       .split(',');
 
