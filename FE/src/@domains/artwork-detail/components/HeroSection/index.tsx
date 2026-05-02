@@ -7,9 +7,10 @@ import { ArtworkActions } from './ArtworkActions'
 
 type HeroSectionProps = {
     artwork: ArtworkDetail
+    onLikeArtwork?: (liked: boolean) => void | Promise<void>
 }
 
-export const HeroSection = ({ artwork }: HeroSectionProps) => {
+export const HeroSection = ({ artwork, onLikeArtwork }: HeroSectionProps) => {
     const artworkThumbnailUrl = artwork.images?.[0]?.url ?? artwork.coverUrl
 
     return (
@@ -24,10 +25,12 @@ export const HeroSection = ({ artwork }: HeroSectionProps) => {
                         <ArtworkActions
                             likesCount={artwork.likesCount}
                             isLiked={artwork.likedByUser}
-                            isSaved={artwork.savedByUser}
                             artworkThumbnailUrl={artworkThumbnailUrl}
-                            artworkImages={artwork.images}
                             artworkId={artwork.id}
+                            artworkTitle={artwork.title}
+                            artworkPrice={artwork.priceAmount}
+                            artworkSellerId={artwork.sellerId}
+                            onLike={onLikeArtwork}
                         />
                     </div>
                 </div>

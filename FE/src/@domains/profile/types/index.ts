@@ -114,8 +114,22 @@ export type ProfileMoodboard = {
   coverUrl: string
   secondaryCoverUrl?: string
   artworkCoverUrls?: string[]
+  artworkItems?: ProfileMoodboardArtwork[]
   mediaItems?: ProfileMoodboardMedia[]
   isPrivate?: boolean
+}
+
+export type ProfileMoodboardArtwork = {
+  artworkId: string
+  title: string
+  imageUrl?: string | null
+  price?: string | null
+  sellerId?: string | null
+  displayOrder: number
+  notes?: string | null
+  tags?: string[] | null
+  isFavorite: boolean
+  availabilityStatus?: string | null
 }
 
 export type ProfileMoodboardMedia = {

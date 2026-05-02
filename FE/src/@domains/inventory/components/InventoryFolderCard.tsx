@@ -75,8 +75,8 @@ export const InventoryFolderCard = ({
 
       {/* link content */}
       <Link href={`/inventory/folder/${folder.id}`} className="flex h-full flex-col">
-        <div className="flex h-[150px] items-center justify-center bg-[#F5F5F5]">
-          <Folder className="h-8 w-8 text-slate-400" />
+        <div className="flex h-[150px] items-center justify-center bg-blue-50">
+          <Folder className="h-8 w-8 text-blue-600" />
         </div>
         <div className="flex min-h-[100px] flex-1 flex-col gap-1 px-3 pt-3 pb-3">
           <p className="text-base font-medium text-slate-900">{folder.name}</p>

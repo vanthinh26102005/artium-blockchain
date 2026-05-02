@@ -567,6 +567,7 @@ services:
     volumes:
       - .:/app
       - community_node_modules:/app/node_modules
+      - ./config/gcs-service-account.json:/app/config/gcs-service-account.json:ro
     depends_on:
       rabbitmq:
         condition: service_healthy

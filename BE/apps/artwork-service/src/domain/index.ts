@@ -28,6 +28,7 @@ export * from './entities/artworks.entity';
 export * from './entities/tags.entity';
 export * from './interfaces/artwork-auction-lifecycle.repository.interface';
 export * from './interfaces/artwork-folder.repository.interface';
+export * from './interfaces/artwork-like.repository.interface';
 export * from './interfaces/artwork.repository.interface';
 export * from './interfaces/tag.repository.interface';
 export * from './services/gcs-storage.service';

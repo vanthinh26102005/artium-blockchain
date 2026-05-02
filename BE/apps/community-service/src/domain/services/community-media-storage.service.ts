@@ -5,6 +5,7 @@ import {
 } from '@app/common';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -37,7 +38,9 @@ export class CommunityMediaStorageService {
   constructor(private readonly configService: ConfigService) {
     this.projectId = this.configService.get<string>('GCS_PROJECT_ID')!;
     this.bucketName = this.configService.get<string>('GCS_BUCKET_NAME')!;
-    const keyFilename = this.configService.get<string>('GCS_KEY_FILE');
+    const keyFilename = this.resolveKeyFilename(
+      this.configService.get<string>('GCS_KEY_FILE'),
+    );
 
     if (!this.projectId || !this.bucketName) {
       throw new Error('GCS_PROJECT_ID and GCS_BUCKET_NAME must be configured');
@@ -46,7 +49,7 @@ export class CommunityMediaStorageService {
     try {
       this.storage = new Storage({
         projectId: this.projectId,
-        keyFilename: keyFilename || undefined,
+        keyFilename,
       });
       this.bucket = this.storage.bucket(this.bucketName);
     } catch (error) {
@@ -64,12 +67,39 @@ export class CommunityMediaStorageService {
     if (!file) {
       throw RpcExceptionHelper.badRequest('No file provided');
     }
+    if (!file.buffer) {
+      throw RpcExceptionHelper.badRequest(
+        'Uploaded file payload is missing file buffer',
+      );
+    }
 
     return this.uploadBuffer(file.buffer, {
       ...options,
       originalFileName: file.originalname,
       mimeType: file.mimetype,
     });
+  }
+
+  private resolveKeyFilename(keyFilename?: string): string | undefined {
+    const trimmedKeyFilename = keyFilename?.trim();
+    if (!trimmedKeyFilename) {
+      return undefined;
+    }
+
+    if (!fs.existsSync(trimmedKeyFilename)) {
+      throw new Error(
+        `GCS_KEY_FILE does not exist: ${trimmedKeyFilename}. Mount the service-account JSON file or unset GCS_KEY_FILE to use application default credentials.`,
+      );
+    }
+
+    const stats = fs.statSync(trimmedKeyFilename);
+    if (!stats.isFile()) {
+      throw new Error(
+        `GCS_KEY_FILE must point to a service-account JSON file, but got a directory: ${trimmedKeyFilename}`,
+      );
+    }
+
+    return trimmedKeyFilename;
   }
 
   private async uploadBuffer(

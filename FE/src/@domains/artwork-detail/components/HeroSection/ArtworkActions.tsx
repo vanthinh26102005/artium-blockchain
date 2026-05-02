@@ -1,35 +1,28 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Bookmark, ChevronDown, ChevronUp, Heart, LayoutGrid, Lock, Plus, Upload } from 'lucide-react'
 import { cn } from '@shared/lib/utils'
 import { ToastPortal } from '@domains/events/components/ui/ToastPortal'
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/components/ui/popover'
 import { Checkbox } from '@shared/components/ui/checkbox'
+import {
+    ArtworkMoodboardOption,
+    ArtworkMoodboardToggleResult,
+    useArtworkMoodboardSave,
+} from '@domains/artwork-detail/hooks/useArtworkMoodboardSave'
 import { CreateMoodboardModal } from './CreateMoodboardModal'
-import { ArtworkDetailImage } from '../../types'
-
-type MoodboardOption = {
-    id: string
-    title: string
-    coverUrl?: string
-    artworksCount?: number
-    isPrivate?: boolean
-    selected?: boolean
-    autoCoverFromArtwork?: boolean
-    baseArtworksCount?: number
-    defaultCoverUrl?: string
-}
 
 type ArtworkActionsProps = {
     likesCount: number
     isLiked?: boolean
-    isSaved?: boolean
     artworkId?: string
+    artworkTitle?: string
+    artworkPrice?: number
+    artworkSellerId?: string
     artworkThumbnailUrl?: string
-    artworkImages?: ArtworkDetailImage[]
-    onLike?: () => void
+    onLike?: (liked: boolean) => void | Promise<void>
     onSave?: () => void
     onShare?: () => void
 }
@@ -39,113 +32,69 @@ type ToastState = {
     variant: 'success' | 'error'
 }
 
-const hashString = (value: string) => {
-    let hash = 0
-    for (let i = 0; i < value.length; i += 1) {
-        hash = (hash << 5) - hash + value.charCodeAt(i)
-        hash |= 0
+const getMoodboardToastMessage = (result: ArtworkMoodboardToggleResult) => {
+    switch (result) {
+        case 'saved':
+            return { message: 'Saved to moodboard', variant: 'success' as const, withSkeleton: true }
+        case 'removed':
+            return { message: 'Removed from moodboard', variant: 'success' as const, withSkeleton: false }
+        case 'already-saved':
+            return { message: 'Already saved to moodboard', variant: 'success' as const, withSkeleton: false }
+        case 'already-removed':
+            return {
+                message: 'Artwork was already removed from moodboard',
+                variant: 'success' as const,
+                withSkeleton: false,
+            }
     }
-    return Math.abs(hash)
-}
-
-const pickArtworkCover = (
-    images?: ArtworkDetailImage[],
-    fallback?: string,
-    seed?: string,
-) => {
-    if (!images || !images.length) return fallback
-    const key = seed ?? images.map((image) => image.url).join('|')
-    const index = hashString(key) % images.length
-    return images[index]?.url ?? fallback
-}
-
-const getDefaultMoodboards = ({
-    artworkThumbnailUrl,
-    artworkImages,
-    artworkId,
-    isSaved,
-}: {
-    artworkThumbnailUrl?: string
-    artworkImages?: ArtworkDetailImage[]
-    artworkId?: string
-    isSaved: boolean
-}): MoodboardOption[] => {
-    const privateCover = pickArtworkCover(
-        artworkImages,
-        artworkThumbnailUrl,
-        `${artworkId ?? 'default'}-private`,
-    )
-    const huutriDefaultCover = pickArtworkCover(
-        artworkImages,
-        artworkThumbnailUrl,
-        `${artworkId ?? 'default'}-huutri`,
-    )
-
-    return [
-        {
-            id: 'private-moodboard',
-            title: 'Private Moodboard',
-            coverUrl: privateCover,
-            defaultCoverUrl: privateCover,
-            artworksCount: 2,
-            baseArtworksCount: 2,
-            isPrivate: true,
-            selected: false,
-        },
-        {
-            id: 'huutri',
-            title: 'HuuTri',
-            coverUrl: isSaved ? artworkThumbnailUrl : huutriDefaultCover,
-            defaultCoverUrl: huutriDefaultCover,
-            artworksCount: 5,
-            baseArtworksCount: Math.max(0, 5 - (isSaved ? 1 : 0)),
-            isPrivate: false,
-            selected: isSaved,
-            autoCoverFromArtwork: true,
-        },
-    ]
 }
 
 export const ArtworkActions = ({
     likesCount,
     isLiked = false,
-    isSaved = false,
     onLike,
     onSave,
     onShare,
     artworkThumbnailUrl,
-    artworkImages,
     artworkId,
+    artworkTitle,
+    artworkPrice,
+    artworkSellerId,
 }: ArtworkActionsProps) => {
     const [liked, setLiked] = useState(isLiked)
     const [currentLikes, setCurrentLikes] = useState(likesCount)
     const [popoverOpen, setPopoverOpen] = useState(false)
     const [createModalOpen, setCreateModalOpen] = useState(false)
-    const artworkImagesSignature = useMemo(
-        () => artworkImages?.map((image) => image.url).join('|') ?? '',
-        [artworkImages],
-    )
-    const defaultMoodboards = useMemo(
-        () =>
-            getDefaultMoodboards({
-                artworkThumbnailUrl,
-                artworkImages,
-                artworkId,
-                isSaved,
-            }),
-        [artworkThumbnailUrl, artworkId, isSaved, artworkImagesSignature],
-    )
-    const [moodboards, setMoodboards] = useState<MoodboardOption[]>(defaultMoodboards)
-
-    useEffect(() => {
-        setMoodboards(defaultMoodboards)
-    }, [defaultMoodboards])
+    const {
+        isAuthenticated,
+        moodboards,
+        isLoading: moodboardsLoading,
+        errorMessage: moodboardError,
+        pendingMoodboardIds,
+        saved,
+        toggleMoodboard,
+        createMoodboardAndSave,
+    } = useArtworkMoodboardSave({
+        artworkId,
+        artworkTitle,
+        artworkPrice,
+        artworkSellerId,
+        artworkThumbnailUrl,
+    })
 
     const [toastState, setToastState] = useState<ToastState | null>(null)
     const [toastLoading, setToastLoading] = useState(false)
     const [pendingToastMessage, setPendingToastMessage] = useState<string | null>(null)
     const toastSkeletonTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     const toastAutoHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    useEffect(() => {
+        setLiked(isLiked)
+    }, [isLiked])
+
+    useEffect(() => {
+        setCurrentLikes(Math.max(0, likesCount))
+    }, [likesCount])
 
     const clearToastTimers = () => {
         if (toastSkeletonTimer.current) {
@@ -175,7 +124,7 @@ export const ArtworkActions = ({
                 toastAutoHideTimer.current = setTimeout(() => {
                     setToastState(null)
                 }, 3000)
-            }, 2000)
+            }, 700)
 
             return
         }
@@ -194,100 +143,84 @@ export const ArtworkActions = ({
         }
     }
 
-    useEffect(() => {
-        const variance = Math.floor(Math.random() * 16) + 5 // add a small, client-only fluctuation
-        const randomizedLikes = Math.max(0, likesCount + variance)
-        setCurrentLikes(randomizedLikes)
-    }, [likesCount])
-
     useEffect(() => () => {
         clearToastTimers()
     }, [])
 
-    const selectedCount = useMemo(
-        () => moodboards.filter((board) => board.selected).length,
-        [moodboards],
-    )
-    const saved = selectedCount > 0
+    const handleLike = async () => {
+        if (!isAuthenticated) {
+            queueToast('Please sign in to like this artwork.', 'error', false)
+            return
+        }
 
-    const handleLike = () => {
-        setLiked((prev) => !prev)
-        setCurrentLikes((prev) => (liked ? prev - 1 : prev + 1))
-        onLike?.()
-    }
+        if (!onLike) {
+            queueToast('Artwork likes are not available from the API yet.', 'error', false)
+            return
+        }
 
-    const handleShare = () => {
-        navigator.clipboard.writeText(window.location.href)
-        queueToast('Share link copied to the clipboard', 'success', false)
-        onShare?.()
-    }
+        const nextLiked = !liked
+        setLiked(nextLiked)
+        setCurrentLikes((prev) => (nextLiked ? prev + 1 : Math.max(prev - 1, 0)))
 
-    const handleToggleMoodboard = (boardId: string, nextState?: boolean) => {
-        let shouldShowToast = false
-
-        setMoodboards((prev) =>
-            prev.map((board) => {
-                if (board.id !== boardId) {
-                    return board
-                }
-
-                const shouldSelect = nextState ?? !board.selected
-                if (shouldSelect && !board.selected) {
-                    shouldShowToast = true
-                }
-
-                if (board.autoCoverFromArtwork) {
-                    const baseCount = board.baseArtworksCount ?? 0
-                    const nextCount = shouldSelect ? baseCount + 1 : baseCount
-                    const fallbackCover = board.defaultCoverUrl ?? board.coverUrl
-                    const coverUrl = shouldSelect
-                        ? artworkThumbnailUrl ?? fallbackCover
-                        : fallbackCover
-
-                    return {
-                        ...board,
-                        selected: shouldSelect,
-                        coverUrl,
-                        artworksCount: nextCount,
-                        baseArtworksCount: baseCount,
-                        defaultCoverUrl: board.defaultCoverUrl,
-                    }
-                }
-
-                return { ...board, selected: shouldSelect }
-            }),
-        )
-
-        onSave?.()
-        if (shouldShowToast) {
-            queueToast('Saved to moodboard', 'success', true)
+        try {
+            await onLike(nextLiked)
+        } catch {
+            setLiked(!nextLiked)
+            setCurrentLikes((prev) => (nextLiked ? Math.max(prev - 1, 0) : prev + 1))
+            queueToast('Unable to update like. Please try again.', 'error', false)
         }
     }
 
-    const handleCreateMoodboard = (name: string) => {
-        const newBoard: MoodboardOption = {
-            id: `${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now().toString(36)}`,
-            title: name,
-            artworksCount: 0,
-            isPrivate: false,
-            selected: false,
-            autoCoverFromArtwork: true,
-            baseArtworksCount: 0,
-            defaultCoverUrl: undefined,
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href)
+            queueToast('Share link copied to the clipboard', 'success', false)
+            onShare?.()
+        } catch {
+            queueToast('Unable to copy share link.', 'error', false)
         }
+    }
 
-        setMoodboards((prev) => {
-            const cleared = prev.map((board) => ({ ...board }))
-            return [...cleared, newBoard]
-        })
+    const handleToggleMoodboard = async (board: ArtworkMoodboardOption, nextState?: boolean) => {
+        try {
+            const result = await toggleMoodboard(board, nextState)
+            if (result) {
+                const toast = getMoodboardToastMessage(result)
+                queueToast(toast.message, toast.variant, toast.withSkeleton)
+                onSave?.()
+            }
+        } catch (error) {
+            queueToast(
+                error instanceof Error ? error.message : 'Unable to update moodboard.',
+                'error',
+                false,
+            )
+        }
+    }
 
-        setCreateModalOpen(false)
-        setPopoverOpen(true)
-        onSave?.()
-        queueToast('Moodboard created', 'success', true)
+    const handleCreateMoodboard = async (name: string) => {
+        try {
+            await createMoodboardAndSave(name)
+            setCreateModalOpen(false)
+            setPopoverOpen(true)
+            onSave?.()
+            queueToast('Moodboard created and artwork saved', 'success', true)
+        } catch (error) {
+            queueToast(
+                error instanceof Error ? error.message : 'Unable to create moodboard.',
+                'error',
+                false,
+            )
+            throw error
+        }
     }
 
     const handleOpenCreateModal = () => {
+        if (!isAuthenticated) {
+            queueToast('Please sign in to create a moodboard.', 'error', false)
+            return
+        }
+
         setPopoverOpen(false)
         setCreateModalOpen(true)
     }
@@ -295,9 +228,9 @@ export const ArtworkActions = ({
     return (
         <>
             <div className="flex items-center justify-center gap-6 py-4">
-                {/* Like Button */}
                 <button
-                    onClick={handleLike}
+                    type="button"
+                    onClick={() => void handleLike()}
                     className="flex cursor-pointer items-center gap-2 text-slate-800 transition-colors hover:text-slate-900"
                     style={{ fontFamily: 'Inter', fontSize: '14px', lineHeight: '20px', fontWeight: 500, letterSpacing: '0%' }}
                 >
@@ -339,19 +272,38 @@ export const ArtworkActions = ({
 
                     <PopoverContent align="end" className="w-[320px] p-0" sideOffset={12}>
                         <div className="space-y-1 p-3">
-                            {moodboards.map((board) => (
-                                <MoodboardRow
-                                    key={board.id}
-                                    board={board}
-                                    onToggle={handleToggleMoodboard}
-                                />
-                            ))}
+                            {!isAuthenticated ? (
+                                <p className="px-2 py-3 text-sm text-slate-500">
+                                    Sign in to save this artwork to your moodboards.
+                                </p>
+                            ) : moodboardsLoading ? (
+                                <div className="space-y-3 px-2 py-3">
+                                    <div className="h-3 w-32 animate-pulse rounded-full bg-slate-200" />
+                                    <div className="h-3 w-44 animate-pulse rounded-full bg-slate-200" />
+                                </div>
+                            ) : moodboardError ? (
+                                <p className="px-2 py-3 text-sm text-rose-500">{moodboardError}</p>
+                            ) : moodboards.length > 0 ? (
+                                moodboards.map((board) => (
+                                    <MoodboardRow
+                                        key={board.id}
+                                        board={board}
+                                        disabled={pendingMoodboardIds.includes(board.id)}
+                                        onToggle={handleToggleMoodboard}
+                                    />
+                                ))
+                            ) : (
+                                <p className="px-2 py-3 text-sm text-slate-500">
+                                    No moodboards yet.
+                                </p>
+                            )}
                         </div>
                         <div className="h-px bg-slate-100" />
                         <button
                             type="button"
                             onClick={handleOpenCreateModal}
-                            className="flex w-full items-center gap-3 rounded-b-[12px] px-3 py-3 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
+                            className="flex w-full items-center gap-3 rounded-b-[12px] px-3 py-3 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            disabled={!isAuthenticated}
                         >
                             <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-dashed border-blue-200 bg-blue-50 text-blue-500">
                                 <Plus className="h-4 w-4" />
@@ -361,9 +313,9 @@ export const ArtworkActions = ({
                     </PopoverContent>
                 </Popover>
 
-                {/* Share Button */}
                 <button
-                    onClick={handleShare}
+                    type="button"
+                    onClick={() => void handleShare()}
                     className="flex cursor-pointer items-center gap-2 text-slate-800 transition-colors hover:text-slate-900"
                     style={{ fontFamily: 'Inter', fontSize: '14px', lineHeight: '20px', fontWeight: 500, letterSpacing: '0%' }}
                 >
@@ -372,14 +324,12 @@ export const ArtworkActions = ({
                 </button>
             </div>
 
-            {/* Create Moodboard Modal (reusable) */}
             <CreateMoodboardModal
                 open={createModalOpen}
                 onOpenChange={setCreateModalOpen}
                 onCreate={handleCreateMoodboard}
             />
 
-            {/* Skeleton + Toast Notification */}
             {toastLoading && (
                 <div className="fixed left-1/2 top-[85px] z-[9998] flex w-auto min-w-[280px] -translate-x-1/2 flex-col gap-2 rounded-lg border border-slate-200 bg-white/80 px-4 py-3 shadow-[0_10px_40px_rgba(15,23,42,0.3)] backdrop-blur-sm">
                     <div className="h-3 w-32 animate-pulse rounded-full bg-slate-200" />
@@ -401,15 +351,29 @@ export const ArtworkActions = ({
 }
 
 type MoodboardRowProps = {
-    board: MoodboardOption
-    onToggle: (id: string, nextState?: boolean) => void
+    board: ArtworkMoodboardOption
+    disabled?: boolean
+    onToggle: (board: ArtworkMoodboardOption, nextState?: boolean) => void | Promise<void>
 }
 
-const MoodboardRow = ({ board, onToggle }: MoodboardRowProps) => (
-    <button
-        type="button"
-        onClick={() => onToggle(board.id)}
-        className="flex w-full items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-slate-50"
+const MoodboardRow = ({ board, disabled = false, onToggle }: MoodboardRowProps) => (
+    <div
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-disabled={disabled}
+        onClick={() => {
+            if (!disabled) void onToggle(board)
+        }}
+        onKeyDown={(event) => {
+            if (!disabled && (event.key === 'Enter' || event.key === ' ')) {
+                event.preventDefault()
+                void onToggle(board)
+            }
+        }}
+        className={cn(
+            'flex w-full items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-slate-50',
+            disabled && 'cursor-not-allowed opacity-60',
+        )}
     >
         <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-inner">
             {board.coverUrl ? (
@@ -432,14 +396,18 @@ const MoodboardRow = ({ board, onToggle }: MoodboardRowProps) => (
                 {board.isPrivate && <Lock className="h-3.5 w-3.5 text-slate-400" />}
             </div>
             <span className="text-xs text-slate-500">
-                {board.artworksCount ?? 0} artworks
+                {board.artworksCount} artworks
             </span>
         </div>
 
         <Checkbox
             checked={board.selected}
-            onCheckedChange={(checked) => onToggle(board.id, checked === true)}
+            disabled={disabled}
+            onClick={(event) => event.stopPropagation()}
+            onCheckedChange={(checked) => {
+                if (!disabled) void onToggle(board, checked === true)
+            }}
             className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
         />
-    </button>
+    </div>
 )

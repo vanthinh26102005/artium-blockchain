@@ -110,6 +110,26 @@ type MoodboardApiItem = {
   createdAt: string
   updatedAt?: string | null
   media?: MoodboardApiMediaItem[]
+  artworks?: MoodboardArtworkApiItem[]
+}
+
+type MoodboardArtworkApiItem = {
+  id: string
+  artworkId: string
+  displayOrder: number
+  notes?: string | null
+  tags?: string[] | null
+  isFavorite: boolean
+  artworkTitle?: string | null
+  artworkImageUrl?: string | null
+  artworkPrice?: string | null
+  artworkSellerId?: string | null
+  availabilityStatus?: string | null
+  viewCount: number
+  hasInquired: boolean
+  wasPurchased: boolean
+  createdAt?: string
+  updatedAt?: string | null
 }
 
 type MoodboardApiMediaItem = {
@@ -183,6 +203,18 @@ type CreateMoodboardInput = {
   isPrivate?: boolean
   isCollaborative?: boolean
   tags?: string[]
+}
+
+type AddArtworkToMoodboardInput = {
+  artworkId: string
+  displayOrder?: number
+  notes?: string
+  tags?: string[]
+  isFavorite?: boolean
+  artworkTitle?: string
+  artworkImageUrl?: string
+  artworkPrice?: number
+  artworkSellerId?: string
 }
 
 type CreateSellerProfileInput = {
@@ -301,6 +333,31 @@ export const profileApis = {
       body: JSON.stringify(input),
       auth: true,
     }),
+  listCurrentUserMoodboardIdsForArtwork: (artworkId: string) =>
+    apiFetch<string[]>(
+      `/community/moodboards/artwork/${encodePathSegment(artworkId)}/me`,
+      {
+        auth: true,
+        cache: 'no-store',
+      },
+    ),
+  addArtworkToMoodboard: (moodboardId: string, input: AddArtworkToMoodboardInput) =>
+    apiFetch<MoodboardArtworkApiItem>(
+      `/community/moodboards/${encodePathSegment(moodboardId)}/artworks`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+        auth: true,
+      },
+    ),
+  removeArtworkFromMoodboard: (moodboardId: string, artworkId: string) =>
+    apiFetch<boolean>(
+      `/community/moodboards/${encodePathSegment(moodboardId)}/artworks/${encodePathSegment(artworkId)}`,
+      {
+        method: 'DELETE',
+        auth: true,
+      },
+    ),
   searchSellerProfiles: (searchQuery: string, options?: { skip?: number; take?: number }) =>
     apiFetch<SearchSellerProfilesResponse>(
       withQuery('/identity/seller-profiles', { searchQuery, ...options }),
@@ -325,12 +382,14 @@ export type {
   CreateSellerProfileResponse,
   MomentApiItem,
   MoodboardApiMediaItem,
+  MoodboardArtworkApiItem,
   MoodboardApiItem,
   CommentApiItem,
   CreateMomentCommentInput,
   LikeStatusResponse,
   CreateMomentInput,
   CreateMoodboardInput,
+  AddArtworkToMoodboardInput,
   SearchSellerProfilesResponse,
 }
 

@@ -21,6 +21,7 @@ import {
   GcsStorageService,
   IArtworkAuctionLifecycleRepository,
   IArtworkFolderRepository,
+  IArtworkLikeRepository,
   IArtworkRepository,
   ITagRepository,
   Tag,
@@ -29,6 +30,7 @@ import {
 import {
   ArtworkAuctionLifecycleRepository,
   ArtworkFolderRepository,
+  ArtworkLikeRepository,
   ArtworkRepository,
   TagRepository,
 } from './infrastructure';
@@ -69,6 +71,7 @@ import {
   GetArtworkHandler,
   GetArtworkUploadDraftHandler,
   GetFolderTreeHandler,
+  IsArtworkLikedHandler,
   GetTagHandler,
   ListArtworkFoldersHandler,
   ListArtworksHandler,
@@ -82,6 +85,7 @@ import {
   SaveArtworkDraftHandler,
   SearchArtworksHandler,
   SearchTagsHandler,
+  SetArtworkLikeStatusHandler,
   SubmitArtworkDraftHandler,
   ToggleFolderVisibilityHandler,
   UpdateArtworkFolderHandler,
@@ -114,6 +118,7 @@ export const CommandHandlers = [
   MarkArtworkAsSoldHandler,
   RemoveImagesFromArtworkHandler,
   SaveArtworkDraftHandler,
+  SetArtworkLikeStatusHandler,
   SubmitArtworkDraftHandler,
   UpdateArtworkHandler,
   UpdateArtworkImagesHandler,
@@ -134,6 +139,7 @@ export const QueryHandlers = [
   FindArtworksByTagsHandler,
   GetArtworkHandler,
   GetArtworkUploadDraftHandler,
+  IsArtworkLikedHandler,
   ListArtworksHandler,
   ListSellerAuctionArtworkCandidatesHandler,
   SearchArtworksHandler,
@@ -151,6 +157,7 @@ export const Repositories = [
     useClass: ArtworkAuctionLifecycleRepository,
   },
   { provide: IArtworkRepository, useClass: ArtworkRepository },
+  { provide: IArtworkLikeRepository, useClass: ArtworkLikeRepository },
 ];
 
 export const Services = [

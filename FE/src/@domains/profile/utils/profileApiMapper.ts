@@ -16,17 +16,22 @@ import type {
   ProfileStats,
   ProfileUser,
   ProfileMoodboardMedia,
+  ProfileMoodboardArtwork,
   MomentDetail,
   MomentComment,
   MomentCommentAuthor,
 } from '@domains/profile/types'
 import type { Moment as MomentCard } from '@domains/profile/constants/moments'
+import {
+  DEFAULT_MOODBOARD_COVER,
+  resolveMoodboardCoverUrl,
+  resolveMoodboardMediaDisplayUrl,
+} from '@domains/profile/utils/moodboardPresentation'
 
 const DEFAULT_AVATAR = '/images/logo-dark-mode.png'
 const DEFAULT_ARTWORK = '/images/placeholder-artwork.jpg'
 
 const ensureText = (value?: string | null) => (value ?? '').toString()
-const isNonEmptyUrl = (value?: string | null) => Boolean(value?.trim())
 
 const formatCurrency = (amount: number, currency?: string | null) => {
   const code = (currency ?? 'USD').toUpperCase()
@@ -223,13 +228,29 @@ export const mapMoodboardToProfileMoodboard = (
   moodboard: MoodboardApiItem,
   author: ProfileUser,
 ): ProfileMoodboard => {
+  const artworkItems = (moodboard.artworks ?? [])
+    .slice()
+    .sort((left, right) => left.displayOrder - right.displayOrder)
+    .map<ProfileMoodboardArtwork>((artwork) => ({
+      artworkId: artwork.artworkId,
+      title: artwork.artworkTitle?.trim() || 'Untitled artwork',
+      imageUrl: artwork.artworkImageUrl ?? null,
+      price: artwork.artworkPrice ?? null,
+      sellerId: artwork.artworkSellerId ?? null,
+      displayOrder: artwork.displayOrder,
+      notes: artwork.notes ?? null,
+      tags: artwork.tags ?? null,
+      isFavorite: Boolean(artwork.isFavorite),
+      availabilityStatus: artwork.availabilityStatus ?? null,
+    }))
+
   const mediaItems = (moodboard.media ?? [])
     .slice()
     .sort((left, right) => left.displayOrder - right.displayOrder)
     .reduce<ProfileMoodboardMedia[]>((items, media) => {
-      const displayUrl = media.thumbnailUrl || media.secureUrl || media.url
+      const displayUrl = resolveMoodboardMediaDisplayUrl(media)
 
-      if (!isNonEmptyUrl(displayUrl)) {
+      if (!displayUrl?.trim()) {
         return items
       }
 
@@ -252,6 +273,10 @@ export const mapMoodboardToProfileMoodboard = (
   const coverMedia = mediaItems.find((media) => media.isCover) ?? mediaItems[0]
   const secondaryMedia = mediaItems.find((media) => media.id !== coverMedia?.id)
   const uploadedCoverUrls = mediaItems.map((media) => media.displayUrl)
+  const savedArtworkCoverUrls = artworkItems
+    .map((artwork) => artwork.imageUrl?.trim())
+    .filter((url): url is string => Boolean(url))
+  const fallbackCoverUrl = resolveMoodboardCoverUrl(moodboard, DEFAULT_MOODBOARD_COVER)
 
   return {
     id: moodboard.id,
@@ -259,9 +284,10 @@ export const mapMoodboardToProfileMoodboard = (
     author: author.displayName,
     authorAvatarUrl: author.avatarUrl,
     featuredArtist: undefined,
-    coverUrl: coverMedia?.displayUrl || moodboard.coverImageUrl || DEFAULT_ARTWORK,
-    secondaryCoverUrl: secondaryMedia?.displayUrl,
-    artworkCoverUrls: uploadedCoverUrls,
+    coverUrl: coverMedia?.displayUrl || savedArtworkCoverUrls[0] || fallbackCoverUrl,
+    secondaryCoverUrl: secondaryMedia?.displayUrl || savedArtworkCoverUrls[1],
+    artworkCoverUrls: [...uploadedCoverUrls, ...savedArtworkCoverUrls],
+    artworkItems,
     mediaItems,
     isPrivate: moodboard.isPrivate,
   }

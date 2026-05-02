@@ -46,6 +46,84 @@ export class MoodboardMediaObject {
   isCover: boolean;
 }
 
+export class MoodboardArtworkObject {
+  @ApiProperty({
+    description: 'Artwork ID saved to the moodboard',
+  })
+  artworkId: string;
+
+  @ApiProperty({
+    description: 'Display order inside the moodboard',
+  })
+  displayOrder: number;
+
+  @ApiPropertyOptional({
+    description: 'Optional note attached to the saved artwork',
+  })
+  notes?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Tags attached to the saved artwork',
+    type: [String],
+  })
+  tags?: string[] | null;
+
+  @ApiProperty({
+    description: 'Whether this artwork is marked as favorite in the moodboard',
+  })
+  isFavorite: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Denormalized artwork title captured at save time',
+  })
+  artworkTitle?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Denormalized artwork image URL captured at save time',
+  })
+  artworkImageUrl?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Denormalized artwork price captured at save time',
+  })
+  artworkPrice?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Denormalized seller ID captured at save time',
+  })
+  artworkSellerId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Artwork availability status captured at save time',
+  })
+  availabilityStatus?: string | null;
+
+  @ApiProperty({
+    description: 'Number of views from the moodboard context',
+  })
+  viewCount: number;
+
+  @ApiProperty({
+    description: 'Whether the viewer has inquired about this saved artwork',
+  })
+  hasInquired: boolean;
+
+  @ApiProperty({
+    description: 'Whether this saved artwork was purchased',
+  })
+  wasPurchased: boolean;
+
+  @ApiProperty({
+    description: 'Creation timestamp',
+  })
+  createdAt: Date;
+
+  @ApiPropertyOptional({
+    description: 'Last update timestamp',
+  })
+  updatedAt?: Date | null;
+}
+
 export class MoodboardObject {
   @ApiProperty({
     description: 'Unique identifier of the moodboard',
@@ -128,6 +206,12 @@ export class MoodboardObject {
     type: [MoodboardMediaObject],
   })
   media?: MoodboardMediaObject[];
+
+  @ApiPropertyOptional({
+    description: 'Artwork attachments saved to this moodboard',
+    type: [MoodboardArtworkObject],
+  })
+  artworks?: MoodboardArtworkObject[];
 
   @ApiProperty({
     description: 'Display order for sorting',

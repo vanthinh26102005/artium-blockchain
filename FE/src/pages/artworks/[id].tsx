@@ -6,6 +6,7 @@ import { ArtworkDetail } from '@domains/artwork-detail/types'
 import artworkApis, { ArtworkApiItem } from '@shared/apis/artworkApis'
 import profileApis from '@shared/apis/profileApis'
 import usersApi from '@shared/apis/usersApi'
+import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
 const priceFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -27,6 +28,9 @@ const mapApiToArtworkDetail = (
     fullName?: string | null
     avatarUrl?: string | null
   } | null,
+  options?: {
+    likedByUser?: boolean
+  },
 ): ArtworkDetail => {
   const price =
     typeof artwork.price === 'string'
@@ -67,8 +71,10 @@ const mapApiToArtworkDetail = (
 
   return {
     id: artwork.id,
+    sellerId: artwork.sellerId,
     title: artwork.title,
     artistName: creatorName,
+    priceAmount: price,
     priceLabel: artwork.status === 'SOLD' ? 'Sold' : price > 0 ? priceFormatter.format(price) : 'Price on request',
     isSold: artwork.status === 'SOLD',
     coverUrl,
@@ -81,7 +87,7 @@ const mapApiToArtworkDetail = (
     isUnique: artwork.editionRun === '1/1' || artwork.quantity === 1,
     hasCertificate: true,
     description: artwork.description ?? undefined,
-    likedByUser: false,
+    likedByUser: options?.likedByUser ?? false,
     savedByUser: false,
     images,
     creator: {
@@ -104,30 +110,47 @@ export default function ArtworkDetailPageRoute() {
   const [artwork, setArtwork] = useState<ArtworkDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const isAuthHydrated = useAuthStore((state) => state.isHydrated)
+  const hydrateAuth = useAuthStore((state) => state.hydrateAuth)
 
   useEffect(() => {
-    if (!router.isReady) return
+    if (!isAuthHydrated) {
+      hydrateAuth()
+    }
+  }, [hydrateAuth, isAuthHydrated])
+
+  useEffect(() => {
+    if (!router.isReady || !isAuthHydrated) return
     const artworkId = typeof id === 'string' ? id : ''
     if (!artworkId) return
 
     let cancelled = false
-    setIsLoading(true)
-    setError(null)
 
     const fetchArtwork = async () => {
       const apiArtwork = await artworkApis.getArtworkById(artworkId)
       if (!apiArtwork || cancelled) return null
 
-      // Fetch seller profile and user data in parallel
-      const [sellerProfile, userData] = await Promise.all([
+      const [sellerProfile, userData, likeStatus] = await Promise.all([
         profileApis.getSellerProfileByUserId(apiArtwork.sellerId).catch(() => null),
         usersApi.getUserById(apiArtwork.sellerId).catch(() => null),
+        isAuthenticated
+          ? artworkApis.getArtworkLikeStatus(apiArtwork.id).catch(() => ({ liked: false }))
+          : Promise.resolve({ liked: false }),
       ])
 
-      return mapApiToArtworkDetail(apiArtwork, sellerProfile, userData)
+      return mapApiToArtworkDetail(apiArtwork, sellerProfile, userData, {
+        likedByUser: likeStatus.liked,
+      })
     }
 
-    fetchArtwork()
+    Promise.resolve()
+      .then(async () => {
+        if (cancelled) return null
+        setIsLoading(true)
+        setError(null)
+        return fetchArtwork()
+      })
       .then((result) => {
         if (!cancelled) {
           setArtwork(result)
@@ -144,7 +167,22 @@ export default function ArtworkDetailPageRoute() {
     return () => {
       cancelled = true
     }
-  }, [router.isReady, id])
+  }, [router.isReady, id, isAuthenticated, isAuthHydrated])
+
+  const handleLikeArtwork = async (liked: boolean) => {
+    if (!artwork) return
+
+    const result = await artworkApis.setArtworkLikeStatus(artwork.id, liked)
+    setArtwork((prev) =>
+      prev
+        ? {
+          ...prev,
+          likedByUser: result.liked,
+          likesCount: result.likeCount,
+        }
+        : prev,
+    )
+  }
 
   if (isLoading) {
     return (
@@ -171,7 +209,7 @@ export default function ArtworkDetailPageRoute() {
   return (
     <>
       <Metadata title={`${artwork.title} | Artium`} />
-      <ArtworkDetailPage artwork={artwork} />
+      <ArtworkDetailPage artwork={artwork} onLikeArtwork={handleLikeArtwork} />
     </>
   )
 }

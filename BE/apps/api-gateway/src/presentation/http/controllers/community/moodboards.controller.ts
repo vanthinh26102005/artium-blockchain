@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -27,9 +28,11 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
+  Min,
 } from 'class-validator';
 import { MICROSERVICES } from '../../../../config';
 import { sendRpc } from '../../utils';
@@ -100,6 +103,69 @@ class CreateMoodboardBody {
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
+}
+
+class AddArtworkToMoodboardBody {
+  @ApiProperty({
+    description: 'Artwork ID to add',
+    example: '123e4567-e89b-12d3-a456-426614174001',
+  })
+  @IsString()
+  @IsNotEmpty()
+  artworkId!: string;
+
+  @ApiPropertyOptional({
+    description: 'Display order in the moodboard',
+    default: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  displayOrder?: number;
+
+  @ApiPropertyOptional({
+    description: 'Notes about this artwork in the context of the moodboard',
+  })
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  @ApiPropertyOptional({
+    description: 'Tags specific to this artwork-moodboard relationship',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Whether this artwork is a favorite in the moodboard',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFavorite?: boolean;
+
+  @ApiPropertyOptional({ description: 'Cached artwork title' })
+  @IsOptional()
+  @IsString()
+  artworkTitle?: string;
+
+  @ApiPropertyOptional({ description: 'Cached artwork image URL' })
+  @IsOptional()
+  @IsString()
+  artworkImageUrl?: string;
+
+  @ApiPropertyOptional({ description: 'Cached artwork price' })
+  @IsOptional()
+  @IsNumber()
+  artworkPrice?: number;
+
+  @ApiPropertyOptional({ description: 'Cached artwork seller ID' })
+  @IsOptional()
+  @IsString()
+  artworkSellerId?: string;
 }
 
 const parseOptionalNumber = (value?: string) => {
@@ -192,6 +258,78 @@ export class CommunityMoodboardsController {
       userId: req.user?.id,
       ...body,
     });
+  }
+
+  @Get('artwork/:artworkId/me')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'List current user moodboard IDs containing an artwork',
+  })
+  @ApiParam({ name: 'artworkId', type: 'string', description: 'Artwork ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Moodboard IDs retrieved successfully',
+  })
+  async listCurrentUserMoodboardIdsForArtwork(
+    @Param('artworkId') artworkId: string,
+    @Request() req: Express.Request & { user: UserPayload },
+  ) {
+    return sendRpc<string[]>(
+      this.communityClient,
+      { cmd: 'list_artwork_moodboard_ids_for_user' },
+      { userId: req.user?.id, artworkId },
+    );
+  }
+
+  @Post(':id/artworks')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Add an artwork to a moodboard' })
+  @ApiParam({ name: 'id', type: 'string', description: 'Moodboard ID' })
+  @ApiBody({ type: AddArtworkToMoodboardBody })
+  @ApiResponse({
+    status: 201,
+    description: 'Artwork added to moodboard successfully',
+  })
+  async addArtworkToMoodboard(
+    @Param('id') id: string,
+    @Body() body: AddArtworkToMoodboardBody,
+    @Request() req: Express.Request & { user: UserPayload },
+  ) {
+    return sendRpc(
+      this.communityClient,
+      { cmd: 'add_artwork_to_moodboard' },
+      {
+        userId: req.user?.id,
+        input: {
+          ...body,
+          moodboardId: id,
+        },
+      },
+    );
+  }
+
+  @Delete(':id/artworks/:artworkId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Remove an artwork from a moodboard' })
+  @ApiParam({ name: 'id', type: 'string', description: 'Moodboard ID' })
+  @ApiParam({ name: 'artworkId', type: 'string', description: 'Artwork ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Artwork removed from moodboard successfully',
+  })
+  async removeArtworkFromMoodboard(
+    @Param('id') id: string,
+    @Param('artworkId') artworkId: string,
+    @Request() req: Express.Request & { user: UserPayload },
+  ) {
+    return sendRpc<boolean>(
+      this.communityClient,
+      { cmd: 'remove_artwork_from_moodboard' },
+      { userId: req.user?.id, moodboardId: id, artworkId },
+    );
   }
 
   @Get(':id')

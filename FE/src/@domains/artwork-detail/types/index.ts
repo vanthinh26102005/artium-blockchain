@@ -16,6 +16,8 @@ export type ArtworkDetailCreator = User & {
 }
 
 export type ArtworkDetail = Artwork & {
+    sellerId?: string
+    priceAmount?: number
     year?: number
     medium?: string
     dimensions?: string

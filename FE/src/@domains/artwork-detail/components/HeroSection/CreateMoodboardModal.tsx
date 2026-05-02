@@ -22,7 +22,7 @@ import {
 type CreateMoodboardModalProps = {
     open: boolean
     onOpenChange: (open: boolean) => void
-    onCreate: (name: string) => void
+    onCreate: (name: string) => void | Promise<void>
 }
 
 export const CreateMoodboardModal = ({ open, onOpenChange, onCreate }: CreateMoodboardModalProps) => {
@@ -50,8 +50,8 @@ export const CreateMoodboardModal = ({ open, onOpenChange, onCreate }: CreateMoo
         onOpenChange(nextOpen)
     }
 
-    const handleCreateMoodboard = ({ name }: CreateMoodboardNameFormValues) => {
-        onCreate(name.trim())
+    const handleCreateMoodboard = async ({ name }: CreateMoodboardNameFormValues) => {
+        await onCreate(name.trim())
         reset()
     }
 

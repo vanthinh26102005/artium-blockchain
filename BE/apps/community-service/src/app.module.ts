@@ -67,6 +67,7 @@ import {
   GetMomentHandler,
   ListUserMomentsHandler,
   GetMoodboardHandler,
+  ListArtworkMoodboardIdsForUserHandler,
   ListUserMoodboardsHandler,
   GetFollowersHandler,
   GetFollowingHandler,
@@ -109,6 +110,7 @@ export const QueryHandlers = [
   ListUserMomentsHandler,
 
   GetMoodboardHandler,
+  ListArtworkMoodboardIdsForUserHandler,
   ListUserMoodboardsHandler,
 
   GetFollowersHandler,

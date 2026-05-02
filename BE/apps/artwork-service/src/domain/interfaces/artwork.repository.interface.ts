@@ -66,4 +66,10 @@ export interface IArtworkRepository extends IRepository<Artwork, string> {
     sellerId: string,
     transactionManager?: EntityManager,
   ): Promise<Record<ArtworkStatus, number>>;
+
+  incrementLikeCount(
+    artworkId: string,
+    increment: number,
+    transactionManager?: EntityManager,
+  ): Promise<void>;
 }

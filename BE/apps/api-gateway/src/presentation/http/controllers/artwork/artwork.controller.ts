@@ -36,12 +36,23 @@ import {
   ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
+  ApiProperty,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { IsBoolean } from 'class-validator';
 import { MICROSERVICES } from '../../../../config';
 import { sendRpc } from '../../utils';
+
+class SetArtworkLikeStatusBody {
+  @ApiProperty({
+    description: 'Whether the current user likes this artwork',
+    example: true,
+  })
+  @IsBoolean()
+  liked!: boolean;
+}
 
 @ApiTags('Artwork')
 @Controller('artwork')
@@ -104,6 +115,64 @@ export class ArtworkController {
       this.artworkClient,
       { cmd: 'get_artworks' },
       query,
+    );
+  }
+
+  @Get(':id/likes/me')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check if current user likes an artwork' })
+  @ApiParam({
+    name: 'id',
+    description: 'The unique identifier of the artwork',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Artwork like status retrieved successfully',
+  })
+  async getArtworkLikeStatus(
+    @Param('id') id: string,
+    @Request() req: { user: UserPayload },
+  ) {
+    const liked = await sendRpc<boolean>(
+      this.artworkClient,
+      { cmd: 'is_artwork_liked' },
+      { userId: req.user?.id, artworkId: id },
+    );
+
+    return { liked };
+  }
+
+  @Put(':id/likes')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Set like status for an artwork' })
+  @ApiParam({
+    name: 'id',
+    description: 'The unique identifier of the artwork',
+    type: 'string',
+  })
+  @ApiBody({ type: SetArtworkLikeStatusBody })
+  @ApiResponse({
+    status: 200,
+    description: 'Artwork like status updated successfully',
+  })
+  async setArtworkLikeStatus(
+    @Param('id') id: string,
+    @Body() body: SetArtworkLikeStatusBody,
+    @Request() req: { user: UserPayload },
+  ) {
+    return sendRpc(
+      this.artworkClient,
+      { cmd: 'set_artwork_like_status' },
+      {
+        userId: req.user?.id,
+        artworkId: id,
+        liked: body.liked,
+      },
     );
   }
 

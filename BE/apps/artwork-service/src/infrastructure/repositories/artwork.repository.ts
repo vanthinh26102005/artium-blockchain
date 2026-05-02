@@ -229,6 +229,15 @@ export class ArtworkRepository implements IArtworkRepository {
     return (repo as any).exists({ where: typeOrmWhere });
   }
 
+  async incrementLikeCount(
+    artworkId: string,
+    increment: number,
+    transactionManager?: EntityManager,
+  ): Promise<void> {
+    const repo = this.getRepo(transactionManager);
+    await repo.increment({ id: artworkId }, 'likeCount', increment);
+  }
+
   async createMany(
     data: Omit<Artwork, 'id' | 'createdAt' | 'updatedAt'>[],
     transactionManager?: EntityManager,

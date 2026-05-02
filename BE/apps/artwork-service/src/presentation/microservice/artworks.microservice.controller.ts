@@ -15,8 +15,10 @@ import {
   AddImagesToArtworkCommand,
   GetArtworkQuery,
   GetArtworkUploadDraftQuery,
+  IsArtworkLikedQuery,
   ListArtworksQuery,
   ListSellerAuctionArtworkCandidatesQuery,
+  SetArtworkLikeStatusCommand,
 } from '../../application';
 import {
   CreateArtworkDraftInput,
@@ -50,6 +52,22 @@ export class ArtworkMicroserviceController {
   @MessagePattern({ cmd: 'get_artwork_by_id' })
   async getArtworkById(@Payload() data: { id: string }) {
     return this.queryBus.execute(new GetArtworkQuery(data.id));
+  }
+
+  @MessagePattern({ cmd: 'is_artwork_liked' })
+  async isArtworkLiked(
+    @Payload() data: { userId: string; artworkId: string },
+  ) {
+    return this.queryBus.execute(
+      new IsArtworkLikedQuery(data.userId, data.artworkId),
+    );
+  }
+
+  @MessagePattern({ cmd: 'set_artwork_like_status' })
+  async setArtworkLikeStatus(
+    @Payload() data: { userId: string; artworkId: string; liked: boolean },
+  ) {
+    return this.commandBus.execute(new SetArtworkLikeStatusCommand(data));
   }
 
   @MessagePattern({ cmd: 'list_seller_auction_artwork_candidates' })

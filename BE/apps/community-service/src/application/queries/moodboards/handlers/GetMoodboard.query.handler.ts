@@ -2,10 +2,9 @@ import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
 import { GetMoodboardQuery } from '../GetMoodboard.query';
 import {
+  IMoodboardArtworkRepository,
   IMoodboardMediaRepository,
   IMoodboardRepository,
-  Moodboard,
-  MoodboardMedia,
   MoodboardObject,
 } from '../../../../domain';
 
@@ -21,6 +20,8 @@ export class GetMoodboardHandler implements IQueryHandler<
     private readonly moodboardRepository: IMoodboardRepository,
     @Inject(IMoodboardMediaRepository)
     private readonly moodboardMediaRepository: IMoodboardMediaRepository,
+    @Inject(IMoodboardArtworkRepository)
+    private readonly moodboardArtworkRepository: IMoodboardArtworkRepository,
   ) {}
 
   async execute(query: GetMoodboardQuery): Promise<MoodboardObject | null> {
@@ -33,13 +34,15 @@ export class GetMoodboardHandler implements IQueryHandler<
       return null;
     }
 
-    const media = await this.moodboardMediaRepository.findByMoodboardId(
-      moodboard.id,
-    );
+    const [media, artworks] = await Promise.all([
+      this.moodboardMediaRepository.findByMoodboardId(moodboard.id),
+      this.moodboardArtworkRepository.findByMoodboardId(moodboard.id),
+    ]);
 
     return {
       ...moodboard,
       media,
+      artworks,
     };
   }
 }

@@ -63,6 +63,12 @@ export type ArtworkApiItem = {
   auctionLifecycle?: SellerAuctionStartStatusResponse | null
 }
 
+export type ArtworkLikeStatusResponse = {
+  liked: boolean
+  changed?: boolean
+  likeCount: number
+}
+
 export type ListArtworksParams = {
   sellerId?: string
   folderId?: string | null
@@ -221,6 +227,17 @@ const artworkApis = {
   },
   getArtworkById: (id: string) =>
     apiFetch<ArtworkApiItem | null>(`/artwork/${encodePathSegment(id)}`),
+  getArtworkLikeStatus: (id: string) =>
+    apiFetch<{ liked: boolean }>(`/artwork/${encodePathSegment(id)}/likes/me`, {
+      auth: true,
+      cache: 'no-store',
+    }),
+  setArtworkLikeStatus: (id: string, liked: boolean) =>
+    apiFetch<ArtworkLikeStatusResponse>(`/artwork/${encodePathSegment(id)}/likes`, {
+      method: 'PUT',
+      body: JSON.stringify({ liked }),
+      auth: true,
+    }),
   createUploadDraft: (draftArtworkId: string) =>
     apiFetch<ArtworkUploadDraft>(
       `/artwork/drafts/${encodePathSegment(draftArtworkId)}`,
