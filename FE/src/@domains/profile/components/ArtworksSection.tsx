@@ -19,6 +19,10 @@ type ArtworksSectionProps = {
   isOwner?: boolean
 }
 
+/**
+ * ArtworksSection - React component
+ * @returns React element
+ */
 export const ArtworksSection = ({
   artworks,
   title = 'Artworks',
@@ -32,6 +36,10 @@ export const ArtworksSection = ({
   const visibleArtworks = limit ? artworks.slice(0, limit) : artworks
 
   return (
+/**
+ * visibleArtworks - Utility function
+ * @returns void
+ */
     <section className={cn(className)}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
@@ -65,18 +73,34 @@ export const ArtworksSection = ({
           const buttonHref = isOwner
             ? `/inventory/artworks/${artwork.id}/edit`
             : `/artworks/${artwork.id}`
+/**
+ * isSold - Utility function
+ * @returns void
+ */
 
           return (
             <div
               key={artwork.id}
+/**
+ * showBuyButton - Utility function
+ * @returns void
+ */
               className="group flex w-[260px] shrink-0 flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
             >
               <Link
                 href={`/artworks/${artwork.id}`}
+/**
+ * buttonLabel - Utility function
+ * @returns void
+ */
                 aria-label={`View artwork ${artwork.title}`}
                 className="relative block h-[320px] w-full overflow-hidden rounded-t-xl bg-slate-100 transition-colors group-hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 <div className="absolute inset-0 p-6">
+/**
+ * buttonHref - Utility function
+ * @returns void
+ */
                   <div className="relative h-full w-full">
                     <Image
                       src={artwork.coverUrl}

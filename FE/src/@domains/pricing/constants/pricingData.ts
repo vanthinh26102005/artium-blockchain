@@ -1,3 +1,7 @@
+/**
+ * BILLING_CYCLES - React component
+ * @returns React element
+ */
 export const BILLING_CYCLES = {
   MONTHLY: 'monthly',
   YEARLY: 'yearly',
@@ -8,6 +12,10 @@ export type BillingCycle = (typeof BILLING_CYCLES)[keyof typeof BILLING_CYCLES]
 export const PRICING_PLANS = [
   {
     id: 'basic',
+/**
+ * PRICING_PLANS - React component
+ * @returns React element
+ */
     name: 'Basic',
     description: 'For hobbyists and new collectors.',
     price: {
@@ -62,6 +70,10 @@ export const SUPPORT_SERVICES = [
     price: '$50 one-time',
     includedIn: ['Premier'],
     description:
+/**
+ * SUPPORT_SERVICES - React component
+ * @returns React element
+ */
       "We'll help migrate your existing artwork data into Artium so you can get started faster.",
   },
   {
@@ -99,6 +111,10 @@ export const COMPARISON_FEATURES = [
         basic: '1-by-1 only',
         pro: '1-by-1 only',
         growth: '+ Bulk upload',
+/**
+ * COMPARISON_FEATURES - React component
+ * @returns React element
+ */
         premier: '+ Bulk upload',
       },
       { name: 'Inventory limit', basic: '50', pro: '200', growth: '500', premier: 'unlimited' },

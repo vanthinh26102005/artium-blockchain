@@ -14,6 +14,10 @@ type CollapsibleSectionProps = {
   className?: string
 }
 
+/**
+ * CollapsibleSection - React component
+ * @returns React element
+ */
 export const CollapsibleSection = ({
   title,
   defaultOpen = false,

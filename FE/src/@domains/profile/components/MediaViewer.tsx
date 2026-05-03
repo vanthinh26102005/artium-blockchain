@@ -8,6 +8,10 @@ type MediaViewerProps = {
   moment: Moment
 }
 
+/**
+ * MediaViewer - React component
+ * @returns React element
+ */
 export const MediaViewer = ({ moment }: MediaViewerProps) => {
   if (moment.type === 'video') {
     return (
