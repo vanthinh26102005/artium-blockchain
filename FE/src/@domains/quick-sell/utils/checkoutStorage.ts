@@ -3,17 +3,29 @@
 
 import type { CheckoutInvoice, CheckoutDraft, InvoicePaymentStatus } from '../types/checkoutTypes'
 
+/**
+ * STORAGE_KEY_PREFIX - React component
+ * @returns React element
+ */
 const STORAGE_KEY_PREFIX = 'artium.quickSell'
 
 const getInvoiceStorageKey = (invoiceCode: string) =>
   `${STORAGE_KEY_PREFIX}.invoiceByCode.${invoiceCode}`
 
+/**
+ * getInvoiceStorageKey - Utility function
+ * @returns void
+ */
 const getDraftStorageKey = (invoiceCode: string) =>
   `${STORAGE_KEY_PREFIX}.checkoutDraftByCode.${invoiceCode}`
 
 // --- Invoice Storage ---
 
 export const saveInvoiceToStorage = (invoice: CheckoutInvoice): void => {
+/**
+ * getDraftStorageKey - Utility function
+ * @returns void
+ */
   if (typeof window === 'undefined') return
 
   try {
@@ -22,6 +34,10 @@ export const saveInvoiceToStorage = (invoice: CheckoutInvoice): void => {
   } catch (error) {
     console.error('[Quick Sell] Failed to save invoice:', error)
   }
+/**
+ * saveInvoiceToStorage - Utility function
+ * @returns void
+ */
 }
 
 export const getInvoiceFromStorage = (invoiceCode: string): CheckoutInvoice | null => {
@@ -29,6 +45,10 @@ export const getInvoiceFromStorage = (invoiceCode: string): CheckoutInvoice | nu
 
   try {
     const key = getInvoiceStorageKey(invoiceCode)
+/**
+ * key - Utility function
+ * @returns void
+ */
     const data = localStorage.getItem(key)
     if (!data) return null
 
@@ -39,6 +59,10 @@ export const getInvoiceFromStorage = (invoiceCode: string): CheckoutInvoice | nu
   }
 }
 
+/**
+ * getInvoiceFromStorage - Utility function
+ * @returns void
+ */
 export const updateInvoiceStatus = (
   invoiceCode: string,
   status: InvoicePaymentStatus,
@@ -46,10 +70,18 @@ export const updateInvoiceStatus = (
   const invoice = getInvoiceFromStorage(invoiceCode)
   if (!invoice) return null
 
+/**
+ * key - Utility function
+ * @returns void
+ */
   const updated = { ...invoice, status }
   saveInvoiceToStorage(updated)
   return updated
 }
+/**
+ * data - Utility function
+ * @returns void
+ */
 
 export const deleteInvoiceFromStorage = (invoiceCode: string): void => {
   if (typeof window === 'undefined') return
@@ -63,6 +95,10 @@ export const deleteInvoiceFromStorage = (invoiceCode: string): void => {
     console.error('[Quick Sell] Failed to delete invoice:', error)
   }
 }
+/**
+ * updateInvoiceStatus - Utility function
+ * @returns void
+ */
 
 // --- Checkout Draft Storage ---
 
@@ -70,12 +106,20 @@ export const saveCheckoutDraft = (invoiceCode: string, draft: CheckoutDraft): vo
   if (typeof window === 'undefined') return
 
   try {
+/**
+ * invoice - Utility function
+ * @returns void
+ */
     const key = getDraftStorageKey(invoiceCode)
     localStorage.setItem(key, JSON.stringify(draft))
   } catch (error) {
     console.error('[Quick Sell] Failed to save checkout draft:', error)
   }
 }
+/**
+ * updated - Utility function
+ * @returns void
+ */
 
 export const getCheckoutDraft = (invoiceCode: string): CheckoutDraft | null => {
   if (typeof window === 'undefined') return null
@@ -84,6 +128,10 @@ export const getCheckoutDraft = (invoiceCode: string): CheckoutDraft | null => {
     const key = getDraftStorageKey(invoiceCode)
     const data = localStorage.getItem(key)
     if (!data) return null
+/**
+ * deleteInvoiceFromStorage - Utility function
+ * @returns void
+ */
 
     return JSON.parse(data) as CheckoutDraft
   } catch (error) {
@@ -91,10 +139,18 @@ export const getCheckoutDraft = (invoiceCode: string): CheckoutDraft | null => {
     return null
   }
 }
+/**
+ * invoiceKey - Utility function
+ * @returns void
+ */
 
 // --- List All Invoices (for debugging) ---
 
 export const getAllStoredInvoices = (): CheckoutInvoice[] => {
+/**
+ * draftKey - Utility function
+ * @returns void
+ */
   if (typeof window === 'undefined') return []
 
   const invoices: CheckoutInvoice[] = []
@@ -108,6 +164,10 @@ export const getAllStoredInvoices = (): CheckoutInvoice[] => {
         if (data) {
           invoices.push(JSON.parse(data))
         }
+/**
+ * saveCheckoutDraft - Utility function
+ * @returns void
+ */
       }
     }
   } catch (error) {
@@ -115,4 +175,41 @@ export const getAllStoredInvoices = (): CheckoutInvoice[] => {
   }
 
   return invoices
+/**
+ * key - Utility function
+ * @returns void
+ */
 }
+
+/**
+ * getCheckoutDraft - Utility function
+ * @returns void
+ */
+/**
+ * key - Utility function
+ * @returns void
+ */
+/**
+ * data - Utility function
+ * @returns void
+ */
+/**
+ * getAllStoredInvoices - Utility function
+ * @returns void
+ */
+/**
+ * invoices - Utility function
+ * @returns void
+ */
+/**
+ * prefix - Utility function
+ * @returns void
+ */
+/**
+ * key - Utility function
+ * @returns void
+ */
+/**
+ * data - Utility function
+ * @returns void
+ */
