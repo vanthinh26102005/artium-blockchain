@@ -37,19 +37,19 @@ type FormFieldContextValue<
 const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue)
 
 const FormField = <
-/**
- * FormFieldContext - React component
- * @returns React element
- */
+  /**
+   * FormFieldContext - React component
+   * @returns React element
+   */
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   ...props
 }: ControllerProps<TFieldValues, TName>) => {
-/**
- * FormField - React component
- * @returns React element
- */
+  /**
+   * FormField - React component
+   * @returns React element
+   */
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller {...props} />
@@ -66,26 +66,26 @@ const useFormField = () => {
 
   if (!fieldContext) {
     throw new Error('useFormField should be used within <FormField>')
-/**
- * useFormField - Custom React hook
- * @returns void
- */
+    /**
+     * useFormField - Custom React hook
+     * @returns void
+     */
   }
 
   const { id } = itemContext
 
-/**
- * fieldContext - Utility function
- * @returns void
- */
+  /**
+   * fieldContext - Utility function
+   * @returns void
+   */
   return {
     id,
     name: fieldContext.name,
     formItemId: `${id}-form-item`,
-/**
- * itemContext - Utility function
- * @returns void
- */
+    /**
+     * itemContext - Utility function
+     * @returns void
+     */
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
     ...fieldState,
@@ -121,31 +121,26 @@ const FormLabel = React.forwardRef<
 >(({ className, required, tooltip, children, ...props }, ref) => {
   const { error, formItemId } = useFormField()
 
-/**
- * FormItemContext - React component
- * @returns React element
- */
+  /**
+   * FormItemContext - React component
+   * @returns React element
+   */
   return (
     <Label
       ref={ref}
       className={cn(error && 'text-destructive', className)}
       htmlFor={formItemId}
-/**
- * FormItem - React component
- * @returns React element
- */
+      /**
+       * FormItem - React component
+       * @returns React element
+       */
       {...props}
     >
       {/* label */}
       {children}
-
-/**
- * id - Utility function
- * @returns void
- */
+      /** * id - Utility function * @returns void */
       {/* required asterisk */}
-      {required && <span className="text-destructive ml-1">*</span>}
-
+      {required && <span className="ml-1 text-destructive">*</span>}
       {/* tooltip */}
       {tooltip && (
         <TooltipProvider>
@@ -157,10 +152,7 @@ const FormLabel = React.forwardRef<
 
             {/* tooltip content */}
             <TooltipContent>
-/**
- * FormLabel - React component
- * @returns React element
- */
+              /** * FormLabel - React component * @returns React element */
               <Text className="text-[10px] font-normal text-[#191414]">{tooltip}</Text>
             </TooltipContent>
           </Tooltip>
@@ -225,14 +217,11 @@ const FormMessage = React.forwardRef<
     <p
       ref={ref}
       id={formMessageId}
-      className={cn('text-destructive text-sm font-medium', className)}
+      className={cn('text-sm font-medium text-destructive', className)}
       {...props}
     >
       {body}
-/**
- * FormDescription - React component
- * @returns React element
- */
+      /** * FormDescription - React component * @returns React element */
     </p>
   )
 })
