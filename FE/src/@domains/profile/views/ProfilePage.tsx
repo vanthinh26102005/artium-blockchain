@@ -31,7 +31,10 @@ import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
 import { ProfileMoodboard, ProfileMoment, ProfileTabKey } from '@domains/profile/types'
 import profileApis from '@shared/apis/profileApis'
 import type { CreateMomentInput, CreateMoodboardInput } from '@shared/apis/profileApis'
-import { mapMoodboardToProfileMoodboard, mapMomentToProfileMoment } from '@domains/profile/utils/profileApiMapper'
+import {
+  mapMoodboardToProfileMoodboard,
+  mapMomentToProfileMoment,
+} from '@domains/profile/utils/profileApiMapper'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
 type ProfilePageViewProps = {
@@ -56,12 +59,20 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
   const [createdMoodboards, setCreatedMoodboards] = useState<ProfileMoodboard[]>([])
 
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, user: fetchedUser, sellerProfile, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
+  const {
+    data: baseData,
+    user: fetchedUser,
+    sellerProfile,
+    isOwner,
+    isLoading,
+    error,
+    resolvedUsername,
+  } = useProfileOverview({
     username: usernameFromRoute,
-/**
- * usernameFromRoute - Custom React hook
- * @returns void
- */
+    /**
+     * usernameFromRoute - Custom React hook
+     * @returns void
+     */
   })
   const profileDataWithDraft = useProfileDraftData(baseData)
   const authUser = useAuthStore((state) => state.user)
@@ -69,78 +80,78 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
 
   const profileData = profileDataWithDraft
   const profileHandle = resolvedUsername || profileData?.user.username || usernameFromRoute || ''
-/**
- * profileDataWithDraft - Utility function
- * @returns void
- */
+  /**
+   * profileDataWithDraft - Utility function
+   * @returns void
+   */
   const canRenderProfile = !isLoading && !error && Boolean(profileData)
 
   const pageTitle = profileData
     ? `${profileData.user.displayName} (@${resolvedUsername}) | Artium`
-/**
- * authUser - Utility function
- * @returns void
- */
-    : 'Profile | Artium'
+    : /**
+       * authUser - Utility function
+       * @returns void
+       */
+      'Profile | Artium'
   const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}` : ''
   const tabHrefs = profileHandle
     ? {
-/**
- * isAuthenticated - Utility function
- * @returns void
- */
+        /**
+         * isAuthenticated - Utility function
+         * @returns void
+         */
         overview: baseHref,
         artworks: `${baseHref}/artworks`,
         moments: `${baseHref}/moments`,
         moodboards: `${baseHref}/moodboards`,
       }
-/**
- * profileData - Utility function
- * @returns void
- */
-    : undefined
+    : /**
+       * profileData - Utility function
+       * @returns void
+       */
+      undefined
   const moments = useMemo(
     () => [...createdMoments, ...(profileData?.moments ?? [])],
     [createdMoments, profileData?.moments],
-/**
- * profileHandle - Utility function
- * @returns void
- */
+    /**
+     * profileHandle - Utility function
+     * @returns void
+     */
   )
   const moodboards = useMemo(
     () => [...createdMoodboards, ...(profileData?.moodboards ?? [])],
     [createdMoodboards, profileData?.moodboards],
-/**
- * canRenderProfile - Utility function
- * @returns void
- */
+    /**
+     * canRenderProfile - Utility function
+     * @returns void
+     */
   )
 
   const handleCreateMoment = async (input: CreateMomentInput) => {
     if (!isAuthenticated || momentSubmitting) return
 
-/**
- * pageTitle - Utility function
- * @returns void
- */
+    /**
+     * pageTitle - Utility function
+     * @returns void
+     */
     setMomentSubmitting(true)
     setMomentError(null)
     setMomentSuccess(null)
 
     try {
       const created = await profileApis.createMoment(input)
-/**
- * baseHref - Utility function
- * @returns void
- */
+      /**
+       * baseHref - Utility function
+       * @returns void
+       */
       setCreatedMoments((prev) => [mapMomentToProfileMoment(created), ...prev])
       setMomentSuccess('Moment published.')
       setIsMomentDialogOpen(false)
     } catch (err) {
-/**
- * tabHrefs - Utility function
- * @returns void
- */
+      /**
+       * tabHrefs - Utility function
+       * @returns void
+       */
       setMomentError(err instanceof Error ? err.message : 'Failed to create moment.')
     } finally {
       setMomentSubmitting(false)
@@ -152,10 +163,10 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
 
     setMoodboardSubmitting(true)
     setMoodboardError(null)
-/**
- * moments - Utility function
- * @returns void
- */
+    /**
+     * moments - Utility function
+     * @returns void
+     */
     setMoodboardSuccess(null)
 
     try {
@@ -163,10 +174,10 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
       setCreatedMoodboards((prev) => [
         mapMoodboardToProfileMoodboard(created, profileData.user),
         ...prev,
-/**
- * moodboards - Utility function
- * @returns void
- */
+        /**
+         * moodboards - Utility function
+         * @returns void
+         */
       ])
       setMoodboardSuccess('Moodboard created.')
       setIsMoodboardDialogOpen(false)
@@ -175,10 +186,10 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
     } finally {
       setMoodboardSubmitting(false)
     }
-/**
- * handleCreateMoment - Utility function
- * @returns void
- */
+    /**
+     * handleCreateMoment - Utility function
+     * @returns void
+     */
   }
 
   const renderTabContent = () => {
@@ -190,10 +201,10 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
           return <ProfileMomentsSectionSkeleton count={6} />
         case 'moodboards':
           return <ProfileMoodboardsSectionSkeleton count={4} />
-/**
- * created - Utility function
- * @returns void
- */
+        /**
+         * created - Utility function
+         * @returns void
+         */
         case 'overview':
         default:
           return <ProfileOverviewSkeleton />
@@ -208,13 +219,15 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
       return null
     }
 
-/**
- * handleCreateMoodboard - Utility function
- * @returns void
- */
+    /**
+     * handleCreateMoodboard - Utility function
+     * @returns void
+     */
     switch (activeTab) {
       case 'artworks':
-        return <ArtworksSection artworks={profileData.artworks} showSeeAll={false} isOwner={isOwner} />
+        return (
+          <ArtworksSection artworks={profileData.artworks} showSeeAll={false} isOwner={isOwner} />
+        )
       case 'moments':
         return <MomentsSection moments={moments} showSeeAll={false} isOwner={isOwner} />
       case 'moodboards':
@@ -223,10 +236,10 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
             moodboards={moodboards}
             detailBaseHref={profileHandle ? `${baseHref}/moodboards` : undefined}
             isOwner={isOwner}
-/**
- * created - Utility function
- * @returns void
- */
+            /**
+             * created - Utility function
+             * @returns void
+             */
           />
         )
       case 'overview':
@@ -244,10 +257,10 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
               limit={6}
               seeAllHref={profileHandle ? `${baseHref}/moments` : undefined}
               detailBaseHref={profileHandle ? `${baseHref}/moments` : undefined}
-/**
- * renderTabContent - Utility function
- * @returns void
- */
+              /**
+               * renderTabContent - Utility function
+               * @returns void
+               */
               isOwner={isOwner}
             />
             <MoodboardsSection
@@ -357,7 +370,7 @@ export const ProfilePageView = ({ username: _username }: ProfilePageViewProps) =
             />
           </div>
         ) : null}
-        {(isLoading || canRenderProfile) ? (
+        {isLoading || canRenderProfile ? (
           <div className="container px-4 py-6 sm:px-6">{renderTabContent()}</div>
         ) : null}
       </div>
