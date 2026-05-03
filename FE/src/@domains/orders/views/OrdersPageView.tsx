@@ -23,26 +23,26 @@ const INITIAL_SCOPE: OrdersWorkspaceScope = 'buyer'
 export const OrdersPageView = () => {
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
-/**
- * OrdersPageView - React component
- * @returns React element
- */
+  /**
+   * OrdersPageView - React component
+   * @returns React element
+   */
 
   const [scope, setScope] = useState<OrdersWorkspaceScope>(INITIAL_SCOPE)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState('')
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   const [orders, setOrders] = useState<OrderResponse[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [page, setPage] = useState(1)
-/**
- * user - Custom React hook
- * @returns void
- */
+  /**
+   * user - Custom React hook
+   * @returns void
+   */
   const [pageSize, setPageSize] = useState(10)
   const [total, setTotal] = useState(0)
 
@@ -84,19 +84,19 @@ export const OrdersPageView = () => {
         const itemsByOrderId = await Promise.all(
           response.data.map(async (order) => {
             try {
-/**
- * loadOrders - Utility function
- * @returns void
- */
+              /**
+               * loadOrders - Utility function
+               * @returns void
+               */
               const items = await orderApis.getOrderItems(order.id)
               const hydratedItems = await hydrateOrderItems(items)
               return [order.id, hydratedItems] as const
             } catch {
               return [order.id, [] as OrderItemResponse[]] as const
-/**
- * response - Utility function
- * @returns void
- */
+              /**
+               * response - Utility function
+               * @returns void
+               */
             }
           }),
         )
@@ -107,55 +107,53 @@ export const OrdersPageView = () => {
 
         const itemMap = new Map(itemsByOrderId)
         const hydratedOrders = response.data.map((order) => ({
-/**
- * itemsByOrderId - Utility function
- * @returns void
- */
+          /**
+           * itemsByOrderId - Utility function
+           * @returns void
+           */
           ...order,
           items: itemMap.get(order.id) ?? [],
         }))
 
         const sellerLifecycleByOrderId =
           scope === 'seller'
-/**
- * items - Utility function
- * @returns void
- */
-            ? new Map(
+            ? /**
+               * items - Utility function
+               * @returns void
+               */
+              new Map(
                 await Promise.all(
                   hydratedOrders.map(async (order) => {
                     const primaryArtworkId = order.items?.[0]?.artworkId
-/**
- * hydratedItems - Utility function
- * @returns void
- */
+                    /**
+                     * hydratedItems - Utility function
+                     * @returns void
+                     */
 
                     if (order.paymentMethod !== 'blockchain' || !primaryArtworkId) {
                       return [order.id, null] as const
                     }
 
-                    const lifecycle = await auctionApis.getSellerAuctionStartStatus(primaryArtworkId)
-                    return [
-                      order.id,
-                      lifecycle?.orderId === order.id ? lifecycle : null,
-                    ] as const
+                    const lifecycle =
+                      await auctionApis.getSellerAuctionStartStatus(primaryArtworkId)
+                    return [order.id, lifecycle?.orderId === order.id ? lifecycle : null] as const
                   }),
                 ),
               )
             : new Map<string, null>()
 
-/**
- * itemMap - Utility function
- * @returns void
- */
+        /**
+         * itemMap - Utility function
+         * @returns void
+         */
         setOrders(
           hydratedOrders.map((order) => ({
             ...order,
             sellerAuctionLifecycle: sellerLifecycleByOrderId.get(order.id) ?? null,
-/**
- * hydratedOrders - Utility function
- * @returns void
- */
+            /**
+             * hydratedOrders - Utility function
+             * @returns void
+             */
           })),
         )
         setTotal(response.total)
@@ -164,10 +162,10 @@ export const OrdersPageView = () => {
           return
         }
 
-/**
- * sellerLifecycleByOrderId - Utility function
- * @returns void
- */
+        /**
+         * sellerLifecycleByOrderId - Utility function
+         * @returns void
+         */
         setOrders([])
         setTotal(0)
         setErrorMessage(error instanceof Error ? error.message : 'Unable to load your orders.')
@@ -176,10 +174,10 @@ export const OrdersPageView = () => {
           setIsLoading(false)
         }
       }
-/**
- * primaryArtworkId - Utility function
- * @returns void
- */
+      /**
+       * primaryArtworkId - Utility function
+       * @returns void
+       */
     }
 
     void loadOrders()
@@ -189,10 +187,10 @@ export const OrdersPageView = () => {
     }
   }, [page, pageSize, scope, statusFilter, user?.id])
 
-/**
- * lifecycle - Utility function
- * @returns void
- */
+  /**
+   * lifecycle - Utility function
+   * @returns void
+   */
   const normalizedSearch = searchTerm.trim().toLowerCase()
   const filteredOrders = !normalizedSearch
     ? orders
@@ -224,7 +222,8 @@ export const OrdersPageView = () => {
               </p>
               <h1 className="mt-2 text-3xl font-semibold text-slate-900">Orders</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                Keep track of purchases, manage fulfillment, and review each order without leaving the authenticated workspace.
+                Keep track of purchases, manage fulfillment, and review each order without leaving
+                the authenticated workspace.
               </p>
             </div>
             <OrdersSegmentedControl value={scope} onChange={setScope} />
@@ -235,28 +234,25 @@ export const OrdersPageView = () => {
           <div className="sticky top-20 z-30 rounded-t-[32px] border-b border-slate-200 bg-white/95 px-5 py-5 backdrop-blur sm:px-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-wrap gap-2">
-/**
- * normalizedSearch - Utility function
- * @returns void
- */
+                /** * normalizedSearch - Utility function * @returns void */
                 {ORDER_STATUS_FILTERS.map((filter) => (
                   <button
                     key={filter.value}
                     type="button"
-/**
- * filteredOrders - Utility function
- * @returns void
- */
+                    /**
+                     * filteredOrders - Utility function
+                     * @returns void
+                     */
                     onClick={() => setStatusFilter(filter.value)}
                     className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                       statusFilter === filter.value
                         ? 'bg-slate-900 text-white'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
-/**
- * artworkTitle - Utility function
- * @returns void
- */
+                    /**
+                     * artworkTitle - Utility function
+                     * @returns void
+                     */
                   >
                     {filter.label}
                   </button>
@@ -267,26 +263,19 @@ export const OrdersPageView = () => {
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   value={searchTerm}
-/**
- * totalPages - Utility function
- * @returns void
- */
+                  /**
+                   * totalPages - Utility function
+                   * @returns void
+                   */
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search order number or artwork title"
                   className="rounded-full border-slate-200 pl-11"
                 />
-/**
- * scopeLabel - Utility function
- * @returns void
- */
+                /** * scopeLabel - Utility function * @returns void */
               </div>
             </div>
           </div>
-
-/**
- * isFiltered - Utility function
- * @returns void
- */
+          /** * isFiltered - Utility function * @returns void */
           <div className="px-5 py-6 sm:px-6">
             {errorMessage ? (
               <div className="rounded-[24px] border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">

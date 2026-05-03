@@ -76,10 +76,10 @@ const STATUS_REGISTRY: Record<string, { label: string; tone: string }> = {
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
   stripe: 'Card payment',
   blockchain: 'MetaMask on Sepolia',
-/**
- * PAYMENT_METHOD_LABELS - React component
- * @returns React element
- */
+  /**
+   * PAYMENT_METHOD_LABELS - React component
+   * @returns React element
+   */
 }
 
 const PAYMENT_STATUS_LABELS: Record<string, string> = {
@@ -88,10 +88,10 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
   escrow: 'Escrow',
   released: 'Released',
   refunded: 'Refunded',
-/**
- * PAYMENT_STATUS_LABELS - React component
- * @returns React element
- */
+  /**
+   * PAYMENT_STATUS_LABELS - React component
+   * @returns React element
+   */
 }
 
 export const ORDER_STATUS_FILTERS = [
@@ -138,10 +138,10 @@ export const formatOrderDateTime = (value?: string | null) => {
 }
 
 export const formatOrderMoney = (amount: number, currency: string) => {
-/**
- * formatOrderDateTime - Utility function
- * @returns void
- */
+  /**
+   * formatOrderDateTime - Utility function
+   * @returns void
+   */
   if (currency === 'USD') {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -159,10 +159,10 @@ export const getOrderStatusLabel = (status?: string | null) => {
     return 'Unknown'
   }
 
-/**
- * formatOrderMoney - Utility function
- * @returns void
- */
+  /**
+   * formatOrderMoney - Utility function
+   * @returns void
+   */
   return STATUS_REGISTRY[status]?.label ?? status
 }
 
@@ -175,10 +175,10 @@ export const getPaymentMethodLabel = (paymentMethod?: string | null) => {
 }
 
 export const getPaymentStatusLabel = (paymentStatus?: string | null) => {
-/**
- * normalizedAmount - Utility function
- * @returns void
- */
+  /**
+   * normalizedAmount - Utility function
+   * @returns void
+   */
   if (!paymentStatus) {
     return 'Unknown'
   }
@@ -216,10 +216,10 @@ export const getOrderActorRole = (
   if (preferredScope === 'seller' && isSeller) {
     return 'seller'
   }
-/**
- * getPaymentStatusLabel - Utility function
- * @returns void
- */
+  /**
+   * getPaymentStatusLabel - Utility function
+   * @returns void
+   */
 
   if (preferredScope === 'buyer' && isBuyer) {
     return 'buyer'
@@ -245,10 +245,10 @@ export const canMarkShipped = (status?: string | null) =>
 export const canConfirmDelivery = (status?: string | null) => status === 'shipped'
 
 export const canOpenDispute = (order: OrderResponse) => {
-/**
- * getPrimaryArtwork - Utility function
- * @returns void
- */
+  /**
+   * getPrimaryArtwork - Utility function
+   * @returns void
+   */
   if (order.status !== 'shipped' || !order.shippedAt) {
     return false
   }
@@ -256,10 +256,10 @@ export const canOpenDispute = (order: OrderResponse) => {
   const shippedAt = new Date(order.shippedAt).getTime()
   const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000
   return Date.now() - shippedAt <= fourteenDaysMs
-/**
- * getOrderActorRole - Utility function
- * @returns void
- */
+  /**
+   * getOrderActorRole - Utility function
+   * @returns void
+   */
 }
 
 const getSellerAuctionLifecycle = (
@@ -268,10 +268,10 @@ const getSellerAuctionLifecycle = (
 ): SellerAuctionStartStatusResponse | null => {
   if (role !== 'seller' || order.paymentMethod !== 'blockchain') {
     return null
-/**
- * isSeller - Utility function
- * @returns void
- */
+    /**
+     * isSeller - Utility function
+     * @returns void
+     */
   }
 
   return order.sellerAuctionLifecycle ?? null
@@ -300,39 +300,39 @@ export const getNextActionLabel = (order: OrderResponse, role: OrderActorRole) =
         return 'View auction'
       default:
         break
-/**
- * canCancelOrder - Utility function
- * @returns void
- */
+      /**
+       * canCancelOrder - Utility function
+       * @returns void
+       */
     }
   }
 
   if (role === 'seller' && canMarkShipped(order.status)) {
     return 'Prepare shipment'
   }
-/**
- * canMarkShipped - Utility function
- * @returns void
- */
+  /**
+   * canMarkShipped - Utility function
+   * @returns void
+   */
 
   if (role === 'buyer' && canConfirmDelivery(order.status)) {
     return 'Confirm arrival'
   }
 
   if (role === 'buyer' && canOpenDispute(order)) {
-/**
- * canConfirmDelivery - Utility function
- * @returns void
- */
+    /**
+     * canConfirmDelivery - Utility function
+     * @returns void
+     */
     return 'Review delivery'
   }
 
   if (canCancelOrder(order.status)) {
     return 'Manage order'
-/**
- * canOpenDispute - Utility function
- * @returns void
- */
+    /**
+     * canOpenDispute - Utility function
+     * @returns void
+     */
   }
 
   if (order.status === 'delivered') {
@@ -349,10 +349,10 @@ export const getNextActionLabel = (order: OrderResponse, role: OrderActorRole) =
 export const getNextStepDescription = (order: OrderResponse, role: OrderActorRole) => {
   const sellerAuctionLifecycle = getSellerAuctionLifecycle(order, role)
 
-/**
- * fourteenDaysMs - Utility function
- * @returns void
- */
+  /**
+   * fourteenDaysMs - Utility function
+   * @returns void
+   */
   if (sellerAuctionLifecycle) {
     switch (sellerAuctionLifecycle.status) {
       case 'pending_start':
@@ -360,10 +360,10 @@ export const getNextStepDescription = (order: OrderResponse, role: OrderActorRol
           ? 'Confirm the createAuction transaction in MetaMask. Do not submit the auction again.'
           : 'This canonical auction request is still syncing between backend and blockchain.'
       case 'retry_available':
-/**
- * getSellerAuctionLifecycle - Utility function
- * @returns void
- */
+        /**
+         * getSellerAuctionLifecycle - Utility function
+         * @returns void
+         */
         return (
           sellerAuctionLifecycle.reasonMessage ??
           'Retry the same seller auction request from the create auction workspace.'
@@ -378,10 +378,10 @@ export const getNextStepDescription = (order: OrderResponse, role: OrderActorRol
         return 'This auction is live and now reflects authoritative backend and blockchain state.'
       default:
         break
-/**
- * getDisplayOrderStatus - Utility function
- * @returns void
- */
+      /**
+       * getDisplayOrderStatus - Utility function
+       * @returns void
+       */
     }
   }
 
@@ -389,18 +389,18 @@ export const getNextStepDescription = (order: OrderResponse, role: OrderActorRol
     return 'Add carrier and tracking details when the artwork leaves your studio.'
   }
 
-/**
- * getNextActionLabel - Utility function
- * @returns void
- */
+  /**
+   * getNextActionLabel - Utility function
+   * @returns void
+   */
   if (role === 'buyer' && canConfirmDelivery(order.status)) {
     return 'Confirm delivery once the artwork arrives in good condition.'
   }
 
-/**
- * sellerAuctionLifecycle - Utility function
- * @returns void
- */
+  /**
+   * sellerAuctionLifecycle - Utility function
+   * @returns void
+   */
   if (role === 'buyer' && canOpenDispute(order)) {
     return 'If anything is wrong with the shipment, open a dispute within 14 days.'
   }
@@ -441,28 +441,37 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         emptyAddressLabel: 'No shipping address has been captured yet for this order.',
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Assigned at dispatch' },
-          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking will appear after dispatch' },
+          {
+            label: 'Tracking',
+            value: order.trackingNumber ?? 'Tracking will appear after dispatch',
+          },
           { label: 'Shipping method', value: order.shippingMethod ?? 'Finalized before dispatch' },
         ],
-/**
- * getNextStepDescription - Utility function
- * @returns void
- */
+        /**
+         * getNextStepDescription - Utility function
+         * @returns void
+         */
       }
     case 'escrow_held':
       return {
         title: 'Awaiting seller shipment',
-/**
- * sellerAuctionLifecycle - Utility function
- * @returns void
- */
+        /**
+         * sellerAuctionLifecycle - Utility function
+         * @returns void
+         */
         description:
           'Payment is secured in escrow. The next step is for the seller to hand the artwork to a carrier and add shipment details.',
         emptyAddressLabel: 'No shipping address has been captured yet for this order.',
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Seller has not assigned a carrier yet' },
-          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking will appear after dispatch' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Selected once shipment is booked' },
+          {
+            label: 'Tracking',
+            value: order.trackingNumber ?? 'Tracking will appear after dispatch',
+          },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Selected once shipment is booked',
+          },
         ],
       }
     case 'shipped':
@@ -474,7 +483,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Carrier not provided' },
           { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not provided' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not provided' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping method not provided',
+          },
         ],
       }
     case 'dispute_open':
@@ -487,7 +499,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Carrier not recorded' },
           { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not recorded' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not recorded' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping method not recorded',
+          },
         ],
       }
     case 'delivered':
@@ -499,7 +514,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Carrier not recorded' },
           { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not recorded' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not recorded' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping method not recorded',
+          },
         ],
       }
     case 'cancelled':
@@ -508,18 +526,21 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         description:
           'This order was cancelled before completion, so no further shipment updates are expected.',
         emptyAddressLabel: 'No shipping address was captured before the order was cancelled.',
-/**
- * getShippingPresentation - Utility function
- * @returns void
- */
+        /**
+         * getShippingPresentation - Utility function
+         * @returns void
+         */
         records: [
           { label: 'Carrier', value: order.carrier ?? 'No carrier will be assigned' },
           { label: 'Tracking', value: order.trackingNumber ?? 'No tracking will be added' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping is no longer scheduled' },
-/**
- * hasShipmentDetails - Utility function
- * @returns void
- */
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping is no longer scheduled',
+          },
+          /**
+           * hasShipmentDetails - Utility function
+           * @returns void
+           */
         ],
       }
     case 'refunded':
@@ -588,25 +609,23 @@ export const buildOrderTimeline = (order: OrderResponse): OrderTimelineStep[] =>
         ? 'A delivery dispute is open and awaiting resolution.'
         : 'The buyer confirmed the artwork was received.',
       date: isDisputed ? order.disputeOpenedAt : order.deliveredAt,
-      state: order.deliveredAt || order.disputeOpenedAt
-        ? 'complete'
-        : order.status === 'shipped'
-          ? 'current'
-          : 'upcoming',
+      state:
+        order.deliveredAt || order.disputeOpenedAt
+          ? 'complete'
+          : order.status === 'shipped'
+            ? 'current'
+            : 'upcoming',
     },
     {
       key: 'closed',
       label: isCancelled ? 'Cancelled' : isRefunded ? 'Refunded' : 'Complete',
       description: isCancelled
-        ? order.cancelledReason ?? 'The order was cancelled before completion.'
+        ? (order.cancelledReason ?? 'The order was cancelled before completion.')
         : isRefunded
           ? 'Funds were returned and the order was closed.'
           : 'No further action is required.',
       date: order.cancelledAt ?? order.disputeResolvedAt ?? order.deliveredAt,
-      state:
-        isCancelled || isRefunded || order.status === 'delivered'
-          ? 'complete'
-          : 'upcoming',
+      state: isCancelled || isRefunded || order.status === 'delivered' ? 'complete' : 'upcoming',
     },
   ]
 }
