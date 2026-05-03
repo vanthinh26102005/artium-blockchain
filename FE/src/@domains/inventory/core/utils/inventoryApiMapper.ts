@@ -12,10 +12,10 @@ const FALLBACK_THUMBNAIL = '/images/logo/logo-light-mode.png'
 const normalizePrice = (value?: number | string | null) => {
   if (value === null || value === undefined) {
     return undefined
-/**
- * normalizePrice - Utility function
- * @returns void
- */
+    /**
+     * normalizePrice - Utility function
+     * @returns void
+     */
   }
 
   if (typeof value === 'number') {
@@ -28,10 +28,10 @@ const normalizePrice = (value?: number | string | null) => {
 
 const resolveThumbnail = (item: ArtworkApiItem) => {
   if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
-/**
- * parsed - Utility function
- * @returns void
- */
+    /**
+     * parsed - Utility function
+     * @returns void
+     */
     return item.thumbnailUrl
   }
 
@@ -62,10 +62,10 @@ export const mapArtworkToInventory = (item: ArtworkApiItem): InventoryArtwork =>
     creatorName: item.creatorName ?? 'Unknown artist',
     status: resolveDisplayStatus(item),
     isPublished: item.isPublished ?? false,
-/**
- * resolveDisplayStatus - Utility function
- * @returns void
- */
+    /**
+     * resolveDisplayStatus - Utility function
+     * @returns void
+     */
     auctionLifecycle: item.auctionLifecycle ?? null,
     backendStatus: item.status,
     createdAt: item.createdAt,
@@ -77,10 +77,10 @@ export const mapArtworkToInventory = (item: ArtworkApiItem): InventoryArtwork =>
 }
 
 export const mapFolderToInventory = (item: ArtworkFolderApiItem): InventoryFolder => {
-/**
- * mapArtworkToInventory - Utility function
- * @returns void
- */
+  /**
+   * mapArtworkToInventory - Utility function
+   * @returns void
+   */
   return {
     id: item.id,
     name: item.name,

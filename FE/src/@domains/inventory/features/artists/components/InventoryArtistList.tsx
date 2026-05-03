@@ -21,10 +21,10 @@ const formatFollowedAt = (value?: string | null) => {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) {
     return 'Recently followed'
-/**
- * date - Utility function
- * @returns void
- */
+    /**
+     * date - Utility function
+     * @returns void
+     */
   }
 
   return `Followed ${date.toLocaleDateString('en-US', {
@@ -40,11 +40,8 @@ export const InventoryArtistList = ({ artists }: InventoryArtistListProps) => {
       <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 px-5 py-10 text-center">
         <h3 className="text-base font-semibold text-slate-900">No followed artists found</h3>
         <p className="mt-1 text-sm text-slate-500">
-/**
- * InventoryArtistList - React component
- * @returns React element
- */
-          Follow artists from their profiles to keep them here.
+          /** * InventoryArtistList - React component * @returns React element */ Follow artists
+          from their profiles to keep them here.
         </p>
       </div>
     )
@@ -93,7 +90,8 @@ export const InventoryArtistList = ({ artists }: InventoryArtistListProps) => {
                   ) : null}
                 </div>
                 <p className="mt-1 truncate text-sm text-slate-900">
-                  {artist.bio || `${artist.artworkCount} artwork${artist.artworkCount === 1 ? '' : 's'}`}
+                  {artist.bio ||
+                    `${artist.artworkCount} artwork${artist.artworkCount === 1 ? '' : 's'}`}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
                   <span>{formatFollowedAt(artist.followedAt)}</span>
