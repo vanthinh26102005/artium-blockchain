@@ -26,19 +26,19 @@ export const ProfilesGrid = ({ searchQuery = '' }: ProfilesGridProps) => {
   const fetchPage = useCallback(
     async (skip: number, take: number) => {
       const result = await profileApis.searchSellerProfiles(searchQuery, { skip, take })
-/**
- * fetchPage - Utility function
- * @returns void
- */
+      /**
+       * fetchPage - Utility function
+       * @returns void
+       */
       return {
         data: result.items.map(mapSellerProfileToDiscover),
         hasMore: result.hasMore,
       }
     },
-/**
- * result - Utility function
- * @returns void
- */
+    /**
+     * result - Utility function
+     * @returns void
+     */
     [searchQuery],
   )
 
@@ -58,10 +58,10 @@ export const ProfilesGrid = ({ searchQuery = '' }: ProfilesGridProps) => {
 
   // -- render --
   if (error) {
-/**
- * handleToggleFollow - Utility function
- * @returns void
- */
+    /**
+     * handleToggleFollow - Utility function
+     * @returns void
+     */
     return (
       <div className="mt-10 text-center text-sm text-red-500">
         Failed to load profiles. Please try again later.
@@ -70,11 +70,7 @@ export const ProfilesGrid = ({ searchQuery = '' }: ProfilesGridProps) => {
   }
 
   if (!isLoading && displayedItems.length === 0) {
-    return (
-      <div className="mt-10 text-center text-sm text-slate-500">
-        No profiles found.
-      </div>
-    )
+    return <div className="mt-10 text-center text-sm text-slate-500">No profiles found.</div>
   }
 
   return (
@@ -98,4 +94,3 @@ export const ProfilesGrid = ({ searchQuery = '' }: ProfilesGridProps) => {
     </section>
   )
 }
-
