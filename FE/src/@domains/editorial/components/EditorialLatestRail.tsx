@@ -26,13 +26,9 @@ const formatDate = (value: string) =>
 export const EditorialLatestRail = ({ items, title = 'Latest' }: EditorialLatestRailProps) => {
   return (
     <section className="space-y-3 px-6 sm:px-10 lg:px-14">
-/**
- * EditorialLatestRail - React component
- * @returns React element
- */
+      /** * EditorialLatestRail - React component * @returns React element */
       {/* header */}
       <h2 className="text-[30px] font-semibold text-slate-900">{title}</h2>
-
       {/* scroll area */}
       <div className="overflow-x-auto pb-2">
         <div className="flex snap-x snap-mandatory gap-6 px-1 sm:px-2 lg:px-3">
@@ -49,7 +45,7 @@ export const EditorialLatestRail = ({ items, title = 'Latest' }: EditorialLatest
                       src={item.imageUrl}
                       alt={item.title}
                       fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-120"
+                      className="group-hover:scale-120 object-cover transition-transform duration-300"
                       sizes="(max-width: 640px) 100vw, 350px"
                     />
                   </div>
@@ -57,11 +53,11 @@ export const EditorialLatestRail = ({ items, title = 'Latest' }: EditorialLatest
 
                 {/* content */}
                 <div className="space-y-2">
-                  <p className="line-clamp-1 text-[12px] leading-tight font-semibold text-[#191414]">
+                  <p className="line-clamp-1 text-[12px] font-semibold leading-tight text-[#191414]">
                     {item.category}
                   </p>
                   <h3
-                    className="text-[18px] leading-tight font-normal text-slate-900 group-hover:underline"
+                    className="text-[18px] font-normal leading-tight text-slate-900 group-hover:underline"
                     style={{
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
@@ -74,9 +70,9 @@ export const EditorialLatestRail = ({ items, title = 'Latest' }: EditorialLatest
                   </h3>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 text-[12px] leading-tight font-semibold text-[#191414]">
+                <div className="flex flex-wrap items-center gap-2 text-[12px] font-semibold leading-tight text-[#191414]">
                   <span className="flex items-center gap-2">
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-[11px] font-semibold text-white uppercase">
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-[11px] font-semibold uppercase text-white">
                       {item.author.charAt(0)}
                     </span>
                     <span>{item.author}</span>

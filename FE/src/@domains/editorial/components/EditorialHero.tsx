@@ -26,10 +26,10 @@ const formatPublishedDate = (value: string) =>
 export const EditorialHero = ({ items }: EditorialHeroProps) => {
   // -- state --
   const [activeIndex, setActiveIndex] = useState(0)
-/**
- * EditorialHero - React component
- * @returns React element
- */
+  /**
+   * EditorialHero - React component
+   * @returns React element
+   */
   const [slideDirection, setSlideDirection] = useState<'next' | 'prev'>('next')
   const router = useRouter()
 
@@ -37,46 +37,46 @@ export const EditorialHero = ({ items }: EditorialHeroProps) => {
   const slides = useMemo(() => (items.length > 0 ? items : []), [items])
   const activeItem = slides[activeIndex] ?? slides[0]
   const formattedDate = activeItem ? formatPublishedDate(activeItem.publishedAt) : ''
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
 
   // -- handlers --
   const goToSlide = (index: number, direction: 'next' | 'prev') => {
     setSlideDirection(direction)
     setActiveIndex(index)
   }
-/**
- * slides - Utility function
- * @returns void
- */
+  /**
+   * slides - Utility function
+   * @returns void
+   */
 
   const goNext = () => {
     goToSlide((activeIndex + 1) % slides.length, 'next')
   }
-/**
- * activeItem - Utility function
- * @returns void
- */
+  /**
+   * activeItem - Utility function
+   * @returns void
+   */
 
   const goPrev = () => {
     goToSlide(activeIndex === 0 ? slides.length - 1 : activeIndex - 1, 'prev')
   }
-/**
- * formattedDate - Utility function
- * @returns void
- */
+  /**
+   * formattedDate - Utility function
+   * @returns void
+   */
 
   // -- effects --
   useEffect(() => {
     if (slides.length <= 1) {
       return
     }
-/**
- * goToSlide - Utility function
- * @returns void
- */
+    /**
+     * goToSlide - Utility function
+     * @returns void
+     */
 
     const timer = window.setInterval(() => {
       goNext()
@@ -85,10 +85,10 @@ export const EditorialHero = ({ items }: EditorialHeroProps) => {
     return () => {
       window.clearInterval(timer)
     }
-/**
- * goNext - Utility function
- * @returns void
- */
+    /**
+     * goNext - Utility function
+     * @returns void
+     */
   }, [slides.length, activeIndex])
 
   // -- render --
@@ -96,10 +96,10 @@ export const EditorialHero = ({ items }: EditorialHeroProps) => {
     return null
   }
 
-/**
- * goPrev - Utility function
- * @returns void
- */
+  /**
+   * goPrev - Utility function
+   * @returns void
+   */
   const handleNavigate = () => {
     router.push(`/editorial/${activeItem.id}`)
   }
@@ -113,10 +113,10 @@ export const EditorialHero = ({ items }: EditorialHeroProps) => {
       onClick={handleNavigate}
       onKeyDown={(event) => {
         if (event.currentTarget !== event.target) {
-/**
- * timer - Utility function
- * @returns void
- */
+          /**
+           * timer - Utility function
+           * @returns void
+           */
           return
         }
         if (event.key === 'Enter' || event.key === ' ') {
@@ -134,14 +134,14 @@ export const EditorialHero = ({ items }: EditorialHeroProps) => {
             : '-translate-x-4'
         return (
           <div
-/**
- * handleNavigate - Utility function
- * @returns void
- */
+            /**
+             * handleNavigate - Utility function
+             * @returns void
+             */
             key={slide.id}
-            className={`absolute inset-0 h-full w-full transition-all duration-[1200ms] ease-out ${
+            className={`duration-[1200ms] absolute inset-0 h-full w-full transition-all ease-out ${
               isActive
-                ? `blur-0 scale-100 opacity-100 ${translateClass}`
+                ? `scale-100 opacity-100 blur-0 ${translateClass}`
                 : `scale-[1.02] opacity-0 blur-[2px] ${translateClass}`
             }`}
             aria-hidden={!isActive}
@@ -163,30 +163,30 @@ export const EditorialHero = ({ items }: EditorialHeroProps) => {
         <div
           className="w-full max-w-4xl space-y-4 rounded-3xl border border-white/25 bg-white/10 p-5 text-white shadow-[0_10px_40px_rgba(15,23,42,0.35)] backdrop-blur-2xl sm:p-6"
           style={{
-/**
- * isActive - Utility function
- * @returns void
- */
+            /**
+             * isActive - Utility function
+             * @returns void
+             */
             background: 'rgba(255, 255, 255, 0.12)',
             backdropFilter: 'blur(22px) saturate(170%)',
             WebkitBackdropFilter: 'blur(22px) saturate(170%)',
           }}
-/**
- * translateClass - Utility function
- * @returns void
- */
+          /**
+           * translateClass - Utility function
+           * @returns void
+           */
         >
-          <div className="inline-flex w-fit items-center rounded-full border border-white/30 bg-white/15 px-3 py-1 text-[12px] leading-tight font-semibold tracking-[0.14em] text-white uppercase">
+          <div className="inline-flex w-fit items-center rounded-full border border-white/30 bg-white/15 px-3 py-1 text-[12px] font-semibold uppercase leading-tight tracking-[0.14em] text-white">
             {activeItem.category}
           </div>
 
           <div className="space-y-3">
-            <h1 className="text-[30px] leading-none font-semibold text-white sm:text-[34px] lg:text-[38px]">
+            <h1 className="text-[30px] font-semibold leading-none text-white sm:text-[34px] lg:text-[38px]">
               {activeItem.title}
             </h1>
 
             <div className="flex flex-wrap items-center gap-3 text-white/90">
-              <span className="line-clamp-1 text-[20px] leading-tight font-normal text-white">
+              <span className="line-clamp-1 text-[20px] font-normal leading-tight text-white">
                 by {activeItem.author}
               </span>
               <span className="h-1 w-1 rounded-full bg-white/60" />

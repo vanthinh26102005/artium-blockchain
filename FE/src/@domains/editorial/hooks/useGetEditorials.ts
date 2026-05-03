@@ -21,10 +21,10 @@ export const useGetEditorials = (): UseGetEditorialsReturn => {
   const featured = useMemo(
     () => EDITORIAL_ITEMS.find((item) => item.featured) ?? EDITORIAL_ITEMS[0],
     [],
-/**
- * featured - Utility function
- * @returns void
- */
+    /**
+     * featured - Utility function
+     * @returns void
+     */
   )
 
   const heroItems = useMemo(() => {
@@ -33,18 +33,18 @@ export const useGetEditorials = (): UseGetEditorialsReturn => {
   }, [featured])
 
   const latestItems = useMemo(() => {
-/**
- * heroItems - Utility function
- * @returns void
- */
+    /**
+     * heroItems - Utility function
+     * @returns void
+     */
     return [...EDITORIAL_ITEMS]
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
       .slice(0, 10)
   }, [])
-/**
- * rest - Utility function
- * @returns void
- */
+  /**
+   * rest - Utility function
+   * @returns void
+   */
 
   const popularItems = useMemo(() => {
     return EDITORIAL_ITEMS.filter((item) => item.id !== featured.id).slice(0, 8)
@@ -52,10 +52,10 @@ export const useGetEditorials = (): UseGetEditorialsReturn => {
 
   const allItems = useMemo(() => {
     return EDITORIAL_ITEMS.filter((item) => item.id !== featured.id)
-/**
- * latestItems - Utility function
- * @returns void
- */
+    /**
+     * latestItems - Utility function
+     * @returns void
+     */
   }, [featured.id])
 
   const visibleAllItems = useMemo(() => allItems.slice(0, 20), [allItems])
@@ -65,10 +65,10 @@ export const useGetEditorials = (): UseGetEditorialsReturn => {
     heroItems,
     latestItems,
     popularItems,
-/**
- * popularItems - Utility function
- * @returns void
- */
+    /**
+     * popularItems - Utility function
+     * @returns void
+     */
     visibleAllItems,
   }
 }

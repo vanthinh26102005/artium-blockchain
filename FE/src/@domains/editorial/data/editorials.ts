@@ -284,26 +284,26 @@ const BASE_EDITORIAL_ITEMS: EditorialItem[] = [
 const CLONE_COUNT = 100
 const generatedEditorials: EditorialItem[] = Array.from({ length: CLONE_COUNT }, (_val, index) => {
   const seedableItems = BASE_EDITORIAL_ITEMS.filter((item) => !item.featured)
-/**
- * CLONE_COUNT - React component
- * @returns React element
- */
+  /**
+   * CLONE_COUNT - React component
+   * @returns React element
+   */
   const seed = seedableItems[index % seedableItems.length]
   const date = new Date(seed.publishedAt)
   date.setDate(date.getDate() - (index + 1))
 
-/**
- * generatedEditorials - Utility function
- * @returns void
- */
+  /**
+   * generatedEditorials - Utility function
+   * @returns void
+   */
   return {
     ...seed,
     id: `${seed.id}-extra-${index + 1}`,
     title: `${seed.title} ${index + 1}`,
-/**
- * seedableItems - Utility function
- * @returns void
- */
+    /**
+     * seedableItems - Utility function
+     * @returns void
+     */
     publishedAt: date.toISOString().slice(0, 10),
     featured: false,
   }
