@@ -7,6 +7,10 @@ interface AppLayoutProps {
   hideFooter?: boolean
 }
 
+/**
+ * AppLayout - React component
+ * @returns React element
+ */
 export const AppLayout: React.FC<AppLayoutProps> = ({ children, hideFooter = false }) => {
   return (
     <div className="app-layout flex min-h-screen flex-col bg-slate-50 text-slate-900">
