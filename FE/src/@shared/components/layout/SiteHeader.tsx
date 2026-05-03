@@ -39,10 +39,10 @@ const navLinks = [
 const shortenWalletAddress = (address?: string | null) => {
   if (!address) {
     return null
-/**
- * shortenWalletAddress - Utility function
- * @returns void
- */
+    /**
+     * shortenWalletAddress - Utility function
+     * @returns void
+     */
   }
 
   return `${address.slice(0, 6)}...${address.slice(-4)}`
@@ -54,19 +54,19 @@ const getUsableAvatarUrl = (avatarUrl?: string | null) => {
   const trimmed = avatarUrl?.trim()
   if (
     !trimmed ||
-/**
- * isWalletLocalEmail - Utility function
- * @returns void
- */
+    /**
+     * isWalletLocalEmail - Utility function
+     * @returns void
+     */
     trimmed === '/images/logo-dark-mode.png' ||
     trimmed === '/images/default-avatar.png'
   ) {
     return null
   }
-/**
- * getUsableAvatarUrl - Utility function
- * @returns void
- */
+  /**
+   * getUsableAvatarUrl - Utility function
+   * @returns void
+   */
 
   return trimmed
 }
@@ -94,26 +94,26 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   const desktopInputRef = useRef<HTMLInputElement>(null)
   const mobileInputRef = useRef<HTMLInputElement>(null)
   const searchResultsRef = useRef<HTMLDivElement>(null)
-/**
- * SiteHeader - React component
- * @returns React element
- */
+  /**
+   * SiteHeader - React component
+   * @returns React element
+   */
   const sidebarPrefixes = [
     '/homepage',
     '/messages',
     '/portfolio',
-/**
- * router - Utility function
- * @returns void
- */
+    /**
+     * router - Utility function
+     * @returns void
+     */
     '/custom-website',
     '/events',
     '/inventory',
     '/artist-management',
-/**
- * user - Custom React hook
- * @returns void
- */
+    /**
+     * user - Custom React hook
+     * @returns void
+     */
     '/contact-management',
     '/marketing-email',
     '/private-views',
@@ -127,34 +127,34 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
 
   // Check if current route is a moment detail page
   const isMomentDetailPage = router.pathname === '/profile/[username]/moments/[id]'
-/**
- * desktopInputRef - Utility function
- * @returns void
- */
+  /**
+   * desktopInputRef - Utility function
+   * @returns void
+   */
   const authRoutes = ['/login', '/sign-up', '/forgot-password', '/reset-password']
   const marketingRoutes = ['/', '/discover', '/editorial', '/pricing', '/auction']
   const isAuthRoute = authRoutes.includes(router.pathname) || router.pathname.startsWith('/auth')
   const isMarketingRoute = marketingRoutes.includes(router.pathname)
-/**
- * mobileInputRef - Utility function
- * @returns void
- */
+  /**
+   * mobileInputRef - Utility function
+   * @returns void
+   */
   const borderedHeaderRoutes = ['/discover', '/auction']
   const shouldForceHeaderBorder = borderedHeaderRoutes.includes(router.pathname)
   const isEditorialPage = router.pathname === '/editorial'
   const isPricingPage = router.pathname === '/pricing'
-/**
- * searchResultsRef - Utility function
- * @returns void
- */
+  /**
+   * searchResultsRef - Utility function
+   * @returns void
+   */
   const isTransparentHeaderPage = isEditorialPage || isPricingPage
   const shouldShowSearch = sidebarPrefixes.some(
     (prefix) => router.asPath === prefix || router.asPath.startsWith(`${prefix}/`),
   )
-/**
- * sidebarPrefixes - Utility function
- * @returns void
- */
+  /**
+   * sidebarPrefixes - Utility function
+   * @returns void
+   */
   const isSearchVisible = shouldShowSearch && isSearchOpen
   const isLandingVariant = variant === 'landing'
 
@@ -178,118 +178,118 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
         setIsSearchOpen(false)
         setShowResults(false)
       }
-/**
- * isMomentDetailPage - Utility function
- * @returns void
- */
+      /**
+       * isMomentDetailPage - Utility function
+       * @returns void
+       */
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-/**
- * authRoutes - Utility function
- * @returns void
- */
+    /**
+     * authRoutes - Utility function
+     * @returns void
+     */
   }, [isSearchOpen])
 
   useEffect(() => {
     if (!isSearchOpen) {
-/**
- * marketingRoutes - Utility function
- * @returns void
- */
+      /**
+       * marketingRoutes - Utility function
+       * @returns void
+       */
       setSearchQuery('')
       setSearchResults([])
       setShowResults(false)
       return
-/**
- * isAuthRoute - Utility function
- * @returns void
- */
+      /**
+       * isAuthRoute - Utility function
+       * @returns void
+       */
     }
 
     const isMobile = window.matchMedia('(max-width: 1023px)').matches
     const targetInput = isMobile ? mobileInputRef.current : desktopInputRef.current
-/**
- * isMarketingRoute - Utility function
- * @returns void
- */
+    /**
+     * isMarketingRoute - Utility function
+     * @returns void
+     */
     targetInput?.focus()
   }, [isSearchOpen])
 
   // Debounced search effect
-/**
- * borderedHeaderRoutes - Utility function
- * @returns void
- */
+  /**
+   * borderedHeaderRoutes - Utility function
+   * @returns void
+   */
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([])
       setShowResults(false)
-/**
- * shouldForceHeaderBorder - Utility function
- * @returns void
- */
+      /**
+       * shouldForceHeaderBorder - Utility function
+       * @returns void
+       */
       return
     }
 
     const timeoutId = setTimeout(async () => {
-/**
- * isEditorialPage - Utility function
- * @returns void
- */
+      /**
+       * isEditorialPage - Utility function
+       * @returns void
+       */
       try {
         setIsSearching(true)
         const response = await profileApis.searchSellerProfiles(searchQuery.trim(), { take: 5 })
         const items = response?.items || []
-/**
- * isPricingPage - Utility function
- * @returns void
- */
+        /**
+         * isPricingPage - Utility function
+         * @returns void
+         */
         setSearchResults(items)
         setShowResults(true)
 
         // Resolve user slugs in parallel for proper URL navigation
-/**
- * isTransparentHeaderPage - Utility function
- * @returns void
- */
+        /**
+         * isTransparentHeaderPage - Utility function
+         * @returns void
+         */
         const slugMap: Record<string, string> = {}
         await Promise.all(
           items.map(async (item) => {
             try {
-/**
- * shouldShowSearch - Utility function
- * @returns void
- */
+              /**
+               * shouldShowSearch - Utility function
+               * @returns void
+               */
               const u = await usersApi.getUserById(item.userId)
               slugMap[item.userId] = u.slug || u.username || item.userId
             } catch {
               slugMap[item.userId] = item.userId
             }
           }),
-/**
- * isSearchVisible - Utility function
- * @returns void
- */
+          /**
+           * isSearchVisible - Utility function
+           * @returns void
+           */
         )
         setResolvedSlugs(slugMap)
       } catch {
         setSearchResults([])
-/**
- * isLandingVariant - Utility function
- * @returns void
- */
+        /**
+         * isLandingVariant - Utility function
+         * @returns void
+         */
         setShowResults(false)
       } finally {
         setIsSearching(false)
       }
     }, 300) // 300ms debounce
 
-/**
- * handleScroll - Utility function
- * @returns void
- */
+    /**
+     * handleScroll - Utility function
+     * @returns void
+     */
     return () => clearTimeout(timeoutId)
   }, [searchQuery])
 
@@ -307,10 +307,10 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
         setShowResults(false)
       }
     }
-/**
- * handleKeyDown - Utility function
- * @returns void
- */
+    /**
+     * handleKeyDown - Utility function
+     * @returns void
+     */
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -333,18 +333,18 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
       : isMarketingRoute
         ? shouldForceHeaderBorder
           ? 'bg-white border-b border-slate-200 shadow-[0_4px_12px_rgba(15,23,42,0.08)]'
-/**
- * isMobile - Utility function
- * @returns void
- */
-          : 'bg-transparent border-b border-black'
+          : /**
+             * isMobile - Utility function
+             * @returns void
+             */
+            'bg-transparent border-b border-black'
         : 'bg-white/70 border-b border-white/40 shadow-[0_6px_20px_rgba(15,23,42,0.06)]'
 
   const headerClasses = [
-/**
- * targetInput - Utility function
- * @returns void
- */
+    /**
+     * targetInput - Utility function
+     * @returns void
+     */
     'sticky top-0 z-50 transition-all duration-300',
     isLandingVariant
       ? isScrolled
@@ -360,28 +360,28 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
     .filter(Boolean)
     .join(' ')
 
-/**
- * timeoutId - Utility function
- * @returns void
- */
+  /**
+   * timeoutId - Utility function
+   * @returns void
+   */
   const desktopSearchClasses = [
     'hidden min-w-0 items-center transition-all duration-300 lg:flex',
     isSearchVisible
       ? 'ml-2 w-[320px] opacity-100 xl:w-[360px]'
       : 'ml-0 w-0 opacity-0 pointer-events-none',
     showResults ? 'overflow-visible' : 'overflow-hidden',
-/**
- * response - Utility function
- * @returns void
- */
+    /**
+     * response - Utility function
+     * @returns void
+     */
   ].join(' ')
 
   const mobileSearchClasses = [
     'transition-all duration-300 lg:hidden',
-/**
- * items - Utility function
- * @returns void
- */
+    /**
+     * items - Utility function
+     * @returns void
+     */
     isSearchVisible ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0 pointer-events-none',
     showResults ? 'overflow-visible' : 'overflow-hidden',
   ].join(' ')
@@ -390,10 +390,10 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   const profileLabel =
     user?.username ??
     user?.displayName ??
-/**
- * slugMap - Utility function
- * @returns void
- */
+    /**
+     * slugMap - Utility function
+     * @returns void
+     */
     user?.fullName ??
     walletLabel ??
     (isWalletLocalEmail(user?.email) ? null : user?.email) ??
@@ -401,11 +401,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   const useWhiteNav = isLandingVariant || isAuthRoute || (isTransparentHeaderPage && !isScrolled)
   const avatarFallbackUrl = useWhiteNav
     ? '/images/logo/logo-dark-mode.png'
-/**
- * u - Utility function
- * @returns void
- */
-    : '/images/logo/logo-light-mode.png'
+    : /**
+       * u - Utility function
+       * @returns void
+       */
+      '/images/logo/logo-light-mode.png'
   const avatarUrl = getUsableAvatarUrl(user?.avatarUrl) || avatarFallbackUrl
   const logoSrc = useWhiteNav
     ? '/images/logo/logo-and-text-dark-mode.png'
@@ -431,10 +431,10 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
       description:
         "Videos of your thoughts, comments, or anything you'd like to share. These will appear in your profile and the feed",
       action: () => setIsPostMomentModalOpen(true),
-/**
- * handleClickOutside - Utility function
- * @returns void
- */
+      /**
+       * handleClickOutside - Utility function
+       * @returns void
+       */
       icon: Video,
     },
     {
@@ -454,10 +454,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
     >
       <div className="mx-auto flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3 sm:min-h-20 sm:px-6 sm:py-4 lg:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3 lg:gap-4 xl:gap-6">
-/**
- * getTransparentHeaderClasses - Utility function
- * @returns void
- */
+          /** * getTransparentHeaderClasses - Utility function * @returns void */
           <Link href="/" className="flex shrink-0 items-center">
             <Image
               src={logoSrc}
@@ -470,18 +467,18 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
           </Link>
           <nav className={navClasses}>
             {navLinks.map((link) => {
-/**
- * for - Utility function
- * @returns void
- */
+              /**
+               * for - Utility function
+               * @returns void
+               */
               const isActive = router.pathname === link.href
               return (
                 <Link
                   key={link.href}
-/**
- * marketingHeaderClass - Utility function
- * @returns void
- */
+                  /**
+                   * marketingHeaderClass - Utility function
+                   * @returns void
+                   */
                   href={link.href}
                   className={`rounded-full px-4 py-2 transition-colors ${
                     useWhiteNav
@@ -494,10 +491,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   }`}
                 >
                   {link.label}
-/**
- * headerClasses - Utility function
- * @returns void
- */
+                  /** * headerClasses - Utility function * @returns void */
                 </Link>
               )
             })}
@@ -517,10 +511,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
               ) : null}
               <div className={desktopSearchClasses}>
                 <div className="relative w-full min-w-0">
-/**
- * desktopSearchClasses - Utility function
- * @returns void
- */
+                  /** * desktopSearchClasses - Utility function * @returns void */
                   <div className="flex h-11 w-full items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-4 text-sm text-slate-900">
                     <button
                       type="button"
@@ -532,10 +523,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                       className="text-slate-500 transition hover:text-slate-700"
                     >
                       <Search className="h-4 w-4" />
-/**
- * mobileSearchClasses - Utility function
- * @returns void
- */
+                      /** * mobileSearchClasses - Utility function * @returns void */
                     </button>
                     <input
                       ref={desktopInputRef}
@@ -544,76 +532,67 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                       inputMode="search"
                       autoComplete="off"
                       autoCorrect="off"
-/**
- * walletLabel - Utility function
- * @returns void
- */
+                      /**
+                       * walletLabel - Utility function
+                       * @returns void
+                       */
                       spellCheck={false}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="h-full flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
-/**
- * profileHandle - Utility function
- * @returns void
- */
+                      /**
+                       * profileHandle - Utility function
+                       * @returns void
+                       */
                     />
                     {isSearching && (
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
                     )}
-/**
- * profileLabel - Utility function
- * @returns void
- */
+                    /** * profileLabel - Utility function * @returns void */
                   </div>
                   {showResults && searchResults && searchResults.length > 0 && (
                     <div
                       ref={searchResultsRef}
-                      className="absolute top-full right-0 left-0 z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+                      className="absolute left-0 right-0 top-full z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
                     >
                       <div className="border-b border-slate-200 bg-slate-50 px-4 py-2">
-                        <div className="text-xs font-semibold tracking-wide text-slate-600 uppercase">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                           Artists
                         </div>
-/**
- * useWhiteNav - Custom React hook
- * @returns void
- */
+                        /** * useWhiteNav - Custom React hook * @returns void */
                       </div>
                       <div className="max-h-80 overflow-y-auto">
                         {searchResults.map((profile) => (
                           <button
-/**
- * avatarFallbackUrl - Utility function
- * @returns void
- */
+                            /**
+                             * avatarFallbackUrl - Utility function
+                             * @returns void
+                             */
                             key={profile.id || profile.profileId}
                             type="button"
                             onClick={() => {
                               const slug = resolvedSlugs[profile.userId] || profile.userId
                               console.log(
                                 '[SiteHeader] Navigating to profile:',
-/**
- * avatarUrl - Utility function
- * @returns void
- */
+                                /**
+                                 * avatarUrl - Utility function
+                                 * @returns void
+                                 */
                                 slug,
                                 profile.displayName,
                               )
                               router.push(`/profile/${encodeURIComponent(slug)}`)
-/**
- * logoSrc - Utility function
- * @returns void
- */
+                              /**
+                               * logoSrc - Utility function
+                               * @returns void
+                               */
                               setIsSearchOpen(false)
                               setShowResults(false)
                               setSearchQuery('')
                             }}
                             className="flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-slate-50"
                           >
-/**
- * navClasses - Utility function
- * @returns void
- */
+                            /** * navClasses - Utility function * @returns void */
                             {profile.profileImageUrl ? (
                               <Image
                                 src={profile.profileImageUrl}
@@ -621,18 +600,15 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                                 width={40}
                                 height={40}
                                 className="h-10 w-10 rounded-full object-cover ring-2 ring-slate-100"
-/**
- * compactMenuClasses - Utility function
- * @returns void
- */
+                                /**
+                                 * compactMenuClasses - Utility function
+                                 * @returns void
+                                 */
                               />
                             ) : (
                               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 ring-2 ring-slate-100">
                                 <User className="h-5 w-5 text-slate-500" />
-/**
- * headerIconButtonClasses - Utility function
- * @returns void
- */
+                                /** * headerIconButtonClasses - Utility function * @returns void */
                               </div>
                             )}
                             <div className="min-w-0 flex-1">
@@ -640,10 +616,10 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                                 {profile.displayName}
                               </div>
                               {profile.location && (
-/**
- * createMenuItems - Utility function
- * @returns void
- */
+                                /**
+                                 * createMenuItems - Utility function
+                                 * @returns void
+                                 */
                                 <div className="truncate text-sm text-slate-500">
                                   {profile.location}
                                 </div>
@@ -676,7 +652,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                     !isSearching && (
                       <div
                         ref={searchResultsRef}
-                        className="absolute top-full right-0 left-0 z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl"
+                        className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl"
                       >
                         <div className="px-4 py-8 text-center">
                           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
@@ -690,10 +666,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                       </div>
                     )}
                 </div>
-/**
- * isActive - Utility function
- * @returns void
- */
+                /** * isActive - Utility function * @returns void */
               </div>
             </>
           ) : null}
@@ -776,10 +749,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                       className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
                     >
                       <Bell className="h-5 w-5 text-slate-700" />
-/**
- * slug - Utility function
- * @returns void
- */
+                      /** * slug - Utility function * @returns void */
                       <span className="font-semibold text-slate-900">Notifications</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -857,7 +827,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   <DropdownMenuContent
                     align="center"
                     sideOffset={12}
-                    className="w-[320px] max-w-[calc(100vw-2rem)] rounded-3xl! border border-slate-200 bg-white p-3 shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:w-[360px]"
+                    className="rounded-3xl! w-[320px] max-w-[calc(100vw-2rem)] border border-slate-200 bg-white p-3 shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:w-[360px]"
                   >
                     <div className="flex flex-col gap-3">
                       {createMenuItems.map((item) => {
@@ -872,13 +842,13 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                                 router.push(item.href)
                               }
                             }}
-                            className="flex w-full cursor-pointer items-start gap-4 rounded-2xl! border border-slate-200/80 bg-white px-4 py-3 text-left text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50/60 hover:shadow-md focus:bg-white"
+                            className="rounded-2xl! flex w-full cursor-pointer items-start gap-4 border border-slate-200/80 bg-white px-4 py-3 text-left text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50/60 hover:shadow-md focus:bg-white"
                           >
                             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
                               <Icon className="h-5 w-5" />
                             </span>
                             <span className="flex flex-col gap-1">
-                              <span className="text-base leading-tight font-semibold text-slate-900">
+                              <span className="text-base font-semibold leading-tight text-slate-900">
                                 {item.title}
                               </span>
                               <span className="text-sm leading-snug text-slate-500">
@@ -982,9 +952,9 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 )}
               </div>
               {showResults && searchResults && searchResults.length > 0 && (
-                <div className="absolute top-full right-0 left-0 z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
                   <div className="border-b border-slate-200 bg-slate-50 px-4 py-2">
-                    <div className="text-xs font-semibold tracking-wide text-slate-600 uppercase">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                       Artists
                     </div>
                   </div>
@@ -1023,10 +993,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                         <div className="min-w-0 flex-1">
                           <div className="truncate font-semibold text-slate-900">
                             {profile.displayName}
-/**
- * Icon - React component
- * @returns React element
- */
+                            /** * Icon - React component * @returns React element */
                           </div>
                           {profile.location && (
                             <div className="truncate text-sm text-slate-500">
@@ -1059,7 +1026,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 searchResults &&
                 searchResults.length === 0 &&
                 !isSearching && (
-                  <div className="absolute top-full right-0 left-0 z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                  <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-slate-200 bg-white shadow-2xl">
                     <div className="px-4 py-8 text-center">
                       <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
                         <Search className="h-6 w-6 text-slate-400" />

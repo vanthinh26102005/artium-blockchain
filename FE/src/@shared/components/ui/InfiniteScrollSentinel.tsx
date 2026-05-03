@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
 
 interface InfiniteScrollSentinelProps {
-    onLoadMore: () => void
-    hasMore: boolean
-    isLoading: boolean
-    rootMargin?: string
+  onLoadMore: () => void
+  hasMore: boolean
+  isLoading: boolean
+  rootMargin?: string
 }
 
 /**
@@ -12,43 +12,43 @@ interface InfiniteScrollSentinelProps {
  * @returns React element
  */
 export const InfiniteScrollSentinel = ({
-    onLoadMore,
-    hasMore,
-    isLoading,
-    rootMargin = '100px',
+  onLoadMore,
+  hasMore,
+  isLoading,
+  rootMargin = '100px',
 }: InfiniteScrollSentinelProps) => {
-    const sentinelRef = useRef<HTMLDivElement>(null)
+  const sentinelRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
-/**
- * sentinelRef - Utility function
- * @returns void
- */
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && hasMore && !isLoading) {
-                    onLoadMore()
-                }
-            },
-/**
- * observer - Utility function
- * @returns void
- */
-            {
-                rootMargin,
-            }
-        )
-
-        if (sentinelRef.current) {
-            observer.observe(sentinelRef.current)
+  useEffect(() => {
+    /**
+     * sentinelRef - Utility function
+     * @returns void
+     */
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          onLoadMore()
         }
+      },
+      /**
+       * observer - Utility function
+       * @returns void
+       */
+      {
+        rootMargin,
+      },
+    )
 
-        return () => {
-            observer.disconnect()
-        }
-    }, [hasMore, isLoading, onLoadMore, rootMargin])
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current)
+    }
 
-    if (!hasMore) return null
+    return () => {
+      observer.disconnect()
+    }
+  }, [hasMore, isLoading, onLoadMore, rootMargin])
 
-    return <div ref={sentinelRef} className="h-4 w-full" />
+  if (!hasMore) return null
+
+  return <div ref={sentinelRef} className="h-4 w-full" />
 }
