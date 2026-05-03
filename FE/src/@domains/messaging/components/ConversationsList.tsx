@@ -24,27 +24,24 @@ export const ConversationsList = ({
   const sortedConversations = useMemo(() => {
     return [...conversations].sort((a, b) => {
       const aTime = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0
-/**
- * sortedConversations - Utility function
- * @returns void
- */
+      /**
+       * sortedConversations - Utility function
+       * @returns void
+       */
       const bTime = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0
       return bTime - aTime
     })
   }, [conversations])
 
-/**
- * aTime - Utility function
- * @returns void
- */
+  /**
+   * aTime - Utility function
+   * @returns void
+   */
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-sm text-slate-500">Loading conversations...</div>
-/**
- * bTime - Utility function
- * @returns void
- */
+        /** * bTime - Utility function * @returns void */
       </div>
     )
   }
@@ -72,25 +69,23 @@ export const ConversationsList = ({
             <button
               key={conversation.id}
               onClick={() => onSelectConversation(conversation.id)}
-              className={`w-full border-b border-slate-100 px-4 py-3 text-left transition-colors hover:bg-slate-50 ${isSelected ? 'bg-primary/5 border-l-2 border-l-primary' : ''
-                }`}
+              className={`w-full border-b border-slate-100 px-4 py-3 text-left transition-colors hover:bg-slate-50 ${
+                isSelected ? 'border-l-2 border-l-primary bg-primary/5' : ''
+              }`}
             >
               <div className="flex items-start gap-3">
                 <UserAvatar src={conversation.imageUrl} name={conversation.name} size="md" />
-/**
- * isSelected - Utility function
- * @returns void
- */
-
+                /** * isSelected - Utility function * @returns void */
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <h3
-/**
- * hasUnread - Utility function
- * @returns void
- */
-                      className={`truncate text-sm font-semibold ${hasUnread ? 'text-slate-900' : 'text-slate-700'
-                        }`}
+                      /**
+                       * hasUnread - Utility function
+                       * @returns void
+                       */
+                      className={`truncate text-sm font-semibold ${
+                        hasUnread ? 'text-slate-900' : 'text-slate-700'
+                      }`}
                     >
                       {conversation.name || 'Conversation'}
                     </h3>
@@ -106,8 +101,9 @@ export const ConversationsList = ({
                   <div className="mt-1 flex items-center gap-1">
                     {conversation.lastMessageContent ? (
                       <p
-                        className={`truncate text-xs ${hasUnread ? 'font-medium text-slate-700' : 'text-slate-500'
-                          }`}
+                        className={`truncate text-xs ${
+                          hasUnread ? 'font-medium text-slate-700' : 'text-slate-500'
+                        }`}
                       >
                         {conversation.lastMessageContent}
                       </p>

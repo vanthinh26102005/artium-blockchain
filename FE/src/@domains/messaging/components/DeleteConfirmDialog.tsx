@@ -25,7 +25,12 @@ export const DeleteConfirmDialog = ({
   message = 'Are you sure you want to delete this message? This action cannot be undone.',
 }: DeleteConfirmDialogProps) => {
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+    >
       <DialogContent size="sm" className="rounded-lg bg-white p-6 shadow-xl">
         <div className="flex items-start gap-3">
           <div className="shrink-0 rounded-full bg-red-100 p-2">

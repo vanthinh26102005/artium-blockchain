@@ -35,19 +35,21 @@ export const EnhancedChatWindow = ({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
-/**
- * messagesEndRef - Utility function
- * @returns void
- */
+  /**
+   * messagesEndRef - Utility function
+   * @returns void
+   */
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [editContent, setEditContent] = useState('')
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [lightboxOpen, setLightboxOpen] = useState(false)
-/**
- * scrollContainerRef - Utility function
- * @returns void
- */
-  const [lightboxImages, setLightboxImages] = useState<Array<{ url: string; alt?: string; messageId: string }>>([])
+  /**
+   * scrollContainerRef - Utility function
+   * @returns void
+   */
+  const [lightboxImages, setLightboxImages] = useState<
+    Array<{ url: string; alt?: string; messageId: string }>
+  >([])
   const [lightboxIndex, setLightboxIndex] = useState(0)
 
   const scrollToBottom = () => {
@@ -59,10 +61,10 @@ export const EnhancedChatWindow = ({
       scrollToBottom()
     }
   }, [messages, isAtBottom])
-/**
- * scrollToBottom - Utility function
- * @returns void
- */
+  /**
+   * scrollToBottom - Utility function
+   * @returns void
+   */
 
   const handleScroll = () => {
     if (!scrollContainerRef.current) return
@@ -76,10 +78,10 @@ export const EnhancedChatWindow = ({
       onLoadMore()
     }
   }
-/**
- * handleScroll - Utility function
- * @returns void
- */
+  /**
+   * handleScroll - Utility function
+   * @returns void
+   */
 
   const handleStartEdit = (message: Message) => {
     setEditingMessageId(message.id)
@@ -87,10 +89,10 @@ export const EnhancedChatWindow = ({
   }
 
   const handleCancelEdit = () => {
-/**
- * atBottom - Utility function
- * @returns void
- */
+    /**
+     * atBottom - Utility function
+     * @returns void
+     */
     setEditingMessageId(null)
     setEditContent('')
   }
@@ -103,10 +105,10 @@ export const EnhancedChatWindow = ({
   }
 
   const handleDeleteMessage = (messageId: string) => {
-/**
- * handleStartEdit - Utility function
- * @returns void
- */
+    /**
+     * handleStartEdit - Utility function
+     * @returns void
+     */
     setDeleteConfirmId(messageId)
   }
 
@@ -115,10 +117,10 @@ export const EnhancedChatWindow = ({
       onDeleteMessage?.(deleteConfirmId)
       setDeleteConfirmId(null)
     }
-/**
- * handleCancelEdit - Utility function
- * @returns void
- */
+    /**
+     * handleCancelEdit - Utility function
+     * @returns void
+     */
   }
 
   const handleImageClick = (messageId: string) => {
@@ -127,24 +129,24 @@ export const EnhancedChatWindow = ({
       .map((msg) => ({
         url: msg.mediaUrl!,
         alt: 'Shared image',
-/**
- * handleSaveEdit - Utility function
- * @returns void
- */
+        /**
+         * handleSaveEdit - Utility function
+         * @returns void
+         */
         messageId: msg.id,
       }))
 
     const clickedIndex = allImages.findIndex((img) => img.messageId === messageId)
-    
+
     setLightboxImages(allImages)
     setLightboxIndex(clickedIndex >= 0 ? clickedIndex : 0)
     setLightboxOpen(true)
   }
 
-/**
- * handleDeleteMessage - Utility function
- * @returns void
- */
+  /**
+   * handleDeleteMessage - Utility function
+   * @returns void
+   */
   if (isLoading && messages.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -152,10 +154,10 @@ export const EnhancedChatWindow = ({
       </div>
     )
   }
-/**
- * confirmDelete - Utility function
- * @returns void
- */
+  /**
+   * confirmDelete - Utility function
+   * @returns void
+   */
 
   if (messages.length === 0) {
     return (
@@ -166,18 +168,18 @@ export const EnhancedChatWindow = ({
         <p className="mt-4 text-sm text-slate-600">No messages yet</p>
         <p className="mt-1 text-xs text-slate-500">Send a message to start the conversation</p>
       </div>
-/**
- * handleImageClick - Utility function
- * @returns void
- */
+      /**
+       * handleImageClick - Utility function
+       * @returns void
+       */
     )
   }
 
   return (
-/**
- * allImages - Utility function
- * @returns void
- */
+    /**
+     * allImages - Utility function
+     * @returns void
+     */
     <>
       <div
         ref={scrollContainerRef}
@@ -189,10 +191,10 @@ export const EnhancedChatWindow = ({
             const isOwnMessage = message.senderId === currentUserId
             const isEditing = editingMessageId === message.id
             const showTimestamp =
-/**
- * clickedIndex - Utility function
- * @returns void
- */
+              /**
+               * clickedIndex - Utility function
+               * @returns void
+               */
               index === 0 ||
               new Date(messages[index - 1].createdAt).getTime() -
                 new Date(message.createdAt).getTime() >
@@ -221,8 +223,8 @@ export const EnhancedChatWindow = ({
                         {message.mediaUrl && (
                           <div className="mb-2">
                             {message.type === 'IMAGE' ? (
-                              <div 
-                                className="relative group cursor-pointer"
+                              <div
+                                className="group relative cursor-pointer"
                                 onClick={() => handleImageClick(message.id)}
                               >
                                 <img
@@ -232,26 +234,21 @@ export const EnhancedChatWindow = ({
                                   loading="lazy"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement
-/**
- * isOwnMessage - Utility function
- * @returns void
- */
-                                    target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23ddd" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle"%3EImage unavailable%3C/text%3E%3C/svg%3E'
+                                    /**
+                                     * isOwnMessage - Utility function
+                                     * @returns void
+                                     */
+                                    target.src =
+                                      'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23ddd" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle"%3EImage unavailable%3C/text%3E%3C/svg%3E'
                                   }}
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 opacity-0 transition-all hover:bg-black/10 hover:opacity-100">
-/**
- * isEditing - Utility function
- * @returns void
- */
+                                  /** * isEditing - Utility function * @returns void */
                                   <span className="rounded bg-black/70 px-3 py-1 text-xs text-white">
                                     Click to view full size
                                   </span>
                                 </div>
-/**
- * showTimestamp - Utility function
- * @returns void
- */
+                                /** * showTimestamp - Utility function * @returns void */
                               </div>
                             ) : message.type === 'VIDEO' ? (
                               <video
@@ -294,10 +291,10 @@ export const EnhancedChatWindow = ({
                                 Cancel
                               </button>
                               <button
-/**
- * target - Utility function
- * @returns void
- */
+                                /**
+                                 * target - Utility function
+                                 * @returns void
+                                 */
                                 onClick={handleSaveEdit}
                                 disabled={!editContent.trim()}
                                 className="rounded bg-primary px-3 py-1 text-xs text-white hover:bg-primary/90 disabled:opacity-50"
