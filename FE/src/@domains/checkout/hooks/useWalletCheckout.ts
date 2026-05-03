@@ -65,47 +65,48 @@ const DEFAULT_SEPOLIA_RPC_URL = process.env.NEXT_PUBLIC_ETH_RPC_URL ?? 'https://
 
 function classifyMetaMaskError(
   err: unknown,
-/**
- * DEFAULT_BLOCK_EXPLORER_URL - React component
- * @returns React element
- */
+  /**
+   * DEFAULT_BLOCK_EXPLORER_URL - React component
+   * @returns React element
+   */
   context: 'connect' | 'transaction' | 'network',
 ): WalletErrorState {
   const code = (err as MetaMaskError)?.code
   const message =
     err instanceof Error
-/**
- * DEFAULT_SEPOLIA_RPC_URL - React component
- * @returns React element
- */
-      ? err.message
+      ? /**
+         * DEFAULT_SEPOLIA_RPC_URL - React component
+         * @returns React element
+         */
+        err.message
       : (err as MetaMaskError)?.message || (err as MetaMaskError)?.data?.message || ''
   const normalizedMessage = message.toLowerCase()
 
   if (code === 4001 || normalizedMessage.includes('user rejected')) {
-/**
- * classifyMetaMaskError - Utility function
- * @returns void
- */
+    /**
+     * classifyMetaMaskError - Utility function
+     * @returns void
+     */
     if (context === 'connect') {
       return {
-        message: 'You rejected the MetaMask connection request. Retry connection when you are ready.',
+        message:
+          'You rejected the MetaMask connection request. Retry connection when you are ready.',
         canRetry: true,
         retryLabel: 'Retry Connection',
       }
     }
-/**
- * code - Utility function
- * @returns void
- */
+    /**
+     * code - Utility function
+     * @returns void
+     */
 
     if (context === 'network') {
       return {
         message: 'You rejected the Sepolia network switch in MetaMask. Retry when you are ready.',
-/**
- * message - Utility function
- * @returns void
- */
+        /**
+         * message - Utility function
+         * @returns void
+         */
         canRetry: true,
         retryLabel: 'Switch to Sepolia',
       }
@@ -113,10 +114,10 @@ function classifyMetaMaskError(
 
     return {
       message: 'You rejected the transaction in MetaMask. Retry the payment when you are ready.',
-/**
- * normalizedMessage - Utility function
- * @returns void
- */
+      /**
+       * normalizedMessage - Utility function
+       * @returns void
+       */
       canRetry: true,
       retryLabel: 'Retry Transaction',
     }
@@ -125,7 +126,8 @@ function classifyMetaMaskError(
   if (code === -32002) {
     if (context === 'connect') {
       return {
-        message: 'A MetaMask connection request is already pending. Open MetaMask to approve or reject it.',
+        message:
+          'A MetaMask connection request is already pending. Open MetaMask to approve or reject it.',
         canRetry: false,
         retryLabel: 'Retry Connection',
       }
@@ -133,14 +135,16 @@ function classifyMetaMaskError(
 
     if (context === 'network') {
       return {
-        message: 'A MetaMask network request is already pending. Open MetaMask to approve or reject it.',
+        message:
+          'A MetaMask network request is already pending. Open MetaMask to approve or reject it.',
         canRetry: false,
         retryLabel: 'Switch to Sepolia',
       }
     }
 
     return {
-      message: 'A MetaMask transaction request is already pending. Open MetaMask to approve or reject it.',
+      message:
+        'A MetaMask transaction request is already pending. Open MetaMask to approve or reject it.',
       canRetry: false,
       retryLabel: 'Retry Transaction',
     }
@@ -170,10 +174,10 @@ function normalizeChainId(chainId: string | null | undefined): string | null {
   }
 
   try {
-/**
- * fallback - Utility function
- * @returns void
- */
+    /**
+     * fallback - Utility function
+     * @returns void
+     */
     return BigInt(chainId).toString()
   } catch {
     return null
@@ -195,10 +199,10 @@ function resolvePlatformWalletAddress(): string {
   }
 
   return address
-/**
- * normalizeChainId - Utility function
- * @returns void
- */
+  /**
+   * normalizeChainId - Utility function
+   * @returns void
+   */
 }
 
 export const useWalletCheckout = ({
@@ -214,10 +218,10 @@ export const useWalletCheckout = ({
   const [networkError, setNetworkError] = useState<WalletErrorState | null>(null)
   const [transactionError, setTransactionError] = useState<WalletErrorState | null>(null)
 
-/**
- * toHexChainId - Utility function
- * @returns void
- */
+  /**
+   * toHexChainId - Utility function
+   * @returns void
+   */
   const requiredChainId = useMemo(
     () => normalizeChainId(quote?.chainId ?? DEFAULT_CHAIN_ID) ?? DEFAULT_CHAIN_ID,
     [quote?.chainId],
@@ -225,18 +229,18 @@ export const useWalletCheckout = ({
   const requiredChainHex = useMemo(() => toHexChainId(requiredChainId), [requiredChainId])
   const isOnRequiredChain = currentChainId === requiredChainId
 
-/**
- * resolvePlatformWalletAddress - Utility function
- * @returns void
- */
+  /**
+   * resolvePlatformWalletAddress - Utility function
+   * @returns void
+   */
   const clearTransactionState = useCallback(() => {
     setTxHash('')
     setTransactionError(null)
   }, [])
-/**
- * address - Utility function
- * @returns void
- */
+  /**
+   * address - Utility function
+   * @returns void
+   */
 
   const disconnectWallet = useCallback(() => {
     setWalletAddress('')
@@ -252,10 +256,10 @@ export const useWalletCheckout = ({
     }
 
     try {
-/**
- * useWalletCheckout - Custom React hook
- * @returns void
- */
+      /**
+       * useWalletCheckout - Custom React hook
+       * @returns void
+       */
       const accounts = (await window.ethereum.request({ method: 'eth_accounts' })) as string[]
       const chainId = normalizeChainId(
         (await window.ethereum.request({ method: 'eth_chainId' })) as string,
@@ -272,10 +276,10 @@ export const useWalletCheckout = ({
   }, [])
 
   useEffect(() => {
-/**
- * requiredChainId - Utility function
- * @returns void
- */
+    /**
+     * requiredChainId - Utility function
+     * @returns void
+     */
     void syncWalletState()
   }, [syncWalletState])
 
@@ -283,27 +287,27 @@ export const useWalletCheckout = ({
     if (typeof window === 'undefined' || !window.ethereum) {
       return
     }
-/**
- * requiredChainHex - Utility function
- * @returns void
- */
+    /**
+     * requiredChainHex - Utility function
+     * @returns void
+     */
 
     const handleAccountsChanged = (accountsValue: unknown) => {
       const accounts = Array.isArray(accountsValue)
         ? accountsValue.filter((account): account is string => typeof account === 'string')
-/**
- * isOnRequiredChain - Utility function
- * @returns void
- */
-        : []
+        : /**
+           * isOnRequiredChain - Utility function
+           * @returns void
+           */
+          []
 
       setConnectError(null)
       setNetworkError(null)
       clearTransactionState()
-/**
- * clearTransactionState - Utility function
- * @returns void
- */
+      /**
+       * clearTransactionState - Utility function
+       * @returns void
+       */
       setWalletAddress(accounts[0] ?? '')
     }
 
@@ -312,10 +316,10 @@ export const useWalletCheckout = ({
         return
       }
 
-/**
- * disconnectWallet - Utility function
- * @returns void
- */
+      /**
+       * disconnectWallet - Utility function
+       * @returns void
+       */
       setCurrentChainId(normalizeChainId(chainValue))
       setNetworkError(null)
       clearTransactionState()
@@ -327,10 +331,10 @@ export const useWalletCheckout = ({
     return () => {
       window.ethereum?.removeListener?.('accountsChanged', handleAccountsChanged)
       window.ethereum?.removeListener?.('chainChanged', handleChainChanged)
-/**
- * syncWalletState - Utility function
- * @returns void
- */
+      /**
+       * syncWalletState - Utility function
+       * @returns void
+       */
     }
   }, [clearTransactionState])
 
@@ -340,28 +344,28 @@ export const useWalletCheckout = ({
   }, [clearTransactionState, quote?.quoteId])
 
   const connectWallet = useCallback(async () => {
-/**
- * accounts - Utility function
- * @returns void
- */
+    /**
+     * accounts - Utility function
+     * @returns void
+     */
     if (typeof window === 'undefined' || !window.ethereum) {
       setConnectError({
         message: 'MetaMask not detected. Please install MetaMask to pay with ETH.',
         canRetry: false,
-/**
- * chainId - Utility function
- * @returns void
- */
+        /**
+         * chainId - Utility function
+         * @returns void
+         */
         retryLabel: 'Retry Connection',
       })
       return
     }
 
     setIsConnecting(true)
-/**
- * nextWalletAddress - Utility function
- * @returns void
- */
+    /**
+     * nextWalletAddress - Utility function
+     * @returns void
+     */
     setConnectError(null)
 
     try {
@@ -385,18 +389,18 @@ export const useWalletCheckout = ({
   const switchToRequiredChain = useCallback(async () => {
     if (typeof window === 'undefined' || !window.ethereum) {
       setNetworkError({
-/**
- * handleAccountsChanged - Utility function
- * @returns void
- */
+        /**
+         * handleAccountsChanged - Utility function
+         * @returns void
+         */
         message: 'MetaMask not detected. Please install MetaMask to pay on Sepolia.',
         canRetry: false,
         retryLabel: 'Switch to Sepolia',
       })
-/**
- * accounts - Utility function
- * @returns void
- */
+      /**
+       * accounts - Utility function
+       * @returns void
+       */
       return false
     }
 
@@ -410,10 +414,10 @@ export const useWalletCheckout = ({
     } catch (err: unknown) {
       if ((err as MetaMaskError)?.code === 4902) {
         try {
-/**
- * handleChainChanged - Utility function
- * @returns void
- */
+          /**
+           * handleChainChanged - Utility function
+           * @returns void
+           */
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [
@@ -441,10 +445,10 @@ export const useWalletCheckout = ({
     }
 
     try {
-/**
- * connectWallet - Utility function
- * @returns void
- */
+      /**
+       * connectWallet - Utility function
+       * @returns void
+       */
       const nextChainId = normalizeChainId(
         (await window.ethereum.request({ method: 'eth_chainId' })) as string,
       )
@@ -462,20 +466,20 @@ export const useWalletCheckout = ({
         message: error.message,
         canRetry: false,
         retryLabel: 'Retry Transaction',
-/**
- * accounts - Utility function
- * @returns void
- */
+        /**
+         * accounts - Utility function
+         * @returns void
+         */
       })
       throw error
     }
 
     if (!quote) {
       throw new Error('A live Sepolia quote is required before MetaMask checkout can continue.')
-/**
- * chainId - Utility function
- * @returns void
- */
+      /**
+       * chainId - Utility function
+       * @returns void
+       */
     }
 
     if (isQuoteExpired) {
@@ -493,10 +497,10 @@ export const useWalletCheckout = ({
 
     setIsSubmittingPayment(true)
     setTransactionError(null)
-/**
- * switchToRequiredChain - Utility function
- * @returns void
- */
+    /**
+     * switchToRequiredChain - Utility function
+     * @returns void
+     */
 
     try {
       if (walletState.currentChainId !== requiredChainId) {
@@ -547,10 +551,10 @@ export const useWalletCheckout = ({
     clearTransactionState,
     submitQuotedTransaction,
   }
-/**
- * nextChainId - Utility function
- * @returns void
- */
+  /**
+   * nextChainId - Utility function
+   * @returns void
+   */
 }
 
 /**

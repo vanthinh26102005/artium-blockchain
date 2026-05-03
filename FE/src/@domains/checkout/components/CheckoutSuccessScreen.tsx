@@ -37,35 +37,35 @@ export const CheckoutSuccessScreen = ({
   const formattedTotal = `$${totalPaid.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
   const isProcessing = status === 'processing'
   const isFailed = status === 'failed'
-/**
- * formattedTotal - Utility function
- * @returns void
- */
+  /**
+   * formattedTotal - Utility function
+   * @returns void
+   */
   const badgeClassName = isProcessing
     ? 'border-amber-200 bg-amber-50'
     : isFailed
       ? 'border-red-200 bg-red-50'
-/**
- * isProcessing - Utility function
- * @returns void
- */
-      : 'border-green-200 bg-green-50'
+      : /**
+         * isProcessing - Utility function
+         * @returns void
+         */
+        'border-green-200 bg-green-50'
   const iconContainerClassName = isProcessing
     ? 'bg-amber-100'
     : isFailed
-/**
- * isFailed - Utility function
- * @returns void
- */
-      ? 'bg-red-100'
+      ? /**
+         * isFailed - Utility function
+         * @returns void
+         */
+        'bg-red-100'
       : 'bg-green-100'
   const titleClassName = isProcessing
     ? 'text-amber-900'
-/**
- * badgeClassName - Utility function
- * @returns void
- */
-    : isFailed
+    : /**
+       * badgeClassName - Utility function
+       * @returns void
+       */
+      isFailed
       ? 'text-red-900'
       : 'text-green-900'
   const descriptionClassName = isProcessing
@@ -73,10 +73,10 @@ export const CheckoutSuccessScreen = ({
     : isFailed
       ? 'text-red-800'
       : 'text-green-800'
-/**
- * iconContainerClassName - Utility function
- * @returns void
- */
+  /**
+   * iconContainerClassName - Utility function
+   * @returns void
+   */
   const title = isProcessing
     ? 'Transaction Submitted'
     : isFailed
@@ -85,23 +85,24 @@ export const CheckoutSuccessScreen = ({
   const description = isProcessing
     ? 'Your Sepolia transaction was submitted. We will update this order automatically after backend confirmation.'
     : isFailed
-/**
- * titleClassName - Utility function
- * @returns void
- */
-      ? failureReason || 'We could not confirm the wallet payment. Please review the order in your orders workspace.'
+      ? /**
+         * titleClassName - Utility function
+         * @returns void
+         */
+        failureReason ||
+        'We could not confirm the wallet payment. Please review the order in your orders workspace.'
       : 'Thank you for your purchase!'
   const nextSteps = isProcessing
     ? [
         'We are verifying the Sepolia transaction in the background.',
         'This page will refresh automatically when the payment is confirmed.',
-        "You can also track the order from your private orders workspace.",
+        'You can also track the order from your private orders workspace.',
       ]
-/**
- * descriptionClassName - Utility function
- * @returns void
- */
-    : isFailed
+    : /**
+       * descriptionClassName - Utility function
+       * @returns void
+       */
+      isFailed
       ? [
           'The order was created, but the wallet payment has not been confirmed.',
           'Review the order in your workspace before retrying payment or contacting support.',
@@ -109,10 +110,10 @@ export const CheckoutSuccessScreen = ({
         ]
       : [
           'The artist has been notified and will confirm your order.',
-/**
- * title - Utility function
- * @returns void
- */
+          /**
+           * title - Utility function
+           * @returns void
+           */
           'Your artwork will be prepared for shipment within 3–5 business days.',
           "You'll receive a tracking number via email once it's shipped.",
         ]
@@ -121,10 +122,7 @@ export const CheckoutSuccessScreen = ({
     <div className="flex min-h-screen flex-col items-center justify-start bg-[#FDFDFD] px-4 pb-16 pt-12 font-sans text-[#191414]">
       {/* Brand header */}
       <div className="mb-10 w-full max-w-2xl">
-/**
- * description - Utility function
- * @returns void
- */
+        /** * description - Utility function * @returns void */
         <Link href="/" className="text-[18px] font-bold tracking-tight text-[#191414]">
           Artium
         </Link>
@@ -133,12 +131,12 @@ export const CheckoutSuccessScreen = ({
       <div className="w-full max-w-2xl space-y-6">
         {/* Status badge */}
         <div
-/**
- * nextSteps - Utility function
- * @returns void
- */
+          /**
+           * nextSteps - Utility function
+           * @returns void
+           */
           className={cn(
-            'animate-in fade-in zoom-in rounded-2xl border p-8 text-center duration-500',
+            'rounded-2xl border p-8 text-center duration-500 animate-in fade-in zoom-in',
             badgeClassName,
           )}
         >
@@ -157,22 +155,12 @@ export const CheckoutSuccessScreen = ({
             )}
           </div>
 
-          <h1
-            className={cn(
-              'text-2xl font-bold',
-              titleClassName,
-            )}
-          >
-            {title}
-          </h1>
+          <h1 className={cn('text-2xl font-bold', titleClassName)}>{title}</h1>
 
-          <p className={cn('mt-2 text-sm', descriptionClassName)}>
-            {description}
-          </p>
+          <p className={cn('mt-2 text-sm', descriptionClassName)}>{description}</p>
 
           <p className="mt-3 text-[13px] font-medium text-[#595959]">
-            Order{' '}
-            <span className="font-mono font-bold text-[#191414]">#{orderNumber}</span>
+            Order <span className="font-mono font-bold text-[#191414]">#{orderNumber}</span>
           </p>
         </div>
 

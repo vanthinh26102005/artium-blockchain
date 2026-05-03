@@ -62,10 +62,10 @@ export const defaultBuyerContactInfo: BuyerContactInfo = {
 export const defaultShippingAddress: BuyerShippingAddress = {
   addressLine1: '',
   addressLine2: '',
-/**
- * defaultShippingAddress - Utility function
- * @returns void
- */
+  /**
+   * defaultShippingAddress - Utility function
+   * @returns void
+   */
   city: '',
   state: '',
   postalCode: '',

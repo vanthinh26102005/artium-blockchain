@@ -3,7 +3,10 @@ import { useFormContext, useWatch } from 'react-hook-form'
 import type { UseFormSetValue } from 'react-hook-form'
 
 import { CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js'
-import type { StripeCardNumberElementChangeEvent, StripeElementChangeEvent } from '@stripe/stripe-js'
+import type {
+  StripeCardNumberElementChangeEvent,
+  StripeElementChangeEvent,
+} from '@stripe/stripe-js'
 import { CreditCard } from 'lucide-react'
 
 import { cn } from '@shared/lib/utils'
@@ -32,10 +35,10 @@ const STRIPE_ELEMENT_STYLE = {
 const METHOD_OPTIONS = [
   { value: 'card' as const, label: 'Card', icon: <CreditCard className="h-5 w-5" /> },
   { value: 'wallet' as const, label: 'Crypto Wallet', icon: <span className="text-lg">🦊</span> },
-/**
- * METHOD_OPTIONS - React component
- * @returns React element
- */
+  /**
+   * METHOD_OPTIONS - React component
+   * @returns React element
+   */
 ]
 
 type StripeCardSectionProps = {
@@ -45,16 +48,26 @@ type StripeCardSectionProps = {
   onCardElementsChange: (complete: boolean) => void
 }
 
-function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: StripeCardSectionProps) {
-  const [numberState, setNumberState] = useState<{ complete: boolean; error?: string }>({ complete: false })
-  const [expiryState, setExpiryState] = useState<{ complete: boolean; error?: string }>({ complete: false })
-  const [cvcState, setCvcState] = useState<{ complete: boolean; error?: string }>({ complete: false })
+function StripeCardSection({
+  setValue,
+  selectedCountry,
+  onCardElementsChange,
+}: StripeCardSectionProps) {
+  const [numberState, setNumberState] = useState<{ complete: boolean; error?: string }>({
+    complete: false,
+  })
+  const [expiryState, setExpiryState] = useState<{ complete: boolean; error?: string }>({
+    complete: false,
+  })
+  const [cvcState, setCvcState] = useState<{ complete: boolean; error?: string }>({
+    complete: false,
+  })
   const [focusedField, setFocusedField] = useState<string | null>(null)
 
-/**
- * StripeCardSection - React component
- * @returns React element
- */
+  /**
+   * StripeCardSection - React component
+   * @returns React element
+   */
   const fieldBorderClass = (error?: string, fieldName?: string) =>
     cn(
       'h-12 flex items-center rounded-xl border px-4 bg-white transition-colors',
@@ -64,10 +77,10 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
           ? 'border-[#0066FF]'
           : 'border-[#E5E5E5]',
     )
-/**
- * fieldBorderClass - Utility function
- * @returns void
- */
+  /**
+   * fieldBorderClass - Utility function
+   * @returns void
+   */
 
   const handleNumberChange = (e: StripeCardNumberElementChangeEvent) => {
     setNumberState({ complete: e.complete, error: e.error?.message })
@@ -81,10 +94,10 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
 
   const handleCvcChange = (e: StripeElementChangeEvent) => {
     setCvcState({ complete: e.complete, error: e.error?.message })
-/**
- * handleNumberChange - Utility function
- * @returns void
- */
+    /**
+     * handleNumberChange - Utility function
+     * @returns void
+     */
     onCardElementsChange(numberState.complete && expiryState.complete && e.complete)
   }
 
@@ -93,10 +106,7 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
       <div className="border-t border-black/5 p-6 pt-4">
         <div className="space-y-5">
           {/* Card Number */}
-/**
- * handleExpiryChange - Utility function
- * @returns void
- */
+          /** * handleExpiryChange - Utility function * @returns void */
           <div className="space-y-2">
             <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
               Card Number
@@ -105,10 +115,10 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
               <CardNumberElement
                 options={{ style: STRIPE_ELEMENT_STYLE, showIcon: true }}
                 onChange={handleNumberChange}
-/**
- * handleCvcChange - Utility function
- * @returns void
- */
+                /**
+                 * handleCvcChange - Utility function
+                 * @returns void
+                 */
                 onFocus={() => setFocusedField('number')}
                 onBlur={() => setFocusedField(null)}
                 className="w-full"
@@ -118,7 +128,6 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
               <span className="text-[11px] text-red-500">{numberState.error}</span>
             )}
           </div>
-
           {/* Expiry + CVC */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -152,12 +161,9 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
                   className="w-full"
                 />
               </div>
-              {cvcState.error && (
-                <span className="text-[11px] text-red-500">{cvcState.error}</span>
-              )}
+              {cvcState.error && <span className="text-[11px] text-red-500">{cvcState.error}</span>}
             </div>
           </div>
-
           {/* Billing country */}
           <div className="space-y-2">
             <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
@@ -176,7 +182,6 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
               <option value="JP">Japan</option>
             </select>
           </div>
-
           <p className="text-[13px] leading-relaxed text-[#595959]">
             By providing your card details, you authorise Artium to charge your card for future
             payments in accordance with their terms.
@@ -208,7 +213,10 @@ export const BuyerCheckoutPaymentForm = ({
   walletCheckout,
   onCardElementsChange,
 }: Props) => {
-  const { formState: { errors }, setValue } = useFormContext<BuyerCheckoutPaymentValues>()
+  const {
+    formState: { errors },
+    setValue,
+  } = useFormContext<BuyerCheckoutPaymentValues>()
 
   const paymentMethod = useWatch({ name: 'paymentMethod' }) ?? 'card'
   const selectedCountry = useWatch({ name: 'country' }) ?? 'VN'
@@ -219,10 +227,10 @@ export const BuyerCheckoutPaymentForm = ({
     if (method === 'card') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setValue('walletAddress' as any, '', { shouldDirty: true, shouldValidate: false })
-/**
- * BuyerCheckoutPaymentForm - React component
- * @returns React element
- */
+      /**
+       * BuyerCheckoutPaymentForm - React component
+       * @returns React element
+       */
     }
   }
 
@@ -238,28 +246,21 @@ export const BuyerCheckoutPaymentForm = ({
             className={cn(
               'flex items-center justify-center gap-3 rounded-2xl border-2 p-4 transition',
               paymentMethod === value
-/**
- * paymentMethod - Utility function
- * @returns void
- */
-                ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
+                ? /**
+                   * paymentMethod - Utility function
+                   * @returns void
+                   */
+                  'border-[#0066FF] bg-blue-50 text-[#0066FF]'
                 : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]',
             )}
           >
-/**
- * selectedCountry - Utility function
- * @returns void
- */
+            /** * selectedCountry - Utility function * @returns void */
             {icon}
             <span className="text-[14px] font-bold">{label}</span>
           </button>
         ))}
       </div>
-/**
- * handleMethodChange - Utility function
- * @returns void
- */
-
+      /** * handleMethodChange - Utility function * @returns void */
       {/* Stripe Card Elements */}
       {paymentMethod === 'card' && (
         <StripeCardSection
@@ -268,7 +269,6 @@ export const BuyerCheckoutPaymentForm = ({
           onCardElementsChange={onCardElementsChange ?? (() => undefined)}
         />
       )}
-
       {/* Wallet section */}
       {paymentMethod === 'wallet' && (
         <WalletPaymentSection
