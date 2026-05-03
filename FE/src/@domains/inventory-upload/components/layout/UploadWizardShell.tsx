@@ -16,6 +16,10 @@ type UploadWizardShellProps = {
   children: React.ReactNode
 }
 
+/**
+ * UploadWizardShell - React component
+ * @returns React element
+ */
 export const UploadWizardShell = ({
   title,
   step,

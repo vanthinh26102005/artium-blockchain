@@ -26,6 +26,10 @@ interface SubmissionProgressProps {
 // Component
 // ============================================================================
 
+/**
+ * SubmissionProgress - React component
+ * @returns React element
+ */
 export const SubmissionProgress: React.FC<SubmissionProgressProps> = ({
   stage,
   message,
@@ -38,14 +42,26 @@ export const SubmissionProgress: React.FC<SubmissionProgressProps> = ({
   const isError = stage === 'error';
   const isComplete = stage === 'complete';
   const isProcessing = !isError && !isComplete;
+/**
+ * isError - Utility function
+ * @returns void
+ */
 
   return (
     <div className={cn("rounded-[28px] border bg-white p-6", className)}>
       {/* Header */}
+/**
+ * isComplete - Utility function
+ * @returns void
+ */
       <div className="flex items-center gap-3">
         {isComplete ? (
           <CheckCircleIcon className="h-8 w-8 text-green-600" />
         ) : isError ? (
+/**
+ * isProcessing - Utility function
+ * @returns void
+ */
           <XCircleIcon className="h-8 w-8 text-red-600" />
         ) : (
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
