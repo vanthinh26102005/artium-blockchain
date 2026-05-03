@@ -27,6 +27,10 @@ export type Moment = {
   artworkPreview?: MomentArtworkPreview
 }
 
+/**
+ * MOMENTS - React component
+ * @returns React element
+ */
 export const MOMENTS: Moment[] = [
   {
     id: 'moment-01',

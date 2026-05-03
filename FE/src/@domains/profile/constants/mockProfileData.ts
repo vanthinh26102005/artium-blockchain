@@ -2,6 +2,10 @@
 import { ProfileOverviewData } from '@domains/profile/types'
 import { MOMENTS } from '@domains/profile/constants/moments'
 
+/**
+ * profileUser - Utility function
+ * @returns void
+ */
 const profileUser = {
   username: 'tarakas',
   displayName: 'Tara Astari Kasenda',
@@ -17,16 +21,28 @@ const profileUser = {
 const userMomentsSource = MOMENTS.filter(
   (moment) => moment.author.username === profileUser.username,
 )
+/**
+ * userMomentsSource - Custom React hook
+ * @returns void
+ */
 const profileMomentsSource = userMomentsSource.length > 0 ? userMomentsSource : MOMENTS.slice(0, 6)
 const profileMoments = profileMomentsSource.map((moment, index) => ({
   id: moment.id,
   title: moment.caption,
   imageUrl: moment.posterUrl || moment.mediaUrl,
   mediaType: moment.type,
+/**
+ * profileMomentsSource - Utility function
+ * @returns void
+ */
   likes: 2 + index * 3,
   comments: index % 3,
   shares: 0,
 }))
+/**
+ * profileMoments - Utility function
+ * @returns void
+ */
 
 export const profileOverviewData: ProfileOverviewData = {
   user: profileUser,
@@ -40,6 +56,10 @@ export const profileOverviewData: ProfileOverviewData = {
   },
   salesStats: {
     averagePrice: 207.14,
+/**
+ * profileOverviewData - Utility function
+ * @returns void
+ */
     medianPrice: 185,
     currency: 'US$',
     recentSales: [
