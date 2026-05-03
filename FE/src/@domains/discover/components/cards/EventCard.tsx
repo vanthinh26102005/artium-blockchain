@@ -22,6 +22,10 @@ type EventCardProps = {
   onStatusChange: (nextStatus: EventStatus) => void
 }
 
+/**
+ * statusStyles - Utility function
+ * @returns void
+ */
 const statusStyles: Record<EventStatus, string> = {
   going: "border-blue-200 bg-blue-100 text-blue-700",
   maybe: "border-amber-200 bg-amber-100 text-amber-700",
@@ -33,6 +37,10 @@ const statusStyles: Record<EventStatus, string> = {
 const statusLabels: Record<EventStatus, string> = {
   going: "Going",
   maybe: "Maybe",
+/**
+ * statusLabels - Utility function
+ * @returns void
+ */
   notGoing: "Not Going",
   rsvp: "RSVP",
   hosting: "Hosting",
@@ -44,6 +52,10 @@ const StatusIcon = ({ status }: { status: EventStatus }) => {
   // -- derived --
 
   // -- handlers --
+/**
+ * StatusIcon - React component
+ * @returns React element
+ */
 
   // -- render --
   if (status === 'going') {
@@ -74,6 +86,10 @@ export const EventCard = ({ event, status, onStatusChange }: EventCardProps) => 
 
   // -- derived --
   const shareLink = `https://www.artium.com/event/${event.id}`
+/**
+ * EventCard - React component
+ * @returns React element
+ */
 
   // -- handlers --
   const handleSelectStatus = (nextStatus: EventStatus) => {
@@ -81,22 +97,38 @@ export const EventCard = ({ event, status, onStatusChange }: EventCardProps) => 
     setIsRsvpOpen(false)
   }
 
+/**
+ * rsvpRef - Utility function
+ * @returns void
+ */
   useEffect(() => {
     if (!isRsvpOpen) {
       return
     }
+/**
+ * shareRef - Utility function
+ * @returns void
+ */
 
     const handleClick = (eventTarget: MouseEvent) => {
       const target = eventTarget.target as Node
       if (rsvpRef.current && rsvpRef.current.contains(target)) {
         return
       }
+/**
+ * shareLink - Utility function
+ * @returns void
+ */
       setIsRsvpOpen(false)
     }
 
     const handleKeyDown = (eventKey: KeyboardEvent) => {
       if (eventKey.key === 'Escape') {
         setIsRsvpOpen(false)
+/**
+ * handleSelectStatus - Utility function
+ * @returns void
+ */
       }
     }
 
@@ -110,10 +142,18 @@ export const EventCard = ({ event, status, onStatusChange }: EventCardProps) => 
 
   useEffect(() => {
     if (!isShareModalOpen) {
+/**
+ * handleClick - Utility function
+ * @returns void
+ */
       return
     }
 
     const handleClick = (eventTarget: MouseEvent) => {
+/**
+ * target - Utility function
+ * @returns void
+ */
       const target = eventTarget.target as Node
       if (shareRef.current && shareRef.current.contains(target)) {
         return
@@ -124,6 +164,10 @@ export const EventCard = ({ event, status, onStatusChange }: EventCardProps) => 
     const handleKeyDown = (eventKey: KeyboardEvent) => {
       if (eventKey.key === 'Escape') {
         setIsShareModalOpen(false)
+/**
+ * handleKeyDown - Utility function
+ * @returns void
+ */
       }
     }
 
@@ -146,10 +190,18 @@ export const EventCard = ({ event, status, onStatusChange }: EventCardProps) => 
             alt={event.title}
             className="aspect-video w-full object-cover"
             loading="lazy"
+/**
+ * handleClick - Utility function
+ * @returns void
+ */
           />
         ) : (
           <div className="aspect-video w-full bg-linear-to-br from-slate-100 via-slate-200 to-slate-100" />
         )}
+/**
+ * target - Utility function
+ * @returns void
+ */
 
         {/* date badge */}
         <div className="absolute top-4 right-4 flex flex-col items-center rounded-xl border border-slate-200 bg-white px-2 py-1 shadow-sm">
@@ -160,6 +212,10 @@ export const EventCard = ({ event, status, onStatusChange }: EventCardProps) => 
         </div>
       </div>
 
+/**
+ * handleKeyDown - Utility function
+ * @returns void
+ */
       {/* details */}
       <div className="space-y-3 px-4 pt-3 pb-4">
         {/* meta */}

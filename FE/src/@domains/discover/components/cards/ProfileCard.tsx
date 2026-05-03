@@ -10,6 +10,10 @@ type ProfileCardProps = {
   onToggleFollow: () => void
 }
 
+/**
+ * ProfileCard - React component
+ * @returns React element
+ */
 export const ProfileCard = ({ profile, isFollowing, onToggleFollow }: ProfileCardProps) => {
   // -- state --
 
@@ -17,10 +21,18 @@ export const ProfileCard = ({ profile, isFollowing, onToggleFollow }: ProfileCar
   const collageImages = profile.collage
   const extendedCollage = [
     ...collageImages,
+/**
+ * collageImages - Utility function
+ * @returns void
+ */
     ...Array.from(
       { length: Math.max(0, 4 - collageImages.length) },
       (_, index) => `https://picsum.photos/seed/profile-${profile.id}-${index}/200/200`,
     ),
+/**
+ * extendedCollage - Utility function
+ * @returns void
+ */
   ]
   const [primaryImage, smallOne, smallTwo, smallThree] = extendedCollage
 

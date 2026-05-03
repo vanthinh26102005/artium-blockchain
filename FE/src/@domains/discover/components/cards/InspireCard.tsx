@@ -8,23 +8,39 @@ type InspireCardProps = {
   item: DiscoverInspireItem
 }
 
+/**
+ * InspireCard - React component
+ * @returns React element
+ */
 export const InspireCard = ({ item }: InspireCardProps) => {
   // -- state --
   const router = useRouter()
 
   // -- derived --
+/**
+ * router - Utility function
+ * @returns void
+ */
   const isImageLayout = item.layoutVariant === 'image'
 
   // -- handlers --
   const handleClick = () => {
     router.push(`/editorial/${item.id}`)
   }
+/**
+ * isImageLayout - Utility function
+ * @returns void
+ */
 
   // -- render --
   return (
     <article
       onClick={handleClick}
       className={`cursor-pointer rounded-2xl border border-slate-200 bg-white shadow-[0_6px_16px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(15,23,42,0.12)] ${isImageLayout ? 'overflow-hidden' : 'p-6'
+/**
+ * handleClick - Utility function
+ * @returns void
+ */
         }`}
     >
       {isImageLayout ? (
