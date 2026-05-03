@@ -13,6 +13,10 @@ import type { UseWalletCheckoutResult } from '../hooks/useWalletCheckout'
 import type { BuyerCheckoutPaymentValues } from '../validations/buyerCheckout.schema'
 import { WalletPaymentSection } from './WalletPaymentSection'
 
+/**
+ * STRIPE_ELEMENT_STYLE - React component
+ * @returns React element
+ */
 const STRIPE_ELEMENT_STYLE = {
   base: {
     fontSize: '15px',
@@ -28,6 +32,10 @@ const STRIPE_ELEMENT_STYLE = {
 const METHOD_OPTIONS = [
   { value: 'card' as const, label: 'Card', icon: <CreditCard className="h-5 w-5" /> },
   { value: 'wallet' as const, label: 'Crypto Wallet', icon: <span className="text-lg">🦊</span> },
+/**
+ * METHOD_OPTIONS - React component
+ * @returns React element
+ */
 ]
 
 type StripeCardSectionProps = {
@@ -43,6 +51,10 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
   const [cvcState, setCvcState] = useState<{ complete: boolean; error?: string }>({ complete: false })
   const [focusedField, setFocusedField] = useState<string | null>(null)
 
+/**
+ * StripeCardSection - React component
+ * @returns React element
+ */
   const fieldBorderClass = (error?: string, fieldName?: string) =>
     cn(
       'h-12 flex items-center rounded-xl border px-4 bg-white transition-colors',
@@ -52,6 +64,10 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
           ? 'border-[#0066FF]'
           : 'border-[#E5E5E5]',
     )
+/**
+ * fieldBorderClass - Utility function
+ * @returns void
+ */
 
   const handleNumberChange = (e: StripeCardNumberElementChangeEvent) => {
     setNumberState({ complete: e.complete, error: e.error?.message })
@@ -65,6 +81,10 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
 
   const handleCvcChange = (e: StripeElementChangeEvent) => {
     setCvcState({ complete: e.complete, error: e.error?.message })
+/**
+ * handleNumberChange - Utility function
+ * @returns void
+ */
     onCardElementsChange(numberState.complete && expiryState.complete && e.complete)
   }
 
@@ -73,6 +93,10 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
       <div className="border-t border-black/5 p-6 pt-4">
         <div className="space-y-5">
           {/* Card Number */}
+/**
+ * handleExpiryChange - Utility function
+ * @returns void
+ */
           <div className="space-y-2">
             <label className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">
               Card Number
@@ -81,6 +105,10 @@ function StripeCardSection({ setValue, selectedCountry, onCardElementsChange }: 
               <CardNumberElement
                 options={{ style: STRIPE_ELEMENT_STYLE, showIcon: true }}
                 onChange={handleNumberChange}
+/**
+ * handleCvcChange - Utility function
+ * @returns void
+ */
                 onFocus={() => setFocusedField('number')}
                 onBlur={() => setFocusedField(null)}
                 className="w-full"
@@ -191,6 +219,10 @@ export const BuyerCheckoutPaymentForm = ({
     if (method === 'card') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setValue('walletAddress' as any, '', { shouldDirty: true, shouldValidate: false })
+/**
+ * BuyerCheckoutPaymentForm - React component
+ * @returns React element
+ */
     }
   }
 
@@ -206,15 +238,27 @@ export const BuyerCheckoutPaymentForm = ({
             className={cn(
               'flex items-center justify-center gap-3 rounded-2xl border-2 p-4 transition',
               paymentMethod === value
+/**
+ * paymentMethod - Utility function
+ * @returns void
+ */
                 ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
                 : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]',
             )}
           >
+/**
+ * selectedCountry - Utility function
+ * @returns void
+ */
             {icon}
             <span className="text-[14px] font-bold">{label}</span>
           </button>
         ))}
       </div>
+/**
+ * handleMethodChange - Utility function
+ * @returns void
+ */
 
       {/* Stripe Card Elements */}
       {paymentMethod === 'card' && (

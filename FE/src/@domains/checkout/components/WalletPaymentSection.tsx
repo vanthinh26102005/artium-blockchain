@@ -2,15 +2,27 @@ import type { FieldErrors } from 'react-hook-form'
 import type { EthereumQuoteResponse } from '@shared/apis/paymentApis'
 import type { WalletErrorState } from '../hooks/useWalletCheckout'
 
+/**
+ * DEFAULT_CHAIN_NAME - React component
+ * @returns React element
+ */
 const DEFAULT_CHAIN_NAME = process.env.NEXT_PUBLIC_ETH_CHAIN_NAME ?? 'Sepolia'
 
 function formatEthAmount(ethAmount: string): string {
   const numeric = Number(ethAmount)
   if (!Number.isFinite(numeric)) {
+/**
+ * formatEthAmount - Utility function
+ * @returns void
+ */
     return ethAmount
   }
 
   return numeric.toLocaleString('en-US', {
+/**
+ * numeric - Utility function
+ * @returns void
+ */
     minimumFractionDigits: 0,
     maximumFractionDigits: 6,
   })
@@ -47,6 +59,10 @@ export const WalletPaymentSection = ({
   onRefreshQuote,
   walletAddress,
   txHash,
+/**
+ * WalletPaymentSection - React component
+ * @returns React element
+ */
   isConnecting,
   isSubmittingPayment,
   connectError,
