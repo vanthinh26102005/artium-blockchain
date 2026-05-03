@@ -20,28 +20,52 @@ export type OrderInvoiceAvailability = {
   reason?: string
 }
 
+/**
+ * INVOICE_UNAVAILABLE_COPY - React component
+ * @returns React element
+ */
 export const INVOICE_UNAVAILABLE_COPY = 'Invoice unavailable for this workspace.'
 export const INVOICE_MISSING_FIELD_COPY = 'Not provided'
 export const INVOICE_REDACTED_FIELD_COPY = 'Redacted by access rules'
 
+/**
+ * INVOICE_MISSING_FIELD_COPY - React component
+ * @returns React element
+ */
 const RETRY_COPY = 'Unable to load invoice. Try again without leaving this order.'
 
 const isNonDisclosingUnavailableError = (message?: string | null) => {
   const normalized = message?.toLowerCase() ?? ''
+/**
+ * INVOICE_REDACTED_FIELD_COPY - React component
+ * @returns React element
+ */
 
   return (
     normalized.includes('not found') ||
     normalized.includes('forbidden') ||
     normalized.includes('unauthorized') ||
+/**
+ * RETRY_COPY - React component
+ * @returns React element
+ */
     normalized.includes('404')
   )
 }
 
 export const getOrderInvoiceAvailability = ({
+/**
+ * isNonDisclosingUnavailableError - Utility function
+ * @returns void
+ */
   invoice,
   isLoading,
   errorMessage,
   isUnavailable,
+/**
+ * normalized - Utility function
+ * @returns void
+ */
 }: {
   invoice: OrderInvoiceResponse | null
   isLoading: boolean
@@ -55,6 +79,10 @@ export const getOrderInvoiceAvailability = ({
       description: 'Preview or print the backend invoice for this order.',
       canPreview: true,
       canPrint: true,
+/**
+ * getOrderInvoiceAvailability - Utility function
+ * @returns void
+ */
     }
   }
 
@@ -121,6 +149,10 @@ export const getOrderListInvoiceAvailability = (order: OrderResponse): OrderInvo
   }
 }
 
+/**
+ * getOrderListInvoiceAvailability - Utility function
+ * @returns void
+ */
 export const formatInvoiceField = (value?: string | number | null): string => {
   if (value === null || value === undefined) {
     return INVOICE_MISSING_FIELD_COPY
@@ -145,6 +177,10 @@ const getAddressValue = (
   const value = address[key]
 
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null
+/**
+ * formatInvoiceField - Utility function
+ * @returns void
+ */
 }
 
 export const formatInvoiceAddressLines = (
@@ -153,6 +189,10 @@ export const formatInvoiceAddressLines = (
   if (!address) {
     return []
   }
+/**
+ * normalized - Utility function
+ * @returns void
+ */
 
   const city = getAddressValue(address, 'city')
   const state = getAddressValue(address, 'state')
@@ -160,6 +200,10 @@ export const formatInvoiceAddressLines = (
   const country = getAddressValue(address, 'country')
   const cityState = `${city ?? ''}${city && state ? ', ' : ''}${state ?? ''}`.trim()
   const postalCountry = `${postalCode ?? ''} ${country ?? ''}`.trim()
+/**
+ * formatInvoicePartyField - Utility function
+ * @returns void
+ */
 
   return [
     getAddressValue(address, 'name'),
@@ -171,9 +215,62 @@ export const formatInvoiceAddressLines = (
   ].filter((line): line is string => Boolean(line))
 }
 
+/**
+ * getAddressValue - Utility function
+ * @returns void
+ */
 export const canPrintOrderInvoice = (availability: OrderInvoiceAvailability): boolean =>
   availability.state === 'ready' && availability.canPrint
 
 export const formatInvoiceMoney = formatOrderMoney
 export const formatInvoiceDate = formatOrderDate
 export const formatInvoiceDateTime = formatOrderDateTime
+
+/**
+ * value - Utility function
+ * @returns void
+ */
+/**
+ * formatInvoiceAddressLines - Utility function
+ * @returns void
+ */
+/**
+ * city - Utility function
+ * @returns void
+ */
+/**
+ * state - Utility function
+ * @returns void
+ */
+/**
+ * postalCode - Utility function
+ * @returns void
+ */
+/**
+ * country - Utility function
+ * @returns void
+ */
+/**
+ * cityState - Utility function
+ * @returns void
+ */
+/**
+ * postalCountry - Utility function
+ * @returns void
+ */
+/**
+ * canPrintOrderInvoice - Utility function
+ * @returns void
+ */
+/**
+ * formatInvoiceMoney - Utility function
+ * @returns void
+ */
+/**
+ * formatInvoiceDate - Utility function
+ * @returns void
+ */
+/**
+ * formatInvoiceDateTime - Utility function
+ * @returns void
+ */
