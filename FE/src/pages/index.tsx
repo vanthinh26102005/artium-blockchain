@@ -5,6 +5,10 @@ import { SiteFooter } from '@shared/components/layout/SiteFooter'
 import { SiteHeader } from '@shared/components/layout/SiteHeader'
 import type { NextPageWithLayout } from '@shared/types/next'
 
+/**
+ * Home - React component
+ * @returns React element
+ */
 const Home: NextPageWithLayout = () => {
   return (
     <>
@@ -22,6 +26,10 @@ const Home: NextPageWithLayout = () => {
 Home.getLayout = function getLayout(page: ReactElement) {
   return (
     <div className="min-h-screen bg-black text-white">
+/**
+ * getLayout - Utility function
+ * @returns void
+ */
       <div className="flex min-h-screen flex-col">
         <SiteHeader variant="landing" />
         <main className="w-full flex-1">{page}</main>

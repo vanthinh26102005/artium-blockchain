@@ -16,6 +16,10 @@ import { ToastPortal } from '@domains/events/components/ui/ToastPortal'
 import { useEventsStore } from '@domains/events/state/useEventsStore'
 import { useShallow } from 'zustand/react/shallow'
 
+/**
+ * priceFormatter - Utility function
+ * @returns void
+ */
 const priceFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -26,6 +30,10 @@ const priceFormatter = new Intl.NumberFormat('en-US', {
 const EDITORIALS_DATA = EDITORIAL_ITEMS.slice(0, 20).map((item) => ({
     id: item.id,
     title: item.title,
+/**
+ * EDITORIALS_DATA - React component
+ * @returns React element
+ */
     author: item.author,
     imageUrl: item.imageUrl,
 }))
@@ -36,6 +44,10 @@ const MOCK_EVENT_IMAGES = [
     'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600&h=400',
     'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=600&h=400',
     'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80&w=600&h=400',
+/**
+ * MOCK_EVENT_IMAGES - React component
+ * @returns React element
+ */
     'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&q=80&w=600&h=400',
     'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&q=80&w=600&h=400',
     'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&q=80&w=600&h=400',
@@ -51,6 +63,10 @@ const EVENTS_DATA_INITIAL: (Event & { locationType: 'in-person' | 'online'; desc
         startDateTime: '2025-04-09T22:00:00',
         endDateTime: '2025-04-09T23:00:00',
         timeZone: 'America/New_York',
+/**
+ * EVENTS_DATA_INITIAL - React component
+ * @returns React element
+ */
         types: ['art-fair'],
         visibility: 'public',
         attendees: 3,
@@ -186,26 +202,46 @@ const SectionDetail: NextPageWithLayout = () => {
 
     const [inviteModalOpen, setInviteModalOpen] = useState(false)
     const [inviteModalEvent, setInviteModalEvent] = useState<HostingEvent | null>(null)
+/**
+ * ARTWORKS_DATA - React component
+ * @returns React element
+ */
     const [shareModalOpen, setShareModalOpen] = useState(false)
     const [shareModalEvent, setShareModalEvent] = useState<HostingEvent | null>(null)
     const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(null)
 
     const handleRsvpChange = (eventId: string, status: EventStatus) => {
+/**
+ * SectionDetail - React component
+ * @returns React element
+ */
         updateRsvpStatus(eventId, status)
         setToast({
             message: 'Your response updated!',
             variant: 'success',
+/**
+ * router - Utility function
+ * @returns void
+ */
         })
         setTimeout(() => setToast(null), 3000)
     }
 
     const handleInvite = (event: Event) => {
+/**
+ * events - Utility function
+ * @returns void
+ */
         setInviteModalEvent(event as unknown as HostingEvent)
         setInviteModalOpen(true)
     }
 
     const handleShare = (event: Event) => {
         setShareModalEvent(event as unknown as HostingEvent)
+/**
+ * updateRsvpStatus - Utility function
+ * @returns void
+ */
         setShareModalOpen(true)
     }
 
@@ -217,6 +253,10 @@ const SectionDetail: NextPageWithLayout = () => {
         return 'Collection'
     }
 
+/**
+ * handleRsvpChange - Utility function
+ * @returns void
+ */
     const handleEditorialClick = (id: string) => {
         router.push(`/editorial/${id}`)
     }
@@ -229,6 +269,10 @@ const SectionDetail: NextPageWithLayout = () => {
                     <Link
                         href="/homepage"
                         className="mb-4 inline-flex items-center text-sm font-semibold text-slate-500 transition-colors hover:text-slate-900"
+/**
+ * handleInvite - Utility function
+ * @returns void
+ */
                     >
                         <ChevronLeft className="mr-1 h-4 w-4" /> Back to Home
                     </Link>
@@ -237,6 +281,10 @@ const SectionDetail: NextPageWithLayout = () => {
 
                 {/* Masonry Layout for Editorials and Artworks */}
                 {(section === 'editorials' || section === 'new-artworks') && (
+/**
+ * handleShare - Utility function
+ * @returns void
+ */
                     <div className="gap-6 columns-1 md:columns-2 lg:columns-3 xl:columns-4">
                         {section === 'editorials' && EDITORIALS_DATA.map((item) => (
                             <div
@@ -246,6 +294,10 @@ const SectionDetail: NextPageWithLayout = () => {
                             >
                                 <img
                                     src={item.imageUrl}
+/**
+ * getTitle - Utility function
+ * @returns void
+ */
                                     alt={item.title}
                                     className="h-auto w-full object-cover"
                                 />
@@ -256,6 +308,10 @@ const SectionDetail: NextPageWithLayout = () => {
                             </div>
                         ))}
                         {section === 'new-artworks' && ARTWORKS_DATA.map((item) => (
+/**
+ * handleEditorialClick - Utility function
+ * @returns void
+ */
                             <div
                                 key={item.id}
                                 onClick={() => router.push(`/artworks/${item.id}`)}
