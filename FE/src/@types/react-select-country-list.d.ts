@@ -12,6 +12,10 @@ declare module 'react-select-country-list' {
     setEmpty(label: string): CountryList
   }
 
+/**
+ * countryList - Utility function
+ * @returns void
+ */
   const countryList: () => CountryList
 
   export default countryList
