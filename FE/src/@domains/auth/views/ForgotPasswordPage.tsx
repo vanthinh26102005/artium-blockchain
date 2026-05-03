@@ -28,10 +28,18 @@ import {
 } from '@domains/auth/validations/auth.schema'
 import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
 
+/**
+ * ForgotPasswordPage - React component
+ * @returns React element
+ */
 export const ForgotPasswordPage = () => {
   const router = useRouter()
   const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
   const { requestReset, verifyReset, isLoading, error: apiError } = useForgotPassword()
+/**
+ * router - Utility function
+ * @returns void
+ */
   const [step, setStep] = useState<'request' | 'verify'>('request')
   const [pendingEmail, setPendingEmail] = useState('')
   const [notice, setNotice] = useState('')
@@ -41,6 +49,10 @@ export const ForgotPasswordPage = () => {
     reValidateMode: 'onChange',
     defaultValues: {
       email: '',
+/**
+ * requestForm - Utility function
+ * @returns void
+ */
     },
   })
   const verifyForm = useForm<ForgotPasswordVerifyFormValues>({
@@ -52,6 +64,10 @@ export const ForgotPasswordPage = () => {
       otp: '',
     },
   })
+/**
+ * verifyForm - Utility function
+ * @returns void
+ */
 
   const requestEmailField = requestForm.register('email')
   const requestEmailError = requestForm.formState.errors.email?.message
@@ -65,15 +81,27 @@ export const ForgotPasswordPage = () => {
       await requestReset({ email: normalizedEmail })
       setPendingEmail(normalizedEmail)
       setStep('verify')
+/**
+ * requestEmailField - Utility function
+ * @returns void
+ */
       setNotice('We sent a verification code to your email.')
       verifyForm.reset({
         email: normalizedEmail,
         otp: '',
+/**
+ * requestEmailError - Utility function
+ * @returns void
+ */
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : apiError || 'Request failed.'
       requestForm.setError('root', { message })
     }
+/**
+ * handleRequestSubmit - Utility function
+ * @returns void
+ */
   }
 
   const handleVerifySubmit = async (values: ForgotPasswordVerifyFormValues) => {
@@ -82,6 +110,10 @@ export const ForgotPasswordPage = () => {
 
     try {
       const response = await verifyReset({
+/**
+ * normalizedEmail - Utility function
+ * @returns void
+ */
         email: values.email.trim(),
         otp: values.otp.trim(),
       })
@@ -95,6 +127,10 @@ export const ForgotPasswordPage = () => {
         email: values.email.trim(),
         resetToken: response.resetToken,
       })
+/**
+ * message - Utility function
+ * @returns void
+ */
       const nextUrl = `/reset-password?email=${encodeURIComponent(values.email.trim())}`
       await router.push(nextUrl)
     } catch (error) {
@@ -103,6 +139,10 @@ export const ForgotPasswordPage = () => {
     }
   }
 
+/**
+ * handleVerifySubmit - Utility function
+ * @returns void
+ */
   // -- render --
   if (!canRenderGuestPage) {
     return null
@@ -111,6 +151,10 @@ export const ForgotPasswordPage = () => {
   return (
     <AuthShell>
       <Metadata title="Forgot password | Artium" />
+/**
+ * response - Utility function
+ * @returns void
+ */
 
       {/* card */}
       <div className="shadow-artium-xl flex w-[88vw] max-w-160 flex-col gap-6 rounded-4xl bg-white px-10 py-10 text-black sm:px-12 lg:px-14 lg:py-12">
@@ -128,12 +172,20 @@ export const ForgotPasswordPage = () => {
           {step === 'request' ? (
             <FormProvider {...requestForm}>
               <form
+/**
+ * nextUrl - Utility function
+ * @returns void
+ */
                 className="mt-6 space-y-6"
                 onSubmit={requestForm.handleSubmit(handleRequestSubmit)}
                 noValidate
               >
                 {notice ? <p className="text-sm font-semibold text-emerald-600">{notice}</p> : null}
                 <div>
+/**
+ * message - Utility function
+ * @returns void
+ */
                   <Input
                     id="forgot-email"
                     type="email"

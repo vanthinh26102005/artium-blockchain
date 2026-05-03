@@ -40,26 +40,46 @@ import {
 import { type LoginFormValues, loginFormSchema } from '@domains/auth/validations/auth.schema'
 import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
 
+/**
+ * LoginPage - React component
+ * @returns React element
+ */
 export const LoginPage = () => {
   const router = useRouter()
   const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
   const setAuth = useAuthStore((state) => state.setAuth)
+/**
+ * router - Utility function
+ * @returns void
+ */
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
   const walletLogin = useWalletLogin()
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
   const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false)
   const form = useForm<LoginFormValues>({
+/**
+ * setAuth - Utility function
+ * @returns void
+ */
     resolver: zodResolver(loginFormSchema),
     mode: 'onBlur',
     reValidateMode: 'onChange',
     defaultValues: {
       email: '',
+/**
+ * walletLogin - Utility function
+ * @returns void
+ */
       password: '',
     },
   })
   const {
     handleSubmit,
     setError,
+/**
+ * form - Utility function
+ * @returns void
+ */
     formState: { errors, isSubmitting },
   } = form
 
@@ -78,6 +98,10 @@ export const LoginPage = () => {
       const message = error instanceof Error ? error.message : 'Login failed.'
       setError('root', { message })
     }
+/**
+ * handleLogin - Utility function
+ * @returns void
+ */
   }
 
   const handleGoogleSignIn = async () => {
@@ -85,6 +109,10 @@ export const LoginPage = () => {
     const callbackUrl = buildAuthCallbackUrl(
       '/login',
       router.query.next,
+/**
+ * response - Utility function
+ * @returns void
+ */
       '/discover?tab=top-picks',
     )
 
@@ -92,6 +120,10 @@ export const LoginPage = () => {
       await signIn('google', { callbackUrl })
     } finally {
       setIsGoogleSubmitting(false)
+/**
+ * nextPath - Utility function
+ * @returns void
+ */
     }
   }
 
@@ -99,6 +131,10 @@ export const LoginPage = () => {
     await walletLogin.loginWithWallet()
   }
 
+/**
+ * message - Utility function
+ * @returns void
+ */
   const handleSwitchWalletNetwork = async () => {
     await walletLogin.switchToTargetChain()
   }
@@ -107,11 +143,19 @@ export const LoginPage = () => {
   if (!canRenderGuestPage) {
     return null
   }
+/**
+ * handleGoogleSignIn - Utility function
+ * @returns void
+ */
 
   return (
     <AuthShell>
       <Metadata title="Log in | Artium" />
       <AuthFormCard>
+/**
+ * callbackUrl - Utility function
+ * @returns void
+ */
         {/* header */}
         <h1 className="font-monument-grotes text-center text-3xl font-bold text-[#191414] lg:text-[48px]">
           Welcome back
@@ -128,6 +172,10 @@ export const LoginPage = () => {
         <AuthProviderButton
           icon={<Wallet className="h-6 w-6 shrink-0 text-[#191414]" />}
           label="Login with MetaMask"
+/**
+ * handleWalletSignIn - Utility function
+ * @returns void
+ */
           loadingLabel="Opening MetaMask..."
           isLoading={walletLogin.isLoading}
           onClick={() => setIsWalletDialogOpen(true)}
@@ -135,6 +183,10 @@ export const LoginPage = () => {
         />
 
         <AuthDivider text="Or sign in with" />
+/**
+ * handleSwitchWalletNetwork - Utility function
+ * @returns void
+ */
 
         <FormProvider {...form}>
           <form className="mt-3 space-y-4" onSubmit={handleSubmit(handleLogin)} noValidate>
