@@ -3,6 +3,10 @@ import { SidebarLayout } from '@shared/components/layout/SidebarLayout'
 import type { NextPageWithLayout } from '@shared/types/next'
 import { useRequireAuth } from '@domains/auth/hooks/useRequireAuth'
 
+/**
+ * MessagingView - React component
+ * @returns React element
+ */
 const MessagingView = dynamic(
   () => import('@domains/messaging/views/MessagingView').then((module) => module.MessagingView),
   { ssr: false },
@@ -11,6 +15,10 @@ const MessagingView = dynamic(
 const MessagesPage: NextPageWithLayout = () => {
   const { canRenderProtected } = useRequireAuth()
 
+/**
+ * MessagesPage - React component
+ * @returns React element
+ */
   if (!canRenderProtected) {
     return null
   }
