@@ -6,6 +6,10 @@ import { useEffect, useState } from "react";
  * @param delay - Delay in milliseconds (default: 500ms)
  * @returns Debounced value
  */
+/**
+ * useDebounce - Custom React hook
+ * @returns void
+ */
 export function useDebounce<T>(value: T, delay: number = 500): T {
     const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
@@ -14,6 +18,10 @@ export function useDebounce<T>(value: T, delay: number = 500): T {
         const timer = setTimeout(() => {
             setDebouncedValue(value);
         }, delay);
+/**
+ * timer - Utility function
+ * @returns void
+ */
 
         // Clean up the timeout if value changes before delay
         return () => {

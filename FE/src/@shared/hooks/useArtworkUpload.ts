@@ -8,10 +8,18 @@
  * ```typescript
  * const { uploadImage, uploading, progress, error, reset } = useArtworkUpload();
  * 
+/**
+ * handleUpload - Utility function
+ * @returns void
+ */
  * const handleUpload = async (file: File) => {
  *   const response = await uploadImage({
  *     file,
  *     sellerId: '123',
+/**
+ * response - Utility function
+ * @returns void
+ */
  *     artworkId: '456',
  *     altText: 'My artwork'
  *   });
@@ -74,6 +82,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
     progress: null,
     error: null,
   });
+/**
+ * useArtworkUpload - Custom React hook
+ * @returns void
+ */
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -84,6 +96,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
     setState({
       uploading: false,
       progress: null,
+/**
+ * abortControllerRef - Utility function
+ * @returns void
+ */
       error: null,
     });
     abortControllerRef.current = null;
@@ -92,6 +108,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
   /**
    * Cancel ongoing upload
    */
+/**
+ * reset - Utility function
+ * @returns void
+ */
   const cancel = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -107,6 +127,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
    * Upload single artwork image
    */
   const uploadImage = useCallback(
+/**
+ * cancel - Utility function
+ * @returns void
+ */
     async (request: UploadArtworkImageRequest): Promise<ArtworkImageUploadResponse> => {
       // Reset state
       setState({
@@ -124,6 +148,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
           signal: abortController.signal,
           onProgress: (progress) => {
             setState((prev) => ({
+/**
+ * uploadImage - Utility function
+ * @returns void
+ */
               ...prev,
               progress,
             }));
@@ -137,6 +165,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
         });
 
         abortControllerRef.current = null;
+/**
+ * abortController - Utility function
+ * @returns void
+ */
         return response;
       } catch (err) {
         const error = err as UploadError;
@@ -144,6 +176,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
           uploading: false,
           progress: null,
           error,
+/**
+ * response - Utility function
+ * @returns void
+ */
         });
         abortControllerRef.current = null;
         throw error;
@@ -166,6 +202,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
 
       // Create abort controller
       const abortController = new AbortController();
+/**
+ * error - Utility function
+ * @returns void
+ */
       abortControllerRef.current = abortController;
 
       try {
@@ -185,6 +225,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
           error: null,
         });
 
+/**
+ * uploadImages - Utility function
+ * @returns void
+ */
         abortControllerRef.current = null;
         return response;
       } catch (err) {
@@ -198,6 +242,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
         throw error;
       }
     },
+/**
+ * abortController - Utility function
+ * @returns void
+ */
     [],
   );
 
@@ -205,6 +253,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
    * Upload avatar image
    */
   const uploadAvatar = useCallback(
+/**
+ * response - Utility function
+ * @returns void
+ */
     async (request: UploadAvatarRequest): Promise<AvatarUploadResponse> => {
       // Reset state
       setState({
@@ -227,6 +279,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
             }));
           },
         });
+/**
+ * error - Utility function
+ * @returns void
+ */
 
         setState({
           uploading: false,
@@ -246,6 +302,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
         abortControllerRef.current = null;
         throw error;
       }
+/**
+ * uploadAvatar - Utility function
+ * @returns void
+ */
     },
     [],
   );
@@ -259,6 +319,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
     uploadAvatar,
     cancel,
     reset,
+/**
+ * abortController - Utility function
+ * @returns void
+ */
   };
 };
 
@@ -266,6 +330,10 @@ export const useArtworkUpload = (): UseArtworkUploadReturn => {
 // Error Helper Hook
 // ============================================================================
 
+/**
+ * response - Utility function
+ * @returns void
+ */
 /**
  * Hook for formatting upload error messages
  */
@@ -277,3 +345,12 @@ export const useUploadErrorMessage = (error: UploadError | null): string | null 
   // Return custom error message
   return error.message;
 };
+
+/**
+ * error - Utility function
+ * @returns void
+ */
+/**
+ * useUploadErrorMessage - Custom React hook
+ * @returns void
+ */
