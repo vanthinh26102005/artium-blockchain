@@ -8,39 +8,39 @@ import { useUploadArtworkStore } from '@domains/inventory-upload/stores/useUploa
  */
 export const useUploadNavigationBlocker = (allowNavigationRef: React.MutableRefObject<boolean>) => {
   const router = useRouter()
-  
+
   const isDirty = useUploadArtworkStore((state) => state.isDirty)
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   const clearDirty = useUploadArtworkStore((state) => state.clearDirty)
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!isDirty) {
-/**
- * isDirty - Utility function
- * @returns void
- */
+        /**
+         * isDirty - Utility function
+         * @returns void
+         */
         return
       }
       event.preventDefault()
     }
-/**
- * clearDirty - Utility function
- * @returns void
- */
+    /**
+     * clearDirty - Utility function
+     * @returns void
+     */
 
     const handleRouteChangeStart = () => {
       if (!isDirty || allowNavigationRef.current) {
         return
       }
       const shouldLeave = window.confirm(
-/**
- * handleBeforeUnload - Utility function
- * @returns void
- */
+        /**
+         * handleBeforeUnload - Utility function
+         * @returns void
+         */
         'You have unsaved changes. Are you sure you want to leave this page?',
       )
       if (shouldLeave) {
@@ -51,10 +51,10 @@ export const useUploadNavigationBlocker = (allowNavigationRef: React.MutableRefO
       throw new Error('Route change aborted.')
     }
 
-/**
- * handleRouteChangeStart - Utility function
- * @returns void
- */
+    /**
+     * handleRouteChangeStart - Utility function
+     * @returns void
+     */
     window.addEventListener('beforeunload', handleBeforeUnload)
     router.events.on('routeChangeStart', handleRouteChangeStart)
 
@@ -62,9 +62,9 @@ export const useUploadNavigationBlocker = (allowNavigationRef: React.MutableRefO
       window.removeEventListener('beforeunload', handleBeforeUnload)
       router.events.off('routeChangeStart', handleRouteChangeStart)
     }
-/**
- * shouldLeave - Utility function
- * @returns void
- */
+    /**
+     * shouldLeave - Utility function
+     * @returns void
+     */
   }, [clearDirty, isDirty, router.events, allowNavigationRef])
 }

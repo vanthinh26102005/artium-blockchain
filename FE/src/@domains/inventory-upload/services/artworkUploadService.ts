@@ -38,10 +38,10 @@ const extractFilesFromMedia = (
   const coverImage = media.coverImage?.file ?? null
   const additionalImages = media.additionalImages
     .map((item) => item.file)
-/**
- * coverImage - Utility function
- * @returns void
- */
+    /**
+     * coverImage - Utility function
+     * @returns void
+     */
     .filter((file): file is File => file !== undefined)
 
   return { coverImage, additionalImages }
@@ -60,10 +60,10 @@ const hasExistingPrimaryImage = (media: UploadMediaState) =>
 
 const toUploadedImageInput = (image: ArtworkImageUploadResponse) => ({
   publicId: image.publicId,
-/**
- * hasExistingPrimaryImage - Utility function
- * @returns void
- */
+  /**
+   * hasExistingPrimaryImage - Utility function
+   * @returns void
+   */
   secureUrl: image.secureUrl,
   url: image.url,
   format: image.format,
@@ -101,10 +101,10 @@ const buildSubmitPayload = (listing: UploadListingState): SubmitArtworkDraftInpu
 const buildExistingArtworkPayload = (
   listing: UploadListingState,
   draftPayload: SaveArtworkDraftInput,
-/**
- * trimmed - Utility function
- * @returns void
- */
+  /**
+   * trimmed - Utility function
+   * @returns void
+   */
 ): UpdateArtworkInput => ({
   ...draftPayload,
   status: listing.status === 'sold' ? 'SOLD' : listing.status === 'inquire' ? 'INACTIVE' : 'ACTIVE',
@@ -112,10 +112,10 @@ const buildExistingArtworkPayload = (
 })
 
 const uploadImageFile = async (
-/**
- * parsed - Utility function
- * @returns void
- */
+  /**
+   * parsed - Utility function
+   * @returns void
+   */
   file: File,
   draftArtworkId: string,
   isPrimary: boolean,
@@ -123,10 +123,10 @@ const uploadImageFile = async (
   total: number,
   onProgress?: ProgressCallback,
 ) => {
-/**
- * buildSubmitPayload - Utility function
- * @returns void
- */
+  /**
+   * buildSubmitPayload - Utility function
+   * @returns void
+   */
   const current = order + 1
 
   onProgress?.({
@@ -137,10 +137,10 @@ const uploadImageFile = async (
       percentage: Math.round((order / total) * 100),
     },
     currentFile: file.name,
-/**
- * buildExistingArtworkPayload - Utility function
- * @returns void
- */
+    /**
+     * buildExistingArtworkPayload - Utility function
+     * @returns void
+     */
   })
 
   return artworkUploadApi.uploadArtworkImage(
@@ -153,10 +153,10 @@ const uploadImageFile = async (
     {
       onProgress: (fileProgress) => {
         const baseProgress = order / total
-/**
- * uploadImageFile - Utility function
- * @returns void
- */
+        /**
+         * uploadImageFile - Utility function
+         * @returns void
+         */
         const fileContribution = fileProgress.percentage / 100 / total
         onProgress?.({
           stage: 'uploading_images',
@@ -168,10 +168,10 @@ const uploadImageFile = async (
           currentFile: file.name,
         })
       },
-/**
- * current - Utility function
- * @returns void
- */
+      /**
+       * current - Utility function
+       * @returns void
+       */
     },
   )
 }
@@ -196,18 +196,18 @@ export const uploadArtworkWithImages = async (
     Boolean(file),
   )
   const uploadedImages: ArtworkImageUploadResponse[] = []
-/**
- * baseProgress - Utility function
- * @returns void
- */
+  /**
+   * baseProgress - Utility function
+   * @returns void
+   */
   const savePayload: SaveArtworkDraftInput = {
     ...draftPayload,
     dimensions: draftPayload.dimensions,
     weight: draftPayload.weight,
-/**
- * fileContribution - Utility function
- * @returns void
- */
+    /**
+     * fileContribution - Utility function
+     * @returns void
+     */
   }
 
   await artworkApis.saveUploadDraft(draftArtworkId, savePayload)
@@ -226,10 +226,10 @@ export const uploadArtworkWithImages = async (
   }
 
   if (uploadedImages.length > 0) {
-/**
- * uploadArtworkWithImages - Utility function
- * @returns void
- */
+    /**
+     * uploadArtworkWithImages - Utility function
+     * @returns void
+     */
     await artworkApis.addImagesToArtwork(draftArtworkId, uploadedImages.map(toUploadedImageInput))
   }
 
@@ -249,20 +249,20 @@ export const uploadArtworkWithImages = async (
     imageProgress: {
       current: filesToUpload.length,
       total: filesToUpload.length,
-/**
- * filesToUpload - Utility function
- * @returns void
- */
+      /**
+       * filesToUpload - Utility function
+       * @returns void
+       */
       percentage: 100,
     },
   })
 
   return {
     artwork,
-/**
- * uploadedImages - Utility function
- * @returns void
- */
+    /**
+     * uploadedImages - Utility function
+     * @returns void
+     */
     uploadedImages,
   }
 }
@@ -283,18 +283,18 @@ export const updateArtworkWithImages = async (
   }
 
   const { coverImage, additionalImages } = extractFilesFromMedia(media)
-/**
- * file - Utility function
- * @returns void
- */
+  /**
+   * file - Utility function
+   * @returns void
+   */
   if (!coverImage && !hasExistingPrimaryImage(media)) {
     throw new Error('Cover image is required')
   }
 
-/**
- * image - Utility function
- * @returns void
- */
+  /**
+   * image - Utility function
+   * @returns void
+   */
   const filesToUpload = [coverImage, ...additionalImages].filter((file): file is File =>
     Boolean(file),
   )
@@ -322,10 +322,10 @@ export const updateArtworkWithImages = async (
       index === 0 && Boolean(coverImage),
       index,
       filesToUpload.length,
-/**
- * artwork - Utility function
- * @returns void
- */
+      /**
+       * artwork - Utility function
+       * @returns void
+       */
       onProgress,
     )
     uploadedImages.push(image)
@@ -346,10 +346,10 @@ export const updateArtworkWithImages = async (
       percentage: 100,
     },
   })
-/**
- * updateArtworkWithImages - Utility function
- * @returns void
- */
+  /**
+   * updateArtworkWithImages - Utility function
+   * @returns void
+   */
 
   return {
     artwork,
@@ -369,20 +369,20 @@ export const validateMediaForUpload = (
     errors.push('Cover image is required')
   }
 
-/**
- * filesToUpload - Utility function
- * @returns void
- */
+  /**
+   * filesToUpload - Utility function
+   * @returns void
+   */
   const allFiles = [
     media.coverImage?.file,
     ...media.additionalImages.map((img) => img.file),
   ].filter((file): file is File => file !== undefined)
 
   const maxSize = 25 * 1024 * 1024
-/**
- * uploadedImages - Utility function
- * @returns void
- */
+  /**
+   * uploadedImages - Utility function
+   * @returns void
+   */
   const allowedTypes = [
     'image/jpeg',
     'image/png',
@@ -403,10 +403,10 @@ export const validateMediaForUpload = (
   })
 
   return {
-/**
- * file - Utility function
- * @returns void
- */
+    /**
+     * file - Utility function
+     * @returns void
+     */
     valid: errors.length === 0,
     errors,
   }
