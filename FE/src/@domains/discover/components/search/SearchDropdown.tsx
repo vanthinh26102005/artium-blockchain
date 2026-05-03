@@ -26,6 +26,10 @@ type SearchDropdownProps = {
   onClose: () => void
 }
 
+/**
+ * SearchDropdown - React component
+ * @returns React element
+ */
 export const SearchDropdown = ({
   isOpen,
   searchQuery,
@@ -42,6 +46,10 @@ export const SearchDropdown = ({
   const hasContent =
     recentSearches.length > 0 || recentlyViewed.length > 0 || suggestions.length > 0
 
+/**
+ * hasContent - Utility function
+ * @returns void
+ */
   // Mock images for suggestions
   const suggestionImages = [
     'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=200&h=200&fit=crop',
@@ -49,6 +57,10 @@ export const SearchDropdown = ({
     'https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=200&h=200&fit=crop',
     'https://images.unsplash.com/photo-1582561833197-7d54b3c2e9e5?w=200&h=200&fit=crop',
   ]
+/**
+ * suggestionImages - Utility function
+ * @returns void
+ */
 
   return (
     <>

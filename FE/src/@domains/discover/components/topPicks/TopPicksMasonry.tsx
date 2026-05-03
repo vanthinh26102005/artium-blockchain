@@ -19,6 +19,10 @@ type TopPicksMasonryProps = {
   searchQuery?: string
 }
 
+/**
+ * MasonryCard - React component
+ * @returns React element
+ */
 const MasonryCard = ({ data }: { data: TopPicksArtwork }) => {
   return <ArtworkThumbnailCard artwork={data} />
 }
@@ -26,16 +30,28 @@ const MasonryCard = ({ data }: { data: TopPicksArtwork }) => {
 export const TopPicksMasonry = ({ searchQuery = '' }: TopPicksMasonryProps) => {
   // -- fetch (sorted by most liked) --
   const fetchPage = useCallback(
+/**
+ * TopPicksMasonry - React component
+ * @returns React element
+ */
     async (skip: number, take: number) => {
       const result = await artworkApis.listArtworksPaginated({
         skip,
         take,
         q: searchQuery || undefined,
+/**
+ * fetchPage - Utility function
+ * @returns void
+ */
         status: 'ACTIVE',
         sortBy: 'likeCount',
         sortOrder: 'desc',
       })
       return {
+/**
+ * result - Utility function
+ * @returns void
+ */
         data: result.data.map(mapArtworkToTopPick),
         hasMore: result.pagination.hasNext,
       }

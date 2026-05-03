@@ -1,5 +1,9 @@
 import { Skeleton } from '@shared/components/ui/skeleton'
 
+/**
+ * TopPickSkeleton - React component
+ * @returns React element
+ */
 export const TopPickSkeleton = () => (
     <div className="mb-4 break-inside-avoid">
         <Skeleton className="h-60 w-full rounded-2xl" />
@@ -13,6 +17,10 @@ export const TopPickSkeleton = () => (
 export const ArtworkSkeleton = () => (
     <div className="mb-4 break-inside-avoid rounded-2xl border border-slate-100 p-3">
         <Skeleton className="h-64 w-full rounded-xl" />
+/**
+ * ArtworkSkeleton - React component
+ * @returns React element
+ */
         <div className="mt-3 flex items-center gap-2">
             <Skeleton className="h-8 w-8 rounded-full" />
             <div className="flex-1 space-y-1">
@@ -29,6 +37,10 @@ export const ProfileSkeleton = () => (
         <Skeleton className="z-10 h-20 w-20 rounded-full border-4 border-white" />
         <div className="mt-3 w-full space-y-2 text-center">
             <Skeleton className="mx-auto h-5 w-3/4" />
+/**
+ * ProfileSkeleton - React component
+ * @returns React element
+ */
             <Skeleton className="mx-auto h-4 w-1/2" />
         </div>
         <div className="mt-4 w-full">
@@ -46,6 +58,10 @@ export const MomentSkeleton = () => (
 export const EventSkeleton = () => (
     <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4">
         <div className="relative aspect-16/10 w-full overflow-hidden rounded-xl">
+/**
+ * MomentSkeleton - React component
+ * @returns React element
+ */
             <Skeleton className="h-full w-full" />
         </div>
         <div className="mt-4 space-y-2">
@@ -55,6 +71,10 @@ export const EventSkeleton = () => (
         </div>
         <div className="mt-4">
             <Skeleton className="h-10 w-full rounded-full" />
+/**
+ * EventSkeleton - React component
+ * @returns React element
+ */
         </div>
     </div>
 )
@@ -74,6 +94,10 @@ export const InspireSkeleton = () => (
                     <Skeleton className="h-2 w-12" />
                 </div>
             </div>
+/**
+ * InspireSkeleton - React component
+ * @returns React element
+ */
         </div>
     </div>
 )

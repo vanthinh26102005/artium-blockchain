@@ -24,6 +24,10 @@ type SocialShareButtonsProps = {
   bio?: string
 }
 
+/**
+ * toKebabCase - Utility function
+ * @returns void
+ */
 const toKebabCase = (value: string) =>
   value
     .trim()
@@ -34,6 +38,10 @@ const toKebabCase = (value: string) =>
 const shareIconStyles = {
   wrapper:
     'inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/70 bg-white/90 shadow-sm',
+/**
+ * shareIconStyles - Utility function
+ * @returns void
+ */
 }
 
 const brandIconColors = {
@@ -42,6 +50,10 @@ const brandIconColors = {
   twitter: '#111111',
   linkedin: '#0A66C2',
   telegram: '#2AABEE',
+/**
+ * brandIconColors - Utility function
+ * @returns void
+ */
 }
 
 export const SocialShareButtons = ({ fullName, storefrontUrl, bio }: SocialShareButtonsProps) => {
@@ -53,6 +65,10 @@ export const SocialShareButtons = ({ fullName, storefrontUrl, bio }: SocialShare
 
   // -- handlers --
   const copyShareUrl = async () => {
+/**
+ * SocialShareButtons - React component
+ * @returns React element
+ */
     try {
       await navigator.clipboard.writeText(storefrontUrl)
       setIsLinkCopied(true)
@@ -61,12 +77,20 @@ export const SocialShareButtons = ({ fullName, storefrontUrl, bio }: SocialShare
       setIsLinkCopied(false)
     }
   }
+/**
+ * hashtag - Utility function
+ * @returns void
+ */
 
   // -- render --
   return (
     <div className="flex w-full flex-col gap-4">
       {/* share buttons */}
       <div className="inline-flex w-full items-center justify-center gap-4">
+/**
+ * copyShareUrl - Utility function
+ * @returns void
+ */
         <WhatsappShareButton url={storefrontUrl} title={fullName}>
           <div className={shareIconStyles.wrapper}>
             <WhatsappIcon
@@ -167,6 +191,10 @@ export const ShareSocialModal = (props: ShareSocialModalProps) => {
       className={cn(
         'w-96 max-w-[90vw] rounded-2xl border border-white/30 bg-white/20 p-4 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] backdrop-blur-xl',
         className,
+/**
+ * ShareSocialModal - React component
+ * @returns React element
+ */
       )}
       style={{
         background: 'rgba(255, 255, 255, 0.1)',
