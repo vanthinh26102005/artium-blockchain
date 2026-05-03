@@ -7,6 +7,10 @@ import {
 
 import { cn } from '@shared/lib/utils'
 
+/**
+ * DropZone - React component
+ * @returns React element
+ */
 const DropZone = ({ className, ...props }: AriaDropZoneProps) => (
   <AriaDropZone
     className={composeRenderProps(className, (className) =>

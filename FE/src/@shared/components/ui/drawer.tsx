@@ -3,6 +3,10 @@ import { Drawer as DrawerPrimitive } from 'vaul'
 
 import { cn } from '@shared/lib/utils'
 
+/**
+ * Drawer - React component
+ * @returns React element
+ */
 const Drawer = ({
   shouldScaleBackground = true,
   ...props
@@ -14,21 +18,37 @@ Drawer.displayName = 'Drawer'
 const DrawerTrigger = DrawerPrimitive.Trigger
 
 const DrawerPortal = DrawerPrimitive.Portal
+/**
+ * DrawerTrigger - React component
+ * @returns React element
+ */
 
 const DrawerClose = DrawerPrimitive.Close
 
 const DrawerOverlay = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Overlay>,
+/**
+ * DrawerPortal - React component
+ * @returns React element
+ */
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
     ref={ref}
     className={cn('fixed inset-0 z-50 bg-black/80', className)}
+/**
+ * DrawerClose - React component
+ * @returns React element
+ */
     {...props}
   />
 ))
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
+/**
+ * DrawerOverlay - React component
+ * @returns React element
+ */
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
@@ -44,6 +64,10 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       <div className="bg-muted mx-auto mt-4 h-2 w-25 rounded-full" />
+/**
+ * DrawerContent - React component
+ * @returns React element
+ */
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
@@ -68,6 +92,10 @@ const DrawerTitle = React.forwardRef<
     ref={ref}
     className={cn('text-lg leading-none font-semibold tracking-tight', className)}
     {...props}
+/**
+ * DrawerHeader - React component
+ * @returns React element
+ */
   />
 ))
 DrawerTitle.displayName = DrawerPrimitive.Title.displayName
@@ -76,6 +104,10 @@ const DrawerDescription = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
 >(({ className, ...props }, ref) => (
+/**
+ * DrawerFooter - React component
+ * @returns React element
+ */
   <DrawerPrimitive.Description
     ref={ref}
     className={cn('text-muted-foreground text-sm', className)}
@@ -84,6 +116,10 @@ const DrawerDescription = React.forwardRef<
 ))
 DrawerDescription.displayName = DrawerPrimitive.Description.displayName
 
+/**
+ * DrawerTitle - React component
+ * @returns React element
+ */
 export {
   Drawer,
   DrawerPortal,
@@ -96,3 +132,8 @@ export {
   DrawerTitle,
   DrawerDescription,
 }
+
+/**
+ * DrawerDescription - React component
+ * @returns React element
+ */

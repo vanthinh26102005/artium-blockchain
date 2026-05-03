@@ -6,36 +6,64 @@ import { Check, ChevronRight, Circle } from 'lucide-react'
 
 import { cn } from '@shared/lib/utils'
 
+/**
+ * DropdownMenu - React component
+ * @returns React element
+ */
 const DropdownMenu = DropdownMenuPrimitive.Root
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
 
 const DropdownMenuGroup = DropdownMenuPrimitive.Group
+/**
+ * DropdownMenuTrigger - React component
+ * @returns React element
+ */
 
 const DropdownMenuPortal = DropdownMenuPrimitive.Portal
 
 const DropdownMenuSub = DropdownMenuPrimitive.Sub
 
+/**
+ * DropdownMenuGroup - React component
+ * @returns React element
+ */
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
 
 const DropdownMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
+/**
+ * DropdownMenuPortal - React component
+ * @returns React element
+ */
     inset?: boolean
   }
 >(({ className, inset, children, ...props }, ref) => (
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
+/**
+ * DropdownMenuSub - React component
+ * @returns React element
+ */
     className={cn(
       'focus:bg-accent data-[state=open]:bg-accent flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none',
       inset && 'pl-8',
       className,
     )}
+/**
+ * DropdownMenuRadioGroup - React component
+ * @returns React element
+ */
     {...props}
   >
     {children}
     <ChevronRight className="ml-auto h-4 w-4" />
   </DropdownMenuPrimitive.SubTrigger>
+/**
+ * DropdownMenuSubTrigger - React component
+ * @returns React element
+ */
 ))
 DropdownMenuSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName
 
@@ -60,6 +88,10 @@ const DropdownMenuContent = React.forwardRef<
 >(({ className, sideOffset = 4, ...props }, ref) => (
   <DropdownMenuPrimitive.Portal>
     <DropdownMenuPrimitive.Content
+/**
+ * DropdownMenuSubContent - React component
+ * @returns React element
+ */
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
@@ -78,6 +110,10 @@ const DropdownMenuItem = React.forwardRef<
     inset?: boolean
   }
 >(({ className, inset, ...props }, ref) => (
+/**
+ * DropdownMenuContent - React component
+ * @returns React element
+ */
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
@@ -99,6 +135,10 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     className={cn(
       'focus:bg-accent focus:text-accent-foreground relative flex cursor-pointer items-center rounded-sm py-1.5 pr-2 pl-8 text-sm transition-colors outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
+/**
+ * DropdownMenuItem - React component
+ * @returns React element
+ */
     )}
     checked={checked}
     {...props}
@@ -120,6 +160,10 @@ const DropdownMenuRadioItem = React.forwardRef<
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
+/**
+ * DropdownMenuCheckboxItem - React component
+ * @returns React element
+ */
       'focus:bg-accent focus:text-accent-foreground relative flex cursor-pointer items-center rounded-sm py-1.5 pr-2 pl-8 text-sm transition-colors outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
@@ -146,6 +190,10 @@ const DropdownMenuLabel = React.forwardRef<
     className={cn('px-2 py-1.5 text-sm font-semibold', inset && 'pl-8', className)}
     {...props}
   />
+/**
+ * DropdownMenuRadioItem - React component
+ * @returns React element
+ */
 ))
 DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName
 
@@ -171,6 +219,10 @@ export {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+/**
+ * DropdownMenuLabel - React component
+ * @returns React element
+ */
   DropdownMenuCheckboxItem,
   DropdownMenuRadioItem,
   DropdownMenuLabel,
@@ -183,3 +235,12 @@ export {
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
 }
+
+/**
+ * DropdownMenuSeparator - React component
+ * @returns React element
+ */
+/**
+ * DropdownMenuShortcut - React component
+ * @returns React element
+ */

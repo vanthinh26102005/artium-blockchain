@@ -8,6 +8,10 @@ type FormErrorMessageProps = {
   visible?: boolean
 }
 
+/**
+ * FormErrorMessage - React component
+ * @returns React element
+ */
 export const FormErrorMessage = ({ id, message, visible = true }: FormErrorMessageProps) => {
   return (
     <div
