@@ -20,6 +20,10 @@ type BuyerCheckoutOrderSummaryProps = {
     onApplyPromo: () => void
 }
 
+/**
+ * BuyerCheckoutOrderSummary - React component
+ * @returns React element
+ */
 export const BuyerCheckoutOrderSummary = ({
     artwork,
     pricing,
@@ -32,6 +36,10 @@ export const BuyerCheckoutOrderSummary = ({
     const formatPrice = (amount: number) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
+/**
+ * formatPrice - Utility function
+ * @returns void
+ */
             currency: 'USD',
             minimumFractionDigits: 2,
         }).format(amount)

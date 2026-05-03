@@ -22,6 +22,10 @@ type BuyerCheckoutLayoutProps = {
     isLoading?: boolean
 }
 
+/**
+ * BuyerCheckoutLayout - React component
+ * @returns React element
+ */
 export const BuyerCheckoutLayout = ({
     children,
     orderSummary,
@@ -37,6 +41,10 @@ export const BuyerCheckoutLayout = ({
     const progressPercent = Math.min(100, (step / totalSteps) * 100)
 
     // Countdown timer state
+/**
+ * progressPercent - Utility function
+ * @returns void
+ */
     const [timeLeft, setTimeLeft] = useState(reservationMinutes * 60) // in seconds
 
     useEffect(() => {
@@ -53,6 +61,10 @@ export const BuyerCheckoutLayout = ({
                     clearInterval(timer)
                     return 0
                 }
+/**
+ * timer - Utility function
+ * @returns void
+ */
                 return prev - 1
             })
         }, 1000)
@@ -70,14 +82,26 @@ export const BuyerCheckoutLayout = ({
     return (
         <div className="flex min-h-screen flex-col bg-[#FDFDFD] font-sans text-[#191414]">
             {/* Header - Full Width */}
+/**
+ * formatTime - Utility function
+ * @returns void
+ */
             <header className="fixed top-0 left-0 right-0 z-30 border-b border-black/10 bg-white">
                 <div className="flex h-[60px] w-full items-center justify-center px-4 lg:h-[80px] lg:px-8">
                     {/* X Button - Far Left */}
                     <div className="absolute left-4 lg:left-8">
+/**
+ * mins - Utility function
+ * @returns void
+ */
                         <Link href="/">
                             <button className="flex h-10 w-10 items-center justify-center rounded-full text-[#191414] transition hover:bg-black/5">
                                 <X className="h-5 w-5" />
                             </button>
+/**
+ * secs - Utility function
+ * @returns void
+ */
                         </Link>
                     </div>
 
