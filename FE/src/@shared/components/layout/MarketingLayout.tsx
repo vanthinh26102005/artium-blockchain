@@ -7,6 +7,10 @@ interface MarketingLayoutProps {
   preFooter?: ReactNode
 }
 
+/**
+ * MarketingLayout - React component
+ * @returns React element
+ */
 export const MarketingLayout: React.FC<MarketingLayoutProps> = ({ children, preFooter }) => {
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900">

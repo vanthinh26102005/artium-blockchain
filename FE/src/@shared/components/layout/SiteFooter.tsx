@@ -3,6 +3,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUp } from 'lucide-react'
 
+/**
+ * footerLinks - Utility function
+ * @returns void
+ */
 const footerLinks = {
   Company: ['Pricing', 'About us', 'Contact us', 'Editorial'],
   'Join the Community': [
@@ -18,6 +22,10 @@ const footerLinks = {
 export const SiteFooter = () => {
   const [showBackToTop, setShowBackToTop] = useState(false)
 
+/**
+ * SiteFooter - React component
+ * @returns React element
+ */
   useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 240)
@@ -25,6 +33,10 @@ export const SiteFooter = () => {
 
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
+/**
+ * handleScroll - Utility function
+ * @returns void
+ */
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -37,6 +49,10 @@ export const SiteFooter = () => {
 
   return (
     <footer
+/**
+ * handleBackToTop - Utility function
+ * @returns void
+ */
       className="relative"
       style={{
         fontFamily: '"ABC Monument Grotesk", "Segoe UI", Tahoma, sans-serif',
