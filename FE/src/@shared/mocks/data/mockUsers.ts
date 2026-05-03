@@ -1,5 +1,9 @@
 import { User } from '@shared/types'
 
+/**
+ * MOCK_USERS - React component
+ * @returns React element
+ */
 export const MOCK_USERS: User[] = [
   {
     username: 'demo',

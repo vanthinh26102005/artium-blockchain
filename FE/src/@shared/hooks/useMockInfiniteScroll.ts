@@ -7,6 +7,10 @@ interface UseMockInfiniteScrollProps<T> {
   delay?: number
 }
 
+/**
+ * useMockInfiniteScroll - Custom React hook
+ * @returns void
+ */
 export const useMockInfiniteScroll = <T>({
   allItems,
   initialCount,
@@ -25,6 +29,10 @@ export const useMockInfiniteScroll = <T>({
   const loadMore = useCallback(() => {
     if (isLoading || !hasMore) return
 
+/**
+ * loadMore - Utility function
+ * @returns void
+ */
     setIsLoading(true)
 
     setTimeout(() => {
@@ -35,8 +43,16 @@ export const useMockInfiniteScroll = <T>({
         return nextItems
       })
       setIsLoading(false)
+/**
+ * nextCount - Utility function
+ * @returns void
+ */
     }, delay)
   }, [allItems, isLoading, hasMore, loadMoreCount, delay])
 
   return { displayedItems, isLoading, hasMore, loadMore }
+/**
+ * nextItems - Utility function
+ * @returns void
+ */
 }
