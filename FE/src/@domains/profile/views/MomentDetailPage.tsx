@@ -20,6 +20,10 @@ type MomentDetailPageProps = {
   momentId: string
 }
 
+/**
+ * MomentDetailPage - React component
+ * @returns React element
+ */
 export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) => {
   // Fetch moment details using custom hook
   const { data: momentData, isLoading, error } = useGetMomentDetails(momentId, { username })
@@ -33,14 +37,26 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
   const user = useAuthStore((state) => state.user)
   const isAuthenticated = Boolean(user?.id)
   const currentUser = useMemo(
+/**
+ * user - Custom React hook
+ * @returns void
+ */
     () =>
       isAuthenticated
         ? {
           id: user?.id,
+/**
+ * isAuthenticated - Utility function
+ * @returns void
+ */
           username: user?.username || 'guest',
           displayName: user?.displayName || user?.username || 'Guest',
           avatarUrl: user?.avatarUrl || '/images/logo-dark-mode.png',
         }
+/**
+ * currentUser - Utility function
+ * @returns void
+ */
         : undefined,
     [isAuthenticated, user],
   )
@@ -66,6 +82,10 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
       try {
         const response = await profileApis.listMomentComments(momentId, { take: 50 })
         if (!isActive) return
+/**
+ * loadComments - Utility function
+ * @returns void
+ */
         const mapped = response.map((comment) =>
           mapCommentToMomentComment(comment, currentUser),
         )
@@ -79,11 +99,19 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
         }
       }
     }
+/**
+ * response - Utility function
+ * @returns void
+ */
 
     void loadComments()
 
     return () => {
       isActive = false
+/**
+ * mapped - Utility function
+ * @returns void
+ */
     }
   }, [momentId, currentUser])
 
@@ -111,6 +139,10 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
     }
   }, [momentId, isAuthenticated])
 
+/**
+ * loadLikeStatus - Utility function
+ * @returns void
+ */
   // Loading state
   if (isLoading) {
     return (
@@ -120,6 +152,10 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
           <p className="text-sm text-slate-500">Loading moment...</p>
         </div>
       </div>
+/**
+ * response - Utility function
+ * @returns void
+ */
     )
   }
 
@@ -162,6 +198,10 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
     )
 
     try {
+/**
+ * handleLike - Utility function
+ * @returns void
+ */
       await profileApis.setMomentLikeStatus(moment.id, nextLiked)
     } catch {
       setMoment((prev) =>
@@ -172,14 +212,26 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
             stats: {
               ...prev.stats,
               likes: previousLikes,
+/**
+ * nextLiked - Utility function
+ * @returns void
+ */
             },
           }
           : prev,
       )
+/**
+ * previousLiked - Utility function
+ * @returns void
+ */
       setLikeError('Unable to update like. Please try again.')
     } finally {
       setIsLikeLoading(false)
     }
+/**
+ * previousLikes - Utility function
+ * @returns void
+ */
   }
 
   const handleSave = () => {
@@ -221,6 +273,10 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
     }
 
     const tempId = `temp-${moment.id}-${Date.now()}`
+/**
+ * handleSave - Utility function
+ * @returns void
+ */
     const optimistic: MomentComment = {
       id: tempId,
       author: currentUser,
@@ -234,6 +290,10 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
     setComments((prev) => [optimistic, ...prev])
 
     try {
+/**
+ * handleShare - Utility function
+ * @returns void
+ */
       const created = await profileApis.createMomentComment(moment.id, { content })
       const mapped = mapCommentToMomentComment(created, currentUser)
       setComments((prev) => prev.map((item) => (item.id === tempId ? mapped : item)))
@@ -255,6 +315,10 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
       setIsCommentSubmitting(false)
     }
   }
+/**
+ * handleAddComment - Utility function
+ * @returns void
+ */
 
   const pageTitle = `${moment.author.displayName} on Artium: "${moment.title}"`
 
@@ -268,10 +332,18 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
         currentUser={currentUser}
         onAddComment={handleAddComment}
         onLike={handleLike}
+/**
+ * tempId - Utility function
+ * @returns void
+ */
         onSave={handleSave}
         onShare={handleShare}
         commentsLoading={commentsLoading}
         commentsError={commentsError}
+/**
+ * optimistic - Utility function
+ * @returns void
+ */
         isCommentSubmitting={isCommentSubmitting}
         isLikeLoading={isLikeLoading}
         isAuthenticated={isAuthenticated}
@@ -284,3 +356,16 @@ export const MomentDetailPage = ({ username, momentId }: MomentDetailPageProps) 
     </div>
   )
 }
+
+/**
+ * created - Utility function
+ * @returns void
+ */
+/**
+ * mapped - Utility function
+ * @returns void
+ */
+/**
+ * pageTitle - Utility function
+ * @returns void
+ */
