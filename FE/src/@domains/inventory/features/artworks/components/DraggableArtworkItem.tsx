@@ -40,10 +40,10 @@ export const DraggableArtworkItem = ({
   const style: CSSProperties = {
     transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.5 : 1,
-/**
- * style - Utility function
- * @returns void
- */
+    /**
+     * style - Utility function
+     * @returns void
+     */
     zIndex: isDragging ? 999 : undefined,
     position: 'relative',
     touchAction: 'none',

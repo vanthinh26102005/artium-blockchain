@@ -13,10 +13,10 @@ const FALLBACK_ARTIST_NAME = 'Unknown artist'
 const resolveArtworkThumbnail = (artwork: ArtworkApiItem) => {
   if (artwork.thumbnailUrl) {
     return artwork.thumbnailUrl
-/**
- * resolveArtworkThumbnail - Utility function
- * @returns void
- */
+    /**
+     * resolveArtworkThumbnail - Utility function
+     * @returns void
+     */
   }
 
   const firstImage = artwork.images?.[0]
@@ -25,10 +25,10 @@ const resolveArtworkThumbnail = (artwork: ArtworkApiItem) => {
 
 const resolveProfileHref = (userId: string, user?: UserPayload | null) => {
   const handle = user?.slug ?? user?.username ?? userId
-/**
- * firstImage - Utility function
- * @returns void
- */
+  /**
+   * firstImage - Utility function
+   * @returns void
+   */
   return `/profile/${encodeURIComponent(handle)}`
 }
 
@@ -36,18 +36,18 @@ export const mapFollowedArtistToInventory = ({
   relationship,
   user,
   sellerProfile,
-/**
- * resolveProfileHref - Utility function
- * @returns void
- */
+  /**
+   * resolveProfileHref - Utility function
+   * @returns void
+   */
   artworks,
   artworkTotal,
 }: {
   relationship: FollowerObject
-/**
- * handle - Utility function
- * @returns void
- */
+  /**
+   * handle - Utility function
+   * @returns void
+   */
   user?: UserPayload | null
   sellerProfile?: SellerProfilePayload | null
   artworks: ArtworkApiItem[]
@@ -55,10 +55,10 @@ export const mapFollowedArtistToInventory = ({
 }): InventoryArtist => {
   const followedUserId = relationship.followedUserId
   const name =
-/**
- * mapFollowedArtistToInventory - Utility function
- * @returns void
- */
+    /**
+     * mapFollowedArtistToInventory - Utility function
+     * @returns void
+     */
     sellerProfile?.displayName ??
     user?.fullName ??
     user?.displayName ??
@@ -75,18 +75,18 @@ export const mapFollowedArtistToInventory = ({
       .map(resolveArtworkThumbnail)
       .filter((thumbnail): thumbnail is string => Boolean(thumbnail)),
     isVerified: Boolean(sellerProfile?.isVerified),
-/**
- * followedUserId - Utility function
- * @returns void
- */
+    /**
+     * followedUserId - Utility function
+     * @returns void
+     */
     profileHref: resolveProfileHref(followedUserId, user),
     followedAt: relationship.createdAt,
     location: sellerProfile?.location ?? undefined,
     bio: sellerProfile?.bio ?? undefined,
-/**
- * name - Utility function
- * @returns void
- */
+    /**
+     * name - Utility function
+     * @returns void
+     */
     isMutual: relationship.isMutual,
   }
 }

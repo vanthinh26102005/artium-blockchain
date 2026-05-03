@@ -17,18 +17,18 @@ const FOLLOWED_ARTIST_ARTWORK_PREVIEW_LIMIT = 4
 const loadFollowedArtist = async (relationship: FollowerObject): Promise<InventoryArtist> => {
   const followedUserId = relationship.followedUserId
   const [userResult, sellerProfileResult, artworksResult] = await Promise.allSettled([
-/**
- * loadFollowedArtist - Utility function
- * @returns void
- */
+    /**
+     * loadFollowedArtist - Utility function
+     * @returns void
+     */
     usersApi.getUserById(followedUserId),
     profileApis.getSellerProfileByUserId(followedUserId),
     artworkApis.listArtworksPaginated({
       sellerId: followedUserId,
-/**
- * followedUserId - Utility function
- * @returns void
- */
+      /**
+       * followedUserId - Utility function
+       * @returns void
+       */
       isPublished: true,
       skip: 0,
       take: FOLLOWED_ARTIST_ARTWORK_PREVIEW_LIMIT,
@@ -44,27 +44,27 @@ const loadFollowedArtist = async (relationship: FollowerObject): Promise<Invento
       : {
           data: [],
           pagination: {
-/**
- * user - Custom React hook
- * @returns void
- */
+            /**
+             * user - Custom React hook
+             * @returns void
+             */
             total: 0,
             skip: 0,
             take: 0,
             totalPages: 1,
-/**
- * sellerProfile - Utility function
- * @returns void
- */
+            /**
+             * sellerProfile - Utility function
+             * @returns void
+             */
             currentPage: 1,
             hasNext: false,
             hasPrev: false,
           },
         }
-/**
- * artworksPage - Utility function
- * @returns void
- */
+  /**
+   * artworksPage - Utility function
+   * @returns void
+   */
 
   return mapFollowedArtistToInventory({
     relationship,
@@ -93,10 +93,10 @@ export const useFollowedArtists = (
       setFollowedArtistsTotal(0)
       setFollowedArtistsTotalPages(1)
       setIsFollowedArtistsLoading(false)
-/**
- * useFollowedArtists - Custom React hook
- * @returns void
- */
+      /**
+       * useFollowedArtists - Custom React hook
+       * @returns void
+       */
       setFollowedArtistsError(null)
       return
     }
@@ -131,19 +131,19 @@ export const useFollowedArtists = (
         setFollowedArtistsTotalPages(Math.max(1, page + (hasNextPage ? 1 : 0)))
       } catch (error) {
         if (!isActive) {
-/**
- * loadFollowedArtists - Utility function
- * @returns void
- */
+          /**
+           * loadFollowedArtists - Utility function
+           * @returns void
+           */
           return
         }
 
         setFollowedArtists([])
         setFollowedArtistsTotal(0)
-/**
- * relationships - Utility function
- * @returns void
- */
+        /**
+         * relationships - Utility function
+         * @returns void
+         */
         setFollowedArtistsTotalPages(1)
         setFollowedArtistsError(
           error instanceof Error ? error.message : 'Failed to load followed artists.',
@@ -151,26 +151,26 @@ export const useFollowedArtists = (
       } finally {
         if (isActive) {
           setIsFollowedArtistsLoading(false)
-/**
- * hasNextPage - Utility function
- * @returns void
- */
+          /**
+           * hasNextPage - Utility function
+           * @returns void
+           */
         }
       }
     }
 
-/**
- * pageRelationships - Utility function
- * @returns void
- */
+    /**
+     * pageRelationships - Utility function
+     * @returns void
+     */
     void loadFollowedArtists()
 
     return () => {
       isActive = false
-/**
- * artists - Utility function
- * @returns void
- */
+      /**
+       * artists - Utility function
+       * @returns void
+       */
     }
   }, [isActiveTab, page, pageSize, userId])
 
@@ -181,8 +181,8 @@ export const useFollowedArtists = (
     isFollowedArtistsLoading,
     followedArtistsError,
   }
-/**
- * estimatedTotal - Utility function
- * @returns void
- */
+  /**
+   * estimatedTotal - Utility function
+   * @returns void
+   */
 }
