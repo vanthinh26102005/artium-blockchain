@@ -8,26 +8,46 @@ import { X } from 'lucide-react'
 import { cn } from '@shared/lib/utils'
 import { ScrollArea } from './scroll-area'
 
+/**
+ * Dialog - React component
+ * @returns React element
+ */
 const Dialog = DialogPrimitive.Root
 
 const DialogTrigger = DialogPrimitive.Trigger
 
 const DialogPortal = DialogPrimitive.Portal
+/**
+ * DialogTrigger - React component
+ * @returns React element
+ */
 
 const DialogClose = DialogPrimitive.Close
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
+/**
+ * DialogPortal - React component
+ * @returns React element
+ */
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
+/**
+ * DialogClose - React component
+ * @returns React element
+ */
       'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm',
       className,
     )}
     {...props}
   />
+/**
+ * DialogOverlay - React component
+ * @returns React element
+ */
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
@@ -46,6 +66,10 @@ const dialogContentVariants = cva(
         '4xl': 'max-w-4xl',
         '5xl': 'max-w-5xl',
         '6xl': 'max-w-6xl',
+/**
+ * dialogContentVariants - Utility function
+ * @returns void
+ */
         '7xl': 'max-w-7xl',
         '8xl': 'max-w-[88rem]',
         '9xl': 'max-w-[96rem]',
@@ -80,6 +104,10 @@ const DialogContent = React.forwardRef<
       children,
       ...props
     },
+/**
+ * DialogContent - React component
+ * @returns React element
+ */
     ref,
   ) => {
     // -- is animating --
@@ -143,6 +171,10 @@ const DialogTitle = React.forwardRef<
     ref={ref}
     className={cn('text-center text-lg leading-none font-semibold tracking-tight', className)}
     {...props}
+/**
+ * DialogHeader - React component
+ * @returns React element
+ */
   />
 ))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
@@ -154,6 +186,10 @@ const DialogDescription = React.forwardRef<
   <DialogPrimitive.Description
     ref={ref}
     className={cn(
+/**
+ * DialogFooter - React component
+ * @returns React element
+ */
       'text-kokushoku-black max-h-[min(640px,60vh)] text-center text-base font-normal',
       className,
     )}
@@ -162,6 +198,10 @@ const DialogDescription = React.forwardRef<
     <ScrollArea className="flex max-h-full flex-col px-6">{children}</ScrollArea>
   </DialogPrimitive.Description>
 ))
+/**
+ * DialogTitle - React component
+ * @returns React element
+ */
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 export {
@@ -177,3 +217,7 @@ export {
   DialogDescription,
   DialogPrimitive,
 }
+/**
+ * DialogDescription - React component
+ * @returns React element
+ */

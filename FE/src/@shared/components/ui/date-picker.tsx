@@ -13,6 +13,10 @@ import { dateFormat } from '@shared/utils/datetime'
 import { Calendar } from './calendar'
 import { Popover, PopoverContent, PopoverTrigger } from './popover'
 
+/**
+ * DatePicker - React component
+ * @returns React element
+ */
 export function DatePicker({
   className,
   mode = 'single',
@@ -31,6 +35,10 @@ export function DatePicker({
   const displayValue = useMemo(() => {
     if (!value) return value
 
+/**
+ * displayValue - Utility function
+ * @returns void
+ */
     if (mode === 'single') return dateFormat(value, HUMAN_READABLE_DATE_FORMAT)
     if (mode === 'multiple')
       return _.map(_.take(value || [], 2), (date: Date) =>
@@ -52,6 +60,10 @@ export function DatePicker({
     if (mode === 'range') return 'Pick a range'
 
     throw new Error('Unhandled mode')
+/**
+ * placeholder - Utility function
+ * @returns void
+ */
   }, [mode])
 
   return (

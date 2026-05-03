@@ -4,36 +4,64 @@ import { Check, ChevronRight, Circle } from 'lucide-react'
 
 import { cn } from '@shared/lib/utils'
 
+/**
+ * ContextMenu - React component
+ * @returns React element
+ */
 const ContextMenu = ContextMenuPrimitive.Root
 
 const ContextMenuTrigger = ContextMenuPrimitive.Trigger
 
 const ContextMenuGroup = ContextMenuPrimitive.Group
+/**
+ * ContextMenuTrigger - React component
+ * @returns React element
+ */
 
 const ContextMenuPortal = ContextMenuPrimitive.Portal
 
 const ContextMenuSub = ContextMenuPrimitive.Sub
 
+/**
+ * ContextMenuGroup - React component
+ * @returns React element
+ */
 const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup
 
 const ContextMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger> & {
+/**
+ * ContextMenuPortal - React component
+ * @returns React element
+ */
     inset?: boolean
   }
 >(({ className, inset, children, ...props }, ref) => (
   <ContextMenuPrimitive.SubTrigger
     ref={ref}
+/**
+ * ContextMenuSub - React component
+ * @returns React element
+ */
     className={cn(
       'focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none',
       inset && 'pl-8',
       className,
     )}
+/**
+ * ContextMenuRadioGroup - React component
+ * @returns React element
+ */
     {...props}
   >
     {children}
     <ChevronRight className="ml-auto h-4 w-4" />
   </ContextMenuPrimitive.SubTrigger>
+/**
+ * ContextMenuSubTrigger - React component
+ * @returns React element
+ */
 ))
 ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName
 
@@ -58,6 +86,10 @@ const ContextMenuContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ContextMenuPrimitive.Portal>
     <ContextMenuPrimitive.Content
+/**
+ * ContextMenuSubContent - React component
+ * @returns React element
+ */
       ref={ref}
       className={cn(
         'bg-popover text-popover-foreground animate-in fade-in-80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 shadow-md',
@@ -76,6 +108,10 @@ const ContextMenuItem = React.forwardRef<
   }
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.Item
+/**
+ * ContextMenuContent - React component
+ * @returns React element
+ */
     ref={ref}
     className={cn(
       'focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
@@ -96,6 +132,10 @@ const ContextMenuCheckboxItem = React.forwardRef<
     className={cn(
       'focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
+/**
+ * ContextMenuItem - React component
+ * @returns React element
+ */
     )}
     checked={checked}
     {...props}
@@ -117,6 +157,10 @@ const ContextMenuRadioItem = React.forwardRef<
   <ContextMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
+/**
+ * ContextMenuCheckboxItem - React component
+ * @returns React element
+ */
       'focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
@@ -143,6 +187,10 @@ const ContextMenuLabel = React.forwardRef<
     className={cn('text-foreground px-2 py-1.5 text-sm font-semibold', inset && 'pl-8', className)}
     {...props}
   />
+/**
+ * ContextMenuRadioItem - React component
+ * @returns React element
+ */
 ))
 ContextMenuLabel.displayName = ContextMenuPrimitive.Label.displayName
 
@@ -168,6 +216,10 @@ const ContextMenuShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLS
 }
 ContextMenuShortcut.displayName = 'ContextMenuShortcut'
 
+/**
+ * ContextMenuLabel - React component
+ * @returns React element
+ */
 export {
   ContextMenu,
   ContextMenuTrigger,
@@ -185,3 +237,12 @@ export {
   ContextMenuSubTrigger,
   ContextMenuRadioGroup,
 }
+/**
+ * ContextMenuSeparator - React component
+ * @returns React element
+ */
+
+/**
+ * ContextMenuShortcut - React component
+ * @returns React element
+ */
