@@ -75,10 +75,10 @@ export const defaultBuyerInfo: BuyerInfo = {
 export const defaultInvoiceDraft: QuickSellInvoiceDraft = {
   buyer: defaultBuyerInfo,
   items: [],
-/**
- * defaultInvoiceDraft - Utility function
- * @returns void
- */
+  /**
+   * defaultInvoiceDraft - Utility function
+   * @returns void
+   */
   isApplySalesTax: false,
   taxPercent: undefined,
   taxZipCode: '',
@@ -93,10 +93,10 @@ export const createCustomLineItem = (): CustomLineItem => ({
   title: '',
   price: 0,
   discountPercent: 0,
-/**
- * createCustomLineItem - Utility function
- * @returns void
- */
+  /**
+   * createCustomLineItem - Utility function
+   * @returns void
+   */
   quantity: 1,
 })
 
@@ -109,10 +109,10 @@ export const createArtworkLineItem = (artwork: {
   dimensions?: string
   materials?: string
   price: number
-/**
- * createArtworkLineItem - Utility function
- * @returns void
- */
+  /**
+   * createArtworkLineItem - Utility function
+   * @returns void
+   */
 }): ArtworkLineItem => ({
   id: `artwork-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   type: 'artwork',
