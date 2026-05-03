@@ -16,21 +16,37 @@ type MomentImageViewerProps = {
   className?: string
 }
 
+/**
+ * MomentImageViewer - React component
+ * @returns React element
+ */
 export const MomentImageViewer = ({ imageUrl, alt, className }: MomentImageViewerProps) => {
   const [imageSize, setImageSize] = useState({ width: 1400, height: 1000 })
   const galleryId = useId()
   const galleryDomId = useMemo(() => `moment-gallery-${galleryId.replace(/:/g, '')}`, [galleryId])
 
+/**
+ * galleryId - Utility function
+ * @returns void
+ */
   useEffect(() => {
     const lightbox = new PhotoSwipeLightbox({
       gallery: `#${galleryDomId}`,
       children: 'a',
+/**
+ * galleryDomId - Utility function
+ * @returns void
+ */
       bgOpacity: 0.9,
       spacing: 0.12,
       wheelToZoom: true,
       showHideAnimationType: 'fade',
       pswpModule: () => import('photoswipe'),
     })
+/**
+ * lightbox - Utility function
+ * @returns void
+ */
 
     lightbox.init()
     return () => {

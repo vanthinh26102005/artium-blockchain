@@ -31,6 +31,10 @@ type MomentDetailViewProps = {
   isAuthenticated?: boolean
 }
 
+/**
+ * MomentDetailView - React component
+ * @returns React element
+ */
 export const MomentDetailView = ({
   moment,
   comments,

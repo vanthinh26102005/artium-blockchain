@@ -28,6 +28,10 @@ type MomentCommentsSectionProps = {
   disabled?: boolean
 }
 
+/**
+ * MomentCommentsSection - React component
+ * @returns React element
+ */
 export const MomentCommentsSection = ({
   comments = [],
   currentUser,
@@ -54,19 +58,35 @@ export const MomentCommentsSection = ({
   const draft = useWatch({ control, name: 'content' }) ?? ''
   const canSubmit = draft.trim().length > 0 && !isSubmitting && !disabled
   const commentField = register('content')
+/**
+ * draft - Utility function
+ * @returns void
+ */
 
   const handleCommentSubmit = ({ content }: CommentFormValues) => {
     if (!canSubmit || !onAddComment) {
       return
+/**
+ * canSubmit - Utility function
+ * @returns void
+ */
     }
     onAddComment(content.trim())
     reset()
   }
+/**
+ * commentField - Utility function
+ * @returns void
+ */
 
   return (
     <CollapsibleSection title="Comments" defaultOpen={true}>
       {isLoading ? (
         <div className="space-y-3">
+/**
+ * handleCommentSubmit - Utility function
+ * @returns void
+ */
           {[1, 2, 3].map((item) => (
             <div key={item} className="flex gap-3">
               <div className="h-10 w-10 animate-pulse rounded-full bg-slate-200" />

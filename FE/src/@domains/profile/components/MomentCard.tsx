@@ -18,15 +18,27 @@ type MomentCardProps = {
   mediaClassName?: string
 }
 
+/**
+ * MomentCard - React component
+ * @returns React element
+ */
 export const MomentCard = ({ moment, hrefBase, className, mediaClassName }: MomentCardProps) => {
   const thumbnail = moment.type === 'video' ? moment.posterUrl || moment.mediaUrl : moment.mediaUrl
   const defaultBase = `/profile/${moment.author.username}/moments`
   const href = hrefBase ? `${hrefBase}/${moment.id}` : `${defaultBase}/${moment.id}`
 
+/**
+ * defaultBase - Utility function
+ * @returns void
+ */
   return (
     <Link href={href} className={cn('group block', className)}>
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
         <div className={cn('relative aspect-[4/5] overflow-hidden bg-slate-100', mediaClassName)}>
+/**
+ * href - Utility function
+ * @returns void
+ */
           <Image
             src={thumbnail}
             alt={moment.caption}
