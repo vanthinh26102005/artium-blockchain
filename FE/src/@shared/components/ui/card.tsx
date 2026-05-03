@@ -10,7 +10,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('bg-card text-card-foreground rounded-lg border shadow-sm', className)}
+      className={cn('rounded-lg border bg-card text-card-foreground shadow-sm', className)}
       {...props}
     />
   ),
@@ -20,10 +20,10 @@ Card.displayName = 'Card'
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div ref={ref} className={cn('flex flex-col space-y-1.5 p-3 lg:p-6', className)} {...props} />
-/**
- * CardHeader - React component
- * @returns React element
- */
+    /**
+     * CardHeader - React component
+     * @returns React element
+     */
   ),
 )
 CardHeader.displayName = 'CardHeader'
@@ -32,12 +32,12 @@ const CardTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivE
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('text-2xl leading-none font-semibold tracking-tight', className)}
+      className={cn('text-2xl font-semibold leading-none tracking-tight', className)}
       {...props}
-/**
- * CardTitle - React component
- * @returns React element
- */
+      /**
+       * CardTitle - React component
+       * @returns React element
+       */
     />
   ),
 )
@@ -45,17 +45,17 @@ CardTitle.displayName = 'CardTitle'
 
 const CardDescription = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('text-muted-foreground text-sm', className)} {...props} />
+    <div ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />
   ),
 )
 CardDescription.displayName = 'CardDescription'
 
 const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-/**
- * CardDescription - React component
- * @returns React element
- */
+    /**
+     * CardDescription - React component
+     * @returns React element
+     */
     <div ref={ref} className={cn('p-3 !pt-0 lg:p-6', className)} {...props} />
   ),
 )

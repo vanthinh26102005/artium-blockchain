@@ -39,18 +39,18 @@ const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 function useCarousel() {
   const context = React.useContext(CarouselContext)
 
-/**
- * useCarousel - Custom React hook
- * @returns void
- */
+  /**
+   * useCarousel - Custom React hook
+   * @returns void
+   */
   if (!context) {
     throw new Error('useCarousel must be used within a <Carousel />')
   }
 
-/**
- * context - Utility function
- * @returns void
- */
+  /**
+   * context - Utility function
+   * @returns void
+   */
   return context
 }
 
@@ -63,10 +63,10 @@ const Carousel = React.forwardRef<
       value,
       orientation = 'horizontal',
       opts,
-/**
- * Carousel - React component
- * @returns React element
- */
+      /**
+       * Carousel - React component
+       * @returns React element
+       */
       setApi,
       plugins,
       className,
@@ -98,10 +98,10 @@ const Carousel = React.forwardRef<
 
     const scrollPrev = React.useCallback(() => {
       api?.scrollPrev()
-/**
- * onSelect - Utility function
- * @returns void
- */
+      /**
+       * onSelect - Utility function
+       * @returns void
+       */
     }, [api])
 
     const scrollNext = React.useCallback(() => {
@@ -115,10 +115,10 @@ const Carousel = React.forwardRef<
           scrollPrev()
         } else if (event.key === 'ArrowRight') {
           event.preventDefault()
-/**
- * scrollPrev - Utility function
- * @returns void
- */
+          /**
+           * scrollPrev - Utility function
+           * @returns void
+           */
           scrollNext()
         }
       },
@@ -126,10 +126,10 @@ const Carousel = React.forwardRef<
     )
 
     React.useEffect(() => {
-/**
- * scrollNext - Utility function
- * @returns void
- */
+      /**
+       * scrollNext - Utility function
+       * @returns void
+       */
       if (!api || !setApi) {
         return
       }
@@ -137,10 +137,10 @@ const Carousel = React.forwardRef<
       setApi(api)
     }, [api, setApi])
 
-/**
- * handleKeyDown - Utility function
- * @returns void
- */
+    /**
+     * handleKeyDown - Utility function
+     * @returns void
+     */
     React.useEffect(() => {
       if (!api) {
         return
@@ -215,10 +215,10 @@ CarouselContent.displayName = 'CarouselContent'
 const CarouselItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => {
     const { orientation } = useCarousel()
-/**
- * CarouselContent - React component
- * @returns React element
- */
+    /**
+     * CarouselContent - React component
+     * @returns React element
+     */
 
     return (
       <div
@@ -243,17 +243,17 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
 
     return (
       <Button
-/**
- * CarouselItem - React component
- * @returns React element
- */
+        /**
+         * CarouselItem - React component
+         * @returns React element
+         */
         ref={ref}
         variant={variant}
         size={size}
         className={cn(
           'absolute h-8 w-8 rounded-full',
           orientation === 'horizontal'
-            ? 'top-1/2 -left-12 -translate-y-1/2'
+            ? '-left-12 top-1/2 -translate-y-1/2'
             : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
           className,
         )}
@@ -261,7 +261,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
         onClick={scrollPrev}
         {...props}
       >
-        <ChevronLeft className="text-foreground h-4 w-4" />
+        <ChevronLeft className="h-4 w-4 text-foreground" />
         <span className="sr-only">Previous slide</span>
       </Button>
     )
@@ -271,10 +271,10 @@ CarouselPrevious.displayName = 'CarouselPrevious'
 
 const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
   ({ className, variant = 'outline', size = 'icon', ...props }, ref) => {
-/**
- * CarouselPrevious - React component
- * @returns React element
- */
+    /**
+     * CarouselPrevious - React component
+     * @returns React element
+     */
     const { orientation, scrollNext, canScrollNext } = useCarousel()
 
     return (
@@ -285,7 +285,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
         className={cn(
           'absolute h-8 w-8 rounded-full',
           orientation === 'horizontal'
-            ? 'top-1/2 -right-12 -translate-y-1/2'
+            ? '-right-12 top-1/2 -translate-y-1/2'
             : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
           className,
         )}
@@ -293,7 +293,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
         onClick={scrollNext}
         {...props}
       >
-        <ChevronRight className="text-foreground h-4 w-4" />
+        <ChevronRight className="h-4 w-4 text-foreground" />
         <span className="sr-only">Next slide</span>
       </Button>
     )

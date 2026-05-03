@@ -54,10 +54,10 @@ const standardizeInputDateValue = (value, mode) => {
 const standardizeOutputDateValue = (value, mode) => {
   if (!value) return undefined
   if (mode === 'single') return dateFormat(value)
-/**
- * standardizeOutputDateValue - Utility function
- * @returns void
- */
+  /**
+   * standardizeOutputDateValue - Utility function
+   * @returns void
+   */
   if (mode === 'multiple') return _.map(value || [], dateFormat)
   if (mode === 'range') return { from: dateFormat(value.from), to: dateFormat(value.to) }
 
@@ -70,10 +70,10 @@ function Calendar({
   showOutsideDays = true,
   mode = 'single',
   // @ts-ignore
-/**
- * Calendar - React component
- * @returns React element
- */
+  /**
+   * Calendar - React component
+   * @returns React element
+   */
   selected,
   // @ts-ignore
   onSelect,
