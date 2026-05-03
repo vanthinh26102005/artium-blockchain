@@ -40,10 +40,10 @@ export const mockMomentDetailImage: MomentDetail = {
 export const mockMomentDetail: MomentDetail = {
   id: 'moment-03',
   title: 'Birdie is ready for a new home',
-/**
- * mockMomentDetail - Utility function
- * @returns void
- */
+  /**
+   * mockMomentDetail - Utility function
+   * @returns void
+   */
   caption: 'Birdie is ready for a new home. Beginning Again, oil on canvas panel.',
   mediaUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
   posterUrl:

@@ -31,10 +31,10 @@ const profileMoments = profileMomentsSource.map((moment, index) => ({
   title: moment.caption,
   imageUrl: moment.posterUrl || moment.mediaUrl,
   mediaType: moment.type,
-/**
- * profileMomentsSource - Utility function
- * @returns void
- */
+  /**
+   * profileMomentsSource - Utility function
+   * @returns void
+   */
   likes: 2 + index * 3,
   comments: index % 3,
   shares: 0,
@@ -56,10 +56,10 @@ export const profileOverviewData: ProfileOverviewData = {
   },
   salesStats: {
     averagePrice: 207.14,
-/**
- * profileOverviewData - Utility function
- * @returns void
- */
+    /**
+     * profileOverviewData - Utility function
+     * @returns void
+     */
     medianPrice: 185,
     currency: 'US$',
     recentSales: [
