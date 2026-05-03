@@ -17,19 +17,19 @@ export const normalizeProfileSlug = (value: string) =>
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 export const editProfileSchema = z.object({
-/**
- * slugPattern - Utility function
- * @returns void
- */
+  /**
+   * slugPattern - Utility function
+   * @returns void
+   */
   avatarUrl: z.string().trim(),
   username: z
     .string()
     .trim()
     .min(1, 'Username is required.')
-/**
- * editProfileSchema - Utility function
- * @returns void
- */
+    /**
+     * editProfileSchema - Utility function
+     * @returns void
+     */
     .max(75, 'Username must be 75 characters or less.')
     .regex(slugPattern, 'Use lowercase letters, numbers, and single hyphens only.'),
   firstName: z

@@ -20,10 +20,10 @@ export const createMoodboardNameSchema = z.object({
     .trim()
     .min(1, 'Moodboard name is required.')
     .max(MAX_MOODBOARD_NAME, `Moodboard name must be ${MAX_MOODBOARD_NAME} characters or less.`),
-/**
- * createMoodboardNameSchema - Utility function
- * @returns void
- */
+  /**
+   * createMoodboardNameSchema - Utility function
+   * @returns void
+   */
 })
 
 export type CommentFormValues = z.infer<typeof commentFormSchema>
