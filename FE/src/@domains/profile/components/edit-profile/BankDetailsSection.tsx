@@ -9,6 +9,10 @@ type BankDetailsSectionProps = {
   register: UseFormRegister<FormValues>
 }
 
+/**
+ * BankDetailsSection - React component
+ * @returns React element
+ */
 export const BankDetailsSection = ({ register }: BankDetailsSectionProps) => {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

@@ -34,6 +34,10 @@ type BasicInformationSectionProps = {
   showSellerContactFields?: boolean
 }
 
+/**
+ * BasicInformationSection - React component
+ * @returns React element
+ */
 export const BasicInformationSection = ({
   register,
   control,
@@ -49,22 +53,42 @@ export const BasicInformationSection = ({
   const username = useWatch({ control, name: 'username' }) ?? ''
   const firstName = useWatch({ control, name: 'firstName' }) ?? ''
   const lastName = useWatch({ control, name: 'lastName' }) ?? ''
+/**
+ * username - Custom React hook
+ * @returns void
+ */
   const countryValue = useWatch({ control, name: 'country' }) ?? ''
   const countryOptions = useMemo<CountryOption[]>(
     () => countryList().setLabel('VN', 'Viet Nam').getData(),
     [],
+/**
+ * firstName - Utility function
+ * @returns void
+ */
   )
   const selectedCountry = useMemo(
     () => countryOptions.find((option) => option.value === countryValue) || null,
     [countryOptions, countryValue],
+/**
+ * lastName - Utility function
+ * @returns void
+ */
   )
   const phoneInputStyle = useMemo(
     () =>
       ({
+/**
+ * countryValue - Utility function
+ * @returns void
+ */
         '--react-international-phone-border-radius': '16px',
         '--react-international-phone-border-color': '#e2e8f0',
         '--react-international-phone-height': '48px',
         '--react-international-phone-font-size': '14px',
+/**
+ * countryOptions - Utility function
+ * @returns void
+ */
         '--react-international-phone-background-color': '#ffffff',
         '--react-international-phone-text-color': '#0f172a',
         '--react-international-phone-selected-dropdown-item-background-color': '#f1f5f9',
@@ -72,6 +96,10 @@ export const BasicInformationSection = ({
       }) as CSSProperties,
     [],
   )
+/**
+ * selectedCountry - Utility function
+ * @returns void
+ */
 
   const avatarError =
     typeof errors.avatarUrl?.message === 'string' ? errors.avatarUrl.message : undefined
@@ -79,6 +107,10 @@ export const BasicInformationSection = ({
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <h2 className="text-sm font-semibold tracking-[0.2em] text-slate-400 uppercase">
+/**
+ * phoneInputStyle - Utility function
+ * @returns void
+ */
         Basic Information
       </h2>
 
@@ -97,6 +129,10 @@ export const BasicInformationSection = ({
           <div>
             <label
               htmlFor="username"
+/**
+ * avatarError - Utility function
+ * @returns void
+ */
               className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
             >
               Username <span className="text-rose-500">*</span>
