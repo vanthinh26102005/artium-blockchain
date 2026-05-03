@@ -6,6 +6,10 @@ import { EventsHostingSection } from "@domains/events/components/sections/Events
 import { YourEventsSection } from "@domains/events/components/sections/YourEventsSection";
 import { DiscoverEventsSection } from "@domains/events/components/sections/DiscoverEventsSection";
 
+/**
+ * EventsPage - React component
+ * @returns React element
+ */
 export const EventsPage = () => {
   // -- render --
   return (

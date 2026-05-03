@@ -38,6 +38,10 @@ import { mapApiEventToHostingEvent } from "@domains/events/utils/eventMappers";
 
 type EventDetailModel = HostingEvent & { sourceRsvp?: EventStatus };
 
+/**
+ * normalizeEventToDetail - Utility function
+ * @returns void
+ */
 const normalizeEventToDetail = (
   item: HostingEvent | Event,
   isHosting: boolean,
@@ -52,10 +56,18 @@ const normalizeEventToDetail = (
   const base = item as Event;
   const inferredLocationType =
     base.location?.toLowerCase().includes("online") ? "online" : "in-person";
+/**
+ * base - Utility function
+ * @returns void
+ */
   return {
     id: base.id,
     title: base.title,
     location: base.location,
+/**
+ * inferredLocationType - Utility function
+ * @returns void
+ */
     locationType: inferredLocationType,
     address: base.location,
     venueDetails: undefined,
@@ -82,75 +94,147 @@ export const EventDetailPage = () => {
   const hostingEvents = useHostingEventsStore((state) => state.events);
   const hostingLoaded = useHostingEventsStore((state) => state.hasLoaded);
   const hostingLoading = useHostingEventsStore((state) => state.isLoading);
+/**
+ * EventDetailPage - React component
+ * @returns React element
+ */
   const loadHostingEvents = useHostingEventsStore((state) => state.loadEvents);
   const discoverEvents = useEventsStore((state) => state.allEvents);
   const discoverLoaded = useEventsStore((state) => state.hasLoaded);
   const discoverLoading = useEventsStore((state) => state.isLoading);
+/**
+ * router - Utility function
+ * @returns void
+ */
   const loadDiscoverEvents = useEventsStore((state) => state.loadDiscoverEvents);
   const invitations = useHostingEventsStore((state) => state.invitations);
   const copyLink = useHostingEventsStore((state) => state.copyLink);
   const deleteEvent = useHostingEventsStore((state) => state.deleteEvent);
+/**
+ * eventId - Utility function
+ * @returns void
+ */
   const updateEventFromForm = useHostingEventsStore((state) => state.updateEventFromForm);
   const updateGlobalRsvp = useEventsStore((state) => state.updateRsvpStatus);
 
   const [inviteOpen, setInviteOpen] = useState(false);
+/**
+ * source - Utility function
+ * @returns void
+ */
   const [shareOpen, setShareOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: "success" | "error" } | null>(null);
+/**
+ * isHomePageContext - Utility function
+ * @returns void
+ */
   const [fetchedEvent, setFetchedEvent] = useState<HostingEvent | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   const initializeStats = useEventDetailStore((state) => state.initializeStats);
   const setInvitedCount = useEventDetailStore((state) => state.setInvitedCount);
+/**
+ * hostingEvents - Utility function
+ * @returns void
+ */
   const setRsvpStatus = useEventDetailStore((state) => state.setRsvpStatus);
   const guestStatsMap = useEventDetailStore((state) => state.guestStats);
 
   const eventRaw = useMemo(() => {
+/**
+ * hostingLoaded - Utility function
+ * @returns void
+ */
     const id = Array.isArray(eventId) ? eventId[0] : eventId;
     if (!id) return null;
     return (
       hostingEvents.find((item) => item.id === id) ||
+/**
+ * hostingLoading - Utility function
+ * @returns void
+ */
       discoverEvents.find((item) => item.id === id) ||
       mockHomeEvents.find((item) => item.id === id) ||
       fetchedEvent ||
       null
+/**
+ * loadHostingEvents - Utility function
+ * @returns void
+ */
     );
   }, [eventId, hostingEvents, discoverEvents, fetchedEvent]);
 
   const isHostingEvent = useMemo(() => {
+/**
+ * discoverEvents - Utility function
+ * @returns void
+ */
     const id = Array.isArray(eventId) ? eventId[0] : eventId;
     if (!id) return false;
     return hostingEvents.some((item) => item.id === id);
   }, [eventId, hostingEvents]);
+/**
+ * discoverLoaded - Utility function
+ * @returns void
+ */
 
   const editingHostingEvent = useMemo(
     () => (isHostingEvent ? hostingEvents.find((item) => item.id === (Array.isArray(eventId) ? eventId[0] : eventId)) ?? null : null),
     [isHostingEvent, hostingEvents, eventId],
+/**
+ * discoverLoading - Utility function
+ * @returns void
+ */
   );
 
   const event = useMemo<EventDetailModel | null>(
     () => (eventRaw ? normalizeEventToDetail(eventRaw, isHostingEvent) : null),
+/**
+ * loadDiscoverEvents - Utility function
+ * @returns void
+ */
     [eventRaw, isHostingEvent],
   );
 
   const stats = event ? guestStatsMap[event.id] : undefined;
+/**
+ * invitations - Utility function
+ * @returns void
+ */
   const goingCount = stats?.going ?? 0;
   const maybeCount = stats?.maybe ?? 0;
   const invitedCount = stats?.invited ?? 0;
   const sourceRsvp: EventStatus = event?.sourceRsvp ?? "rsvp";
+/**
+ * copyLink - Utility function
+ * @returns void
+ */
   const currentRsvp: EventStatus = stats?.rsvpStatus ?? sourceRsvp ?? "rsvp";
 
   useEffect(() => {
     if (!hostingLoaded) {
+/**
+ * deleteEvent - Utility function
+ * @returns void
+ */
       void loadHostingEvents();
     }
     if (!discoverLoaded) {
       void loadDiscoverEvents();
+/**
+ * updateEventFromForm - Utility function
+ * @returns void
+ */
     }
   }, [hostingLoaded, loadHostingEvents, discoverLoaded, loadDiscoverEvents]);
 
   useEffect(() => {
+/**
+ * updateGlobalRsvp - Utility function
+ * @returns void
+ */
     setFetchedEvent(null);
     setFetchError(null);
   }, [eventId]);
@@ -164,27 +248,51 @@ export const EventDetailPage = () => {
     const loadEvent = async () => {
       try {
         const apiEvent = await eventsApis.getEventById(id);
+/**
+ * initializeStats - Utility function
+ * @returns void
+ */
         setFetchedEvent(mapApiEventToHostingEvent(apiEvent));
       } catch (error) {
         setFetchError(error instanceof Error ? error.message : "Event not found");
       }
+/**
+ * setInvitedCount - Utility function
+ * @returns void
+ */
     };
 
     void loadEvent();
   }, [
+/**
+ * setRsvpStatus - Utility function
+ * @returns void
+ */
     eventId,
     fetchedEvent,
     fetchError,
     hostingLoading,
+/**
+ * guestStatsMap - Utility function
+ * @returns void
+ */
     discoverLoading,
     eventRaw,
   ]);
 
   useEffect(() => {
+/**
+ * eventRaw - Utility function
+ * @returns void
+ */
     if (!event) return;
     const invited = invitations.filter((inv) => inv.eventId === event.id).length;
     const baselineGoing = event.attendees > 0 ? Math.max(1, Math.round(event.attendees * 0.6)) : 8;
     const baselineMaybe = event.attendees > 0 ? Math.max(0, Math.round(event.attendees * 0.2)) : 3;
+/**
+ * id - Utility function
+ * @returns void
+ */
     initializeStats(event.id, {
       going: baselineGoing,
       maybe: baselineMaybe,
@@ -199,10 +307,18 @@ export const EventDetailPage = () => {
     setInvitedCount(event.id, invited);
   }, [event, invitations, setInvitedCount]);
 
+/**
+ * isHostingEvent - Utility function
+ * @returns void
+ */
 
   const handleRsvpChange = (status: EventStatus) => {
     if (!event) return;
     setRsvpStatus(event.id, status);
+/**
+ * id - Utility function
+ * @returns void
+ */
     updateGlobalRsvp(event.id, status);
     setToast({ message: "Your response updated", variant: "success" });
     window.setTimeout(() => setToast(null), 2400);
@@ -211,6 +327,10 @@ export const EventDetailPage = () => {
   if (!event && (hostingLoading || discoverLoading)) {
     return (
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 lg:px-0">
+/**
+ * editingHostingEvent - Utility function
+ * @returns void
+ */
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-base font-semibold text-slate-900">Loading event...</p>
         </div>
@@ -219,6 +339,10 @@ export const EventDetailPage = () => {
   }
 
   if (!event && fetchError) {
+/**
+ * event - Utility function
+ * @returns void
+ */
     return (
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 lg:px-0">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -227,26 +351,50 @@ export const EventDetailPage = () => {
             href="/events"
             className="mt-4 inline-flex h-10 items-center justify-center rounded-full bg-blue-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
           >
+/**
+ * stats - Utility function
+ * @returns void
+ */
             Back to events
           </Link>
         </div>
       </div>
+/**
+ * goingCount - Utility function
+ * @returns void
+ */
     );
   }
 
   if (!event) {
+/**
+ * maybeCount - Utility function
+ * @returns void
+ */
     return (
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 lg:px-0">
         <Breadcrumb className="text-sm">
           <BreadcrumbList className="text-slate-500">
+/**
+ * invitedCount - Utility function
+ * @returns void
+ */
             <BreadcrumbItem>
               <BreadcrumbLink asChild className="text-slate-500 font-medium hover:text-slate-700">
                 <Link href="/events">Events</Link>
               </BreadcrumbLink>
+/**
+ * sourceRsvp - Utility function
+ * @returns void
+ */
             </BreadcrumbItem>
             <BreadcrumbSeparator className="text-slate-400" />
             <BreadcrumbItem>
               <BreadcrumbPage className="font-semibold text-slate-900">Event not found</BreadcrumbPage>
+/**
+ * currentRsvp - Utility function
+ * @returns void
+ */
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -267,6 +415,10 @@ export const EventDetailPage = () => {
   }
 
   return (
+/**
+ * id - Utility function
+ * @returns void
+ */
     <>
       <Metadata title={`${event.title} | Artium`} />
       <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 pb-10 pt-6 sm:px-6 lg:px-0">
@@ -275,11 +427,19 @@ export const EventDetailPage = () => {
             message={toast.message}
             variant={toast.variant}
             onClose={() => setToast(null)}
+/**
+ * loadEvent - Utility function
+ * @returns void
+ */
           />
         ) : null}
 
         <Breadcrumb className="text-sm">
           <BreadcrumbList>
+/**
+ * apiEvent - Utility function
+ * @returns void
+ */
             {isHomePageContext ? (
               <BreadcrumbItem>
                 <BreadcrumbLink
@@ -302,14 +462,26 @@ export const EventDetailPage = () => {
               <BreadcrumbItem>
                 <BreadcrumbLink
                   asChild
+/**
+ * invited - Utility function
+ * @returns void
+ */
                   className="text-slate-500 font-medium hover:text-slate-700"
                 >
                   <Link href="/homepage">Home</Link>
                 </BreadcrumbLink>
+/**
+ * baselineGoing - Utility function
+ * @returns void
+ */
               </BreadcrumbItem>
             ) : (
               <BreadcrumbItem>
                 <BreadcrumbLink
+/**
+ * baselineMaybe - Utility function
+ * @returns void
+ */
                   asChild
                   className="text-slate-500 font-medium hover:text-slate-700"
                 >
@@ -324,6 +496,10 @@ export const EventDetailPage = () => {
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
+/**
+ * invited - Utility function
+ * @returns void
+ */
         </Breadcrumb>
 
         <EventDetailHero
@@ -332,6 +508,10 @@ export const EventDetailPage = () => {
           onRsvpChange={handleRsvpChange}
           onInvite={() => setInviteOpen(true)}
           onShare={() => setShareOpen(true)}
+/**
+ * handleRsvpChange - Utility function
+ * @returns void
+ */
           onCopyLink={() => copyLink?.(event.id)}
           isHosting={isHostingEvent}
           onDeleteHosting={() => setDeleteOpen(true)}
@@ -405,3 +585,12 @@ export const EventDetailPage = () => {
     </>
   );
 };
+
+/**
+ * baseRoute - Utility function
+ * @returns void
+ */
+/**
+ * invited - Utility function
+ * @returns void
+ */

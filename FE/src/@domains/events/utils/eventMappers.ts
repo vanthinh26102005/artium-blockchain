@@ -7,6 +7,10 @@ import type {
   EventLocation,
 } from "@shared/apis/eventsApis";
 
+/**
+ * EVENT_TYPE_MAP - React component
+ * @returns React element
+ */
 const EVENT_TYPE_MAP: Record<string, string> = {
   EXHIBITION: "exhibition",
   ART_FAIR: "art-fair",
@@ -21,6 +25,10 @@ const EVENT_TYPE_MAP: Record<string, string> = {
 const resolveTypes = (event: EventApiResponse): string[] => {
   if (event.tags && event.tags.length) {
     return event.tags;
+/**
+ * resolveTypes - Utility function
+ * @returns void
+ */
   }
   const mapped = EVENT_TYPE_MAP[event.type] ?? "other";
   return [mapped];
@@ -28,6 +36,10 @@ const resolveTypes = (event: EventApiResponse): string[] => {
 
 const buildAddressLine = (location?: EventLocation | null): string | undefined => {
   if (!location?.address) {
+/**
+ * mapped - Utility function
+ * @returns void
+ */
     return undefined;
   }
   const parts = [
@@ -35,6 +47,10 @@ const buildAddressLine = (location?: EventLocation | null): string | undefined =
     location.address.line2,
     location.address.city,
     location.address.state,
+/**
+ * buildAddressLine - Utility function
+ * @returns void
+ */
     location.address.postalCode,
     location.address.country,
   ].filter(Boolean);
@@ -42,6 +58,10 @@ const buildAddressLine = (location?: EventLocation | null): string | undefined =
 };
 
 export const mapEventLocation = (location?: EventLocation | null) => {
+/**
+ * parts - Utility function
+ * @returns void
+ */
   if (!location) {
     return {
       locationType: "in-person" as const,
@@ -56,6 +76,10 @@ export const mapEventLocation = (location?: EventLocation | null) => {
     return {
       locationType: "online" as const,
       address: "",
+/**
+ * mapEventLocation - Utility function
+ * @returns void
+ */
       venueDetails: "",
       onlineUrl: location.virtualUrl ?? "",
       locationLabel: "Online event",
@@ -80,14 +104,26 @@ export const mapApiEventToHostingEvent = (event: EventApiResponse): HostingEvent
   const createdAt = event.createdAt || event.startTime || new Date().toISOString();
   const startDateTime = event.startTime || new Date().toISOString();
   const endDateTime =
+/**
+ * addressLine - Utility function
+ * @returns void
+ */
     event.endTime ||
     new Date(new Date(startDateTime).getTime() + 60 * 60 * 1000).toISOString();
 
   return {
+/**
+ * venue - Utility function
+ * @returns void
+ */
     id: event.id,
     title: event.title,
     location: locationInfo.locationLabel,
     locationType: locationInfo.locationType,
+/**
+ * locationLabel - Utility function
+ * @returns void
+ */
     address: locationInfo.address || undefined,
     venueDetails: locationInfo.venueDetails || undefined,
     onlineUrl: locationInfo.onlineUrl || undefined,
@@ -102,22 +138,42 @@ export const mapApiEventToHostingEvent = (event: EventApiResponse): HostingEvent
     createdAt,
   };
 };
+/**
+ * mapApiEventToHostingEvent - Utility function
+ * @returns void
+ */
 
 export const mapApiEventToEvent = (
   event: EventApiResponse,
   overrides?: Partial<Event>,
+/**
+ * locationInfo - Utility function
+ * @returns void
+ */
 ): Event => {
   const hosting = mapApiEventToHostingEvent(event);
   return {
     id: hosting.id,
+/**
+ * createdAt - Utility function
+ * @returns void
+ */
     title: hosting.title,
     location: hosting.location,
     startDateTime: hosting.startDateTime,
     endDateTime: hosting.endDateTime,
+/**
+ * startDateTime - Utility function
+ * @returns void
+ */
     timeZone: hosting.timeZone,
     types: hosting.types,
     visibility: hosting.visibility,
     attendees: hosting.attendees,
+/**
+ * endDateTime - Utility function
+ * @returns void
+ */
     coverImageUrl: hosting.coverImageUrl,
     rsvpStatus: "rsvp",
     ...overrides,
@@ -141,3 +197,16 @@ export const buildCreateEventPayload = (
   types: values.types,
   coverImageUrl: coverImageUrl ?? undefined,
 });
+
+/**
+ * mapApiEventToEvent - Utility function
+ * @returns void
+ */
+/**
+ * hosting - Utility function
+ * @returns void
+ */
+/**
+ * buildCreateEventPayload - Utility function
+ * @returns void
+ */
