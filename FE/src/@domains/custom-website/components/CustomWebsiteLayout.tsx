@@ -6,10 +6,10 @@ import { TemplateGrid } from './TemplateGrid'
  * @returns React element
  */
 export const CustomWebsiteLayout = () => {
-    return (
-        <div className="py-6">
-            <CustomWebsiteHeader />
-            <TemplateGrid />
-        </div>
-    )
+  return (
+    <div className="py-6">
+      <CustomWebsiteHeader />
+      <TemplateGrid />
+    </div>
+  )
 }
