@@ -20,6 +20,10 @@ type QuickSellCheckoutSidebarProps = {
     }
 }
 
+/**
+ * QuickSellCheckoutSidebar - React component
+ * @returns React element
+ */
 export const QuickSellCheckoutSidebar = ({
     invoice,
     totals,
@@ -29,23 +33,43 @@ export const QuickSellCheckoutSidebar = ({
     const artistName = invoice.seller?.name || 'Artist'
     const artistEmail = invoice.seller?.email || ''
     const buyerName = invoice.buyer?.name || 'Buyer'
+/**
+ * artistName - Utility function
+ * @returns void
+ */
     const buyerEmail = invoice.buyer?.email || ''
 
     const cardClass = "rounded-3xl bg-white p-6 border border-black/5"
 
+/**
+ * artistEmail - Utility function
+ * @returns void
+ */
     return (
         <div className="flex flex-col gap-4">
             {/* FROM Section */}
             <div className={cardClass}>
+/**
+ * buyerName - Utility function
+ * @returns void
+ */
                 <p className="text-[11px] font-bold uppercase tracking-wider text-[#989898] mb-3">FROM</p>
                 <p className="text-[15px] font-bold text-[#191414]">{artistName}</p>
                 {artistEmail && (
                     <p className="mt-1 text-[13px] text-[#595959]">{artistEmail}</p>
+/**
+ * buyerEmail - Utility function
+ * @returns void
+ */
                 )}
             </div>
 
             {/* TO Section */}
             <div className={cardClass}>
+/**
+ * cardClass - Utility function
+ * @returns void
+ */
                 <p className="text-[11px] font-bold uppercase tracking-wider text-[#989898] mb-3">TO</p>
                 <p className="text-[15px] font-bold text-[#191414]">{buyerName}</p>
                 {buyerEmail && (

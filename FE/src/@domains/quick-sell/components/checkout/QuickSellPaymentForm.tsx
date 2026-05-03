@@ -19,6 +19,10 @@ type QuickSellPaymentFormProps = {
     onProcessingChange: (isProcessing: boolean) => void
 }
 
+/**
+ * QuickSellPaymentForm - React component
+ * @returns React element
+ */
 export const QuickSellPaymentForm = ({
     invoiceCode,
     total,
@@ -29,6 +33,10 @@ export const QuickSellPaymentForm = ({
     const router = useRouter()
 
     // -- state --
+/**
+ * router - Utility function
+ * @returns void
+ */
     const [error, setError] = useState<string | null>(null)
 
     // -- handlers --
@@ -38,6 +46,10 @@ export const QuickSellPaymentForm = ({
         onProcessingChange(true)
         setError(null)
 
+/**
+ * handlePayNow - Utility function
+ * @returns void
+ */
         try {
             // 1. Create Payment Intent
             const intentResult = await mockPaymentAdapter.createPaymentIntent({
@@ -49,6 +61,10 @@ export const QuickSellPaymentForm = ({
             // 2. Construct Return URL (current page + params)
             const currentPath = window.location.pathname
             const returnUrl = new URL(currentPath, window.location.origin)
+/**
+ * intentResult - Utility function
+ * @returns void
+ */
             // We pass the current query params but will be overridden by adapter
 
             // 3. Confirm Payment (Simulates Redirect)
@@ -59,10 +75,18 @@ export const QuickSellPaymentForm = ({
                     card: { token: 'tok_visa' }, // Mock token
                 },
             })
+/**
+ * currentPath - Utility function
+ * @returns void
+ */
 
             // Note: Code below this might not execute if redirect happens
         } catch (err) {
             console.error('Payment failed:', err)
+/**
+ * returnUrl - Utility function
+ * @returns void
+ */
             setError('Payment failed. Please try again.')
             onProcessingChange(false)
         }

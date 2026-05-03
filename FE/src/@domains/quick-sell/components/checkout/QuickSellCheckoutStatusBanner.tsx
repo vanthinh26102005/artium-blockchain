@@ -8,6 +8,10 @@ type QuickSellCheckoutStatusBannerProps = {
     invoiceCode: string
 }
 
+/**
+ * QuickSellCheckoutStatusBanner - React component
+ * @returns React element
+ */
 export const QuickSellCheckoutStatusBanner = ({
     status,
     invoiceCode,

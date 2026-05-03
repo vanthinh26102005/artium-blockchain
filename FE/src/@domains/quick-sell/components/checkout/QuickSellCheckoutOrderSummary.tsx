@@ -20,6 +20,10 @@ type QuickSellCheckoutOrderSummaryProps = {
     total: number
 }
 
+/**
+ * QuickSellCheckoutOrderSummary - React component
+ * @returns React element
+ */
 export const QuickSellCheckoutOrderSummary = ({
     items,
     subtotal,

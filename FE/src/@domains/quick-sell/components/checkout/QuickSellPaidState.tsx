@@ -23,6 +23,10 @@ type QuickSellPaidStateProps = {
     returnLabel?: string
 }
 
+/**
+ * QuickSellPaidState - React component
+ * @returns React element
+ */
 export const QuickSellPaidState = ({
     invoiceCode,
     items,
