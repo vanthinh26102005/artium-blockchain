@@ -6,6 +6,10 @@ type UploadStepHeaderProps = {
   onClose?: () => void
 }
 
+/**
+ * UploadStepHeader - React component
+ * @returns React element
+ */
 export const UploadStepHeader = ({ title, onClose }: UploadStepHeaderProps) => {
   return (
     <header className="fixed top-0 right-0 left-0 z-20 border-b border-black/10 bg-white">

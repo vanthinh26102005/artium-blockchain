@@ -1,6 +1,10 @@
 import { HostingEvent } from '@domains/events/mock/mockHostingEvents'
 
 // Using unsplash images for variety
+/**
+ * MOCK_HOME_EVENT_IMAGES - React component
+ * @returns React element
+ */
 const MOCK_HOME_EVENT_IMAGES = [
     'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800&h=500',
     'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=800&h=500',
@@ -15,10 +19,18 @@ const MOCK_HOME_EVENT_IMAGES = [
 const addDays = (date: Date, days: number) => {
     const d = new Date(date)
     d.setDate(d.getDate() + days)
+/**
+ * addDays - Utility function
+ * @returns void
+ */
     return d.toISOString()
 }
 
 const now = new Date()
+/**
+ * d - Utility function
+ * @returns void
+ */
 
 export const mockHomeEvents: HostingEvent[] = [
     {
@@ -27,11 +39,19 @@ export const mockHomeEvents: HostingEvent[] = [
         location: 'San Francisco, CA, USA',
         locationType: 'in-person',
         address: '151 3rd St, San Francisco, CA 94103, USA',
+/**
+ * now - Utility function
+ * @returns void
+ */
         startDateTime: addDays(now, 5),
         endDateTime: addDays(now, 5),
         timeZone: 'America/Los_Angeles',
         types: ['exhibition'],
         visibility: 'public',
+/**
+ * mockHomeEvents - Utility function
+ * @returns void
+ */
         description: 'A showcase of the most influential modern artists of the 21st century.',
         attendees: 120,
         coverImageUrl: MOCK_HOME_EVENT_IMAGES[0],

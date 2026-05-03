@@ -1,5 +1,9 @@
 import { DiscoverArtwork } from '@domains/discover/mock/mockArtworks'
 
+/**
+ * mockHomeArtworks - Utility function
+ * @returns void
+ */
 export const mockHomeArtworks: DiscoverArtwork[] = [
     {
         id: 'home-aw-001',

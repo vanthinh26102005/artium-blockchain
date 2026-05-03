@@ -15,6 +15,10 @@ import { ToastPortal } from '@domains/events/components/ui/ToastPortal'
 
 // --- Mock Data ---
 
+/**
+ * priceFormatter - Utility function
+ * @returns void
+ */
 const priceFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -25,6 +29,10 @@ const priceFormatter = new Intl.NumberFormat('en-US', {
 const MOCK_EVENT_IMAGES = [
     'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=600&h=400',
     'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=600&h=400',
+/**
+ * MOCK_EVENT_IMAGES - React component
+ * @returns React element
+ */
     'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600&h=400',
     'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=600&h=400',
     'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80&w=600&h=400',
@@ -40,6 +48,10 @@ const MOCK_AVATARS = [
     'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100&h=100',
     'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100',
     'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100&h=100',
+/**
+ * MOCK_AVATARS - React component
+ * @returns React element
+ */
 ]
 
 // Use real items for Editorials with avatar
@@ -52,6 +64,10 @@ const EDITORIALS = EDITORIAL_ITEMS.slice(0, 10).map((item, index) => ({
     category: item.category,
     imageUrl: item.imageUrl,
     avatarUrl: MOCK_AVATARS[index % MOCK_AVATARS.length],
+/**
+ * EDITORIALS - React component
+ * @returns React element
+ */
 }))
 
 // MOCK_EVENT_IMAGES and EVENTS definitions removed as we now use mockHomeEvents
@@ -68,6 +84,10 @@ interface EditorialCardProps {
     readTime: string
     category: string
     imageUrl: string
+/**
+ * NEW_ARTWORKS - React component
+ * @returns React element
+ */
     avatarUrl: string
 }
 
@@ -86,6 +106,10 @@ const EditorialCard = ({
         <div
             className="group w-[300px] shrink-0 cursor-pointer md:w-[350px]"
             onClick={() => router.push(`/editorial/${id}`)}
+/**
+ * EditorialCard - React component
+ * @returns React element
+ */
         >
             <div className="relative mb-4 aspect-16/10 overflow-hidden rounded-xl">
                 <img
@@ -99,6 +123,10 @@ const EditorialCard = ({
                 <h3 className="line-clamp-2 text-lg font-bold leading-snug text-slate-900 transition-colors group-hover:text-blue-600">
                     {title}
                 </h3>
+/**
+ * router - Utility function
+ * @returns void
+ */
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                     <img
                         src={avatarUrl}
@@ -138,14 +166,26 @@ const ArtworkCard = ({ item }: { item: (typeof NEW_ARTWORKS)[0] }) => {
                     <img
                         src={item.creator.coverImage || `https://i.pravatar.cc/64?u=${item.creator.username}`}
                         alt={item.creator.fullName}
+/**
+ * ArtworkCard - React component
+ * @returns React element
+ */
                         className="h-5 w-5 rounded-full object-cover"
                     />
                     <span className="truncate text-xs font-semibold text-slate-900">{item.creator.fullName}</span>
                     <svg className="h-3 w-3 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+/**
+ * router - Utility function
+ * @returns void
+ */
                         <path
                             fillRule="evenodd"
                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                             clipRule="evenodd"
+/**
+ * priceLabel - Utility function
+ * @returns void
+ */
                         />
                     </svg>
                 </div>
@@ -191,6 +231,10 @@ const DiscoverBanner = () => (
                         className="h-full w-full object-cover"
                     />
                 </div>
+/**
+ * DiscoverBanner - React component
+ * @returns React element
+ */
             ))}
         </div>
     </div>
@@ -229,21 +273,37 @@ export const DashboardView = () => {
 
     const handleInvite = (event: Event) => {
         // Cast to HostingEvent for modal compatibility
+/**
+ * DashboardView - React component
+ * @returns React element
+ */
         setInviteModalEvent(event as unknown as HostingEvent)
         setInviteModalOpen(true)
     }
 
+/**
+ * router - Utility function
+ * @returns void
+ */
     const handleShare = (event: Event) => {
         // Cast to HostingEvent for modal compatibility
         setShareModalEvent(event as unknown as HostingEvent)
         setShareModalOpen(true)
     }
+/**
+ * events - Utility function
+ * @returns void
+ */
 
     return (
         <div className="w-full space-y-12 py-8">
             <style jsx global>{`
         /* Hide scrollbar for Chrome, Safari and Opera */
         .no-scrollbar::-webkit-scrollbar {
+/**
+ * updateRsvpStatus - Utility function
+ * @returns void
+ */
           display: none;
         }
         /* Hide scrollbar for IE, Edge and Firefox */
@@ -256,6 +316,10 @@ export const DashboardView = () => {
             <div className="space-y-12">
                 {/* Weekly Editorial */}
                 <section>
+/**
+ * navigateToSection - Utility function
+ * @returns void
+ */
                     <div
                         className="group mb-6 flex cursor-pointer items-center gap-2 pr-6"
                         onClick={() => navigateToSection('editorials')}
@@ -266,6 +330,10 @@ export const DashboardView = () => {
                     <div className="no-scrollbar -mr-6 flex gap-6 overflow-x-auto pb-4 pr-6">
                         {EDITORIALS.map((item) => (
                             <EditorialCard key={item.id} {...item} />
+/**
+ * handleRsvpChange - Utility function
+ * @returns void
+ */
                         ))}
                     </div>
                 </section>
@@ -278,6 +346,10 @@ export const DashboardView = () => {
                     >
                         <h2 className="text-2xl font-bold text-slate-900">Upcoming Events</h2>
                         <ChevronRight className="h-6 w-6 text-slate-400 transition-colors group-hover:text-slate-900" />
+/**
+ * handleInvite - Utility function
+ * @returns void
+ */
                     </div>
                     <div className="no-scrollbar -mr-6 flex gap-6 overflow-x-auto overflow-y-visible pb-[200px] pr-6 -mb-[180px]">
                         {events.map((event) => (
@@ -287,6 +359,10 @@ export const DashboardView = () => {
                                     onRsvpChange={handleRsvpChange}
                                     onInvite={handleInvite}
                                     onShare={handleShare}
+/**
+ * handleShare - Utility function
+ * @returns void
+ */
                                     onClick={(id) => router.push(`/homepage/events/${id}`)}
                                 />
                             </div>

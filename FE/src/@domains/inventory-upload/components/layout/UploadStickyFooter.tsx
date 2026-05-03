@@ -13,6 +13,10 @@ type UploadStickyFooterProps = {
   isNextDisabled?: boolean
 }
 
+/**
+ * UploadStickyFooter - React component
+ * @returns React element
+ */
 export const UploadStickyFooter = ({
   step,
   totalSteps,
@@ -24,14 +28,26 @@ export const UploadStickyFooter = ({
   const isFirstStep = step <= 1
   const isLastStep = step >= totalSteps
   const progressPercent = Math.min(100, (step / totalSteps) * 100)
+/**
+ * isFirstStep - Utility function
+ * @returns void
+ */
 
   return (
     <footer className="fixed right-0 bottom-0 left-0 z-20 w-full">
       <div className="flex h-[60px] w-full items-center justify-between gap-4 border-t border-black/10 bg-white px-4 py-4 lg:h-[80px] lg:px-8">
+/**
+ * isLastStep - Utility function
+ * @returns void
+ */
         <div className="flex flex-1 items-center">
           <Button
             type="button"
             variant="outline"
+/**
+ * progressPercent - Utility function
+ * @returns void
+ */
             onClick={isFirstStep ? onCancel : onPrev}
             className="text-kokushoku-black h-[40px] rounded-full border-black/10 px-6 text-[14px] font-semibold hover:shadow disabled:opacity-40 lg:h-[44px]"
           >
