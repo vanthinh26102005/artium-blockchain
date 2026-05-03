@@ -27,6 +27,10 @@ type InventoryArtworkDetailsPanelProps = {
   onToggleProfileVisibility: (artwork: InventoryArtwork) => void
 }
 
+/**
+ * InventoryArtworkDetailsPanel - React component
+ * @returns React element
+ */
 export const InventoryArtworkDetailsPanel = ({
   isOpen,
   artwork,
@@ -45,25 +49,45 @@ export const InventoryArtworkDetailsPanel = ({
   const priceLabel =
     typeof artwork.price === 'number' ? `US$${artwork.price.toLocaleString('en-US')}` : '—'
 
+/**
+ * priceLabel - Utility function
+ * @returns void
+ */
   const isArtworkSection = activeSection === 'artwork'
   const isEditLocked = isArtworkEditLocked(artwork)
   const profileVisibilityLabel = getProfileVisibilityLabel(artwork)
 
   const handleEdit = () => {
     if (isEditLocked) {
+/**
+ * isArtworkSection - Utility function
+ * @returns void
+ */
       return
     }
     onClose()
     onEdit(artwork)
+/**
+ * isEditLocked - Utility function
+ * @returns void
+ */
   }
 
   const handleDelete = () => {
     onClose()
+/**
+ * profileVisibilityLabel - Utility function
+ * @returns void
+ */
     onDelete(artwork)
   }
 
   const handleToggleProfileVisibility = () => {
     onToggleProfileVisibility(artwork)
+/**
+ * handleEdit - Utility function
+ * @returns void
+ */
   }
 
   // -- render --
@@ -75,6 +99,10 @@ export const InventoryArtworkDetailsPanel = ({
           onClose()
         }
       }}
+/**
+ * handleDelete - Utility function
+ * @returns void
+ */
     >
       <DialogPortal>
         <DialogOverlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 bg-black/40 backdrop-blur-sm data-[state=closed]:duration-200 data-[state=open]:duration-300" />
@@ -83,6 +111,10 @@ export const InventoryArtworkDetailsPanel = ({
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
           {/* Header */}
+/**
+ * handleToggleProfileVisibility - Utility function
+ * @returns void
+ */
           <div className="flex items-center justify-between border-b border-slate-200 px-8 py-4">
             <h2 className="text-xl font-semibold text-slate-900">Artwork Information Details</h2>
             <button

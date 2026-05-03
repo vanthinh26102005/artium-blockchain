@@ -9,6 +9,10 @@ type ConfirmDeleteModalProps = {
   onConfirm: () => void
 }
 
+/**
+ * ConfirmDeleteModal - React component
+ * @returns React element
+ */
 export const ConfirmDeleteModal = ({
   isOpen,
   artworkTitle,
@@ -24,6 +28,10 @@ export const ConfirmDeleteModal = ({
   const handleOpenChange = (open: boolean) => {
     if (!open && !isDeleting) {
       onCancel()
+/**
+ * handleOpenChange - Utility function
+ * @returns void
+ */
     }
   }
 
