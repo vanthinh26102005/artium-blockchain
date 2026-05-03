@@ -27,10 +27,10 @@ let authState: MockAuthState = {
 const listeners = new Set<() => void>()
 
 const subscribe = (listener: () => void) => {
-/**
- * listeners - Utility function
- * @returns void
- */
+  /**
+   * listeners - Utility function
+   * @returns void
+   */
   listeners.add(listener)
   return () => listeners.delete(listener)
 }
@@ -57,10 +57,10 @@ export const useMockAuth = () => {
   const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 
   return {
-/**
- * setAuthState - Utility function
- * @returns void
- */
+    /**
+     * setAuthState - Utility function
+     * @returns void
+     */
     ...state,
     login,
     logout,
