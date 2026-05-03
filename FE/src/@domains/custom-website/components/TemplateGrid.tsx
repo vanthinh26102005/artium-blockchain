@@ -2,6 +2,10 @@ import { TemplateCard, TemplateCardProps } from './TemplateCard'
 
 import { templates } from '../data'
 
+/**
+ * TemplateGrid - React component
+ * @returns React element
+ */
 export const TemplateGrid = () => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

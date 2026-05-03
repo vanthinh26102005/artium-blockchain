@@ -11,6 +11,10 @@ export interface TemplateCardProps {
     demoUrl?: string
 }
 
+/**
+ * TemplateCard - React component
+ * @returns React element
+ */
 export const TemplateCard = ({
     name,
     description,
