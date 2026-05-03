@@ -18,10 +18,7 @@ type QuickSellCustomItemRowProps = {
  * QuickSellCustomItemRow - React component
  * @returns React element
  */
-export const QuickSellCustomItemRow = ({
-  index,
-  onRemove,
-}: QuickSellCustomItemRowProps) => {
+export const QuickSellCustomItemRow = ({ index, onRemove }: QuickSellCustomItemRowProps) => {
   const {
     control,
     formState: { errors },
@@ -31,10 +28,10 @@ export const QuickSellCustomItemRow = ({
   const item = useWatch({
     control,
     name: `items.${index}` as const,
-/**
- * item - Utility function
- * @returns void
- */
+    /**
+     * item - Utility function
+     * @returns void
+     */
   }) as CustomLineItem
 
   const itemErrors = errors.items?.[index] as
@@ -43,10 +40,10 @@ export const QuickSellCustomItemRow = ({
         price?: { message?: string }
         discountPercent?: { message?: string }
         quantity?: { message?: string }
-/**
- * itemErrors - Utility function
- * @returns void
- */
+        /**
+         * itemErrors - Utility function
+         * @returns void
+         */
       }
     | undefined
   const itemTotal = calculateItemTotal(item)
@@ -58,26 +55,26 @@ export const QuickSellCustomItemRow = ({
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-3">
           <BaseInputField
-/**
- * itemTotal - Utility function
- * @returns void
- */
+            /**
+             * itemTotal - Utility function
+             * @returns void
+             */
             id={`quick-sell-custom-item-${index}-title`}
             type="text"
             label="Item Title"
             {...register(`items.${index}.title` as const)}
-/**
- * labelClassName - Utility function
- * @returns void
- */
+            /**
+             * labelClassName - Utility function
+             * @returns void
+             */
             placeholder="Enter item title"
             errorMessage={itemErrors?.title?.message}
             containerClassName="space-y-1"
             labelClassName={labelClassName}
-/**
- * messageClassName - Utility function
- * @returns void
- */
+            /**
+             * messageClassName - Utility function
+             * @returns void
+             */
             messageClassName={messageClassName}
             errorInputClassName="border-red-500"
           />
@@ -105,7 +102,7 @@ export const QuickSellCustomItemRow = ({
                     aria-describedby={`quick-sell-custom-item-${index}-price-message`}
                     value={field.value}
                     onChange={(event) => field.onChange(parseFloat(event.target.value) || 0)}
-                    className={`flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] ${
+                    className={`shadow-xs flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none transition-[color,box-shadow] ${
                       itemErrors?.price ? 'border-red-500' : 'border-input'
                     }`}
                   />
@@ -135,9 +132,11 @@ export const QuickSellCustomItemRow = ({
                     aria-describedby={`quick-sell-custom-item-${index}-discount-message`}
                     value={field.value}
                     onChange={(event) =>
-                      field.onChange(Math.min(100, Math.max(0, parseFloat(event.target.value) || 0)))
+                      field.onChange(
+                        Math.min(100, Math.max(0, parseFloat(event.target.value) || 0)),
+                      )
                     }
-                    className={`flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] ${
+                    className={`shadow-xs flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none transition-[color,box-shadow] ${
                       itemErrors?.discountPercent ? 'border-red-500' : 'border-input'
                     }`}
                   />
@@ -165,8 +164,10 @@ export const QuickSellCustomItemRow = ({
                     aria-invalid={Boolean(itemErrors?.quantity)}
                     aria-describedby={`quick-sell-custom-item-${index}-quantity-message`}
                     value={field.value}
-                    onChange={(event) => field.onChange(Math.max(1, parseInt(event.target.value, 10) || 1))}
-                    className={`flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] ${
+                    onChange={(event) =>
+                      field.onChange(Math.max(1, parseInt(event.target.value, 10) || 1))
+                    }
+                    className={`shadow-xs flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none transition-[color,box-shadow] ${
                       itemErrors?.quantity ? 'border-red-500' : 'border-input'
                     }`}
                   />
