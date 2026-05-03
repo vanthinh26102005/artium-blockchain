@@ -18,6 +18,10 @@ type SortableFolderItemProps = {
   onHide: (folder: InventoryFolder) => void
 }
 
+/**
+ * SortableFolderItem - React component
+ * @returns React element
+ */
 export const SortableFolderItem = ({
   folder,
   onRename,
@@ -36,6 +40,10 @@ export const SortableFolderItem = ({
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
+/**
+ * style - Utility function
+ * @returns void
+ */
     opacity: isDragging ? 0.4 : 1,
     zIndex: isDragging ? 999 : undefined,
     position: 'relative',

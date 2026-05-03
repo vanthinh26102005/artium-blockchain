@@ -14,6 +14,10 @@ type InventoryFolderGridProps = {
   onHide: (folder: InventoryFolder) => void
 }
 
+/**
+ * InventoryFolderGrid - React component
+ * @returns React element
+ */
 export const InventoryFolderGrid = ({
   folders,
   onRename,

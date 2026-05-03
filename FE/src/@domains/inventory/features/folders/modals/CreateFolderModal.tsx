@@ -13,6 +13,10 @@ import {
 import { Input } from '@shared/components/ui/input'
 import { Textarea } from '@shared/components/ui/textarea'
 
+/**
+ * MAX_FOLDER_NAME - React component
+ * @returns React element
+ */
 const MAX_FOLDER_NAME = 80
 
 type CreateFolderModalProps = {
@@ -24,6 +28,10 @@ type CreateFolderModalProps = {
 export const CreateFolderModal = ({ isOpen, onClose, onCreate }: CreateFolderModalProps) => {
   // -- state --
   const [name, setName] = useState('')
+/**
+ * CreateFolderModal - React component
+ * @returns React element
+ */
   const [description, setDescription] = useState('')
 
   // -- derived --
@@ -33,16 +41,28 @@ export const CreateFolderModal = ({ isOpen, onClose, onCreate }: CreateFolderMod
   // -- handlers --
   const handleOpenChange = (open: boolean) => {
     if (!open) {
+/**
+ * trimmedName - Utility function
+ * @returns void
+ */
       onClose()
     }
   }
 
+/**
+ * isCreateDisabled - Utility function
+ * @returns void
+ */
   const handleCreate = () => {
     if (isCreateDisabled) {
       return
     }
 
     onCreate(trimmedName, description.trim())
+/**
+ * handleOpenChange - Utility function
+ * @returns void
+ */
   }
 
   useEffect(() => {
@@ -52,6 +72,10 @@ export const CreateFolderModal = ({ isOpen, onClose, onCreate }: CreateFolderMod
       window.queueMicrotask(() => {
         if (isCancelled) {
           return
+/**
+ * handleCreate - Utility function
+ * @returns void
+ */
         }
 
         setName('')

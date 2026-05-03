@@ -54,6 +54,10 @@ export type InventoryFolderRowProps = {
   children?: React.ReactNode
 }
 
+/**
+ * InventoryFolderRow - React component
+ * @returns React element
+ */
 export const InventoryFolderRow = ({
   folder,
   index,
