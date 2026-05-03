@@ -7,6 +7,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 // @domains - auth
 import { ResetPasswordPage } from '@domains/auth/views/ResetPasswordPage'
 
+/**
+ * ResetPasswordRoute - React component
+ * @returns React element
+ */
 const ResetPasswordRoute: NextPageWithLayout = () => {
   // -- state --
 
