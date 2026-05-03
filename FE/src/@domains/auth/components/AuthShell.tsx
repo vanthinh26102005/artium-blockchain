@@ -5,6 +5,10 @@ type AuthShellProps = {
   children: ReactNode
 }
 
+/**
+ * AuthShell - React component
+ * @returns React element
+ */
 export const AuthShell = ({ children }: AuthShellProps) => {
   // -- render --
   return (

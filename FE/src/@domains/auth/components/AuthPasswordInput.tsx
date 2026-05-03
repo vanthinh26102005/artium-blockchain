@@ -10,6 +10,10 @@ type AuthPasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'
   errorMessage?: string
 }
 
+/**
+ * AuthPasswordInput - React component
+ * @returns React element
+ */
 export const AuthPasswordInput = forwardRef<HTMLInputElement, AuthPasswordInputProps>(
   ({ label, required = false, hasError = false, errorMessage, id, className, ...props }, ref) => {
     return (

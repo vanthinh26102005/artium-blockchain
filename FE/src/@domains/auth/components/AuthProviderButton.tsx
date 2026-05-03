@@ -17,6 +17,10 @@ type AuthProviderButtonProps = {
   onClick?: () => void
 }
 
+/**
+ * AuthProviderButton - React component
+ * @returns React element
+ */
 export const AuthProviderButton = ({
   className,
   disabled = false,
@@ -29,6 +33,10 @@ export const AuthProviderButton = ({
   const isDisabled = disabled || isLoading
 
   return (
+/**
+ * isDisabled - Utility function
+ * @returns void
+ */
     <button
       type="button"
       onClick={onClick}
