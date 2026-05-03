@@ -24,10 +24,10 @@ const clampPage = (page: number, totalPages: number) => Math.min(Math.max(page, 
 export const useInventoryPagination = (
   items: InventoryArtwork[],
   initialPageSize = 20,
-/**
- * useInventoryPagination - Custom React hook
- * @returns void
- */
+  /**
+   * useInventoryPagination - Custom React hook
+   * @returns void
+   */
   initialPage = 1,
 ): InventoryPaginationResult => {
   const [page, setPageState] = useState(initialPage)
@@ -41,51 +41,51 @@ export const useInventoryPagination = (
 
   const pageItems = useMemo(() => {
     const startIndex = (clampedPage - 1) * pageSize
-/**
- * total - Utility function
- * @returns void
- */
+    /**
+     * total - Utility function
+     * @returns void
+     */
     const endIndex = startIndex + pageSize
     return items.slice(startIndex, endIndex)
   }, [clampedPage, items, pageSize])
 
-/**
- * totalPages - Utility function
- * @returns void
- */
+  /**
+   * totalPages - Utility function
+   * @returns void
+   */
   const setPage = useCallback(
     (nextPage: number) => {
       setPageState(clampPage(nextPage, totalPages))
     },
-/**
- * clampedPage - Utility function
- * @returns void
- */
+    /**
+     * clampedPage - Utility function
+     * @returns void
+     */
     [totalPages],
   )
 
   const setPageSize = useCallback((nextSize: number) => {
     setPageSizeState(nextSize)
-/**
- * pageItems - Utility function
- * @returns void
- */
+    /**
+     * pageItems - Utility function
+     * @returns void
+     */
     setPageState(1)
   }, [])
 
   return {
-/**
- * startIndex - Utility function
- * @returns void
- */
+    /**
+     * startIndex - Utility function
+     * @returns void
+     */
     page: clampedPage,
     pageSize,
     total,
     totalPages,
-/**
- * endIndex - Utility function
- * @returns void
- */
+    /**
+     * endIndex - Utility function
+     * @returns void
+     */
     pageItems,
     isLoading,
     setPage,
