@@ -17,48 +17,48 @@ import { useRequireAuth } from '@domains/auth/hooks/useRequireAuth'
  * @returns React element
  */
 const QuickSellCreateInvoicePageView = dynamic(
-    () =>
-        import('@domains/quick-sell/views/QuickSellCreateInvoicePageView').then(
-            (module) => module.QuickSellCreateInvoicePageView,
-        ),
-    { ssr: false },
+  () =>
+    import('@domains/quick-sell/views/QuickSellCreateInvoicePageView').then(
+      (module) => module.QuickSellCreateInvoicePageView,
+    ),
+  { ssr: false },
 )
 
 const CreateInvoiceRoute: NextPageWithLayout = () => {
-    // -- auth --
-    const { canRenderProtected } = useRequireAuth()
-/**
- * CreateInvoiceRoute - React component
- * @returns React element
- */
+  // -- auth --
+  const { canRenderProtected } = useRequireAuth()
+  /**
+   * CreateInvoiceRoute - React component
+   * @returns React element
+   */
 
-    // -- router --
-    const router = useRouter()
+  // -- router --
+  const router = useRouter()
 
-    // -- derived --
-    const artworkId = router.query.artworkId as string | undefined
+  // -- derived --
+  const artworkId = router.query.artworkId as string | undefined
 
-    // -- handlers --
-/**
- * router - Utility function
- * @returns void
- */
+  // -- handlers --
+  /**
+   * router - Utility function
+   * @returns void
+   */
 
-    // -- render --
-    if (!canRenderProtected) {
-        return null
-    }
+  // -- render --
+  if (!canRenderProtected) {
+    return null
+  }
 
-/**
- * artworkId - Utility function
- * @returns void
- */
-    return (
-        <>
-            <Metadata title="Create Invoice | Artium" />
-            <QuickSellCreateInvoicePageView artworkId={artworkId} />
-        </>
-    )
+  /**
+   * artworkId - Utility function
+   * @returns void
+   */
+  return (
+    <>
+      <Metadata title="Create Invoice | Artium" />
+      <QuickSellCreateInvoicePageView artworkId={artworkId} />
+    </>
+  )
 }
 
 // No layout wrapper - full screen page

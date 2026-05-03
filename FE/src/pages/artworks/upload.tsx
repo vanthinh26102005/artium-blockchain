@@ -20,10 +20,10 @@ const UploadPage = dynamic(
 const UploadRoute: NextPageWithLayout = () => {
   // -- state --
   const { canRenderProtected } = useRequireAuth()
-/**
- * UploadRoute - React component
- * @returns React element
- */
+  /**
+   * UploadRoute - React component
+   * @returns React element
+   */
 
   // -- render --
   if (!canRenderProtected) {
