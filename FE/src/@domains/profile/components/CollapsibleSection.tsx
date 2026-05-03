@@ -39,7 +39,7 @@ export const CollapsibleSection = ({
           <ChevronDown className="h-5 w-5 text-slate-400" />
         )}
       </button>
-      {isOpen && <div className="animate-in fade-in px-6 pb-6 duration-200">{children}</div>}
+      {isOpen && <div className="px-6 pb-6 duration-200 animate-in fade-in">{children}</div>}
     </div>
   )
 }
