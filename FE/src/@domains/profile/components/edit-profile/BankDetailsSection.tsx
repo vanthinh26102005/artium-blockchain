@@ -16,7 +16,7 @@ type BankDetailsSectionProps = {
 export const BankDetailsSection = ({ register }: BankDetailsSectionProps) => {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-sm font-semibold tracking-[0.2em] text-slate-400 uppercase">
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
         Bank Details
       </h2>
       <p className="mt-2 text-sm text-slate-500">
@@ -27,7 +27,7 @@ export const BankDetailsSection = ({ register }: BankDetailsSectionProps) => {
         <div>
           <label
             htmlFor="bankAccountNumber"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Bank account number
           </label>
@@ -42,7 +42,7 @@ export const BankDetailsSection = ({ register }: BankDetailsSectionProps) => {
         <div>
           <label
             htmlFor="bankAccountHolder"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Account holder name
           </label>
@@ -57,7 +57,7 @@ export const BankDetailsSection = ({ register }: BankDetailsSectionProps) => {
         <div>
           <label
             htmlFor="bankName"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Bank name
           </label>
@@ -72,7 +72,7 @@ export const BankDetailsSection = ({ register }: BankDetailsSectionProps) => {
         <div>
           <label
             htmlFor="bankBranch"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Branch
           </label>
@@ -87,7 +87,7 @@ export const BankDetailsSection = ({ register }: BankDetailsSectionProps) => {
         <div>
           <label
             htmlFor="bankSwiftCode"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Swift/BIC (international)
           </label>
@@ -102,7 +102,7 @@ export const BankDetailsSection = ({ register }: BankDetailsSectionProps) => {
         <div>
           <label
             htmlFor="bankAddress"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Bank address
           </label>

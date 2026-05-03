@@ -27,10 +27,10 @@ const INSPIRE_VIBES_OPTIONS = [
 const INSPIRE_VALUES_OPTIONS = [
   'Pride',
   'Cultural Heritage',
-/**
- * INSPIRE_VALUES_OPTIONS - React component
- * @returns React element
- */
+  /**
+   * INSPIRE_VALUES_OPTIONS - React component
+   * @returns React element
+   */
   'Equity',
   'Futurism',
   'Environment',
@@ -45,10 +45,10 @@ const INSPIRE_MEDIUM_OPTIONS = [
   'Illustration',
   'Immersive',
   'Digital',
-/**
- * INSPIRE_MEDIUM_OPTIONS - React component
- * @returns React element
- */
+  /**
+   * INSPIRE_MEDIUM_OPTIONS - React component
+   * @returns React element
+   */
   'Prints',
   'Video',
   'Photography',
@@ -73,10 +73,10 @@ export const WhatInspiresMeSection = ({ control }: WhatInspiresMeSectionProps) =
   const inspireMediums = inspireMediumsField.value ?? []
   const toggleSelection = (current: string[] | undefined, value: string) => {
     const safeCurrent = current ?? []
-/**
- * WhatInspiresMeSection - React component
- * @returns React element
- */
+    /**
+     * WhatInspiresMeSection - React component
+     * @returns React element
+     */
     return safeCurrent.includes(value)
       ? safeCurrent.filter((item) => item !== value)
       : [...safeCurrent, value]
@@ -84,49 +84,36 @@ export const WhatInspiresMeSection = ({ control }: WhatInspiresMeSectionProps) =
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-/**
- * inspireVibes - Utility function
- * @returns void
- */
-      <h2 className="text-sm font-semibold tracking-[0.2em] text-slate-400 uppercase">
+      /** * inspireVibes - Utility function * @returns void */
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
         What Inspires Me
       </h2>
-
-/**
- * inspireValues - Utility function
- * @returns void
- */
+      /** * inspireValues - Utility function * @returns void */
       <div className="mt-6 space-y-6">
         <div>
-          <p className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">Vibes</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Vibes</p>
           <div className="mt-3 flex flex-wrap gap-2">
-/**
- * inspireMediums - Utility function
- * @returns void
- */
+            /** * inspireMediums - Utility function * @returns void */
             {INSPIRE_VIBES_OPTIONS.map((option) => (
               <button
                 key={option}
                 type="button"
-/**
- * toggleSelection - Utility function
- * @returns void
- */
+                /**
+                 * toggleSelection - Utility function
+                 * @returns void
+                 */
                 onClick={() => inspireVibesField.onChange(toggleSelection(inspireVibes, option))}
                 className={getChipClasses(inspireVibes.includes(option))}
               >
                 {option}
-/**
- * safeCurrent - Utility function
- * @returns void
- */
+                /** * safeCurrent - Utility function * @returns void */
               </button>
             ))}
           </div>
         </div>
 
         <div>
-          <p className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">Values</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Values</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {INSPIRE_VALUES_OPTIONS.map((option) => (
               <button
@@ -142,7 +129,7 @@ export const WhatInspiresMeSection = ({ control }: WhatInspiresMeSectionProps) =
         </div>
 
         <div>
-          <p className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">Medium</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Medium</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {INSPIRE_MEDIUM_OPTIONS.map((option) => (
               <button
