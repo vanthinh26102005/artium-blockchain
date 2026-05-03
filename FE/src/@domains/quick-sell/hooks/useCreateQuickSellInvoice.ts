@@ -36,10 +36,10 @@ export const useCreateQuickSellInvoice = (): UseCreateQuickSellInvoiceReturn => 
   const reset = useCallback(() => {
     setError(null)
     setIsLoading(false)
-/**
- * reset - Utility function
- * @returns void
- */
+    /**
+     * reset - Utility function
+     * @returns void
+     */
   }, [])
 
   const createInvoice = useCallback(
@@ -48,10 +48,10 @@ export const useCreateQuickSellInvoice = (): UseCreateQuickSellInvoiceReturn => 
       setError(null)
 
       try {
-/**
- * createInvoice - Utility function
- * @returns void
- */
+        /**
+         * createInvoice - Utility function
+         * @returns void
+         */
         // Map draft to API payload
         const payload = mapCreateInvoicePayload(draft)
 
@@ -62,30 +62,30 @@ export const useCreateQuickSellInvoice = (): UseCreateQuickSellInvoiceReturn => 
         const checkoutInvoice: CheckoutInvoice = {
           id: response.id || `invoice-${Date.now()}`,
           invoiceCode: response.invoiceCode,
-/**
- * payload - Utility function
- * @returns void
- */
+          /**
+           * payload - Utility function
+           * @returns void
+           */
           status: 'UNPAID',
           items: response.invoiceItems.map((item, i) => ({
             id: item.id,
             type: item.type === 'Artium-artwork' ? 'artwork' : 'custom',
             name: item.artworkName || `Item ${i + 1}`,
             title: item.artworkName,
-/**
- * response - Utility function
- * @returns void
- */
+            /**
+             * response - Utility function
+             * @returns void
+             */
             price: item.salePrice,
             quantity: item.quantity || 1,
             discountPercent: item.discountPercentage,
             imageUrl: item.artworkImageUrl,
             artworkName: item.artworkName,
             artworkImageUrl: item.artworkImageUrl,
-/**
- * checkoutInvoice - Utility function
- * @returns void
- */
+            /**
+             * checkoutInvoice - Utility function
+             * @returns void
+             */
           })),
           buyer: draft.buyer.name
             ? {
@@ -114,10 +114,10 @@ export const useCreateQuickSellInvoice = (): UseCreateQuickSellInvoiceReturn => 
           invoiceCode: response.invoiceCode,
           invoice: response,
         }
-/**
- * basePrice - Utility function
- * @returns void
- */
+        /**
+         * basePrice - Utility function
+         * @returns void
+         */
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to create invoice')
         setError(error)
