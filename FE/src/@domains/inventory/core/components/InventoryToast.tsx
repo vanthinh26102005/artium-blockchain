@@ -9,6 +9,10 @@ type InventoryToastProps = {
   onClose: () => void
 }
 
+/**
+ * InventoryToast - React component
+ * @returns React element
+ */
 export const InventoryToast = ({ message, onClose }: InventoryToastProps) => {
   // -- state --
 
