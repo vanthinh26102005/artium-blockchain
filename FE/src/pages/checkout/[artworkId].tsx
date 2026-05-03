@@ -31,10 +31,10 @@ const BuyerCheckoutPageView = dynamic(
       (module) => module.BuyerCheckoutPageView,
     ),
   { ssr: false },
-/**
- * BuyerCheckoutPageView - React component
- * @returns React element
- */
+  /**
+   * BuyerCheckoutPageView - React component
+   * @returns React element
+   */
 )
 
 const CheckoutArtworkRoute: NextPageWithLayout = () => {
@@ -46,30 +46,24 @@ const CheckoutArtworkRoute: NextPageWithLayout = () => {
   // -- render --
   if (!artworkIdStr) return null
 
-/**
- * CheckoutArtworkRoute - React component
- * @returns React element
- */
+  /**
+   * CheckoutArtworkRoute - React component
+   * @returns React element
+   */
   if (!stripePromise) {
     return (
       <>
         <Metadata title="Checkout | Artium" />
         <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
-/**
- * router - Utility function
- * @returns void
- */
+          /** * router - Utility function * @returns void */
           <div className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
             <h1 className="text-xl font-semibold text-slate-900">
               Stripe checkout is not configured
             </h1>
             <p className="mt-3 text-sm leading-6 text-slate-500">
-/**
- * artworkIdStr - Utility function
- * @returns void
- */
-              The production build is missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY. Rebuild and
-              redeploy the frontend with the Stripe publishable key.
+              /** * artworkIdStr - Utility function * @returns void */ The production build is
+              missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY. Rebuild and redeploy the frontend with the
+              Stripe publishable key.
             </p>
           </div>
         </div>
