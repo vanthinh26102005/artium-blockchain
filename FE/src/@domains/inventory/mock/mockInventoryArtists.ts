@@ -1,5 +1,9 @@
 import { type InventoryArtist } from '@domains/inventory/features/artists/types/inventoryArtist'
 
+/**
+ * mockInventoryArtists - Utility function
+ * @returns void
+ */
 export const mockInventoryArtists: InventoryArtist[] = [
   {
     id: 'artist-1',

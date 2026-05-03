@@ -11,6 +11,10 @@ type DeleteFolderModalProps = {
   onConfirm: () => void
 }
 
+/**
+ * DeleteFolderModal - React component
+ * @returns React element
+ */
 export const DeleteFolderModal = ({
   isOpen,
   folder,
@@ -23,12 +27,20 @@ export const DeleteFolderModal = ({
   const folderName = folder?.name ?? 'this folder'
 
   // -- handlers --
+/**
+ * folderName - Utility function
+ * @returns void
+ */
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onCancel()
     }
   }
 
+/**
+ * handleOpenChange - Utility function
+ * @returns void
+ */
   // -- render --
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>

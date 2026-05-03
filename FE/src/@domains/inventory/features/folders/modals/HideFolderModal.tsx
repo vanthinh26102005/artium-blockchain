@@ -18,6 +18,10 @@ type HideFolderModalProps = {
   onConfirm: () => void
 }
 
+/**
+ * HideFolderModal - React component
+ * @returns React element
+ */
 export const HideFolderModal = ({ isOpen, folder, onCancel, onConfirm }: HideFolderModalProps) => {
   // -- state --
 
@@ -25,12 +29,20 @@ export const HideFolderModal = ({ isOpen, folder, onCancel, onConfirm }: HideFol
   const folderName = folder?.name ?? 'this folder'
 
   // -- handlers --
+/**
+ * folderName - Utility function
+ * @returns void
+ */
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onCancel()
     }
   }
 
+/**
+ * handleOpenChange - Utility function
+ * @returns void
+ */
   // -- render --
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>

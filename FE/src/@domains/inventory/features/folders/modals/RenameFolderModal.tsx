@@ -15,6 +15,10 @@ import { Input } from '@shared/components/ui/input'
 // @domains - inventory
 import { type InventoryFolder } from '@domains/inventory/features/folders/types/inventoryFolder'
 
+/**
+ * MAX_FOLDER_NAME - React component
+ * @returns React element
+ */
 const MAX_FOLDER_NAME = 80
 
 type RenameFolderModalProps = {
@@ -27,6 +31,10 @@ type RenameFolderModalProps = {
 export const RenameFolderModal = ({ isOpen, folder, onClose, onSave }: RenameFolderModalProps) => {
   // -- state --
   const [name, setName] = useState('')
+/**
+ * RenameFolderModal - React component
+ * @returns React element
+ */
 
   // -- derived --
   const trimmedName = name.trim()
@@ -35,16 +43,28 @@ export const RenameFolderModal = ({ isOpen, folder, onClose, onSave }: RenameFol
   // -- handlers --
   const handleOpenChange = (open: boolean) => {
     if (!open) {
+/**
+ * trimmedName - Utility function
+ * @returns void
+ */
       onClose()
     }
   }
 
+/**
+ * isSaveDisabled - Utility function
+ * @returns void
+ */
   const handleSave = () => {
     if (isSaveDisabled) {
       return
     }
 
     onSave(trimmedName)
+/**
+ * handleOpenChange - Utility function
+ * @returns void
+ */
   }
 
   useEffect(() => {
@@ -54,6 +74,10 @@ export const RenameFolderModal = ({ isOpen, folder, onClose, onSave }: RenameFol
 
     let isCancelled = false
 
+/**
+ * handleSave - Utility function
+ * @returns void
+ */
     window.queueMicrotask(() => {
       if (isCancelled) {
         return
