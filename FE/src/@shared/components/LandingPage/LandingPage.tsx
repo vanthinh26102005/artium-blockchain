@@ -10,6 +10,10 @@ type LandingPageProps = {
   className?: string
 }
 
+/**
+ * LandingPage - React component
+ * @returns React element
+ */
 export const LandingPage = ({ className }: LandingPageProps) => {
   return (
     <div className={className}>

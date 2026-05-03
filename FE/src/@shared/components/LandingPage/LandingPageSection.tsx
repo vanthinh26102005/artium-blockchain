@@ -5,6 +5,10 @@ type LandingPageSectionProps = PropsWithChildren<{
   className?: string
 }>
 
+/**
+ * LandingPageSection - React component
+ * @returns React element
+ */
 const LandingPageSection = ({ children, className }: LandingPageSectionProps) => {
   return (
     <section

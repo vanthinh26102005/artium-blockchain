@@ -10,6 +10,10 @@ type JourneySectionProps = {
   className?: string
 }
 
+/**
+ * JourneySection - React component
+ * @returns React element
+ */
 const JourneySection = ({ className }: JourneySectionProps) => {
   return (
     <LandingPageSection className={cn('space-y-[24px] lg:space-y-[30px]', className)}>

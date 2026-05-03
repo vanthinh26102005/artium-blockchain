@@ -10,6 +10,10 @@ type PartnersSectionProps = {
   className?: string
 }
 
+/**
+ * PartnersSection - React component
+ * @returns React element
+ */
 const PartnersSection = ({ className }: PartnersSectionProps) => {
   return (
     <LandingPageSection

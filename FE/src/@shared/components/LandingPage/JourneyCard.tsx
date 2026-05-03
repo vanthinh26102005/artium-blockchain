@@ -13,6 +13,10 @@ type JourneyCardProps = {
   cta?: string
 }
 
+/**
+ * JourneyCard - React component
+ * @returns React element
+ */
 export const JourneyCard = ({
   className,
   title,
