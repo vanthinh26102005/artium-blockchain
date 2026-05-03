@@ -20,10 +20,10 @@ export const ArtworkThumbnailCard = ({ artwork }: ArtworkThumbnailCardProps) => 
   const router = useRouter()
 
   // -- derived --
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
 
   // -- handlers --
   const handleClick = () => {
@@ -32,14 +32,14 @@ export const ArtworkThumbnailCard = ({ artwork }: ArtworkThumbnailCardProps) => 
 
   // -- render --
   return (
-/**
- * handleClick - Utility function
- * @returns void
- */
+    /**
+     * handleClick - Utility function
+     * @returns void
+     */
     <button
       type="button"
       onClick={handleClick}
-      className="group w-full text-left focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:outline-none"
+      className="group w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
       aria-label={`View artwork ${artwork.title}`}
     >
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_6px_16px_rgba(15,23,42,0.08)] transition duration-200 ease-out group-hover:-translate-y-0.5 group-hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
@@ -55,7 +55,7 @@ export const ArtworkThumbnailCard = ({ artwork }: ArtworkThumbnailCardProps) => 
           {/* trending badge */}
           {artwork.badges.trending && (
             <div className="absolute bottom-3 left-3">
-              <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold tracking-wide text-green-700 uppercase">
+              <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-green-700">
                 Trending
               </span>
             </div>
@@ -63,7 +63,7 @@ export const ArtworkThumbnailCard = ({ artwork }: ArtworkThumbnailCardProps) => 
         </div>
 
         {/* details */}
-        <div className="space-y-3 px-4 pt-3 pb-4">
+        <div className="space-y-3 px-4 pb-4 pt-3">
           {/* price */}
           {artwork.badges.price ? (
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-semibold text-slate-800">
