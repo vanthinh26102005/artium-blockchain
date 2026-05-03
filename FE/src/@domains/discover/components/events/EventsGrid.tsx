@@ -24,10 +24,10 @@ type EventsGridProps = {
 export const EventsGrid = ({ searchQuery = '' }: EventsGridProps) => {
   // -- state --
   const [allEvents, setAllEvents] = useState<DiscoverEvent[]>([])
-/**
- * EventsGrid - React component
- * @returns React element
- */
+  /**
+   * EventsGrid - React component
+   * @returns React element
+   */
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE)
@@ -49,10 +49,10 @@ export const EventsGrid = ({ searchQuery = '' }: EventsGridProps) => {
           mapped.reduce<Record<string, EventStatus>>((acc, e) => {
             acc[e.id] = e.status
             return acc
-/**
- * mapped - Utility function
- * @returns void
- */
+            /**
+             * mapped - Utility function
+             * @returns void
+             */
           }, {}),
         )
       })
@@ -79,19 +79,19 @@ export const EventsGrid = ({ searchQuery = '' }: EventsGridProps) => {
   }, [allEvents, searchQuery])
 
   // Reset pagination when search changes
-/**
- * filtered - Utility function
- * @returns void
- */
+  /**
+   * filtered - Utility function
+   * @returns void
+   */
   useEffect(() => {
     setDisplayCount(PAGE_SIZE)
   }, [searchQuery])
 
   const displayedItems = filtered.slice(0, displayCount)
-/**
- * q - Utility function
- * @returns void
- */
+  /**
+   * q - Utility function
+   * @returns void
+   */
   const hasMore = displayCount < filtered.length
 
   // -- handlers --
@@ -106,39 +106,32 @@ export const EventsGrid = ({ searchQuery = '' }: EventsGridProps) => {
     }))
   }
 
-/**
- * displayedItems - Utility function
- * @returns void
- */
+  /**
+   * displayedItems - Utility function
+   * @returns void
+   */
   // -- render --
   if (error) {
     return (
       <div className="mt-6 text-center text-sm text-red-500">
-/**
- * hasMore - Utility function
- * @returns void
- */
-        Failed to load events. Please try again later.
+        /** * hasMore - Utility function * @returns void */ Failed to load events. Please try again
+        later.
       </div>
     )
   }
 
   if (!isLoading && displayedItems.length === 0) {
-/**
- * loadMore - Utility function
- * @returns void
- */
-    return (
-      <div className="mt-6 text-center text-sm text-slate-500">
-        No events found.
-      </div>
-    )
+    /**
+     * loadMore - Utility function
+     * @returns void
+     */
+    return <div className="mt-6 text-center text-sm text-slate-500">No events found.</div>
   }
 
-/**
- * handleStatusChange - Utility function
- * @returns void
- */
+  /**
+   * handleStatusChange - Utility function
+   * @returns void
+   */
   return (
     <section className="mt-6">
       {/* grid */}
@@ -160,4 +153,3 @@ export const EventsGrid = ({ searchQuery = '' }: EventsGridProps) => {
     </section>
   )
 }
-

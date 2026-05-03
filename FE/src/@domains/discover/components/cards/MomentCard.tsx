@@ -17,10 +17,10 @@ const getMomentThumbnail = (moment: DiscoverMoment) => {
   for (const content of moment.contents) {
     if (content.video?.processedThumb) {
       return content.video.processedThumb
-/**
- * content - Utility function
- * @returns void
- */
+      /**
+       * content - Utility function
+       * @returns void
+       */
     }
     if (content.image?.imageMedium) {
       return content.image.imageMedium
@@ -39,10 +39,10 @@ export const MomentCard = ({ moment, onClick }: MomentCardProps) => {
   // -- derived --
   const thumbnail = getMomentThumbnail(moment)
 
-/**
- * MomentCard - React component
- * @returns React element
- */
+  /**
+   * MomentCard - React component
+   * @returns React element
+   */
   // -- handlers --
 
   // -- render --
@@ -50,14 +50,14 @@ export const MomentCard = ({ moment, onClick }: MomentCardProps) => {
   return (
     <article
       onClick={() => onClick?.(moment)}
-/**
- * thumbnail - Utility function
- * @returns void
- */
+      /**
+       * thumbnail - Utility function
+       * @returns void
+       */
       className={`overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_6px_16px_rgba(15,23,42,0.08)] ${onClick ? 'cursor-pointer transition-transform hover:scale-[1.02]' : ''}`}
     >
       {/* thumbnail */}
-      <div className="relative aspect-4/5 w-full bg-slate-100">
+      <div className="aspect-4/5 relative w-full bg-slate-100">
         <img
           src={thumbnail}
           alt={moment.caption}
@@ -74,7 +74,7 @@ export const MomentCard = ({ moment, onClick }: MomentCardProps) => {
       </div>
 
       {/* content */}
-      <div className="space-y-2 px-4 pt-3 pb-4">
+      <div className="space-y-2 px-4 pb-4 pt-3">
         {/* header */}
         <div className="flex items-center justify-between text-sm text-slate-600">
           {/* user */}
