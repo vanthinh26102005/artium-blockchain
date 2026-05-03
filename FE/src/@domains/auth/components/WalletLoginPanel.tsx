@@ -25,6 +25,10 @@ type WalletStep = {
   state: StepState
 }
 
+/**
+ * getWalletSteps - Utility function
+ * @returns void
+ */
 const getWalletSteps = ({
   isWrongNetwork,
   shortenedAddress,
@@ -37,10 +41,18 @@ const getWalletSteps = ({
   const hasWallet = Boolean(shortenedAddress)
   const hasSigned = status === 'logging_in' || status === 'authenticated'
 
+/**
+ * hasWallet - Utility function
+ * @returns void
+ */
   return [
     {
       label: 'Connect wallet',
       state: status === 'connecting' ? 'active' : hasWallet ? 'complete' : 'idle',
+/**
+ * hasSigned - Utility function
+ * @returns void
+ */
     },
     {
       label: 'Sepolia network',
@@ -82,6 +94,10 @@ const WalletStepIcon = ({ state }: { state: StepState }) => {
     return <Loader2 className="h-4 w-4 animate-spin text-[#191414]" />
   }
 
+/**
+ * WalletStepIcon - React component
+ * @returns React element
+ */
   if (state === 'warning') {
     return <AlertTriangle className="h-4 w-4 text-[#9a3412]" />
   }
@@ -101,6 +117,10 @@ export const WalletLoginPanel = ({
 }: WalletLoginPanelProps) => {
   const steps = getWalletSteps({ isWrongNetwork, shortenedAddress, status })
   const shouldShowSwitchButton = isWrongNetwork && status !== 'switching_network'
+/**
+ * WalletLoginPanel - React component
+ * @returns React element
+ */
   const networkLabel = isWrongNetwork ? 'Required' : targetChainName
 
   return (
@@ -114,14 +134,26 @@ export const WalletLoginPanel = ({
         {isLoading ? (
           <Loader2 className="h-5 w-5 animate-spin text-white" />
         ) : (
+/**
+ * steps - Utility function
+ * @returns void
+ */
           <Wallet className="h-5 w-5 text-white" />
         )}
         <span>{buttonLabel}</span>
       </button>
+/**
+ * shouldShowSwitchButton - Utility function
+ * @returns void
+ */
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex min-h-[72px] items-center gap-3 rounded-lg border border-black/10 bg-white px-4 py-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f7f5f2]">
+/**
+ * networkLabel - Utility function
+ * @returns void
+ */
             <Wallet className="h-5 w-5 text-[#191414]" />
           </span>
           <span className="min-w-0">

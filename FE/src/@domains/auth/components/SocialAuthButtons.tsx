@@ -8,6 +8,10 @@ type SocialAuthButtonsProps = {
   isGoogleLoading?: boolean
 }
 
+/**
+ * SocialAuthButtons - React component
+ * @returns React element
+ */
 export const SocialAuthButtons = ({
   onGoogleClick,
   isGoogleLoading = false,
@@ -15,6 +19,10 @@ export const SocialAuthButtons = ({
   const isGoogleDisabled = isGoogleLoading || !onGoogleClick
 
   // -- render --
+/**
+ * isGoogleDisabled - Utility function
+ * @returns void
+ */
   return (
     <div className="inline-flex w-full flex-col gap-3 sm:flex-row sm:gap-4">
       {/* google */}
