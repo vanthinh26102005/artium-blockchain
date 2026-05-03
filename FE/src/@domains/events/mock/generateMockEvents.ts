@@ -21,10 +21,10 @@ const EVENT_IMAGES = [
 export const generateMockEvents = (
   count: number = 260,
   idPrefix: string = 'discover-event-',
-/**
- * generateMockEvents - Utility function
- * @returns void
- */
+  /**
+   * generateMockEvents - Utility function
+   * @returns void
+   */
 ): Event[] => {
   const types = [
     ['exhibition'],
@@ -32,10 +32,10 @@ export const generateMockEvents = (
     ['gallery-opening'],
     ['workshop'],
     ['panel-talk'],
-/**
- * types - Utility function
- * @returns void
- */
+    /**
+     * types - Utility function
+     * @returns void
+     */
     ['studio-visit'],
     ['museum-show'],
     ['exhibition', 'art-fair'],
@@ -50,10 +50,10 @@ export const generateMockEvents = (
     'The Superfair, San Francisco',
     'Berlin Art Week 2026',
     'Venice Biennale Preview',
-/**
- * titles - Utility function
- * @returns void
- */
+    /**
+     * titles - Utility function
+     * @returns void
+     */
     'London Gallery Weekend',
     'Tokyo Art Fair',
     'Miami Art Basel',
@@ -75,10 +75,10 @@ export const generateMockEvents = (
     'London Gallery District, UK',
     'Tokyo Metropolitan Museum, Japan',
   ]
-/**
- * locations - Utility function
- * @returns void
- */
+  /**
+   * locations - Utility function
+   * @returns void
+   */
 
   const events: Event[] = []
   const now = new Date()
@@ -95,18 +95,18 @@ export const generateMockEvents = (
 
     const rsvpStatuses: EventStatus[] = ['rsvp', 'going', 'maybe', 'notGoing']
 
-/**
- * events - Utility function
- * @returns void
- */
+    /**
+     * events - Utility function
+     * @returns void
+     */
     events.push({
       id: `${idPrefix}${i + 1}`,
       title: titles[i % titles.length],
       location: locations[i % locations.length],
-/**
- * now - Utility function
- * @returns void
- */
+      /**
+       * now - Utility function
+       * @returns void
+       */
       startDateTime: startDate.toISOString(),
       endDateTime: endDate.toISOString(),
       timeZone: 'America/Los_Angeles',
@@ -114,18 +114,18 @@ export const generateMockEvents = (
       visibility: i % 4 === 0 ? 'private' : 'public',
       attendees: Math.floor(Math.random() * 500) + 2,
       coverImageUrl: EVENT_IMAGES[i % EVENT_IMAGES.length],
-/**
- * daysOffset - Utility function
- * @returns void
- */
+      /**
+       * daysOffset - Utility function
+       * @returns void
+       */
       rsvpStatus: rsvpStatuses[i % rsvpStatuses.length],
     })
   }
 
-/**
- * startDate - Utility function
- * @returns void
- */
+  /**
+   * startDate - Utility function
+   * @returns void
+   */
   return events
 }
 

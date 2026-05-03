@@ -1,16 +1,16 @@
-import * as React from "react";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
-import { cn } from "@shared/lib/utils";
-import { EmailTemplatePreview } from "@domains/events/components/email/EmailTemplatePreview";
-import type { HostingEvent } from "@domains/events/state/useHostingEventsStore";
+import * as React from 'react'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { X } from 'lucide-react'
+import { cn } from '@shared/lib/utils'
+import { EmailTemplatePreview } from '@domains/events/components/email/EmailTemplatePreview'
+import type { HostingEvent } from '@domains/events/state/useHostingEventsStore'
 
 type EmailPreviewModalProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  event: HostingEvent;
-  recipientEmails: string[];
-};
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  event: HostingEvent
+  recipientEmails: string[]
+}
 
 /**
  * EmailPreviewModal - React component
@@ -26,13 +26,11 @@ export function EmailPreviewModal({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         {/* Overlay with higher z-index */}
-        <DialogPrimitive.Overlay
-          className="fixed inset-0 z-[230] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
-        />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[230] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         {/* Content with higher z-index */}
         <DialogPrimitive.Content
           className={cn(
-            "fixed left-[50%] top-[50%] z-[240] max-h-[90vh] w-[min(680px,calc(100%-2rem))] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-2xl bg-white font-inter shadow-2xl"
+            'fixed left-[50%] top-[50%] z-[240] max-h-[90vh] w-[min(680px,calc(100%-2rem))] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-2xl bg-white font-inter shadow-2xl',
           )}
           onPointerDownOutside={(event) => event.preventDefault()}
           onInteractOutside={(event) => event.preventDefault()}
@@ -41,9 +39,7 @@ export function EmailPreviewModal({
             <DialogPrimitive.Title className="text-center text-2xl font-semibold leading-tight text-slate-900">
               Email Preview
             </DialogPrimitive.Title>
-            <p className="mt-1 text-xs text-slate-600">
-              Subject - Event invitation: {event.title}
-            </p>
+            <p className="mt-1 text-xs text-slate-600">Subject - Event invitation: {event.title}</p>
           </div>
           <div className="max-h-[calc(90vh-180px)] overflow-y-auto">
             <EmailTemplatePreview event={event} recipientEmails={recipientEmails} />
@@ -65,5 +61,5 @@ export function EmailPreviewModal({
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
-  );
+  )
 }
