@@ -72,154 +72,154 @@ export const InventoryPage = () => {
   const viewMode = useInventoryUiStore((state) => state.viewMode)
   const setViewMode = useInventoryUiStore((state) => state.setViewMode)
   const activeTab = useInventoryUiStore((state) => state.activeTab)
-/**
- * viewMode - Utility function
- * @returns void
- */
+  /**
+   * viewMode - Utility function
+   * @returns void
+   */
   const user = useAuthStore((state) => state.user)
   const artworks = useInventoryDataStore((state) => state.artworks)
   const setArtworks = useInventoryDataStore((state) => state.setArtworks)
   const updateArtwork = useInventoryDataStore((state) => state.updateArtwork)
-/**
- * setViewMode - Utility function
- * @returns void
- */
+  /**
+   * setViewMode - Utility function
+   * @returns void
+   */
   const folders = useInventoryDataStore((state) => state.folders)
   const addFolder = useInventoryDataStore((state) => state.addFolder)
   const removeArtwork = useInventoryDataStore((state) => state.removeArtwork)
   const moveArtwork = useInventoryDataStore((state) => state.moveArtwork)
-/**
- * activeTab - Utility function
- * @returns void
- */
+  /**
+   * activeTab - Utility function
+   * @returns void
+   */
   const renameFolder = useInventoryDataStore((state) => state.renameFolder)
   const removeFolder = useInventoryDataStore((state) => state.removeFolder)
   const setFolderHidden = useInventoryDataStore((state) => state.setFolderHidden)
   const reorderFolders = useInventoryDataStore((state) => state.reorderFolders)
-/**
- * user - Custom React hook
- * @returns void
- */
+  /**
+   * user - Custom React hook
+   * @returns void
+   */
   const optimisticMoveArtwork = useInventoryDataStore((state) => state.optimisticMoveArtwork)
   const moveFolderToFolder = useInventoryDataStore((state) => state.moveFolderToFolder)
   const selectedIds = useInventorySelectionStore((state) => state.selectedIds)
   const setMany = useInventorySelectionStore((state) => state.setMany)
-/**
- * artworks - Utility function
- * @returns void
- */
+  /**
+   * artworks - Utility function
+   * @returns void
+   */
   const { error: bootstrapError } = useInventoryBootstrap({
     includeArtworks: false,
   })
 
-/**
- * setArtworks - Utility function
- * @returns void
- */
+  /**
+   * setArtworks - Utility function
+   * @returns void
+   */
   const {
     followedArtists,
     followedArtistsTotal,
     followedArtistsTotalPages,
-/**
- * updateArtwork - Utility function
- * @returns void
- */
+    /**
+     * updateArtwork - Utility function
+     * @returns void
+     */
     isFollowedArtistsLoading,
     followedArtistsError,
   } = useFollowedArtists(user?.id, page, pageSize, activeTab === 'artists')
 
-/**
- * folders - Utility function
- * @returns void
- */
+  /**
+   * folders - Utility function
+   * @returns void
+   */
   const debouncedSearchName = useDebounce(searchName, 400)
   const normalizedSearchName = debouncedSearchName.trim().toLowerCase()
 
   const {
-/**
- * addFolder - Utility function
- * @returns void
- */
+    /**
+     * addFolder - Utility function
+     * @returns void
+     */
     total,
     totalPages,
     isLoading: isArtworksLoading,
     error: artworksError,
-/**
- * removeArtwork - Utility function
- * @returns void
- */
+    /**
+     * removeArtwork - Utility function
+     * @returns void
+     */
   } = useInventoryArtworks(
     user?.id,
     page,
     pageSize,
-/**
- * moveArtwork - Utility function
- * @returns void
- */
+    /**
+     * moveArtwork - Utility function
+     * @returns void
+     */
     debouncedSearchName,
     filters,
     activeTab === 'artworks',
     refreshToken,
-/**
- * renameFolder - Utility function
- * @returns void
- */
+    /**
+     * renameFolder - Utility function
+     * @returns void
+     */
     setArtworks,
-    setMany
+    setMany,
   )
 
-/**
- * removeFolder - Utility function
- * @returns void
- */
+  /**
+   * removeFolder - Utility function
+   * @returns void
+   */
   const artworkActions = useArtworkActions({
     user,
     selectedIds,
     setMany,
-/**
- * setFolderHidden - Utility function
- * @returns void
- */
+    /**
+     * setFolderHidden - Utility function
+     * @returns void
+     */
     setToastMessage,
     onArtworkUpdated: (artwork) => {
       updateArtwork(artwork)
       setRefreshToken((r) => r + 1)
-/**
- * reorderFolders - Utility function
- * @returns void
- */
+      /**
+       * reorderFolders - Utility function
+       * @returns void
+       */
     },
     onArtworkDeleted: (id) => {
       removeArtwork(id)
       setRefreshToken((r) => r + 1)
-/**
- * optimisticMoveArtwork - Utility function
- * @returns void
- */
+      /**
+       * optimisticMoveArtwork - Utility function
+       * @returns void
+       */
     },
     onArtworkMoved: (id, folderId) => moveArtwork(id, folderId ?? undefined),
     artworks,
   })
-/**
- * moveFolderToFolder - Utility function
- * @returns void
- */
+  /**
+   * moveFolderToFolder - Utility function
+   * @returns void
+   */
 
   const folderActions = useFolderActions({
     user,
     setToastMessage,
-/**
- * selectedIds - Utility function
- * @returns void
- */
+    /**
+     * selectedIds - Utility function
+     * @returns void
+     */
     onFolderCreated: addFolder,
     onFolderRenamed: renameFolder,
     onFolderDeleted: removeFolder,
     onFolderHidden: setFolderHidden,
-/**
- * setMany - Utility function
- * @returns void
- */
+    /**
+     * setMany - Utility function
+     * @returns void
+     */
   })
 
   const { activeId, activeItem, handleDragStart, handleDragEnd } = useInventoryDnd({
@@ -236,18 +236,18 @@ export const InventoryPage = () => {
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
   )
 
-/**
- * debouncedSearchName - Utility function
- * @returns void
- */
+  /**
+   * debouncedSearchName - Utility function
+   * @returns void
+   */
   // -- derived --
   const folderCounts = useMemo(() => {
     const counts = new Map<string, number>()
 
-/**
- * normalizedSearchName - Utility function
- * @returns void
- */
+    /**
+     * normalizedSearchName - Utility function
+     * @returns void
+     */
     artworks.forEach((artwork) => {
       if (!artwork.folderId) {
         return
@@ -270,10 +270,10 @@ export const InventoryPage = () => {
 
   const filteredArtists = useMemo(() => {
     if (!normalizedSearchName) {
-/**
- * artworkActions - Utility function
- * @returns void
- */
+      /**
+       * artworkActions - Utility function
+       * @returns void
+       */
       return followedArtists
     }
 
@@ -294,10 +294,10 @@ export const InventoryPage = () => {
 
   useEffect(() => {
     setPage(1)
-/**
- * folderActions - Utility function
- * @returns void
- */
+    /**
+     * folderActions - Utility function
+     * @returns void
+     */
   }, [debouncedSearchName, filters, activeTab])
 
   // -- handlers --
@@ -319,10 +319,10 @@ export const InventoryPage = () => {
 
   const handleCloseExportModal = () => {
     setIsExportModalOpen(false)
-/**
- * sensors - Utility function
- * @returns void
- */
+    /**
+     * sensors - Utility function
+     * @returns void
+     */
   }
 
   const handlePageChange = (nextPage: number) => {
@@ -332,18 +332,18 @@ export const InventoryPage = () => {
   const handlePageSizeChange = (nextSize: number) => {
     setPageSize(nextSize)
     setPage(1)
-/**
- * folderCounts - Utility function
- * @returns void
- */
+    /**
+     * folderCounts - Utility function
+     * @returns void
+     */
   }
 
   const handleMoveArtworkToFolder = async (artworkId: string, folderId: string | null) => {
-    artworkActions.handleMoveArtwork(artworks.find(a => a.id === artworkId)!)
-/**
- * counts - Utility function
- * @returns void
- */
+    artworkActions.handleMoveArtwork(artworks.find((a) => a.id === artworkId)!)
+    /**
+     * counts - Utility function
+     * @returns void
+     */
     artworkActions.handleConfirmMove(folderId ?? undefined)
   }
 
@@ -356,30 +356,33 @@ export const InventoryPage = () => {
 
       moveFolderToFolder(folderId, newParentId)
 
-      artworkFolderApis.moveFolder(folderId, {
-        folderId,
-        newParentId,
-      }).then(() => {
-/**
- * foldersWithCounts - Utility function
- * @returns void
- */
-        setToastMessage(newParentId ? 'Folder moved successfully' : 'Folder moved to root')
-      }).catch((error) => {
-        moveFolderToFolder(folderId, previousParentId)
-        const message = error instanceof Error ? error.message : 'Failed to move folder'
-        setToastMessage(message)
-      })
+      artworkFolderApis
+        .moveFolder(folderId, {
+          folderId,
+          newParentId,
+        })
+        .then(() => {
+          /**
+           * foldersWithCounts - Utility function
+           * @returns void
+           */
+          setToastMessage(newParentId ? 'Folder moved successfully' : 'Folder moved to root')
+        })
+        .catch((error) => {
+          moveFolderToFolder(folderId, previousParentId)
+          const message = error instanceof Error ? error.message : 'Failed to move folder'
+          setToastMessage(message)
+        })
     })
   }
 
   useEffect(() => {
     if (bootstrapError) {
       setToastMessage(bootstrapError)
-/**
- * filteredArtists - Utility function
- * @returns void
- */
+      /**
+       * filteredArtists - Utility function
+       * @returns void
+       */
     }
   }, [bootstrapError])
 
@@ -395,18 +398,18 @@ export const InventoryPage = () => {
     }
 
     const timeout = window.setTimeout(() => {
-/**
- * idsOnPage - Utility function
- * @returns void
- */
+      /**
+       * idsOnPage - Utility function
+       * @returns void
+       */
       setToastMessage(null)
     }, 2400)
 
     return () => window.clearTimeout(timeout)
-/**
- * uncategorizedArtworks - Utility function
- * @returns void
- */
+    /**
+     * uncategorizedArtworks - Utility function
+     * @returns void
+     */
   }, [toastMessage])
 
   // -- render --
@@ -414,10 +417,10 @@ export const InventoryPage = () => {
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-/**
- * gridArtworks - Utility function
- * @returns void
- */
+      /**
+       * gridArtworks - Utility function
+       * @returns void
+       */
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
@@ -425,36 +428,25 @@ export const InventoryPage = () => {
 
       <div className="-mx-6 -my-1 min-h-screen sm:-mx-8 lg:-mx-12">
         {/* header */}
-        <div className="flex items-center justify-between gap-4 px-4 pt-4 pb-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl leading-[120%] font-semibold text-slate-900">Inventory</h1>
+        <div className="flex items-center justify-between gap-4 px-4 pb-4 pt-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-semibold leading-[120%] text-slate-900">Inventory</h1>
 
           <div className="flex items-center gap-2">
-/**
- * handleSearchChange - Utility function
- * @returns void
- */
+            /** * handleSearchChange - Utility function * @returns void */
             <Button
               variant="outline"
               size="lg"
-              className="border-primary! text-primary! hover:bg-primary/10! border font-bold!"
+              className="border-primary! text-primary! hover:bg-primary/10! font-bold! border"
               onClick={folderActions.handleOpenCreateFolder}
             >
               <Plus className="h-4 w-4" />
-/**
- * handleApplyFilters - Utility function
- * @returns void
- */
-              New folder
+              /** * handleApplyFilters - Utility function * @returns void */ New folder
             </Button>
             <UploadArtworkMenu />
           </div>
         </div>
-
         {/* content */}
-/**
- * handleViewModeChange - Utility function
- * @returns void
- */
+        /** * handleViewModeChange - Utility function * @returns void */
         <div className="mx-4 rounded-3xl border border-black/10 bg-white shadow-sm sm:mx-6 lg:mx-8">
           <div className="sticky top-20 z-40 rounded-t-3xl border-b border-black/10 bg-white px-6 py-5">
             <InventoryToolbar
@@ -462,10 +454,10 @@ export const InventoryPage = () => {
               onSearchChange={handleSearchChange}
               viewMode={viewMode}
               onViewModeChange={handleViewModeChange}
-/**
- * handleOpenExportModal - Utility function
- * @returns void
- */
+              /**
+               * handleOpenExportModal - Utility function
+               * @returns void
+               */
               filteredCount={total}
               totalCount={total}
               idsOnPage={idsOnPage}
@@ -473,10 +465,10 @@ export const InventoryPage = () => {
               onOpenExport={handleOpenExportModal}
               filters={filters}
               onApplyFilters={handleApplyFilters}
-/**
- * handleCloseExportModal - Utility function
- * @returns void
- */
+              /**
+               * handleCloseExportModal - Utility function
+               * @returns void
+               */
             />
           </div>
 
@@ -484,21 +476,17 @@ export const InventoryPage = () => {
             {activeTab === 'artists' ? (
               <>
                 {/* artists view */}
-/**
- * handlePageChange - Utility function
- * @returns void
- */
+                /** * handlePageChange - Utility function * @returns void */
                 {followedArtistsError ? (
                   <div className="mt-4 rounded-[24px] border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
                     {followedArtistsError}
                   </div>
                 ) : null}
-
                 {isFollowedArtistsLoading ? (
-/**
- * handlePageSizeChange - Utility function
- * @returns void
- */
+                  /**
+                   * handlePageSizeChange - Utility function
+                   * @returns void
+                   */
                   <div className="mt-4 space-y-4">
                     {Array.from({ length: 3 }).map((_, index) => (
                       <div
@@ -507,11 +495,11 @@ export const InventoryPage = () => {
                       />
                     ))}
                   </div>
-/**
- * handleMoveArtworkToFolder - Utility function
- * @returns void
- */
-                ) : viewMode === 'list' ? (
+                ) : /**
+                 * handleMoveArtworkToFolder - Utility function
+                 * @returns void
+                 */
+                viewMode === 'list' ? (
                   <div className="mt-4">
                     <InventoryArtistList artists={filteredArtists} />
                   </div>
@@ -519,29 +507,28 @@ export const InventoryPage = () => {
                   <div className="mt-4">
                     <InventoryArtistGrid artists={filteredArtists} />
                   </div>
-/**
- * handleMoveFolderToFolder - Utility function
- * @returns void
- */
+                  /**
+                   * handleMoveFolderToFolder - Utility function
+                   * @returns void
+                   */
                 )}
-
                 <div className="mt-4">
                   <Pagination
                     page={page}
                     totalPages={
                       normalizedSearchName
-/**
- * folder - Utility function
- * @returns void
- */
-                        ? Math.max(1, Math.ceil(filteredArtists.length / pageSize))
+                        ? /**
+                           * folder - Utility function
+                           * @returns void
+                           */
+                          Math.max(1, Math.ceil(filteredArtists.length / pageSize))
                         : followedArtistsTotalPages
                     }
                     total={normalizedSearchName ? filteredArtists.length : followedArtistsTotal}
-/**
- * previousParentId - Utility function
- * @returns void
- */
+                    /**
+                     * previousParentId - Utility function
+                     * @returns void
+                     */
                     pageSize={pageSize}
                     onPageChange={handlePageChange}
                     onPageSizeChange={handlePageSizeChange}
@@ -556,10 +543,10 @@ export const InventoryPage = () => {
                     folders={foldersWithCounts}
                     onRename={folderActions.handleOpenRenameFolder}
                     onDelete={folderActions.handleOpenDeleteFolder}
-/**
- * message - Utility function
- * @returns void
- */
+                    /**
+                     * message - Utility function
+                     * @returns void
+                     */
                     onHide={folderActions.handleOpenHideFolder}
                   />
                 ) : null}
@@ -585,11 +572,7 @@ export const InventoryPage = () => {
                         <div className="h-px flex-1 bg-slate-200" />
                       </div>
                     ) : null}
-
-/**
- * timeout - Utility function
- * @returns void
- */
+                    /** * timeout - Utility function * @returns void */
                     {foldersWithCounts.length > 0 && uncategorizedArtworks.length === 0 ? (
                       <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center">
                         <h3 className="text-base font-semibold text-slate-900">
