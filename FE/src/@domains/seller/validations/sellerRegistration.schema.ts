@@ -9,18 +9,18 @@ const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const isOptionalUrl = (value?: string) => {
   const trimmed = value?.trim()
   if (!trimmed) return true
-/**
- * isOptionalUrl - Utility function
- * @returns void
- */
+  /**
+   * isOptionalUrl - Utility function
+   * @returns void
+   */
 
   try {
     const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
     const parsed = new URL(withProtocol)
-/**
- * trimmed - Utility function
- * @returns void
- */
+    /**
+     * trimmed - Utility function
+     * @returns void
+     */
     return parsed.protocol === 'http:' || parsed.protocol === 'https:'
   } catch {
     return false
@@ -28,18 +28,18 @@ const isOptionalUrl = (value?: string) => {
 }
 
 export const normalizeSellerSlug = (value: string) =>
-/**
- * withProtocol - Utility function
- * @returns void
- */
+  /**
+   * withProtocol - Utility function
+   * @returns void
+   */
   value
     .trim()
     .toLowerCase()
     .normalize('NFD')
-/**
- * parsed - Utility function
- * @returns void
- */
+    /**
+     * parsed - Utility function
+     * @returns void
+     */
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
@@ -67,18 +67,18 @@ export const sellerRegistrationSchema = z.object({
     .min(3, 'Profile URL must be at least 3 characters.')
     .max(75, 'Profile URL must be 75 characters or less.')
     .regex(slugPattern, 'Use lowercase letters, numbers, and single hyphens only.'),
-/**
- * normalizeOptionalUrl - Utility function
- * @returns void
- */
+  /**
+   * normalizeOptionalUrl - Utility function
+   * @returns void
+   */
   profileType: z.enum(['individual', 'gallery', 'institution']),
   bio: z
     .string()
     .trim()
-/**
- * trimmed - Utility function
- * @returns void
- */
+    /**
+     * trimmed - Utility function
+     * @returns void
+     */
     .max(600, 'Seller bio must be 600 characters or less.')
     .optional()
     .or(z.literal('')),
@@ -87,10 +87,10 @@ export const sellerRegistrationSchema = z.object({
     .trim()
     .max(120, 'Location must be 120 characters or less.')
     .optional()
-/**
- * sellerRegistrationSchema - Utility function
- * @returns void
- */
+    /**
+     * sellerRegistrationSchema - Utility function
+     * @returns void
+     */
     .or(z.literal('')),
   websiteUrl: z
     .string()

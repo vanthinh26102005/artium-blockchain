@@ -52,34 +52,34 @@ export const SellerRegistrationPage = () => {
   const refreshMe = useAuthStore((state) => state.refreshMe)
   const [existingSellerProfile, setExistingSellerProfile] = useState<SellerProfilePayload | null>(
     null,
-/**
- * SellerRegistrationPage - React component
- * @returns React element
- */
+    /**
+     * SellerRegistrationPage - React component
+     * @returns React element
+     */
   )
   const [isCheckingExisting, setIsCheckingExisting] = useState(true)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   const defaultValues = useMemo<SellerRegistrationFormValues>(
     () => ({
       displayName: authUser?.fullName || authUser?.displayName || '',
       slug: normalizeSellerSlug(authUser?.slug || authUser?.username || ''),
-/**
- * authUser - Utility function
- * @returns void
- */
+      /**
+       * authUser - Utility function
+       * @returns void
+       */
       profileType: 'individual',
       bio: '',
       location: '',
       websiteUrl: '',
-/**
- * refreshMe - Utility function
- * @returns void
- */
+      /**
+       * refreshMe - Utility function
+       * @returns void
+       */
     }),
     [authUser?.displayName, authUser?.fullName, authUser?.slug, authUser?.username],
   )
@@ -90,10 +90,10 @@ export const SellerRegistrationPage = () => {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<SellerRegistrationFormValues>({
-/**
- * defaultValues - Utility function
- * @returns void
- */
+    /**
+     * defaultValues - Utility function
+     * @returns void
+     */
     resolver: zodResolver(sellerRegistrationSchema),
     defaultValues,
     mode: 'onBlur',
@@ -127,10 +127,10 @@ export const SellerRegistrationPage = () => {
               : 'Unable to check your seller registration status.',
           )
         }
-/**
- * checkExistingSellerProfile - Utility function
- * @returns void
- */
+        /**
+         * checkExistingSellerProfile - Utility function
+         * @returns void
+         */
       } finally {
         if (isActive) {
           setIsCheckingExisting(false)
@@ -142,10 +142,10 @@ export const SellerRegistrationPage = () => {
 
     return () => {
       isActive = false
-/**
- * profile - Utility function
- * @returns void
- */
+      /**
+       * profile - Utility function
+       * @returns void
+       */
     }
   }, [authUser?.id])
 
@@ -154,10 +154,10 @@ export const SellerRegistrationPage = () => {
       setSubmitError('Please log in before registering as a seller.')
       return
     }
-/**
- * status - Utility function
- * @returns void
- */
+    /**
+     * status - Utility function
+     * @returns void
+     */
 
     const displayName = values.displayName.trim()
     const slug = normalizeSellerSlug(values.slug)
@@ -183,10 +183,10 @@ export const SellerRegistrationPage = () => {
         profileImageUrl: authUser.avatarUrl ?? null,
         websiteUrl: normalizeOptionalUrl(values.websiteUrl),
         location,
-/**
- * handleRegister - Utility function
- * @returns void
- */
+        /**
+         * handleRegister - Utility function
+         * @returns void
+         */
       })
 
       setExistingSellerProfile(response.sellerProfile)
@@ -196,35 +196,35 @@ export const SellerRegistrationPage = () => {
       const profileSlug = refreshedUser?.slug || slug || authUser.id
       void router.replace(buildProfileEditHref(profileSlug))
     } catch (error) {
-/**
- * displayName - Utility function
- * @returns void
- */
+      /**
+       * displayName - Utility function
+       * @returns void
+       */
       const status = (error as ApiError).status
       if (status === 409) {
         try {
           const profile = await profileApis.getSellerProfileByUserId(authUser.id)
-/**
- * slug - Utility function
- * @returns void
- */
+          /**
+           * slug - Utility function
+           * @returns void
+           */
           setExistingSellerProfile(profile)
         } catch {
           // Preserve the original conflict message if lookup fails.
         }
-/**
- * bio - Utility function
- * @returns void
- */
+        /**
+         * bio - Utility function
+         * @returns void
+         */
       }
 
       setSubmitError(
         error instanceof Error
-/**
- * location - Utility function
- * @returns void
- */
-          ? error.message
+          ? /**
+             * location - Utility function
+             * @returns void
+             */
+            error.message
           : 'Unable to register seller profile. Please try again.',
       )
     }
@@ -232,10 +232,10 @@ export const SellerRegistrationPage = () => {
 
   const existingProfileHref = buildProfileEditHref(authUser?.slug || authUser?.id || '')
   const fieldLabelClass = 'text-sm font-semibold text-slate-800'
-/**
- * needsUserUpdate - Utility function
- * @returns void
- */
+  /**
+   * needsUserUpdate - Utility function
+   * @returns void
+   */
   const inputClass =
     'mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-4 focus:ring-slate-900/10'
   const errorTextClass = 'mt-2 block text-xs font-medium text-rose-600'
@@ -247,12 +247,8 @@ export const SellerRegistrationPage = () => {
         <div className="pt-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
-/**
- * response - Utility function
- * @returns void
- */
-                Seller workspace
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                /** * response - Utility function * @returns void */ Seller workspace
               </p>
               <h1 className="mt-2 text-3xl font-semibold text-slate-900">Register seller</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
@@ -266,39 +262,28 @@ export const SellerRegistrationPage = () => {
             </span>
           </div>
         </div>
-
-/**
- * refreshedUser - Utility function
- * @returns void
- */
+        /** * refreshedUser - Utility function * @returns void */
         <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <form
             onSubmit={(event) => void handleSubmit(handleRegister)(event)}
             className="rounded-[32px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8"
-/**
- * profileSlug - Utility function
- * @returns void
- */
+            /**
+             * profileSlug - Utility function
+             * @returns void
+             */
           >
             {submitError ? (
               <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
                 {submitError}
               </div>
             ) : null}
-/**
- * status - Utility function
- * @returns void
- */
-
+            /** * status - Utility function * @returns void */
             {existingSellerProfile ? (
               <div className="rounded-[28px] border border-emerald-200 bg-emerald-50 p-6">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-700" />
                   <div>
-/**
- * profile - Utility function
- * @returns void
- */
+                    /** * profile - Utility function * @returns void */
                     <h2 className="text-lg font-semibold text-emerald-950">
                       Your seller profile is already active.
                     </h2>
@@ -317,35 +302,29 @@ export const SellerRegistrationPage = () => {
                   </div>
                 </div>
               </div>
-/**
- * existingProfileHref - Utility function
- * @returns void
- */
             ) : (
+              /**
+               * existingProfileHref - Utility function
+               * @returns void
+               */
               <div className="space-y-6">
                 <div className="grid gap-5 lg:grid-cols-2">
                   <label className="block">
-/**
- * fieldLabelClass - Utility function
- * @returns void
- */
+                    /** * fieldLabelClass - Utility function * @returns void */
                     <span className={fieldLabelClass}>Seller display name</span>
                     <input
                       {...register('displayName')}
                       className={inputClass}
-/**
- * inputClass - Utility function
- * @returns void
- */
+                      /**
+                       * inputClass - Utility function
+                       * @returns void
+                       */
                       placeholder="Your artist or gallery name"
                     />
                     {errors.displayName ? (
                       <span className={errorTextClass}>{errors.displayName.message}</span>
                     ) : null}
-/**
- * errorTextClass - Utility function
- * @returns void
- */
+                    /** * errorTextClass - Utility function * @returns void */
                   </label>
 
                   <label className="block">
