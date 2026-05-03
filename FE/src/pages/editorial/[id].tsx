@@ -28,10 +28,10 @@ EditorialDetailPage.getLayout = (page) => <MarketingLayout>{page}</MarketingLayo
 export const getStaticPaths: GetStaticPaths = async () => {
   const paths = EDITORIAL_ITEMS.map((item) => ({
     params: { id: item.id },
-/**
- * getStaticPaths - Utility function
- * @returns void
- */
+    /**
+     * getStaticPaths - Utility function
+     * @returns void
+     */
   }))
   return { paths, fallback: false }
 }
@@ -49,18 +49,18 @@ export const getStaticProps: GetStaticProps<EditorialDetailProps> = async (conte
   }
 
   return {
-/**
- * getStaticProps - Utility function
- * @returns void
- */
+    /**
+     * getStaticProps - Utility function
+     * @returns void
+     */
     props: {
       article,
     },
   }
-/**
- * id - Utility function
- * @returns void
- */
+  /**
+   * id - Utility function
+   * @returns void
+   */
 }
 
 export default EditorialDetailPage
