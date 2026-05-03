@@ -41,10 +41,18 @@ type HostingEventsState = {
   getInvitationsForEvent: (eventId: string) => EventInvitation[];
 };
 
+/**
+ * makeGradientFromTitle - Utility function
+ * @returns void
+ */
 const makeGradientFromTitle = (title: string) => {
   const hash = [...title].reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   return (
     eventImages[hash % eventImages.length] ??
+/**
+ * hash - Utility function
+ * @returns void
+ */
     eventImages[0] ??
     "data:image/svg+xml;charset=UTF-8,"
   );
@@ -56,6 +64,10 @@ const ensureCoverImage = (event: HostingEvent) => {
 };
 
 const mapApiToHostingEvent = (event: EventApiResponse): HostingEvent => {
+/**
+ * ensureCoverImage - Utility function
+ * @returns void
+ */
   return ensureCoverImage(mapApiEventToHostingEvent(event));
 };
 
@@ -64,6 +76,10 @@ const createLocalId = () => {
 };
 
 const resolveUploadedImageUrl = (result: { secureUrl?: string; url?: string }) => {
+/**
+ * mapApiToHostingEvent - Utility function
+ * @returns void
+ */
   return result.secureUrl || result.url;
 };
 
@@ -71,6 +87,10 @@ const uploadEventCoverImage = async (file: File, eventId: string, title: string)
   const { user } = useAuthStore.getState();
   const uploadResult = await artworkUploadApi.uploadArtworkImage({
     file,
+/**
+ * createLocalId - Utility function
+ * @returns void
+ */
     sellerId: user?.id ?? "event-host",
     artworkId: `event-${eventId}`,
     altText: title,
@@ -78,6 +98,10 @@ const uploadEventCoverImage = async (file: File, eventId: string, title: string)
   });
   const coverImageUrl = resolveUploadedImageUrl(uploadResult);
 
+/**
+ * resolveUploadedImageUrl - Utility function
+ * @returns void
+ */
   if (!coverImageUrl) {
     throw new Error("Event cover upload did not return an image URL.");
   }
@@ -85,11 +109,19 @@ const uploadEventCoverImage = async (file: File, eventId: string, title: string)
   return coverImageUrl;
 };
 
+/**
+ * uploadEventCoverImage - Utility function
+ * @returns void
+ */
 export const useHostingEventsStore = create<HostingEventsState>((set, get) => ({
   events: [],
   invitations: [],
   isLoading: false,
   hasLoaded: false,
+/**
+ * uploadResult - Utility function
+ * @returns void
+ */
   error: null,
   loadEvents: async () => {
     if (get().isLoading) return;
@@ -100,6 +132,10 @@ export const useHostingEventsStore = create<HostingEventsState>((set, get) => ({
         events: events.map(mapApiToHostingEvent),
         isLoading: false,
         hasLoaded: true,
+/**
+ * coverImageUrl - Utility function
+ * @returns void
+ */
       });
     } catch (error) {
       set({
@@ -112,6 +148,10 @@ export const useHostingEventsStore = create<HostingEventsState>((set, get) => ({
   addEvent: async (values) => {
     const eventUploadId = createLocalId();
     const coverImageUrl = values.coverImage
+/**
+ * useHostingEventsStore - Custom React hook
+ * @returns void
+ */
       ? await uploadEventCoverImage(values.coverImage, eventUploadId, values.title)
       : undefined;
     const payload = buildCreateEventPayload(values, coverImageUrl);
@@ -125,6 +165,10 @@ export const useHostingEventsStore = create<HostingEventsState>((set, get) => ({
     set((state) => ({
       events: state.events.filter((event) => event.id !== id),
     }));
+/**
+ * events - Utility function
+ * @returns void
+ */
   },
   updateEvent: (next) => {
     set((state) => ({
@@ -143,24 +187,44 @@ export const useHostingEventsStore = create<HostingEventsState>((set, get) => ({
     const updated = mapApiToHostingEvent(updatedApi);
     set((state) => ({
       events: state.events.map((event) =>
+/**
+ * eventUploadId - Utility function
+ * @returns void
+ */
         event.id === id ? updated : event,
       ),
     }));
     return updated;
+/**
+ * coverImageUrl - Utility function
+ * @returns void
+ */
   },
   copyLink: async (eventId: string) => {
     if (typeof window === "undefined" || !navigator?.clipboard) {
       return;
     }
     const origin = window.location.origin && window.location.origin !== "null"
+/**
+ * payload - Utility function
+ * @returns void
+ */
       ? window.location.origin
       : "";
     const urlToCopy = origin ? `${origin}/event/${eventId}` : window.location.href;
     await navigator.clipboard.writeText(urlToCopy);
+/**
+ * created - Utility function
+ * @returns void
+ */
   },
   sendInvitations: async (eventId, recipientEmails, message) => {
     const recipients = recipientEmails.map((email) => ({ email }));
     const { user } = useAuthStore.getState();
+/**
+ * event - Utility function
+ * @returns void
+ */
 
     await eventsApis.sendInvitations(eventId, {
       recipients,
@@ -182,7 +246,44 @@ export const useHostingEventsStore = create<HostingEventsState>((set, get) => ({
     }));
   },
   getInvitationsForEvent: (eventId) =>
+/**
+ * existing - Utility function
+ * @returns void
+ */
     get().invitations.filter((invitation) => invitation.eventId === eventId),
 }));
 
 export type { HostingEvent };
+/**
+ * coverImageUrl - Utility function
+ * @returns void
+ */
+
+/**
+ * payload - Utility function
+ * @returns void
+ */
+/**
+ * updatedApi - Utility function
+ * @returns void
+ */
+/**
+ * updated - Utility function
+ * @returns void
+ */
+/**
+ * origin - Utility function
+ * @returns void
+ */
+/**
+ * urlToCopy - Utility function
+ * @returns void
+ */
+/**
+ * recipients - Utility function
+ * @returns void
+ */
+/**
+ * invitations - Utility function
+ * @returns void
+ */

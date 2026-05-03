@@ -11,10 +11,18 @@ type YourEventsState = {
 };
 
 // Mock data generator
+/**
+ * generateMockEvents - Utility function
+ * @returns void
+ */
 const generateMockEvents = (): Event[] => {
   const types = [
     ["exhibition"],
     ["art-fair"],
+/**
+ * types - Utility function
+ * @returns void
+ */
     ["gallery-opening"],
     ["workshop"],
     ["panel-talk"],
@@ -27,6 +35,10 @@ const generateMockEvents = (): Event[] => {
     "Contemporary Art Fair in the Carrousel du Louvre, Paris",
     "International Contemporary Art Biennale Basel",
     "International Fine Art Cannes Biennale 2026",
+/**
+ * titles - Utility function
+ * @returns void
+ */
     "Washington DC May 1-3, 2026",
     "Modern Art Exhibition",
     "Gallery Night Opening",
@@ -43,6 +55,10 @@ const generateMockEvents = (): Event[] => {
     "New York's Pier 36, Manhattan's trendy Lower East Side, 36 South Street, New York, NY 10004, USA",
   ];
 
+/**
+ * locations - Utility function
+ * @returns void
+ */
   const events: Event[] = [];
   const now = new Date();
 
@@ -55,20 +71,36 @@ const generateMockEvents = (): Event[] => {
     const endDate = new Date(startDate);
     endDate.setHours(23, 0, 0, 0);
 
+/**
+ * events - Utility function
+ * @returns void
+ */
     const rsvpStatuses: EventStatus[] = ["rsvp", "going", "maybe", "notGoing"];
 
     events.push({
       id: `your-event-${i + 1}`,
+/**
+ * now - Utility function
+ * @returns void
+ */
       title: titles[i % titles.length],
       location: locations[i % locations.length],
       startDateTime: startDate.toISOString(),
       endDateTime: endDate.toISOString(),
       timeZone: "America/Los_Angeles",
       types: types[i % types.length],
+/**
+ * daysOffset - Utility function
+ * @returns void
+ */
       visibility: i % 3 === 0 ? "private" : "public",
       attendees: Math.floor(Math.random() * 200) + 1,
       coverImageUrl: eventImages[i % eventImages.length],
       rsvpStatus: rsvpStatuses[i % rsvpStatuses.length],
+/**
+ * startDate - Utility function
+ * @returns void
+ */
     });
   }
 
@@ -76,12 +108,25 @@ const generateMockEvents = (): Event[] => {
 };
 
 export const useYourEventsStore = create<YourEventsState>((set) => ({
+/**
+ * endDate - Utility function
+ * @returns void
+ */
   events: generateMockEvents(),
   updateRsvpStatus: (eventId, status) => {
     set((state) => ({
       events: state.events.map((event) =>
         event.id === eventId ? { ...event, rsvpStatus: status } : event
       ),
+/**
+ * rsvpStatuses - Utility function
+ * @returns void
+ */
     }));
   },
 }));
+
+/**
+ * useYourEventsStore - Custom React hook
+ * @returns void
+ */

@@ -18,6 +18,10 @@ type EventDetailState = {
   setInvitedCount: (eventId: string, invited: number) => GuestStats;
 };
 
+/**
+ * buildDefaultStats - Utility function
+ * @returns void
+ */
 const buildDefaultStats = (initial?: Partial<GuestStats>): GuestStats => ({
   going: initial?.going ?? 0,
   maybe: initial?.maybe ?? 0,
@@ -28,6 +32,10 @@ const buildDefaultStats = (initial?: Partial<GuestStats>): GuestStats => ({
 export const useEventDetailStore = create<EventDetailState>((set, get) => ({
   guestStats: {},
 
+/**
+ * useEventDetailStore - Custom React hook
+ * @returns void
+ */
   initializeStats: (eventId, initial) => {
     const current = get().guestStats[eventId];
     if (current) {
@@ -35,6 +43,10 @@ export const useEventDetailStore = create<EventDetailState>((set, get) => ({
     }
 
     const built = buildDefaultStats(initial);
+/**
+ * current - Utility function
+ * @returns void
+ */
     set((state) => ({
       guestStats: {
         ...state.guestStats,
@@ -43,6 +55,10 @@ export const useEventDetailStore = create<EventDetailState>((set, get) => ({
     }));
     return built;
   },
+/**
+ * built - Utility function
+ * @returns void
+ */
 
   setRsvpStatus: (eventId, nextStatus) => {
     const stats = get().guestStats[eventId] ?? buildDefaultStats();
@@ -57,6 +73,10 @@ export const useEventDetailStore = create<EventDetailState>((set, get) => ({
 
     if (nextStatus === "going") {
       going += 1;
+/**
+ * stats - Utility function
+ * @returns void
+ */
     } else if (nextStatus === "maybe") {
       maybe += 1;
     }
@@ -76,6 +96,10 @@ export const useEventDetailStore = create<EventDetailState>((set, get) => ({
     }));
 
     return nextStats;
+/**
+ * nextStats - Utility function
+ * @returns void
+ */
   },
 
   setInvitedCount: (eventId, invited) => {
@@ -97,3 +121,12 @@ export const useEventDetailStore = create<EventDetailState>((set, get) => ({
 }));
 
 export type { GuestStats };
+/**
+ * stats - Utility function
+ * @returns void
+ */
+
+/**
+ * nextStats - Utility function
+ * @returns void
+ */

@@ -18,6 +18,10 @@ type EventsState = {
   updateRsvpStatus: (eventId: string, status: EventStatus) => void
 }
 
+/**
+ * useEventsStore - Custom React hook
+ * @returns void
+ */
 export const useEventsStore = create<EventsState>((set) => ({
   allEvents: [
     ...generateMockEvents(),
@@ -33,6 +37,10 @@ export const useEventsStore = create<EventsState>((set) => ({
       const events = await eventsApis.getDiscoverEvents()
       set({
         allEvents: events.map((event) => mapApiEventToEvent(event)),
+/**
+ * events - Utility function
+ * @returns void
+ */
         isLoading: false,
         hasLoaded: true,
       })
@@ -61,3 +69,12 @@ export const useYourEvents = () =>
   )
 
 export const useDiscoverEvents = () => useEventsStore(useShallow((state) => state.allEvents))
+/**
+ * useYourEvents - Custom React hook
+ * @returns void
+ */
+
+/**
+ * useDiscoverEvents - Custom React hook
+ * @returns void
+ */
