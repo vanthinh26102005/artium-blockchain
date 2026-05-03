@@ -29,20 +29,20 @@ export const HideFolderModal = ({ isOpen, folder, onCancel, onConfirm }: HideFol
   const folderName = folder?.name ?? 'this folder'
 
   // -- handlers --
-/**
- * folderName - Utility function
- * @returns void
- */
+  /**
+   * folderName - Utility function
+   * @returns void
+   */
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onCancel()
     }
   }
 
-/**
- * handleOpenChange - Utility function
- * @returns void
- */
+  /**
+   * handleOpenChange - Utility function
+   * @returns void
+   */
   // -- render --
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>

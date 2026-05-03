@@ -31,10 +31,10 @@ type RenameFolderModalProps = {
 export const RenameFolderModal = ({ isOpen, folder, onClose, onSave }: RenameFolderModalProps) => {
   // -- state --
   const [name, setName] = useState('')
-/**
- * RenameFolderModal - React component
- * @returns React element
- */
+  /**
+   * RenameFolderModal - React component
+   * @returns React element
+   */
 
   // -- derived --
   const trimmedName = name.trim()
@@ -43,28 +43,28 @@ export const RenameFolderModal = ({ isOpen, folder, onClose, onSave }: RenameFol
   // -- handlers --
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-/**
- * trimmedName - Utility function
- * @returns void
- */
+      /**
+       * trimmedName - Utility function
+       * @returns void
+       */
       onClose()
     }
   }
 
-/**
- * isSaveDisabled - Utility function
- * @returns void
- */
+  /**
+   * isSaveDisabled - Utility function
+   * @returns void
+   */
   const handleSave = () => {
     if (isSaveDisabled) {
       return
     }
 
     onSave(trimmedName)
-/**
- * handleOpenChange - Utility function
- * @returns void
- */
+    /**
+     * handleOpenChange - Utility function
+     * @returns void
+     */
   }
 
   useEffect(() => {
@@ -74,10 +74,10 @@ export const RenameFolderModal = ({ isOpen, folder, onClose, onSave }: RenameFol
 
     let isCancelled = false
 
-/**
- * handleSave - Utility function
- * @returns void
- */
+    /**
+     * handleSave - Utility function
+     * @returns void
+     */
     window.queueMicrotask(() => {
       if (isCancelled) {
         return
@@ -115,7 +115,7 @@ export const RenameFolderModal = ({ isOpen, folder, onClose, onSave }: RenameFol
           {/* Content */}
           <div className="px-6 py-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold tracking-wider text-slate-500 uppercase lg:text-base">
+              <label className="text-sm font-bold uppercase tracking-wider text-slate-500 lg:text-base">
                 Folder name <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
@@ -126,7 +126,7 @@ export const RenameFolderModal = ({ isOpen, folder, onClose, onSave }: RenameFol
                   maxLength={MAX_FOLDER_NAME}
                   className="h-12 rounded-full border-black/10 bg-white pr-14 text-base text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-blue-500 md:text-base"
                 />
-                <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-400">
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">
                   {name.length}/{MAX_FOLDER_NAME}
                 </span>
               </div>
@@ -148,7 +148,7 @@ export const RenameFolderModal = ({ isOpen, folder, onClose, onSave }: RenameFol
                 size="lg"
                 onClick={handleSave}
                 disabled={isSaveDisabled}
-                className="disabled:bg-muted disabled:text-muted-foreground h-12 min-w-[140px] rounded-full px-10 text-lg font-semibold hover:shadow-lg"
+                className="h-12 min-w-[140px] rounded-full px-10 text-lg font-semibold hover:shadow-lg disabled:bg-muted disabled:text-muted-foreground"
               >
                 Save
               </Button>

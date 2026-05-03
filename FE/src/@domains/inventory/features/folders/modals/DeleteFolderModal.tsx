@@ -27,20 +27,20 @@ export const DeleteFolderModal = ({
   const folderName = folder?.name ?? 'this folder'
 
   // -- handlers --
-/**
- * folderName - Utility function
- * @returns void
- */
+  /**
+   * folderName - Utility function
+   * @returns void
+   */
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onCancel()
     }
   }
 
-/**
- * handleOpenChange - Utility function
- * @returns void
- */
+  /**
+   * handleOpenChange - Utility function
+   * @returns void
+   */
   // -- render --
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -56,14 +56,14 @@ export const DeleteFolderModal = ({
           {/* Header */}
           <div className="px-6 pt-6">
             <DialogHeader className="px-0 text-left">
-              <DialogTitle className="text-base font-bold tracking-wider text-slate-900 uppercase lg:text-lg">
+              <DialogTitle className="text-base font-bold uppercase tracking-wider text-slate-900 lg:text-lg">
                 Delete folder?
               </DialogTitle>
             </DialogHeader>
           </div>
 
           {/* Content */}
-          <div className="px-6 pt-2 pb-6 text-base text-slate-700">
+          <div className="px-6 pb-6 pt-2 text-base text-slate-700">
             This will delete the folder{' '}
             <span className="font-semibold text-slate-900">{folderName}</span>. Any artworks inside
             will be moved back to your inventory and will no longer be grouped under this folder.
