@@ -27,10 +27,10 @@ const formatBytes = (bytes?: number) => {
   const units = ['B', 'KB', 'MB', 'GB']
   let value = bytes
   let unitIndex = 0
-/**
- * units - Utility function
- * @returns void
- */
+  /**
+   * units - Utility function
+   * @returns void
+   */
   while (value >= 1024 && unitIndex < units.length - 1) {
     value /= 1024
     unitIndex += 1
@@ -44,10 +44,10 @@ export const MediaPreviewCard = ({
   size,
   type,
   variant = 'image',
-/**
- * MediaPreviewCard - React component
- * @returns React element
- */
+  /**
+   * MediaPreviewCard - React component
+   * @returns React element
+   */
   onRemove,
 }: MediaPreviewCardProps) => {
   return (
@@ -80,7 +80,7 @@ export const MediaPreviewCard = ({
           variant="ghost"
           size="icon"
           onClick={onRemove}
-          className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/90 shadow-sm hover:bg-white"
+          className="absolute right-2 top-2 h-8 w-8 rounded-full bg-white/90 shadow-sm hover:bg-white"
         >
           <XMarkIcon className="h-4 w-4" />
         </Button>

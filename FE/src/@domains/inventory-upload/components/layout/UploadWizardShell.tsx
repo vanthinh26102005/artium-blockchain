@@ -33,7 +33,7 @@ export const UploadWizardShell = ({
   return (
     <div className="flex min-h-screen flex-col bg-[#FDFDFD] text-[#191414]">
       <UploadStepHeader title={title} />
-      <main className="w-full px-4 pt-[60px] pb-[70px] lg:px-8 lg:pt-[80px] lg:pb-[80px]">
+      <main className="w-full px-4 pb-[70px] pt-[60px] lg:px-8 lg:pb-[80px] lg:pt-[80px]">
         <div className="w-full">{children}</div>
       </main>
       <UploadStickyFooter

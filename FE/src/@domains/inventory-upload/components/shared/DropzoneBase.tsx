@@ -48,28 +48,28 @@ export const DropzoneBase = ({
   const inputRef = useRef<HTMLInputElement>(null)
   const inputId = useId()
 
-/**
- * inputRef - Utility function
- * @returns void
- */
+  /**
+   * inputRef - Utility function
+   * @returns void
+   */
   // -- handlers --
   const handleFiles = (files: FileList | null) => {
     if (!files || disabled) {
       return
-/**
- * inputId - Utility function
- * @returns void
- */
+      /**
+       * inputId - Utility function
+       * @returns void
+       */
     }
     onFiles(Array.from(files))
   }
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault()
-/**
- * handleFiles - Utility function
- * @returns void
- */
+    /**
+     * handleFiles - Utility function
+     * @returns void
+     */
     setIsDragging(false)
     handleFiles(event.dataTransfer.files)
   }
@@ -80,10 +80,10 @@ export const DropzoneBase = ({
     }
     inputRef.current?.click()
   }
-/**
- * handleDrop - Utility function
- * @returns void
- */
+  /**
+   * handleDrop - Utility function
+   * @returns void
+   */
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (disabled) {
@@ -93,10 +93,10 @@ export const DropzoneBase = ({
       event.preventDefault()
       inputRef.current?.click()
     }
-/**
- * handleClick - Utility function
- * @returns void
- */
+    /**
+     * handleClick - Utility function
+     * @returns void
+     */
   }
 
   // -- render --
@@ -107,11 +107,11 @@ export const DropzoneBase = ({
 
   const dropzoneContent = renderDropzoneContent ? (
     renderDropzoneContent(inputId)
-/**
- * handleKeyDown - Utility function
- * @returns void
- */
   ) : (
+    /**
+     * handleKeyDown - Utility function
+     * @returns void
+     */
     <>
       <span className="text-[15px] font-semibold text-[#191414] lg:text-[16px]">
         {disabled ? 'Uploads disabled' : 'Drag & drop or click to upload'}
@@ -125,22 +125,19 @@ export const DropzoneBase = ({
   return (
     <section className={wrapperClassName}>
       {hideHeader ? null : (
-/**
- * wrapperClassName - Utility function
- * @returns void
- */
+        /**
+         * wrapperClassName - Utility function
+         * @returns void
+         */
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[13px] font-extrabold tracking-[0.05em] text-black/50 uppercase lg:text-[17px]">
+            <p className="text-[13px] font-extrabold uppercase tracking-[0.05em] text-black/50 lg:text-[17px]">
               {title}
             </p>
             {description ? (
               <p className="mt-2 text-[15px] font-semibold text-[#191414] lg:text-[16px]">
                 {description}
-/**
- * dropzoneContent - Utility function
- * @returns void
- */
+                /** * dropzoneContent - Utility function * @returns void */
               </p>
             ) : null}
             {helperText ? <p className="mt-1 text-sm text-[#898788]">{helperText}</p> : null}
