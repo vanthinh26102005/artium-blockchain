@@ -8,6 +8,10 @@ type QuickSellOrderSummaryProps = {
     showShipping?: boolean
 }
 
+/**
+ * QuickSellOrderSummary - React component
+ * @returns React element
+ */
 export const QuickSellOrderSummary = ({
     totals,
     showTax = true,

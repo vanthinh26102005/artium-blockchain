@@ -11,6 +11,10 @@ type QuickSellInvoicePreviewProps = {
     totals: InvoiceTotals
 }
 
+/**
+ * QuickSellInvoicePreview - React component
+ * @returns React element
+ */
 export const QuickSellInvoicePreview = ({
     draft,
     totals,
@@ -19,10 +23,18 @@ export const QuickSellInvoicePreview = ({
     const hasItems = draft.items.length > 0
     const invoiceNumber = 'Preview'
 
+/**
+ * hasItems - Utility function
+ * @returns void
+ */
     // -- render --
     return (
         <div className="w-full max-w-[900px]">
             <div className="mb-4 text-center">
+/**
+ * invoiceNumber - Utility function
+ * @returns void
+ */
                 <span className="text-[11px] uppercase tracking-widest text-[#989898]">
                     This is what your buyer will see
                 </span>

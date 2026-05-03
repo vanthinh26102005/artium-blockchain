@@ -14,6 +14,10 @@ type QuickSellFooterProps = {
     isSaveDisabled?: boolean
 }
 
+/**
+ * QuickSellFooter - React component
+ * @returns React element
+ */
 export const QuickSellFooter = ({
     onCancel,
     onSaveDraft,
