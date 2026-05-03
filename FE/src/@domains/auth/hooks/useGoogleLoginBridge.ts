@@ -33,18 +33,18 @@ export const useGoogleLoginBridge = (): GoogleBridgeState => {
   const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
   const { data: session, status } = useSession()
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const hasHandledRef = useRef(false)
 
-/**
- * setAuth - Utility function
- * @returns void
- */
+  /**
+   * setAuth - Utility function
+   * @returns void
+   */
   // -- derived --
   const idToken = (session as SessionWithIdToken | null)?.idToken
 
@@ -52,20 +52,20 @@ export const useGoogleLoginBridge = (): GoogleBridgeState => {
   useEffect(() => {
     if (!router.isReady || status !== 'authenticated' || hasHandledRef.current) {
       return
-/**
- * hasHandledRef - Utility function
- * @returns void
- */
+      /**
+       * hasHandledRef - Utility function
+       * @returns void
+       */
     }
 
     if (!idToken || typeof idToken !== 'string') {
       return
     }
 
-/**
- * idToken - Utility function
- * @returns void
- */
+    /**
+     * idToken - Utility function
+     * @returns void
+     */
     hasHandledRef.current = true
 
     const bridgeLogin = async () => {
@@ -83,10 +83,10 @@ export const useGoogleLoginBridge = (): GoogleBridgeState => {
       try {
         const response = await usersApi.loginWithGoogle({ idToken })
         setAuth(response)
-/**
- * bridgeLogin - Utility function
- * @returns void
- */
+        /**
+         * bridgeLogin - Utility function
+         * @returns void
+         */
         const nextPath = getSafeNextPath(router.query.next, '/')
         await router.replace(nextPath)
       } catch (error) {
