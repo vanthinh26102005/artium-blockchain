@@ -12,6 +12,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 import { useRequireAuth } from '@domains/auth/hooks/useRequireAuth'
 
 // @domains - quick-sell (dynamic import)
+/**
+ * QuickSellInvoicesListView - React component
+ * @returns React element
+ */
 const QuickSellInvoicesListView = dynamic(
     () =>
         import('@domains/quick-sell/views/QuickSellInvoicesListView').then(
@@ -23,6 +27,10 @@ const QuickSellInvoicesListView = dynamic(
 const InvoicesIndexPage: NextPageWithLayout = () => {
     // -- auth --
     const { canRenderProtected } = useRequireAuth()
+/**
+ * InvoicesIndexPage - React component
+ * @returns React element
+ */
 
     // -- render --
     if (!canRenderProtected) {

@@ -3,6 +3,10 @@ import { SiteFooter } from '@shared/components/layout/SiteFooter'
 import { SiteHeader } from '@shared/components/layout/SiteHeader'
 import { LiveAuctionPage } from '@/views/LiveAuctionPage'
 
+/**
+ * AuctionRoute - React component
+ * @returns React element
+ */
 const AuctionRoute: NextPageWithLayout = () => {
   return <LiveAuctionPage />
 }
