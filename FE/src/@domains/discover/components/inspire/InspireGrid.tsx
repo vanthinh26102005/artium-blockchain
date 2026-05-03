@@ -7,6 +7,10 @@ import { InspireSkeleton } from '@domains/discover/components/skeletons/Discover
 import { useMockInfiniteScroll } from '@shared/hooks/useMockInfiniteScroll'
 import { InfiniteScrollSentinel } from '@shared/components/ui/InfiniteScrollSentinel'
 
+/**
+ * InspireGrid - React component
+ * @returns React element
+ */
 export const InspireGrid = () => {
   // -- state --
   const { displayedItems, isLoading, hasMore, loadMore } = useMockInfiniteScroll({

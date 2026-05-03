@@ -12,6 +12,10 @@ import { mapMomentToDiscover } from '@domains/discover/utils/discoverMappers'
 import profileApis from '@shared/apis/profileApis'
 import { InfiniteScrollSentinel } from '@shared/components/ui/InfiniteScrollSentinel'
 
+/**
+ * PAGE_SIZE - React component
+ * @returns React element
+ */
 const PAGE_SIZE = 12
 
 type MomentsGridProps = {
@@ -21,6 +25,10 @@ type MomentsGridProps = {
 export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
   // -- state --
   const [allMoments, setAllMoments] = useState<DiscoverMoment[]>([])
+/**
+ * MomentsGrid - React component
+ * @returns React element
+ */
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE)
@@ -39,17 +47,29 @@ export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
 
       // Build user-info lookup
       const userInfoMap = new Map(
+/**
+ * fetchMoments - Utility function
+ * @returns void
+ */
         profiles.items.map((p) => [
           p.userId,
           {
             username: p.displayName.toLowerCase().replace(/\s+/g, ''),
             fullName: p.displayName,
+/**
+ * profiles - Utility function
+ * @returns void
+ */
             avatarUrl: p.profileImageUrl || '/images/default-avatar.png',
             isVerified: p.isVerified,
           },
         ]),
       )
 
+/**
+ * userInfoMap - Custom React hook
+ * @returns void
+ */
       // Fetch moments per user in parallel (limit to first 10 profiles)
       const userIds = profiles.items.slice(0, 10).map((p) => p.userId)
       const momentArrays = await Promise.all(
@@ -66,10 +86,18 @@ export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
       return moments
     }
 
+/**
+ * userIds - Custom React hook
+ * @returns void
+ */
     fetchMoments()
       .then((moments) => {
         if (!cancelled) setAllMoments(moments)
       })
+/**
+ * momentArrays - Utility function
+ * @returns void
+ */
       .catch((err) => {
         if (!cancelled) setError(err instanceof Error ? err : new Error('Failed to fetch moments'))
       })
@@ -80,6 +108,10 @@ export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
     return () => {
       cancelled = true
     }
+/**
+ * moments - Utility function
+ * @returns void
+ */
   }, [])
 
   // Client-side search filter
@@ -107,11 +139,19 @@ export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
     setDisplayCount((prev) => prev + PAGE_SIZE)
   }, [])
 
+/**
+ * filtered - Utility function
+ * @returns void
+ */
   const handleMomentClick = (moment: DiscoverMoment) => {
     setSelectedMoment(moment)
     setIsModalOpen(true)
   }
 
+/**
+ * q - Utility function
+ * @returns void
+ */
   // -- render --
   if (error) {
     return (
@@ -129,16 +169,28 @@ export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
     )
   }
 
+/**
+ * displayedItems - Utility function
+ * @returns void
+ */
   return (
     <section className="mt-6">
       {/* grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+/**
+ * hasMore - Utility function
+ * @returns void
+ */
         {displayedItems.map((moment) => (
           <MomentCard key={moment.id} moment={moment} onClick={handleMomentClick} />
         ))}
         {isLoading &&
           Array.from({ length: 6 }).map((_, i) => <MomentSkeleton key={`skeleton-${i}`} />)}
       </div>
+/**
+ * loadMore - Utility function
+ * @returns void
+ */
 
       {/* sentinel */}
       <InfiniteScrollSentinel onLoadMore={loadMore} hasMore={hasMore} isLoading={isLoading} />
@@ -146,6 +198,10 @@ export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
       {/* modal */}
       <MomentViewModal
         moment={selectedMoment}
+/**
+ * handleMomentClick - Utility function
+ * @returns void
+ */
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
       />

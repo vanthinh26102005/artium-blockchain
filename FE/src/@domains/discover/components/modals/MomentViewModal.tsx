@@ -10,6 +10,10 @@ type MomentViewModalProps = {
     onOpenChange: (open: boolean) => void
 }
 
+/**
+ * MomentViewModal - React component
+ * @returns React element
+ */
 export const MomentViewModal = ({ moment, open, onOpenChange }: MomentViewModalProps) => {
     if (!moment) return null
 
@@ -17,25 +21,45 @@ export const MomentViewModal = ({ moment, open, onOpenChange }: MomentViewModalP
     const content = moment.contents[0]
     const isVideo = !!content.video
     const mediaUrl = isVideo
+/**
+ * content - Utility function
+ * @returns void
+ */
         ? content.video?.videoUrl || ''
         : content.image?.imageMedium || content.artwork?.imageMedium || ''
     const posterUrl = isVideo ? content.video?.processedThumb : undefined
 
+/**
+ * isVideo - Utility function
+ * @returns void
+ */
     const momentDetail: MomentDetail = {
         id: moment.id,
         title: content.video?.title || 'Moment',
         caption: moment.caption,
+/**
+ * mediaUrl - Utility function
+ * @returns void
+ */
         mediaUrl,
         posterUrl,
         mediaType: isVideo ? 'video' : 'image',
         author: {
             username: moment.user.username,
             displayName: moment.user.fullName,
+/**
+ * posterUrl - Utility function
+ * @returns void
+ */
             avatarUrl: moment.user.avatarUrl,
             verified: moment.user.isVerified || false,
         },
         stats: {
             likes: moment.stats.likes,
+/**
+ * momentDetail - Utility function
+ * @returns void
+ */
             comments: moment.stats.comments,
             shares: 0,
         },
@@ -63,6 +87,10 @@ export const MomentViewModal = ({ moment, open, onOpenChange }: MomentViewModalP
                 displayName: 'Collector 101',
                 avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
             },
+/**
+ * mockComments - Utility function
+ * @returns void
+ */
             content: 'Can\'t wait to see the final piece.',
             createdAt: new Date().toISOString(),
         },
