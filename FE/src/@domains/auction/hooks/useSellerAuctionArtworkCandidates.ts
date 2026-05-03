@@ -13,12 +13,20 @@ type UseSellerAuctionArtworkCandidatesResult = {
   refresh: () => Promise<void>
 }
 
+/**
+ * toError - Utility function
+ * @returns void
+ */
 const toError = (error: unknown) =>
   error instanceof Error ? error : new Error('Unable to load auction eligibility.')
 
 export const useSellerAuctionArtworkCandidates =
   (): UseSellerAuctionArtworkCandidatesResult => {
     const [data, setData] = useState<SellerAuctionArtworkCandidatesResponse | null>(null)
+/**
+ * useSellerAuctionArtworkCandidates - Custom React hook
+ * @returns void
+ */
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<Error | null>(null)
 
@@ -28,6 +36,10 @@ export const useSellerAuctionArtworkCandidates =
 
       try {
         const response = await auctionApis.getSellerArtworkCandidates()
+/**
+ * refresh - Utility function
+ * @returns void
+ */
         setData(response)
       } catch (err) {
         setError(toError(err))
@@ -36,6 +48,10 @@ export const useSellerAuctionArtworkCandidates =
       }
     }, [])
 
+/**
+ * response - Utility function
+ * @returns void
+ */
     useEffect(() => {
       void refresh()
     }, [refresh])

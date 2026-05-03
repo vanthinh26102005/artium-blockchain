@@ -12,12 +12,20 @@ type UseAuctionLotsResult = {
   refreshAuctionById: (auctionId: string) => Promise<AuctionLot>
 }
 
+/**
+ * toError - Utility function
+ * @returns void
+ */
 const toError = (error: unknown) =>
   error instanceof Error ? error : new Error('Unable to sync auction state.')
 
 export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult => {
   const { category, maxBidEth, minBidEth, skip, status, take } = input
   const [lots, setLots] = useState<AuctionLot[]>([])
+/**
+ * useAuctionLots - Custom React hook
+ * @returns void
+ */
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -28,6 +36,10 @@ export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult =>
 
     try {
       const response = await auctionApis.getAuctions({
+/**
+ * refresh - Utility function
+ * @returns void
+ */
         category,
         maxBidEth,
         minBidEth,
@@ -36,6 +48,10 @@ export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult =>
         take,
       })
       setLots(response.data.map(mapAuctionReadToLot))
+/**
+ * response - Utility function
+ * @returns void
+ */
       setTotal(response.total)
     } catch (err) {
       setError(toError(err))
@@ -56,14 +72,26 @@ export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult =>
   }, [])
 
   useEffect(() => {
+/**
+ * refreshAuctionById - Utility function
+ * @returns void
+ */
     void refresh()
   }, [refresh])
 
   return {
+/**
+ * response - Utility function
+ * @returns void
+ */
     lots,
     total,
     isLoading,
     error,
+/**
+ * nextLot - Utility function
+ * @returns void
+ */
     refresh,
     refreshAuctionById,
   }

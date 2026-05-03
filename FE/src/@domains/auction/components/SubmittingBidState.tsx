@@ -20,6 +20,10 @@ type SubmittingBidStateProps = {
   currentBidValue: number
 }
 
+/**
+ * spaceGrotesk - Utility function
+ * @returns void
+ */
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   weight: ['500', '700'],
@@ -28,6 +32,10 @@ const spaceGrotesk = Space_Grotesk({
 const headlineFont = {
   fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
+/**
+ * headlineFont - Utility function
+ * @returns void
+ */
 
 const formatEthDisplay = (value: number) => `${value.toFixed(2)} ETH`
 
@@ -35,17 +43,29 @@ const getEstimatedGasFee = (bidValue: number) =>
   Math.max(0.0018, Math.min(0.0048, bidValue * 0.00017)).toFixed(4)
 
 export const SubmittingBidState = ({
+/**
+ * formatEthDisplay - Utility function
+ * @returns void
+ */
   isOpen,
   title,
   imageSrc,
   imageAlt,
   committedBidValue,
+/**
+ * getEstimatedGasFee - Utility function
+ * @returns void
+ */
   currentBidValue,
 }: SubmittingBidStateProps) => {
   return (
     <Dialog open={isOpen}>
       <DialogPortal>
         <DialogOverlay className="bg-black/5 backdrop-blur-md" />
+/**
+ * SubmittingBidState - React component
+ * @returns React element
+ */
         <DialogPrimitive.Content
           aria-labelledby="auction-bid-submitting-title"
           className="fixed inset-0 z-[210] flex items-center justify-center p-4 outline-none md:p-8"
