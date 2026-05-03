@@ -15,10 +15,18 @@ export type ValidationResult = {
   errors: ValidationError[]
 }
 
+/**
+ * validateLineItem - Utility function
+ * @returns void
+ */
 export const validateLineItem = (item: QuickSellLineItem, index: number): ValidationError[] => {
   const result = quickSellLineItemSchema.safeParse(item)
 
   if (result.success) {
+/**
+ * result - Utility function
+ * @returns void
+ */
     return []
   }
 
@@ -28,6 +36,10 @@ export const validateLineItem = (item: QuickSellLineItem, index: number): Valida
     message: issue.message,
   }))
 }
+/**
+ * prefix - Utility function
+ * @returns void
+ */
 
 export const validateBuyerInfo = (buyer: QuickSellInvoiceDraft['buyer']): ValidationError[] => {
   const result = quickSellBuyerInfoSchema.safeParse(buyer)
@@ -38,10 +50,18 @@ export const validateBuyerInfo = (buyer: QuickSellInvoiceDraft['buyer']): Valida
   return result.error.issues.map((issue) => ({
     field: issue.path.length > 0 ? `buyer.${issue.path.join('.')}` : 'buyer',
     message: issue.message,
+/**
+ * validateBuyerInfo - Utility function
+ * @returns void
+ */
   }))
 }
 
 export const validateTaxSettings = (draft: QuickSellInvoiceDraft): ValidationError[] => {
+/**
+ * result - Utility function
+ * @returns void
+ */
   const result = quickSellInvoiceFormSchema.pick({
     isApplySalesTax: true,
     taxPercent: true,
@@ -56,10 +76,18 @@ export const validateTaxSettings = (draft: QuickSellInvoiceDraft): ValidationErr
     return []
   }
 
+/**
+ * validateTaxSettings - Utility function
+ * @returns void
+ */
   return result.error.issues
     .filter((issue) => issue.path[0] === 'taxPercent' || issue.path[0] === 'shippingFee')
     .map((issue) => ({
       field: issue.path.join('.'),
+/**
+ * result - Utility function
+ * @returns void
+ */
       message: issue.message,
     }))
 }
@@ -82,3 +110,20 @@ export const validateInvoiceDraft = (draft: QuickSellInvoiceDraft): ValidationRe
 export const canSubmitDraft = (draft: QuickSellInvoiceDraft): boolean => {
   return quickSellInvoiceFormSchema.safeParse(draft).success
 }
+
+/**
+ * validateInvoiceDraft - Utility function
+ * @returns void
+ */
+/**
+ * result - Utility function
+ * @returns void
+ */
+/**
+ * errors - Utility function
+ * @returns void
+ */
+/**
+ * canSubmitDraft - Utility function
+ * @returns void
+ */
