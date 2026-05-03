@@ -9,6 +9,10 @@ export type TimeInputProps = {
   onChange: (newValue: any) => void
   hourCycle?: 24 | 12
 }
+/**
+ * TimeInput - React component
+ * @returns React element
+ */
 const TimeInput = ({
   className,
   value,

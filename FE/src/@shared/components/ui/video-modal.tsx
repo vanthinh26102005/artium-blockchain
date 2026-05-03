@@ -2,26 +2,46 @@ import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { cn } from '@shared/lib/utils'
 
+/**
+ * VideoModal - React component
+ * @returns React element
+ */
 const VideoModal = DialogPrimitive.Root
 
 const VideoModalTrigger = DialogPrimitive.Trigger
 
 const VideoModalPortal = DialogPrimitive.Portal
+/**
+ * VideoModalTrigger - React component
+ * @returns React element
+ */
 
 const VideoModalClose = DialogPrimitive.Close
 
 const VideoModalOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
+/**
+ * VideoModalPortal - React component
+ * @returns React element
+ */
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
+/**
+ * VideoModalClose - React component
+ * @returns React element
+ */
       'data-[state=closed]:animate-modal-fade-out data-[state=open]:animate-modal-fade-in fixed inset-0 z-50 backdrop-blur-xl',
       className,
     )}
     {...props}
   />
+/**
+ * VideoModalOverlay - React component
+ * @returns React element
+ */
 ))
 VideoModalOverlay.displayName = DialogPrimitive.Overlay.displayName
 
@@ -40,6 +60,10 @@ const VideoModalContent = React.forwardRef<
       )}
       {...props}
     >
+/**
+ * VideoModalContent - React component
+ * @returns React element
+ */
       <div className="relative mx-auto flex size-full items-center justify-center rounded-2xl border border-gray-950/[.1] bg-gray-50/[.2] dark:border-gray-50/[.1] dark:bg-gray-950/[.5]">
         {/* Mobile close button */}
         <CloseIcon isMobile />
@@ -74,6 +98,10 @@ const VideoModalDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
+/**
+ * VideoModalTitle - React component
+ * @returns React element
+ */
     className={cn('mb-6 text-xl text-gray-950/80 dark:text-gray-50/70', className)}
     {...props}
   />
@@ -89,6 +117,10 @@ const VideoPreview = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
         className,
       )}
       {...props}
+/**
+ * VideoModalDescription - React component
+ * @returns React element
+ */
     >
       {children}
     </div>
@@ -104,6 +136,10 @@ const VideoPlayButton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
         'absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 group-[.playing]:pointer-events-none group-[.playing]:opacity-0',
         className,
       )}
+/**
+ * VideoPreview - React component
+ * @returns React element
+ */
       {...props}
     >
       {children}
@@ -123,6 +159,10 @@ const VideoPlayer = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
           'group relative aspect-video max-w-4xl overflow-hidden rounded-xl border border-gray-950/[.1] object-cover dark:border-gray-50/[.1]',
           isPlaying && 'playing',
           className,
+/**
+ * VideoPlayButton - React component
+ * @returns React element
+ */
         )}
         onClick={() => setIsPlaying(true)}
         {...props}
@@ -142,6 +182,10 @@ const VideoModalVideo = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
         'aspect-video max-w-4xl overflow-hidden rounded-xl border border-gray-950/[.1] object-cover shadow-xl dark:border-gray-50/[.1]',
         className,
       )}
+/**
+ * VideoPlayer - React component
+ * @returns React element
+ */
       {...props}
     >
       {children}
@@ -167,6 +211,10 @@ const CloseIcon = React.forwardRef<
   >
     <svg fill="none" height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg">
       <path
+/**
+ * VideoModalVideo - React component
+ * @returns React element
+ */
         d="M1 1L11 11M11 1L1 11"
         className="stroke-current"
         strokeLinecap="round"
@@ -186,6 +234,10 @@ export {
   VideoModalContent,
   VideoModalTitle,
   VideoModalDescription,
+/**
+ * CloseIcon - React component
+ * @returns React element
+ */
   VideoModalVideo,
   VideoPreview,
   VideoPlayButton,

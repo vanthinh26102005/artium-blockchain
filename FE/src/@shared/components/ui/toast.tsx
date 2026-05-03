@@ -16,6 +16,10 @@ import {
 // @shared - utils
 import { cn } from '@shared/lib/utils'
 
+/**
+ * DEFAULT_TOAST_DURATION_MS - React component
+ * @returns React element
+ */
 const DEFAULT_TOAST_DURATION_MS: Record<ToastVariant, number | null> = {
   loading: null,
   success: 3000,
@@ -27,11 +31,19 @@ const DEFAULT_TOAST_DURATION_MS: Record<ToastVariant, number | null> = {
 const MAX_VISIBLE_TOASTS = 4
 
 const getToastIcon = (variant: ToastVariant) => {
+/**
+ * MAX_VISIBLE_TOASTS - React component
+ * @returns React element
+ */
   if (variant === 'loading') {
     return <Loader2 className="h-5 w-5 animate-spin text-[#191414]" />
   }
 
   if (variant === 'success') {
+/**
+ * getToastIcon - Utility function
+ * @returns void
+ */
     return <CheckCircle2 className="h-5 w-5 text-[#167a3b]" />
   }
 
@@ -55,6 +67,10 @@ const getToastClasses = (variant: ToastVariant) =>
     variant === 'info' && 'border-[#b8cdf8] bg-[#f3f7ff]',
     variant === 'loading' && 'border-black/10 bg-white',
   )
+/**
+ * getToastClasses - Utility function
+ * @returns void
+ */
 
 const createToastId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
@@ -68,6 +84,10 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
   const timerRefs = useRef(new Map<string, ReturnType<typeof setTimeout>>())
 
   const clearToastTimer = useCallback((id: string) => {
+/**
+ * createToastId - Utility function
+ * @returns void
+ */
     const timer = timerRefs.current.get(id)
 
     if (timer) {
@@ -78,20 +98,36 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 
   const dismiss = useCallback(
     (id: string) => {
+/**
+ * ToastProvider - React component
+ * @returns React element
+ */
       clearToastTimer(id)
       setToasts((currentToasts) => currentToasts.filter((toast) => toast.id !== id))
     },
     [clearToastTimer],
   )
+/**
+ * timerRefs - Utility function
+ * @returns void
+ */
 
   const scheduleDismiss = useCallback(
     (toast: ToastItem) => {
       clearToastTimer(toast.id)
 
+/**
+ * clearToastTimer - Utility function
+ * @returns void
+ */
       const durationMs = toast.durationMs ?? DEFAULT_TOAST_DURATION_MS[toast.variant]
       if (!durationMs) {
         return
       }
+/**
+ * timer - Utility function
+ * @returns void
+ */
 
       const timer = setTimeout(() => dismiss(toast.id), durationMs)
       timerRefs.current.set(toast.id, timer)
@@ -103,6 +139,10 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
     (variant: ToastVariant, message: string, options?: ToastOptions) => {
       let nextToast: ToastItem | null = null
 
+/**
+ * dismiss - Utility function
+ * @returns void
+ */
       const toast: ToastItem = {
         id: createToastId(),
         variant,
@@ -114,6 +154,10 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 
       setToasts((currentToasts) => {
         if (!toast.toastKey) {
+/**
+ * scheduleDismiss - Utility function
+ * @returns void
+ */
           nextToast = toast
           return [toast, ...currentToasts].slice(0, MAX_VISIBLE_TOASTS)
         }
@@ -121,6 +165,10 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
         const existingToast = currentToasts.find(
           (currentToast) => currentToast.toastKey === toast.toastKey,
         )
+/**
+ * durationMs - Utility function
+ * @returns void
+ */
 
         if (!existingToast) {
           nextToast = toast
@@ -129,6 +177,10 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 
         nextToast = {
           ...existingToast,
+/**
+ * timer - Utility function
+ * @returns void
+ */
           variant,
           message,
           title: options?.title,
@@ -138,6 +190,10 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 
         return [
           nextToast,
+/**
+ * addToast - Utility function
+ * @returns void
+ */
           ...currentToasts.filter((currentToast) => currentToast.id !== existingToast.id),
         ].slice(0, MAX_VISIBLE_TOASTS)
       })
@@ -145,6 +201,10 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
       if (nextToast) {
         scheduleDismiss(nextToast)
       }
+/**
+ * toast - Utility function
+ * @returns void
+ */
 
       return toast.id
     },
@@ -163,6 +223,10 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 
           updatedToast = {
             ...toast,
+/**
+ * existingToast - Utility function
+ * @returns void
+ */
             ...nextToast,
             message: nextToast.message ?? toast.message,
             variant: nextToast.variant ?? toast.variant,
@@ -199,6 +263,10 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
     return () => {
       timers.forEach((timer) => clearTimeout(timer))
       timers.clear()
+/**
+ * update - Utility function
+ * @returns void
+ */
     }
   }, [])
 
@@ -231,3 +299,12 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
     </ToastContext.Provider>
   )
 }
+/**
+ * api - Utility function
+ * @returns void
+ */
+
+/**
+ * timers - Utility function
+ * @returns void
+ */

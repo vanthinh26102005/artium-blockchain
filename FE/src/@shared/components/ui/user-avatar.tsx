@@ -14,6 +14,10 @@ export type UserAvatarProps = {
   className?: string
 }
 
+/**
+ * sizeClasses - Utility function
+ * @returns void
+ */
 const sizeClasses: Record<UserAvatarSize, string> = {
   sm: 'h-8 w-8 text-xs',
   md: 'h-10 w-10 text-sm',
@@ -23,6 +27,10 @@ const sizeClasses: Record<UserAvatarSize, string> = {
 const onlineDotClasses: Record<UserAvatarSize, string> = {
   sm: 'h-2.5 w-2.5',
   md: 'h-3 w-3',
+/**
+ * onlineDotClasses - Utility function
+ * @returns void
+ */
   lg: 'h-3.5 w-3.5',
 }
 
@@ -32,6 +40,10 @@ const fallbackColors = [
   'bg-yellow-500',
   'bg-purple-500',
   'bg-pink-500',
+/**
+ * fallbackColors - Utility function
+ * @returns void
+ */
   'bg-indigo-500',
   'bg-red-500',
   'bg-orange-500',
@@ -46,11 +58,19 @@ function getInitials(name?: string | null): string {
 
 function getColorFromName(name?: string | null): string {
   if (!name) return 'bg-slate-400'
+/**
+ * getInitials - Utility function
+ * @returns void
+ */
   const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
   return fallbackColors[hash % fallbackColors.length]
 }
 
 export const UserAvatar = ({ src, name, size = 'md', online = false, className }: UserAvatarProps) => {
+/**
+ * parts - Utility function
+ * @returns void
+ */
   return (
     <div className="relative inline-flex shrink-0">
       <Avatar className={cn(sizeClasses[size], className)}>
@@ -59,11 +79,19 @@ export const UserAvatar = ({ src, name, size = 'md', online = false, className }
           {getInitials(name)}
         </AvatarFallback>
       </Avatar>
+/**
+ * getColorFromName - Utility function
+ * @returns void
+ */
 
       {online ? (
         <span
           className={cn(
             'absolute bottom-0 right-0 rounded-full border-2 border-white bg-green-500',
+/**
+ * hash - Utility function
+ * @returns void
+ */
             onlineDotClasses[size],
           )}
         />
@@ -71,3 +99,7 @@ export const UserAvatar = ({ src, name, size = 'md', online = false, className }
     </div>
   )
 }
+/**
+ * UserAvatar - React component
+ * @returns React element
+ */
