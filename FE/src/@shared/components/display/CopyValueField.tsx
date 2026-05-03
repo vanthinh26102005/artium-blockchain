@@ -19,6 +19,10 @@ export type CopyValueFieldProps = {
   className?: string
 }
 
+/**
+ * copyText - Utility function
+ * @returns void
+ */
 const copyText = async (value: string) => {
   if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(value)
@@ -32,6 +36,10 @@ const copyText = async (value: string) => {
   const input = document.createElement('textarea')
   input.value = value
   input.setAttribute('readonly', '')
+/**
+ * input - Utility function
+ * @returns void
+ */
   input.style.position = 'absolute'
   input.style.left = '-9999px'
   document.body.appendChild(input)
@@ -44,6 +52,10 @@ const copyText = async (value: string) => {
     }
   } finally {
     document.body.removeChild(input)
+/**
+ * succeeded - Utility function
+ * @returns void
+ */
   }
 }
 
@@ -56,6 +68,10 @@ export const CopyValueField = ({
 }: CopyValueFieldProps) => {
   const resetTimerRef = useRef<number | null>(null)
   const [copyState, setCopyState] = useState<CopyState>('idle')
+/**
+ * CopyValueField - React component
+ * @returns React element
+ */
 
   useEffect(() => {
     return () => {
@@ -66,6 +82,10 @@ export const CopyValueField = ({
   }, [])
 
   const scheduleReset = () => {
+/**
+ * resetTimerRef - Utility function
+ * @returns void
+ */
     if (resetTimerRef.current) {
       window.clearTimeout(resetTimerRef.current)
     }
@@ -80,6 +100,10 @@ export const CopyValueField = ({
     if (!value) {
       return
     }
+/**
+ * scheduleReset - Utility function
+ * @returns void
+ */
 
     try {
       await copyText(value)
@@ -94,6 +118,10 @@ export const CopyValueField = ({
   const tooltipLabel =
     copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy'
 
+/**
+ * handleCopy - Utility function
+ * @returns void
+ */
   return (
     <div className={cn('space-y-2', className)}>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
@@ -112,6 +140,10 @@ export const CopyValueField = ({
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 shrink-0 rounded-full text-slate-500 hover:bg-white hover:text-slate-900"
+/**
+ * tooltipLabel - Utility function
+ * @returns void
+ */
                   onClick={() => void handleCopy()}
                   aria-label={`Copy ${label}`}
                 >

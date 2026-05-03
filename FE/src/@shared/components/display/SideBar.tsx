@@ -33,6 +33,10 @@ interface SidebarItemConfig {
   badge?: 'Pro' | 'Growth' | 'Premier'
 }
 
+/**
+ * topItems - Utility function
+ * @returns void
+ */
 const topItems: SidebarItemConfig[] = [
   { label: 'Home', href: '/homepage', icon: Home },
   { label: 'Profile', href: '/profile/artiumfan', icon: User },
@@ -42,6 +46,10 @@ const topItems: SidebarItemConfig[] = [
 const mainItems: SidebarItemConfig[] = [
   { label: 'Portfolio', href: '/portfolio', icon: Store },
   { label: 'Custom Website', href: '/custom-website', icon: Globe },
+/**
+ * mainItems - Utility function
+ * @returns void
+ */
   { label: 'Events', href: '/events', icon: Calendar },
   { label: 'Inventory', href: '/inventory', icon: ImageIcon },
   {
@@ -63,6 +71,10 @@ const bottomItems: SidebarItemConfig[] = [
 
 const messagesCount = 2
 
+/**
+ * bottomItems - Utility function
+ * @returns void
+ */
 const SidebarItem = ({
   label,
   href,
@@ -70,11 +82,19 @@ const SidebarItem = ({
   badge,
   onUpgradeRequired,
 }: SidebarItemConfig & { onUpgradeRequired: () => void }) => {
+/**
+ * messagesCount - Utility function
+ * @returns void
+ */
   const router = useRouter()
   const isActive = href
     ? router.asPath === href ||
       router.asPath.startsWith(`${href}/`) ||
       router.pathname === href ||
+/**
+ * SidebarItem - React component
+ * @returns React element
+ */
       router.pathname.startsWith(`${href}/`)
     : false
 
@@ -85,10 +105,18 @@ const SidebarItem = ({
   }
 
   const handleClick = (e: React.MouseEvent) => {
+/**
+ * router - Utility function
+ * @returns void
+ */
     if (badge) {
       e.preventDefault()
       onUpgradeRequired()
     }
+/**
+ * isActive - Utility function
+ * @returns void
+ */
   }
 
   const content = (
@@ -99,6 +127,10 @@ const SidebarItem = ({
       </span>
       {label === 'Messages' && messagesCount > 0 ? (
         <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+/**
+ * badgeColors - Utility function
+ * @returns void
+ */
           {messagesCount}
         </span>
       ) : null}
@@ -108,6 +140,10 @@ const SidebarItem = ({
             }`}
         >
           {badge}
+/**
+ * handleClick - Utility function
+ * @returns void
+ */
         </span>
       )}
     </>
@@ -118,6 +154,10 @@ const SidebarItem = ({
 
   if (href) {
     return (
+/**
+ * content - Utility function
+ * @returns void
+ */
       <Link href={href} className={className} onClick={handleClick}>
         {content}
       </Link>
@@ -143,6 +183,10 @@ export const SideBar = () => {
     }
 
     const handleClickOutside = (event: MouseEvent) => {
+/**
+ * className - Utility function
+ * @returns void
+ */
       if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
         setIsMoreOpen(false)
       }
@@ -164,16 +208,28 @@ export const SideBar = () => {
       <aside className="fixed top-20 left-0 z-40 hidden h-[calc(100vh-80px)] w-[300px] flex-col border-r border-slate-200 bg-white lg:flex">
         <div className="flex-1 overflow-y-auto px-3 py-6">
           <div className="space-y-1">
+/**
+ * SideBar - React component
+ * @returns React element
+ */
             {topItems.map((item) => {
               if (item.label === 'Profile') {
                 return (
                   <SidebarItem
                     key={item.label}
                     {...item}
+/**
+ * moreRef - Utility function
+ * @returns void
+ */
                     href={`/profile/${encodeURIComponent(profileHandle)}`}
                     onUpgradeRequired={handleUpgradeRequired}
                   />
                 )
+/**
+ * logout - Utility function
+ * @returns void
+ */
               }
               return (
                 <SidebarItem
@@ -184,6 +240,10 @@ export const SideBar = () => {
               )
             })}
           </div>
+/**
+ * handleClickOutside - Utility function
+ * @returns void
+ */
 
 
           <div className="my-4 border-t border-slate-200" />
@@ -197,6 +257,10 @@ export const SideBar = () => {
               />
             ))}
             <SidebarItem
+/**
+ * handleUpgradeRequired - Utility function
+ * @returns void
+ */
               label="Orders"
               href="/orders"
               icon={Package}
@@ -204,10 +268,18 @@ export const SideBar = () => {
             />
             <SidebarItem
               label="Invoices"
+/**
+ * user - Custom React hook
+ * @returns void
+ */
               href="/artist/invoices"
               icon={DollarSign}
               onUpgradeRequired={handleUpgradeRequired}
             />
+/**
+ * profileHandle - Utility function
+ * @returns void
+ */
             <SidebarItem
               label="Auctions"
               href="/artist/auctions/create"

@@ -36,6 +36,10 @@ type BaseAutocompleteFieldProps = {
   maxVisibleOptions?: number
 }
 
+/**
+ * BaseAutocompleteField - React component
+ * @returns React element
+ */
 export const BaseAutocompleteField = ({
   id,
   options,
@@ -65,16 +69,28 @@ export const BaseAutocompleteField = ({
   const messageId = id ? `${id}-message` : undefined
 
   const selectedOption = useMemo(() => options.find((option) => option.value === value), [options, value])
+/**
+ * messageId - Utility function
+ * @returns void
+ */
 
   const filteredOptions = useMemo(() => {
     if (!search) {
       return options.slice(0, maxVisibleOptions)
     }
+/**
+ * selectedOption - Utility function
+ * @returns void
+ */
 
     const normalizedSearch = search.toLowerCase()
     return options
       .filter((option) => {
         const searchIn = option.searchTerms ?? option.label
+/**
+ * filteredOptions - Utility function
+ * @returns void
+ */
         return searchIn.toLowerCase().includes(normalizedSearch)
       })
       .slice(0, maxVisibleOptions)
@@ -83,12 +99,20 @@ export const BaseAutocompleteField = ({
   const handleSelect = useCallback(
     (option: BaseAutocompleteOption) => {
       onValueChange(option.value)
+/**
+ * normalizedSearch - Utility function
+ * @returns void
+ */
       setSearch(option.label)
       setIsOpen(false)
     },
     [onValueChange],
   )
 
+/**
+ * searchIn - Utility function
+ * @returns void
+ */
   const handleInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const nextSearch = event.target.value
@@ -98,6 +122,10 @@ export const BaseAutocompleteField = ({
       if (selectedOption && nextSearch !== selectedOption.label) {
         onValueChange('')
       }
+/**
+ * handleSelect - Utility function
+ * @returns void
+ */
     },
     [onValueChange, selectedOption],
   )
@@ -110,11 +138,19 @@ export const BaseAutocompleteField = ({
   const handleBlur = useCallback(() => {
     setTimeout(() => {
       setIsOpen(false)
+/**
+ * handleInputChange - Utility function
+ * @returns void
+ */
       if (!selectedOption) {
         setSearch('')
       }
     }, 200)
   }, [selectedOption])
+/**
+ * nextSearch - Utility function
+ * @returns void
+ */
 
   const inputValue = isOpen ? search : selectedOption?.label || ''
 
@@ -129,6 +165,10 @@ export const BaseAutocompleteField = ({
       className={cn('relative', className)}
       labelClassName={labelClassName}
       requiredMarkClassName={requiredMarkClassName}
+/**
+ * handleFocus - Utility function
+ * @returns void
+ */
       messageClassName={messageClassName}
       descriptionClassName={descriptionClassName}
     >
@@ -137,6 +177,10 @@ export const BaseAutocompleteField = ({
           id={id}
           value={inputValue}
           onChange={handleInputChange}
+/**
+ * handleBlur - Utility function
+ * @returns void
+ */
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
@@ -149,6 +193,10 @@ export const BaseAutocompleteField = ({
         <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
           <svg className="h-4 w-4 text-[#989898]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+/**
+ * inputValue - Utility function
+ * @returns void
+ */
           </svg>
         </div>
       </div>

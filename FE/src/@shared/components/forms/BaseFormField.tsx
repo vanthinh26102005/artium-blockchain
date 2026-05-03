@@ -17,6 +17,10 @@ export type BaseFormFieldProps = {
   descriptionClassName?: string
 }
 
+/**
+ * BaseFormField - React component
+ * @returns React element
+ */
 export const BaseFormField = ({
   id,
   label,
