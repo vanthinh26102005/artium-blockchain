@@ -5,6 +5,10 @@ type AuthFormCardProps = {
   children: ReactNode
 }
 
+/**
+ * AuthFormCard - React component
+ * @returns React element
+ */
 export const AuthFormCard = ({ children }: AuthFormCardProps) => {
   // -- render --
   return (

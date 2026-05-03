@@ -29,6 +29,10 @@ type AuthFormOtpInputProps<TFieldValues extends FieldValues> = Omit<
   clearRootErrorOnChange?: boolean
 }
 
+/**
+ * useFieldError - Custom React hook
+ * @returns void
+ */
 const useFieldError = <TFieldValues extends FieldValues>(name: FieldPath<TFieldValues>) => {
   const { getFieldState, formState } = useFormContext<TFieldValues>()
   return getFieldState(name, formState).error?.message
@@ -37,6 +41,10 @@ const useFieldError = <TFieldValues extends FieldValues>(name: FieldPath<TFieldV
 export const AuthFormInput = <TFieldValues extends FieldValues>({
   name,
   clearRootErrorOnChange = true,
+/**
+ * AuthFormInput - React component
+ * @returns React element
+ */
   onChange,
   onBlur,
   ...props
@@ -48,6 +56,10 @@ export const AuthFormInput = <TFieldValues extends FieldValues>({
     onBlur: fieldOnBlur,
     onChange: fieldOnChange,
     ...field
+/**
+ * errorMessage - Utility function
+ * @returns void
+ */
   } = register(name)
 
   return (
@@ -81,6 +93,10 @@ export const AuthFormPasswordInput = <TFieldValues extends FieldValues>({
 }: AuthFormPasswordInputProps<TFieldValues>) => {
   const { register, clearErrors } = useFormContext<TFieldValues>()
   const errorMessage = useFieldError<TFieldValues>(name)
+/**
+ * AuthFormPasswordInput - React component
+ * @returns React element
+ */
   const {
     ref,
     onBlur: fieldOnBlur,
@@ -92,6 +108,10 @@ export const AuthFormPasswordInput = <TFieldValues extends FieldValues>({
     <AuthPasswordInput
       {...props}
       {...field}
+/**
+ * errorMessage - Utility function
+ * @returns void
+ */
       ref={ref}
       onBlur={(event) => {
         fieldOnBlur(event)
@@ -125,6 +145,10 @@ export const AuthFormOtpInput = <TFieldValues extends FieldValues>({
       render={({ field }) => (
         <AuthOtpCodeInput
           {...props}
+/**
+ * AuthFormOtpInput - React component
+ * @returns React element
+ */
           value={typeof field.value === 'string' ? field.value : ''}
           onBlur={field.onBlur}
           onChange={(value) => {
@@ -134,6 +158,10 @@ export const AuthFormOtpInput = <TFieldValues extends FieldValues>({
             field.onChange(value)
           }}
           hasError={Boolean(errorMessage)}
+/**
+ * errorMessage - Utility function
+ * @returns void
+ */
           errorMessage={errorMessage}
         />
       )}

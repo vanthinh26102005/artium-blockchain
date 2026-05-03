@@ -2,6 +2,10 @@ type AuthDividerProps = {
   text: string
 }
 
+/**
+ * AuthDivider - React component
+ * @returns React element
+ */
 export const AuthDivider = ({ text }: AuthDividerProps) => {
   // -- render --
   return (

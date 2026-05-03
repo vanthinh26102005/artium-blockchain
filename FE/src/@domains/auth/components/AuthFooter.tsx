@@ -1,3 +1,7 @@
+/**
+ * AuthFooter - React component
+ * @returns React element
+ */
 export const AuthFooter = () => {
   // -- render --
   return (
