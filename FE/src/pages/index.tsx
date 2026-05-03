@@ -26,10 +26,7 @@ const Home: NextPageWithLayout = () => {
 Home.getLayout = function getLayout(page: ReactElement) {
   return (
     <div className="min-h-screen bg-black text-white">
-/**
- * getLayout - Utility function
- * @returns void
- */
+      /** * getLayout - Utility function * @returns void */
       <div className="flex min-h-screen flex-col">
         <SiteHeader variant="landing" />
         <main className="w-full flex-1">{page}</main>
