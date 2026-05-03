@@ -21,6 +21,10 @@ import {
 } from '@shared/components/ui/tooltip'
 import { Text } from '@shared/components/Text'
 
+/**
+ * Form - React component
+ * @returns React element
+ */
 const Form = FormProvider
 
 type FormFieldContextValue<
@@ -33,11 +37,19 @@ type FormFieldContextValue<
 const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue)
 
 const FormField = <
+/**
+ * FormFieldContext - React component
+ * @returns React element
+ */
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   ...props
 }: ControllerProps<TFieldValues, TName>) => {
+/**
+ * FormField - React component
+ * @returns React element
+ */
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller {...props} />
@@ -54,20 +66,36 @@ const useFormField = () => {
 
   if (!fieldContext) {
     throw new Error('useFormField should be used within <FormField>')
+/**
+ * useFormField - Custom React hook
+ * @returns void
+ */
   }
 
   const { id } = itemContext
 
+/**
+ * fieldContext - Utility function
+ * @returns void
+ */
   return {
     id,
     name: fieldContext.name,
     formItemId: `${id}-form-item`,
+/**
+ * itemContext - Utility function
+ * @returns void
+ */
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
     ...fieldState,
   }
 }
 
+/**
+ * fieldState - Utility function
+ * @returns void
+ */
 type FormItemContextValue = {
   id: string
 }
@@ -93,16 +121,28 @@ const FormLabel = React.forwardRef<
 >(({ className, required, tooltip, children, ...props }, ref) => {
   const { error, formItemId } = useFormField()
 
+/**
+ * FormItemContext - React component
+ * @returns React element
+ */
   return (
     <Label
       ref={ref}
       className={cn(error && 'text-destructive', className)}
       htmlFor={formItemId}
+/**
+ * FormItem - React component
+ * @returns React element
+ */
       {...props}
     >
       {/* label */}
       {children}
 
+/**
+ * id - Utility function
+ * @returns void
+ */
       {/* required asterisk */}
       {required && <span className="text-destructive ml-1">*</span>}
 
@@ -117,6 +157,10 @@ const FormLabel = React.forwardRef<
 
             {/* tooltip content */}
             <TooltipContent>
+/**
+ * FormLabel - React component
+ * @returns React element
+ */
               <Text className="text-[10px] font-normal text-[#191414]">{tooltip}</Text>
             </TooltipContent>
           </Tooltip>
@@ -160,6 +204,10 @@ const FormDescription = React.forwardRef<
     />
   )
 })
+/**
+ * FormControl - React component
+ * @returns React element
+ */
 FormDescription.displayName = 'FormDescription'
 
 const FormMessage = React.forwardRef<
@@ -181,6 +229,10 @@ const FormMessage = React.forwardRef<
       {...props}
     >
       {body}
+/**
+ * FormDescription - React component
+ * @returns React element
+ */
     </p>
   )
 })
@@ -196,3 +248,12 @@ export {
   FormMessage,
   FormField,
 }
+
+/**
+ * FormMessage - React component
+ * @returns React element
+ */
+/**
+ * body - Utility function
+ * @returns void
+ */

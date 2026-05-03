@@ -8,6 +8,10 @@ import { Button } from "./button"
 import { Input } from "./input"
 import { Textarea } from "./textarea"
 
+/**
+ * InputGroup - React component
+ * @returns React element
+ */
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -25,6 +29,10 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
 const inputGroupAddonVariants = cva(
   "flex h-auto cursor-text items-center justify-center gap-2 py-1.5 text-sm font-medium text-muted-foreground select-none group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-4",
   {
+/**
+ * inputGroupAddonVariants - Utility function
+ * @returns void
+ */
     variants: {
       align: {
         "inline-start":
@@ -49,6 +57,10 @@ function InputGroupAddon({
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>) {
   return (
+/**
+ * InputGroupAddon - React component
+ * @returns React element
+ */
     <div
       role="group"
       data-slot="input-group-addon"
@@ -74,6 +86,10 @@ const inputGroupButtonVariants = cva(
         sm: "",
         "icon-xs":
           "size-6 rounded-[calc(var(--radius)-3px)] p-0 has-[>svg]:p-0",
+/**
+ * inputGroupButtonVariants - Utility function
+ * @returns void
+ */
         "icon-sm": "size-8 p-0 has-[>svg]:p-0",
       },
     },
@@ -95,6 +111,10 @@ function InputGroupButton({
     <Button
       type={type}
       data-size={size}
+/**
+ * InputGroupButton - React component
+ * @returns React element
+ */
       variant={variant}
       className={cn(inputGroupButtonVariants({ size }), className)}
       {...props}
@@ -117,6 +137,10 @@ function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
 function InputGroupInput({
   className,
   ...props
+/**
+ * InputGroupText - React component
+ * @returns React element
+ */
 }: React.ComponentProps<"input">) {
   return (
     <Input
@@ -132,6 +156,10 @@ function InputGroupInput({
 
 function InputGroupTextarea({
   className,
+/**
+ * InputGroupInput - React component
+ * @returns React element
+ */
   ...props
 }: React.ComponentProps<"textarea">) {
   return (
@@ -151,6 +179,10 @@ export {
   InputGroupAddon,
   InputGroupButton,
   InputGroupText,
+/**
+ * InputGroupTextarea - React component
+ * @returns React element
+ */
   InputGroupInput,
   InputGroupTextarea,
 }

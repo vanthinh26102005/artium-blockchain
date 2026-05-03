@@ -32,6 +32,10 @@ interface MarqueeProps extends ComponentPropsWithoutRef<'div'> {
   repeat?: number
 }
 
+/**
+ * Marquee - React component
+ * @returns React element
+ */
 export default function Marquee({
   className,
   reverse = false,
