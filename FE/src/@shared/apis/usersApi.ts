@@ -31,36 +31,44 @@ type LoginByGoogleInput = {
  */
 const usersApi = {
   loginByEmail: async (input: LoginByEmailInput) => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/login', input, { auth: false })
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/login', input, {
+      auth: false,
+    })
     return normalizeLoginResponse(raw)
   },
-/**
- * raw - Utility function
- * @returns void
- */
+  /**
+   * raw - Utility function
+   * @returns void
+   */
   loginByGoogle: async (input: LoginByGoogleInput) => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, { auth: false })
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, {
+      auth: false,
+    })
     return normalizeLoginResponse(raw)
   },
   loginWithGoogle: async (input: LoginByGoogleInput) => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, { auth: false })
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, {
+      auth: false,
+    })
     return normalizeLoginResponse(raw)
-/**
- * raw - Utility function
- * @returns void
- */
+    /**
+     * raw - Utility function
+     * @returns void
+     */
   },
   getWalletNonce: (address: string) =>
-    apiFetch<WalletNonceResponse>(
-      withQuery('/identity/auth/wallet/nonce', { address }),
-      { auth: false, cache: 'no-store' },
-    ),
+    apiFetch<WalletNonceResponse>(withQuery('/identity/auth/wallet/nonce', { address }), {
+      auth: false,
+      cache: 'no-store',
+    }),
   loginByWallet: async (input: LoginByWalletPayload) => {
-/**
- * raw - Utility function
- * @returns void
- */
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet', input, { auth: false })
+    /**
+     * raw - Utility function
+     * @returns void
+     */
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet', input, {
+      auth: false,
+    })
     return normalizeLoginResponse(raw)
   },
   registerInitiate: (input: RegisterInitiatePayload) =>
@@ -68,14 +76,16 @@ const usersApi = {
       auth: false,
     }),
   registerComplete: async (input: RegisterCompletePayload) => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/register/complete', input, { auth: false })
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/register/complete', input, {
+      auth: false,
+    })
     return normalizeLoginResponse(raw)
   },
   requestPasswordReset: (input: RequestPasswordResetPayload) =>
-/**
- * raw - Utility function
- * @returns void
- */
+    /**
+     * raw - Utility function
+     * @returns void
+     */
     apiPost<RequestPasswordResetResponse>('/identity/auth/password/reset/request', input, {
       auth: false,
     }),
@@ -87,16 +97,19 @@ const usersApi = {
     const raw = await apiFetch<Record<string, unknown>>('/identity/auth/password/reset/confirm', {
       auth: false,
       method: 'PUT',
-/**
- * raw - Utility function
- * @returns void
- */
+      /**
+       * raw - Utility function
+       * @returns void
+       */
       body: JSON.stringify(input),
     })
     return normalizeLoginResponse(raw)
   },
   getMe: async () => {
-    const raw = await apiFetch<Record<string, unknown>>('/identity/users/me', { auth: true, cache: 'no-store' })
+    const raw = await apiFetch<Record<string, unknown>>('/identity/users/me', {
+      auth: true,
+      cache: 'no-store',
+    })
     return normalizeUserPayload(raw)
   },
   getUserBySlug: async (slug: string) => {
@@ -106,14 +119,18 @@ const usersApi = {
         auth: false,
         cache: 'no-store',
       },
-/**
- * raw - Utility function
- * @returns void
- */
+      /**
+       * raw - Utility function
+       * @returns void
+       */
     )
     return normalizeUserPayload(raw)
   },
-  updateMe: async (input: { fullName?: string | null; slug?: string | null; avatarUrl?: string | null }) => {
+  updateMe: async (input: {
+    fullName?: string | null
+    slug?: string | null
+    avatarUrl?: string | null
+  }) => {
     const raw = await apiFetch<Record<string, unknown>>('/identity/users/me', {
       method: 'PUT',
       body: JSON.stringify(input),
@@ -121,10 +138,10 @@ const usersApi = {
     })
     return normalizeUserPayload((raw as { user: Record<string, unknown> }).user ?? raw)
   },
-/**
- * raw - Utility function
- * @returns void
- */
+  /**
+   * raw - Utility function
+   * @returns void
+   */
   getUserById: async (userId: string) => {
     const raw = await apiFetch<Record<string, unknown>>(
       `/identity/users/${encodePathSegment(userId)}`,
@@ -132,10 +149,10 @@ const usersApi = {
         auth: false,
         cache: 'no-store',
       },
-/**
- * raw - Utility function
- * @returns void
- */
+      /**
+       * raw - Utility function
+       * @returns void
+       */
     )
     return normalizeUserPayload(raw)
   },

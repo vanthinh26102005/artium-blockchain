@@ -75,7 +75,7 @@ type UpdateSellerProfileResponse = {
 type MomentApiItem = {
   id: string
   userId: string
-  mediaUrl: (string & {})
+  mediaUrl: string & {}
   mediaType: 'image' | 'video'
   thumbnailUrl?: null | string
   caption?: string | null
@@ -287,13 +287,10 @@ export const profileApis = {
       },
     ),
   getMoodboard: (moodboardId: string) =>
-    apiFetch<MoodboardApiItem | null>(
-      `/community/moodboards/${encodePathSegment(moodboardId)}`,
-      {
-        auth: false,
-        cache: 'no-store',
-      },
-    ),
+    apiFetch<MoodboardApiItem | null>(`/community/moodboards/${encodePathSegment(moodboardId)}`, {
+      auth: false,
+      cache: 'no-store',
+    }),
   listMomentComments: (
     momentId: string,
     options?: { skip?: number; take?: number; includeDeleted?: boolean },
@@ -312,13 +309,10 @@ export const profileApis = {
       auth: true,
     }),
   getMomentLikeStatus: (momentId: string) =>
-    apiFetch<{ liked: boolean }>(
-      `/community/moments/${encodePathSegment(momentId)}/likes/me`,
-      {
-        auth: true,
-        cache: 'no-store',
-      },
-    ),
+    apiFetch<{ liked: boolean }>(`/community/moments/${encodePathSegment(momentId)}/likes/me`, {
+      auth: true,
+      cache: 'no-store',
+    }),
   setMomentLikeStatus: (momentId: string, liked: boolean, contentOwnerId?: string) =>
     apiFetch<LikeStatusResponse>(`/community/moments/${encodePathSegment(momentId)}/likes`, {
       method: 'PUT',
@@ -338,13 +332,10 @@ export const profileApis = {
       auth: true,
     }),
   listCurrentUserMoodboardIdsForArtwork: (artworkId: string) =>
-    apiFetch<string[]>(
-      `/community/moodboards/artwork/${encodePathSegment(artworkId)}/me`,
-      {
-        auth: true,
-        cache: 'no-store',
-      },
-    ),
+    apiFetch<string[]>(`/community/moodboards/artwork/${encodePathSegment(artworkId)}/me`, {
+      auth: true,
+      cache: 'no-store',
+    }),
   addArtworkToMoodboard: (moodboardId: string, input: AddArtworkToMoodboardInput) =>
     apiFetch<MoodboardArtworkApiItem>(
       `/community/moodboards/${encodePathSegment(moodboardId)}/artworks`,

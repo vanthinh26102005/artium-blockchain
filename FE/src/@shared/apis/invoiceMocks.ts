@@ -16,10 +16,10 @@ const generateMockInvoiceCode = (): string => {
   const timestamp = Date.now().toString(36).toUpperCase()
   const random = Math.random().toString(36).slice(2, 6).toUpperCase()
   return `INV-${timestamp}-${random}`
-/**
- * timestamp - Utility function
- * @returns void
- */
+  /**
+   * timestamp - Utility function
+   * @returns void
+   */
 }
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -35,19 +35,19 @@ export const mockCreateQuickSellInvoice = async (
 
   const artworkTotal = payload.artworks.reduce((sum, item) => {
     const qty = item.quantity || 1
-/**
- * delay - Utility function
- * @returns void
- */
+    /**
+     * delay - Utility function
+     * @returns void
+     */
     const lineTotal = item.price * qty
     const discounted = lineTotal * (1 - item.discountPercent / 100)
     return sum + discounted
   }, 0)
 
-/**
- * mockCreateQuickSellInvoice - Utility function
- * @returns void
- */
+  /**
+   * mockCreateQuickSellInvoice - Utility function
+   * @returns void
+   */
   const customTotal = payload.customItems.reduce((sum, item) => {
     const qty = item.quantity || 1
     const lineTotal = item.price * qty
@@ -56,34 +56,34 @@ export const mockCreateQuickSellInvoice = async (
   }, 0)
 
   const subtotal = artworkTotal + customTotal
-/**
- * artworkTotal - Utility function
- * @returns void
- */
+  /**
+   * artworkTotal - Utility function
+   * @returns void
+   */
   const tax = payload.isApplySalesTax ? subtotal * ((payload.taxPercent || 0) / 100) : 0
   const totalAmount = Math.round((subtotal + tax) * 100) / 100
 
   const response: CreateInvoiceResponse = {
-/**
- * qty - Utility function
- * @returns void
- */
+    /**
+     * qty - Utility function
+     * @returns void
+     */
     id: `mock-invoice-${Date.now()}`,
     invoiceCode: generateMockInvoiceCode(),
     totalAmount,
     invoiceItems: [
-/**
- * lineTotal - Utility function
- * @returns void
- */
+      /**
+       * lineTotal - Utility function
+       * @returns void
+       */
       ...payload.artworks.map((item, i) => ({
         id: `item-artwork-${i}`,
         type: 'Artium-artwork' as const,
         salePrice: item.price,
-/**
- * discounted - Utility function
- * @returns void
- */
+        /**
+         * discounted - Utility function
+         * @returns void
+         */
         quantity: item.quantity || 1,
         discountPercentage: item.discountPercent,
         artworkId: item.id,
@@ -91,26 +91,26 @@ export const mockCreateQuickSellInvoice = async (
         artworkImageUrl: item.artworkImageUrl,
       })),
       ...payload.customItems.map((item, i) => ({
-/**
- * customTotal - Utility function
- * @returns void
- */
+        /**
+         * customTotal - Utility function
+         * @returns void
+         */
         id: `item-custom-${i}`,
         type: 'custom-item' as const,
         salePrice: item.price,
         quantity: item.quantity || 1,
-/**
- * qty - Utility function
- * @returns void
- */
+        /**
+         * qty - Utility function
+         * @returns void
+         */
         discountPercentage: item.discountPercent,
         artworkName: item.title,
       })),
     ],
-/**
- * lineTotal - Utility function
- * @returns void
- */
+    /**
+     * lineTotal - Utility function
+     * @returns void
+     */
   }
 
   return response
@@ -126,35 +126,35 @@ export const mockGetInvoiceByCode = async (invoiceCode: string): Promise<Invoice
   return {
     id: 'mock-invoice-id',
     invoiceCode,
-/**
- * subtotal - Utility function
- * @returns void
- */
+    /**
+     * subtotal - Utility function
+     * @returns void
+     */
     status: 'sent',
     subtotal: 1500,
     discountAmount: 0,
     taxAmount: 0,
-/**
- * tax - Utility function
- * @returns void
- */
+    /**
+     * tax - Utility function
+     * @returns void
+     */
     taxPercent: 0,
     totalAmount: 1500,
     currency: 'USD',
     collector: {
-/**
- * totalAmount - Utility function
- * @returns void
- */
+      /**
+       * totalAmount - Utility function
+       * @returns void
+       */
       name: 'Mock Buyer',
       email: 'buyer@example.com',
     },
     items: [
       {
-/**
- * response - Utility function
- * @returns void
- */
+        /**
+         * response - Utility function
+         * @returns void
+         */
         id: 'mock-item-1',
         type: 'Artium-artwork',
         salePrice: 1500,
@@ -187,10 +187,10 @@ export const mockSendQuickSellInvoice = async (
   payload: SendInvoiceRequest,
 ): Promise<{ success: boolean }> => {
   await delay(500)
-/**
- * mockGetInvoiceByCode - Utility function
- * @returns void
- */
+  /**
+   * mockGetInvoiceByCode - Utility function
+   * @returns void
+   */
   void invoiceCode
   void payload
   return { success: true }

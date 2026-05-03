@@ -213,7 +213,12 @@ const orderApis = {
     return apiFetch<OrderInvoiceResponse>(`/orders/${encodePathSegment(id)}/invoice`)
   },
 
-  getMyOrders: async ({ scope, status, skip, take }: GetMyOrdersInput): Promise<PaginatedOrdersResponse> => {
+  getMyOrders: async ({
+    scope,
+    status,
+    skip,
+    take,
+  }: GetMyOrdersInput): Promise<PaginatedOrdersResponse> => {
     return apiFetch<PaginatedOrdersResponse>(withQuery('/orders', { scope, status, skip, take }))
   },
 

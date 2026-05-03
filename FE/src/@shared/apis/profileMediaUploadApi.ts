@@ -27,26 +27,26 @@ export type ProfileCommunityMediaStatus = 'pending' | 'consumed' | 'rejected' | 
 
 export type ProfileMediaUploadResponse = {
   mediaId: string
-/**
- * PROFILE_MAX_VIDEO_SIZE_BYTES - React component
- * @returns React element
- */
+  /**
+   * PROFILE_MAX_VIDEO_SIZE_BYTES - React component
+   * @returns React element
+   */
   url: string
   secureUrl: string
   mediaType: ProfileCommunityMediaType
   mimeType: string
-/**
- * PROFILE_MAX_VIDEO_DURATION_SECONDS - React component
- * @returns React element
- */
+  /**
+   * PROFILE_MAX_VIDEO_DURATION_SECONDS - React component
+   * @returns React element
+   */
   originalFilename: string
   size: number
   status: ProfileCommunityMediaStatus
   durationSeconds?: number | null
-/**
- * PROFILE_MAX_MOODBOARD_FILES - React component
- * @returns React element
- */
+  /**
+   * PROFILE_MAX_MOODBOARD_FILES - React component
+   * @returns React element
+   */
   thumbnailUrl?: string | null
   createdAt: string | Date
 }
@@ -94,10 +94,10 @@ const validateDuration = (durationSeconds?: number) => {
     throw createUploadError(
       UploadErrorType.INVALID_PARAMS,
       `Video duration exceeds maximum allowed duration of ${PROFILE_MAX_VIDEO_DURATION_SECONDS} seconds`,
-/**
- * error - Utility function
- * @returns void
- */
+      /**
+       * error - Utility function
+       * @returns void
+       */
     )
   }
 }
@@ -108,36 +108,36 @@ const validateProfileMediaFile = (file: File, durationSeconds?: number) => {
       throw createUploadError(
         UploadErrorType.FILE_TOO_LARGE,
         `Image size (${formatMegabytes(file.size)}MB) exceeds maximum allowed size (${formatMegabytes(PROFILE_MAX_IMAGE_SIZE_BYTES)}MB)`,
-/**
- * formatMegabytes - Utility function
- * @returns void
- */
+        /**
+         * formatMegabytes - Utility function
+         * @returns void
+         */
       )
     }
     return
   }
 
-/**
- * isImageFile - Utility function
- * @returns void
- */
+  /**
+   * isImageFile - Utility function
+   * @returns void
+   */
   if (isVideoFile(file)) {
     if (file.size > PROFILE_MAX_VIDEO_SIZE_BYTES) {
       throw createUploadError(
         UploadErrorType.FILE_TOO_LARGE,
-/**
- * isVideoFile - Utility function
- * @returns void
- */
+        /**
+         * isVideoFile - Utility function
+         * @returns void
+         */
         `Video size (${formatMegabytes(file.size)}MB) exceeds maximum allowed size (${formatMegabytes(PROFILE_MAX_VIDEO_SIZE_BYTES)}MB)`,
       )
     }
     validateDuration(durationSeconds)
     return
-/**
- * validateDuration - Utility function
- * @returns void
- */
+    /**
+     * validateDuration - Utility function
+     * @returns void
+     */
   }
 
   throw createUploadError(
@@ -154,10 +154,10 @@ export const uploadProfileMomentMedia = async (
   options?: ProfileMediaUploadOptions,
 ): Promise<ProfileMediaUploadResponse> => {
   const { file, durationSeconds } = request
-/**
- * validateProfileMediaFile - Utility function
- * @returns void
- */
+  /**
+   * validateProfileMediaFile - Utility function
+   * @returns void
+   */
 
   if (!file) {
     throw createUploadError(UploadErrorType.INVALID_PARAMS, 'Exactly one file is required')
@@ -172,11 +172,7 @@ export const uploadProfileMomentMedia = async (
     formData.append('durationSeconds', String(durationSeconds))
   }
 
-  return apiUpload<ProfileMediaUploadResponse>(
-    '/community/uploads/moment-media',
-    formData,
-    options,
-  )
+  return apiUpload<ProfileMediaUploadResponse>('/community/uploads/moment-media', formData, options)
 }
 
 export const uploadProfileMoodboardMedia = async (
@@ -192,10 +188,10 @@ export const uploadProfileMoodboardMedia = async (
   if (files.length > PROFILE_MAX_MOODBOARD_FILES) {
     throw createUploadError(
       UploadErrorType.INVALID_PARAMS,
-/**
- * uploadProfileMomentMedia - Utility function
- * @returns void
- */
+      /**
+       * uploadProfileMomentMedia - Utility function
+       * @returns void
+       */
       `Maximum ${PROFILE_MAX_MOODBOARD_FILES} files allowed per moodboard upload`,
     )
   }
@@ -211,10 +207,10 @@ export const uploadProfileMoodboardMedia = async (
 
   if (durationSecondsByFileName) {
     formData.append('durationSecondsByFileName', JSON.stringify(durationSecondsByFileName))
-/**
- * formData - Utility function
- * @returns void
- */
+    /**
+     * formData - Utility function
+     * @returns void
+     */
   }
 
   return apiUpload<ProfileMediaUploadResponse[]>(

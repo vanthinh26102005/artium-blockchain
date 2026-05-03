@@ -85,16 +85,11 @@ const eventsApis = {
     return apiFetch<EventApiResponse>(`/events/${encodePathSegment(eventId)}`, { auth: false })
   },
 
-  createEvent: async (
-    payload: CreateEventRequest,
-  ): Promise<EventApiResponse> => {
+  createEvent: async (payload: CreateEventRequest): Promise<EventApiResponse> => {
     return apiPost<EventApiResponse>('/events', payload)
   },
 
-  updateEvent: async (
-    eventId: string,
-    payload: UpdateEventRequest,
-  ): Promise<EventApiResponse> => {
+  updateEvent: async (eventId: string, payload: UpdateEventRequest): Promise<EventApiResponse> => {
     return apiFetch<EventApiResponse>(`/events/${encodePathSegment(eventId)}`, {
       method: 'PATCH',
       body: JSON.stringify(payload),

@@ -124,19 +124,14 @@ export type PaymentTransactionResponse = {
  * @returns void
  */
 const paymentApis = {
-  createPaymentIntent: async (
-    data: CreatePaymentIntentRequest,
-  ): Promise<PaymentIntentResponse> => {
+  createPaymentIntent: async (data: CreatePaymentIntentRequest): Promise<PaymentIntentResponse> => {
     return apiPost<PaymentIntentResponse>('/payments/stripe/payment-intent', data)
   },
 
   confirmPaymentIntent: async (
     data: ConfirmPaymentIntentRequest,
   ): Promise<ConfirmPaymentIntentResponse> => {
-    return apiPost<ConfirmPaymentIntentResponse>(
-      '/payments/stripe/payment-intent/confirm',
-      data,
-    )
+    return apiPost<ConfirmPaymentIntentResponse>('/payments/stripe/payment-intent/confirm', data)
   },
 
   createStripeCustomer: async (
@@ -149,12 +144,8 @@ const paymentApis = {
     return apiFetch<PaymentTransactionResponse[]>('/payments/transactions')
   },
 
-  getTransactionById: async (
-    id: string,
-  ): Promise<PaymentTransactionResponse> => {
-    return apiFetch<PaymentTransactionResponse>(
-      `/payments/transactions/${encodePathSegment(id)}`,
-    )
+  getTransactionById: async (id: string): Promise<PaymentTransactionResponse> => {
+    return apiFetch<PaymentTransactionResponse>(`/payments/transactions/${encodePathSegment(id)}`)
   },
 
   recordEthereumPayment: async (
@@ -167,10 +158,10 @@ const paymentApis = {
     const normalizedAmount = usdAmount.toFixed(2)
     return apiFetch<EthereumQuoteResponse>(
       withQuery('/payments/ethereum/quote', { usdAmount: normalizedAmount }),
-/**
- * normalizedAmount - Utility function
- * @returns void
- */
+      /**
+       * normalizedAmount - Utility function
+       * @returns void
+       */
     )
   },
 }

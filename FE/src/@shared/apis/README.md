@@ -5,6 +5,7 @@
 API modules in this directory keep stable default exports such as `artworkApis`, `auctionApis`, `paymentApis`, `orderApis`, `profileApis`, `followersApis`, `messagingApis`, `eventsApis`, `usersApi`, `invoiceApis`, `artworkFolderApis`, and `artworkUploadApi`.
 
 Use this order for new modules:
+
 1. Imports from `@shared/services/apiClient`.
 2. Exported request and response types.
 3. Small local response normalizers when backend shapes vary.
@@ -13,6 +14,7 @@ Use this order for new modules:
 ## Shared Client Helpers
 
 Use these helpers from `@shared/services/apiClient`:
+
 - `buildApiUrl` for base URL and path joining.
 - `buildQueryString` for query encoding.
 - `withQuery` for appending query strings to paths.
@@ -74,7 +76,7 @@ withQuery('/orders', { scope, status, skip, take })
 Path construction:
 
 ```ts
-`/orders/${encodePathSegment(id)}`
+;`/orders/${encodePathSegment(id)}`
 ```
 
 Upload construction:
