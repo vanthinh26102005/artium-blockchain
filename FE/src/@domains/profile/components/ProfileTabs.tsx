@@ -26,26 +26,26 @@ export const ProfileTabs = ({ tabs, activeTab, onTabChange, tabHrefs }: ProfileT
           const isActive = activeTab === tab.key
           const href = tabHrefs?.[tab.key]
           const tabClassName = cn(
-/**
- * isActive - Utility function
- * @returns void
- */
+            /**
+             * isActive - Utility function
+             * @returns void
+             */
             'px-3 sm:px-4 py-2 text-sm sm:text-base font-semibold uppercase tracking-tight rounded-full transition-all whitespace-nowrap',
             isActive ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-800 hover:bg-slate-100',
           )
 
-/**
- * href - Utility function
- * @returns void
- */
+          /**
+           * href - Utility function
+           * @returns void
+           */
           if (href) {
             return (
               <Link
                 key={tab.key}
-/**
- * tabClassName - Utility function
- * @returns void
- */
+                /**
+                 * tabClassName - Utility function
+                 * @returns void
+                 */
                 href={href}
                 className={tabClassName}
                 aria-current={isActive ? 'page' : undefined}

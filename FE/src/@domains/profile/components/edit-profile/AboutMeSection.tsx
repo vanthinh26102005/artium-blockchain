@@ -19,10 +19,10 @@ const PROFILE_CATEGORY_OPTIONS = ['Artist', 'Advisor', 'Collector', 'Gallery', '
 const ROLE_OPTIONS = [
   'Curator',
   'Designer',
-/**
- * ROLE_OPTIONS - React component
- * @returns React element
- */
+  /**
+   * ROLE_OPTIONS - React component
+   * @returns React element
+   */
   'Musician',
   'Collector',
   'Newbie',
@@ -47,10 +47,10 @@ export const AboutMeSection = ({
   errors,
   showErrors,
   showClassificationFields = true,
-/**
- * AboutMeSection - React component
- * @returns React element
- */
+  /**
+   * AboutMeSection - React component
+   * @returns React element
+   */
 }: AboutMeSectionProps) => {
   const headline = useWatch({ control, name: 'headline' }) ?? ''
   const biography = useWatch({ control, name: 'biography' }) ?? ''
@@ -61,47 +61,43 @@ export const AboutMeSection = ({
   const { field: rolesField } = useController({ control, name: 'roles' })
   const profileCategories = profileCategoriesField.value ?? []
   const roles = rolesField.value ?? []
-/**
- * headline - Utility function
- * @returns void
- */
+  /**
+   * headline - Utility function
+   * @returns void
+   */
   const toggleSelection = (current: string[], value: string) =>
     current.includes(value) ? current.filter((item) => item !== value) : [...current, value]
 
   return (
-/**
- * biography - Utility function
- * @returns void
- */
+    /**
+     * biography - Utility function
+     * @returns void
+     */
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-sm font-semibold tracking-[0.2em] text-slate-400 uppercase">About Me</h2>
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">About Me</h2>
 
       <div className="mt-6 space-y-4">
         <div>
           <label
             htmlFor="headline"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
-/**
- * profileCategories - Utility function
- * @returns void
- */
-            Headline
+            /** * profileCategories - Utility function * @returns void */ Headline
           </label>
           <input
             id="headline"
-/**
- * roles - Utility function
- * @returns void
- */
+            /**
+             * roles - Utility function
+             * @returns void
+             */
             {...register('headline')}
             maxLength={100}
             placeholder="Exploring art and building communities"
             className={getInputClasses()}
-/**
- * toggleSelection - Utility function
- * @returns void
- */
+            /**
+             * toggleSelection - Utility function
+             * @returns void
+             */
           />
           <div className="mt-1 flex min-h-[16px] items-center justify-end text-xs text-slate-400">
             <span>{headline.length}/100 characters</span>
@@ -111,7 +107,7 @@ export const AboutMeSection = ({
         <div>
           <label
             htmlFor="biography"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Biography
           </label>
@@ -131,7 +127,7 @@ export const AboutMeSection = ({
         <div>
           <label
             htmlFor="websiteUrl"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Website URL
           </label>
@@ -146,7 +142,7 @@ export const AboutMeSection = ({
         <div>
           <label
             htmlFor="instagram"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Instagram
           </label>
@@ -161,7 +157,7 @@ export const AboutMeSection = ({
         <div>
           <label
             htmlFor="twitter"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Twitter
           </label>
@@ -175,7 +171,7 @@ export const AboutMeSection = ({
 
         {showClassificationFields ? (
           <div>
-            <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
+            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
               Choose what best describes you
             </label>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -204,7 +200,7 @@ export const AboutMeSection = ({
 
         {showClassificationFields ? (
           <div>
-            <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
+            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
               My roles
             </label>
             <div className="mt-3 flex flex-wrap gap-2">

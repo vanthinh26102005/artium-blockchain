@@ -21,29 +21,22 @@ export const ArtWorldConnectionSection = ({
   const connectionAffiliations = useWatch({ control, name: 'connectionAffiliations' }) ?? ''
   const connectionSeenAt = useWatch({ control, name: 'connectionSeenAt' }) ?? ''
   const connectionCurrently = useWatch({ control, name: 'connectionCurrently' }) ?? ''
-/**
- * connectionAffiliations - Utility function
- * @returns void
- */
+  /**
+   * connectionAffiliations - Utility function
+   * @returns void
+   */
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-sm font-semibold tracking-[0.2em] text-slate-400 uppercase">
-        My Connection to the Art World
-/**
- * connectionSeenAt - Utility function
- * @returns void
- */
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+        My Connection to the Art World /** * connectionSeenAt - Utility function * @returns void */
       </h2>
 
       <div className="mt-6 space-y-4">
         <div>
-/**
- * connectionCurrently - Utility function
- * @returns void
- */
+          /** * connectionCurrently - Utility function * @returns void */
           <label
             htmlFor="connectionAffiliations"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Affiliations
           </label>
@@ -62,7 +55,7 @@ export const ArtWorldConnectionSection = ({
         <div>
           <label
             htmlFor="connectionSeenAt"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             You might have seen me at
           </label>
@@ -81,7 +74,7 @@ export const ArtWorldConnectionSection = ({
         <div>
           <label
             htmlFor="connectionCurrently"
-            className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
           >
             Currently
           </label>
