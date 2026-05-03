@@ -16,6 +16,10 @@ type OrderInvoicePanelProps = {
   panelRef?: RefObject<HTMLDivElement | null>
 }
 
+/**
+ * OrderInvoicePanel - React component
+ * @returns React element
+ */
 export const OrderInvoicePanel = ({
   availability,
   invoice,
@@ -27,6 +31,10 @@ export const OrderInvoicePanel = ({
   const canPrint = canPrintOrderInvoice(availability)
 
   return (
+/**
+ * canPrint - Utility function
+ * @returns void
+ */
     <div
       ref={panelRef}
       tabIndex={-1}

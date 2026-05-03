@@ -9,6 +9,10 @@ type PostMomentModalProps = {
     onOpenChange: (open: boolean) => void
 }
 
+/**
+ * PostMomentModal - React component
+ * @returns React element
+ */
 export const PostMomentModal = ({ open, onOpenChange }: PostMomentModalProps) => {
     const [videoFile, setVideoFile] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -19,11 +23,19 @@ export const PostMomentModal = ({ open, onOpenChange }: PostMomentModalProps) =>
     const handleSelectVideo = (file: File) => {
         setVideoFile(file)
         const url = URL.createObjectURL(file)
+/**
+ * handleSelectVideo - Utility function
+ * @returns void
+ */
         setPreviewUrl(url)
     }
 
     const handleRemoveVideo = () => {
         setVideoFile(null)
+/**
+ * url - Utility function
+ * @returns void
+ */
         if (previewUrl) {
             URL.revokeObjectURL(previewUrl)
             setPreviewUrl(null)
@@ -31,6 +43,10 @@ export const PostMomentModal = ({ open, onOpenChange }: PostMomentModalProps) =>
         setCaption('')
         setVideoType('')
     }
+/**
+ * handleRemoveVideo - Utility function
+ * @returns void
+ */
 
     const handlePost = async () => {
         if (!videoFile) return
@@ -44,6 +60,10 @@ export const PostMomentModal = ({ open, onOpenChange }: PostMomentModalProps) =>
 
         setIsSubmitting(false)
         handleRemoveVideo()
+/**
+ * handlePost - Utility function
+ * @returns void
+ */
         onOpenChange(false)
     }
 

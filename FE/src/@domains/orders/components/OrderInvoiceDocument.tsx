@@ -15,6 +15,10 @@ type OrderInvoiceDocumentProps = {
   className?: string
 }
 
+/**
+ * FieldBlock - React component
+ * @returns React element
+ */
 const FieldBlock = ({ label, value }: { label: string; value: string }) => (
   <div>
     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
@@ -27,6 +31,10 @@ const FieldBlock = ({ label, value }: { label: string; value: string }) => (
 const AddressBlock = ({ title, lines }: { title: string; lines: string[] }) => (
   <div className="rounded-[16px] border border-slate-200 p-4">
     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+/**
+ * AddressBlock - React component
+ * @returns React element
+ */
       {title}
     </p>
     <div className="mt-3 space-y-1 text-sm leading-6 text-slate-700">
@@ -45,6 +53,10 @@ const TotalRow = ({
   currency,
   strong,
 }: {
+/**
+ * TotalRow - React component
+ * @returns React element
+ */
   label: string
   value: number
   currency: string
@@ -72,30 +84,58 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
   const billingLines = formatInvoiceAddressLines(invoice.billingAddress)
 
   return (
+/**
+ * OrderInvoiceDocument - React component
+ * @returns React element
+ */
     <article
       className={cn(
         'order-invoice-print-root bg-white text-slate-900',
         'mx-auto w-full max-w-[960px] rounded-[20px] border border-slate-200 p-5 shadow-sm sm:p-8',
+/**
+ * buyerNameRedacted - Utility function
+ * @returns void
+ */
         className,
       )}
     >
       <header className="order-invoice-document-header flex flex-col gap-6 border-b border-slate-200 pb-6 lg:flex-row lg:items-start lg:justify-between">
+/**
+ * buyerEmailRedacted - Utility function
+ * @returns void
+ */
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
             Artium invoice
           </p>
+/**
+ * sellerNameRedacted - Utility function
+ * @returns void
+ */
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <h1 className="text-[28px] font-semibold leading-[1.2] text-slate-950">
               {invoice.invoiceNumber}
             </h1>
+/**
+ * sellerEmailRedacted - Utility function
+ * @returns void
+ */
             <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
               {formatInvoiceField(invoice.status)}
             </span>
           </div>
+/**
+ * shippingLines - Utility function
+ * @returns void
+ */
           <p className="mt-2 text-sm text-slate-500">
             Order {invoice.orderNumber}
           </p>
         </div>
+/**
+ * billingLines - Utility function
+ * @returns void
+ */
 
         <div className="order-invoice-document-summary grid gap-4 rounded-[16px] border border-slate-200 bg-slate-50 p-4 sm:grid-cols-3 lg:min-w-[420px]">
           <FieldBlock label="Issue date" value={formatInvoiceDate(invoice.issueDate ?? invoice.createdAt)} />

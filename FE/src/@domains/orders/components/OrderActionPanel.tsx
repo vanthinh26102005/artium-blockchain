@@ -19,6 +19,10 @@ type OrderActionPanelProps = {
   onOrderUpdated: (order: OrderResponse, message: string) => void
 }
 
+/**
+ * OrderActionPanel - React component
+ * @returns React element
+ */
 export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPanelProps) => {
   const [activeAction, setActiveAction] = useState<ActiveAction>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -33,23 +37,43 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
   const labelClassName = 'text-sm font-medium text-slate-700'
   const messageClassName = 'text-sm text-red-500'
   const inputClassName = 'border-slate-200 bg-white text-slate-900'
+/**
+ * labelClassName - Utility function
+ * @returns void
+ */
   const textareaClassName = 'border-slate-200 bg-white text-slate-900'
 
   const resetLocalState = () => {
     setActiveAction(null)
+/**
+ * messageClassName - Utility function
+ * @returns void
+ */
     setErrorMessage(null)
   }
 
   const handleCancel = async () => {
+/**
+ * inputClassName - Utility function
+ * @returns void
+ */
     setIsSubmitting(true)
     setErrorMessage(null)
 
     try {
+/**
+ * textareaClassName - Utility function
+ * @returns void
+ */
       const updatedOrder = await orderApis.cancelOrder(order.id, cancelReason.trim() || undefined)
       setCancelReason('')
       resetLocalState()
       onOrderUpdated(updatedOrder, 'The order was cancelled successfully.')
     } catch (error) {
+/**
+ * resetLocalState - Utility function
+ * @returns void
+ */
       setErrorMessage(error instanceof Error ? error.message : 'Unable to cancel this order.')
     } finally {
       setIsSubmitting(false)
@@ -58,6 +82,10 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
 
   const handleMarkShipped = async () => {
     setIsSubmitting(true)
+/**
+ * handleCancel - Utility function
+ * @returns void
+ */
     setErrorMessage(null)
 
     try {
@@ -66,6 +94,10 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
         trackingNumber: trackingNumber.trim(),
         shippingMethod: shippingMethod.trim() || undefined,
       })
+/**
+ * updatedOrder - Utility function
+ * @returns void
+ */
       setShippingCarrier('')
       setTrackingNumber('')
       setShippingMethod('')
@@ -80,6 +112,10 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
 
   const handleConfirmDelivery = async () => {
     setIsSubmitting(true)
+/**
+ * handleMarkShipped - Utility function
+ * @returns void
+ */
     setErrorMessage(null)
 
     try {
@@ -88,6 +124,10 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
       })
       setDeliveryNotes('')
       resetLocalState()
+/**
+ * updatedOrder - Utility function
+ * @returns void
+ */
       onOrderUpdated(updatedOrder, 'Delivery was confirmed successfully.')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to confirm delivery.')
@@ -108,6 +148,10 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
       resetLocalState()
       onOrderUpdated(updatedOrder, 'The dispute has been opened and the order is under review.')
     } catch (error) {
+/**
+ * handleConfirmDelivery - Utility function
+ * @returns void
+ */
       setErrorMessage(error instanceof Error ? error.message : 'Unable to open a dispute.')
     } finally {
       setIsSubmitting(false)
@@ -116,6 +160,10 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
 
   const actions = [
     role === 'seller' && canMarkShipped(order.status)
+/**
+ * updatedOrder - Utility function
+ * @returns void
+ */
       ? { key: 'ship' as const, label: 'Mark as shipped', variant: 'default' as const }
       : null,
     role === 'buyer' && canConfirmDelivery(order.status)
@@ -132,6 +180,10 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
   return (
     <div tabIndex={10} className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
       <div className="flex flex-col gap-2">
+/**
+ * handleOpenDispute - Utility function
+ * @returns void
+ */
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Next step</p>
         <h2 className="text-xl font-semibold text-slate-900">Manage this order</h2>
         <p className="text-sm leading-6 text-slate-500">{getNextStepDescription(order, role)}</p>
@@ -140,6 +192,10 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
       {errorMessage ? (
         <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {errorMessage}
+/**
+ * updatedOrder - Utility function
+ * @returns void
+ */
         </div>
       ) : null}
 
@@ -156,6 +212,10 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
               variant={action.variant}
               className={action.variant === 'outline' ? 'border-slate-200 text-slate-900' : ''}
               onClick={() => {
+/**
+ * actions - Utility function
+ * @returns void
+ */
                 setErrorMessage(null)
                 setActiveAction((current) => (current === action.key ? null : action.key))
               }}
