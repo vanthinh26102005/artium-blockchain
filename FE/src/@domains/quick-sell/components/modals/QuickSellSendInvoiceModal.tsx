@@ -18,6 +18,10 @@ type QuickSellSendInvoiceModalProps = {
     isSending?: boolean
 }
 
+/**
+ * QuickSellSendInvoiceModal - React component
+ * @returns React element
+ */
 export const QuickSellSendInvoiceModal = ({
     isOpen,
     onClose,
@@ -41,6 +45,10 @@ export const QuickSellSendInvoiceModal = ({
     const handleSend = () => {
         onSend({ name, email, message })
         onClose()
+/**
+ * handleSend - Utility function
+ * @returns void
+ */
     }
 
     return (

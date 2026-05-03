@@ -1,6 +1,10 @@
 // Mock invoice data for development
 import type { Invoice, InvoiceItem } from '../types/invoice'
 
+/**
+ * mockInvoiceItem - Utility function
+ * @returns void
+ */
 export const mockInvoiceItem: InvoiceItem = {
   id: '1',
   type: 'Artium-artwork',
@@ -15,6 +19,10 @@ export const mockInvoiceItem: InvoiceItem = {
 export const mockInvoice: Invoice = {
   id: 'invoice-001',
   invoiceCode: 'INV-2024-001',
+/**
+ * mockInvoice - Utility function
+ * @returns void
+ */
   status: 'Open',
   totalAmount: 16200,
   subtotal: 15000,
@@ -42,6 +50,10 @@ export const mockEmptyInvoice: Invoice = {
   status: 'Open',
   totalAmount: 0,
   subtotal: 0,
+/**
+ * mockEmptyInvoice - Utility function
+ * @returns void
+ */
   tax: 0,
   shipping: 0,
   isQuickSell: true,
