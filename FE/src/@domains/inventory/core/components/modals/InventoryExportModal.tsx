@@ -20,6 +20,10 @@ type InventoryExportModalProps = {
 
 type ExportFormat = 'csv' | 'xlsx' | 'pdf'
 
+/**
+ * EXPORT_OPTIONS - React component
+ * @returns React element
+ */
 const EXPORT_OPTIONS: { value: ExportFormat; label: string }[] = [
   { value: 'csv', label: 'CSV' },
   { value: 'xlsx', label: 'XLSX' },
@@ -29,6 +33,10 @@ const EXPORT_OPTIONS: { value: ExportFormat; label: string }[] = [
 export const InventoryExportModal = ({ isOpen, onClose, onExport }: InventoryExportModalProps) => {
   // -- state --
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('csv')
+/**
+ * InventoryExportModal - React component
+ * @returns React element
+ */
 
   // -- derived --
 
@@ -39,6 +47,10 @@ export const InventoryExportModal = ({ isOpen, onClose, onExport }: InventoryExp
   }
 
   const handleOpenChange = (open: boolean) => {
+/**
+ * handleExport - Utility function
+ * @returns void
+ */
     if (!open) {
       onClose()
     }
@@ -47,6 +59,10 @@ export const InventoryExportModal = ({ isOpen, onClose, onExport }: InventoryExp
   // -- render --
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+/**
+ * handleOpenChange - Utility function
+ * @returns void
+ */
       <DialogContent
         size="2xl"
         className="overflow-hidden rounded-3xl border border-white/30 bg-white/95 p-0 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] backdrop-blur-xl"

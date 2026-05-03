@@ -17,6 +17,10 @@ type UseInventoryDndProps = {
   setToastMessage: (msg: string | null) => void
 }
 
+/**
+ * useInventoryDnd - Custom React hook
+ * @returns void
+ */
 export const useInventoryDnd = ({
   user,
   artworks,
@@ -31,6 +35,10 @@ export const useInventoryDnd = ({
   const handleReorderFolders = async (oldIndex: number, newIndex: number) => {
     if (!user?.id) {
       setToastMessage('Please log in to reorder folders.')
+/**
+ * handleReorderFolders - Utility function
+ * @returns void
+ */
       return
     }
 
@@ -43,10 +51,18 @@ export const useInventoryDnd = ({
         sellerId: user.id,
         folderIds: newOrderIds,
       })
+/**
+ * newFolders - Utility function
+ * @returns void
+ */
     } catch {
       setToastMessage('Failed to save folder order')
       reorderFolders(newIndex, oldIndex)
     }
+/**
+ * newOrderIds - Utility function
+ * @returns void
+ */
   }
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -61,6 +77,10 @@ export const useInventoryDnd = ({
 
     if (!over || !user?.id) return
 
+/**
+ * handleDragStart - Utility function
+ * @returns void
+ */
     const activeType = active.data.current?.type
     const overType = over.data.current?.type
 
@@ -69,6 +89,10 @@ export const useInventoryDnd = ({
         const oldIndex = folders.findIndex((f) => f.id === active.id)
         const newIndex = folders.findIndex((f) => f.id === over.id)
         await handleReorderFolders(oldIndex, newIndex)
+/**
+ * handleDragEnd - Utility function
+ * @returns void
+ */
       }
     } else if (activeType === 'Artwork' && overType === 'Folder') {
       const artworkId = active.id as string
@@ -79,10 +103,18 @@ export const useInventoryDnd = ({
 
       optimisticMoveArtwork(artworkId, folderId)
 
+/**
+ * activeType - Utility function
+ * @returns void
+ */
       try {
         await artworkApis.bulkMoveArtworks({
           artworkIds: [artworkId],
           folderId,
+/**
+ * overType - Utility function
+ * @returns void
+ */
           sellerId: user.id,
         })
         setToastMessage('Artwork moved to folder')
@@ -90,13 +122,38 @@ export const useInventoryDnd = ({
         optimisticMoveArtwork(artworkId, previousFolderId)
         setToastMessage('Failed to move artwork')
       }
+/**
+ * oldIndex - Utility function
+ * @returns void
+ */
     }
   }
 
   return {
+/**
+ * newIndex - Utility function
+ * @returns void
+ */
     activeId,
     activeItem,
     handleDragStart,
     handleDragEnd,
   }
 }
+
+/**
+ * artworkId - Utility function
+ * @returns void
+ */
+/**
+ * folderId - Utility function
+ * @returns void
+ */
+/**
+ * artwork - Utility function
+ * @returns void
+ */
+/**
+ * previousFolderId - Utility function
+ * @returns void
+ */

@@ -11,6 +11,10 @@ type UploadArtworkMenuProps = {
   triggerLabel?: string
 }
 
+/**
+ * UploadArtworkMenu - React component
+ * @returns React element
+ */
 export const UploadArtworkMenu = ({
   triggerLabel = 'Upload Artwork',
 }: UploadArtworkMenuProps) => {
