@@ -3,6 +3,10 @@ import { cn } from '@shared/lib/utils'
 
 type HeadingSize = 'h1' | 'h2' | 'h3'
 
+/**
+ * headingSizeClass - Utility function
+ * @returns void
+ */
 const headingSizeClass: Record<HeadingSize, string> = {
   h1: 'text-[32px] leading-[1.05] lg:text-[64px] xl:text-[80px]',
   h2: 'text-[24px] leading-[1.1] lg:text-[40px] xl:text-[54px]',
@@ -14,6 +18,10 @@ type HeadingTone = 'default' | 'light' | 'inherit'
 const headingToneClass: Record<HeadingTone, string> = {
   default: 'text-black',
   light: 'text-white',
+/**
+ * headingToneClass - Utility function
+ * @returns void
+ */
   inherit: 'text-inherit',
 }
 
@@ -31,6 +39,10 @@ export const Heading = <T extends ElementType = 'h2'>({
   tone = 'default',
   className,
   children,
+/**
+ * Heading - React component
+ * @returns React element
+ */
   ...props
 }: HeadingProps<T>) => {
   const Component = (as || 'h2') as ElementType
@@ -42,6 +54,10 @@ export const Heading = <T extends ElementType = 'h2'>({
         headingToneClass[tone],
         className,
       )}
+/**
+ * Component - React component
+ * @returns React element
+ */
       {...props}
     >
       {children}
@@ -59,3 +75,8 @@ export const Text = ({ className, children, ...props }: TextProps) => (
     {children}
   </p>
 )
+
+/**
+ * Text - React component
+ * @returns React element
+ */

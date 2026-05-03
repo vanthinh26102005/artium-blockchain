@@ -29,6 +29,10 @@ type AddressFormFieldsProps = {
 
 // --- Postal Code Validation Patterns ---
 
+/**
+ * POSTAL_PATTERNS - React component
+ * @returns React element
+ */
 const POSTAL_PATTERNS: Record<string, { regex: RegExp; placeholder: string; maxLength: number }> = {
   US: { regex: /^\d{5}(-\d{4})?$/, placeholder: '12345 or 12345-6789', maxLength: 10 },
   VN: { regex: /^\d{6}$/, placeholder: '100000', maxLength: 6 },
@@ -47,6 +51,10 @@ const POSTAL_PATTERNS: Record<string, { regex: RegExp; placeholder: string; maxL
 const getPostalConfig = (countryCode: string) => {
   return POSTAL_PATTERNS[countryCode] || { regex: /^.{3,10}$/, placeholder: 'Postal code', maxLength: 10 }
 }
+/**
+ * getPostalConfig - Utility function
+ * @returns void
+ */
 
 // --- Main Component ---
 
@@ -56,6 +64,10 @@ export const AddressFormFields = ({
   disabled = false,
   showValidation = false,
   errors: externalErrors = {},
+/**
+ * AddressFormFields - React component
+ * @returns React element
+ */
 }: AddressFormFieldsProps) => {
   // --- Country options ---
   const countryOptions = useMemo<BaseAutocompleteOption[]>(() => {
@@ -67,6 +79,10 @@ export const AddressFormFields = ({
   }, [])
 
   // --- State options (based on selected country) ---
+/**
+ * countryOptions - Utility function
+ * @returns void
+ */
   const stateOptions = useMemo<BaseAutocompleteOption[]>(() => {
     if (!value.country) return []
     return State.getStatesOfCountry(value.country).map((s: IState) => ({
@@ -79,6 +95,10 @@ export const AddressFormFields = ({
   // --- City options (based on selected country + state) ---
   const cityOptions = useMemo<BaseAutocompleteOption[]>(() => {
     if (!value.country) return []
+/**
+ * stateOptions - Utility function
+ * @returns void
+ */
     const cities = value.state
       ? City.getCitiesOfState(value.country, value.state)
       : City.getCitiesOfCountry(value.country) || []
@@ -92,11 +112,19 @@ export const AddressFormFields = ({
   // --- Postal config ---
   const postalConfig = useMemo(() => getPostalConfig(value.country), [value.country])
   const labelClassName = 'text-[11px] font-bold uppercase tracking-wider text-[#989898]'
+/**
+ * cityOptions - Utility function
+ * @returns void
+ */
   const requiredMarkClassName = 'text-red-500'
   const messageClassName = 'text-[11px] text-red-500'
   const descriptionClassName = 'text-[11px] text-[#989898]'
   const baseInputClassName =
     'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0'
+/**
+ * cities - Utility function
+ * @returns void
+ */
 
   // --- Validation ---
   const errors = useMemo(() => {
@@ -111,26 +139,50 @@ export const AddressFormFields = ({
     if (!value.addressLine1) internalErrors.addressLine1 = 'Address is required'
     if (!value.city) internalErrors.city = 'City is required'
     if (!value.postalCode) {
+/**
+ * postalConfig - Utility function
+ * @returns void
+ */
       internalErrors.postalCode = 'Postal code is required'
     } else if (!postalConfig.regex.test(value.postalCode)) {
       internalErrors.postalCode = `Invalid format (e.g., ${postalConfig.placeholder})`
     }
+/**
+ * labelClassName - Utility function
+ * @returns void
+ */
     return {
       ...internalErrors,
       ...externalErrors,
     }
+/**
+ * requiredMarkClassName - Utility function
+ * @returns void
+ */
   }, [externalErrors, postalConfig, showValidation, value])
 
   // --- Handlers ---
   const handleCountryChange = useCallback(
+/**
+ * messageClassName - Utility function
+ * @returns void
+ */
     (country: string) => {
       // Reset dependent fields when country changes
       onChange({
         ...value,
+/**
+ * descriptionClassName - Utility function
+ * @returns void
+ */
         country,
         state: '',
         city: '',
         postalCode: '',
+/**
+ * baseInputClassName - Utility function
+ * @returns void
+ */
       })
     },
     [value, onChange],
@@ -138,10 +190,18 @@ export const AddressFormFields = ({
 
   const handleStateChange = useCallback(
     (state: string) => {
+/**
+ * errors - Utility function
+ * @returns void
+ */
       // Reset city when state changes
       onChange({
         ...value,
         state,
+/**
+ * internalErrors - Utility function
+ * @returns void
+ */
         city: '',
       })
     },
@@ -167,6 +227,10 @@ export const AddressFormFields = ({
         placeholder="Search country..."
         emptyMessage="No countries found"
         disabled={disabled}
+/**
+ * handleCountryChange - Utility function
+ * @returns void
+ */
         errorMessage={errors.country}
         className="space-y-2"
         labelClassName={labelClassName}
@@ -184,6 +248,10 @@ export const AddressFormFields = ({
       {/* Row 2: State/Province + City */}
       <div className="grid grid-cols-2 gap-4">
         <BaseAutocompleteField
+/**
+ * handleStateChange - Utility function
+ * @returns void
+ */
           label="State / Province"
           options={stateOptions}
           value={value.state}
@@ -199,6 +267,10 @@ export const AddressFormFields = ({
             baseInputClassName,
             errors.state ? 'border-red-500 focus:border-red-500' : 'border-[#E5E5E5] focus:border-[#0066FF]',
           )}
+/**
+ * handleFieldChange - Utility function
+ * @returns void
+ */
           dropdownClassName="absolute z-50 mt-1 max-h-[240px] w-full overflow-auto rounded-xl border border-[#E5E5E5] bg-white shadow-lg"
           optionClassName="w-full px-4 py-3 text-left text-[14px] transition-colors hover:bg-blue-50 text-[#191414]"
           selectedOptionClassName="bg-blue-50 font-medium text-[#0066FF]"
