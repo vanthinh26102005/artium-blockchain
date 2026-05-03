@@ -5,6 +5,10 @@ import { useController, Control } from 'react-hook-form'
 import { getChipClasses } from '@domains/profile/components/edit-profile/editProfileStyles'
 import { FormValues } from '@domains/profile/types/editProfile'
 
+/**
+ * ARTISTIC_VIBES_OPTIONS - React component
+ * @returns React element
+ */
 const ARTISTIC_VIBES_OPTIONS = [
   'Joyful',
   'Vibrant',
@@ -23,6 +27,10 @@ const ARTISTIC_VIBES_OPTIONS = [
 const ARTISTIC_VALUES_OPTIONS = [
   'Pride',
   'Cultural Heritage',
+/**
+ * ARTISTIC_VALUES_OPTIONS - React component
+ * @returns React element
+ */
   'Equity',
   'Futurism',
   'Environment',
@@ -37,6 +45,10 @@ const ARTISTIC_MEDIUM_OPTIONS = [
   'Illustration',
   'Immersive',
   'Digital',
+/**
+ * ARTISTIC_MEDIUM_OPTIONS - React component
+ * @returns React element
+ */
   'Prints',
   'Video',
   'Photography',
@@ -61,6 +73,10 @@ export const ArtisticDirectionSection = ({ control }: ArtisticDirectionSectionPr
   const artisticMediums = artisticMediumsField.value ?? []
   const toggleSelection = (current: string[], value: string) =>
     current.includes(value) ? current.filter((item) => item !== value) : [...current, value]
+/**
+ * ArtisticDirectionSection - React component
+ * @returns React element
+ */
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -68,18 +84,34 @@ export const ArtisticDirectionSection = ({ control }: ArtisticDirectionSectionPr
         Artistic Direction
       </h2>
 
+/**
+ * artisticVibes - Utility function
+ * @returns void
+ */
       <div className="mt-6 space-y-6">
         <div>
           <p className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">Vibes</p>
           <div className="mt-3 flex flex-wrap gap-2">
+/**
+ * artisticValues - Utility function
+ * @returns void
+ */
             {ARTISTIC_VIBES_OPTIONS.map((option) => (
               <button
                 key={option}
                 type="button"
+/**
+ * artisticMediums - Utility function
+ * @returns void
+ */
                 onClick={() => artisticVibesField.onChange(toggleSelection(artisticVibes, option))}
                 className={getChipClasses(artisticVibes.includes(option))}
               >
                 {option}
+/**
+ * toggleSelection - Utility function
+ * @returns void
+ */
               </button>
             ))}
           </div>

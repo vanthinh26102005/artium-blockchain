@@ -17,6 +17,10 @@ type AvatarUploadProps = {
   error?: string
 }
 
+/**
+ * AvatarUpload - React component
+ * @returns React element
+ */
 export const AvatarUpload = ({
   avatarSrc,
   inputRef,
@@ -29,6 +33,10 @@ export const AvatarUpload = ({
   const hasAvatar = Boolean(avatarSrc)
 
   return (
+/**
+ * hasAvatar - Utility function
+ * @returns void
+ */
     <div>
       <label className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
         Profile Picture

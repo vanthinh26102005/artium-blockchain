@@ -10,6 +10,10 @@ type ArtWorldConnectionSectionProps = {
   control: Control<FormValues>
 }
 
+/**
+ * ArtWorldConnectionSection - React component
+ * @returns React element
+ */
 export const ArtWorldConnectionSection = ({
   register,
   control,
@@ -17,14 +21,26 @@ export const ArtWorldConnectionSection = ({
   const connectionAffiliations = useWatch({ control, name: 'connectionAffiliations' }) ?? ''
   const connectionSeenAt = useWatch({ control, name: 'connectionSeenAt' }) ?? ''
   const connectionCurrently = useWatch({ control, name: 'connectionCurrently' }) ?? ''
+/**
+ * connectionAffiliations - Utility function
+ * @returns void
+ */
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <h2 className="text-sm font-semibold tracking-[0.2em] text-slate-400 uppercase">
         My Connection to the Art World
+/**
+ * connectionSeenAt - Utility function
+ * @returns void
+ */
       </h2>
 
       <div className="mt-6 space-y-4">
         <div>
+/**
+ * connectionCurrently - Utility function
+ * @returns void
+ */
           <label
             htmlFor="connectionAffiliations"
             className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
