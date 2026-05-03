@@ -9,10 +9,10 @@ const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
 export const authEmailSchema = z
   .string()
   .trim()
-/**
- * authEmailSchema - Utility function
- * @returns void
- */
+  /**
+   * authEmailSchema - Utility function
+   * @returns void
+   */
   .min(1, 'Email is required.')
   .email('Enter a valid email address.')
 
@@ -22,28 +22,28 @@ export const signUpFirstNameSchema = z.string().trim().min(1, 'First name is req
 
 export const signUpPasswordSchema = z
   .string()
-/**
- * loginPasswordSchema - Utility function
- * @returns void
- */
+  /**
+   * loginPasswordSchema - Utility function
+   * @returns void
+   */
   .min(1, 'Password is required.')
   .regex(STRONG_PASSWORD_REGEX, 'Use 8+ characters with uppercase, lowercase, and a number.')
 
 export const otpCodeSchema = z
   .string()
-/**
- * signUpFirstNameSchema - Utility function
- * @returns void
- */
+  /**
+   * signUpFirstNameSchema - Utility function
+   * @returns void
+   */
   .trim()
   .min(1, 'Verification code is required.')
   .regex(/^\d{6}$/, 'OTP must be 6 digits.')
 
 export const loginFormSchema = z.object({
-/**
- * signUpPasswordSchema - Utility function
- * @returns void
- */
+  /**
+   * signUpPasswordSchema - Utility function
+   * @returns void
+   */
   email: authEmailSchema,
   password: loginPasswordSchema,
 })
@@ -52,10 +52,10 @@ export const signUpDetailsFormSchema = z.object({
   firstName: signUpFirstNameSchema,
   email: authEmailSchema,
   password: signUpPasswordSchema,
-/**
- * otpCodeSchema - Utility function
- * @returns void
- */
+  /**
+   * otpCodeSchema - Utility function
+   * @returns void
+   */
 })
 
 export const otpOnlyFormSchema = z.object({
@@ -77,10 +77,10 @@ export const forgotPasswordVerifyFormSchema = z.object({
 
 export const resetPasswordVerifyFormSchema = z.object({
   email: authEmailSchema,
-/**
- * signUpDetailsFormSchema - Utility function
- * @returns void
- */
+  /**
+   * signUpDetailsFormSchema - Utility function
+   * @returns void
+   */
   otp: otpCodeSchema,
 })
 
@@ -90,10 +90,10 @@ export const resetPasswordConfirmFormSchema = z
     resetToken: z.string().min(1, 'Reset session expired. Please request a new code.'),
     newPassword: signUpPasswordSchema,
     confirmPassword: z.string().min(1, 'Confirm your new password.'),
-/**
- * otpOnlyFormSchema - Utility function
- * @returns void
- */
+    /**
+     * otpOnlyFormSchema - Utility function
+     * @returns void
+     */
   })
   .refine((values) => values.confirmPassword === values.newPassword, {
     message: 'Passwords do not match.',

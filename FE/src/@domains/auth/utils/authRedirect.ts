@@ -7,10 +7,10 @@ const AUTH_REDIRECT_BASE_URL = 'https://artium.local'
 export const getSafeNextPath = (
   next: string | string[] | undefined,
   fallback = '/',
-/**
- * getSafeNextPath - Utility function
- * @returns void
- */
+  /**
+   * getSafeNextPath - Utility function
+   * @returns void
+   */
 ) => {
   if (typeof next !== 'string') {
     return fallback
@@ -22,10 +22,10 @@ export const getSafeNextPath = (
   }
 
   try {
-/**
- * trimmedNext - Utility function
- * @returns void
- */
+    /**
+     * trimmedNext - Utility function
+     * @returns void
+     */
     const url = new URL(trimmedNext, AUTH_REDIRECT_BASE_URL)
     if (url.origin !== AUTH_REDIRECT_BASE_URL) {
       return fallback
@@ -35,10 +35,10 @@ export const getSafeNextPath = (
   } catch {
     return fallback
   }
-/**
- * url - Utility function
- * @returns void
- */
+  /**
+   * url - Utility function
+   * @returns void
+   */
 }
 
 export const buildAuthCallbackUrl = (
@@ -53,10 +53,10 @@ export const buildAuthCallbackUrl = (
 export const buildLoginRedirectUrl = (
   next: string | string[] | undefined,
   fallback = '/',
-/**
- * buildAuthCallbackUrl - Utility function
- * @returns void
- */
+  /**
+   * buildAuthCallbackUrl - Utility function
+   * @returns void
+   */
 ) => buildAuthCallbackUrl('/login', next, fallback)
 
 /**

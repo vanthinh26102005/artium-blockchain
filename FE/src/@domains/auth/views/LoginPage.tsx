@@ -48,38 +48,38 @@ export const LoginPage = () => {
   const router = useRouter()
   const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
   const setAuth = useAuthStore((state) => state.setAuth)
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
   const walletLogin = useWalletLogin()
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
   const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false)
   const form = useForm<LoginFormValues>({
-/**
- * setAuth - Utility function
- * @returns void
- */
+    /**
+     * setAuth - Utility function
+     * @returns void
+     */
     resolver: zodResolver(loginFormSchema),
     mode: 'onBlur',
     reValidateMode: 'onChange',
     defaultValues: {
       email: '',
-/**
- * walletLogin - Utility function
- * @returns void
- */
+      /**
+       * walletLogin - Utility function
+       * @returns void
+       */
       password: '',
     },
   })
   const {
     handleSubmit,
     setError,
-/**
- * form - Utility function
- * @returns void
- */
+    /**
+     * form - Utility function
+     * @returns void
+     */
     formState: { errors, isSubmitting },
   } = form
 
@@ -98,10 +98,10 @@ export const LoginPage = () => {
       const message = error instanceof Error ? error.message : 'Login failed.'
       setError('root', { message })
     }
-/**
- * handleLogin - Utility function
- * @returns void
- */
+    /**
+     * handleLogin - Utility function
+     * @returns void
+     */
   }
 
   const handleGoogleSignIn = async () => {
@@ -109,10 +109,10 @@ export const LoginPage = () => {
     const callbackUrl = buildAuthCallbackUrl(
       '/login',
       router.query.next,
-/**
- * response - Utility function
- * @returns void
- */
+      /**
+       * response - Utility function
+       * @returns void
+       */
       '/discover?tab=top-picks',
     )
 
@@ -120,10 +120,10 @@ export const LoginPage = () => {
       await signIn('google', { callbackUrl })
     } finally {
       setIsGoogleSubmitting(false)
-/**
- * nextPath - Utility function
- * @returns void
- */
+      /**
+       * nextPath - Utility function
+       * @returns void
+       */
     }
   }
 
@@ -131,10 +131,10 @@ export const LoginPage = () => {
     await walletLogin.loginWithWallet()
   }
 
-/**
- * message - Utility function
- * @returns void
- */
+  /**
+   * message - Utility function
+   * @returns void
+   */
   const handleSwitchWalletNetwork = async () => {
     await walletLogin.switchToTargetChain()
   }
@@ -143,51 +143,40 @@ export const LoginPage = () => {
   if (!canRenderGuestPage) {
     return null
   }
-/**
- * handleGoogleSignIn - Utility function
- * @returns void
- */
+  /**
+   * handleGoogleSignIn - Utility function
+   * @returns void
+   */
 
   return (
     <AuthShell>
       <Metadata title="Log in | Artium" />
       <AuthFormCard>
-/**
- * callbackUrl - Utility function
- * @returns void
- */
+        /** * callbackUrl - Utility function * @returns void */
         {/* header */}
-        <h1 className="font-monument-grotes text-center text-3xl font-bold text-[#191414] lg:text-[48px]">
+        <h1 className="text-center font-monument-grotes text-3xl font-bold text-[#191414] lg:text-[48px]">
           Welcome back
         </h1>
-
         {/* social auth */}
         <SocialAuthButtons
           onGoogleClick={handleGoogleSignIn}
           isGoogleLoading={isGoogleSubmitting || isGoogleBridgeLoading}
         />
-
         {googleError ? <FormErrorMessage id="google-error" message={googleError} /> : null}
-
         <AuthProviderButton
           icon={<Wallet className="h-6 w-6 shrink-0 text-[#191414]" />}
           label="Login with MetaMask"
-/**
- * handleWalletSignIn - Utility function
- * @returns void
- */
+          /**
+           * handleWalletSignIn - Utility function
+           * @returns void
+           */
           loadingLabel="Opening MetaMask..."
           isLoading={walletLogin.isLoading}
           onClick={() => setIsWalletDialogOpen(true)}
           className="w-full flex-none"
         />
-
         <AuthDivider text="Or sign in with" />
-/**
- * handleSwitchWalletNetwork - Utility function
- * @returns void
- */
-
+        /** * handleSwitchWalletNetwork - Utility function * @returns void */
         <FormProvider {...form}>
           <form className="mt-3 space-y-4" onSubmit={handleSubmit(handleLogin)} noValidate>
             <AuthFormInput<LoginFormValues>
@@ -220,7 +209,7 @@ export const LoginPage = () => {
             />
 
             <Button
-              className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
+              className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold uppercase tracking-[0.3em]"
               loading={isSubmitting}
               disabled={isSubmitting}
               type="submit"
@@ -229,15 +218,14 @@ export const LoginPage = () => {
             </Button>
           </form>
         </FormProvider>
-
         {/* footer links */}
         <div className="space-y-3 text-center">
-          <Link href="/forgot-password" className="text-primary text-base font-semibold">
+          <Link href="/forgot-password" className="text-base font-semibold text-primary">
             Forgot Password?
           </Link>
           <p className="text-base text-[#191414]">
             Not yet on Artium?{' '}
-            <Link href="/sign-up" className="text-primary font-semibold">
+            <Link href="/sign-up" className="font-semibold text-primary">
               Sign up
             </Link>
           </p>
@@ -245,7 +233,6 @@ export const LoginPage = () => {
             Need help? <span className="font-semibold">Contact Support</span>
           </button>
         </div>
-
         <AuthFooter />
       </AuthFormCard>
 
@@ -257,10 +244,10 @@ export const LoginPage = () => {
         >
           <DialogHeader className="mb-6 !px-0 pr-14 text-left sm:mb-7">
             <div className="min-w-0">
-              <DialogTitle className="text-left text-[22px] leading-[1.15] font-bold text-[#191414] sm:text-2xl">
+              <DialogTitle className="text-left text-[22px] font-bold leading-[1.15] text-[#191414] sm:text-2xl">
                 Sign in with MetaMask
               </DialogTitle>
-              <p className="max-w-[390px] text-left text-sm leading-6 font-medium text-[#6f6a67]">
+              <p className="max-w-[390px] text-left text-sm font-medium leading-6 text-[#6f6a67]">
                 Connect your wallet and sign a secure message to access Artium.
               </p>
             </div>
