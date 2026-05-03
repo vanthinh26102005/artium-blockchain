@@ -35,10 +35,10 @@ export const AutoComplete = ({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [isOpen, setOpen] = useState(false)
-/**
- * inputRef - Utility function
- * @returns void
- */
+  /**
+   * inputRef - Utility function
+   * @returns void
+   */
   const [selected, setSelected] = useState<Option>(value as Option)
   const [inputValue, setInputValue] = useState<string>(value?.label || '')
 
@@ -48,19 +48,19 @@ export const AutoComplete = ({
       if (!input) {
         return
       }
-/**
- * handleKeyDown - Utility function
- * @returns void
- */
+      /**
+       * handleKeyDown - Utility function
+       * @returns void
+       */
 
       // Keep the options displayed when the user is typing
       if (!isOpen) {
         setOpen(true)
       }
-/**
- * input - Utility function
- * @returns void
- */
+      /**
+       * input - Utility function
+       * @returns void
+       */
 
       // This is not a default behaviour of the <input /> field
       if (event.key === 'Enter' && input.value !== '') {
@@ -76,10 +76,10 @@ export const AutoComplete = ({
       }
     },
     [isOpen, options, onValueChange],
-/**
- * optionToSelect - Utility function
- * @returns void
- */
+    /**
+     * optionToSelect - Utility function
+     * @returns void
+     */
   )
 
   const handleBlur = useCallback(() => {
@@ -97,10 +97,10 @@ export const AutoComplete = ({
       // This is a hack to prevent the input from being focused after the user selects an option
       // We can call this hack: "The next tick"
       setTimeout(() => {
-/**
- * handleBlur - Utility function
- * @returns void
- */
+        /**
+         * handleBlur - Utility function
+         * @returns void
+         */
         inputRef?.current?.blur()
       }, 0)
     },
@@ -109,10 +109,7 @@ export const AutoComplete = ({
 
   return (
     <CommandPrimitive onKeyDown={handleKeyDown}>
-/**
- * handleSelectOption - Utility function
- * @returns void
- */
+      /** * handleSelectOption - Utility function * @returns void */
       <div>
         <CommandInput
           ref={inputRef}
@@ -128,7 +125,7 @@ export const AutoComplete = ({
       <div className="relative mt-1">
         <div
           className={cn(
-            'animate-in fade-in-0 zoom-in-95 absolute top-0 z-10 w-full rounded-xl bg-white outline-none',
+            'absolute top-0 z-10 w-full rounded-xl bg-white outline-none animate-in fade-in-0 zoom-in-95',
             isOpen ? 'block' : 'hidden',
           )}
         >
@@ -163,11 +160,8 @@ export const AutoComplete = ({
               </CommandGroup>
             ) : null}
             {!isLoading ? (
-              <CommandPrimitive.Empty className="rounded-sm px-2 py-3 text-center text-sm select-none">
-/**
- * isSelected - Utility function
- * @returns void
- */
+              <CommandPrimitive.Empty className="select-none rounded-sm px-2 py-3 text-center text-sm">
+                /** * isSelected - Utility function * @returns void */
                 {emptyMessage}
               </CommandPrimitive.Empty>
             ) : null}

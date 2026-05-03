@@ -19,13 +19,13 @@ Breadcrumb.displayName = 'Breadcrumb'
 const BreadcrumbList = React.forwardRef<HTMLOListElement, React.ComponentPropsWithoutRef<'ol'>>(
   ({ className, ...props }, ref) => (
     <ol
-/**
- * BreadcrumbList - React component
- * @returns React element
- */
+      /**
+       * BreadcrumbList - React component
+       * @returns React element
+       */
       ref={ref}
       className={cn(
-        'text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5',
+        'flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5',
         className,
       )}
       {...props}
@@ -54,13 +54,13 @@ const BreadcrumbLink = React.forwardRef<
   const Comp = asChild ? Slot : 'a'
 
   return (
-/**
- * BreadcrumbLink - React component
- * @returns React element
- */
+    /**
+     * BreadcrumbLink - React component
+     * @returns React element
+     */
     <Comp
       ref={ref}
-      className={cn('hover:text-foreground transition-colors', className)}
+      className={cn('transition-colors hover:text-foreground', className)}
       {...props}
     />
   )
@@ -78,7 +78,7 @@ const BreadcrumbPage = React.forwardRef<HTMLSpanElement, React.ComponentPropsWit
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn('text-foreground font-semibold', className)}
+      className={cn('font-semibold text-foreground', className)}
       {...props}
     />
   ),
@@ -86,10 +86,10 @@ const BreadcrumbPage = React.forwardRef<HTMLSpanElement, React.ComponentPropsWit
 BreadcrumbPage.displayName = 'BreadcrumbPage'
 
 const BreadcrumbSeparator = ({ children, className, ...props }: React.ComponentProps<'li'>) => (
-/**
- * BreadcrumbPage - React component
- * @returns React element
- */
+  /**
+   * BreadcrumbPage - React component
+   * @returns React element
+   */
   <li
     role="presentation"
     aria-hidden="true"
@@ -107,10 +107,10 @@ const BreadcrumbEllipsis = ({ className, ...props }: React.ComponentProps<'span'
     aria-hidden="true"
     className={cn('flex h-9 w-9 items-center justify-center', className)}
     {...props}
-/**
- * BreadcrumbSeparator - React component
- * @returns React element
- */
+    /**
+     * BreadcrumbSeparator - React component
+     * @returns React element
+     */
   >
     <MoreHorizontal className="h-4 w-4" />
     <span className="sr-only">More</span>
@@ -126,8 +126,8 @@ export {
   BreadcrumbPage,
   BreadcrumbSeparator,
   BreadcrumbEllipsis,
-/**
- * BreadcrumbEllipsis - React component
- * @returns React element
- */
+  /**
+   * BreadcrumbEllipsis - React component
+   * @returns React element
+   */
 }
