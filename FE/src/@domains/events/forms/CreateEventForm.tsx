@@ -58,26 +58,50 @@ type CreateEventFormProps = {
 
 export type { CreateEventFormValues } from "@domains/events/validations/eventForm.schema";
 
+/**
+ * formatDateTimeLocal - Utility function
+ * @returns void
+ */
 const formatDateTimeLocal = (date: Date) => {
   const yyyy = date.getFullYear();
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const dd = String(date.getDate()).padStart(2, "0");
+/**
+ * yyyy - Utility function
+ * @returns void
+ */
   const hh = String(date.getHours()).padStart(2, "0");
   const min = String(date.getMinutes()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
 };
+/**
+ * mm - Utility function
+ * @returns void
+ */
 
 export const CreateEventForm = ({
   onCancel,
   onSubmitSuccess,
+/**
+ * dd - Utility function
+ * @returns void
+ */
   initialValues,
   initialCoverImageUrl,
   mode = "create",
 }: CreateEventFormProps) => {
+/**
+ * hh - Utility function
+ * @returns void
+ */
   const defaultDateTimes = useMemo(() => {
     const now = new Date();
     const base = new Date(now);
     base.setMinutes(0, 0, 0);
+/**
+ * min - Utility function
+ * @returns void
+ */
     const start = new Date(base);
     start.setDate(start.getDate() + 1);
     const end = new Date(start);
@@ -85,6 +109,10 @@ export const CreateEventForm = ({
     return {
       startDateTime: formatDateTimeLocal(start),
       endDateTime: formatDateTimeLocal(end),
+/**
+ * CreateEventForm - React component
+ * @returns React element
+ */
     };
   }, []);
 
@@ -95,24 +123,44 @@ export const CreateEventForm = ({
   const { options: timeZoneOptions, isLoading } = useTimeZoneOptions();
   const requireCoverImage = !initialCoverImageUrl;
 
+/**
+ * defaultDateTimes - Utility function
+ * @returns void
+ */
   const {
     register,
     control,
     handleSubmit,
+/**
+ * now - Utility function
+ * @returns void
+ */
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateEventFormValues>({
     resolver: zodResolver(
+/**
+ * base - Utility function
+ * @returns void
+ */
       createEventFormSchema({
         requireCoverImage,
       }),
     ),
     defaultValues: {
+/**
+ * start - Utility function
+ * @returns void
+ */
       title: "",
       startDateTime: defaultDateTimes.startDateTime,
       endDateTime: defaultDateTimes.endDateTime,
       timeZone: "",
       locationType: "in-person",
+/**
+ * end - Utility function
+ * @returns void
+ */
       types: [],
       address: "",
       venueDetails: "",
@@ -126,15 +174,27 @@ export const CreateEventForm = ({
     reValidateMode: "onChange",
   });
 
+/**
+ * fileInputRef - Utility function
+ * @returns void
+ */
   const titleValue = useWatch({ control, name: "title" }) ?? "";
   const venueValue = useWatch({ control, name: "venueDetails" }) ?? "";
   const descriptionValue = useWatch({ control, name: "description" }) ?? "";
   const locationType = useWatch({ control, name: "locationType" });
+/**
+ * formContainerRef - Utility function
+ * @returns void
+ */
   const coverImage = useWatch({ control, name: "coverImage" });
   const timeZoneValue = useWatch({ control, name: "timeZone" });
 
   // -- effects --
   useEffect(() => {
+/**
+ * requireCoverImage - Utility function
+ * @returns void
+ */
     register("coverImage");
   }, [register]);
 
@@ -171,26 +231,50 @@ export const CreateEventForm = ({
     const current = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const matched = timeZoneOptions.find((option) => option.value === current);
     if (matched) {
+/**
+ * titleValue - Utility function
+ * @returns void
+ */
       setValue("timeZone", matched.value, { shouldValidate: true });
     }
   }, [setValue, timeZoneOptions, timeZoneValue]);
 
+/**
+ * venueValue - Utility function
+ * @returns void
+ */
   useEffect(() => {
     if (locationType === "online") {
       setValue("address", "");
       setValue("venueDetails", "");
+/**
+ * descriptionValue - Utility function
+ * @returns void
+ */
     } else {
       setValue("onlineUrl", "");
     }
   }, [locationType, setValue]);
+/**
+ * locationType - Utility function
+ * @returns void
+ */
 
 
   // -- handlers --
   const handleFileSelect = (files: File[]) => {
+/**
+ * coverImage - Utility function
+ * @returns void
+ */
     const file = files[0];
     if (!file) {
       return;
     }
+/**
+ * timeZoneValue - Utility function
+ * @returns void
+ */
     setValue("coverImage", file, { shouldValidate: true });
   };
 
@@ -201,6 +285,10 @@ export const CreateEventForm = ({
     handleFileSelect(Array.from(event.target.files));
     event.target.value = "";
   };
+/**
+ * previewUrl - Utility function
+ * @returns void
+ */
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -226,6 +314,10 @@ export const CreateEventForm = ({
       fileInputRef.current.value = "";
     }
   };
+/**
+ * preferredZone - Utility function
+ * @returns void
+ */
 
   const handleSubmitForm = useCallback(
     async (values: CreateEventFormValues) => {
@@ -237,10 +329,18 @@ export const CreateEventForm = ({
 
   // Scroll to first error field when form validation fails
   const scrollToFirstError = useCallback((errors: Record<string, unknown>) => {
+/**
+ * current - Utility function
+ * @returns void
+ */
     // Define the order of fields in the form
     const fieldOrder: (keyof CreateEventFormValues)[] = [
       "title",
       "types",
+/**
+ * matched - Utility function
+ * @returns void
+ */
       "startDateTime",
       "endDateTime",
       "timeZone",
@@ -261,10 +361,18 @@ export const CreateEventForm = ({
     const errorElement = formContainerRef.current.querySelector(
       `[name="${firstErrorField}"], [data-field="${firstErrorField}"]`
     ) as HTMLElement;
+/**
+ * handleFileSelect - Utility function
+ * @returns void
+ */
 
     if (errorElement) {
       errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
       // Focus the element if it's focusable
+/**
+ * file - Utility function
+ * @returns void
+ */
       if (typeof errorElement.focus === "function") {
         setTimeout(() => errorElement.focus(), 300);
       }
@@ -275,6 +383,10 @@ export const CreateEventForm = ({
     if (Object.keys(errors).length === 0) {
       return;
     }
+/**
+ * handleFileChange - Utility function
+ * @returns void
+ */
 
     scrollToFirstError(errors as Record<string, unknown>);
   }, [errors, scrollToFirstError]);
@@ -286,12 +398,20 @@ export const CreateEventForm = ({
       className="flex max-h-[75vh] flex-col overflow-hidden"
     >
       <div ref={formContainerRef} className="min-h-0 flex-1 space-y-6 overflow-y-auto px-8 pb-8 pt-6">
+/**
+ * handleDrop - Utility function
+ * @returns void
+ */
         <FieldBlock>
           <FieldHeader
             label="Event Title"
             required
             counter={`${titleValue.length}/${TITLE_LIMIT}`}
           />
+/**
+ * file - Utility function
+ * @returns void
+ */
           <EventInput
             placeholder="Enter event title"
             maxLength={TITLE_LIMIT}
@@ -301,6 +421,10 @@ export const CreateEventForm = ({
         </FieldBlock>
 
         <FieldBlock>
+/**
+ * handleDragOver - Utility function
+ * @returns void
+ */
           <FieldHeader label="Type" required />
             <Controller
               name="types"
@@ -309,6 +433,10 @@ export const CreateEventForm = ({
               <div data-field="types">
                 <TypeMultiSelect
                   options={EVENT_TYPE_OPTIONS}
+/**
+ * handleDragLeave - Utility function
+ * @returns void
+ */
                   value={field.value ?? []}
                   onChange={field.onChange}
                   placeholder="Select event type"
@@ -316,6 +444,10 @@ export const CreateEventForm = ({
               </div>
             )}
           />
+/**
+ * handleRemoveImage - Utility function
+ * @returns void
+ */
           <FieldErrorMessage error={errors.types} />
         </FieldBlock>
 
@@ -326,6 +458,10 @@ export const CreateEventForm = ({
               name="startDateTime"
               control={control}
               render={({ field }) => (
+/**
+ * handleSubmitForm - Utility function
+ * @returns void
+ */
                 <div data-field="startDateTime">
                   <DateTimePicker
                     value={field.value}
@@ -338,11 +474,19 @@ export const CreateEventForm = ({
             <FieldErrorMessage error={errors.startDateTime} />
           </FieldBlock>
           <FieldBlock>
+/**
+ * scrollToFirstError - Utility function
+ * @returns void
+ */
             <FieldHeader label="End Date" required />
             <Controller
               name="endDateTime"
               control={control}
               render={({ field }) => (
+/**
+ * fieldOrder - Utility function
+ * @returns void
+ */
                 <div data-field="endDateTime">
                   <DateTimePicker
                     value={field.value}
@@ -362,6 +506,10 @@ export const CreateEventForm = ({
               Time Zone<span className="ml-1 text-rose-500">*</span>
             </span>
             <div className="min-w-[240px]" data-field="timeZone">
+/**
+ * firstErrorField - Utility function
+ * @returns void
+ */
               <Controller
                 name="timeZone"
                 control={control}
@@ -369,6 +517,10 @@ export const CreateEventForm = ({
                   <TimeZoneSelect
                     options={timeZoneOptions}
                     value={field.value}
+/**
+ * errorElement - Utility function
+ * @returns void
+ */
                     onChange={field.onChange}
                     isLoading={isLoading}
                     placeholder="Search..."
@@ -690,6 +842,10 @@ const TimeZoneSelect = ({
   const selectedOption = options.find((option) => option.value === value);
   const selectedIndex = options.findIndex((option) => option.value === value);
 
+/**
+ * FieldHeader - React component
+ * @returns React element
+ */
   // -- effects --
   useEffect(() => {
     if (isOpen && selectedIndex >= 0) {
@@ -707,6 +863,10 @@ const TimeZoneSelect = ({
           behavior: "auto",
           block: "center",
         });
+/**
+ * FieldBlock - React component
+ * @returns React element
+ */
       }, 100);
 
       return () => clearTimeout(timer);
@@ -714,6 +874,10 @@ const TimeZoneSelect = ({
   }, [isOpen, selectedIndex]);
 
   // -- handlers --
+/**
+ * FieldErrorMessage - React component
+ * @returns React element
+ */
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
     setIsOpen(false);
@@ -728,6 +892,10 @@ const TimeZoneSelect = ({
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={isOpen}
+/**
+ * EventInput - React component
+ * @returns React element
+ */
           aria-controls={listId}
           className="flex h-9 w-full items-center justify-between rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none"
         >
@@ -747,6 +915,10 @@ const TimeZoneSelect = ({
         <Command className="rounded-xl border-0 bg-white text-slate-900 shadow-none [&_[cmdk-input-wrapper]]:border-b [&_[cmdk-input-wrapper]]:border-slate-200 [&_[cmdk-input]]:text-slate-900 [&_[cmdk-input]]:placeholder:text-slate-500 [&_[cmdk-input-wrapper]_svg]:text-slate-500">
           <CommandInput
             placeholder={placeholder || "Search..."}
+/**
+ * EventTextarea - React component
+ * @returns React element
+ */
             className="h-10 text-slate-900 placeholder:text-slate-500"
           />
           <CommandList id={listId} className="max-h-[260px] overflow-y-auto">
@@ -765,6 +937,10 @@ const TimeZoneSelect = ({
                       className={cn(
                         "cursor-pointer text-slate-900 transition hover:bg-slate-100 active:bg-slate-200",
                         isSelected && "bg-blue-50 text-blue-700"
+/**
+ * EventRadioLabel - React component
+ * @returns React element
+ */
                       )}
                       data-timezone-selected={isSelected}
                     >
@@ -780,6 +956,10 @@ const TimeZoneSelect = ({
       </PopoverContent>
     </Popover>
   );
+/**
+ * EventButton - React component
+ * @returns React element
+ */
 };
 
 type TypeMultiSelectProps = {
@@ -810,6 +990,10 @@ const TypeMultiSelect = ({
   // -- handlers --
   const handleToggle = (optionValue: string) => {
     if (value.includes(optionValue)) {
+/**
+ * TimeZoneSelect - React component
+ * @returns React element
+ */
       onChange(value.filter((item) => item !== optionValue));
     } else {
       onChange([...value, optionValue]);
@@ -822,16 +1006,28 @@ const TypeMultiSelect = ({
       <PopoverTrigger asChild>
         <button
           type="button"
+/**
+ * listId - Utility function
+ * @returns void
+ */
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           aria-controls={listId}
           className="flex min-h-[44px] w-full items-center justify-between gap-2 rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-50 focus:outline-none"
         >
+/**
+ * selectedOption - Utility function
+ * @returns void
+ */
           <div className="flex flex-1 items-center gap-2 overflow-hidden">
             {value.length ? (
               <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
                 {visibleOptions.map((option) => (
+/**
+ * selectedIndex - Utility function
+ * @returns void
+ */
                   <span
                     key={option.value}
                     className="inline-flex shrink-0 items-center gap-1 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white"
@@ -841,11 +1037,19 @@ const TypeMultiSelect = ({
                       type="button"
                       onClick={(event) => {
                         event.preventDefault();
+/**
+ * timer - Utility function
+ * @returns void
+ */
                         event.stopPropagation();
                         handleToggle(option.value);
                       }}
                       className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/60 text-[10px] hover:bg-white/20"
                       aria-label={`Remove ${option.label}`}
+/**
+ * selectedItem - Utility function
+ * @returns void
+ */
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -867,6 +1071,10 @@ const TypeMultiSelect = ({
                       <X className="h-3 w-3" />
                     </button>
                   </span>
+/**
+ * handleSelect - Utility function
+ * @returns void
+ */
                 ) : null}
               </div>
             ) : (
@@ -912,6 +1120,10 @@ const TypeMultiSelect = ({
             {options.map((option) => (
               <CommandItem
                 key={option.value}
+/**
+ * isSelected - Utility function
+ * @returns void
+ */
                 value={option.label}
                 onSelect={() => handleToggle(option.value)}
                 className={cn(
@@ -940,3 +1152,32 @@ const TypeMultiSelect = ({
     </Popover>
   );
 };
+
+/**
+ * TypeMultiSelect - React component
+ * @returns React element
+ */
+/**
+ * listId - Utility function
+ * @returns void
+ */
+/**
+ * selectedOptions - Utility function
+ * @returns void
+ */
+/**
+ * MAX_VISIBLE - React component
+ * @returns React element
+ */
+/**
+ * visibleOptions - Utility function
+ * @returns void
+ */
+/**
+ * hiddenCount - Utility function
+ * @returns void
+ */
+/**
+ * handleToggle - Utility function
+ * @returns void
+ */

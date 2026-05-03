@@ -1,3 +1,7 @@
+/**
+ * EVENTS_HOSTING_SORT_OPTIONS - React component
+ * @returns React element
+ */
 export const EVENTS_HOSTING_SORT_OPTIONS = [
   { value: "eventDateNewest", label: "Event Date (Newest)" },
   { value: "eventDateOldest", label: "Event Date (Oldest)" },

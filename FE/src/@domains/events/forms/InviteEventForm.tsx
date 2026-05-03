@@ -21,15 +21,27 @@ type InviteEventFormProps = {
   onSubmitSuccess: (recipientEmails: string[], message?: string) => Promise<void>;
 };
 
+/**
+ * EMAIL_PATTERN - React component
+ * @returns React element
+ */
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
 const EMPTY_EMAILS: string[] = [];
 
 const parseEmails = (value: string) =>
+/**
+ * EMPTY_EMAILS - React component
+ * @returns React element
+ */
   value
     .split(/[,;\n\s]+/)
     .map((email) => email.trim())
     .filter(Boolean);
 
+/**
+ * parseEmails - Utility function
+ * @returns void
+ */
 export function InviteEventForm({
   event,
   onCancel,
@@ -39,6 +51,10 @@ export function InviteEventForm({
   const {
     control,
     handleSubmit,
+/**
+ * InviteEventForm - React component
+ * @returns React element
+ */
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<InviteEventFormValues>({
@@ -63,20 +79,36 @@ export function InviteEventForm({
 
   const mergeInputEmails = (emails: string[]) => {
     const parsed = parseEmails(emailInput);
+/**
+ * watchedRecipientEmails - Utility function
+ * @returns void
+ */
     if (!parsed.length) {
       return emails;
     }
     const unique = Array.from(
+/**
+ * recipientEmails - Utility function
+ * @returns void
+ */
       new Set([...emails, ...parsed].map((email) => email.toLowerCase())),
     );
     setEmailInput("");
     return unique.map(
+/**
+ * personalMessage - Utility function
+ * @returns void
+ */
       (email) => emails.find((item) => item.toLowerCase() === email) ?? email,
     );
   };
 
   const handleFormSubmit = async (values: InviteEventFormValues) => {
     const mergedEmails = mergeInputEmails(values.recipientEmails);
+/**
+ * invalidEmails - Utility function
+ * @returns void
+ */
     if (mergedEmails.length !== values.recipientEmails.length) {
       setValue("recipientEmails", mergedEmails, { shouldValidate: true });
     }
@@ -85,10 +117,18 @@ export function InviteEventForm({
 
   const handlePreviewClick = () => {
     const mergedEmails = mergeInputEmails(recipientEmails);
+/**
+ * mergeInputEmails - Utility function
+ * @returns void
+ */
     if (mergedEmails.length !== recipientEmails.length) {
       setValue("recipientEmails", mergedEmails, { shouldValidate: true });
     }
     onPreview(mergedEmails);
+/**
+ * parsed - Utility function
+ * @returns void
+ */
   };
 
   const handleAddEmails = () => {
@@ -96,6 +136,10 @@ export function InviteEventForm({
     if (!nextEmails.length) {
       return;
     }
+/**
+ * unique - Utility function
+ * @returns void
+ */
 
     const unique = Array.from(
       new Set([...recipientEmails, ...nextEmails].map((email) => email.toLowerCase())),
@@ -108,10 +152,18 @@ export function InviteEventForm({
     setEmailInput("");
     return merged;
   };
+/**
+ * handleFormSubmit - Utility function
+ * @returns void
+ */
 
   const handleAddFromInput = () => {
     const merged = handleAddEmails();
     if (merged) {
+/**
+ * mergedEmails - Utility function
+ * @returns void
+ */
       return merged;
     }
     return recipientEmails;
@@ -122,10 +174,18 @@ export function InviteEventForm({
       (item) => item.toLowerCase() !== email.toLowerCase(),
     );
     return next;
+/**
+ * handlePreviewClick - Utility function
+ * @returns void
+ */
   };
 
   return (
     <form
+/**
+ * mergedEmails - Utility function
+ * @returns void
+ */
       onSubmit={handleSubmit(handleFormSubmit)}
       className="flex max-h-[75vh] flex-col overflow-hidden bg-slate-50"
     >
@@ -136,10 +196,18 @@ export function InviteEventForm({
           </p>
           <h3 className="mt-2 text-xl font-semibold text-slate-900">
             {event.title}
+/**
+ * handleAddEmails - Utility function
+ * @returns void
+ */
           </h3>
           <p className="mt-2 text-sm text-slate-600">
             Send a personalized invitation to collectors, friends, or collaborators.
           </p>
+/**
+ * nextEmails - Utility function
+ * @returns void
+ */
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm">
@@ -148,6 +216,10 @@ export function InviteEventForm({
             required
             helper="Enter one or more email addresses. Use commas or press Enter to add."
           />
+/**
+ * unique - Utility function
+ * @returns void
+ */
           <Controller
             name="recipientEmails"
             control={control}
@@ -155,6 +227,10 @@ export function InviteEventForm({
               <div className="space-y-3">
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <input
+/**
+ * merged - Utility function
+ * @returns void
+ */
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -166,10 +242,18 @@ export function InviteEventForm({
                     }}
                     placeholder="Add email addresses"
                     className="h-[42px] w-full rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none"
+/**
+ * handleAddFromInput - Utility function
+ * @returns void
+ */
                   />
                   <button
                     type="button"
                     onClick={() => field.onChange(handleAddFromInput())}
+/**
+ * merged - Utility function
+ * @returns void
+ */
                     className="h-[42px] rounded-full border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
                     Add
@@ -180,10 +264,18 @@ export function InviteEventForm({
                     {field.value.map((email) => (
                       <span
                         key={email}
+/**
+ * handleRemoveEmail - Utility function
+ * @returns void
+ */
                         className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700"
                       >
                         {email}
                         <button
+/**
+ * next - Utility function
+ * @returns void
+ */
                           type="button"
                           onClick={() => field.onChange(handleRemoveEmail(email))}
                           className="text-slate-400 hover:text-slate-600"
@@ -229,6 +321,10 @@ export function InviteEventForm({
           />
           <p className="mt-2 text-xs text-slate-500">
             {personalMessage ? personalMessage.length : 0} characters
+/**
+ * next - Utility function
+ * @returns void
+ */
           </p>
         </div>
       </div>
@@ -333,3 +429,20 @@ const EventTextarea = ({
     />
   );
 };
+
+/**
+ * FieldHeader - React component
+ * @returns React element
+ */
+/**
+ * FieldErrorMessage - React component
+ * @returns React element
+ */
+/**
+ * EventButton - React component
+ * @returns React element
+ */
+/**
+ * EventTextarea - React component
+ * @returns React element
+ */

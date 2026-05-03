@@ -1,3 +1,7 @@
+/**
+ * EVENT_TYPE_OPTIONS - React component
+ * @returns React element
+ */
 export const EVENT_TYPE_OPTIONS = [
   { value: "exhibition", label: "Exhibition" },
   { value: "art-fair", label: "Art Fair" },
@@ -12,4 +16,8 @@ export const EVENT_TYPE_OPTIONS = [
 export const VISIBILITY_OPTIONS = [
   { value: "public", label: "Public" },
   { value: "private", label: "Private" },
+/**
+ * VISIBILITY_OPTIONS - React component
+ * @returns React element
+ */
 ] as const;
