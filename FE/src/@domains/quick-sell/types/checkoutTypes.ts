@@ -82,10 +82,10 @@ export const defaultBuyerAddress: CheckoutBuyerAddress = {
 export const defaultCheckoutDraft: CheckoutDraft = {
   address: defaultBuyerAddress,
   shippingFee: 0,
-/**
- * defaultCheckoutDraft - Utility function
- * @returns void
- */
+  /**
+   * defaultCheckoutDraft - Utility function
+   * @returns void
+   */
   taxPercent: 0,
   taxAmount: 0,
 }
