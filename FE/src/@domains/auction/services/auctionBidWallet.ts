@@ -16,10 +16,10 @@ export type AuctionBidWalletErrorCode =
   | 'missing_wallet'
   | 'wrong_chain'
   | 'rejected'
-/**
- * WEI_DECIMALS - React component
- * @returns React element
- */
+  /**
+   * WEI_DECIMALS - React component
+   * @returns React element
+   */
   | 'invalid_amount'
   | 'invalid_contract'
   | 'transaction_failed'
@@ -33,10 +33,10 @@ export class AuctionBidWalletError extends Error {
     super(message)
     this.name = 'AuctionBidWalletError'
   }
-/**
- * AuctionBidWalletError - React component
- * @returns React element
- */
+  /**
+   * AuctionBidWalletError - React component
+   * @returns React element
+   */
 }
 
 export type SubmitAuctionBidInput = {
@@ -78,18 +78,18 @@ const assertContractAddress = (contractAddress: string) => {
 
 const decimalEthToWei = (amountEth: string | number) => {
   const normalized = String(amountEth).trim()
-/**
- * isRejectedRequest - Utility function
- * @returns void
- */
+  /**
+   * isRejectedRequest - Utility function
+   * @returns void
+   */
 
   if (!/^\d+(\.\d+)?$/.test(normalized)) {
     throw new AuctionBidWalletError('invalid_amount', 'Bid amount must be a valid ETH value.')
   }
-/**
- * maybeError - Utility function
- * @returns void
- */
+  /**
+   * maybeError - Utility function
+   * @returns void
+   */
 
   const [wholePart, fractionPart = ''] = normalized.split('.')
   if (fractionPart.length > WEI_DECIMALS) {
@@ -97,19 +97,19 @@ const decimalEthToWei = (amountEth: string | number) => {
       'invalid_amount',
       'Bid amount supports up to 18 decimal places.',
     )
-/**
- * normalizeAddress - Utility function
- * @returns void
- */
+    /**
+     * normalizeAddress - Utility function
+     * @returns void
+     */
   }
 
   const wei =
     BigInt(wholePart) * BigInt(10) ** BigInt(WEI_DECIMALS) +
     BigInt(fractionPart.padEnd(WEI_DECIMALS, '0'))
-/**
- * assertContractAddress - Utility function
- * @returns void
- */
+  /**
+   * assertContractAddress - Utility function
+   * @returns void
+   */
 
   if (wei <= BigInt(0)) {
     throw new AuctionBidWalletError('invalid_amount', 'Bid amount must be greater than zero.')
@@ -127,10 +127,10 @@ const toHexQuantity = (value: bigint) => `0x${value.toString(16)}`
 const padHexWord = (hexValue: string) => hexValue.padStart(64, '0')
 
 const utf8ToHex = (value: string) =>
-/**
- * normalized - Utility function
- * @returns void
- */
+  /**
+   * normalized - Utility function
+   * @returns void
+   */
   Array.from(new TextEncoder().encode(value))
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('')
@@ -166,28 +166,28 @@ export const submitAuctionBid = async ({
   }
 
   let accounts: string[]
-/**
- * toHexQuantity - Utility function
- * @returns void
- */
+  /**
+   * toHexQuantity - Utility function
+   * @returns void
+   */
   try {
     accounts = await provider.request<string[]>({ method: 'eth_requestAccounts' })
   } catch (error) {
     throw new AuctionBidWalletError(
       isRejectedRequest(error) ? 'rejected' : 'transaction_failed',
-/**
- * padHexWord - Utility function
- * @returns void
- */
+      /**
+       * padHexWord - Utility function
+       * @returns void
+       */
       isRejectedRequest(error)
         ? 'You rejected the MetaMask account request.'
         : 'MetaMask account request failed.',
       error,
     )
-/**
- * utf8ToHex - Utility function
- * @returns void
- */
+    /**
+     * utf8ToHex - Utility function
+     * @returns void
+     */
   }
 
   const walletAddress = accounts[0] ? normalizeAddress(accounts[0]) : ''
@@ -196,34 +196,34 @@ export const submitAuctionBid = async ({
   }
 
   const value = toHexQuantity(decimalEthToWei(bidAmountEth))
-/**
- * encodeBidCalldata - Utility function
- * @returns void
- */
+  /**
+   * encodeBidCalldata - Utility function
+   * @returns void
+   */
   const data = encodeBidCalldata(auctionId)
 
   try {
     const txHash = await provider.request<string>({
-/**
- * stringHex - Utility function
- * @returns void
- */
+      /**
+       * stringHex - Utility function
+       * @returns void
+       */
       method: 'eth_sendTransaction',
       params: [
         {
           from: walletAddress,
-/**
- * byteLength - Utility function
- * @returns void
- */
+          /**
+           * byteLength - Utility function
+           * @returns void
+           */
           to: contractAddress,
           value,
           data,
         },
-/**
- * paddedStringHex - Utility function
- * @returns void
- */
+        /**
+         * paddedStringHex - Utility function
+         * @returns void
+         */
       ],
     })
 
@@ -237,11 +237,11 @@ export const submitAuctionBid = async ({
       isRejectedRequest(error) ? 'rejected' : 'transaction_failed',
       isRejectedRequest(error)
         ? 'You rejected the bid transaction.'
-/**
- * submitAuctionBid - Utility function
- * @returns void
- */
-        : 'MetaMask could not submit the bid transaction.',
+        : /**
+           * submitAuctionBid - Utility function
+           * @returns void
+           */
+          'MetaMask could not submit the bid transaction.',
       error,
     )
   }

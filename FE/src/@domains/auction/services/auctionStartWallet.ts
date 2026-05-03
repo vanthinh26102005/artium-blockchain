@@ -39,10 +39,10 @@ export type SubmitSellerAuctionStartTransactionResult = {
 const getProvider = (): EthereumProvider => {
   if (typeof window === 'undefined' || !window.ethereum?.isMetaMask) {
     throw new SellerAuctionStartWalletError(
-/**
- * getProvider - Utility function
- * @returns void
- */
+      /**
+       * getProvider - Utility function
+       * @returns void
+       */
       'missing_wallet',
       'MetaMask is required to start this auction.',
     )
@@ -66,28 +66,28 @@ const assertContractAddress = (contractAddress: string) => {
     throw new SellerAuctionStartWalletError(
       'invalid_contract',
       'Auction contract address is invalid.',
-/**
- * isPendingRequest - Utility function
- * @returns void
- */
+      /**
+       * isPendingRequest - Utility function
+       * @returns void
+       */
     )
   }
 }
 
 const assertCalldata = (data: string) => {
-/**
- * normalizeAddress - Utility function
- * @returns void
- */
+  /**
+   * normalizeAddress - Utility function
+   * @returns void
+   */
   if (!/^0x[a-fA-F0-9]+$/.test(data) || data.length < 10) {
     throw new SellerAuctionStartWalletError(
       'invalid_request',
       'Auction wallet request is missing valid transaction data.',
     )
-/**
- * assertContractAddress - Utility function
- * @returns void
- */
+    /**
+     * assertContractAddress - Utility function
+     * @returns void
+     */
   }
 }
 
@@ -100,10 +100,10 @@ const ensureTargetChain = async (provider: EthereumProvider) => {
   try {
     await provider.request({
       method: 'wallet_switchEthereumChain',
-/**
- * assertCalldata - Utility function
- * @returns void
- */
+      /**
+       * assertCalldata - Utility function
+       * @returns void
+       */
       params: [{ chainId: WALLET_TARGET_CHAIN.chainIdHex }],
     })
   } catch (error) {
@@ -116,18 +116,18 @@ const ensureTargetChain = async (provider: EthereumProvider) => {
           `Missing RPC URL for ${WALLET_TARGET_CHAIN.name}.`,
           error,
         )
-/**
- * ensureTargetChain - Utility function
- * @returns void
- */
+        /**
+         * ensureTargetChain - Utility function
+         * @returns void
+         */
       }
 
       try {
         await provider.request({
-/**
- * chainId - Utility function
- * @returns void
- */
+          /**
+           * chainId - Utility function
+           * @returns void
+           */
           method: 'wallet_addEthereumChain',
           params: [
             {
@@ -142,10 +142,10 @@ const ensureTargetChain = async (provider: EthereumProvider) => {
       } catch (addChainError) {
         if (isPendingRequest(addChainError)) {
           throw new SellerAuctionStartWalletError(
-/**
- * maybeError - Utility function
- * @returns void
- */
+            /**
+             * maybeError - Utility function
+             * @returns void
+             */
             'request_pending',
             'MetaMask already has a pending network request. Open MetaMask to continue.',
             addChainError,
@@ -207,10 +207,10 @@ export const submitSellerAuctionStartTransaction = async ({
         : isRejectedRequest(error)
           ? 'rejected'
           : 'transaction_failed',
-/**
- * nextChainId - Utility function
- * @returns void
- */
+      /**
+       * nextChainId - Utility function
+       * @returns void
+       */
       isPendingRequest(error)
         ? 'MetaMask already has a pending wallet request. Open MetaMask to continue.'
         : isRejectedRequest(error)
@@ -225,20 +225,20 @@ export const submitSellerAuctionStartTransaction = async ({
     throw new SellerAuctionStartWalletError(
       'missing_wallet',
       'No MetaMask account was selected for this auction start.',
-/**
- * submitSellerAuctionStartTransaction - Utility function
- * @returns void
- */
+      /**
+       * submitSellerAuctionStartTransaction - Utility function
+       * @returns void
+       */
     )
   }
 
   try {
     const txHash = await provider.request<string>({
       method: 'eth_sendTransaction',
-/**
- * provider - Utility function
- * @returns void
- */
+      /**
+       * provider - Utility function
+       * @returns void
+       */
       params: [
         {
           from: walletAddress,
@@ -246,10 +246,10 @@ export const submitSellerAuctionStartTransaction = async ({
           data: transactionRequest.data,
         },
       ],
-/**
- * chainId - Utility function
- * @returns void
- */
+      /**
+       * chainId - Utility function
+       * @returns void
+       */
     })
 
     return {
