@@ -6,10 +6,18 @@ type EmailTemplatePreviewProps = {
   recipientEmails: string[];
 };
 
+/**
+ * formatEventDate - Utility function
+ * @returns void
+ */
 const formatEventDate = (dateString: string, timeZone?: string) => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
+/**
+ * date - Utility function
+ * @returns void
+ */
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -23,6 +31,10 @@ const formatEventTime = (
   timeZone?: string,
 ) => {
   const start = new Date(startDateTime);
+/**
+ * formatEventTime - Utility function
+ * @returns void
+ */
   const end = new Date(endDateTime);
 
   const startTime = new Intl.DateTimeFormat("en-US", {
@@ -31,15 +43,27 @@ const formatEventTime = (
     hour12: true,
     timeZone: timeZone || undefined,
   }).format(start);
+/**
+ * start - Utility function
+ * @returns void
+ */
 
   const endTime = new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
+/**
+ * end - Utility function
+ * @returns void
+ */
     hour12: true,
     timeZone: timeZone || undefined,
   }).format(end);
 
   return `${startTime} - ${endTime}`;
+/**
+ * startTime - Utility function
+ * @returns void
+ */
 };
 
 export function EmailTemplatePreview({
@@ -50,6 +74,10 @@ export function EmailTemplatePreview({
     <div className="mx-auto max-w-160 bg-slate-50 font-inter text-slate-900">
       <div className="rounded-3xl border border-slate-200 bg-white shadow-lg">
         <div className="border-b border-slate-200 bg-gradient-to-b from-white to-slate-50 px-8 py-6">
+/**
+ * endTime - Utility function
+ * @returns void
+ */
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
             Event Invitation
           </p>
@@ -63,6 +91,10 @@ export function EmailTemplatePreview({
           </p>
           <button
             type="button"
+/**
+ * EmailTemplatePreview - React component
+ * @returns React element
+ */
             className="mt-4 inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white"
           >
             View Event

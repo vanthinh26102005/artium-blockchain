@@ -44,6 +44,10 @@ type EventDetailHeroProps = {
   onEditHosting?: () => void;
 };
 
+/**
+ * statusStyles - Utility function
+ * @returns void
+ */
 const statusStyles: Record<EventStatus, string> = {
   going: "border-blue-500 bg-blue-100 text-blue-700 hover:bg-blue-200",
   maybe: "border-yellow-500 bg-yellow-100 text-yellow-700 hover:bg-yellow-200",
@@ -54,6 +58,10 @@ const statusStyles: Record<EventStatus, string> = {
 const statusLabels: Record<EventStatus, string> = {
   going: "Going",
   maybe: "Maybe",
+/**
+ * statusLabels - Utility function
+ * @returns void
+ */
   notGoing: "Not Going",
   rsvp: "RSVP",
 };
@@ -64,6 +72,10 @@ const StatusIcon = ({ status }: { status: EventStatus }) => {
   }
 
   if (status === "maybe") {
+/**
+ * StatusIcon - React component
+ * @returns React element
+ */
     return <HelpCircle className="h-4 w-4" />;
   }
 
@@ -83,6 +95,10 @@ export const EventDetailHero = ({
   onCopyLink,
   isHosting = false,
   onDeleteHosting,
+/**
+ * EventDetailHero - React component
+ * @returns React element
+ */
   onEditHosting,
 }: EventDetailHeroProps) => {
   const [isRsvpOpen, setIsRsvpOpen] = useState(false);
@@ -100,10 +116,18 @@ export const EventDetailHero = ({
         <div className="relative aspect-[32/9] w-full max-h-[420px] bg-slate-100">
           {event.coverImageUrl ? (
             <Image
+/**
+ * typeLabels - Utility function
+ * @returns void
+ */
               src={event.coverImageUrl}
               alt={event.title}
               fill
               className="object-cover"
+/**
+ * map - Utility function
+ * @returns void
+ */
               sizes="(min-width: 1280px) 90vw, 100vw"
               priority
               unoptimized

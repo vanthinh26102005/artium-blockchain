@@ -12,6 +12,10 @@ type EventGuestsCardProps = {
   onSeeAll?: () => void;
 };
 
+/**
+ * EventGuestsCard - React component
+ * @returns React element
+ */
 export const EventGuestsCard = ({
   going,
   maybe,
@@ -22,6 +26,10 @@ export const EventGuestsCard = ({
   const stats = [
     { label: "Going", value: going },
     { label: "Maybe", value: maybe },
+/**
+ * stats - Utility function
+ * @returns void
+ */
     { label: "Invited", value: invited },
   ];
 
