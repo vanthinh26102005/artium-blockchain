@@ -3,16 +3,28 @@ import { templates } from '@domains/custom-website/data'
 import Head from 'next/head'
 import type { NextPageWithLayout } from '@shared/types/next'
 
+/**
+ * TemplatePreview - React component
+ * @returns React element
+ */
 const TemplatePreview: NextPageWithLayout = () => {
     const router = useRouter()
     const { id } = router.query
 
+/**
+ * router - Utility function
+ * @returns void
+ */
     const template = templates.find((t) => t.id === id)
 
     if (!router.isReady) return <div className="p-8">Loading...</div>
 
     if (!template) {
         return (
+/**
+ * template - Utility function
+ * @returns void
+ */
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-slate-900">Template Not Found</h1>
