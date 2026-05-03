@@ -46,10 +46,18 @@ type BuyerCheckoutPageViewProps = {
   artworkId: string
 }
 
+/**
+ * apiArtworkToCheckout - Utility function
+ * @returns void
+ */
 const apiArtworkToCheckout = (artwork: ArtworkApiItem): ArtworkForCheckout => {
   const rawPrice =
     typeof artwork.price === 'string' ? parseFloat(artwork.price) : (artwork.price ?? 0)
 
+/**
+ * rawPrice - Utility function
+ * @returns void
+ */
   return {
     id: artwork.id,
     title: artwork.title,
@@ -71,19 +79,35 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
   const stripe = useStripe()
   const elements = useElements()
 
+/**
+ * BuyerCheckoutPageView - React component
+ * @returns React element
+ */
   // -- state --
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [isFetchingArtwork, setIsFetchingArtwork] = useState(true)
+/**
+ * router - Utility function
+ * @returns void
+ */
   const [artwork, setArtwork] = useState<ArtworkForCheckout | null>(null)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [paymentResult, setPaymentResult] = useState<CheckoutSuccessState | null>(null)
   const [paymentError, setPaymentError] = useState<ClassifiedPaymentError | null>(null)
   const [cardElementsComplete, setCardElementsComplete] = useState(false)
+/**
+ * stripe - Utility function
+ * @returns void
+ */
   const [paymentFormResetKey, setPaymentFormResetKey] = useState(0)
   const [walletQuote, setWalletQuote] = useState<EthereumQuoteResponse | null>(null)
   const [walletQuoteStatus, setWalletQuoteStatus] = useState<
     'idle' | 'loading' | 'ready' | 'error'
+/**
+ * elements - Utility function
+ * @returns void
+ */
   >('idle')
   const [walletQuoteError, setWalletQuoteError] = useState<string | null>(null)
   const [walletQuoteRefreshKey, setWalletQuoteRefreshKey] = useState(0)
@@ -107,6 +131,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
   const watchedPaymentMethod = watchedPaymentValues?.paymentMethod ?? 'card'
   const draft: BuyerCheckoutContactStepValues = {
     ...defaultBuyerCheckoutDraft,
+/**
+ * contactForm - Utility function
+ * @returns void
+ */
     ...watchedDraft,
     contact: {
       ...defaultBuyerCheckoutDraft.contact,
@@ -115,6 +143,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     shippingAddress: {
       ...defaultBuyerCheckoutDraft.shippingAddress,
       ...watchedDraft?.shippingAddress,
+/**
+ * paymentForm - Utility function
+ * @returns void
+ */
     },
   }
 
@@ -126,18 +158,34 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     }
 
     setPaymentResult(persistedSuccessState)
+/**
+ * watchedDraft - Utility function
+ * @returns void
+ */
 
     if (!router.isReady || router.query.status === 'success') {
       return
     }
+/**
+ * watchedPaymentValues - Utility function
+ * @returns void
+ */
 
     void router.replace(`/checkout/${artworkId}?status=success`, undefined, { shallow: true })
   }, [artworkId, router])
 
+/**
+ * watchedPaymentMethod - Utility function
+ * @returns void
+ */
   // -- fetch artwork from API --
   useEffect(() => {
     let cancelled = false
     const fetchArtwork = async () => {
+/**
+ * draft - Utility function
+ * @returns void
+ */
       setIsFetchingArtwork(true)
       setFetchError(null)
       try {
@@ -156,6 +204,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         if (!cancelled) setIsFetchingArtwork(false)
       }
     }
+/**
+ * persistedSuccessState - Utility function
+ * @returns void
+ */
     fetchArtwork()
     return () => {
       cancelled = true
@@ -176,6 +228,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
   }, [contactForm, isAuthenticated, user])
 
   // -- pricing calculation --
+/**
+ * fetchArtwork - Utility function
+ * @returns void
+ */
   const pricing: CheckoutPricing = useMemo(() => {
     if (!artwork) return { artworkPrice: 0, shippingFee: 0, discount: 0, total: 0 }
 
@@ -183,6 +239,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     const shippingRate = draft.shippingAddress.country === 'US' ? 0.05 : 0.08
     const shippingFee =
       draft.deliveryMethod === 'ship_by_platform' ? artworkPrice * shippingRate : 0
+/**
+ * apiArtwork - Utility function
+ * @returns void
+ */
     const discount = 0
     const total = artworkPrice + shippingFee - discount
 
@@ -210,14 +270,26 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     if ((currentWalletAddress ?? '') === nextWalletAddress) {
       return
     }
+/**
+ * nameParts - Utility function
+ * @returns void
+ */
 
     paymentForm.setValue('walletAddress', nextWalletAddress, {
       shouldDirty: true,
       shouldValidate: connectedWalletAddress.length > 0,
+/**
+ * firstName - Utility function
+ * @returns void
+ */
     })
     if (nextWalletAddress) {
       paymentForm.clearErrors('walletAddress')
     }
+/**
+ * lastName - Utility function
+ * @returns void
+ */
   }, [connectedWalletAddress, paymentForm])
 
   // -- handlers --
@@ -230,29 +302,53 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
 
   const handleApplyPromo = useCallback(() => {
     // TODO: Validate promo code via API
+/**
+ * pricing - Utility function
+ * @returns void
+ */
   }, [])
 
   const handleCancel = useCallback(() => {
     if (step === 2) {
       setStep(1)
       setPaymentError(null)
+/**
+ * artworkPrice - Utility function
+ * @returns void
+ */
       setCardElementsComplete(false)
       return
     }
     router.back()
+/**
+ * shippingRate - Utility function
+ * @returns void
+ */
   }, [router, step])
 
   const updateStoredPaymentResult = useCallback(
     (updater: (current: CheckoutSuccessState) => CheckoutSuccessState) => {
+/**
+ * shippingFee - Utility function
+ * @returns void
+ */
       setPaymentResult((current) => {
         if (!current) {
           return current
         }
 
+/**
+ * discount - Utility function
+ * @returns void
+ */
         const nextPaymentResult = updater(current)
         saveCheckoutSuccessState(nextPaymentResult)
         return nextPaymentResult
       })
+/**
+ * total - Utility function
+ * @returns void
+ */
     },
     [],
   )
@@ -261,17 +357,29 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     (nextPaymentResult: CheckoutSuccessState) => {
       saveCheckoutSuccessState(nextPaymentResult)
       setPaymentResult(nextPaymentResult)
+/**
+ * isWalletQuoteExpired - Utility function
+ * @returns void
+ */
       void router.replace(`/checkout/${artworkId}?status=success`, undefined, { shallow: true })
     },
     [artworkId, router],
   )
 
+/**
+ * walletQuoteExpiresInSeconds - Utility function
+ * @returns void
+ */
   const resetPaymentStepState = useCallback(() => {
     clearCheckoutSuccessState(artworkId)
     setPaymentError(null)
     setCardElementsComplete(false)
     setWalletQuote(null)
     setWalletQuoteStatus('idle')
+/**
+ * walletCheckout - Utility function
+ * @returns void
+ */
     setWalletQuoteError(null)
     clearWalletTransactionState()
     setPaymentFormResetKey((current) => current + 1)
@@ -279,28 +387,52 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
       paymentMethod: 'card',
       country: paymentForm.getValues('country') || 'VN',
     })
+/**
+ * connectedWalletAddress - Utility function
+ * @returns void
+ */
   }, [artworkId, clearWalletTransactionState, paymentForm])
 
   const refreshWalletQuote = useCallback(() => {
     setWalletQuoteRefreshKey((current) => current + 1)
+/**
+ * clearWalletTransactionState - Utility function
+ * @returns void
+ */
   }, [])
 
   useEffect(() => {
     if (step !== 2 || watchedPaymentMethod !== 'wallet') {
+/**
+ * submitWalletTransaction - Utility function
+ * @returns void
+ */
       setWalletQuoteClock(Date.now())
       return
     }
 
+/**
+ * syncWalletState - Utility function
+ * @returns void
+ */
     setWalletQuoteClock(Date.now())
     const intervalId = window.setInterval(() => {
       setWalletQuoteClock(Date.now())
     }, 1000)
 
     return () => {
+/**
+ * nextWalletAddress - Utility function
+ * @returns void
+ */
       window.clearInterval(intervalId)
     }
   }, [step, watchedPaymentMethod])
 
+/**
+ * currentWalletAddress - Utility function
+ * @returns void
+ */
   useEffect(() => {
     if (step !== 2 || watchedPaymentMethod !== 'wallet') {
       setWalletQuote(null)
@@ -320,6 +452,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         if (cancelled) return
         setWalletQuote(quote)
         setWalletQuoteStatus('ready')
+/**
+ * handlePromoCodeChange - Utility function
+ * @returns void
+ */
       } catch (err) {
         if (cancelled) return
         setWalletQuote(null)
@@ -330,6 +466,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
       }
     }
 
+/**
+ * handleApplyPromo - Utility function
+ * @returns void
+ */
     void fetchWalletQuote()
 
     return () => {
@@ -337,6 +477,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     }
   }, [pricing.total, step, walletQuoteRefreshKey, watchedPaymentMethod])
 
+/**
+ * handleCancel - Utility function
+ * @returns void
+ */
   useEffect(() => {
     if (
       !paymentResult ||
@@ -350,6 +494,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     let cancelled = false
     let timeoutId: number | null = null
 
+/**
+ * updateStoredPaymentResult - Utility function
+ * @returns void
+ */
     const scheduleNextPoll = () => {
       timeoutId = window.setTimeout(() => {
         void pollTransactionStatus()
@@ -360,6 +508,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
       transaction: PaymentTransactionResponse,
     ): CheckoutSuccessState['status'] | null => {
       if (transaction.status === 'SUCCEEDED') {
+/**
+ * nextPaymentResult - Utility function
+ * @returns void
+ */
         return 'succeeded'
       }
 
@@ -371,6 +523,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     }
 
     const pollTransactionStatus = async () => {
+/**
+ * showSuccessState - Utility function
+ * @returns void
+ */
       const transactionId = paymentResult.transactionId
       if (!transactionId) {
         return
@@ -383,6 +539,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         }
 
         const nextStatus = mapTransactionToCheckoutStatus(transaction)
+/**
+ * resetPaymentStepState - Utility function
+ * @returns void
+ */
         if (!nextStatus) {
           scheduleNextPoll()
           return
@@ -401,6 +561,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         if (!cancelled) {
           scheduleNextPoll()
         }
+/**
+ * refreshWalletQuote - Utility function
+ * @returns void
+ */
       }
     }
 
@@ -415,6 +579,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
   }, [paymentResult, updateStoredPaymentResult])
 
   const handleContinue = useCallback(async () => {
+/**
+ * intervalId - Utility function
+ * @returns void
+ */
     setPaymentError(null)
 
     if (step === 1) {
@@ -437,6 +605,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         return
       }
 
+/**
+ * fetchWalletQuote - Utility function
+ * @returns void
+ */
       setStep(2)
       return
     }
@@ -445,6 +617,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
 
     if (paymentValues.paymentMethod === 'card') {
       if (!paymentValues.country?.trim()) {
+/**
+ * quote - Utility function
+ * @returns void
+ */
         setPaymentError({ type: 'generic', message: 'Please select your billing country.' })
         return
       }
@@ -482,6 +658,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         paymentForm.clearErrors('walletAddress')
       }
 
+/**
+ * scheduleNextPoll - Utility function
+ * @returns void
+ */
       const isStepValid = await paymentForm.trigger()
       if (!isStepValid) {
         setPaymentError({
@@ -491,6 +671,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         return
       }
     }
+/**
+ * mapTransactionToCheckoutStatus - Utility function
+ * @returns void
+ */
 
     if (!artwork) return
 
@@ -508,10 +692,18 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
 
     setIsLoading(true)
 
+/**
+ * pollTransactionStatus - Utility function
+ * @returns void
+ */
     let createdOrder: Awaited<ReturnType<typeof orderApis.createOrder>> | null = null
     let submittedWalletTxHash = ''
 
     try {
+/**
+ * transactionId - Utility function
+ * @returns void
+ */
       const shippingAddr =
         checkoutValues.deliveryMethod !== 'pickup'
           ? {
@@ -521,6 +713,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
               state: checkoutValues.shippingAddress.state,
               postalCode: checkoutValues.shippingAddress.postalCode,
               country: checkoutValues.shippingAddress.country,
+/**
+ * transaction - Utility function
+ * @returns void
+ */
             }
           : undefined
 
@@ -529,6 +725,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         items: [
           {
             artworkId: artwork.id,
+/**
+ * nextStatus - Utility function
+ * @returns void
+ */
             quantity: 1,
             price: artwork.price,
             artworkTitle: artwork.title,
@@ -564,6 +764,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
           description: `Purchase: ${artwork.title}`,
         })
 
+/**
+ * handleContinue - Utility function
+ * @returns void
+ */
         if (!intent.clientSecret) {
           throw new Error('Stripe did not return a payment confirmation token. Please try again.')
         }
@@ -571,6 +775,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         // Confirm card payment in-browser using the same Stripe account as the publishable key.
         const cardNumberEl = elements!.getElement(CardNumberElement)
         if (!cardNumberEl)
+/**
+ * isStepValid - Utility function
+ * @returns void
+ */
           throw new Error('Card form is not mounted. Please refresh and try again.')
         const confirmation = await stripe!.confirmCardPayment(intent.clientSecret, {
           payment_method: {
@@ -597,6 +805,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
           orderNumber: createdOrder.orderNumber,
           paymentMethod: 'card',
           status: confirmedStatus === 'processing' ? 'processing' : 'succeeded',
+/**
+ * paymentValues - Utility function
+ * @returns void
+ */
           totalPaid: createdOrder.totalAmount,
           orderId: createdOrder.id,
           transactionId: intent.id,
@@ -629,10 +841,18 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
           chainId: walletQuote.chainId,
           description: `Purchase: ${artwork.title}`,
         })
+/**
+ * walletState - Utility function
+ * @returns void
+ */
 
         const nextPaymentResult: CheckoutSuccessState = {
           artworkId,
           orderNumber: createdOrder.orderNumber,
+/**
+ * walletAddressForValidation - Utility function
+ * @returns void
+ */
           paymentMethod: 'wallet',
           status: 'processing',
           totalPaid: createdOrder.totalAmount,
@@ -647,6 +867,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
       }
     } catch (err) {
       const isWalletPayment = paymentForm.getValues('paymentMethod') === 'wallet'
+/**
+ * isStepValid - Utility function
+ * @returns void
+ */
       const walletTxHash = submittedWalletTxHash
 
       if (createdOrder && !(isWalletPayment && walletTxHash)) {
@@ -662,6 +886,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         })
       } else {
         setPaymentError(classifyPaymentError(err))
+/**
+ * checkoutValues - Utility function
+ * @returns void
+ */
       }
     } finally {
       setIsLoading(false)
@@ -683,6 +911,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     stripe,
     walletQuote,
   ])
+/**
+ * shippingAddr - Utility function
+ * @returns void
+ */
 
   const handlePaymentRecovery = useCallback(() => {
     if (!paymentError?.recoveryAction) {
@@ -719,6 +951,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
   }
 
   // -- not found --
+/**
+ * status - Utility function
+ * @returns void
+ */
   if (!artwork) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -732,10 +968,18 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
             className="mt-4 text-[#0066FF] hover:underline"
           >
             Go to Discover
+/**
+ * amountInCents - Utility function
+ * @returns void
+ */
           </button>
         </div>
       </div>
     )
+/**
+ * intent - Utility function
+ * @returns void
+ */
   }
 
   // -- success screen (step 3) --
@@ -752,12 +996,20 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
       />
     )
   }
+/**
+ * cardNumberEl - Utility function
+ * @returns void
+ */
 
   const isStep1Valid = contactForm.formState.isValid
   const isCardReady =
     watchedPaymentValues?.paymentMethod === 'card' &&
     Boolean(watchedPaymentValues.country?.trim()) &&
     cardElementsComplete
+/**
+ * confirmation - Utility function
+ * @returns void
+ */
   const isWalletReady =
     watchedPaymentValues?.paymentMethod === 'wallet' &&
     walletQuoteStatus === 'ready' &&
@@ -776,6 +1028,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     <BuyerCheckoutLayout
       step={step}
       totalSteps={2}
+/**
+ * confirmedStatus - Utility function
+ * @returns void
+ */
       reservationMinutes={20}
       onCancel={handleCancel}
       onContinue={handleContinue}
@@ -784,6 +1040,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
       isLoading={isLoading}
       orderSummary={
         <BuyerCheckoutOrderSummary
+/**
+ * nextPaymentResult - Utility function
+ * @returns void
+ */
           artwork={artwork}
           pricing={pricing}
           promoCode={draft.promoCode}
@@ -814,6 +1074,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
               {paymentError.ctaLabel && paymentError.recoveryAction && (
                 <button
                   type="button"
+/**
+ * recordedTransaction - Utility function
+ * @returns void
+ */
                   onClick={handlePaymentRecovery}
                   disabled={isLoading}
                   className="mt-3 text-[12px] font-semibold text-red-700 underline underline-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
@@ -828,6 +1092,10 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
               key={paymentFormResetKey}
               walletQuote={walletQuote}
               walletQuoteStatus={walletQuoteStatus}
+/**
+ * nextPaymentResult - Utility function
+ * @returns void
+ */
               walletQuoteError={walletQuoteError}
               isWalletQuoteExpired={isWalletQuoteExpired}
               walletQuoteExpiresInSeconds={walletQuoteExpiresInSeconds}
@@ -841,3 +1109,40 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
     </BuyerCheckoutLayout>
   )
 }
+
+/**
+ * isWalletPayment - Utility function
+ * @returns void
+ */
+/**
+ * walletTxHash - Utility function
+ * @returns void
+ */
+/**
+ * handlePaymentRecovery - Utility function
+ * @returns void
+ */
+/**
+ * handleContinueShopping - Utility function
+ * @returns void
+ */
+/**
+ * isStep1Valid - Utility function
+ * @returns void
+ */
+/**
+ * isCardReady - Utility function
+ * @returns void
+ */
+/**
+ * isWalletReady - Utility function
+ * @returns void
+ */
+/**
+ * isStep2Valid - Utility function
+ * @returns void
+ */
+/**
+ * isFormValid - Utility function
+ * @returns void
+ */

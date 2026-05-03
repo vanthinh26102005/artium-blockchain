@@ -1,14 +1,26 @@
 import { z } from 'zod'
 
+/**
+ * PHONE_REGEX - React component
+ * @returns React element
+ */
 export const PHONE_REGEX = /^[\d\s\-()]+$/
 export const CARD_EXPIRY_REGEX = /^(0[1-9]|1[0-2])\s?\/\s?\d{2}$/
 
 export const buyerContactSchema = z.object({
+/**
+ * CARD_EXPIRY_REGEX - React component
+ * @returns React element
+ */
   firstName: z
     .string()
     .trim()
     .min(1, 'First name is required')
     .max(50, 'Max 50 characters'),
+/**
+ * buyerContactSchema - Utility function
+ * @returns void
+ */
   lastName: z
     .string()
     .trim()
@@ -33,6 +45,10 @@ export const buyerShippingAddressSchema = z.object({
   country: z.string().trim().min(1, 'Country is required'),
 })
 
+/**
+ * buyerShippingAddressSchema - Utility function
+ * @returns void
+ */
 export const buyerCheckoutContactStepSchema = z
   .object({
     contact: buyerContactSchema,
@@ -45,6 +61,10 @@ export const buyerCheckoutContactStepSchema = z
       return
     }
 
+/**
+ * buyerCheckoutContactStepSchema - Utility function
+ * @returns void
+ */
     if (!values.shippingAddress.addressLine1.trim()) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
@@ -93,4 +113,8 @@ export const buyerCheckoutPaymentSchema = z.discriminatedUnion('paymentMethod', 
 ])
 
 export type BuyerCheckoutContactStepValues = z.infer<typeof buyerCheckoutContactStepSchema>
+/**
+ * buyerCheckoutPaymentSchema - Utility function
+ * @returns void
+ */
 export type BuyerCheckoutPaymentValues = z.infer<typeof buyerCheckoutPaymentSchema>

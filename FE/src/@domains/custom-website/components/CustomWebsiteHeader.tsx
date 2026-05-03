@@ -5,6 +5,10 @@ interface CustomWebsiteHeaderProps {
     username?: string
 }
 
+/**
+ * CustomWebsiteHeader - React component
+ * @returns React element
+ */
 export const CustomWebsiteHeader = ({ username = 'artiumartist' }: CustomWebsiteHeaderProps) => {
     return (
         <div className="mb-8">
