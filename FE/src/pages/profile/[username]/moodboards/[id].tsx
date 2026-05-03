@@ -11,10 +11,10 @@ const ProfileMoodboardDetailPage: NextPageWithLayout = () => {
   const router = useRouter()
   const { username, id } = router.query
 
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   return <ProfileMoodboardDetailPageView username={username} moodboardId={id} />
 }
 
