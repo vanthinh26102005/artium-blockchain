@@ -32,6 +32,10 @@ type ShareEventModalProps = {
   event: HostingEvent;
 };
 
+/**
+ * ShareEventModal - React component
+ * @returns React element
+ */
 export const ShareEventModal = ({
   open,
   onOpenChange,
@@ -42,15 +46,27 @@ export const ShareEventModal = ({
   const eventUrl = `https://www.artium.com/event/${event.id}`;
   const shareTitle = `Check out this event: ${event.title}`;
 
+/**
+ * eventUrl - Utility function
+ * @returns void
+ */
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(eventUrl);
       setCopied(true);
+/**
+ * shareTitle - Utility function
+ * @returns void
+ */
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error("Failed to copy link:", error);
     }
   };
+/**
+ * handleCopyLink - Utility function
+ * @returns void
+ */
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

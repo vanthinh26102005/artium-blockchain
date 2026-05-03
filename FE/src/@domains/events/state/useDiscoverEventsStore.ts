@@ -13,6 +13,10 @@ type DiscoverEventsState = {
 // Mock data generator
 import { generateMockEvents } from '@domains/events/mock/generateMockEvents'
 
+/**
+ * useDiscoverEventsStore - Custom React hook
+ * @returns void
+ */
 export const useDiscoverEventsStore = create<DiscoverEventsState>((set) => ({
   events: generateMockEvents(),
   updateRsvpStatus: (eventId, status) => {

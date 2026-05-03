@@ -18,6 +18,10 @@ type InviteEventModalProps = {
   onInviteSuccess?: (recipientEmails: string[]) => void;
 };
 
+/**
+ * InviteEventModal - React component
+ * @returns React element
+ */
 export function InviteEventModal({
   open,
   onOpenChange,
@@ -29,11 +33,19 @@ export function InviteEventModal({
   const sendInvitations = useHostingEventsStore((state) => state.sendInvitations);
 
   const handlePreview = (recipientEmails: string[]) => {
+/**
+ * sendInvitations - Utility function
+ * @returns void
+ */
     setPreviewRecipientEmails(recipientEmails);
     setPreviewOpen(true);
   };
 
   const handleSubmit = async (recipientEmails: string[], message?: string) => {
+/**
+ * handlePreview - Utility function
+ * @returns void
+ */
     await sendInvitations(event.id, recipientEmails, message);
 
     // Call success callback
@@ -42,6 +54,10 @@ export function InviteEventModal({
     // Close modal
     onOpenChange(false);
   };
+/**
+ * handleSubmit - Utility function
+ * @returns void
+ */
 
   return (
     <>
