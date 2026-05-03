@@ -14,6 +14,10 @@ type FeaturesSectionProps = {
   className?: string
 }
 
+/**
+ * FeaturesSection - React component
+ * @returns React element
+ */
 const FeaturesSection = ({ className }: FeaturesSectionProps) => {
   // -- state --
   const [activeIndex, setActiveIndex] = useState(0)
@@ -22,20 +26,36 @@ const FeaturesSection = ({ className }: FeaturesSectionProps) => {
   const activeFeature = FEATURES[activeIndex] ?? FEATURES[0]
   const router = useRouter()
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+/**
+ * activeFeature - Utility function
+ * @returns void
+ */
 
   // -- handlers --
   const handleSignUpClick = () => {
     if (isAuthenticated) return
+/**
+ * router - Utility function
+ * @returns void
+ */
     router.push('/sign-up')
   }
 
   return (
+/**
+ * isAuthenticated - Utility function
+ * @returns void
+ */
     <>
       <div className="relative w-full overflow-hidden bg-gradient-to-b from-[#f7c6ff] to-[#b9d9ff] text-black lg:h-[750px] xl:h-[900px] 2xl:h-[900px]">
         <LandingPageSection
           className={cn(
             'relative h-full !max-w-none !px-6 !pt-10 !pb-10 lg:!pt-12 lg:!pr-0 lg:!pb-6 lg:!pl-10',
             className,
+/**
+ * handleSignUpClick - Utility function
+ * @returns void
+ */
           )}
         >
           {/* -- header -- */}
@@ -74,6 +94,10 @@ const FeaturesSection = ({ className }: FeaturesSectionProps) => {
                           )}
                         />
                       </div>
+/**
+ * isActive - Utility function
+ * @returns void
+ */
                       <div className="space-y-2">
                         <Heading
                           as="h3"
