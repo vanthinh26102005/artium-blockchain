@@ -34,26 +34,26 @@ const formatStat = (value: number) => {
 export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHeroProps) => {
   const authUser = useAuthStore((state) => state.user)
   const targetUserId = userId || authUser?.id || ''
-/**
- * ProfileHero - React component
- * @returns React element
- */
+  /**
+   * ProfileHero - React component
+   * @returns React element
+   */
   const [localFollowersCount, setLocalFollowersCount] = React.useState(stats.followers)
   const [localFollowingCount, setLocalFollowingCount] = React.useState(stats.following)
 
   React.useEffect(() => {
-/**
- * authUser - Utility function
- * @returns void
- */
+    /**
+     * authUser - Utility function
+     * @returns void
+     */
     setLocalFollowersCount(stats.followers)
   }, [stats.followers])
 
   React.useEffect(() => {
-/**
- * targetUserId - Utility function
- * @returns void
- */
+    /**
+     * targetUserId - Utility function
+     * @returns void
+     */
     setLocalFollowingCount(stats.following)
   }, [stats.following])
 
@@ -69,7 +69,8 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
     },
   })
 
-  const handleShare = async () => {    if (typeof window === 'undefined') {
+  const handleShare = async () => {
+    if (typeof window === 'undefined') {
       return
     }
 
@@ -81,10 +82,10 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
       if (navigator.share) {
         await navigator.share({ title, text, url })
         return
-/**
- * handleShare - Utility function
- * @returns void
- */
+        /**
+         * handleShare - Utility function
+         * @returns void
+         */
       }
 
       if (navigator.clipboard?.writeText) {
@@ -92,26 +93,23 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
         alert('Link copied to clipboard!')
       }
     } catch (error) {
-/**
- * url - Utility function
- * @returns void
- */
+      /**
+       * url - Utility function
+       * @returns void
+       */
       console.error('Failed to share profile', error)
     }
   }
 
-/**
- * title - Utility function
- * @returns void
- */
+  /**
+   * title - Utility function
+   * @returns void
+   */
   return (
     <section className="w-full py-8 font-['Inter'] lg:py-12">
       <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex w-full flex-col items-start gap-3 lg:flex-row lg:items-center lg:gap-4">
-/**
- * text - Utility function
- * @returns void
- */
+          /** * text - Utility function * @returns void */
           <div className="flex w-auto items-center justify-center p-2 lg:p-6">
             <div className="relative h-28 w-28 overflow-hidden rounded-full border border-black/10 bg-slate-100 shadow sm:h-32 sm:w-32 lg:h-36 lg:w-36">
               <Image
@@ -123,10 +121,9 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
               />
             </div>
           </div>
-
           <div className="flex-auto space-y-1 lg:flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl leading-[1.05] font-semibold text-slate-900 sm:text-[28px] lg:text-[32px]">
+              <h1 className="text-2xl font-semibold leading-[1.05] text-slate-900 sm:text-[28px] lg:text-[32px]">
                 {user.displayName}
               </h1>
               {user.verified ? <BadgeCheck className="h-5 w-5 text-blue-600" /> : null}
@@ -175,7 +172,7 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
                   isFollowing
                     ? 'border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50'
                     : 'border-0 bg-blue-600 text-white hover:bg-blue-700',
-                  isFollowLoading && 'opacity-60 cursor-not-allowed',
+                  isFollowLoading && 'cursor-not-allowed opacity-60',
                 )}
               >
                 {isFollowing ? (
@@ -233,7 +230,7 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
                   isFollowing
                     ? 'border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50'
                     : 'border-0 bg-blue-600 text-white hover:bg-blue-700',
-                  isFollowLoading && 'opacity-60 cursor-not-allowed',
+                  isFollowLoading && 'cursor-not-allowed opacity-60',
                 )}
               >
                 {isFollowing ? (
@@ -275,7 +272,7 @@ const StatBlock = ({ label, value, compact }: StatBlockProps) => (
     <span
       className={cn(
         compact ? 'text-base' : 'text-xl',
-        'leading-tight font-semibold text-slate-900',
+        'font-semibold leading-tight text-slate-900',
       )}
     >
       {formatStat(value)}

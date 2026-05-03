@@ -24,10 +24,10 @@ const breakpointColumns = {
 const aspectVariants = [
   'aspect-[4/5]',
   'aspect-[5/6]',
-/**
- * aspectVariants - Utility function
- * @returns void
- */
+  /**
+   * aspectVariants - Utility function
+   * @returns void
+   */
   'aspect-[6/7]',
   'aspect-[7/8]',
   'aspect-[8/9]',
@@ -39,18 +39,18 @@ const getAspectClass = (seed: string, index: number) => {
 }
 
 export const ProfileMomentsMasonry = ({ moments, hrefBase }: ProfileMomentsMasonryProps) => {
-/**
- * getAspectClass - Utility function
- * @returns void
- */
+  /**
+   * getAspectClass - Utility function
+   * @returns void
+   */
   return (
     <Masonry
       breakpointCols={breakpointColumns}
       className="flex w-full gap-6"
-/**
- * hash - Utility function
- * @returns void
- */
+      /**
+       * hash - Utility function
+       * @returns void
+       */
       columnClassName="space-y-6"
     >
       {moments.map((moment, index) => {
@@ -58,10 +58,10 @@ export const ProfileMomentsMasonry = ({ moments, hrefBase }: ProfileMomentsMason
         return (
           <MomentCard
             key={moment.id}
-/**
- * ProfileMomentsMasonry - React component
- * @returns React element
- */
+            /**
+             * ProfileMomentsMasonry - React component
+             * @returns React element
+             */
             moment={moment}
             hrefBase={hrefBase}
             className="break-inside-avoid"

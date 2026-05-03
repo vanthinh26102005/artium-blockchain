@@ -29,22 +29,22 @@ export const ProfileArtworkCard = ({
   const isSold = Boolean(artwork.isSold)
   const aspectRatio = '4 / 4'
 
-/**
- * isSold - Utility function
- * @returns void
- */
+  /**
+   * isSold - Utility function
+   * @returns void
+   */
   // -- render --
   return (
     <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_6px_16px_rgba(15,23,42,0.08)] transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
       <Link
-/**
- * aspectRatio - Utility function
- * @returns void
- */
+        /**
+         * aspectRatio - Utility function
+         * @returns void
+         */
         href={`/artworks/${artwork.id}`}
         aria-label={`View artwork ${artwork.title}`}
         className={cn(
-          'relative block w-full cursor-pointer bg-slate-100 transition-colors group-hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 focus-visible:outline-none',
+          'relative block w-full cursor-pointer bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 group-hover:bg-slate-200',
           mediaClassName,
         )}
         style={{ aspectRatio }}
@@ -62,11 +62,11 @@ export const ProfileArtworkCard = ({
         </div>
       </Link>
 
-      <div className="space-y-3 px-4 pt-3 pb-4">
+      <div className="space-y-3 px-4 pb-4 pt-3">
         <div className="flex items-center gap-2 text-sm text-slate-600">
           <Link
             href={`/profile/${artist.username}`}
-            className="group/artist inline-flex items-center gap-2 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 focus-visible:outline-none"
+            className="group/artist inline-flex items-center gap-2 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2"
           >
             <span className="relative h-7 w-7 overflow-hidden rounded-full bg-slate-200">
               <Image
@@ -86,7 +86,7 @@ export const ProfileArtworkCard = ({
         <h4 className="text-base font-semibold text-slate-900">
           <Link
             href={`/artworks/${artwork.id}`}
-            className="line-clamp-2 block cursor-pointer transition-colors hover:text-slate-950 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 focus-visible:outline-none"
+            className="line-clamp-2 block cursor-pointer transition-colors hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2"
           >
             {artwork.title}
           </Link>
