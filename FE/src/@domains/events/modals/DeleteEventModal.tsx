@@ -16,6 +16,10 @@ type DeleteEventModalProps = {
   eventTitle?: string;
 };
 
+/**
+ * DeleteEventModal - React component
+ * @returns React element
+ */
 export const DeleteEventModal = ({
   open,
   onOpenChange,

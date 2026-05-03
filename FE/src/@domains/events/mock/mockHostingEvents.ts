@@ -19,10 +19,18 @@ export type HostingEvent = {
   createdAt: string;
 };
 
+/**
+ * createEventImage - Utility function
+ * @returns void
+ */
 const createEventImage = (primary: string, secondary: string) => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${primary}"/><stop offset="100%" stop-color="${secondary}"/></linearGradient></defs><rect width="960" height="540" fill="url(#g)"/></svg>`;
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 };
+/**
+ * svg - Utility function
+ * @returns void
+ */
 
 export const eventImages = [
   createEventImage("#0f172a", "#334155"),
@@ -30,6 +38,10 @@ export const eventImages = [
   createEventImage("#0f172a", "#1e40af"),
 ];
 
+/**
+ * eventImages - Utility function
+ * @returns void
+ */
 const addHours = (iso: string, hours: number) => {
   const d = new Date(iso);
   d.setHours(d.getHours() + hours);
@@ -39,10 +51,18 @@ const addHours = (iso: string, hours: number) => {
 export const mockHostingEvents: HostingEvent[] = [
   {
     id: "host-001",
+/**
+ * addHours - Utility function
+ * @returns void
+ */
     title: "The Other Art Fair Los Angeles - 2026",
     location: "3021 Airport Avenue, Santa Monica, CA, USA",
     locationType: "in-person",
     address: "3021 Airport Avenue, Santa Monica, CA, USA",
+/**
+ * d - Utility function
+ * @returns void
+ */
     startDateTime: "2026-02-26T23:00:00Z",
     endDateTime: addHours("2026-02-26T23:00:00Z", 1),
     timeZone: "UTC",
@@ -51,6 +71,10 @@ export const mockHostingEvents: HostingEvent[] = [
     visibility: "public",
     description: "Discover emerging artists in Los Angeles.",
     attendees: 0,
+/**
+ * mockHostingEvents - Utility function
+ * @returns void
+ */
     coverImageUrl: eventImages[0],
   },
   {

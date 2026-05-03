@@ -17,6 +17,10 @@ type CreateEventModalProps = {
   editingEvent?: HostingEvent | null;
 };
 
+/**
+ * CreateEventModal - React component
+ * @returns React element
+ */
 export const CreateEventModal = ({
   open,
   onOpenChange,
@@ -27,11 +31,19 @@ export const CreateEventModal = ({
   const isEditing = Boolean(editingEvent);
 
   const initialValues = editingEvent
+/**
+ * isEditing - Utility function
+ * @returns void
+ */
     ? {
         title: editingEvent.title,
         startDateTime: editingEvent.startDateTime.slice(0, 16),
         endDateTime: editingEvent.endDateTime.slice(0, 16),
         timeZone: editingEvent.timeZone ?? "",
+/**
+ * initialValues - Utility function
+ * @returns void
+ */
         locationType: editingEvent.locationType,
         onlineUrl: editingEvent.onlineUrl ?? "",
         address: editingEvent.address ?? "",

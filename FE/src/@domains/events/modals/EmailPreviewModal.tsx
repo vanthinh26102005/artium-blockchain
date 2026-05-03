@@ -12,6 +12,10 @@ type EmailPreviewModalProps = {
   recipientEmails: string[];
 };
 
+/**
+ * EmailPreviewModal - React component
+ * @returns React element
+ */
 export function EmailPreviewModal({
   open,
   onOpenChange,
