@@ -49,6 +49,10 @@ type VideoPickerProps = {
   onRemove: () => void
 }
 
+/**
+ * VideoPicker - React component
+ * @returns React element
+ */
 export const VideoPicker = ({
   video,
   error,
@@ -72,10 +76,18 @@ export const VideoPicker = ({
   const isMoments = mode === 'moments'
   const titleLabelClassName =
     'text-[13px] font-extrabold uppercase tracking-[0.05em] text-black/50 lg:text-[17px]'
+/**
+ * isMoments - Utility function
+ * @returns void
+ */
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDiscardOpen, setIsDiscardOpen] = useState(false)
   const [localCaption, setLocalCaption] = useState('')
   const [localVideoType, setLocalVideoType] = useState('')
+/**
+ * titleLabelClassName - Utility function
+ * @returns void
+ */
   const videoTypePlaceholderValue = '__placeholder__'
   const videoTypePlaceholderLabel = 'Select a video type from the dropdown'
   const videoTypeOptions = [
@@ -85,11 +97,19 @@ export const VideoPicker = ({
     'Installation/Exhibitions / Out in the Wild',
     'Testimony / Review',
   ]
+/**
+ * videoTypePlaceholderValue - Utility function
+ * @returns void
+ */
 
   const currentCaption = caption ?? localCaption
   const currentVideoType = videoType ?? localVideoType
 
   const handleCaptionChange = (value: string) => {
+/**
+ * videoTypeOptions - Utility function
+ * @returns void
+ */
     if (onCaptionChange) {
       onCaptionChange(value)
       return
@@ -101,15 +121,27 @@ export const VideoPicker = ({
     if (onVideoTypeChange) {
       onVideoTypeChange(value)
       return
+/**
+ * currentCaption - Utility function
+ * @returns void
+ */
     }
     setLocalVideoType(value)
   }
 
+/**
+ * currentVideoType - Utility function
+ * @returns void
+ */
   const handleSelectFile = (file: File) => {
     onSelect(file)
     if (isMoments) {
       setIsEditOpen(true)
     }
+/**
+ * handleCaptionChange - Utility function
+ * @returns void
+ */
   }
 
   const handleRemove = () => {
@@ -121,6 +153,10 @@ export const VideoPicker = ({
 
   const handleEditOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
+/**
+ * handleVideoTypeChange - Utility function
+ * @returns void
+ */
       setIsEditOpen(true)
       return
     }
@@ -132,6 +168,10 @@ export const VideoPicker = ({
     handleRemove()
   }
 
+/**
+ * handleSelectFile - Utility function
+ * @returns void
+ */
   return (
     <>
       <DropzoneBase
@@ -142,6 +182,10 @@ export const VideoPicker = ({
             ? undefined
             : (helperText ??
               (disabled
+/**
+ * handleRemove - Utility function
+ * @returns void
+ */
                 ? 'Video uploads are available in Step 2.'
                 : `Supported MP4, MOV, WEBM. ${maxSizeLabel}`))
         }
@@ -152,6 +196,10 @@ export const VideoPicker = ({
         hideHeader={isMoments}
         containerClassName={containerClassName}
         dropzoneClassName={cn(
+/**
+ * handleEditOpenChange - Utility function
+ * @returns void
+ */
           isMoments &&
           'min-h-[320px] items-stretch justify-start rounded-4xl border-black/20 bg-white px-0 py-0 text-left lg:min-h-[420px]',
           isMoments && 'border-dashed',
@@ -163,6 +211,10 @@ export const VideoPicker = ({
         renderDropzoneContent={
           isMoments
             ? (inputId) => {
+/**
+ * handleDiscardVideo - Utility function
+ * @returns void
+ */
               if (!video?.previewUrl) {
                 return (
                   <div className="flex h-full w-full flex-col">

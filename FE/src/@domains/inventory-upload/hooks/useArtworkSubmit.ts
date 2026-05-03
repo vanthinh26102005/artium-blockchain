@@ -57,10 +57,18 @@ interface UseArtworkSubmitReturn {
  * ```typescript
  * const { submit, submitting, progress, error } = useArtworkSubmit();
  *
+/**
+ * handleSubmit - Utility function
+ * @returns void
+ */
  * const handleSubmit = async () => {
  *   const artwork = await submit(draftArtworkId);
  *   if (artwork) {
  *     router.push(`/inventory/${artwork.id}`);
+/**
+ * artwork - Utility function
+ * @returns void
+ */
  *   }
  * };
  * ```
@@ -71,27 +79,51 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
   const listing = useUploadArtworkStore((state) => state.listing)
   const validateAll = useUploadArtworkStore((state) => state.validateAll)
   const getDraftPayload = useUploadArtworkStore((state) => state.getDraftPayload)
+/**
+ * useArtworkSubmit - Custom React hook
+ * @returns void
+ */
   const resetDraft = useUploadArtworkStore((state) => state.resetDraft)
 
   // Local state
   const [submitting, setSubmitting] = useState(false)
   const [progress, setProgress] = useState<SubmitProgress | null>(null)
+/**
+ * media - Utility function
+ * @returns void
+ */
   const [error, setError] = useState<string | null>(null)
   const [completedArtwork, setCompletedArtwork] = useState<ArtworkApiItem | null>(null)
 
   /**
+/**
+ * listing - Utility function
+ * @returns void
+ */
    * Submit artwork
    */
   const submit = useCallback(
     async (
+/**
+ * validateAll - Utility function
+ * @returns void
+ */
       draftArtworkId: string,
       options?: { creatorName?: string | null },
     ): Promise<ArtworkApiItem | null> => {
       // Reset previous state
+/**
+ * getDraftPayload - Utility function
+ * @returns void
+ */
       setSubmitting(true)
       setProgress({ stage: 'validating', message: 'Validating artwork data...', percentage: 0 })
       setError(null)
       setCompletedArtwork(null)
+/**
+ * resetDraft - Utility function
+ * @returns void
+ */
 
       try {
         // Step 1: Validate form
@@ -106,6 +138,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
 
         // Step 2: Validate media
         const mediaValidation = validateMediaForUpload(media)
+/**
+ * submit - Utility function
+ * @returns void
+ */
         if (!mediaValidation.valid) {
           throw new Error(mediaValidation.errors.join('. '))
         }
@@ -122,6 +158,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
           listing,
           draftArtworkId,
           getDraftPayload({ creatorName: options?.creatorName }),
+/**
+ * isFormValid - Utility function
+ * @returns void
+ */
           (uploadProgress) => {
             // Map upload progress to UI progress
             if (uploadProgress.stage === 'uploading_images') {
@@ -135,6 +175,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
               })
             } else if (uploadProgress.stage === 'creating_artwork') {
               setProgress({
+/**
+ * mediaValidation - Utility function
+ * @returns void
+ */
                 stage: 'creating_artwork',
                 message: 'Saving draft and publishing artwork...',
                 percentage: 95,
@@ -150,6 +194,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
         )
 
         // Step 4: Success
+/**
+ * result - Utility function
+ * @returns void
+ */
         setCompletedArtwork(result.artwork)
         setSubmitting(false)
 
@@ -194,6 +242,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
         if (!artworkId) {
           throw new Error('Artwork id is missing. Refresh the page and try again.')
         }
+/**
+ * errorMessage - Utility function
+ * @returns void
+ */
 
         const mediaValidation = validateMediaForUpload(media)
         if (!mediaValidation.valid) {
@@ -214,6 +266,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
           (uploadProgress) => {
             if (uploadProgress.stage === 'uploading_images') {
               setProgress({
+/**
+ * updateExisting - Utility function
+ * @returns void
+ */
                 stage: 'uploading_images',
                 message: uploadProgress.currentFile
                   ? `Uploading ${uploadProgress.currentFile}...`
@@ -228,6 +284,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
                 percentage: uploadProgress.imageProgress?.percentage ?? 90,
               })
             } else if (uploadProgress.stage === 'complete') {
+/**
+ * isFormValid - Utility function
+ * @returns void
+ */
               setProgress({
                 stage: 'complete',
                 message: 'Artwork updated successfully!',
@@ -240,6 +300,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
         setCompletedArtwork(result.artwork)
         setSubmitting(false)
         resetDraft()
+/**
+ * mediaValidation - Utility function
+ * @returns void
+ */
 
         return result.artwork
       } catch (err) {
@@ -254,6 +318,10 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
         return null
       }
     },
+/**
+ * result - Utility function
+ * @returns void
+ */
     [media, listing, validateAll, getDraftPayload, resetDraft],
   )
 
@@ -277,3 +345,12 @@ export const useArtworkSubmit = (): UseArtworkSubmitReturn => {
     reset,
   }
 }
+
+/**
+ * errorMessage - Utility function
+ * @returns void
+ */
+/**
+ * reset - Utility function
+ * @returns void
+ */

@@ -21,24 +21,44 @@ import {
   useUploadArtworkStore,
 } from '@domains/inventory-upload/stores/useUploadArtworkStore'
 
+/**
+ * SECTION_TITLE_CLASSNAME - React component
+ * @returns React element
+ */
 const SECTION_TITLE_CLASSNAME =
   'text-[13px] font-extrabold uppercase tracking-[0.05em] text-black/50 lg:text-[17px]'
 const LABEL_CLASSNAME =
   'text-[11px] font-semibold uppercase tracking-[0.2em] text-black/50 lg:text-[12px]'
 const TEXTAREA_BASE_CLASSNAME = 'min-h-[140px] text-[15px] lg:min-h-[160px] lg:text-[16px]'
+/**
+ * LABEL_CLASSNAME - React component
+ * @returns React element
+ */
 const QUICK_FACT_PLACEHOLDER_VALUE = '__placeholder__'
 const QUICK_FACT_PLACEHOLDER_LABEL = 'Select a question'
 
 type Step2LayoutProps = {
   className?: string
+/**
+ * TEXTAREA_BASE_CLASSNAME - React component
+ * @returns React element
+ */
 }
 
 type Step2ColumnProps = {
   className?: string
+/**
+ * QUICK_FACT_PLACEHOLDER_VALUE - React component
+ * @returns React element
+ */
 }
 
 type TagGroupProps = {
   label: string
+/**
+ * QUICK_FACT_PLACEHOLDER_LABEL - React component
+ * @returns React element
+ */
   options: string[]
   selected: string[]
   onToggle: (value: string) => void
@@ -59,6 +79,10 @@ const TagGroup = ({ label, options, selected, onToggle }: TagGroupProps) => {
               size="xs"
               onClick={() => onToggle(option)}
               className={cn(
+/**
+ * TagGroup - React component
+ * @returns React element
+ */
                 'h-[36px] rounded-full border px-4! py-4! text-[10px] font-semibold tracking-[0.18em] uppercase transition lg:h-[38px] lg:text-[12px]',
                 isSelected
                   ? '!border-[#0F6BFF] !bg-[#0F6BFF] !text-white'
@@ -68,6 +92,10 @@ const TagGroup = ({ label, options, selected, onToggle }: TagGroupProps) => {
               {option}
             </Button>
           )
+/**
+ * isSelected - Utility function
+ * @returns void
+ */
         })}
       </div>
     </div>
@@ -95,15 +123,27 @@ const Step2LeftColumn = ({ className }: Step2ColumnProps) => {
             options={UPLOAD_TAG_OPTIONS.values}
             selected={tags.values}
             onToggle={(value) => toggleTag('values', value)}
+/**
+ * Step2LeftColumn - React component
+ * @returns React element
+ */
           />
           <TagGroup
             label="Mediums"
             options={UPLOAD_TAG_OPTIONS.mediums}
             selected={tags.mediums}
+/**
+ * tags - Utility function
+ * @returns void
+ */
             onToggle={(value) => toggleTag('mediums', value)}
           />
         </div>
       </div>
+/**
+ * toggleTag - Utility function
+ * @returns void
+ */
     </div>
   )
 }
@@ -138,61 +178,117 @@ const Step2RightColumn = ({ className }: Step2ColumnProps) => {
         helperText="Supported formats: MOV, MP4, WEBM. Maximum duration: 60 seconds."
         mode="moments"
         caption={story.moment.caption}
+/**
+ * Step2RightColumn - React component
+ * @returns React element
+ */
         videoType={story.moment.type}
         onCaptionChange={(value) => {
           setField('story.moment.caption', value)
           markFieldTouched('story.moment.caption')
         }}
+/**
+ * media - Utility function
+ * @returns void
+ */
         onVideoTypeChange={(value) => {
           setField('story.moment.type', value)
           markFieldTouched('story.moment.type')
         }}
+/**
+ * story - Utility function
+ * @returns void
+ */
         onSelect={setMomentVideo}
         onRemove={() => setMomentVideo(null)}
       />
 
+/**
+ * errors - Utility function
+ * @returns void
+ */
       <div className="rounded-4xl border border-black/10 bg-white p-4 lg:p-6">
         <p className={SECTION_TITLE_CLASSNAME}>Quick facts</p>
         <div className="mt-4 space-y-4">
           {trivias.map((trivia, index) => {
+/**
+ * touched - Utility function
+ * @returns void
+ */
             const answerErrorKey = `story.trivia.${trivia.id}.answer`
             const hasAnswerError = shouldShowError(answerErrorKey)
             const isQuestionPlaceholder = !trivia.question
             return (
+/**
+ * hasSubmitted - Utility function
+ * @returns void
+ */
               <div key={trivia.id} className="rounded-2xl border border-black/10 bg-[#FDFDFD] p-4">
                 <div className="flex items-center justify-between">
                   <p className={LABEL_CLASSNAME}>Question {index + 1}</p>
                   <Button
                     type="button"
+/**
+ * setMomentVideo - Utility function
+ * @returns void
+ */
                     variant="ghost"
                     size="sm"
                     onClick={() => removeTrivia(trivia.id)}
                   >
+/**
+ * setField - Utility function
+ * @returns void
+ */
                     Remove
                   </Button>
                 </div>
                 <Select
+/**
+ * trivias - Utility function
+ * @returns void
+ */
                   value={trivia.question || QUICK_FACT_PLACEHOLDER_VALUE}
                   onValueChange={(value) =>
                     updateTrivia(
                       trivia.id,
+/**
+ * addTrivia - Utility function
+ * @returns void
+ */
                       'question',
                       value === QUICK_FACT_PLACEHOLDER_VALUE ? '' : value,
                     )
                   }
+/**
+ * updateTrivia - Utility function
+ * @returns void
+ */
                 >
                   <SelectTrigger
                     className={cn(
                       'mt-3 h-14 rounded-[18px] border-black/10 px-5 text-[16px] !text-[#191414] data-[placeholder]:text-[#9A9A9A]',
+/**
+ * removeTrivia - Utility function
+ * @returns void
+ */
                       isQuestionPlaceholder && '!text-[#9A9A9A]',
                     )}
                   >
                     <SelectValue />
+/**
+ * markFieldTouched - Utility function
+ * @returns void
+ */
                   </SelectTrigger>
                   <SelectContent className="z-[220] rounded-[18px] border border-black/10 bg-white p-0 text-[#191414] shadow-[0_16px_40px_rgba(0,0,0,0.08)] [&_[data-radix-select-viewport]]:h-auto [&_[data-radix-select-viewport]]:max-h-[320px] [&_[data-radix-select-viewport]]:overflow-y-auto [&_[data-radix-select-viewport]]:p-0">
                     <SelectItem
                       value={QUICK_FACT_PLACEHOLDER_VALUE}
                       className="rounded-none border-b border-black/10 px-5 py-4 text-[16px] !text-[#9A9A9A] focus:bg-[#F5F5F5] focus:!text-[#9A9A9A] data-[state=checked]:!text-[#9A9A9A] [&>span:first-child]:hidden"
+/**
+ * shouldShowError - Utility function
+ * @returns void
+ */
                     >
                       {QUICK_FACT_PLACEHOLDER_LABEL}
                     </SelectItem>
@@ -227,14 +323,26 @@ const Step2RightColumn = ({ className }: Step2ColumnProps) => {
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <Button type="button" variant="outline" size="sm" onClick={addTrivia}>
+/**
+ * answerErrorKey - Utility function
+ * @returns void
+ */
             Add another
           </Button>
           <span className="text-sm text-[#898788]">
             {trivias.length} {trivias.length === 1 ? 'entry' : 'entries'}
+/**
+ * hasAnswerError - Utility function
+ * @returns void
+ */
           </span>
         </div>
       </div>
     </div>
+/**
+ * isQuestionPlaceholder - Utility function
+ * @returns void
+ */
   )
 }
 
@@ -248,3 +356,8 @@ export const Step2Layout = ({ className }: Step2LayoutProps) => {
 }
 
 export { Step2LeftColumn, Step2RightColumn }
+
+/**
+ * Step2Layout - React component
+ * @returns React element
+ */
