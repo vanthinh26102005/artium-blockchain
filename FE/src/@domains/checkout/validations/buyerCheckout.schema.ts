@@ -8,24 +8,16 @@ export const PHONE_REGEX = /^[\d\s\-()]+$/
 export const CARD_EXPIRY_REGEX = /^(0[1-9]|1[0-2])\s?\/\s?\d{2}$/
 
 export const buyerContactSchema = z.object({
-/**
- * CARD_EXPIRY_REGEX - React component
- * @returns React element
- */
-  firstName: z
-    .string()
-    .trim()
-    .min(1, 'First name is required')
-    .max(50, 'Max 50 characters'),
-/**
- * buyerContactSchema - Utility function
- * @returns void
- */
-  lastName: z
-    .string()
-    .trim()
-    .min(1, 'Last name is required')
-    .max(50, 'Max 50 characters'),
+  /**
+   * CARD_EXPIRY_REGEX - React component
+   * @returns React element
+   */
+  firstName: z.string().trim().min(1, 'First name is required').max(50, 'Max 50 characters'),
+  /**
+   * buyerContactSchema - Utility function
+   * @returns void
+   */
+  lastName: z.string().trim().min(1, 'Last name is required').max(50, 'Max 50 characters'),
   email: z.string().trim().min(1, 'Email is required').email('Invalid email format'),
   phone: z
     .string()
@@ -61,10 +53,10 @@ export const buyerCheckoutContactStepSchema = z
       return
     }
 
-/**
- * buyerCheckoutContactStepSchema - Utility function
- * @returns void
- */
+    /**
+     * buyerCheckoutContactStepSchema - Utility function
+     * @returns void
+     */
     if (!values.shippingAddress.addressLine1.trim()) {
       context.addIssue({
         code: z.ZodIssueCode.custom,

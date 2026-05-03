@@ -23,18 +23,18 @@ export function classifyPaymentError(err: unknown): ClassifiedPaymentError {
   const raw = err instanceof Error ? err.message : String(err ?? '')
   const lower = raw.toLowerCase()
 
-/**
- * raw - Utility function
- * @returns void
- */
+  /**
+   * raw - Utility function
+   * @returns void
+   */
   if (lower.includes('card_declined') || lower.includes('your card was declined')) {
     return {
       type: 'card_declined',
       message: 'Your card was declined. Please check your details or try a different card.',
-/**
- * lower - Utility function
- * @returns void
- */
+      /**
+       * lower - Utility function
+       * @returns void
+       */
       ctaLabel: 'Try Again',
       recoveryAction: 'reset-payment',
     }

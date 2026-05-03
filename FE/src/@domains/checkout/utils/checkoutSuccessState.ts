@@ -18,19 +18,19 @@ const STORAGE_KEY_PREFIX = 'artium.checkout.success'
 const getStorageKey = (artworkId: string) => `${STORAGE_KEY_PREFIX}.${artworkId}`
 
 const isCheckoutSuccessState = (value: unknown): value is CheckoutSuccessState => {
-/**
- * getStorageKey - Utility function
- * @returns void
- */
+  /**
+   * getStorageKey - Utility function
+   * @returns void
+   */
   if (!value || typeof value !== 'object') {
     return false
   }
 
   const candidate = value as Record<string, unknown>
-/**
- * isCheckoutSuccessState - Utility function
- * @returns void
- */
+  /**
+   * isCheckoutSuccessState - Utility function
+   * @returns void
+   */
 
   return (
     typeof candidate.artworkId === 'string' &&
@@ -39,10 +39,10 @@ const isCheckoutSuccessState = (value: unknown): value is CheckoutSuccessState =
     (candidate.status === 'processing' ||
       candidate.status === 'succeeded' ||
       candidate.status === 'failed') &&
-/**
- * candidate - Utility function
- * @returns void
- */
+    /**
+     * candidate - Utility function
+     * @returns void
+     */
     typeof candidate.totalPaid === 'number'
   )
 }
@@ -59,10 +59,10 @@ const isLegacyCheckoutSuccessState = (
   return (
     typeof candidate.artworkId === 'string' &&
     typeof candidate.orderNumber === 'string' &&
-/**
- * isLegacyCheckoutSuccessState - Utility function
- * @returns void
- */
+    /**
+     * isLegacyCheckoutSuccessState - Utility function
+     * @returns void
+     */
     (candidate.paymentMethod === 'card' || candidate.paymentMethod === 'wallet') &&
     typeof candidate.isProcessing === 'boolean' &&
     typeof candidate.totalPaid === 'number'
@@ -73,10 +73,10 @@ const getSessionStorage = () => {
   if (typeof window === 'undefined') {
     return null
   }
-/**
- * candidate - Utility function
- * @returns void
- */
+  /**
+   * candidate - Utility function
+   * @returns void
+   */
 
   return window.sessionStorage
 }
@@ -91,10 +91,10 @@ export const saveCheckoutSuccessState = (state: CheckoutSuccessState) => {
 }
 
 export const loadCheckoutSuccessState = (artworkId: string) => {
-/**
- * getSessionStorage - Utility function
- * @returns void
- */
+  /**
+   * getSessionStorage - Utility function
+   * @returns void
+   */
   const storage = getSessionStorage()
   if (!storage) {
     return null
@@ -106,18 +106,18 @@ export const loadCheckoutSuccessState = (artworkId: string) => {
   }
 
   try {
-/**
- * saveCheckoutSuccessState - Utility function
- * @returns void
- */
+    /**
+     * saveCheckoutSuccessState - Utility function
+     * @returns void
+     */
     const parsed = JSON.parse(raw) as unknown
     if (isCheckoutSuccessState(parsed) && parsed.artworkId === artworkId) {
       return parsed
     }
-/**
- * storage - Utility function
- * @returns void
- */
+    /**
+     * storage - Utility function
+     * @returns void
+     */
 
     if (isLegacyCheckoutSuccessState(parsed) && parsed.artworkId === artworkId) {
       return {
@@ -129,18 +129,18 @@ export const loadCheckoutSuccessState = (artworkId: string) => {
       } satisfies CheckoutSuccessState
     }
 
-/**
- * loadCheckoutSuccessState - Utility function
- * @returns void
- */
+    /**
+     * loadCheckoutSuccessState - Utility function
+     * @returns void
+     */
     return null
   } catch {
     return null
   }
-/**
- * storage - Utility function
- * @returns void
- */
+  /**
+   * storage - Utility function
+   * @returns void
+   */
 }
 
 export const clearCheckoutSuccessState = (artworkId: string) => {
@@ -149,10 +149,10 @@ export const clearCheckoutSuccessState = (artworkId: string) => {
     return
   }
 
-/**
- * raw - Utility function
- * @returns void
- */
+  /**
+   * raw - Utility function
+   * @returns void
+   */
   storage.removeItem(getStorageKey(artworkId))
 }
 
