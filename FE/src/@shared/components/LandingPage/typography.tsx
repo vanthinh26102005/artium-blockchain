@@ -18,10 +18,10 @@ type HeadingTone = 'default' | 'light' | 'inherit'
 const headingToneClass: Record<HeadingTone, string> = {
   default: 'text-black',
   light: 'text-white',
-/**
- * headingToneClass - Utility function
- * @returns void
- */
+  /**
+   * headingToneClass - Utility function
+   * @returns void
+   */
   inherit: 'text-inherit',
 }
 
@@ -39,10 +39,10 @@ export const Heading = <T extends ElementType = 'h2'>({
   tone = 'default',
   className,
   children,
-/**
- * Heading - React component
- * @returns React element
- */
+  /**
+   * Heading - React component
+   * @returns React element
+   */
   ...props
 }: HeadingProps<T>) => {
   const Component = (as || 'h2') as ElementType
@@ -54,10 +54,10 @@ export const Heading = <T extends ElementType = 'h2'>({
         headingToneClass[tone],
         className,
       )}
-/**
- * Component - React component
- * @returns React element
- */
+      /**
+       * Component - React component
+       * @returns React element
+       */
       {...props}
     >
       {children}
