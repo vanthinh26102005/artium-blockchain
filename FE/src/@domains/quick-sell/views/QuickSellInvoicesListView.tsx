@@ -23,10 +23,18 @@ import { formatMoney } from '../utils/pricing'
 
 import { QuickSellSendInvoiceModal } from '../components/modals/QuickSellSendInvoiceModal'
 
+/**
+ * QuickSellInvoicesListView - React component
+ * @returns React element
+ */
 export const QuickSellInvoicesListView = () => {
     const router = useRouter()
     const [invoices, setInvoices] = useState<CheckoutInvoice[]>([])
     const [filter, setFilter] = useState<'ALL' | 'PAID' | 'UNPAID' | 'DRAFT'>('ALL')
+/**
+ * router - Utility function
+ * @returns void
+ */
     const [isLoading, setIsLoading] = useState(true)
     const [isSending, setIsSending] = useState(false)
 
@@ -43,6 +51,10 @@ export const QuickSellInvoicesListView = () => {
         }, 500)
     }, [])
 
+/**
+ * all - Utility function
+ * @returns void
+ */
     const filteredInvoices = invoices.filter(inv => {
         if (filter === 'ALL') return true
         if (filter === 'PAID') return inv.status === 'PAID'
@@ -52,6 +64,10 @@ export const QuickSellInvoicesListView = () => {
 
     const handleDelete = (code: string, id?: string) => {
         if (confirm('Are you sure you want to delete this invoice?')) {
+/**
+ * filteredInvoices - Utility function
+ * @returns void
+ */
             const isUuid = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
             if (isUuid) {
                 invoiceApis.deleteInvoice(id).catch(() => undefined)
@@ -62,11 +78,19 @@ export const QuickSellInvoicesListView = () => {
     }
 
     const handleOpenSendModal = (invoice: CheckoutInvoice) => {
+/**
+ * handleDelete - Utility function
+ * @returns void
+ */
         setSelectedInvoice(invoice)
         setIsSendModalOpen(true)
     }
 
     const handleSendInvoice = async (data: { name: string; email: string; message: string }) => {
+/**
+ * isUuid - Utility function
+ * @returns void
+ */
         if (!selectedInvoice) return
 
         setIsSending(true)
@@ -79,6 +103,10 @@ export const QuickSellInvoicesListView = () => {
 
             const updatedInvoice: CheckoutInvoice = {
                 ...selectedInvoice,
+/**
+ * handleOpenSendModal - Utility function
+ * @returns void
+ */
                 buyer: {
                     name: data.name,
                     email: data.email,
@@ -87,6 +115,10 @@ export const QuickSellInvoicesListView = () => {
             }
 
             saveInvoiceToStorage(updatedInvoice)
+/**
+ * handleSendInvoice - Utility function
+ * @returns void
+ */
             setInvoices(prev =>
                 prev.map(inv =>
                     inv.invoiceCode === selectedInvoice.invoiceCode ? updatedInvoice : inv,
@@ -95,6 +127,10 @@ export const QuickSellInvoicesListView = () => {
             setSelectedInvoice(updatedInvoice)
 
             alert(`Invoice sent to ${data.email}!`)
+/**
+ * invoiceUrl - Utility function
+ * @returns void
+ */
         } catch (error) {
             console.error('Failed to send invoice:', error)
             alert('Failed to send invoice. Please try again.')
@@ -104,6 +140,10 @@ export const QuickSellInvoicesListView = () => {
     }
 
     return (
+/**
+ * updatedInvoice - Utility function
+ * @returns void
+ */
         <div className="-mx-6 -my-1 min-h-screen sm:-mx-8 lg:-mx-12 font-sans text-[#191414]">
             {/* Header */}
             <div className="flex items-center justify-between gap-4 px-4 pt-4 pb-4 sm:px-6 lg:px-8">
@@ -219,6 +259,10 @@ const InvoiceCard = ({
                     {/* ID */}
                     <div>
                         <h3 className="text-[16px] font-bold text-[#191414] group-hover:text-blue-600 transition-colors">
+/**
+ * InvoiceCard - React component
+ * @returns React element
+ */
                             Invoice #{invoice.invoiceCode}
                         </h3>
                         <p className="text-[13px] text-[#595959] mt-1">
@@ -234,6 +278,10 @@ const InvoiceCard = ({
                         className="h-[36px] gap-2 rounded-full bg-[#0066FF] px-4 text-[13px] font-bold text-white hover:bg-blue-700"
                     >
                         <Mail className="h-4 w-4" />
+/**
+ * isPaid - Utility function
+ * @returns void
+ */
                         Send Invoice
                     </Button>
 
@@ -298,6 +346,10 @@ const InvoiceCard = ({
                         <p className="text-[14px] font-bold text-[#191414]">
                             {formatMoney(invoice.subtotal)}
                         </p>
+/**
+ * url - Utility function
+ * @returns void
+ */
                     </div>
                     <div className="flex justify-between md:block md:space-y-1">
                         <p className="text-[11px] font-bold uppercase tracking-wider text-[#989898]">Order Status</p>

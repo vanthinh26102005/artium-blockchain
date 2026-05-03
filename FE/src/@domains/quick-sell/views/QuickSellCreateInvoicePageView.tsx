@@ -31,6 +31,10 @@ type QuickSellCreateInvoicePageViewProps = {
     invoiceCode?: string
 }
 
+/**
+ * QuickSellCreateInvoicePageView - React component
+ * @returns React element
+ */
 export const QuickSellCreateInvoicePageView = ({
     invoiceCode,
 }: QuickSellCreateInvoicePageViewProps) => {
@@ -38,6 +42,10 @@ export const QuickSellCreateInvoicePageView = ({
     const router = useRouter()
 
     // -- hooks --
+/**
+ * router - Utility function
+ * @returns void
+ */
     const { createInvoice, isLoading: isCreating, error, reset } = useCreateQuickSellInvoice()
 
     // -- state --
@@ -50,6 +58,10 @@ export const QuickSellCreateInvoicePageView = ({
         mode: 'onChange',
     })
     const watchedDraft = useWatch({ control: form.control })
+/**
+ * form - Utility function
+ * @returns void
+ */
     const draft: QuickSellInvoiceFormValues = useMemo(() => ({
         ...defaultInvoiceDraft,
         ...watchedDraft,
@@ -58,10 +70,18 @@ export const QuickSellCreateInvoicePageView = ({
             ...watchedDraft?.buyer,
         },
         items: (watchedDraft?.items as QuickSellInvoiceFormValues['items']) ?? defaultInvoiceDraft.items,
+/**
+ * watchedDraft - Utility function
+ * @returns void
+ */
     }), [watchedDraft])
 
     // -- derived --
     const isEditMode = !!invoiceCode
+/**
+ * draft - Utility function
+ * @returns void
+ */
     const totals = useMemo(() => calculateInvoiceTotals(draft), [draft])
     const isLoading = isCreating || isModelsLoading
 
@@ -76,14 +96,26 @@ export const QuickSellCreateInvoicePageView = ({
                         id: item.id,
                         type: 'artwork',
                         artworkId: item.artworkId || item.id,
+/**
+ * isEditMode - Utility function
+ * @returns void
+ */
                         artworkName: item.artworkName || item.name,
                         price: item.price,
                         quantity: item.quantity,
                         discountPercent: item.discountPercent,
+/**
+ * totals - Utility function
+ * @returns void
+ */
                         artworkImageUrl: item.artworkImageUrl || item.imageUrl,
                     }
                 }
                 return {
+/**
+ * isLoading - Utility function
+ * @returns void
+ */
                     id: item.id,
                     type: 'custom',
                     title: item.title || item.name,
@@ -93,6 +125,10 @@ export const QuickSellCreateInvoicePageView = ({
                 }
             }),
             buyer: {
+/**
+ * mapCheckoutInvoiceToDraft - Utility function
+ * @returns void
+ */
                 name: invoice.buyer?.name || '',
                 email: invoice.buyer?.email || '',
                 message: invoice.buyer?.message || '',
@@ -131,16 +167,28 @@ export const QuickSellCreateInvoicePageView = ({
         }
     }, [form, invoiceCode])
 
+/**
+ * loadInvoice - Utility function
+ * @returns void
+ */
     useEffect(() => {
         if (!error) return
 
         const subscription = form.watch(() => {
             reset()
         })
+/**
+ * apiInvoice - Utility function
+ * @returns void
+ */
 
         return () => subscription.unsubscribe()
     }, [error, form, reset])
 
+/**
+ * checkoutInvoice - Utility function
+ * @returns void
+ */
     const handleCancel = useCallback(() => {
         setShowCancelModal(true)
     }, [])
@@ -150,6 +198,10 @@ export const QuickSellCreateInvoicePageView = ({
         router.push('/artist/invoices')
     }, [router])
 
+/**
+ * invoice - Utility function
+ * @returns void
+ */
     const handleSave = form.handleSubmit(async (values) => {
         if (isLoading) return
         try {
@@ -173,6 +225,10 @@ export const QuickSellCreateInvoicePageView = ({
                             type: item.type,
                             name: item.type === 'artwork' ? item.artworkName : item.title,
                             price: item.price,
+/**
+ * subscription - Utility function
+ * @returns void
+ */
                             quantity: item.quantity,
                             discountPercent: item.discountPercent,
                             imageUrl: item.type === 'artwork' ? item.artworkImageUrl : undefined,
@@ -183,6 +239,10 @@ export const QuickSellCreateInvoicePageView = ({
                             message: values.buyer.message,
                         } : undefined,
                         subtotal: totals.subtotal,
+/**
+ * handleCancel - Utility function
+ * @returns void
+ */
                         discountTotal: totals.discountTotal,
                         taxPercent: values.isApplySalesTax ? (values.taxPercent ?? 0) : 0,
                         tax: totals.tax,
@@ -190,6 +250,10 @@ export const QuickSellCreateInvoicePageView = ({
                     }
 
                     saveInvoiceToStorage(updatedInvoice)
+/**
+ * handleConfirmCancel - Utility function
+ * @returns void
+ */
                 }
                 router.push('/artist/invoices')
             } else {
@@ -198,6 +262,10 @@ export const QuickSellCreateInvoicePageView = ({
             }
         } catch (err) {
             console.error('Failed to save invoice:', err)
+/**
+ * handleSave - Utility function
+ * @returns void
+ */
         }
     })
 
@@ -205,25 +273,45 @@ export const QuickSellCreateInvoicePageView = ({
     const leftColumn = (
         <>
             {/* Error Banner */}
+/**
+ * isUuid - Utility function
+ * @returns void
+ */
             {error && (
                 <div className="rounded-lg border border-red-200 bg-red-50 p-4">
                     <div className="flex items-center gap-2">
                         <span className="text-red-500">⚠</span>
                         <p className="text-sm font-medium text-red-800">
+/**
+ * payload - Utility function
+ * @returns void
+ */
                             Failed to create invoice
                         </p>
                     </div>
                     <p className="mt-1 text-sm text-red-600">{error.message}</p>
                     <button
+/**
+ * resolvedCode - Utility function
+ * @returns void
+ */
                         type="button"
                         onClick={reset}
                         className="mt-2 text-sm text-red-700 underline hover:no-underline"
                     >
                         Dismiss
+/**
+ * refreshed - Utility function
+ * @returns void
+ */
                     </button>
                 </div>
             )}
 
+/**
+ * updatedInvoice - Utility function
+ * @returns void
+ */
             <FormProvider {...form}>
                 <QuickSellInvoiceForm />
             </FormProvider>
@@ -232,6 +320,10 @@ export const QuickSellCreateInvoicePageView = ({
 
     const rightColumn = (
         <QuickSellInvoicePreview
+/**
+ * updatedInvoice - Utility function
+ * @returns void
+ */
             draft={draft}
             totals={totals}
         />
@@ -271,9 +363,18 @@ export const QuickSellCreateInvoicePageView = ({
                         >
                             Keep Editing
                         </button>
+/**
+ * leftColumn - Utility function
+ * @returns void
+ */
                     </div>
                 </DialogContent>
             </Dialog>
         </>
     )
 }
+
+/**
+ * rightColumn - Utility function
+ * @returns void
+ */
