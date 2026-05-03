@@ -1,36 +1,36 @@
 // react
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect } from 'react'
 
 // next
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router'
 
 // third-party
-import { X } from "lucide-react";
+import { X } from 'lucide-react'
 
 // @shared
-import { useDebounce } from "@shared/hooks/useDebounce";
+import { useDebounce } from '@shared/hooks/useDebounce'
 
 // @domains - events
 // @domains - events
-import { EventFiltersBar } from "@domains/events/components/filters/EventFiltersBar";
-import { EventCard, type EventStatus, type Event } from "@domains/events/components/cards/EventCard";
-import { useEventsStore } from "@domains/events/state/useEventsStore";
-import { InviteEventModal } from "@domains/events/modals/InviteEventModal";
-import { ShareEventModal } from "@domains/events/modals/ShareEventModal";
-import { EventsPagination } from "@domains/events/components/ui/EventsPagination";
-import { ToastPortal } from "@domains/events/components/ui/ToastPortal";
-import { type EventStatusValue } from "@domains/events/constants/eventFilterOptions";
-import { type EventsHostingSortValue } from "@domains/events/constants/hostingSortOptions";
-import { type HostingEvent } from "@domains/events/state/useHostingEventsStore";
-import { mockHomeEvents } from "@domains/home/mock/mockHomeEvents";
+import { EventFiltersBar } from '@domains/events/components/filters/EventFiltersBar'
+import { EventCard, type EventStatus, type Event } from '@domains/events/components/cards/EventCard'
+import { useEventsStore } from '@domains/events/state/useEventsStore'
+import { InviteEventModal } from '@domains/events/modals/InviteEventModal'
+import { ShareEventModal } from '@domains/events/modals/ShareEventModal'
+import { EventsPagination } from '@domains/events/components/ui/EventsPagination'
+import { ToastPortal } from '@domains/events/components/ui/ToastPortal'
+import { type EventStatusValue } from '@domains/events/constants/eventFilterOptions'
+import { type EventsHostingSortValue } from '@domains/events/constants/hostingSortOptions'
+import { type HostingEvent } from '@domains/events/state/useHostingEventsStore'
+import { mockHomeEvents } from '@domains/home/mock/mockHomeEvents'
 
 /**
  * DEFAULT_STATUS_FILTER - React component
  * @returns React element
  */
-const DEFAULT_STATUS_FILTER: EventStatusValue = "upcoming";
-const DEFAULT_DATE_SORT: EventsHostingSortValue = "eventDateNewest";
-const DEFAULT_ITEMS_PER_PAGE = 12;
+const DEFAULT_STATUS_FILTER: EventStatusValue = 'upcoming'
+const DEFAULT_DATE_SORT: EventsHostingSortValue = 'eventDateNewest'
+const DEFAULT_ITEMS_PER_PAGE = 12
 
 /**
  * DEFAULT_DATE_SORT - React component
@@ -38,200 +38,201 @@ const DEFAULT_ITEMS_PER_PAGE = 12;
  */
 export const YourEventsSection = () => {
   // -- refs --
-  const sectionRef = useRef<HTMLElement>(null);
-  const router = useRouter();
-/**
- * DEFAULT_ITEMS_PER_PAGE - React component
- * @returns React element
- */
+  const sectionRef = useRef<HTMLElement>(null)
+  const router = useRouter()
+  /**
+   * DEFAULT_ITEMS_PER_PAGE - React component
+   * @returns React element
+   */
 
   // -- state --
-  const [statusFilter, setStatusFilter] = useState<EventStatusValue>(DEFAULT_STATUS_FILTER);
-  const [eventTypeFilter, setEventTypeFilter] = useState<string[]>([]);
-  const [dateSortFilter, setDateSortFilter] = useState<EventsHostingSortValue>(DEFAULT_DATE_SORT);
-/**
- * YourEventsSection - React component
- * @returns React element
- */
-  const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
-  const [inviteModalOpen, setInviteModalOpen] = useState(false);
-/**
- * sectionRef - Utility function
- * @returns void
- */
-  const [inviteModalEvent, setInviteModalEvent] = useState<any | null>(null);
-  const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [shareModalEvent, setShareModalEvent] = useState<any | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: "success" | "error" } | null>(null);
-/**
- * router - Utility function
- * @returns void
- */
+  const [statusFilter, setStatusFilter] = useState<EventStatusValue>(DEFAULT_STATUS_FILTER)
+  const [eventTypeFilter, setEventTypeFilter] = useState<string[]>([])
+  const [dateSortFilter, setDateSortFilter] = useState<EventsHostingSortValue>(DEFAULT_DATE_SORT)
+  /**
+   * YourEventsSection - React component
+   * @returns React element
+   */
+  const [searchQuery, setSearchQuery] = useState('')
+  const debouncedSearchQuery = useDebounce(searchQuery, 500)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE)
+  const [inviteModalOpen, setInviteModalOpen] = useState(false)
+  /**
+   * sectionRef - Utility function
+   * @returns void
+   */
+  const [inviteModalEvent, setInviteModalEvent] = useState<any | null>(null)
+  const [shareModalOpen, setShareModalOpen] = useState(false)
+  const [shareModalEvent, setShareModalEvent] = useState<any | null>(null)
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(null)
+  /**
+   * router - Utility function
+   * @returns void
+   */
 
   // Use mock data for events (filtered by 'going' status to simulate 'Your Events')
-  const events = useMemo(() => mockHomeEvents.filter((e: any) => e.rsvpStatus === 'going'), []);
-  const isLoading = false; // Mock data is always loaded
-  const updateRsvpStatus = useEventsStore((state) => state.updateRsvpStatus);
+  const events = useMemo(() => mockHomeEvents.filter((e: any) => e.rsvpStatus === 'going'), [])
+  const isLoading = false // Mock data is always loaded
+  const updateRsvpStatus = useEventsStore((state) => state.updateRsvpStatus)
 
   // Track previous page to detect actual page changes (not initial mount)
-  const prevPageRef = useRef(currentPage);
+  const prevPageRef = useRef(currentPage)
   useEffect(() => {
     // Only scroll if page actually changed (user clicked pagination)
-/**
- * debouncedSearchQuery - Utility function
- * @returns void
- */
+    /**
+     * debouncedSearchQuery - Utility function
+     * @returns void
+     */
     if (prevPageRef.current !== currentPage) {
-      sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      prevPageRef.current = currentPage;
+      sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      prevPageRef.current = currentPage
     }
-  }, [currentPage]);
+  }, [currentPage])
 
   // -- derived --
   const filteredAndSortedEvents = useMemo(() => {
-    const now = new Date();
-    let filtered = [...events];
+    const now = new Date()
+    let filtered = [...events]
 
     // Filter by status
-    if (statusFilter !== "all") {
-/**
- * events - Utility function
- * @returns void
- */
+    if (statusFilter !== 'all') {
+      /**
+       * events - Utility function
+       * @returns void
+       */
       filtered = filtered.filter((event) => {
-        const eventStart = new Date(event.startDateTime);
-        const eventEnd = new Date(event.endDateTime);
+        const eventStart = new Date(event.startDateTime)
+        const eventEnd = new Date(event.endDateTime)
 
-/**
- * isLoading - Utility function
- * @returns void
- */
-        if (statusFilter === "upcoming") {
-          return eventStart > now;
-        } else if (statusFilter === "ongoing") {
-          return eventStart <= now && eventEnd >= now;
-/**
- * updateRsvpStatus - Utility function
- * @returns void
- */
-        } else if (statusFilter === "past") {
-          return eventEnd < now;
+        /**
+         * isLoading - Utility function
+         * @returns void
+         */
+        if (statusFilter === 'upcoming') {
+          return eventStart > now
+        } else if (statusFilter === 'ongoing') {
+          return eventStart <= now && eventEnd >= now
+          /**
+           * updateRsvpStatus - Utility function
+           * @returns void
+           */
+        } else if (statusFilter === 'past') {
+          return eventEnd < now
         }
-        return true;
-      });
+        return true
+      })
     }
-/**
- * prevPageRef - Utility function
- * @returns void
- */
+    /**
+     * prevPageRef - Utility function
+     * @returns void
+     */
 
     // Filter by event type
     if (eventTypeFilter.length > 0) {
       filtered = filtered.filter((event) =>
-        event.types.some((type) => eventTypeFilter.includes(type))
-      );
+        event.types.some((type) => eventTypeFilter.includes(type)),
+      )
     }
 
     // Filter by search query
     if (debouncedSearchQuery.trim()) {
-      const query = debouncedSearchQuery.toLowerCase();
-      filtered = filtered.filter((event) =>
-        event.title.toLowerCase().includes(query) ||
-/**
- * filteredAndSortedEvents - Utility function
- * @returns void
- */
-        event.location.toLowerCase().includes(query)
-      );
+      const query = debouncedSearchQuery.toLowerCase()
+      filtered = filtered.filter(
+        (event) =>
+          event.title.toLowerCase().includes(query) ||
+          /**
+           * filteredAndSortedEvents - Utility function
+           * @returns void
+           */
+          event.location.toLowerCase().includes(query),
+      )
     }
 
-/**
- * now - Utility function
- * @returns void
- */
+    /**
+     * now - Utility function
+     * @returns void
+     */
     // Sort by date and other criteria
     filtered.sort((a, b) => {
-      const dateA = new Date(a.startDateTime).getTime();
-      const dateB = new Date(b.startDateTime).getTime();
+      const dateA = new Date(a.startDateTime).getTime()
+      const dateB = new Date(b.startDateTime).getTime()
 
       switch (dateSortFilter) {
-        case "eventDateNewest":
-          return dateB - dateA;
-        case "eventDateOldest":
-/**
- * eventStart - Utility function
- * @returns void
- */
-          return dateA - dateB;
-        case "titleAsc":
-          return a.title.localeCompare(b.title, "en", { sensitivity: "base" });
-        case "titleDesc":
-/**
- * eventEnd - Utility function
- * @returns void
- */
-          return b.title.localeCompare(a.title, "en", { sensitivity: "base" });
+        case 'eventDateNewest':
+          return dateB - dateA
+        case 'eventDateOldest':
+          /**
+           * eventStart - Utility function
+           * @returns void
+           */
+          return dateA - dateB
+        case 'titleAsc':
+          return a.title.localeCompare(b.title, 'en', { sensitivity: 'base' })
+        case 'titleDesc':
+          /**
+           * eventEnd - Utility function
+           * @returns void
+           */
+          return b.title.localeCompare(a.title, 'en', { sensitivity: 'base' })
         default:
-          return dateB - dateA;
+          return dateB - dateA
       }
-    });
+    })
 
-    return filtered;
-  }, [events, statusFilter, eventTypeFilter, debouncedSearchQuery, dateSortFilter]);
+    return filtered
+  }, [events, statusFilter, eventTypeFilter, debouncedSearchQuery, dateSortFilter])
 
-  const totalPages = Math.ceil(filteredAndSortedEvents.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredAndSortedEvents.length / itemsPerPage)
   const paginatedEvents = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredAndSortedEvents.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredAndSortedEvents, currentPage, itemsPerPage]);
+    const startIndex = (currentPage - 1) * itemsPerPage
+    return filteredAndSortedEvents.slice(startIndex, startIndex + itemsPerPage)
+  }, [filteredAndSortedEvents, currentPage, itemsPerPage])
 
   // -- handlers --
   const handleRsvpChange = (eventId: string, status: EventStatus) => {
-    updateRsvpStatus(eventId, status);
+    updateRsvpStatus(eventId, status)
 
     // Show success toast (simplified)
     setToast({
-      message: "Your response updated!",
-      variant: "success",
-    });
+      message: 'Your response updated!',
+      variant: 'success',
+    })
 
-/**
- * query - Utility function
- * @returns void
- */
+    /**
+     * query - Utility function
+     * @returns void
+     */
     // Auto-hide toast after 3 seconds
-    window.setTimeout(() => setToast(null), 3000);
-  };
+    window.setTimeout(() => setToast(null), 3000)
+  }
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+    setCurrentPage(page)
+  }
 
   const handleItemsPerPageChange = (value: number) => {
-    setItemsPerPage(value);
-    setCurrentPage(1);
-  };
-/**
- * dateA - Utility function
- * @returns void
- */
+    setItemsPerPage(value)
+    setCurrentPage(1)
+  }
+  /**
+   * dateA - Utility function
+   * @returns void
+   */
 
   const handleFilterChange = () => {
-    setCurrentPage(1);
-  };
-/**
- * dateB - Utility function
- * @returns void
- */
+    setCurrentPage(1)
+  }
+  /**
+   * dateB - Utility function
+   * @returns void
+   */
 
   const toHostingEvent = (event: Event): any => ({
     id: event.id,
     title: event.title,
     location: event.location,
-    locationType: "in-person",
+    locationType: 'in-person',
     address: event.location,
     venueDetails: undefined,
     onlineUrl: undefined,
@@ -240,66 +241,62 @@ export const YourEventsSection = () => {
     timeZone: event.timeZone,
     types: event.types,
     visibility: event.visibility,
-    description: "",
+    description: '',
     attendees: event.attendees,
     coverImageUrl: event.coverImageUrl,
     createdAt: event.startDateTime,
-    rsvpStatus: event.rsvpStatus
-  });
+    rsvpStatus: event.rsvpStatus,
+  })
 
   // -- render --
-/**
- * totalPages - Utility function
- * @returns void
- */
+  /**
+   * totalPages - Utility function
+   * @returns void
+   */
   return (
-    <section ref={sectionRef} className="rounded-3xl border border-slate-200 bg-white p-6 font-inter">
+    <section
+      ref={sectionRef}
+      className="rounded-3xl border border-slate-200 bg-white p-6 font-inter"
+    >
       <div className="flex flex-col gap-4">
         {/* Header */}
-/**
- * paginatedEvents - Utility function
- * @returns void
- */
+        /** * paginatedEvents - Utility function * @returns void */
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-inter text-2xl font-semibold leading-none text-slate-900">
             Your events
           </h2>
-/**
- * startIndex - Utility function
- * @returns void
- */
+          /** * startIndex - Utility function * @returns void */
         </div>
-
         {/* Filters Row */}
         <EventFiltersBar
           statusFilter={statusFilter}
           onStatusChange={(value) => {
-            setStatusFilter(value);
-            handleFilterChange();
-/**
- * handleRsvpChange - Utility function
- * @returns void
- */
+            setStatusFilter(value)
+            handleFilterChange()
+            /**
+             * handleRsvpChange - Utility function
+             * @returns void
+             */
           }}
           eventTypeFilter={eventTypeFilter}
           onEventTypeChange={(value) => {
-            setEventTypeFilter(value);
-            handleFilterChange();
+            setEventTypeFilter(value)
+            handleFilterChange()
           }}
           dateSortFilter={dateSortFilter}
           onDateSortChange={(value) => {
-            setDateSortFilter(value);
-            handleFilterChange();
+            setDateSortFilter(value)
+            handleFilterChange()
           }}
           searchQuery={searchQuery}
           onSearchChange={(e) => {
-            setSearchQuery(e.target.value);
-            handleFilterChange();
+            setSearchQuery(e.target.value)
+            handleFilterChange()
           }}
-/**
- * handlePageChange - Utility function
- * @returns void
- */
+          /**
+           * handlePageChange - Utility function
+           * @returns void
+           */
         />
       </div>
 
@@ -307,10 +304,10 @@ export const YourEventsSection = () => {
         <ToastPortal
           message={toast.message}
           variant={toast.variant}
-/**
- * handleItemsPerPageChange - Utility function
- * @returns void
- */
+          /**
+           * handleItemsPerPageChange - Utility function
+           * @returns void
+           */
           onClose={() => setToast(null)}
         />
       ) : null}
@@ -318,31 +315,27 @@ export const YourEventsSection = () => {
       {/* Events Grid */}
       {isLoading && paginatedEvents.length === 0 ? (
         <div className="mt-6 flex min-h-[240px] items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-6 py-10 text-sm text-slate-600">
-          Loading your events...
-/**
- * handleFilterChange - Utility function
- * @returns void
- */
+          Loading your events... /** * handleFilterChange - Utility function * @returns void */
         </div>
       ) : paginatedEvents.length > 0 ? (
         <>
-          <div className="mt-6 grid auto-rows-fr grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+          <div className="mt-6 grid auto-rows-fr grid-cols-1 gap-4 2xl:grid-cols-3 lg:grid-cols-2">
             {paginatedEvents.map((event) => (
               <EventCard
                 key={event.id}
-/**
- * toHostingEvent - Utility function
- * @returns void
- */
+                /**
+                 * toHostingEvent - Utility function
+                 * @returns void
+                 */
                 event={event as any}
                 onRsvpChange={handleRsvpChange}
                 onInvite={(event) => {
-                  setInviteModalEvent(toHostingEvent(event));
-                  setInviteModalOpen(true);
+                  setInviteModalEvent(toHostingEvent(event))
+                  setInviteModalOpen(true)
                 }}
                 onShare={(event) => {
-                  setShareModalEvent(toHostingEvent(event));
-                  setShareModalOpen(true);
+                  setShareModalEvent(toHostingEvent(event))
+                  setShareModalOpen(true)
                 }}
                 onClick={(id) => router.push(`/events/${id}?source=events`)}
               />
@@ -365,11 +358,10 @@ export const YourEventsSection = () => {
         </>
       ) : (
         <div className="mt-6 flex min-h-[240px] flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-10 text-center">
-          <h3 className="text-lg font-semibold text-slate-900">
-            No events in your list yet
-          </h3>
+          <h3 className="text-lg font-semibold text-slate-900">No events in your list yet</h3>
           <p className="max-w-[720px] text-sm text-slate-600">
-            Events you RSVP to from the Discover section will appear here. Start exploring events below!
+            Events you RSVP to from the Discover section will appear here. Start exploring events
+            below!
           </p>
         </div>
       )}
@@ -381,10 +373,10 @@ export const YourEventsSection = () => {
           event={inviteModalEvent}
           onInviteSuccess={(recipientEmails) => {
             setToast({
-              message: `Invitations sent to ${recipientEmails.length} ${recipientEmails.length === 1 ? "person" : "people"}`,
-              variant: "success",
-            });
-            window.setTimeout(() => setToast(null), 3000);
+              message: `Invitations sent to ${recipientEmails.length} ${recipientEmails.length === 1 ? 'person' : 'people'}`,
+              variant: 'success',
+            })
+            window.setTimeout(() => setToast(null), 3000)
           }}
         />
       )}
@@ -397,5 +389,5 @@ export const YourEventsSection = () => {
         />
       )}
     </section>
-  );
-};
+  )
+}
