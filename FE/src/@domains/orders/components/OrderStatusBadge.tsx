@@ -14,7 +14,10 @@ export const OrderStatusBadge = ({ status }: OrderStatusBadgeProps) => {
   return (
     <Badge
       variant="outline"
-      className={cn('border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]', getStatusTone(status))}
+      className={cn(
+        'border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]',
+        getStatusTone(status),
+      )}
     >
       {getOrderStatusLabel(status)}
     </Badge>

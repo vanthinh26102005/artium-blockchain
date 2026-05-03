@@ -31,42 +31,39 @@ export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProp
   const primaryArtwork = getPrimaryArtwork(order.items)
   const role = getOrderActorRole(order, currentUserId, scope)
   const displayStatus = getDisplayOrderStatus(order, role)
-/**
- * primaryArtwork - Utility function
- * @returns void
- */
+  /**
+   * primaryArtwork - Utility function
+   * @returns void
+   */
   const nextStepDescription = getNextStepDescription(order, role)
   const invoiceAvailability = getOrderListInvoiceAvailability(order)
 
   return (
-/**
- * role - Utility function
- * @returns void
- */
+    /**
+     * role - Utility function
+     * @returns void
+     */
     <Link
       href={{
         pathname: `/orders/${order.id}`,
         query: { scope, invoice: '1' },
-/**
- * displayStatus - Utility function
- * @returns void
- */
+        /**
+         * displayStatus - Utility function
+         * @returns void
+         */
       }}
       className="group block rounded-[28px] border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm"
     >
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-/**
- * nextStepDescription - Utility function
- * @returns void
- */
+        /** * nextStepDescription - Utility function * @returns void */
         <div className="flex min-w-0 gap-4">
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
             {primaryArtwork?.artworkImageUrl ? (
               <Image
-/**
- * invoiceAvailability - Utility function
- * @returns void
- */
+                /**
+                 * invoiceAvailability - Utility function
+                 * @returns void
+                 */
                 src={primaryArtwork.artworkImageUrl}
                 alt={primaryArtwork.artworkTitle}
                 width={80}
@@ -92,7 +89,8 @@ export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProp
               {primaryArtwork?.artworkTitle ?? 'Artwork details available on the order detail page'}
             </p>
             <p className="mt-2 text-sm text-slate-500">
-              Created {formatOrderDate(order.createdAt)} • {getPaymentMethodLabel(order.paymentMethod)}
+              Created {formatOrderDate(order.createdAt)} •{' '}
+              {getPaymentMethodLabel(order.paymentMethod)}
             </p>
             {role === 'seller' && order.sellerAuctionLifecycle?.reasonMessage ? (
               <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
@@ -101,7 +99,6 @@ export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProp
             ) : null}
           </div>
         </div>
-
         <div className="flex shrink-0 items-center justify-between gap-5 md:block md:text-right">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
