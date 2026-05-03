@@ -3,6 +3,10 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@shared/lib/utils'
 
+/**
+ * alertVariants - Utility function
+ * @returns void
+ */
 const alertVariants = cva(
   'relative w-full rounded-lg border p-4 !pb-2 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground',
   {
@@ -23,6 +27,10 @@ const alertVariants = cva(
 const Alert = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
+/**
+ * Alert - React component
+ * @returns React element
+ */
 >(({ className, variant, ...props }, ref) => (
   <div ref={ref} role="alert" className={cn(alertVariants({ variant }), className)} {...props} />
 ))
@@ -34,6 +42,10 @@ const AlertTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<H
       ref={ref}
       className={cn('mb-1 leading-none font-medium tracking-tight', className)}
       {...props}
+/**
+ * AlertTitle - React component
+ * @returns React element
+ */
     />
   ),
 )
@@ -48,3 +60,7 @@ const AlertDescription = React.forwardRef<
 AlertDescription.displayName = 'AlertDescription'
 
 export { Alert, AlertTitle, AlertDescription }
+/**
+ * AlertDescription - React component
+ * @returns React element
+ */

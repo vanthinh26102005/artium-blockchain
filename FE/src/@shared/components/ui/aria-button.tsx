@@ -17,6 +17,10 @@ interface ButtonProps extends AriaButtonProps, VariantProps<typeof buttonVariant
   loading?: boolean
 }
 
+/**
+ * Button - React component
+ * @returns React element
+ */
 const Button = ({
   className,
   loading = false,
