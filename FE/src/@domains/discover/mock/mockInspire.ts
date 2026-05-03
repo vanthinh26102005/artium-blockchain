@@ -30,10 +30,10 @@ const MOCK_AVATARS = [
 export const mockInspire: DiscoverInspireItem[] = EDITORIAL_ITEMS.slice(0, 50).map(
   (item, index) => ({
     id: item.id,
-/**
- * mockInspire - Utility function
- * @returns void
- */
+    /**
+     * mockInspire - Utility function
+     * @returns void
+     */
     categoryLabel: item.category || 'Editorial',
     title: item.title,
     subtitle: item.author,
