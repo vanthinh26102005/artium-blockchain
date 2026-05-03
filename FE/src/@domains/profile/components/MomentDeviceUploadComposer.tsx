@@ -1,21 +1,9 @@
 import { ChangeEvent, DragEvent, FormEvent, useRef, useState } from 'react'
 
-import {
-  AlertCircle,
-  CheckCircle2,
-  Film,
-  ImageIcon,
-  RefreshCw,
-  UploadCloud,
-} from 'lucide-react'
+import { AlertCircle, CheckCircle2, Film, ImageIcon, RefreshCw, UploadCloud } from 'lucide-react'
 
 import type { CreateMomentInput } from '@shared/apis/profileApis'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from '@shared/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@shared/components/ui/dialog'
 import { Button } from '@shared/components/ui/button'
 import { Input } from '@shared/components/ui/input'
 import { Progress } from '@shared/components/ui/progress'
@@ -50,10 +38,10 @@ const emptyMetadata = {
 const parseHashtags = (value: string) =>
   value
     .split(',')
-/**
- * parseHashtags - Utility function
- * @returns void
- */
+    /**
+     * parseHashtags - Utility function
+     * @returns void
+     */
     .map((item) => item.trim())
     .filter(Boolean)
     .map((item) => (item.startsWith('#') ? item.slice(1) : item))
@@ -64,10 +52,10 @@ export const MomentDeviceUploadComposer = ({
   errorMessage,
   onOpenChange,
   onPublish,
-/**
- * MomentDeviceUploadComposer - React component
- * @returns React element
- */
+  /**
+   * MomentDeviceUploadComposer - React component
+   * @returns React element
+   */
 }: MomentDeviceUploadComposerProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const { state, mediaId, isUploading, canPublish, selectFile, retryUpload } =
@@ -78,10 +66,10 @@ export const MomentDeviceUploadComposer = ({
   const [isPinned, setIsPinned] = useState(emptyMetadata.isPinned)
   const [isDragging, setIsDragging] = useState(false)
 
-/**
- * fileInputRef - Utility function
- * @returns void
- */
+  /**
+   * fileInputRef - Utility function
+   * @returns void
+   */
   const openFilePicker = () => {
     fileInputRef.current?.click()
   }
@@ -94,10 +82,10 @@ export const MomentDeviceUploadComposer = ({
     void selectFile(file)
   }
 
-/**
- * openFilePicker - Utility function
- * @returns void
- */
+  /**
+   * openFilePicker - Utility function
+   * @returns void
+   */
   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     handleSelectedFile(event.target.files?.[0])
     event.target.value = ''
@@ -105,10 +93,10 @@ export const MomentDeviceUploadComposer = ({
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault()
-/**
- * handleSelectedFile - Utility function
- * @returns void
- */
+    /**
+     * handleSelectedFile - Utility function
+     * @returns void
+     */
     setIsDragging(false)
     handleSelectedFile(event.dataTransfer.files?.[0])
   }
@@ -120,10 +108,10 @@ export const MomentDeviceUploadComposer = ({
       return
     }
 
-/**
- * handleFileInputChange - Utility function
- * @returns void
- */
+    /**
+     * handleFileInputChange - Utility function
+     * @returns void
+     */
     await onPublish({
       mediaId,
       caption: caption.trim() || undefined,
@@ -132,10 +120,10 @@ export const MomentDeviceUploadComposer = ({
       isPinned,
       durationSeconds: state.uploadedMedia?.durationSeconds ?? state.durationSeconds,
     })
-/**
- * handleDrop - Utility function
- * @returns void
- */
+    /**
+     * handleDrop - Utility function
+     * @returns void
+     */
   }
 
   const isVideoPreview = state.file?.type.startsWith('video/')
@@ -145,11 +133,11 @@ export const MomentDeviceUploadComposer = ({
     state.status === 'uploaded'
       ? 'Upload complete'
       : state.status === 'replacing'
-/**
- * handleSubmit - Utility function
- * @returns void
- */
-        ? 'Replacing media'
+        ? /**
+           * handleSubmit - Utility function
+           * @returns void
+           */
+          'Replacing media'
         : showFailure
           ? 'Upload failed'
           : 'Uploading media'
@@ -160,7 +148,10 @@ export const MomentDeviceUploadComposer = ({
         size="4xl"
         className="max-h-[92vh] w-[95vw] overflow-hidden rounded-3xl bg-white p-0"
       >
-        <form onSubmit={handleSubmit} className="grid max-h-[92vh] overflow-y-auto lg:grid-cols-[1.1fr_0.9fr]">
+        <form
+          onSubmit={handleSubmit}
+          className="grid max-h-[92vh] overflow-y-auto lg:grid-cols-[1.1fr_0.9fr]"
+        >
           <section className="flex min-h-[520px] flex-col gap-6 bg-slate-50 px-6 py-8">
             <div className="space-y-2">
               <DialogTitle className="text-left text-2xl font-semibold text-slate-950">
@@ -169,34 +160,31 @@ export const MomentDeviceUploadComposer = ({
               <DialogDescription className="max-h-none px-0 text-left text-sm text-slate-600">
                 Upload one image or one video, then add any details you want before publishing.
               </DialogDescription>
-/**
- * isVideoPreview - Utility function
- * @returns void
- */
+              /** * isVideoPreview - Utility function * @returns void */
             </div>
 
             <input
               ref={fileInputRef}
-/**
- * showProgress - Utility function
- * @returns void
- */
+              /**
+               * showProgress - Utility function
+               * @returns void
+               */
               type="file"
               accept={PROFILE_MOMENT_ACCEPT}
               className="sr-only"
               onChange={handleFileInputChange}
-/**
- * showFailure - Utility function
- * @returns void
- */
+              /**
+               * showFailure - Utility function
+               * @returns void
+               */
             />
 
             <div
               className={cn(
-/**
- * statusLabel - Utility function
- * @returns void
- */
+                /**
+                 * statusLabel - Utility function
+                 * @returns void
+                 */
                 'flex flex-1 flex-col justify-center rounded-3xl border border-dashed border-slate-300 bg-white p-6 transition',
                 isDragging && 'border-slate-900 bg-slate-100',
               )}
@@ -284,7 +272,12 @@ export const MomentDeviceUploadComposer = ({
                             </Button>
                           ) : null}
                           {state.status === 'uploaded' || showFailure ? (
-                            <Button type="button" variant="outline" size="sm" onClick={openFilePicker}>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={openFilePicker}
+                            >
                               <UploadCloud className="h-4 w-4" />
                               Replace file
                             </Button>
@@ -372,7 +365,11 @@ export const MomentDeviceUploadComposer = ({
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={!canPublish || isUploading || submitting} loading={submitting}>
+              <Button
+                type="submit"
+                disabled={!canPublish || isUploading || submitting}
+                loading={submitting}
+              >
                 Publish moment
               </Button>
             </div>

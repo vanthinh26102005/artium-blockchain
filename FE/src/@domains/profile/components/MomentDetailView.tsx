@@ -51,11 +51,11 @@ export const MomentDetailView = ({
 }: MomentDetailViewProps) => {
   return (
     <div className="font-['Inter']">
-      <div className="mx-auto max-w-262.5 px-0 py-4 lg:px-1 lg:py-8 2xl:max-w-300">
-        <div className="grid justify-center gap-4 lg:grid-cols-[380px_420px] lg:gap-4 2xl:grid-cols-[480px_500px] 2xl:gap-6">
+      <div className="max-w-262.5 2xl:max-w-300 mx-auto px-0 py-4 lg:px-1 lg:py-8">
+        <div className="grid justify-center gap-4 2xl:grid-cols-[480px_500px] 2xl:gap-6 lg:grid-cols-[380px_420px] lg:gap-4">
           {/* Left: Video Player */}
           <div className="flex items-start justify-center px-4 lg:px-0">
-            <div className="aspect-square w-full max-w-100 lg:sticky lg:top-6 lg:aspect-[3/4] lg:max-h-[510px] lg:max-w-none 2xl:max-h-[580px]">
+            <div className="max-w-100 aspect-square w-full 2xl:max-h-[580px] lg:sticky lg:top-6 lg:aspect-[3/4] lg:max-h-[510px] lg:max-w-none">
               {moment.mediaType === 'video' ? (
                 <MomentVideoPlayer
                   videoUrl={moment.mediaUrl}

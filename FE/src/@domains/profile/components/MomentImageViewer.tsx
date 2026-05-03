@@ -25,28 +25,28 @@ export const MomentImageViewer = ({ imageUrl, alt, className }: MomentImageViewe
   const galleryId = useId()
   const galleryDomId = useMemo(() => `moment-gallery-${galleryId.replace(/:/g, '')}`, [galleryId])
 
-/**
- * galleryId - Utility function
- * @returns void
- */
+  /**
+   * galleryId - Utility function
+   * @returns void
+   */
   useEffect(() => {
     const lightbox = new PhotoSwipeLightbox({
       gallery: `#${galleryDomId}`,
       children: 'a',
-/**
- * galleryDomId - Utility function
- * @returns void
- */
+      /**
+       * galleryDomId - Utility function
+       * @returns void
+       */
       bgOpacity: 0.9,
       spacing: 0.12,
       wheelToZoom: true,
       showHideAnimationType: 'fade',
       pswpModule: () => import('photoswipe'),
     })
-/**
- * lightbox - Utility function
- * @returns void
- */
+    /**
+     * lightbox - Utility function
+     * @returns void
+     */
 
     lightbox.init()
     return () => {
@@ -67,7 +67,7 @@ export const MomentImageViewer = ({ imageUrl, alt, className }: MomentImageViewe
         data-pswp-width={imageSize.width}
         data-pswp-height={imageSize.height}
         aria-label={`Open image ${alt}`}
-        className="group relative block h-full w-full cursor-zoom-in focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 focus-visible:outline-none"
+        className="group relative block h-full w-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2"
       >
         <Image
           src={imageUrl}
