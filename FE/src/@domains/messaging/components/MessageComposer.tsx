@@ -3,6 +3,10 @@ import { Send, Paperclip, Smile, X, Image as ImageIcon } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { Button } from '@shared/components/ui/button'
 
+/**
+ * EmojiPicker - React component
+ * @returns React element
+ */
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false })
 
 type MessageComposerProps = {
@@ -26,6 +30,10 @@ type MessageComposerProps = {
 export const MessageComposer = ({
   onSend,
   onTypingStart,
+/**
+ * MessageComposer - React component
+ * @returns React element
+ */
   onTypingStop,
   onFileUpload,
   disabled = false,
@@ -48,19 +56,35 @@ export const MessageComposer = ({
 
   const handleChange = (value: string) => {
     setMessage(value)
+/**
+ * textareaRef - Utility function
+ * @returns void
+ */
 
     if (value.trim() && !isTyping) {
       setIsTyping(true)
       onTypingStart?.()
+/**
+ * fileInputRef - Utility function
+ * @returns void
+ */
     }
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current)
+/**
+ * typingTimeoutRef - Utility function
+ * @returns void
+ */
     }
 
     typingTimeoutRef.current = setTimeout(() => {
       if (isTyping) {
         setIsTyping(false)
+/**
+ * handleChange - Utility function
+ * @returns void
+ */
         onTypingStop?.()
       }
     }, 1000)
@@ -84,10 +108,18 @@ export const MessageComposer = ({
       textareaRef.current.style.height = 'auto'
     }
 
+/**
+ * handleSend - Utility function
+ * @returns void
+ */
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current)
     }
   }
+/**
+ * trimmedMessage - Utility function
+ * @returns void
+ */
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -113,10 +145,18 @@ export const MessageComposer = ({
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) {
+/**
+ * handleFileSelect - Utility function
+ * @returns void
+ */
         fileInputRef.current.value = ''
       }
     }
   }
+/**
+ * file - Utility function
+ * @returns void
+ */
 
   const handleRemoveFile = () => {
     setUploadedFile(null)
@@ -125,19 +165,35 @@ export const MessageComposer = ({
   const handleEmojiClick = (emojiData: any) => {
     const emoji = emojiData.emoji
     const textarea = textareaRef.current
+/**
+ * response - Utility function
+ * @returns void
+ */
     if (!textarea) return
 
     const start = textarea.selectionStart
     const end = textarea.selectionEnd
+/**
+ * url - Utility function
+ * @returns void
+ */
     const newValue = message.substring(0, start) + emoji + message.substring(end)
 
     setMessage(newValue)
     setTimeout(() => {
       textarea.focus()
+/**
+ * isImage - Utility function
+ * @returns void
+ */
       textarea.setSelectionRange(start + emoji.length, start + emoji.length)
     }, 0)
   }
 
+/**
+ * isVideo - Utility function
+ * @returns void
+ */
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -160,6 +216,10 @@ export const MessageComposer = ({
       {uploadedFile && (
         <div className="mb-2 rounded-lg border border-slate-200 bg-slate-50 p-2">
           {uploadedFile.isImage ? (
+/**
+ * handleRemoveFile - Utility function
+ * @returns void
+ */
             <div className="relative">
               <img
                 src={uploadedFile.url}
@@ -167,28 +227,52 @@ export const MessageComposer = ({
                 className="max-h-48 w-full rounded-lg object-contain"
                 onError={(e) => {
                   // Fallback if image fails to load
+/**
+ * handleEmojiClick - Utility function
+ * @returns void
+ */
                   const target = e.target as HTMLImageElement
                   target.style.display = 'none'
                   target.nextElementSibling?.classList.remove('hidden')
                 }}
+/**
+ * emoji - Utility function
+ * @returns void
+ */
               />
               <div className="hidden flex items-center gap-2 px-3 py-2">
                 <ImageIcon className="h-4 w-4 text-slate-500" />
                 <span className="flex-1 truncate text-sm text-slate-700">{uploadedFile.name}</span>
+/**
+ * textarea - Utility function
+ * @returns void
+ */
               </div>
               <button
                 type="button"
                 onClick={handleRemoveFile}
                 className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
               >
+/**
+ * start - Utility function
+ * @returns void
+ */
                 <X className="h-4 w-4" />
               </button>
             </div>
           ) : uploadedFile.isVideo ? (
+/**
+ * end - Utility function
+ * @returns void
+ */
             <div className="relative">
               <video
                 src={uploadedFile.url}
                 className="max-h-48 w-full rounded-lg"
+/**
+ * newValue - Utility function
+ * @returns void
+ */
                 controls
               />
               <button
@@ -201,6 +285,10 @@ export const MessageComposer = ({
             </div>
           ) : (
             <div className="flex items-center gap-2 px-1">
+/**
+ * handleKeyDown - Utility function
+ * @returns void
+ */
               <ImageIcon className="h-4 w-4 text-slate-500" />
               <span className="flex-1 truncate text-sm text-slate-700">{uploadedFile.name}</span>
               <button
@@ -211,10 +299,18 @@ export const MessageComposer = ({
                 <X className="h-4 w-4" />
               </button>
             </div>
+/**
+ * adjustTextareaHeight - Utility function
+ * @returns void
+ */
           )}
         </div>
       )}
 
+/**
+ * textarea - Utility function
+ * @returns void
+ */
       <div className="flex items-end gap-2">
         <input
           ref={fileInputRef}
@@ -222,10 +318,18 @@ export const MessageComposer = ({
           accept="image/*,video/*,.pdf,.doc,.docx"
           onChange={handleFileSelect}
           className="hidden"
+/**
+ * maxHeight - Utility function
+ * @returns void
+ */
         />
         <button
           type="button"
           disabled={disabled || isUploading}
+/**
+ * newHeight - Utility function
+ * @returns void
+ */
           onClick={() => fileInputRef.current?.click()}
           className="shrink-0 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
         >
@@ -245,6 +349,10 @@ export const MessageComposer = ({
             disabled={disabled}
             rows={1}
             className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+/**
+ * target - Utility function
+ * @returns void
+ */
             style={{
               minHeight: '40px',
               maxHeight: '120px',

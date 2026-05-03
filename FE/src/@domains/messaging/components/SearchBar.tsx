@@ -7,6 +7,10 @@ type SearchBarProps = {
   placeholder?: string
 }
 
+/**
+ * SearchBar - React component
+ * @returns React element
+ */
 export const SearchBar = ({
   value,
   onChange,
@@ -16,11 +20,19 @@ export const SearchBar = ({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleClear = () => {
+/**
+ * inputRef - Utility function
+ * @returns void
+ */
     onChange('')
     inputRef.current?.focus()
   }
 
   return (
+/**
+ * handleClear - Utility function
+ * @returns void
+ */
     <div
       className={`relative flex items-center rounded-lg border transition-colors ${
         isFocused ? 'border-primary ring-2 ring-primary/20' : 'border-slate-200'

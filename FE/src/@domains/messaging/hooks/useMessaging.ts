@@ -4,10 +4,18 @@ import { messagingWs } from '@shared/services/websocketClient'
 import type { Conversation, Message } from '@/types/messaging'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
+/**
+ * useMessaging - Custom React hook
+ * @returns void
+ */
 export const useMessaging = () => {
   const user = useAuthStore((state) => state.user)
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null)
+/**
+ * user - Custom React hook
+ * @returns void
+ */
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoadingConversations, setIsLoadingConversations] = useState(false)
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
@@ -20,6 +28,10 @@ export const useMessaging = () => {
     try {
       setIsLoadingConversations(true)
       setError(null)
+/**
+ * loadConversations - Utility function
+ * @returns void
+ */
       const data = await messagingApis.getConversationsForUser(user.id)
       setConversations(data)
     } catch (err) {
@@ -29,12 +41,20 @@ export const useMessaging = () => {
     } finally {
       setIsLoadingConversations(false)
     }
+/**
+ * data - Utility function
+ * @returns void
+ */
   }, [user?.id])
 
   const loadMessages = useCallback(
     async (conversationId: string) => {
       if (!user?.id) return
 
+/**
+ * message - Utility function
+ * @returns void
+ */
       try {
         setIsLoadingMessages(true)
         setError(null)
@@ -46,6 +66,10 @@ export const useMessaging = () => {
         console.error('Failed to load messages:', err)
       } finally {
         setIsLoadingMessages(false)
+/**
+ * loadMessages - Utility function
+ * @returns void
+ */
       }
     },
     [user?.id],
@@ -56,12 +80,20 @@ export const useMessaging = () => {
       if (!user?.id) return
 
       try {
+/**
+ * data - Utility function
+ * @returns void
+ */
         const message = await messagingApis.sendMessage({
           senderId: user.id,
           conversationId,
           content,
           mediaUrl,
         })
+/**
+ * message - Utility function
+ * @returns void
+ */
 
         setMessages((prev) => [...prev, message])
 
@@ -75,6 +107,10 @@ export const useMessaging = () => {
     [user?.id],
   )
 
+/**
+ * sendMessage - Utility function
+ * @returns void
+ */
   const updateMessage = useCallback(
     async (messageId: string, content: string) => {
       if (!user?.id) return
@@ -83,6 +119,10 @@ export const useMessaging = () => {
         const updated = await messagingApis.updateMessage(messageId, {
           userId: user.id,
           content,
+/**
+ * message - Utility function
+ * @returns void
+ */
         })
 
         setMessages((prev) => prev.map((msg) => (msg.id === messageId ? updated : msg)))
@@ -97,6 +137,10 @@ export const useMessaging = () => {
 
   const deleteMessage = useCallback(
     async (messageId: string) => {
+/**
+ * message - Utility function
+ * @returns void
+ */
       if (!user?.id) return
 
       try {
@@ -108,6 +152,10 @@ export const useMessaging = () => {
         setError(message)
         console.error('Failed to delete message:', err)
       }
+/**
+ * updateMessage - Utility function
+ * @returns void
+ */
     },
     [user?.id],
   )
@@ -116,6 +164,10 @@ export const useMessaging = () => {
     async (messageId: string, emoji: string) => {
       if (!user?.id) return
 
+/**
+ * updated - Utility function
+ * @returns void
+ */
       try {
         setMessages((prev) =>
           prev.map((msg) => {
@@ -126,6 +178,10 @@ export const useMessaging = () => {
               )
 
               if (existingReaction) {
+/**
+ * message - Utility function
+ * @returns void
+ */
                 return {
                   ...msg,
                   reactions: reactions.filter((r) => r !== existingReaction),
@@ -137,6 +193,10 @@ export const useMessaging = () => {
                 }
               }
             }
+/**
+ * deleteMessage - Utility function
+ * @returns void
+ */
             return msg
           }),
         )
@@ -149,6 +209,10 @@ export const useMessaging = () => {
     [user?.id],
   )
 
+/**
+ * message - Utility function
+ * @returns void
+ */
   const selectConversation = useCallback(
     (conversationId: string) => {
       setSelectedConversationId(conversationId)
@@ -160,6 +224,10 @@ export const useMessaging = () => {
 
   useEffect(() => {
     if (user?.id) {
+/**
+ * reactToMessage - Utility function
+ * @returns void
+ */
       loadConversations()
 
       messagingWs.connect(user.id, user.username ?? undefined, user.email ?? undefined)
@@ -171,10 +239,18 @@ export const useMessaging = () => {
           return [...prev, message]
         })
 
+/**
+ * reactions - Utility function
+ * @returns void
+ */
         setConversations((prev) =>
           prev.map((conv) =>
             conv.id === message.conversationId
               ? {
+/**
+ * existingReaction - Utility function
+ * @returns void
+ */
                   ...conv,
                   lastMessageContent: message.content || '',
                   lastMessageAt: message.createdAt,
@@ -198,6 +274,10 @@ export const useMessaging = () => {
       const handleUserStoppedTyping = (data: { conversationId: string; userId: string }) => {
         setTypingUsers((prev) => prev.filter((id) => id !== data.userId))
       }
+/**
+ * message - Utility function
+ * @returns void
+ */
 
       messagingWs.onNewMessage(handleNewMessage)
       messagingWs.onUserTyping(handleUserTyping)
@@ -209,6 +289,10 @@ export const useMessaging = () => {
         messagingWs.off('userStoppedTyping', handleUserStoppedTyping)
         messagingWs.disconnect()
       }
+/**
+ * selectConversation - Utility function
+ * @returns void
+ */
     }
   }, [user?.id, user?.username, user?.email, selectedConversationId, loadConversations])
 
@@ -227,4 +311,21 @@ export const useMessaging = () => {
     reactToMessage,
     loadConversations,
   }
+/**
+ * handleNewMessage - Utility function
+ * @returns void
+ */
 }
+
+/**
+ * exists - Utility function
+ * @returns void
+ */
+/**
+ * handleUserTyping - Utility function
+ * @returns void
+ */
+/**
+ * handleUserStoppedTyping - Utility function
+ * @returns void
+ */
