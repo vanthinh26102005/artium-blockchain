@@ -20,10 +20,10 @@ export const InventoryViewToggle = ({ viewMode, onChange }: InventoryViewToggleP
   const baseButtonClassName =
     'inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition'
 
-/**
- * baseButtonClassName - Utility function
- * @returns void
- */
+  /**
+   * baseButtonClassName - Utility function
+   * @returns void
+   */
   // -- handlers --
   const handleGridClick = () => {
     onChange('grid')
@@ -31,10 +31,10 @@ export const InventoryViewToggle = ({ viewMode, onChange }: InventoryViewToggleP
 
   const handleListClick = () => {
     onChange('list')
-/**
- * handleGridClick - Utility function
- * @returns void
- */
+    /**
+     * handleGridClick - Utility function
+     * @returns void
+     */
   }
 
   // -- render --
@@ -42,10 +42,10 @@ export const InventoryViewToggle = ({ viewMode, onChange }: InventoryViewToggleP
     <div className="inline-flex items-center rounded-full border border-black/10 bg-slate-50 p-1">
       <button
         type="button"
-/**
- * handleListClick - Utility function
- * @returns void
- */
+        /**
+         * handleListClick - Utility function
+         * @returns void
+         */
         onClick={handleGridClick}
         aria-pressed={viewMode === 'grid'}
         className={`${baseButtonClassName} ${

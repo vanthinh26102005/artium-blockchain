@@ -26,10 +26,10 @@ type PaginationProps = {
 export const Pagination = ({
   page,
   totalPages,
-/**
- * Pagination - React component
- * @returns React element
- */
+  /**
+   * Pagination - React component
+   * @returns React element
+   */
   total,
   pageSize,
   onPageChange,
@@ -44,28 +44,25 @@ export const Pagination = ({
   // -- handlers --
   const handlePrev = () => {
     onPageChange(page - 1)
-/**
- * isPrevDisabled - Utility function
- * @returns void
- */
+    /**
+     * isPrevDisabled - Utility function
+     * @returns void
+     */
   }
 
   const handleNext = () => {
     onPageChange(page + 1)
-/**
- * isNextDisabled - Utility function
- * @returns void
- */
+    /**
+     * isNextDisabled - Utility function
+     * @returns void
+     */
   }
 
   // -- render --
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-black/10 px-4 py-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-2 text-slate-700">
-/**
- * handlePrev - Utility function
- * @returns void
- */
+        /** * handlePrev - Utility function * @returns void */
         <span className="font-medium">Page</span>
         <span className="font-semibold text-slate-900">{page}</span>
         <span>of</span>
@@ -73,14 +70,14 @@ export const Pagination = ({
         <span className="text-slate-400">|</span>
         <span>Total: {total}</span>
       </div>
-/**
- * handleNext - Utility function
- * @returns void
- */
+      /** * handleNext - Utility function * @returns void */
       <div className="flex flex-wrap items-center gap-2">
         <label className="flex items-center gap-2 text-sm text-slate-500">
           <span>Page size</span>
-          <Select value={String(pageSize)} onValueChange={(value) => onPageSizeChange(Number(value))}>
+          <Select
+            value={String(pageSize)}
+            onValueChange={(value) => onPageSizeChange(Number(value))}
+          >
             <SelectTrigger className="h-9 w-auto rounded-full border-black/10 bg-white px-3 text-sm text-slate-700">
               <SelectValue />
             </SelectTrigger>
