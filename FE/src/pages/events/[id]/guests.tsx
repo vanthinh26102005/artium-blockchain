@@ -7,6 +7,10 @@ import type { NextPageWithLayout } from "@shared/types/next";
 // @domains - events
 import { EventGuestsPage } from "@domains/events/views/EventGuestsPage";
 
+/**
+ * EventGuestsRoute - React component
+ * @returns React element
+ */
 const EventGuestsRoute: NextPageWithLayout = () => {
   return <EventGuestsPage />;
 };

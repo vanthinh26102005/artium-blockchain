@@ -3,6 +3,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 import { Metadata } from '@/components/SEO/Metadata'
 import { DashboardView } from '@domains/home/components/DashboardView'
 
+/**
+ * HomePage - React component
+ * @returns React element
+ */
 const HomePage: NextPageWithLayout = () => {
   return (
     <>
