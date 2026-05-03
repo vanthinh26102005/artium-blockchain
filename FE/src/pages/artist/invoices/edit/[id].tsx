@@ -12,6 +12,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 import { useRequireAuth } from '@domains/auth/hooks/useRequireAuth'
 
 // @domains - quick-sell (dynamic import)
+/**
+ * QuickSellCreateInvoicePageView - React component
+ * @returns React element
+ */
 const QuickSellCreateInvoicePageView = dynamic(
     () =>
         import('@domains/quick-sell/views/QuickSellCreateInvoicePageView').then(
@@ -23,6 +27,10 @@ const QuickSellCreateInvoicePageView = dynamic(
 const EditInvoiceRoute: NextPageWithLayout = () => {
     // -- auth --
     const { canRenderProtected } = useRequireAuth()
+/**
+ * EditInvoiceRoute - React component
+ * @returns React element
+ */
 
     // -- router --
     const router = useRouter()
@@ -31,11 +39,19 @@ const EditInvoiceRoute: NextPageWithLayout = () => {
 
     // -- render --
     if (!canRenderProtected) return null
+/**
+ * router - Utility function
+ * @returns void
+ */
     if (!invoiceCode) return null
 
     return (
         <>
             <Metadata title="Edit Invoice | Artium" />
+/**
+ * invoiceCode - Utility function
+ * @returns void
+ */
             <QuickSellCreateInvoicePageView invoiceCode={invoiceCode} />
         </>
     )

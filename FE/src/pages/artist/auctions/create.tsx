@@ -4,6 +4,10 @@ import { useRequireAuth } from '@domains/auth/hooks/useRequireAuth'
 import { SidebarLayout } from '@shared/components/layout/SidebarLayout'
 import type { NextPageWithLayout } from '@shared/types/next'
 
+/**
+ * SellerAuctionArtworkPickerPage - React component
+ * @returns React element
+ */
 const SellerAuctionArtworkPickerPage = dynamic(
   () =>
     import('@domains/auction/views/SellerAuctionArtworkPickerPage').then(
@@ -15,6 +19,10 @@ const SellerAuctionArtworkPickerPage = dynamic(
 const CreateSellerAuctionRoute: NextPageWithLayout = () => {
   const { canRenderProtected } = useRequireAuth()
 
+/**
+ * CreateSellerAuctionRoute - React component
+ * @returns React element
+ */
   if (!canRenderProtected) {
     return null
   }
