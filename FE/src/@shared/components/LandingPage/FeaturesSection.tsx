@@ -26,36 +26,36 @@ const FeaturesSection = ({ className }: FeaturesSectionProps) => {
   const activeFeature = FEATURES[activeIndex] ?? FEATURES[0]
   const router = useRouter()
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-/**
- * activeFeature - Utility function
- * @returns void
- */
+  /**
+   * activeFeature - Utility function
+   * @returns void
+   */
 
   // -- handlers --
   const handleSignUpClick = () => {
     if (isAuthenticated) return
-/**
- * router - Utility function
- * @returns void
- */
+    /**
+     * router - Utility function
+     * @returns void
+     */
     router.push('/sign-up')
   }
 
   return (
-/**
- * isAuthenticated - Utility function
- * @returns void
- */
+    /**
+     * isAuthenticated - Utility function
+     * @returns void
+     */
     <>
-      <div className="relative w-full overflow-hidden bg-gradient-to-b from-[#f7c6ff] to-[#b9d9ff] text-black lg:h-[750px] xl:h-[900px] 2xl:h-[900px]">
+      <div className="relative w-full overflow-hidden bg-gradient-to-b from-[#f7c6ff] to-[#b9d9ff] text-black 2xl:h-[900px] lg:h-[750px] xl:h-[900px]">
         <LandingPageSection
           className={cn(
-            'relative h-full !max-w-none !px-6 !pt-10 !pb-10 lg:!pt-12 lg:!pr-0 lg:!pb-6 lg:!pl-10',
+            'relative h-full !max-w-none !px-6 !pb-10 !pt-10 lg:!pb-6 lg:!pl-10 lg:!pr-0 lg:!pt-12',
             className,
-/**
- * handleSignUpClick - Utility function
- * @returns void
- */
+            /**
+             * handleSignUpClick - Utility function
+             * @returns void
+             */
           )}
         >
           {/* -- header -- */}
@@ -74,7 +74,7 @@ const FeaturesSection = ({ className }: FeaturesSectionProps) => {
           </div>
 
           {/* -- main content -- */}
-          <div className="relative mt-12 grid gap-10 lg:h-[500px] lg:grid-cols-[0.4fr_0.6fr] lg:items-stretch lg:justify-items-end lg:gap-12 xl:h-[650px] xl:gap-16 2xl:h-[700px]">
+          <div className="relative mt-12 grid gap-10 2xl:h-[700px] lg:h-[500px] lg:grid-cols-[0.4fr_0.6fr] lg:items-stretch lg:justify-items-end lg:gap-12 xl:h-[650px] xl:gap-16">
             {/* -- feature list -- */}
             <div className="relative flex flex-col gap-6 lg:max-w-[540px]">
               <div className="flex flex-col gap-4">
@@ -94,15 +94,12 @@ const FeaturesSection = ({ className }: FeaturesSectionProps) => {
                           )}
                         />
                       </div>
-/**
- * isActive - Utility function
- * @returns void
- */
+                      /** * isActive - Utility function * @returns void */
                       <div className="space-y-2">
                         <Heading
                           as="h3"
                           size="h3"
-                          className="text-xl leading-tight font-semibold text-black md:text-2xl lg:text-xl"
+                          className="text-xl font-semibold leading-tight text-black md:text-2xl lg:text-xl"
                         >
                           {feature.title}
                         </Heading>
@@ -141,7 +138,7 @@ const FeaturesSection = ({ className }: FeaturesSectionProps) => {
 
             {/* -- feature image (desktop) -- */}
             <div
-              className="pointer-events-none absolute right-0 bottom-0 hidden lg:top-[20px] lg:z-0 lg:flex xl:top-[10px] 2xl:top-0"
+              className="pointer-events-none absolute bottom-0 right-0 hidden 2xl:top-0 lg:top-[20px] lg:z-0 lg:flex xl:top-[10px]"
               style={{
                 animation: 'featuresFade 0.75s cubic-bezier(0.33, 1, 0.68, 1) forwards',
                 willChange: 'opacity, transform',
