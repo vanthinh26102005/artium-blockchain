@@ -24,6 +24,10 @@ type InventoryFolderCardProps = {
   onHide: (folder: InventoryFolder) => void
 }
 
+/**
+ * InventoryFolderCard - React component
+ * @returns React element
+ */
 export const InventoryFolderCard = ({
   folder,
   onRename,

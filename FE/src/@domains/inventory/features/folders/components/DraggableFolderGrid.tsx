@@ -42,10 +42,18 @@ import artworkFolderApis from '@shared/apis/artworkFolderApis'
 
 type FolderWithCount = InventoryFolder & { itemCount: number }
 
+/**
+ * dedupeFoldersById - Utility function
+ * @returns void
+ */
 const dedupeFoldersById = (folders: FolderWithCount[]) => {
   const seen = new Set<string>()
 
   return folders.filter((folder) => {
+/**
+ * seen - Utility function
+ * @returns void
+ */
     if (seen.has(folder.id)) {
       return false
     }
@@ -68,6 +76,10 @@ const SortableFolderItem = ({ folder, onRename, onDelete, onHide }: SortableFold
   })
 
   const style = {
+/**
+ * SortableFolderItem - React component
+ * @returns React element
+ */
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0 : 1,
@@ -76,6 +88,10 @@ const SortableFolderItem = ({ folder, onRename, onDelete, onHide }: SortableFold
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-black/10 bg-white transition-shadow hover:shadow-lg">
+/**
+ * style - Utility function
+ * @returns void
+ */
         {/* actions */}
         <div className="absolute top-3 right-3 z-10">
           <DropdownMenu>
@@ -153,6 +169,10 @@ export const DraggableFolderGrid = ({
   const [localFolders, setLocalFolders] = useState<FolderWithCount[] | null>(null)
   const optimisticReorderFolders = useInventoryDataStore((state) => state.optimisticReorderFolders)
   const user = useAuthStore((state) => state.user)
+/**
+ * DraggableFolderGrid - React component
+ * @returns React element
+ */
   const renderedFolders = localFolders ?? dedupedFolders
 
   const sensors = useSensors(
@@ -164,24 +184,44 @@ export const DraggableFolderGrid = ({
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
+/**
+ * dedupedFolders - Utility function
+ * @returns void
+ */
   )
 
   const handleDragStart = (event: DragStartEvent) => {
     setLocalFolders(renderedFolders)
     setActiveId(event.active.id as string)
+/**
+ * optimisticReorderFolders - Utility function
+ * @returns void
+ */
   }
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
+/**
+ * user - Custom React hook
+ * @returns void
+ */
 
     if (!over || active.id === over.id) {
       setLocalFolders(null)
       setActiveId(null)
+/**
+ * renderedFolders - Utility function
+ * @returns void
+ */
       return
     }
 
     const oldIndex = renderedFolders.findIndex((f) => f.id === active.id)
     const newIndex = renderedFolders.findIndex((f) => f.id === over.id)
+/**
+ * sensors - Utility function
+ * @returns void
+ */
 
     if (oldIndex === -1 || newIndex === -1) {
       setLocalFolders(null)
@@ -196,6 +236,10 @@ export const DraggableFolderGrid = ({
     optimisticReorderFolders(folderIds)
 
     if (user?.id) {
+/**
+ * handleDragStart - Utility function
+ * @returns void
+ */
       try {
         await artworkFolderApis.reorderFolders({
           sellerId: user.id,
@@ -204,6 +248,10 @@ export const DraggableFolderGrid = ({
         setLocalFolders(null)
       } catch {
         setLocalFolders(dedupedFolders)
+/**
+ * handleDragEnd - Utility function
+ * @returns void
+ */
         optimisticReorderFolders(dedupedFolders.map((f) => f.id))
         onError?.('Failed to reorder folders')
       }
@@ -216,10 +264,18 @@ export const DraggableFolderGrid = ({
 
   return (
     <DndContext
+/**
+ * oldIndex - Utility function
+ * @returns void
+ */
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+/**
+ * newIndex - Utility function
+ * @returns void
+ */
     >
       <SortableContext items={renderedFolders.map((f) => f.id)} strategy={rectSortingStrategy}>
         <div className="mt-4 mb-4 grid grid-cols-2 gap-4 lg:grid-cols-5">
@@ -231,12 +287,20 @@ export const DraggableFolderGrid = ({
               onDelete={onDelete}
               onHide={onHide}
             />
+/**
+ * reordered - Utility function
+ * @returns void
+ */
           ))}
         </div>
       </SortableContext>
 
       <DragOverlay>
         {activeFolder ? (
+/**
+ * folderIds - Utility function
+ * @returns void
+ */
           <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl transition-shadow">
             <div className="flex h-[150px] items-center justify-center bg-[#F5F5F5]">
               <Folder className="h-8 w-8 text-slate-400" />
@@ -251,3 +315,8 @@ export const DraggableFolderGrid = ({
     </DndContext>
   )
 }
+
+/**
+ * activeFolder - Utility function
+ * @returns void
+ */

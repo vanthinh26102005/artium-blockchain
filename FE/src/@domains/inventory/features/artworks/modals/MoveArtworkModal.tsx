@@ -20,6 +20,10 @@ import { ScrollArea } from '@shared/components/ui/scroll-area'
 import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
 import { type InventoryFolder } from '@domains/inventory/features/folders/types/inventoryFolder'
 
+/**
+ * INVENTORY_DESTINATION_ID - React component
+ * @returns React element
+ */
 const INVENTORY_DESTINATION_ID = 'inventory-root'
 
 type MoveArtworkModalProps = {
@@ -33,6 +37,10 @@ type MoveArtworkModalProps = {
 export const MoveArtworkModal = ({
   isOpen,
   artwork,
+/**
+ * MoveArtworkModal - React component
+ * @returns React element
+ */
   folders,
   onClose,
   onMove,
@@ -47,12 +55,20 @@ export const MoveArtworkModal = ({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onClose()
+/**
+ * titleLabel - Utility function
+ * @returns void
+ */
     }
   }
 
   const handleMove = () => {
     const destination =
       selectedDestination === INVENTORY_DESTINATION_ID ? undefined : selectedDestination
+/**
+ * handleOpenChange - Utility function
+ * @returns void
+ */
     onMove(destination)
   }
 
@@ -62,10 +78,18 @@ export const MoveArtworkModal = ({
     }
 
     let isCancelled = false
+/**
+ * handleMove - Utility function
+ * @returns void
+ */
 
     window.queueMicrotask(() => {
       if (isCancelled) {
         return
+/**
+ * destination - Utility function
+ * @returns void
+ */
       }
 
       setSelectedDestination(artwork?.folderId ?? INVENTORY_DESTINATION_ID)
