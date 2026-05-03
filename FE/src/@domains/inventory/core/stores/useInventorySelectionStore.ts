@@ -11,6 +11,10 @@ type InventorySelectionState = {
   unselectAll: (idsOnPage: string[]) => void
 }
 
+/**
+ * useInventorySelectionStore - Custom React hook
+ * @returns void
+ */
 export const useInventorySelectionStore = create<InventorySelectionState>((set, get) => ({
   selectedIds: [],
   isSelected: (id) => get().selectedIds.includes(id),
