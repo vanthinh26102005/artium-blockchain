@@ -9,11 +9,19 @@ import type {
   ConfirmPaymentResult,
 } from './types'
 
+/**
+ * delay - Utility function
+ * @returns void
+ */
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const mockPaymentAdapter: QuickSellPaymentAdapter = {
   createPaymentIntent: async (
     input: CreatePaymentIntentInput,
+    /**
+     * mockPaymentAdapter - Utility function
+     * @returns void
+     */
   ): Promise<CreatePaymentIntentResult> => {
     // Simulate API call delay
     await delay(1000)
@@ -40,6 +48,10 @@ export const mockPaymentAdapter: QuickSellPaymentAdapter = {
       url.searchParams.set('redirect_status', 'succeeded')
       url.searchParams.set('pending', 'true') // Signal to frontend to poll/simulate processing
 
+      /**
+       * url - Utility function
+       * @returns void
+       */
       console.log('[Mock Adapter] Redirecting to:', url.toString())
 
       // In real scenario, Stripe redirects the top window

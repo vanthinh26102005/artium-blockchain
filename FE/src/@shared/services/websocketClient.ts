@@ -3,6 +3,10 @@ import type { Message } from '@/types/messaging'
 
 type WebSocketEventHandler = (...args: any[]) => void
 
+/**
+ * MessagingWebSocketClient - React component
+ * @returns React element
+ */
 export class MessagingWebSocketClient {
   private socket: Socket | null = null
   private isConnected = false
@@ -15,6 +19,10 @@ export class MessagingWebSocketClient {
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8081'
 
     this.socket = io(`${wsUrl}/messaging`, {
+      /**
+       * wsUrl - Utility function
+       * @returns void
+       */
       auth: {
         user: {
           id: userId,
@@ -96,7 +104,9 @@ export class MessagingWebSocketClient {
     this.socket.on('newMessage', handler)
   }
 
-  onUserTyping(handler: (data: { conversationId: string; userId: string; username?: string }) => void) {
+  onUserTyping(
+    handler: (data: { conversationId: string; userId: string; username?: string }) => void,
+  ) {
     if (!this.socket) return
 
     this.socket.on('userTyping', handler)
@@ -136,3 +146,8 @@ export class MessagingWebSocketClient {
 }
 
 export const messagingWs = new MessagingWebSocketClient()
+
+/**
+ * messagingWs - Utility function
+ * @returns void
+ */

@@ -5,6 +5,10 @@ import { type InventoryArtwork } from '@domains/inventory/features/artworks/type
 import { mapArtworkToInventory } from '@domains/inventory/core/utils/inventoryApiMapper'
 import { type InventoryFilters } from '@domains/inventory/core/types/inventoryFilters'
 
+/**
+ * useInventoryArtworks - Custom React hook
+ * @returns void
+ */
 export const useInventoryArtworks = (
   userId: string | undefined,
   page: number,
@@ -44,11 +48,19 @@ export const useInventoryArtworks = (
     const loadArtworks = async () => {
       try {
         const response = await artworkApis.listArtworksPaginated({
+          /**
+           * loadArtworks - Utility function
+           * @returns void
+           */
           sellerId: userId,
           includeSellerAuctionLifecycle: true,
           q: searchName || undefined,
           status: filters.status,
           minPrice: filters.minPrice,
+          /**
+           * response - Utility function
+           * @returns void
+           */
           maxPrice: filters.maxPrice,
           skip: (page - 1) * pageSize,
           take: pageSize,
@@ -67,6 +79,10 @@ export const useInventoryArtworks = (
         if (!isActive) {
           return
         }
+        /**
+         * mappedArtworks - Utility function
+         * @returns void
+         */
 
         setArtworks([])
         setTotal(0)

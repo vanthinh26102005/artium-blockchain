@@ -8,6 +8,10 @@ export interface Template {
   demoUrl?: string
 }
 
+/**
+ * templates - Utility function
+ * @returns void
+ */
 export const templates: Template[] = [
   {
     id: 'axis',

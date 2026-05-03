@@ -10,6 +10,10 @@ type JourneySectionProps = {
   className?: string
 }
 
+/**
+ * JourneySection - React component
+ * @returns React element
+ */
 const JourneySection = ({ className }: JourneySectionProps) => {
   return (
     <LandingPageSection className={cn('space-y-[24px] lg:space-y-[30px]', className)}>
@@ -18,7 +22,7 @@ const JourneySection = ({ className }: JourneySectionProps) => {
         as="h2"
         size="h2"
         tone="light"
-        className="text-center text-[24px] leading-[130%] font-medium tracking-[-1.4px] lg:!text-[70px] lg:leading-none"
+        className="text-center text-[24px] font-medium leading-[130%] tracking-[-1.4px] lg:!text-[70px] lg:leading-none"
       >
         <span className="inline lg:block">Designed for Every</span>{' '}
         <span className="inline lg:block">Stage of the Art Journey</span>

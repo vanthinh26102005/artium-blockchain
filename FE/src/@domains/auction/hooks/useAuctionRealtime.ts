@@ -6,11 +6,19 @@ type UseAuctionRealtimeInput = {
   onAuctionChange: (auctionId: string) => void
 }
 
+/**
+ * resolveAuctionId - Utility function
+ * @returns void
+ */
 const resolveAuctionId = (payload: unknown) => {
   if (payload && typeof payload === 'object' && 'auctionId' in payload) {
     const auctionId = (payload as { auctionId?: unknown }).auctionId
     return typeof auctionId === 'string' ? auctionId : null
   }
+  /**
+   * auctionId - Utility function
+   * @returns void
+   */
 
   return null
 }
@@ -21,6 +29,10 @@ export const useAuctionRealtime = ({ auctionIds, onAuctionChange }: UseAuctionRe
       return
     }
 
+    /**
+     * useAuctionRealtime - Custom React hook
+     * @returns void
+     */
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8081'
     const socket = io(`${wsUrl}/auction`, {
       reconnection: true,
@@ -30,10 +42,18 @@ export const useAuctionRealtime = ({ auctionIds, onAuctionChange }: UseAuctionRe
 
     const handleAuctionEvent = (payload: unknown) => {
       const auctionId = resolveAuctionId(payload)
+      /**
+       * wsUrl - Utility function
+       * @returns void
+       */
       if (auctionId) {
         onAuctionChange(auctionId)
       }
     }
+    /**
+     * socket - Utility function
+     * @returns void
+     */
 
     socket.on('connect', () => {
       auctionIds.forEach((auctionId) => {
@@ -43,10 +63,18 @@ export const useAuctionRealtime = ({ auctionIds, onAuctionChange }: UseAuctionRe
     socket.on('auctionStateChanged', handleAuctionEvent)
     socket.on('auctionBidUpdated', handleAuctionEvent)
     socket.on('auctionExtended', handleAuctionEvent)
+    /**
+     * handleAuctionEvent - Utility function
+     * @returns void
+     */
 
     return () => {
       auctionIds.forEach((auctionId) => {
         socket.emit('leaveAuction', { auctionId })
+        /**
+         * auctionId - Utility function
+         * @returns void
+         */
       })
       socket.off('auctionStateChanged', handleAuctionEvent)
       socket.off('auctionBidUpdated', handleAuctionEvent)

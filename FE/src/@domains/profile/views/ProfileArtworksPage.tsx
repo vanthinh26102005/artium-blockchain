@@ -18,11 +18,26 @@ type ProfileArtworksPageViewProps = {
   username?: string | string[]
 }
 
+/**
+ * ProfileArtworksPageView - React component
+ * @returns React element
+ */
 export const ProfileArtworksPageView = ({ username: _username }: ProfileArtworksPageViewProps) => {
   // -- derived --
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, user: fetchedUser, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
+  const {
+    data: baseData,
+    user: fetchedUser,
+    isOwner,
+    isLoading,
+    error,
+    resolvedUsername,
+  } = useProfileOverview({
     username: usernameFromRoute,
+    /**
+     * usernameFromRoute - Custom React hook
+     * @returns void
+     */
   })
   const profileData = useProfileDraftData(baseData)
   const profileHandle = resolvedUsername || profileData?.user.username || usernameFromRoute || ''
@@ -30,29 +45,53 @@ export const ProfileArtworksPageView = ({ username: _username }: ProfileArtworks
   const pageTitle = profileData
     ? `${profileData.user.displayName} (@${resolvedUsername}) | Artworks`
     : 'Profile Artworks | Artium'
+  /**
+   * profileData - Utility function
+   * @returns void
+   */
   const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}` : ''
   const tabHrefs = profileHandle
     ? {
         overview: baseHref,
+        /**
+         * profileHandle - Utility function
+         * @returns void
+         */
         artworks: `${baseHref}/artworks`,
         moments: `${baseHref}/moments`,
         moodboards: `${baseHref}/moodboards`,
       }
-    : undefined
+    : /**
+       * canRenderProfile - Utility function
+       * @returns void
+       */
+      undefined
 
   // -- render --
   return (
+    /**
+     * pageTitle - Utility function
+     * @returns void
+     */
     <>
       <Metadata title={pageTitle} />
       <div className="space-y-4">
         <div className="container">
           {isLoading ? (
             <ProfileHeroSkeleton />
-          ) : error || !profileData ? (
+          ) : /**
+           * baseHref - Utility function
+           * @returns void
+           */
+          error || !profileData ? (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-600">
               {error ?? 'Profile not found.'}
             </div>
           ) : (
+            /**
+             * tabHrefs - Utility function
+             * @returns void
+             */
             <ProfileHero
               user={profileData.user}
               stats={profileData.stats}
@@ -78,7 +117,7 @@ export const ProfileArtworksPageView = ({ username: _username }: ProfileArtworks
           <div className="container py-6">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
+                <h2 className="text-[20px] font-semibold leading-[1.2] text-kokushoku-black lg:text-[28px]">
                   Artworks
                 </h2>
                 <p className="text-sm text-slate-500">All artworks by this artist</p>

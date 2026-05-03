@@ -1,15 +1,27 @@
 import NextAuth, { type AuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 
+/**
+ * googleClientId - Utility function
+ * @returns void
+ */
 const googleClientId = process.env.GOOGLE_CLIENT_ID
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET
 
 export const authOptions = {
+  /**
+   * googleClientSecret - Utility function
+   * @returns void
+   */
   providers: [
     GoogleProvider({
       clientId: googleClientId ?? '',
       clientSecret: googleClientSecret ?? '',
       authorization: {
+        /**
+         * authOptions - Utility function
+         * @returns void
+         */
         params: {
           prompt: 'consent',
           access_type: 'offline',

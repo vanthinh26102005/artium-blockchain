@@ -12,6 +12,10 @@ type EditorialAllListProps = {
   title?: string
 }
 
+/**
+ * formatDate - Utility function
+ * @returns void
+ */
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -22,9 +26,9 @@ const formatDate = (value: string) =>
 export const EditorialAllList = ({ items, title = 'All Articles' }: EditorialAllListProps) => {
   return (
     <section className="space-y-3 px-6 sm:px-10 lg:px-14">
+      /** * EditorialAllList - React component * @returns React element */
       {/* header */}
       <h2 className="text-[30px] font-semibold text-slate-900">{title}</h2>
-
       {/* list grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {items.map((item) => (
@@ -39,7 +43,7 @@ export const EditorialAllList = ({ items, title = 'All Articles' }: EditorialAll
                   src={item.imageUrl}
                   alt={item.title}
                   fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-120"
+                  className="group-hover:scale-120 object-cover transition-transform duration-300"
                   sizes="(max-width: 640px) 100px, 289px"
                 />
               </div>
@@ -47,15 +51,15 @@ export const EditorialAllList = ({ items, title = 'All Articles' }: EditorialAll
               {/* content */}
               <div className="flex h-full min-w-0 flex-col justify-between gap-2 p-3">
                 <div className="space-y-2">
-                  <p className="line-clamp-1 text-[12px] leading-tight font-semibold text-[#191414]">
+                  <p className="line-clamp-1 text-[12px] font-semibold leading-tight text-[#191414]">
                     {item.category}
                   </p>
-                  <h3 className="line-clamp-2 text-[18px] leading-tight font-semibold text-slate-900 group-hover:underline">
+                  <h3 className="line-clamp-2 text-[18px] font-semibold leading-tight text-slate-900 group-hover:underline">
                     {item.title}
                   </h3>
 
-                  <div className="flex flex-wrap items-center gap-2 text-[12px] leading-tight font-semibold text-[#191414]">
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-[11px] font-semibold text-white uppercase">
+                  <div className="flex flex-wrap items-center gap-2 text-[12px] font-semibold leading-tight text-[#191414]">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-[11px] font-semibold uppercase text-white">
                       {item.author.charAt(0)}
                     </span>
                     <span>{item.author}</span>
@@ -68,7 +72,7 @@ export const EditorialAllList = ({ items, title = 'All Articles' }: EditorialAll
                     </span>
                   </div>
 
-                  <p className="line-clamp-2 text-[16px] leading-normal font-normal text-slate-700">
+                  <p className="line-clamp-2 text-[16px] font-normal leading-normal text-slate-700">
                     {item.excerpt}
                   </p>
                 </div>

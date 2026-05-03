@@ -10,10 +10,18 @@ import { messagingWs } from '@shared/services/websocketClient'
 import messagingApis from '@shared/apis/messagingApis'
 import { useState } from 'react'
 
+/**
+ * MessagingView - React component
+ * @returns React element
+ */
 export const MessagingView = () => {
   const user = useAuthStore((state) => state.user)
   const [searchQuery, setSearchQuery] = useState('')
 
+  /**
+   * user - Custom React hook
+   * @returns void
+   */
   const {
     conversations,
     selectedConversationId,
@@ -35,11 +43,19 @@ export const MessagingView = () => {
     conv.name?.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
+  /**
+   * selectedConversation - Utility function
+   * @returns void
+   */
   const handleSendMessage = async (content: string, mediaUrl?: string) => {
     if (selectedConversationId) {
       await sendMessage(selectedConversationId, content, mediaUrl)
     }
   }
+  /**
+   * filteredConversations - Utility function
+   * @returns void
+   */
 
   const handleFileUpload = async (file: File) => {
     const response = await messagingApis.uploadFile(file)
@@ -47,6 +63,10 @@ export const MessagingView = () => {
   }
 
   const handleEditMessage = async (messageId: string, content: string) => {
+    /**
+     * handleSendMessage - Utility function
+     * @returns void
+     */
     if (updateMessage) {
       await updateMessage(messageId, content)
     }
@@ -56,10 +76,18 @@ export const MessagingView = () => {
     if (deleteMessage) {
       await deleteMessage(messageId)
     }
+    /**
+     * handleFileUpload - Utility function
+     * @returns void
+     */
   }
 
   const handleReactToMessage = async (messageId: string, emoji: string) => {
     if (reactToMessage) {
+      /**
+       * response - Utility function
+       * @returns void
+       */
       await reactToMessage(messageId, emoji)
     }
   }
@@ -67,6 +95,10 @@ export const MessagingView = () => {
   const handleTypingStart = () => {
     if (selectedConversationId) {
       messagingWs.startTyping(selectedConversationId)
+      /**
+       * handleEditMessage - Utility function
+       * @returns void
+       */
     }
   }
 
@@ -76,6 +108,10 @@ export const MessagingView = () => {
     }
   }
 
+  /**
+   * handleDeleteMessage - Utility function
+   * @returns void
+   */
   return (
     <>
       <Metadata title="Messages | Artium" />
@@ -85,15 +121,15 @@ export const MessagingView = () => {
         <div className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-semibold leading-[120%] text-slate-900">Messages</h1>
         </div>
-
+        /** * handleReactToMessage - Utility function * @returns void */
         {error && (
           <div className="mx-4 mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 sm:mx-6 lg:mx-8">
             {error}
           </div>
         )}
-
         {/* Main Content */}
         <div className="flex h-[calc(100%-80px)]">
+          /** * handleTypingStart - Utility function * @returns void */
           {/* Conversations List */}
           <div className="w-80 shrink-0 border-r border-slate-200 bg-white">
             {/* Search */}
@@ -103,13 +139,16 @@ export const MessagingView = () => {
 
             {/* List */}
             <ConversationsList
+              /**
+               * handleTypingStop - Utility function
+               * @returns void
+               */
               conversations={filteredConversations}
               selectedConversationId={selectedConversationId}
               onSelectConversation={selectConversation}
               isLoading={isLoadingConversations}
             />
           </div>
-
           {/* Chat Area */}
           <div className="flex flex-1 flex-col bg-slate-50">
             {selectedConversation ? (
@@ -166,9 +205,7 @@ export const MessagingView = () => {
                 <div className="rounded-full bg-slate-200 p-6">
                   <MessageCircle className="h-12 w-12 text-slate-400" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-slate-700">
-                  Select a conversation
-                </h3>
+                <h3 className="mt-4 text-lg font-semibold text-slate-700">Select a conversation</h3>
                 <p className="mt-1 text-sm text-slate-500">
                   Choose a conversation from the list to start messaging
                 </p>

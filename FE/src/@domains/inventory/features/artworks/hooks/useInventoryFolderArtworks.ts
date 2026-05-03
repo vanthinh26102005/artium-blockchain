@@ -4,6 +4,10 @@ import artworkFolderApis from '@shared/apis/artworkFolderApis'
 import { mapArtworkToInventory } from '@domains/inventory/core/utils/inventoryApiMapper'
 import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
 
+/**
+ * useInventoryFolderArtworks - Custom React hook
+ * @returns void
+ */
 export const useInventoryFolderArtworks = (
   folderId: string,
   userId: string | undefined,
@@ -28,15 +32,27 @@ export const useInventoryFolderArtworks = (
     const loadFolderArtworks = async () => {
       try {
         const response = await artworkFolderApis.getArtworksInFolder(folderId)
+        /**
+         * loadFolderArtworks - Utility function
+         * @returns void
+         */
         const mapped = response.map(mapArtworkToInventory)
 
         if (!isActive) {
           return
         }
+        /**
+         * response - Utility function
+         * @returns void
+         */
 
         setFolderArtworks(mapped)
         setMany([])
       } catch (error) {
+        /**
+         * mapped - Utility function
+         * @returns void
+         */
         if (!isActive) {
           return
         }

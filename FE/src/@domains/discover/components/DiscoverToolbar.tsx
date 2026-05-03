@@ -21,6 +21,10 @@ type DiscoverToolbarProps = {
   onToggleFilters: () => void
 }
 
+/**
+ * DiscoverToolbar - React component
+ * @returns React element
+ */
 export const DiscoverToolbar = ({
   activeTabKey,
   searchQuery,
@@ -35,6 +39,10 @@ export const DiscoverToolbar = ({
   const searchContainerRef = useRef<HTMLDivElement>(null)
   const {
     recentSearches,
+    /**
+     * searchContainerRef - Utility function
+     * @returns void
+     */
     recentlyViewed,
     addRecentSearch,
     removeRecentSearch,
@@ -49,6 +57,10 @@ export const DiscoverToolbar = ({
         !searchContainerRef.current.contains(event.target as Node)
       ) {
         setIsSearchFocused(false)
+        /**
+         * handleClickOutside - Utility function
+         * @returns void
+         */
       }
     }
 
@@ -66,43 +78,79 @@ export const DiscoverToolbar = ({
   const placeholder = isImageSearchActive ? IMAGE_SEARCH_PLACEHOLDER : config.placeholder
 
   // -- handlers --
+  /**
+   * config - Utility function
+   * @returns void
+   */
   const handleSearchFocus = () => {
     setIsSearchFocused(true)
   }
 
+  /**
+   * isArtworksTab - Utility function
+   * @returns void
+   */
   const handleSuggestionClick = (text: string) => {
     onSearchChange(text)
     addRecentSearch(text)
     setIsSearchFocused(false)
+    /**
+     * isImageSearchActive - Utility function
+     * @returns void
+     */
   }
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    /**
+     * shouldShowSearch - Utility function
+     * @returns void
+     */
     if (searchQuery.trim()) {
       addRecentSearch(searchQuery)
       setIsSearchFocused(false)
     }
+    /**
+     * shouldShowFilters - Utility function
+     * @returns void
+     */
   }
 
   // -- render --
   if (!shouldShowSearch && !shouldShowFilters) {
+    /**
+     * showCamera - Utility function
+     * @returns void
+     */
     return null
   }
 
   return (
+    /**
+     * placeholder - Utility function
+     * @returns void
+     */
     <div className="sticky top-20 z-20 w-full bg-white xl:w-auto">
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:gap-3 lg:justify-end">
         {shouldShowSearch ? (
           <div
             ref={searchContainerRef}
-            className="relative w-full sm:w-80 md:w-105 lg:w-115 xl:w-125"
+            className="md:w-105 lg:w-115 xl:w-125 relative w-full sm:w-80"
+            /**
+             * handleSearchFocus - Utility function
+             * @returns void
+             */
           >
             <form onSubmit={handleSearchSubmit}>
-              <label className="flex h-10.75 w-full items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm transition focus-within:border-slate-300 focus-within:ring-2 focus-within:ring-slate-200">
+              <label className="h-10.75 flex w-full items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm transition focus-within:border-slate-300 focus-within:ring-2 focus-within:ring-slate-200">
                 {/* search */}
                 <Search className="h-4 w-4 text-slate-500" />
                 <input
                   type="text"
+                  /**
+                   * handleSuggestionClick - Utility function
+                   * @returns void
+                   */
                   value={searchQuery}
                   onChange={(event) => onSearchChange(event.target.value)}
                   onFocus={handleSearchFocus}
@@ -112,6 +160,10 @@ export const DiscoverToolbar = ({
                   autoComplete="off"
                   autoCorrect="off"
                   spellCheck={false}
+                  /**
+                   * handleSearchSubmit - Utility function
+                   * @returns void
+                   */
                   className="h-full flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
                 />
                 {showCamera ? (
@@ -120,10 +172,11 @@ export const DiscoverToolbar = ({
                     aria-label="Search by image"
                     aria-pressed={isImageSearch}
                     onClick={onToggleImageSearch}
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border transition ${isImageSearch
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border transition ${
+                      isImageSearch
                         ? 'border-slate-900 bg-slate-900 text-white'
                         : 'border-black text-slate-500 hover:text-slate-700'
-                      }`}
+                    }`}
                   >
                     {/* image search */}
                     <Camera className="h-4 w-4" />
@@ -154,13 +207,13 @@ export const DiscoverToolbar = ({
             <button
               type="button"
               onClick={onToggleFilters}
-              className="inline-flex h-10.75 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300"
+              className="h-10.75 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300"
             >
               <SlidersHorizontal className="h-4 w-4" />
               Filters
             </button>
             {openFilters ? (
-              <div className="absolute top-full right-0 mt-3 w-64 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-lg">
+              <div className="absolute right-0 top-full mt-3 w-64 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-lg">
                 {/* filters panel */}
                 Filters (coming soon)
               </div>

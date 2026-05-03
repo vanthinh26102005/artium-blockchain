@@ -48,6 +48,10 @@ type ArtworkFolderListResponse = {
   data?: ArtworkFolderApiItem[]
 }
 
+/**
+ * normalizeFolderList - Utility function
+ * @returns void
+ */
 const normalizeFolderList = (
   response: ArtworkFolderApiItem[] | ArtworkFolderListResponse,
 ): ArtworkFolderApiItem[] => {
@@ -69,6 +73,10 @@ type ArtworkFolderArtworksResponse = {
 const normalizeFolderArtworks = (
   response: ArtworkApiItem[] | ArtworkFolderArtworksResponse,
 ): ArtworkApiItem[] => {
+  /**
+   * normalizeFolderArtworks - Utility function
+   * @returns void
+   */
   if (Array.isArray(response)) {
     return response
   }
@@ -86,14 +94,20 @@ const artworkFolderApis = {
       withQuery('/artwork/artwork-folders', params),
       {
         cache: 'no-store',
+        /**
+         * artworkFolderApis - Utility function
+         * @returns void
+         */
       },
     )
     return normalizeFolderList(response)
   },
   getFolderById: (id: string) =>
-    apiFetch<ArtworkFolderApiItem | null>(
-      `/artwork/artwork-folders/${encodePathSegment(id)}`,
-    ),
+    /**
+     * response - Utility function
+     * @returns void
+     */
+    apiFetch<ArtworkFolderApiItem | null>(`/artwork/artwork-folders/${encodePathSegment(id)}`),
   createFolder: (input: CreateFolderInput) =>
     apiFetch<ArtworkFolderApiItem>('/artwork/artwork-folders', {
       method: 'POST',
@@ -122,14 +136,19 @@ const artworkFolderApis = {
     return normalizeFolderArtworks(response)
   },
   getArtworksCountInFolder: (folderId: string) =>
-    apiFetch<number>(
-      `/artwork/artwork-folders/${encodePathSegment(folderId)}/artworks/count`,
-    ),
+    apiFetch<number>(`/artwork/artwork-folders/${encodePathSegment(folderId)}/artworks/count`),
+  /**
+   * response - Utility function
+   * @returns void
+   */
   moveFolder: (id: string, input: MoveFolderInput) =>
-    apiFetch<{ folder: ArtworkFolderApiItem }>(`/artwork/artwork-folders/${encodePathSegment(id)}/move`, {
-      method: 'PUT',
-      body: JSON.stringify(input),
-    }),
+    apiFetch<{ folder: ArtworkFolderApiItem }>(
+      `/artwork/artwork-folders/${encodePathSegment(id)}/move`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      },
+    ),
   createDefaultRootFolder: (sellerId: string) =>
     apiFetch<ArtworkFolderApiItem>(
       `/artwork/artwork-folders/default-root/${encodePathSegment(sellerId)}`,

@@ -28,28 +28,52 @@ type SellerAuctionTermsFormProps = {
 
 type SellerAuctionTermsFieldName = keyof SellerAuctionTermsFormValues
 
+/**
+ * fieldLabelClass - Utility function
+ * @returns void
+ */
 const fieldLabelClass = 'text-sm font-bold text-[#191414]'
 const helperClass = 'mt-2 text-sm leading-6 text-[#191414]/60'
 const errorClass = 'mt-2 text-sm font-medium text-[#FF4337]'
 const actionButtonClass = 'w-full md:w-auto'
+/**
+ * helperClass - Utility function
+ * @returns void
+ */
 
 const getFieldMessageId = (field: SellerAuctionTermsFieldName) => `${field}-message`
 
 export const SellerAuctionTermsForm = ({
+  /**
+   * errorClass - Utility function
+   * @returns void
+   */
   values,
   errors,
   hasSubmitted,
   onChange,
+  /**
+   * actionButtonClass - Utility function
+   * @returns void
+   */
   onValidate,
   onBack,
   onSaveDraft,
   onStartAttempt,
   isStartDisabled,
+  /**
+   * getFieldMessageId - Utility function
+   * @returns void
+   */
   isLocked = false,
   isBackDisabled = false,
   isSaveDraftDisabled = false,
   startButtonLabel = 'Start Auction',
   supportingMessage = 'Network gas is shown in MetaMask during activation.',
+  /**
+   * SellerAuctionTermsForm - React component
+   * @returns React element
+   */
 }: SellerAuctionTermsFormProps) => {
   const [touchedFields, setTouchedFields] = useState<
     Partial<Record<SellerAuctionTermsFieldName, boolean>>
@@ -58,9 +82,7 @@ export const SellerAuctionTermsForm = ({
   const hasErrors = Object.keys(errors).length > 0
 
   const markFieldTouched = (field: SellerAuctionTermsFieldName) => {
-    setTouchedFields((previous) =>
-      previous[field] ? previous : { ...previous, [field]: true },
-    )
+    setTouchedFields((previous) => (previous[field] ? previous : { ...previous, [field]: true }))
   }
 
   const shouldShowError = (field: SellerAuctionTermsFieldName) =>
@@ -73,11 +95,19 @@ export const SellerAuctionTermsForm = ({
 
   const handleValuesChange = (
     field: SellerAuctionTermsFieldName,
+    /**
+     * hasErrors - Utility function
+     * @returns void
+     */
     nextValues: SellerAuctionTermsFormValues,
   ) => {
     markFieldTouched(field)
     onChange(nextValues)
   }
+  /**
+   * markFieldTouched - Utility function
+   * @returns void
+   */
 
   return (
     <section className="rounded-[32px] border border-black/10 bg-white p-6 md:p-8">
@@ -87,12 +117,16 @@ export const SellerAuctionTermsForm = ({
       <h2 className="mt-3 text-[40px] font-semibold leading-[44px] tracking-[-0.04em] text-[#191414]">
         Set terms before activation
       </h2>
+      /** * shouldShowError - Utility function * @returns void */
       <p className="mt-4 max-w-3xl text-base leading-6 text-[#191414]/65">
         Configure the contract-backed rules buyers will see before this auction is started on
         Sepolia.
       </p>
-
       {hasSubmitted && hasErrors ? (
+        /**
+         * handleBlur - Utility function
+         * @returns void
+         */
         <div
           className="mt-6 rounded-[24px] border border-[#FF4337]/20 bg-[#FFF5F4] px-4 py-3 text-sm font-medium text-[#FF4337]"
           role="alert"
@@ -100,7 +134,7 @@ export const SellerAuctionTermsForm = ({
           Review auction terms before continuing.
         </div>
       ) : null}
-
+      /** * handleValuesChange - Utility function * @returns void */
       <div className="mt-8 space-y-8">
         <fieldset>
           <legend className={fieldLabelClass}>Reserve policy</legend>
@@ -167,7 +201,9 @@ export const SellerAuctionTermsForm = ({
                 ETH
               </span>
             </div>
-            <p className={helperClass}>The sale completes only if the final bid meets this reserve.</p>
+            <p className={helperClass}>
+              The sale completes only if the final bid meets this reserve.
+            </p>
             {shouldShowError('reservePriceEth') ? (
               <p id={getFieldMessageId('reservePriceEth')} className={errorClass}>
                 {errors.reservePriceEth}
@@ -196,7 +232,9 @@ export const SellerAuctionTermsForm = ({
               aria-invalid={shouldShowError('minBidIncrementEth')}
               disabled={isLocked}
               aria-describedby={`seller-auction-min-bid-increment-helper seller-auction-min-bid-increment-note${
-                shouldShowError('minBidIncrementEth') ? ` ${getFieldMessageId('minBidIncrementEth')}` : ''
+                shouldShowError('minBidIncrementEth')
+                  ? ` ${getFieldMessageId('minBidIncrementEth')}`
+                  : ''
               }`}
               className="h-12 rounded-[20px] border-[#E5E5E5] bg-white pr-14 text-sm text-[#191414] focus-visible:border-[#2351FC] focus-visible:ring-[#2351FC]/20"
               placeholder="0.00"
@@ -209,7 +247,10 @@ export const SellerAuctionTermsForm = ({
             The first bid must be at least this amount; later bids must increase by at least this
             amount.
           </p>
-          <p id="seller-auction-min-bid-increment-note" className="mt-1 text-sm leading-6 text-[#191414]/60">
+          <p
+            id="seller-auction-min-bid-increment-note"
+            className="mt-1 text-sm leading-6 text-[#191414]/60"
+          >
             On the current contract, this also acts as the first-bid floor.
           </p>
           {shouldShowError('minBidIncrementEth') ? (
@@ -224,12 +265,12 @@ export const SellerAuctionTermsForm = ({
           <div className="mt-4 flex flex-wrap gap-3">
             {SELLER_AUCTION_DURATION_PRESETS.map((preset) => (
               <button
-                  key={preset.value}
-                  type="button"
-                  disabled={isLocked}
-                  onClick={() =>
-                    handleValuesChange('durationPreset', { ...values, durationPreset: preset.value })
-                  }
+                key={preset.value}
+                type="button"
+                disabled={isLocked}
+                onClick={() =>
+                  handleValuesChange('durationPreset', { ...values, durationPreset: preset.value })
+                }
                 className={`rounded-[22px] border px-4 py-3 text-sm font-medium transition ${
                   values.durationPreset === preset.value
                     ? 'border-[#2351FC] bg-[#2351FC] text-white'
@@ -239,13 +280,15 @@ export const SellerAuctionTermsForm = ({
                 {preset.label}
               </button>
             ))}
-              <button
-                type="button"
-                disabled={isLocked}
-                onClick={() => handleValuesChange('durationPreset', { ...values, durationPreset: 'custom' })}
-                className={`rounded-[22px] border px-4 py-3 text-sm font-medium transition ${
-                  values.durationPreset === 'custom'
-                    ? 'border-[#2351FC] bg-[#2351FC] text-white'
+            <button
+              type="button"
+              disabled={isLocked}
+              onClick={() =>
+                handleValuesChange('durationPreset', { ...values, durationPreset: 'custom' })
+              }
+              className={`rounded-[22px] border px-4 py-3 text-sm font-medium transition ${
+                values.durationPreset === 'custom'
+                  ? 'border-[#2351FC] bg-[#2351FC] text-white'
                   : 'border-[#E5E5E5] bg-white text-[#191414]'
               }`}
             >
@@ -384,7 +427,6 @@ export const SellerAuctionTermsForm = ({
           ) : null}
         </div>
       </div>
-
       <div className="mt-8 flex flex-col gap-3 border-t border-[#E5E5E5] pt-6 md:flex-row md:flex-wrap md:items-center md:justify-between">
         <div className="flex flex-col gap-3 md:flex-row">
           <Button
@@ -415,9 +457,7 @@ export const SellerAuctionTermsForm = ({
           >
             {startButtonLabel}
           </Button>
-          <p className="mt-3 text-sm leading-6 text-[#191414]/60">
-            {supportingMessage}
-          </p>
+          <p className="mt-3 text-sm leading-6 text-[#191414]/60">{supportingMessage}</p>
         </div>
       </div>
     </section>

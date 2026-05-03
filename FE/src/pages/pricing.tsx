@@ -4,6 +4,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 import { PricingMain } from '@domains/pricing/components/PricingMain'
 import { PricingFooter } from '@domains/pricing/components/PricingFooter'
 
+/**
+ * PricingPage - React component
+ * @returns React element
+ */
 const PricingPage: NextPageWithLayout = () => {
   return (
     <>

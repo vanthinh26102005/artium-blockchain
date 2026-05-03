@@ -10,6 +10,10 @@ type ProfileCardProps = {
   onToggleFollow: () => void
 }
 
+/**
+ * ProfileCard - React component
+ * @returns React element
+ */
 export const ProfileCard = ({ profile, isFollowing, onToggleFollow }: ProfileCardProps) => {
   // -- state --
 
@@ -17,10 +21,18 @@ export const ProfileCard = ({ profile, isFollowing, onToggleFollow }: ProfileCar
   const collageImages = profile.collage
   const extendedCollage = [
     ...collageImages,
+    /**
+     * collageImages - Utility function
+     * @returns void
+     */
     ...Array.from(
       { length: Math.max(0, 4 - collageImages.length) },
       (_, index) => `https://picsum.photos/seed/profile-${profile.id}-${index}/200/200`,
     ),
+    /**
+     * extendedCollage - Utility function
+     * @returns void
+     */
   ]
   const [primaryImage, smallOne, smallTwo, smallThree] = extendedCollage
 
@@ -28,7 +40,7 @@ export const ProfileCard = ({ profile, isFollowing, onToggleFollow }: ProfileCar
 
   // -- render --
   return (
-    <div className="relative rounded-2xl border border-slate-200 bg-white px-5 pt-12 pb-5 shadow-[0_6px_16px_rgba(15,23,42,0.08)]">
+    <div className="relative rounded-2xl border border-slate-200 bg-white px-5 pb-5 pt-12 shadow-[0_6px_16px_rgba(15,23,42,0.08)]">
       {/* avatar */}
       <img
         src={profile.avatarUrl}
@@ -41,7 +53,7 @@ export const ProfileCard = ({ profile, isFollowing, onToggleFollow }: ProfileCar
         type="button"
         onClick={onToggleFollow}
         aria-pressed={isFollowing}
-        className={`absolute top-4 right-5 inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition ${
+        className={`absolute right-5 top-4 inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition ${
           isFollowing
             ? 'border-slate-900 bg-slate-900 text-white'
             : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300'

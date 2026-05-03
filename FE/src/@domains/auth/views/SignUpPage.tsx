@@ -38,10 +38,18 @@ import {
 } from '@domains/auth/validations/auth.schema'
 import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
 
+/**
+ * SignUpPage - React component
+ * @returns React element
+ */
 export const SignUpPage = () => {
   const router = useRouter()
   const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
   const { initiate, complete, isLoading, error: registerError } = useRegister()
+  /**
+   * router - Utility function
+   * @returns void
+   */
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
   const [step, setStep] = useState<'details' | 'otp'>('details')
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
@@ -52,6 +60,10 @@ export const SignUpPage = () => {
     reValidateMode: 'onChange',
     defaultValues: {
       firstName: '',
+      /**
+       * detailsForm - Utility function
+       * @returns void
+       */
       email: '',
       password: '',
     },
@@ -65,6 +77,10 @@ export const SignUpPage = () => {
     },
   })
 
+  /**
+   * otpForm - Utility function
+   * @returns void
+   */
   const handleDetailsSubmit = async (values: SignUpDetailsFormValues) => {
     detailsForm.clearErrors('root')
 
@@ -77,8 +93,13 @@ export const SignUpPage = () => {
       setPendingDetails(values)
       setStep('otp')
       otpForm.reset({ otp: '' })
+      /**
+       * handleDetailsSubmit - Utility function
+       * @returns void
+       */
     } catch (error) {
-      const message = error instanceof Error ? error.message : registerError ?? 'Registration failed.'
+      const message =
+        error instanceof Error ? error.message : (registerError ?? 'Registration failed.')
       detailsForm.setError('root', { message })
     }
   }
@@ -93,29 +114,38 @@ export const SignUpPage = () => {
 
     try {
       await complete({ email: pendingDetails.email.trim(), otp: values.otp.trim() })
+      /**
+       * message - Utility function
+       * @returns void
+       */
       await router.push('/login?signup=success')
     } catch (error) {
-      const message = error instanceof Error ? error.message : registerError ?? 'OTP verification failed.'
+      const message =
+        error instanceof Error ? error.message : (registerError ?? 'OTP verification failed.')
       otpForm.setError('root', { message })
     }
   }
 
   const handleGoogleSignIn = async () => {
+    /**
+     * handleOtpSubmit - Utility function
+     * @returns void
+     */
     setIsGoogleSubmitting(true)
 
     try {
       await signIn('google', {
-        callbackUrl: buildAuthCallbackUrl(
-          '/sign-up',
-          router.query.next,
-          '/discover?tab=top-picks',
-        ),
+        callbackUrl: buildAuthCallbackUrl('/sign-up', router.query.next, '/discover?tab=top-picks'),
       })
     } finally {
       setIsGoogleSubmitting(false)
     }
   }
 
+  /**
+   * message - Utility function
+   * @returns void
+   */
   // -- render --
   if (!canRenderGuestPage) {
     return null
@@ -124,9 +154,10 @@ export const SignUpPage = () => {
   return (
     <AuthShell>
       <Metadata title="Sign up | Artium" />
+      /** * handleGoogleSignIn - Utility function * @returns void */
       <AuthFormCard>
         {/* header */}
-        <h1 className="font-monument-grotes text-center text-3xl font-bold text-[#191414] lg:text-[48px]">
+        <h1 className="text-center font-monument-grotes text-3xl font-bold text-[#191414] lg:text-[48px]">
           Sign up
         </h1>
 
@@ -195,7 +226,7 @@ export const SignUpPage = () => {
               />
 
               <Button
-                className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
+                className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold uppercase tracking-[0.3em]"
                 loading={detailsForm.formState.isSubmitting || isLoading}
                 disabled={detailsForm.formState.isSubmitting || isLoading}
                 type="submit"
@@ -206,7 +237,11 @@ export const SignUpPage = () => {
           </FormProvider>
         ) : (
           <FormProvider {...otpForm}>
-            <form className="mt-3 space-y-4" onSubmit={otpForm.handleSubmit(handleOtpSubmit)} noValidate>
+            <form
+              className="mt-3 space-y-4"
+              onSubmit={otpForm.handleSubmit(handleOtpSubmit)}
+              noValidate
+            >
               <AuthInput
                 id="signup-email-readonly"
                 name="email"
@@ -233,7 +268,7 @@ export const SignUpPage = () => {
               />
 
               <Button
-                className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
+                className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold uppercase tracking-[0.3em]"
                 loading={otpForm.formState.isSubmitting || isLoading}
                 disabled={otpForm.formState.isSubmitting || isLoading}
                 type="submit"
@@ -248,13 +283,13 @@ export const SignUpPage = () => {
         <div className="space-y-3 text-center">
           <p className="text-base text-[#191414]">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary font-semibold">
+            <Link href="/login" className="font-semibold text-primary">
               Sign in
             </Link>
           </p>
           <p className="text-sm text-[#898788]">
             By signing up, you agree to our{' '}
-            <span className="text-primary font-semibold">Terms &amp; Conditions</span>
+            <span className="font-semibold text-primary">Terms &amp; Conditions</span>
           </p>
         </div>
 

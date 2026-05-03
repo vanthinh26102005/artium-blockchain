@@ -11,11 +11,19 @@ type SaveStatusToastProps = {
   onClose: () => void
 }
 
+/**
+ * SaveStatusToast - React component
+ * @returns React element
+ */
 export const SaveStatusToast = ({ status, onClose }: SaveStatusToastProps) => {
   const isSaving = status === 'saving'
 
   return (
-    <div className="fixed top-24 left-1/2 z-[60] -translate-x-1/2">
+    /**
+     * isSaving - Utility function
+     * @returns void
+     */
+    <div className="fixed left-1/2 top-24 z-[60] -translate-x-1/2">
       <div
         className={cn(
           'flex items-center gap-3 rounded-2xl border bg-white px-5 py-4 shadow-lg',

@@ -13,16 +13,28 @@ import { Metadata } from '@/components/SEO/Metadata'
 import type { NextPageWithLayout } from '@shared/types/next'
 
 // Load Stripe once at module level. In production this key is baked into the Next.js build.
+/**
+ * stripePublishableKey - Utility function
+ * @returns void
+ */
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null
 
 // @domains - checkout (dynamic import, SSR disabled — Elements requires browser)
+/**
+ * stripePromise - Utility function
+ * @returns void
+ */
 const BuyerCheckoutPageView = dynamic(
   () =>
     import('@domains/checkout/views/BuyerCheckoutPageView').then(
       (module) => module.BuyerCheckoutPageView,
     ),
   { ssr: false },
+  /**
+   * BuyerCheckoutPageView - React component
+   * @returns React element
+   */
 )
 
 const CheckoutArtworkRoute: NextPageWithLayout = () => {
@@ -34,18 +46,24 @@ const CheckoutArtworkRoute: NextPageWithLayout = () => {
   // -- render --
   if (!artworkIdStr) return null
 
+  /**
+   * CheckoutArtworkRoute - React component
+   * @returns React element
+   */
   if (!stripePromise) {
     return (
       <>
         <Metadata title="Checkout | Artium" />
         <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
+          /** * router - Utility function * @returns void */
           <div className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
             <h1 className="text-xl font-semibold text-slate-900">
               Stripe checkout is not configured
             </h1>
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              The production build is missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY. Rebuild and
-              redeploy the frontend with the Stripe publishable key.
+              /** * artworkIdStr - Utility function * @returns void */ The production build is
+              missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY. Rebuild and redeploy the frontend with the
+              Stripe publishable key.
             </p>
           </div>
         </div>

@@ -1,26 +1,50 @@
 // third-party
 import { create } from 'zustand'
 
+/**
+ * MAX_ADDITIONAL_IMAGES - React component
+ * @returns React element
+ */
 const MAX_ADDITIONAL_IMAGES = 4
 const MAX_IMAGE_SIZE_MB = 25
 const MAX_VIDEO_SIZE_MB = 200
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024
+/**
+ * MAX_IMAGE_SIZE_MB - React component
+ * @returns React element
+ */
 const MAX_VIDEO_SIZE_BYTES = MAX_VIDEO_SIZE_MB * 1024 * 1024
 const IMAGE_MIME_TYPES = [
   'image/png',
   'image/jpeg',
+  /**
+   * MAX_VIDEO_SIZE_MB - React component
+   * @returns React element
+   */
   'image/jpg',
   'image/gif',
   'image/heic',
   'image/heif',
+  /**
+   * MAX_IMAGE_SIZE_BYTES - React component
+   * @returns React element
+   */
 ]
 const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.heic', '.heif']
 const VIDEO_MIME_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
 const VIDEO_EXTENSIONS = ['.mp4', '.mov', '.webm']
+/**
+ * MAX_VIDEO_SIZE_BYTES - React component
+ * @returns React element
+ */
 
 const IMAGE_ACCEPT = [...IMAGE_MIME_TYPES, ...IMAGE_EXTENSIONS].join(',')
 const VIDEO_ACCEPT = [...VIDEO_MIME_TYPES, ...VIDEO_EXTENSIONS].join(',')
 
+/**
+ * IMAGE_MIME_TYPES - React component
+ * @returns React element
+ */
 const createPreviewUrl = (file: File) => {
   if (typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
     return undefined
@@ -32,28 +56,52 @@ const revokePreviewUrl = (previewUrl?: string) => {
   if (!previewUrl || typeof URL === 'undefined' || typeof URL.revokeObjectURL !== 'function') {
     return
   }
+  /**
+   * IMAGE_EXTENSIONS - React component
+   * @returns React element
+   */
   URL.revokeObjectURL(previewUrl)
 }
 
 const createLocalId = () => {
+  /**
+   * VIDEO_MIME_TYPES - React component
+   * @returns React element
+   */
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID()
   }
   return `media-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
+  /**
+   * VIDEO_EXTENSIONS - React component
+   * @returns React element
+   */
 }
 
 const getFileExtension = (fileName: string) => {
   const index = fileName.lastIndexOf('.')
   return index >= 0 ? fileName.slice(index).toLowerCase() : ''
+  /**
+   * IMAGE_ACCEPT - React component
+   * @returns React element
+   */
 }
 
 const isAllowedFileType = (file: File, allowedMimeTypes: string[], allowedExtensions: string[]) => {
   if (allowedMimeTypes.includes(file.type)) {
+    /**
+     * VIDEO_ACCEPT - React component
+     * @returns React element
+     */
     return true
   }
   const extension = getFileExtension(file.name)
   return extension ? allowedExtensions.includes(extension) : false
 }
+/**
+ * createPreviewUrl - Utility function
+ * @returns void
+ */
 
 const validateFile = (
   file: File,
@@ -64,6 +112,10 @@ const validateFile = (
   if (!isAllowedFileType(file, allowedMimeTypes, allowedExtensions)) {
     return 'Unsupported file type.'
   }
+  /**
+   * revokePreviewUrl - Utility function
+   * @returns void
+   */
   if (file.size > maxSizeBytes) {
     return 'File is too large.'
   }
@@ -74,6 +126,10 @@ const filterErrorsByPrefix = (errors: Record<string, string>, prefix: string) =>
   return Object.fromEntries(Object.entries(errors).filter(([key]) => !key.startsWith(prefix)))
 }
 
+/**
+ * createLocalId - Utility function
+ * @returns void
+ */
 type UploadMediaFile = {
   file?: File
   previewUrl?: string
@@ -84,10 +140,18 @@ type UploadMediaFile = {
 
 type UploadImageItem = UploadMediaFile & {
   id: string
+  /**
+   * getFileExtension - Utility function
+   * @returns void
+   */
 }
 
 type UploadTagGroup = 'vibes' | 'values' | 'mediums'
 
+/**
+ * index - Utility function
+ * @returns void
+ */
 type UploadTags = {
   vibes: string[]
   values: string[]
@@ -95,6 +159,10 @@ type UploadTags = {
 }
 
 type UploadTrivia = {
+  /**
+   * isAllowedFileType - Utility function
+   * @returns void
+   */
   id: string
   question: string
   answer: string
@@ -102,6 +170,10 @@ type UploadTrivia = {
 
 type UploadDetailsDraft = {
   tags: UploadTags
+  /**
+   * extension - Utility function
+   * @returns void
+   */
   trivias: UploadTrivia[]
 }
 
@@ -109,6 +181,10 @@ type InventoryUploadState = {
   draftArtworkId: string | null
   step: number
   isHydrated: boolean
+  /**
+   * validateFile - Utility function
+   * @returns void
+   */
   coverImage: UploadMediaFile
   images: UploadImageItem[]
   video?: UploadMediaFile
@@ -127,6 +203,10 @@ type InventoryUploadState = {
   ) => void
   addTag: (group: UploadTagGroup, value: string) => void
   removeTag: (group: UploadTagGroup, value: string) => void
+  /**
+   * filterErrorsByPrefix - Utility function
+   * @returns void
+   */
   addTrivia: () => void
   updateTrivia: (id: string, field: 'question' | 'answer', value: string) => void
   removeTrivia: (id: string) => void
@@ -198,6 +278,10 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
           file,
           previewUrl: createPreviewUrl(file),
           name: file.name,
+          /**
+           * UPLOAD_MEDIA_RULES - React component
+           * @returns React element
+           */
           size: file.size,
           type: file.type,
         },
@@ -211,6 +295,10 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
       if (remainingSlots <= 0) {
         return {
           errors: {
+            /**
+             * createEmptyTrivia - Utility function
+             * @returns void
+             */
             ...nextErrors,
             images: `You can add up to ${MAX_ADDITIONAL_IMAGES} additional images.`,
           },
@@ -220,6 +308,10 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
       const acceptedFiles = files.slice(0, remainingSlots)
       const newImages: UploadImageItem[] = []
 
+      /**
+       * useInventoryUploadStore - Custom React hook
+       * @returns void
+       */
       for (const file of acceptedFiles) {
         const validationError = validateFile(
           file,
@@ -243,6 +335,10 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
 
       if (newImages.length === 0) {
         return { errors: nextErrors }
+        /**
+         * nextErrors - Utility function
+         * @returns void
+         */
       }
 
       delete nextErrors.images
@@ -253,6 +349,10 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
     }),
   removeImage: (id) =>
     set((state) => {
+      /**
+       * validationError - Utility function
+       * @returns void
+       */
       const target = state.images.find((image) => image.id === id)
       const nextErrors = { ...state.errors }
       revokePreviewUrl(target?.previewUrl)
@@ -281,10 +381,18 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
         return { errors: { ...nextErrors, video: validationError } }
       }
 
+      /**
+       * nextErrors - Utility function
+       * @returns void
+       */
       revokePreviewUrl(state.video?.previewUrl)
       delete nextErrors.video
       return {
         video: {
+          /**
+           * remainingSlots - Utility function
+           * @returns void
+           */
           file,
           previewUrl: createPreviewUrl(file),
           name: file.name,
@@ -298,19 +406,35 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
     set((state) => {
       revokePreviewUrl(state.coverImage.previewUrl)
       state.images.forEach((image) => revokePreviewUrl(image.previewUrl))
+      /**
+       * acceptedFiles - Utility function
+       * @returns void
+       */
       revokePreviewUrl(state.video?.previewUrl)
       return {
         coverImage: {},
         images: [],
+        /**
+         * newImages - Utility function
+         * @returns void
+         */
         video: undefined,
         errors: {},
       }
     }),
   setDetailField: (field, value) =>
+    /**
+     * file - Utility function
+     * @returns void
+     */
     set((state) => ({
       detailsDraft: {
         ...state.detailsDraft,
         [field]: value,
+        /**
+         * validationError - Utility function
+         * @returns void
+         */
       },
     })),
   addTag: (group, value) =>
@@ -346,10 +470,18 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
   addTrivia: () =>
     set((state) => ({
       detailsDraft: {
+        /**
+         * target - Utility function
+         * @returns void
+         */
         ...state.detailsDraft,
         trivias: [...state.detailsDraft.trivias, createEmptyTrivia()],
       },
     })),
+  /**
+   * nextErrors - Utility function
+   * @returns void
+   */
   updateTrivia: (id, field, value) =>
     set((state) => {
       const nextErrors = { ...state.errors }
@@ -363,6 +495,10 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
       return {
         detailsDraft: {
           ...state.detailsDraft,
+          /**
+           * nextErrors - Utility function
+           * @returns void
+           */
           trivias: state.detailsDraft.trivias.map((trivia) =>
             trivia.id === id ? { ...trivia, [field]: value } : trivia,
           ),
@@ -373,6 +509,10 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
   removeTrivia: (id) =>
     set((state) => {
       const nextErrors = { ...state.errors }
+      /**
+       * validationError - Utility function
+       * @returns void
+       */
       delete nextErrors[`trivia-${id}-answer`]
       const nextTrivias = state.detailsDraft.trivias.filter((trivia) => trivia.id !== id)
       return {
@@ -420,6 +560,10 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
             IMAGE_MIME_TYPES,
             IMAGE_EXTENSIONS,
             MAX_IMAGE_SIZE_BYTES,
+            /**
+             * trimmed - Utility function
+             * @returns void
+             */
           )
           if (error) {
             nextErrors.images = error
@@ -427,6 +571,10 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
             break
           }
         }
+        /**
+         * groupValues - Utility function
+         * @returns void
+         */
       }
 
       if (state.video?.file) {
@@ -463,10 +611,18 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
       return { errors: nextErrors }
     })
 
+    /**
+     * nextErrors - Utility function
+     * @returns void
+     */
     return isValid
   },
   goToStep: (step) =>
     set({
+      /**
+       * errorKey - Utility function
+       * @returns void
+       */
       step: Math.max(1, Math.min(2, step)),
     }),
   nextStep: () => {
@@ -489,11 +645,19 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
   },
   prevStep: () =>
     set((state) => ({
+      /**
+       * nextErrors - Utility function
+       * @returns void
+       */
       step: Math.max(1, state.step - 1),
     })),
   reset: () =>
     set((state) => {
       revokePreviewUrl(state.coverImage.previewUrl)
+      /**
+       * nextTrivias - Utility function
+       * @returns void
+       */
       state.images.forEach((image) => revokePreviewUrl(image.previewUrl))
       revokePreviewUrl(state.video?.previewUrl)
       return {
@@ -509,9 +673,46 @@ export const useInventoryUploadStore = create<InventoryUploadState>((set, get) =
             values: [],
             mediums: [],
           },
+          /**
+           * nextErrors - Utility function
+           * @returns void
+           */
           trivias: [createEmptyTrivia()],
         },
         errors: {},
       }
     }),
 }))
+
+/**
+ * error - Utility function
+ * @returns void
+ */
+/**
+ * image - Utility function
+ * @returns void
+ */
+/**
+ * error - Utility function
+ * @returns void
+ */
+/**
+ * error - Utility function
+ * @returns void
+ */
+/**
+ * nextErrors - Utility function
+ * @returns void
+ */
+/**
+ * totalSteps - Utility function
+ * @returns void
+ */
+/**
+ * isValid - Utility function
+ * @returns void
+ */
+/**
+ * isValid - Utility function
+ * @returns void
+ */

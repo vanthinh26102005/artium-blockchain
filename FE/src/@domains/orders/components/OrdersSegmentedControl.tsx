@@ -6,6 +6,10 @@ type OrdersSegmentedControlProps = {
   onChange: (value: OrdersWorkspaceScope) => void
 }
 
+/**
+ * OPTIONS - React component
+ * @returns React element
+ */
 const OPTIONS: Array<{ label: string; value: OrdersWorkspaceScope }> = [
   { label: 'Purchases', value: 'buyer' },
   { label: 'Sales', value: 'seller' },
@@ -14,6 +18,7 @@ const OPTIONS: Array<{ label: string; value: OrdersWorkspaceScope }> = [
 export const OrdersSegmentedControl = ({ value, onChange }: OrdersSegmentedControlProps) => {
   return (
     <div className="inline-flex rounded-full bg-slate-100 p-1">
+      /** * OrdersSegmentedControl - React component * @returns React element */
       {OPTIONS.map((option) => (
         <button
           key={option.value}

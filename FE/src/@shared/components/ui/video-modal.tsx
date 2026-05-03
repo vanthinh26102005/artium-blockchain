@@ -2,26 +2,46 @@ import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { cn } from '@shared/lib/utils'
 
+/**
+ * VideoModal - React component
+ * @returns React element
+ */
 const VideoModal = DialogPrimitive.Root
 
 const VideoModalTrigger = DialogPrimitive.Trigger
 
 const VideoModalPortal = DialogPrimitive.Portal
+/**
+ * VideoModalTrigger - React component
+ * @returns React element
+ */
 
 const VideoModalClose = DialogPrimitive.Close
 
 const VideoModalOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
+  /**
+   * VideoModalPortal - React component
+   * @returns React element
+   */
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'data-[state=closed]:animate-modal-fade-out data-[state=open]:animate-modal-fade-in fixed inset-0 z-50 backdrop-blur-xl',
+      /**
+       * VideoModalClose - React component
+       * @returns React element
+       */
+      'fixed inset-0 z-50 backdrop-blur-xl data-[state=closed]:animate-modal-fade-out data-[state=open]:animate-modal-fade-in',
       className,
     )}
     {...props}
   />
+  /**
+   * VideoModalOverlay - React component
+   * @returns React element
+   */
 ))
 VideoModalOverlay.displayName = DialogPrimitive.Overlay.displayName
 
@@ -34,12 +54,13 @@ const VideoModalContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed top-1/2 left-1/2 z-50 flex h-screen w-screen -translate-x-1/2 -translate-y-1/2 items-center justify-center p-3',
-        'data-[state=closed]:animate-modal-fade-out data-[state=open]:animate-modal-fade-in data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[50%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[50%] transition-all',
+        'fixed left-1/2 top-1/2 z-50 flex h-screen w-screen -translate-x-1/2 -translate-y-1/2 items-center justify-center p-3',
+        'transition-all data-[state=closed]:animate-modal-fade-out data-[state=open]:animate-modal-fade-in data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[50%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[50%]',
         className,
       )}
       {...props}
     >
+      /** * VideoModalContent - React component * @returns React element */
       <div className="relative mx-auto flex size-full items-center justify-center rounded-2xl border border-gray-950/[.1] bg-gray-50/[.2] dark:border-gray-50/[.1] dark:bg-gray-950/[.5]">
         {/* Mobile close button */}
         <CloseIcon isMobile />
@@ -47,7 +68,7 @@ const VideoModalContent = React.forwardRef<
         <div className="flex h-4/5 w-full max-w-5xl gap-6">
           {/* Desktop close button */}
           <CloseIcon />
-          <div className="flex w-full flex-col max-lg:p-4 max-lg:text-center">{children}</div>
+          <div className="max-lg:p-4 max-lg:text-center flex w-full flex-col">{children}</div>
         </div>
       </div>
     </DialogPrimitive.Content>
@@ -62,7 +83,7 @@ const VideoModalTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('mb-4 text-2xl font-bold text-white md:text-4xl dark:text-gray-50', className)}
+    className={cn('mb-4 text-2xl font-bold text-white dark:text-gray-50 md:text-4xl', className)}
     {...props}
   />
 ))
@@ -74,6 +95,10 @@ const VideoModalDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
+    /**
+     * VideoModalTitle - React component
+     * @returns React element
+     */
     className={cn('mb-6 text-xl text-gray-950/80 dark:text-gray-50/70', className)}
     {...props}
   />
@@ -89,6 +114,10 @@ const VideoPreview = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
         className,
       )}
       {...props}
+      /**
+       * VideoModalDescription - React component
+       * @returns React element
+       */
     >
       {children}
     </div>
@@ -104,6 +133,10 @@ const VideoPlayButton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
         'absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 group-[.playing]:pointer-events-none group-[.playing]:opacity-0',
         className,
       )}
+      /**
+       * VideoPreview - React component
+       * @returns React element
+       */
       {...props}
     >
       {children}
@@ -123,6 +156,10 @@ const VideoPlayer = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
           'group relative aspect-video max-w-4xl overflow-hidden rounded-xl border border-gray-950/[.1] object-cover dark:border-gray-50/[.1]',
           isPlaying && 'playing',
           className,
+          /**
+           * VideoPlayButton - React component
+           * @returns React element
+           */
         )}
         onClick={() => setIsPlaying(true)}
         {...props}
@@ -142,6 +179,10 @@ const VideoModalVideo = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
         'aspect-video max-w-4xl overflow-hidden rounded-xl border border-gray-950/[.1] object-cover shadow-xl dark:border-gray-50/[.1]',
         className,
       )}
+      /**
+       * VideoPlayer - React component
+       * @returns React element
+       */
       {...props}
     >
       {children}
@@ -160,13 +201,17 @@ const CloseIcon = React.forwardRef<
     ref={ref}
     className={cn(
       'rounded-full border border-white p-2 text-white transition duration-300 hover:bg-white/10',
-      isMobile ? 'absolute top-4 right-4 lg:hidden' : 'hidden self-start lg:block',
+      isMobile ? 'absolute right-4 top-4 lg:hidden' : 'hidden self-start lg:block',
       className,
     )}
     {...props}
   >
     <svg fill="none" height="12" viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg">
       <path
+        /**
+         * VideoModalVideo - React component
+         * @returns React element
+         */
         d="M1 1L11 11M11 1L1 11"
         className="stroke-current"
         strokeLinecap="round"
@@ -186,6 +231,10 @@ export {
   VideoModalContent,
   VideoModalTitle,
   VideoModalDescription,
+  /**
+   * CloseIcon - React component
+   * @returns React element
+   */
   VideoModalVideo,
   VideoPreview,
   VideoPlayButton,

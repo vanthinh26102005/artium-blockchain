@@ -15,11 +15,13 @@ type OrderInvoiceDocumentProps = {
   className?: string
 }
 
+/**
+ * FieldBlock - React component
+ * @returns React element
+ */
 const FieldBlock = ({ label, value }: { label: string; value: string }) => (
   <div>
-    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-      {label}
-    </p>
+    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
     <p className="mt-1 break-words text-sm text-slate-900">{value}</p>
   </div>
 )
@@ -27,6 +29,7 @@ const FieldBlock = ({ label, value }: { label: string; value: string }) => (
 const AddressBlock = ({ title, lines }: { title: string; lines: string[] }) => (
   <div className="rounded-[16px] border border-slate-200 p-4">
     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+      /** * AddressBlock - React component * @returns React element */
       {title}
     </p>
     <div className="mt-3 space-y-1 text-sm leading-6 text-slate-700">
@@ -45,6 +48,10 @@ const TotalRow = ({
   currency,
   strong,
 }: {
+  /**
+   * TotalRow - React component
+   * @returns React element
+   */
   label: string
   value: number
   currency: string
@@ -72,43 +79,57 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
   const billingLines = formatInvoiceAddressLines(invoice.billingAddress)
 
   return (
+    /**
+     * OrderInvoiceDocument - React component
+     * @returns React element
+     */
     <article
       className={cn(
         'order-invoice-print-root bg-white text-slate-900',
         'mx-auto w-full max-w-[960px] rounded-[20px] border border-slate-200 p-5 shadow-sm sm:p-8',
+        /**
+         * buyerNameRedacted - Utility function
+         * @returns void
+         */
         className,
       )}
     >
       <header className="order-invoice-document-header flex flex-col gap-6 border-b border-slate-200 pb-6 lg:flex-row lg:items-start lg:justify-between">
+        /** * buyerEmailRedacted - Utility function * @returns void */
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
             Artium invoice
           </p>
+          /** * sellerNameRedacted - Utility function * @returns void */
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <h1 className="text-[28px] font-semibold leading-[1.2] text-slate-950">
               {invoice.invoiceNumber}
             </h1>
+            /** * sellerEmailRedacted - Utility function * @returns void */
             <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
               {formatInvoiceField(invoice.status)}
             </span>
           </div>
-          <p className="mt-2 text-sm text-slate-500">
-            Order {invoice.orderNumber}
-          </p>
+          /** * shippingLines - Utility function * @returns void */
+          <p className="mt-2 text-sm text-slate-500">Order {invoice.orderNumber}</p>
         </div>
-
+        /** * billingLines - Utility function * @returns void */
         <div className="order-invoice-document-summary grid gap-4 rounded-[16px] border border-slate-200 bg-slate-50 p-4 sm:grid-cols-3 lg:min-w-[420px]">
-          <FieldBlock label="Issue date" value={formatInvoiceDate(invoice.issueDate ?? invoice.createdAt)} />
+          <FieldBlock
+            label="Issue date"
+            value={formatInvoiceDate(invoice.issueDate ?? invoice.createdAt)}
+          />
           <FieldBlock label="Paid date" value={formatInvoiceDate(invoice.paidAt)} />
-          <FieldBlock label="Total" value={formatInvoiceMoney(invoice.totalAmount, invoice.currency)} />
+          <FieldBlock
+            label="Total"
+            value={formatInvoiceMoney(invoice.totalAmount, invoice.currency)}
+          />
         </div>
       </header>
 
       <section className="order-invoice-party-grid grid gap-4 py-6 lg:grid-cols-2">
         <div className="rounded-[16px] border border-slate-200 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-            Buyer
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Buyer</p>
           <div className="mt-3 space-y-2 text-sm text-slate-700">
             <p className="font-medium text-slate-900">
               {formatInvoicePartyField(invoice.buyer.name, buyerNameRedacted)}
@@ -118,9 +139,7 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
         </div>
 
         <div className="rounded-[16px] border border-slate-200 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-            Seller
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Seller</p>
           <div className="mt-3 space-y-2 text-sm text-slate-700">
             <p className="font-medium text-slate-900">
               {formatInvoicePartyField(invoice.seller.name, sellerNameRedacted)}
@@ -194,11 +213,23 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
               <p className="mt-1 text-sm text-slate-500">{formatInvoiceField(item.description)}</p>
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <FieldBlock label="Quantity" value={String(item.quantity)} />
-                <FieldBlock label="Unit" value={formatInvoiceMoney(item.unitPrice, invoice.currency)} />
-                <FieldBlock label="Tax" value={formatInvoiceMoney(item.taxAmount, invoice.currency)} />
-                <FieldBlock label="Discount" value={formatInvoiceMoney(item.discountAmount, invoice.currency)} />
+                <FieldBlock
+                  label="Unit"
+                  value={formatInvoiceMoney(item.unitPrice, invoice.currency)}
+                />
+                <FieldBlock
+                  label="Tax"
+                  value={formatInvoiceMoney(item.taxAmount, invoice.currency)}
+                />
+                <FieldBlock
+                  label="Discount"
+                  value={formatInvoiceMoney(item.discountAmount, invoice.currency)}
+                />
                 <div className="col-span-2">
-                  <FieldBlock label="Line total" value={formatInvoiceMoney(item.lineTotal, invoice.currency)} />
+                  <FieldBlock
+                    label="Line total"
+                    value={formatInvoiceMoney(item.lineTotal, invoice.currency)}
+                  />
                 </div>
               </div>
             </div>
@@ -208,12 +239,27 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
 
       <section className="order-invoice-payment-grid grid gap-6 border-t border-slate-200 pt-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="order-invoice-payment-fields grid gap-4 sm:grid-cols-2">
-          <FieldBlock label="Payment status" value={formatInvoiceField(invoice.payment.paymentStatus)} />
-          <FieldBlock label="Payment method" value={formatInvoiceField(invoice.payment.paymentMethod)} />
-          <FieldBlock label="Transaction" value={formatInvoiceField(invoice.payment.paymentTransactionId)} />
-          <FieldBlock label="Payment intent" value={formatInvoiceField(invoice.payment.paymentIntentId)} />
+          <FieldBlock
+            label="Payment status"
+            value={formatInvoiceField(invoice.payment.paymentStatus)}
+          />
+          <FieldBlock
+            label="Payment method"
+            value={formatInvoiceField(invoice.payment.paymentMethod)}
+          />
+          <FieldBlock
+            label="Transaction"
+            value={formatInvoiceField(invoice.payment.paymentTransactionId)}
+          />
+          <FieldBlock
+            label="Payment intent"
+            value={formatInvoiceField(invoice.payment.paymentIntentId)}
+          />
           <FieldBlock label="Wallet tx hash" value={formatInvoiceField(invoice.payment.txHash)} />
-          <FieldBlock label="On-chain order" value={formatInvoiceField(invoice.payment.onChainOrderId)} />
+          <FieldBlock
+            label="On-chain order"
+            value={formatInvoiceField(invoice.payment.onChainOrderId)}
+          />
         </div>
 
         <div className="space-y-3 rounded-[16px] border border-slate-200 bg-slate-50 p-4">

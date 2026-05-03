@@ -32,6 +32,10 @@ interface MarqueeProps extends ComponentPropsWithoutRef<'div'> {
   repeat?: number
 }
 
+/**
+ * Marquee - React component
+ * @returns React element
+ */
 export default function Marquee({
   className,
   reverse = false,
@@ -45,7 +49,7 @@ export default function Marquee({
     <div
       {...props}
       className={cn(
-        'group flex [gap:var(--gap)] overflow-hidden p-2 [--duration:40s] [--gap:1rem]',
+        'group flex overflow-hidden p-2 [--duration:40s] [--gap:1rem] [gap:var(--gap)]',
         {
           'flex-row': !vertical,
           'flex-col': vertical,

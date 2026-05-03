@@ -11,15 +11,17 @@ type UploadArtworkMenuProps = {
   triggerLabel?: string
 }
 
-export const UploadArtworkMenu = ({
-  triggerLabel = 'Upload Artwork',
-}: UploadArtworkMenuProps) => {
+/**
+ * UploadArtworkMenu - React component
+ * @returns React element
+ */
+export const UploadArtworkMenu = ({ triggerLabel = 'Upload Artwork' }: UploadArtworkMenuProps) => {
   return (
     <Button
       asChild
       variant="default"
       size="lg"
-      className="bg-primary hover:bg-primary/90 gap-2 font-bold text-white"
+      className="gap-2 bg-primary font-bold text-white hover:bg-primary/90"
     >
       <Link href="/artworks/upload">
         <Upload className="h-4 w-4" />

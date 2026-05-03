@@ -14,6 +14,10 @@ type InventoryFolderGridProps = {
   onHide: (folder: InventoryFolder) => void
 }
 
+/**
+ * InventoryFolderGrid - React component
+ * @returns React element
+ */
 export const InventoryFolderGrid = ({
   folders,
   onRename,
@@ -23,7 +27,7 @@ export const InventoryFolderGrid = ({
   // -- render --
   return (
     <SortableContext items={folders.map((f) => f.id)} strategy={rectSortingStrategy}>
-      <div className="mt-4 mb-4 grid grid-cols-2 gap-4 lg:grid-cols-5">
+      <div className="mb-4 mt-4 grid grid-cols-2 gap-4 lg:grid-cols-5">
         {folders.map((folder) => (
           <SortableFolderItem
             key={folder.id}

@@ -1,3 +1,7 @@
+/**
+ * UPLOAD_TAG_OPTIONS - React component
+ * @returns React element
+ */
 export const UPLOAD_TAG_OPTIONS = {
   vibes: [
     'Joyful',

@@ -27,6 +27,10 @@ type ProfileMoodboardsPageViewProps = {
   username?: string | string[]
 }
 
+/**
+ * ProfileMoodboardsPageView - React component
+ * @returns React element
+ */
 export const ProfileMoodboardsPageView = ({
   username: _username,
 }: ProfileMoodboardsPageViewProps) => {
@@ -36,8 +40,19 @@ export const ProfileMoodboardsPageView = ({
   const [moodboardSuccess, setMoodboardSuccess] = useState<string | null>(null)
   const [createdMoodboards, setCreatedMoodboards] = useState<ProfileMoodboard[]>([])
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, user: fetchedUser, isOwner, isLoading, error, resolvedUsername } = useProfileOverview({
+  const {
+    data: baseData,
+    user: fetchedUser,
+    isOwner,
+    isLoading,
+    error,
+    resolvedUsername,
+  } = useProfileOverview({
     username: usernameFromRoute,
+    /**
+     * usernameFromRoute - Custom React hook
+     * @returns void
+     */
   })
   const profileData = useProfileDraftData(baseData)
   const authUser = useAuthStore((state) => state.user)
@@ -45,26 +60,50 @@ export const ProfileMoodboardsPageView = ({
   const profileHandle = resolvedUsername || profileData?.user.username || usernameFromRoute || ''
   const canRenderProfile = !isLoading && !error && Boolean(profileData)
   const moodboards = useMemo(
+    /**
+     * profileData - Utility function
+     * @returns void
+     */
     () => [...createdMoodboards, ...(profileData?.moodboards ?? [])],
     [createdMoodboards, profileData?.moodboards],
   )
   const pageTitle = profileData
-    ? `${profileData.user.displayName} (@${resolvedUsername}) | Moodboards`
+    ? /**
+       * authUser - Utility function
+       * @returns void
+       */
+      `${profileData.user.displayName} (@${resolvedUsername}) | Moodboards`
     : 'Profile Moodboards | Artium'
   const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}` : ''
   const tabHrefs = profileHandle
-    ? {
+    ? /**
+       * isAuthenticated - Utility function
+       * @returns void
+       */
+      {
         overview: baseHref,
         artworks: `${baseHref}/artworks`,
         moments: `${baseHref}/moments`,
+        /**
+         * profileHandle - Utility function
+         * @returns void
+         */
         moodboards: `${baseHref}/moodboards`,
       }
     : undefined
 
+  /**
+   * canRenderProfile - Utility function
+   * @returns void
+   */
   const handleCreateMoodboard = async (input: CreateMoodboardInput) => {
     if (!isAuthenticated || moodboardSubmitting || !profileData) return
 
     setMoodboardSubmitting(true)
+    /**
+     * moodboards - Utility function
+     * @returns void
+     */
     setMoodboardError(null)
     setMoodboardSuccess(null)
 
@@ -72,16 +111,28 @@ export const ProfileMoodboardsPageView = ({
       const created = await profileApis.createMoodboard(input)
       setCreatedMoodboards((prev) => [
         mapMoodboardToProfileMoodboard(created, profileData.user),
+        /**
+         * pageTitle - Utility function
+         * @returns void
+         */
         ...prev,
       ])
       setMoodboardSuccess('Moodboard created.')
       setIsMoodboardDialogOpen(false)
     } catch (err) {
       setMoodboardError(err instanceof Error ? err.message : 'Failed to create moodboard.')
+      /**
+       * baseHref - Utility function
+       * @returns void
+       */
     } finally {
       setMoodboardSubmitting(false)
     }
   }
+  /**
+   * tabHrefs - Utility function
+   * @returns void
+   */
 
   return (
     <>
@@ -95,6 +146,10 @@ export const ProfileMoodboardsPageView = ({
               {error ?? 'Profile not found.'}
             </div>
           ) : (
+            /**
+             * handleCreateMoodboard - Utility function
+             * @returns void
+             */
             <ProfileHero
               user={profileData.user}
               stats={profileData.stats}
@@ -105,6 +160,7 @@ export const ProfileMoodboardsPageView = ({
         </div>
         {isLoading ? (
           <div className="container">
+            /** * created - Utility function * @returns void */
             <ProfileTabsSkeleton />
           </div>
         ) : canRenderProfile && profileData ? (
@@ -120,7 +176,7 @@ export const ProfileMoodboardsPageView = ({
           <div className="container py-6">
             <div className="mb-6 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
+                <h2 className="text-[20px] font-semibold leading-[1.2] text-kokushoku-black lg:text-[28px]">
                   Moodboards
                 </h2>
                 <p className="text-sm text-slate-500">All moodboards by this artist</p>

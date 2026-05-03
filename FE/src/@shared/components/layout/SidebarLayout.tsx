@@ -7,6 +7,10 @@ interface SidebarLayoutProps {
   hideFooter?: boolean
 }
 
+/**
+ * SidebarLayout - React component
+ * @returns React element
+ */
 export const SidebarLayout = ({ children, hideFooter = false }: SidebarLayoutProps) => {
   return (
     <div className="relative">

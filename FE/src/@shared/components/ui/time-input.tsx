@@ -9,6 +9,10 @@ export type TimeInputProps = {
   onChange: (newValue: any) => void
   hourCycle?: 24 | 12
 }
+/**
+ * TimeInput - React component
+ * @returns React element
+ */
 const TimeInput = ({
   className,
   value,
@@ -33,14 +37,14 @@ const TimeInput = ({
       {/* input */}
       <DateInput
         className={cn(
-          'border-input bg-background relative inline-flex h-[44px] w-full items-center overflow-hidden rounded-lg border px-3 py-2 ps-9 text-sm whitespace-nowrap shadow-sm shadow-black/5 transition-shadow data-[disabled]:opacity-50 data-[focus-within]:border-[#0F6BFF]',
+          'relative inline-flex h-[44px] w-full items-center overflow-hidden whitespace-nowrap rounded-lg border border-input bg-background px-3 py-2 ps-9 text-sm shadow-sm shadow-black/5 transition-shadow data-[focus-within]:border-[#0F6BFF] data-[disabled]:opacity-50',
           inputClassName,
         )}
       >
         {(segment) => (
           <DateSegment
             segment={segment}
-            className="data-[placeholder]:text-muted-foreground/70 data-[type=literal]:text-muted-foreground/70 text-foreground data-[focused]:bg-accent data-[invalid]:data-[focused]:bg-destructive data-[focused]:data-[placeholder]:text-foreground data-[focused]:text-foreground data-[invalid]:data-[focused]:data-[placeholder]:text-destructive-foreground data-[invalid]:data-[focused]:text-destructive-foreground data-[invalid]:data-[placeholder]:text-destructive data-[invalid]:text-destructive inline rounded p-0.5 caret-transparent outline outline-0 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[type=literal]:px-0"
+            className="data-[placeholder]:text-muted-foreground/70 data-[type=literal]:text-muted-foreground/70 inline rounded p-0.5 text-foreground caret-transparent outline outline-0 data-[disabled]:cursor-not-allowed data-[focused]:bg-accent data-[invalid]:data-[focused]:bg-destructive data-[type=literal]:px-0 data-[focused]:data-[placeholder]:text-foreground data-[focused]:text-foreground data-[invalid]:data-[focused]:data-[placeholder]:text-destructive-foreground data-[invalid]:data-[focused]:text-destructive-foreground data-[invalid]:data-[placeholder]:text-destructive data-[invalid]:text-destructive data-[disabled]:opacity-50"
           />
         )}
       </DateInput>

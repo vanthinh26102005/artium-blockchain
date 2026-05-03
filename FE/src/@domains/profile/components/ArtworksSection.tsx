@@ -19,6 +19,10 @@ type ArtworksSectionProps = {
   isOwner?: boolean
 }
 
+/**
+ * ArtworksSection - React component
+ * @returns React element
+ */
 export const ArtworksSection = ({
   artworks,
   title = 'Artworks',
@@ -32,10 +36,14 @@ export const ArtworksSection = ({
   const visibleArtworks = limit ? artworks.slice(0, limit) : artworks
 
   return (
+    /**
+     * visibleArtworks - Utility function
+     * @returns void
+     */
     <section className={cn(className)}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
+          <h3 className="text-[20px] font-semibold leading-[1.2] text-kokushoku-black lg:text-[28px]">
             {title}
           </h3>
           <p className="text-sm text-slate-500">{subtitle}</p>
@@ -65,18 +73,31 @@ export const ArtworksSection = ({
           const buttonHref = isOwner
             ? `/inventory/artworks/${artwork.id}/edit`
             : `/artworks/${artwork.id}`
+          /**
+           * isSold - Utility function
+           * @returns void
+           */
 
           return (
             <div
               key={artwork.id}
+              /**
+               * showBuyButton - Utility function
+               * @returns void
+               */
               className="group flex w-[260px] shrink-0 flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
             >
               <Link
                 href={`/artworks/${artwork.id}`}
+                /**
+                 * buttonLabel - Utility function
+                 * @returns void
+                 */
                 aria-label={`View artwork ${artwork.title}`}
-                className="relative block h-[320px] w-full overflow-hidden rounded-t-xl bg-slate-100 transition-colors group-hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 focus-visible:outline-none"
+                className="relative block h-[320px] w-full overflow-hidden rounded-t-xl bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 group-hover:bg-slate-200"
               >
                 <div className="absolute inset-0 p-6">
+                  /** * buttonHref - Utility function * @returns void */
                   <div className="relative h-full w-full">
                     <Image
                       src={artwork.coverUrl}
@@ -90,15 +111,12 @@ export const ArtworksSection = ({
                 </div>
                 <span
                   className={cn(
-                    'absolute top-3 right-3 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold shadow',
+                    'absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold shadow',
                     isSold ? 'bg-red-50 text-red-600' : 'bg-white/90 text-slate-900',
                   )}
                 >
                   <span
-                    className={cn(
-                      'h-2 w-2 rounded-full',
-                      isSold ? 'bg-red-500' : 'bg-blue-500',
-                    )}
+                    className={cn('h-2 w-2 rounded-full', isSold ? 'bg-red-500' : 'bg-blue-500')}
                   />
                   <span className="leading-none">{isSold ? 'SOLD' : artwork.priceLabel}</span>
                 </span>
@@ -108,7 +126,7 @@ export const ArtworksSection = ({
                   <h4 className="font-semibold text-slate-900">
                     <Link
                       href={`/artworks/${artwork.id}`}
-                      className="block cursor-pointer truncate transition-colors hover:text-slate-950 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 focus-visible:outline-none"
+                      className="block cursor-pointer truncate transition-colors hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2"
                     >
                       {artwork.title}
                     </Link>
@@ -123,7 +141,7 @@ export const ArtworksSection = ({
                   <Link
                     href={buttonHref}
                     className={cn(
-                      'block w-full cursor-pointer rounded-full border px-3 py-2 text-center text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                      'block w-full cursor-pointer rounded-full border px-3 py-2 text-center text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                       showBuyButton
                         ? 'border-blue-600 bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500/40'
                         : 'border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50 focus-visible:ring-slate-300/70',

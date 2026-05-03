@@ -19,6 +19,10 @@ type UseResetPasswordResult = {
   error: string | null
 }
 
+/**
+ * useResetPassword - Custom React hook
+ * @returns void
+ */
 export const useResetPassword = (): UseResetPasswordResult => {
   // -- state --
   const [isVerifying, setIsVerifying] = useState(false)
@@ -29,6 +33,10 @@ export const useResetPassword = (): UseResetPasswordResult => {
   const verifyReset = useCallback(async (payload: VerifyPasswordResetPayload) => {
     setError(null)
     setIsVerifying(true)
+    /**
+     * verifyReset - Utility function
+     * @returns void
+     */
 
     try {
       return await usersApi.verifyPasswordReset(payload)
@@ -39,6 +47,10 @@ export const useResetPassword = (): UseResetPasswordResult => {
     } finally {
       setIsVerifying(false)
     }
+    /**
+     * message - Utility function
+     * @returns void
+     */
   }, [])
 
   const confirmReset = useCallback(async (payload: ConfirmPasswordResetPayload) => {
@@ -50,6 +62,10 @@ export const useResetPassword = (): UseResetPasswordResult => {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Reset failed.'
       setError(message)
+      /**
+       * confirmReset - Utility function
+       * @returns void
+       */
       throw error
     } finally {
       setIsConfirming(false)
@@ -60,6 +76,10 @@ export const useResetPassword = (): UseResetPasswordResult => {
     verifyReset,
     confirmReset,
     isLoading: isVerifying || isConfirming,
+    /**
+     * message - Utility function
+     * @returns void
+     */
     error,
   }
 }

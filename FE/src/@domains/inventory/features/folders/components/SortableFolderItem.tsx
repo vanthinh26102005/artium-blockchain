@@ -18,24 +18,28 @@ type SortableFolderItemProps = {
   onHide: (folder: InventoryFolder) => void
 }
 
+/**
+ * SortableFolderItem - React component
+ * @returns React element
+ */
 export const SortableFolderItem = ({
   folder,
   onRename,
   onDelete,
   onHide,
 }: SortableFolderItemProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: folder.id, data: { type: 'Folder', folder } })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: folder.id,
+    data: { type: 'Folder', folder },
+  })
 
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
+    /**
+     * style - Utility function
+     * @returns void
+     */
     opacity: isDragging ? 0.4 : 1,
     zIndex: isDragging ? 999 : undefined,
     position: 'relative',

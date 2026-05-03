@@ -39,11 +39,19 @@ import { useArtworkActions } from '@domains/inventory/features/artworks/hooks/us
 
 type FolderWithCount = InventoryFolder & { itemCount: number }
 
+/**
+ * InventoryFolderPage - React component
+ * @returns React element
+ */
 export const InventoryFolderPage = () => {
   // -- state --
   const router = useRouter()
   const [searchName, setSearchName] = useState('')
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  /**
+   * router - Utility function
+   * @returns void
+   */
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [filters, setFilters] = useState<InventoryFilters>(DEFAULT_INVENTORY_FILTERS)
 
@@ -53,26 +61,50 @@ export const InventoryFolderPage = () => {
   const folders = useInventoryDataStore((state) => state.folders)
   const selectedIds = useInventorySelectionStore((state) => state.selectedIds)
   const setMany = useInventorySelectionStore((state) => state.setMany)
+  /**
+   * viewMode - Utility function
+   * @returns void
+   */
   const { error: bootstrapError } = useInventoryBootstrap({
     includeArtworks: false,
   })
 
+  /**
+   * setViewMode - Utility function
+   * @returns void
+   */
   // -- derived --
   const folderId = typeof router.query.folderId === 'string' ? router.query.folderId : ''
   const activeFolder = folders.find((folder) => folder.id === folderId)
   const folderName = activeFolder?.name ?? 'Folder'
+  /**
+   * user - Custom React hook
+   * @returns void
+   */
 
   const {
     folderArtworks,
     setFolderArtworks,
+    /**
+     * folders - Utility function
+     * @returns void
+     */
     isFetching,
-    fetchError
+    fetchError,
   } = useInventoryFolderArtworks(folderId, user?.id, setMany)
 
+  /**
+   * selectedIds - Utility function
+   * @returns void
+   */
   const artworkActions = useArtworkActions({
     user,
     selectedIds,
     setMany,
+    /**
+     * setMany - Utility function
+     * @returns void
+     */
     setToastMessage,
     onArtworkUpdated: (artwork) => {
       setFolderArtworks((items) => items.map((item) => (item.id === artwork.id ? artwork : item)))
@@ -82,14 +114,26 @@ export const InventoryFolderPage = () => {
     },
     onArtworkMoved: (id, targetFolderId) => {
       if (targetFolderId !== folderId) {
+        /**
+         * folderId - Utility function
+         * @returns void
+         */
         setFolderArtworks((items) => items.filter((item) => item.id !== id))
       }
     },
     artworks: folderArtworks,
+    /**
+     * activeFolder - Utility function
+     * @returns void
+     */
   })
 
   const folderCount = useMemo<FolderWithCount>(() => {
     return {
+      /**
+       * folderName - Utility function
+       * @returns void
+       */
       id: folderId,
       name: folderName,
       description: activeFolder?.description,
@@ -102,6 +146,10 @@ export const InventoryFolderPage = () => {
 
   const filteredArtworks = useMemo(() => {
     let results = folderArtworks
+    /**
+     * artworkActions - Utility function
+     * @returns void
+     */
 
     if (normalizedSearchName) {
       results = results.filter(
@@ -124,6 +172,10 @@ export const InventoryFolderPage = () => {
     }
     return results
   }, [filters, folderArtworks, normalizedSearchName])
+  /**
+   * folderCount - Utility function
+   * @returns void
+   */
 
   const {
     page,
@@ -136,15 +188,27 @@ export const InventoryFolderPage = () => {
     setPageSize,
   } = useInventoryPagination(filteredArtworks, 20, 1)
 
+  /**
+   * debouncedSearchName - Utility function
+   * @returns void
+   */
   const isLoading = isFetching || isPaging
 
   const idsOnPage = useMemo(() => pageItems.map((artwork) => artwork.id), [pageItems])
 
+  /**
+   * normalizedSearchName - Utility function
+   * @returns void
+   */
   // -- handlers --
   const handleSearchChange = (value: string) => {
     setSearchName(value)
   }
 
+  /**
+   * filteredArtworks - Utility function
+   * @returns void
+   */
   const handleApplyFilters = (nextFilters: InventoryFilters) => {
     setFilters(nextFilters)
   }
@@ -184,17 +248,29 @@ export const InventoryFolderPage = () => {
     }, 2400)
 
     return () => window.clearTimeout(timeout)
+    /**
+     * isLoading - Utility function
+     * @returns void
+     */
   }, [toastMessage])
 
   useEffect(() => {
     if (bootstrapError) {
       setToastMessage(bootstrapError)
+      /**
+       * idsOnPage - Utility function
+       * @returns void
+       */
     }
   }, [bootstrapError])
 
   useEffect(() => {
     if (fetchError) {
       setToastMessage(fetchError)
+      /**
+       * handleSearchChange - Utility function
+       * @returns void
+       */
     }
   }, [fetchError])
 
@@ -202,13 +278,14 @@ export const InventoryFolderPage = () => {
   return (
     <>
       <Metadata title={`Inventory | ${folderName}`} />
-
+      /** * handleApplyFilters - Utility function * @returns void */
       <div className="-mx-6 -my-4 min-h-screen sm:-mx-8 lg:-mx-12">
         <div className="mx-4 rounded-3xl border border-black/10 bg-white shadow-sm sm:mx-6 lg:mx-8">
           {/* header */}
           <div className="border-b border-black/10 bg-white px-6 py-5">
             <Button variant="outline" size="lg" asChild>
               <Link href="/inventory">
+                /** * handleViewModeChange - Utility function * @returns void */
                 <ArrowLeft className="h-4 w-4" />
                 Back to Inventory
               </Link>
@@ -216,13 +293,17 @@ export const InventoryFolderPage = () => {
             <div className="mt-4">
               <p className="text-sm text-slate-500">Inventory / {folderName}</p>
               <h1 className="mt-1 text-2xl font-semibold text-slate-900">{folderName}</h1>
+              /** * handleOpenExportModal - Utility function * @returns void */
               <p className="mt-1 text-sm text-[#898788]">{folderCount.itemCount} items</p>
             </div>
           </div>
-
           {/* toolbar */}
           <div className="sticky top-20 z-40 border-b border-black/10 bg-white px-6 py-4">
             <InventoryToolbar
+              /**
+               * handleCloseExportModal - Utility function
+               * @returns void
+               */
               searchName={searchName}
               onSearchChange={handleSearchChange}
               viewMode={viewMode}
@@ -230,13 +311,17 @@ export const InventoryFolderPage = () => {
               filteredCount={filteredArtworks.length}
               totalCount={folderArtworks.length}
               idsOnPage={idsOnPage}
+              /**
+               * handlePageChange - Utility function
+               * @returns void
+               */
               onMoveSelected={artworkActions.handleMoveSelected}
               onOpenExport={handleOpenExportModal}
               filters={filters}
               onApplyFilters={handleApplyFilters}
             />
           </div>
-
+          /** * handlePageSizeChange - Utility function * @returns void */
           {/* content */}
           <div className="px-6 pb-6">
             {isLoading ? (
@@ -254,6 +339,10 @@ export const InventoryFolderPage = () => {
                 onStartAuction={artworkActions.handleStartAuction}
               />
             ) : (
+              /**
+               * timeout - Utility function
+               * @returns void
+               */
               <InventoryArtworkList
                 artworks={pageItems}
                 forceFlatList
@@ -279,7 +368,6 @@ export const InventoryFolderPage = () => {
           </div>
         </div>
       </div>
-
       {/* modals */}
       <InventoryArtworkDetailsPanel
         isOpen={Boolean(artworkActions.detailsTarget)}

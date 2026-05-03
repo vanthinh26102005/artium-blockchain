@@ -1,21 +1,20 @@
 // @shared - components
-import { Button } from "@shared/components/ui/button";
-import {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogPrimitive,
-} from "@shared/components/ui/dialog";
-import { X } from "lucide-react";
+import { Button } from '@shared/components/ui/button'
+import { Dialog, DialogPortal, DialogOverlay, DialogPrimitive } from '@shared/components/ui/dialog'
+import { X } from 'lucide-react'
 
 type DeleteEventModalProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
-  onCancel?: () => void;
-  eventTitle?: string;
-};
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: () => void
+  onCancel?: () => void
+  eventTitle?: string
+}
 
+/**
+ * DeleteEventModal - React component
+ * @returns React element
+ */
 export const DeleteEventModal = ({
   open,
   onOpenChange,
@@ -32,7 +31,7 @@ export const DeleteEventModal = ({
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           {/* Header with Title and Close Button */}
-          <div className="flex items-start justify-between px-6 pt-5 pb-0">
+          <div className="flex items-start justify-between px-6 pb-0 pt-5">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900">
               Delete this event?
             </h2>
@@ -46,11 +45,11 @@ export const DeleteEventModal = ({
           </div>
 
           {/* Description */}
-          <div className="px-6 pt-4 pb-6">
+          <div className="px-6 pb-6 pt-4">
             <p className="text-sm leading-relaxed text-slate-600">
               This action is permanent and will remove
-              {eventTitle ? ` "${eventTitle}"` : " the event"} from your
-              dashboard. Anyone you've invited will no longer have access.
+              {eventTitle ? ` "${eventTitle}"` : ' the event'} from your dashboard. Anyone you've
+              invited will no longer have access.
             </p>
           </div>
 
@@ -61,8 +60,8 @@ export const DeleteEventModal = ({
               variant="ghost"
               className="h-12 rounded-none text-sm font-medium text-slate-800 hover:bg-slate-50"
               onClick={() => {
-                onCancel?.();
-                onOpenChange(false);
+                onCancel?.()
+                onOpenChange(false)
               }}
             >
               Cancel
@@ -72,8 +71,8 @@ export const DeleteEventModal = ({
               variant="ghost"
               className="h-12 rounded-none border-l border-slate-200 text-sm font-medium text-rose-600 hover:bg-rose-50 hover:text-rose-700"
               onClick={() => {
-                onConfirm();
-                onOpenChange(false);
+                onConfirm()
+                onOpenChange(false)
               }}
             >
               Delete Event
@@ -82,5 +81,5 @@ export const DeleteEventModal = ({
         </DialogPrimitive.Content>
       </DialogPortal>
     </Dialog>
-  );
-};
+  )
+}

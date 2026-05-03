@@ -21,11 +21,19 @@ type InventoryArtworkListViewItemProps = {
   onStartAuction: (artwork: InventoryArtwork) => void
 }
 
+/**
+ * DIMENSIONS_PLACEHOLDER - React component
+ * @returns React element
+ */
 const DIMENSIONS_PLACEHOLDER = '36 × 24 × 1.9 in'
 
 export const InventoryArtworkListViewItem = ({
   artwork,
   onEdit,
+  /**
+   * InventoryArtworkListViewItem - React component
+   * @returns React element
+   */
   onDelete,
   onMove,
   onOpenDetails,
@@ -39,43 +47,73 @@ export const InventoryArtworkListViewItem = ({
   // -- derived --
   const isSelected = selectedIds.includes(artwork.id)
   const priceLabel =
+    /**
+     * selectedIds - Utility function
+     * @returns void
+     */
     typeof artwork.price === 'number' ? `US$${artwork.price.toLocaleString('en-US')}` : ''
   const subtitleParts = [priceLabel, artwork.creatorName].filter(Boolean)
   const subtitleLabel = subtitleParts.join(' • ')
   const visibilityLabel = artwork.status === 'Hidden' ? 'Hidden in profile' : 'Draft'
+  /**
+   * toggle - Utility function
+   * @returns void
+   */
   const hasAuctionDraft = useSellerAuctionTermsDraftStatus(artwork.id)
 
   // -- handlers --
   const handleToggleSelection = () => {
     toggle(artwork.id)
   }
+  /**
+   * isSelected - Utility function
+   * @returns void
+   */
 
   const handleOpenDetails = () => {
     onOpenDetails(artwork)
   }
+  /**
+   * priceLabel - Utility function
+   * @returns void
+   */
 
   // -- render --
   return (
     <div
       className={`cursor-pointer rounded-2xl border border-black/10 bg-white px-4 py-4 ${
+        /**
+         * subtitleParts - Utility function
+         * @returns void
+         */
         isSelected ? 'ring-1 ring-blue-200' : ''
       }`}
       onClick={handleOpenDetails}
     >
+      /** * subtitleLabel - Utility function * @returns void */
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3">
           <Checkbox
             checked={isSelected}
+            /**
+             * visibilityLabel - Utility function
+             * @returns void
+             */
             onCheckedChange={handleToggleSelection}
             aria-label={`Select ${artwork.title}`}
             className="mt-1 border-black/30 bg-white data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
           />
+          /** * hasAuctionDraft - Utility function * @returns void */
           <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-[#F5F5F5]">
             <img
               src={artwork.thumbnailUrl}
               alt={artwork.title}
               loading="lazy"
               className="h-full w-full object-cover"
+              /**
+               * handleToggleSelection - Utility function
+               * @returns void
+               */
             />
           </div>
           <div className="min-w-0">
@@ -83,13 +121,14 @@ export const InventoryArtworkListViewItem = ({
             {subtitleLabel ? (
               <p className="truncate text-base text-slate-500">{subtitleLabel}</p>
             ) : null}
+            /** * handleOpenDetails - Utility function * @returns void */
           </div>
         </div>
         <div className="flex items-center gap-3">
           {hasAuctionDraft ? <SellerAuctionDraftBadge /> : null}
           <div className="flex items-center gap-2">
             {artwork.status === 'Hidden' && <EyeOff className="h-4 w-4 text-slate-400" />}
-            <span className="text-sm font-semibold text-slate-500 uppercase">
+            <span className="text-sm font-semibold uppercase text-slate-500">
               {visibilityLabel}
             </span>
           </div>
@@ -106,8 +145,7 @@ export const InventoryArtworkListViewItem = ({
           />
         </div>
       </div>
-
-      <div className="mt-3 ml-[2rem] flex items-start gap-8 text-base">
+      <div className="ml-[2rem] mt-3 flex items-start gap-8 text-base">
         <div className="flex min-w-0 flex-1 gap-8">
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <div className="flex items-center justify-between gap-4">

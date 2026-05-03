@@ -12,29 +12,37 @@ import type { NextPageWithLayout } from '@shared/types/next'
 import { useRequireAuth } from '@domains/auth/hooks/useRequireAuth'
 
 // @domains - quick-sell (dynamic import)
+/**
+ * QuickSellInvoicesListView - React component
+ * @returns React element
+ */
 const QuickSellInvoicesListView = dynamic(
-    () =>
-        import('@domains/quick-sell/views/QuickSellInvoicesListView').then(
-            (module) => module.QuickSellInvoicesListView,
-        ),
-    { ssr: false },
+  () =>
+    import('@domains/quick-sell/views/QuickSellInvoicesListView').then(
+      (module) => module.QuickSellInvoicesListView,
+    ),
+  { ssr: false },
 )
 
 const InvoicesIndexPage: NextPageWithLayout = () => {
-    // -- auth --
-    const { canRenderProtected } = useRequireAuth()
+  // -- auth --
+  const { canRenderProtected } = useRequireAuth()
+  /**
+   * InvoicesIndexPage - React component
+   * @returns React element
+   */
 
-    // -- render --
-    if (!canRenderProtected) {
-        return null
-    }
+  // -- render --
+  if (!canRenderProtected) {
+    return null
+  }
 
-    return (
-        <>
-            <Metadata title="Invoices | Artium" description="Manage your art sales invoices." />
-            <QuickSellInvoicesListView />
-        </>
-    )
+  return (
+    <>
+      <Metadata title="Invoices | Artium" description="Manage your art sales invoices." />
+      <QuickSellInvoicesListView />
+    </>
+  )
 }
 
 InvoicesIndexPage.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>

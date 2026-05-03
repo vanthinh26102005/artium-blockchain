@@ -5,6 +5,10 @@ interface MetadataProps {
   description?: string
 }
 
+/**
+ * Metadata - React component
+ * @returns React element
+ */
 export const Metadata = ({ title, description }: MetadataProps) => {
   return (
     <Head>

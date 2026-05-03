@@ -30,14 +30,26 @@ export type ToastApi = {
   dismiss: (id: string) => void
 }
 
+/**
+ * ToastContext - React component
+ * @returns React element
+ */
 export const ToastContext = createContext<ToastApi | null>(null)
 
 export const useToast = () => {
   const toast = useContext(ToastContext)
 
+  /**
+   * useToast - Custom React hook
+   * @returns void
+   */
   if (!toast) {
     throw new Error('useToast must be used within ToastProvider.')
   }
 
+  /**
+   * toast - Utility function
+   * @returns void
+   */
   return toast
 }

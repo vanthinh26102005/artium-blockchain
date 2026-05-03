@@ -13,6 +13,10 @@ import { QuickSellCustomItemRow } from './QuickSellCustomItemRow'
 import { createArtworkLineItem, createCustomLineItem } from '../../types/quickSellDraft'
 import type { QuickSellInvoiceFormValues } from '../../validations/quickSellInvoice.schema'
 
+/**
+ * QuickSellInvoiceForm - React component
+ * @returns React element
+ */
 export const QuickSellInvoiceForm = () => {
   const [isArtworkPickerOpen, setIsArtworkPickerOpen] = useState(false)
   const {
@@ -29,15 +33,27 @@ export const QuickSellInvoiceForm = () => {
   const buyerMessage = useWatch({ control, name: 'buyer.message' }) ?? ''
   const isApplySalesTax = useWatch({ control, name: 'isApplySalesTax' }) ?? false
 
+  /**
+   * buyerMessage - Utility function
+   * @returns void
+   */
   const handleAddCustomItem = useCallback(() => {
     append(createCustomLineItem())
   }, [append])
 
+  /**
+   * isApplySalesTax - Utility function
+   * @returns void
+   */
   const handleSelectArtwork = useCallback(
     (artwork: QuickSellArtworkOption) => {
       append(
         createArtworkLineItem({
           id: artwork.id,
+          /**
+           * handleAddCustomItem - Utility function
+           * @returns void
+           */
           name: artwork.name,
           imageUrl: artwork.imageUrl,
           artistName: artwork.artistName,
@@ -45,6 +61,10 @@ export const QuickSellInvoiceForm = () => {
           dimensions: artwork.dimensions,
           materials: artwork.materials,
           price: artwork.price,
+          /**
+           * handleSelectArtwork - Utility function
+           * @returns void
+           */
         }),
       )
     },
@@ -53,8 +73,7 @@ export const QuickSellInvoiceForm = () => {
 
   const sectionTitleClass =
     'mb-2 text-[13px] font-extrabold uppercase tracking-widest text-[#191414]'
-  const labelClass =
-    'mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-[#191414]'
+  const labelClass = 'mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-[#191414]'
   const inputClass =
     'h-[44px] rounded border-[#E5E5E5] bg-white px-4 text-[14px] text-[#191414] placeholder:text-[#989898] focus:border-black focus:ring-0'
   const messageClass = 'mt-1 text-xs text-red-500'
@@ -65,26 +84,42 @@ export const QuickSellInvoiceForm = () => {
       <div>
         <h2 className={sectionTitleClass}>BUYER INFORMATION</h2>
         <p className="mb-6 text-[13px] text-[#595959]">
-          Enter the buyer details if available. You can update or complete these details anytime
-          before sending the invoice.
+          Enter the buyer details if available. You can update or complete these details anytime /**
+          * sectionTitleClass - Utility function * @returns void */ before sending the invoice.
         </p>
 
         <div className="space-y-5">
           <BaseInputField
+            /**
+             * labelClass - Utility function
+             * @returns void
+             */
             id="buyer-name"
             type="text"
             label="FULL NAME"
             {...register('buyer.name')}
             containerClassName="space-y-1.5"
+            /**
+             * inputClass - Utility function
+             * @returns void
+             */
             labelClassName={labelClass}
             inputClassName={inputClass}
           />
 
           <BaseInputField
+            /**
+             * messageClass - Utility function
+             * @returns void
+             */
             id="buyer-email"
             type="email"
             label="EMAIL ADDRESS"
             {...register('buyer.email')}
+            /**
+             * helperClass - Utility function
+             * @returns void
+             */
             errorMessage={errors.buyer?.email?.message}
             containerClassName="space-y-1.5"
             labelClassName={labelClass}
@@ -134,17 +169,9 @@ export const QuickSellInvoiceForm = () => {
           <div className="mb-6 space-y-4">
             {fields.map((field, index) =>
               field.type === 'artwork' ? (
-                <QuickSellArtworkItemRow
-                  key={field.id}
-                  index={index}
-                  onRemove={remove}
-                />
+                <QuickSellArtworkItemRow key={field.id} index={index} onRemove={remove} />
               ) : (
-                <QuickSellCustomItemRow
-                  key={field.id}
-                  index={index}
-                  onRemove={remove}
-                />
+                <QuickSellCustomItemRow key={field.id} index={index} onRemove={remove} />
               ),
             )}
           </div>
@@ -233,12 +260,16 @@ export const QuickSellInvoiceForm = () => {
                       onChange={(event) => {
                         const rawValue = event.target.value
                         field.onChange(
-                          rawValue === '' ? undefined : Math.min(100, Math.max(0, parseFloat(rawValue) || 0)),
+                          rawValue === ''
+                            ? undefined
+                            : Math.min(100, Math.max(0, parseFloat(rawValue) || 0)),
                         )
                       }}
                       className={`${inputClass} w-full pr-8 ${errors.taxPercent ? 'border-red-500' : ''}`}
                     />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#989898]">%</div>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#989898]">
+                      %
+                    </div>
                   </div>
                 )}
               />
@@ -261,6 +292,7 @@ export const QuickSellInvoiceForm = () => {
           >
             {isApplySalesTax && <Check className="h-3 w-3 text-white" />}
           </button>
+          /** * rawValue - Utility function * @returns void */
           <div
             className="cursor-pointer text-[13px] text-[#191414]"
             onClick={() =>

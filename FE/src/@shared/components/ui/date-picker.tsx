@@ -13,6 +13,10 @@ import { dateFormat } from '@shared/utils/datetime'
 import { Calendar } from './calendar'
 import { Popover, PopoverContent, PopoverTrigger } from './popover'
 
+/**
+ * DatePicker - React component
+ * @returns React element
+ */
 export function DatePicker({
   className,
   mode = 'single',
@@ -31,6 +35,10 @@ export function DatePicker({
   const displayValue = useMemo(() => {
     if (!value) return value
 
+    /**
+     * displayValue - Utility function
+     * @returns void
+     */
     if (mode === 'single') return dateFormat(value, HUMAN_READABLE_DATE_FORMAT)
     if (mode === 'multiple')
       return _.map(_.take(value || [], 2), (date: Date) =>
@@ -52,6 +60,10 @@ export function DatePicker({
     if (mode === 'range') return 'Pick a range'
 
     throw new Error('Unhandled mode')
+    /**
+     * placeholder - Utility function
+     * @returns void
+     */
   }, [mode])
 
   return (
@@ -59,12 +71,12 @@ export function DatePicker({
       <PopoverTrigger asChild>
         <div
           className={cn(
-            'focus:ring-ring flex w-full items-center justify-between rounded-md border px-[15px] py-[11px] text-sm font-medium shadow-sm transition-colors focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+            'flex w-full items-center justify-between rounded-md border px-[15px] py-[11px] text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
             className,
           )}
         >
           <div className="flex items-center gap-2 truncate text-left">
-            <CalendarIcon className="text-muted-foreground h-4 w-4 shrink-0" />
+            <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
             {displayValue ? (
               <span className="truncate">{displayValue}</span>
             ) : (
@@ -74,7 +86,7 @@ export function DatePicker({
 
           {clearable && value && (
             <XIcon
-              className="text-muted-foreground hover:text-foreground ml-2 h-4 w-4 cursor-pointer"
+              className="ml-2 h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground"
               onClick={(e) => {
                 e.stopPropagation()
                 onChange(undefined)

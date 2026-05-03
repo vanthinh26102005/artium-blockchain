@@ -22,6 +22,10 @@ type InventoryArtworkGridViewItemProps = {
   onStartAuction: (artwork: InventoryArtwork) => void
 }
 
+/**
+ * STATUS_CONFIG - React component
+ * @returns React element
+ */
 const STATUS_CONFIG: Record<
   InventoryArtworkStatus,
   { icon: string; label: string; className: string }
@@ -41,6 +45,10 @@ const STATUS_CONFIG: Record<
 export const InventoryArtworkGridViewItem = ({
   artwork,
   onEdit,
+  /**
+   * InventoryArtworkGridViewItem - React component
+   * @returns React element
+   */
   onDelete,
   onMove,
   onOpenDetails,
@@ -54,39 +62,68 @@ export const InventoryArtworkGridViewItem = ({
   // -- derived --
   const statusConfig = STATUS_CONFIG[artwork.status] ?? STATUS_CONFIG.Hidden
   const hasAuctionDraft = useSellerAuctionTermsDraftStatus(artwork.id)
+  /**
+   * selectedIds - Utility function
+   * @returns void
+   */
   const priceLabel =
     typeof artwork.price === 'number' ? `US$${artwork.price.toLocaleString('en-US')}` : null
   const isSelected = selectedIds.includes(artwork.id)
   const visibilityLabel = artwork.status === 'Hidden' ? 'Hidden in profile' : 'Draft'
+  /**
+   * toggle - Utility function
+   * @returns void
+   */
 
   // -- handlers --
   const handleToggleSelection = () => {
     toggle(artwork.id)
   }
 
+  /**
+   * statusConfig - Utility function
+   * @returns void
+   */
   const handleOpenDetails = () => {
     onOpenDetails(artwork)
   }
 
+  /**
+   * hasAuctionDraft - Utility function
+   * @returns void
+   */
   // -- render --
   return (
     <article
       className={`group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-3xl border bg-white shadow-sm transition-all duration-200 hover:shadow-xl ${
+        /**
+         * priceLabel - Utility function
+         * @returns void
+         */
         isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-black/5'
       }`}
       onClick={handleToggleSelection}
     >
       {/* Selection & Actions Overlay */}
+      /** * isSelected - Utility function * @returns void */
       <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between p-4">
         <div
           className={`transition-opacity ${
             isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            /**
+             * visibilityLabel - Utility function
+             * @returns void
+             */
           }`}
         >
           <Checkbox
             checked={isSelected}
             onCheckedChange={handleToggleSelection}
             aria-label={`Select ${artwork.title}`}
+            /**
+             * handleToggleSelection - Utility function
+             * @returns void
+             */
             className="h-5 w-5 rounded border-2 border-white bg-white shadow-md data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
           />
         </div>
@@ -94,6 +131,10 @@ export const InventoryArtworkGridViewItem = ({
           {hasAuctionDraft ? <SellerAuctionDraftBadge /> : null}
           <div
             className={`transition-opacity ${
+              /**
+               * handleOpenDetails - Utility function
+               * @returns void
+               */
               isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}
           >
@@ -111,7 +152,6 @@ export const InventoryArtworkGridViewItem = ({
           </div>
         </div>
       </div>
-
       {/* Image Container */}
       <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100/50">
         <img
@@ -121,7 +161,6 @@ export const InventoryArtworkGridViewItem = ({
           className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
         />
       </div>
-
       {/* Info Container */}
       <div className="flex flex-col gap-3 p-4">
         {/* User Info */}
@@ -136,7 +175,7 @@ export const InventoryArtworkGridViewItem = ({
         </div>
 
         {/* Title */}
-        <h3 className="line-clamp-2 text-lg leading-snug font-semibold text-slate-900">
+        <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-slate-900">
           {artwork.title}
         </h3>
 
@@ -155,10 +194,14 @@ export const InventoryArtworkGridViewItem = ({
                 : 'bg-amber-50 text-amber-700'
             }`}
           >
-            <span className={`text-base leading-none ${statusConfig.className}`}>{statusConfig.icon}</span>
+            <span className={`text-base leading-none ${statusConfig.className}`}>
+              {statusConfig.icon}
+            </span>
             {visibilityLabel}
           </span>
-          {artwork.auctionLifecycle ? <OrderStatusBadge status={artwork.auctionLifecycle.status} /> : null}
+          {artwork.auctionLifecycle ? (
+            <OrderStatusBadge status={artwork.auctionLifecycle.status} />
+          ) : null}
         </div>
       </div>
     </article>

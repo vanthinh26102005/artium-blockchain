@@ -22,10 +22,18 @@ import type {
   UploadError,
 } from '@shared/types/artwork'
 
+/**
+ * MAX_FILE_SIZE - React component
+ * @returns React element
+ */
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB default
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 // ============================================================================
+/**
+ * ALLOWED_IMAGE_TYPES - React component
+ * @returns React element
+ */
 // Helper Functions
 // ============================================================================
 
@@ -38,6 +46,10 @@ const createUploadError = (
   statusCode?: number,
   details?: unknown,
 ): UploadError => {
+/**
+ * createUploadError - Utility function
+ * @returns void
+ */
   const error = new Error(message) as UploadError
   error.type = type
   error.statusCode = statusCode
@@ -47,6 +59,10 @@ const createUploadError = (
 
 /**
  * Validate file before upload
+/**
+ * error - Utility function
+ * @returns void
+ */
  */
 const validateFile = (file: File, maxSize = MAX_FILE_SIZE): void => {
   if (file.size > maxSize) {
@@ -60,6 +76,10 @@ const validateFile = (file: File, maxSize = MAX_FILE_SIZE): void => {
     throw createUploadError(
       UploadErrorType.INVALID_FILE_TYPE,
       `File type ${file.type} is not allowed. Allowed types: ${ALLOWED_IMAGE_TYPES.join(', ')}`,
+/**
+ * validateFile - Utility function
+ * @returns void
+ */
     )
   }
 }
@@ -82,10 +102,18 @@ const buildUploadPath = (path: string): string => {
  * @param request - Upload request parameters
  * @param options - Upload options (progress, abort signal)
  * @returns Promise with upload response
+/**
+ * buildUploadPath - Utility function
+ * @returns void
+ */
  * 
  * @example
  * ```typescript
  * const response = await uploadArtworkImage({
+/**
+ * normalizedPath - Utility function
+ * @returns void
+ */
  *   file: imageFile,
  *   artworkId: '456',
  *   altText: 'Beautiful artwork',
@@ -106,6 +134,10 @@ export const uploadArtworkImage = async (
     throw createUploadError(
       UploadErrorType.INVALID_PARAMS,
       "artworkId is required and must not be 'undefined'",
+/**
+ * response - Utility function
+ * @returns void
+ */
     )
   }
 
@@ -119,6 +151,10 @@ export const uploadArtworkImage = async (
   if (altText) {
     formData.append('altText', altText)
   }
+/**
+ * uploadArtworkImage - Utility function
+ * @returns void
+ */
 
   if (typeof isPrimary === 'boolean') {
     formData.append('isPrimary', String(isPrimary))
@@ -139,6 +175,10 @@ export const uploadArtworkImage = async (
  * @param request - Upload request parameters
  * @param options - Upload options (progress, abort signal)
  * @returns Promise with array of upload responses
+/**
+ * formData - Utility function
+ * @returns void
+ */
  * 
  * @example
  * ```typescript
@@ -172,6 +212,10 @@ export const uploadArtworkImages = async (
     throw createUploadError(
       UploadErrorType.INVALID_PARAMS,
       'Maximum 10 files allowed per upload',
+/**
+ * responses - Utility function
+ * @returns void
+ */
     )
   }
 
@@ -183,6 +227,10 @@ export const uploadArtworkImages = async (
   files.forEach((file) => {
     formData.append('files', file)
   })
+/**
+ * uploadArtworkImages - Utility function
+ * @returns void
+ */
   formData.append('artworkId', artworkId)
 
   return apiUpload<ArtworkImageUploadResponse[]>(buildUploadPath('/artwork-images'), formData, {
@@ -215,6 +263,10 @@ export const uploadAvatar = async (
 
   // Validate inputs
   if (!userId || userId === 'undefined') {
+/**
+ * formData - Utility function
+ * @returns void
+ */
     throw createUploadError(
       UploadErrorType.INVALID_PARAMS,
       "userId is required and must not be 'undefined'",
@@ -238,9 +290,26 @@ export const uploadAvatar = async (
 // ============================================================================
 
 const artworkUploadApi = {
+/**
+ * response - Utility function
+ * @returns void
+ */
   uploadArtworkImage,
   uploadArtworkImages,
   uploadAvatar,
 }
 
 export default artworkUploadApi
+
+/**
+ * uploadAvatar - Utility function
+ * @returns void
+ */
+/**
+ * formData - Utility function
+ * @returns void
+ */
+/**
+ * artworkUploadApi - Utility function
+ * @returns void
+ */

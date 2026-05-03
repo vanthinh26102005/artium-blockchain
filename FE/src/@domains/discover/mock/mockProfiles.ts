@@ -12,6 +12,10 @@ export interface DiscoverProfile {
   collage: string[]
 }
 
+/**
+ * mockProfiles - Utility function
+ * @returns void
+ */
 export const mockProfiles: DiscoverProfile[] = [
   {
     id: 'pr-001',

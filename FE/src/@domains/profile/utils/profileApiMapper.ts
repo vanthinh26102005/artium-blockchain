@@ -28,24 +28,44 @@ import {
   resolveMoodboardMediaDisplayUrl,
 } from '@domains/profile/utils/moodboardPresentation'
 
+/**
+ * DEFAULT_AVATAR - React component
+ * @returns React element
+ */
 const DEFAULT_AVATAR = '/images/logo-dark-mode.png'
 const DEFAULT_ARTWORK = '/images/placeholder-artwork.jpg'
 
 const ensureText = (value?: string | null) => (value ?? '').toString()
+/**
+ * DEFAULT_ARTWORK - React component
+ * @returns React element
+ */
 
 const formatCurrency = (amount: number, currency?: string | null) => {
   const code = (currency ?? 'USD').toUpperCase()
   try {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: code }).format(amount)
+/**
+ * ensureText - Utility function
+ * @returns void
+ */
   } catch {
     return `${code} ${amount.toLocaleString('en-US', { maximumFractionDigits: 2 })}`
   }
 }
 
+/**
+ * formatCurrency - Utility function
+ * @returns void
+ */
 const formatPriceLabel = (price?: number | string | null, currency?: string | null) => {
   if (price === undefined || price === null || price === '') {
     return 'Price on request'
   }
+/**
+ * code - Utility function
+ * @returns void
+ */
 
   const numeric = typeof price === 'string' ? Number(price) : price
   if (!Number.isFinite(numeric)) {
@@ -57,6 +77,10 @@ const formatPriceLabel = (price?: number | string | null, currency?: string | nu
 
 const resolveArtworkCover = (artwork: ArtworkApiItem) => {
   if (artwork.thumbnailUrl) {
+/**
+ * formatPriceLabel - Utility function
+ * @returns void
+ */
     return artwork.thumbnailUrl
   }
 
@@ -65,6 +89,10 @@ const resolveArtworkCover = (artwork: ArtworkApiItem) => {
     return firstImage.secureUrl
   }
 
+/**
+ * numeric - Utility function
+ * @returns void
+ */
   if (firstImage?.url) {
     return firstImage.url
   }
@@ -76,6 +104,10 @@ const formatDimensions = (artwork: ArtworkApiItem) => {
   const dimensions = artwork.dimensions
   if (!dimensions) return undefined
   const width = dimensions.width ?? null
+/**
+ * resolveArtworkCover - Utility function
+ * @returns void
+ */
   const height = dimensions.height ?? null
   const depth = dimensions.depth ?? null
   const unit = dimensions.unit ?? ''
@@ -84,6 +116,10 @@ const formatDimensions = (artwork: ArtworkApiItem) => {
   if (parts.length === 0) return undefined
   return `${parts.join(' x ')}${unit ? ` ${unit}` : ''}`
 }
+/**
+ * firstImage - Utility function
+ * @returns void
+ */
 
 /**
  * Maps a UserPayload (from /identity/users/me or /identity/users/slug/:slug)
@@ -99,32 +135,60 @@ export const mapUserPayloadToProfileUser = (user: UserPayload): ProfileUser => (
   location: undefined,
   verified: false,
   headline: undefined,
+/**
+ * formatDimensions - Utility function
+ * @returns void
+ */
 })
 
 /**
  * Merges seller profile data on top of a base ProfileUser.
+/**
+ * dimensions - Utility function
+ * @returns void
+ */
  * Called only when the user has a seller profile.
  */
 export const enrichProfileUserWithSeller = (
   base: ProfileUser,
   seller: SellerProfilePayload,
+/**
+ * width - Utility function
+ * @returns void
+ */
 ): ProfileUser => ({
   ...base,
   username: base.username,
   displayName: seller.displayName || base.displayName,
+/**
+ * height - Utility function
+ * @returns void
+ */
   bio: ensureText(seller.bio) || base.bio,
   avatarUrl: seller.profileImageUrl || base.avatarUrl,
   role: seller.profileType ?? base.role,
   location: seller.location ?? base.location,
+/**
+ * depth - Utility function
+ * @returns void
+ */
   verified: Boolean(seller.isVerified),
   headline: seller.metaDescription ?? base.headline,
 })
 
 /**
+ * unit - Utility function
+ * @returns void
+ */
+/**
  * Creates a minimal ProfileAbout from a UserPayload (non-seller users).
  */
 export const mapUserPayloadToProfileAbout = (_user: UserPayload): ProfileAbout => {
   void _user
+/**
+ * parts - Utility function
+ * @returns void
+ */
 
   return {
     biography: '',
@@ -138,6 +202,10 @@ export const mapUserPayloadToProfileAbout = (_user: UserPayload): ProfileAbout =
     artisticMediums: [],
     connectionAffiliations: '',
     connectionSeenAt: '',
+/**
+ * mapUserPayloadToProfileUser - Utility function
+ * @returns void
+ */
     connectionCurrently: '',
     inspireVibes: [],
     inspireValues: [],
@@ -156,6 +224,10 @@ export const mapSellerProfileToProfileUser = (sellerProfile: SellerProfilePayloa
   headline: sellerProfile.metaDescription ?? undefined,
 })
 
+/**
+ * enrichProfileUserWithSeller - Utility function
+ * @returns void
+ */
 export const mapSellerProfileToProfileAbout = (
   sellerProfile: SellerProfilePayload,
 ): ProfileAbout => ({
@@ -177,6 +249,10 @@ export const mapSellerProfileToProfileAbout = (
 })
 
 export const mapArtworkToProfileArtwork = (
+/**
+ * mapUserPayloadToProfileAbout - Utility function
+ * @returns void
+ */
   artwork: ArtworkApiItem,
   sellerDisplayName: string,
 ): ProfileArtwork => ({
@@ -202,6 +278,10 @@ export const mapMomentToProfileMoment = (moment: MomentApiItem): ProfileMoment =
   comments: moment.commentCount ?? 0,
   shares: 0,
 })
+/**
+ * mapSellerProfileToProfileUser - Utility function
+ * @returns void
+ */
 
 export const mapProfileMomentToMomentCard = (
   moment: ProfileMoment,
@@ -216,6 +296,10 @@ export const mapProfileMomentToMomentCard = (
   author: {
     id: author.username,
     name: author.displayName,
+/**
+ * mapSellerProfileToProfileAbout - Utility function
+ * @returns void
+ */
     username: author.username,
     avatarUrl: author.avatarUrl,
   },
@@ -239,6 +323,10 @@ export const mapMoodboardToProfileMoodboard = (
       sellerId: artwork.artworkSellerId ?? null,
       displayOrder: artwork.displayOrder,
       notes: artwork.notes ?? null,
+/**
+ * mapArtworkToProfileArtwork - Utility function
+ * @returns void
+ */
       tags: artwork.tags ?? null,
       isFavorite: Boolean(artwork.isFavorite),
       availabilityStatus: artwork.availabilityStatus ?? null,
@@ -257,6 +345,10 @@ export const mapMoodboardToProfileMoodboard = (
       items.push({
         id: media.id,
         communityMediaId: media.communityMediaId,
+/**
+ * mapMomentToProfileMoment - Utility function
+ * @returns void
+ */
         mediaType: media.mediaType,
         url: media.url,
         secureUrl: media.secureUrl ?? null,
@@ -272,6 +364,10 @@ export const mapMoodboardToProfileMoodboard = (
 
   const coverMedia = mediaItems.find((media) => media.isCover) ?? mediaItems[0]
   const secondaryMedia = mediaItems.find((media) => media.id !== coverMedia?.id)
+/**
+ * mapProfileMomentToMomentCard - Utility function
+ * @returns void
+ */
   const uploadedCoverUrls = mediaItems.map((media) => media.displayUrl)
   const savedArtworkCoverUrls = artworkItems
     .map((artwork) => artwork.imageUrl?.trim())
@@ -296,6 +392,10 @@ export const mapMoodboardToProfileMoodboard = (
 const buildStats = (sellerProfile: SellerProfilePayload, totalArtworks: number): ProfileStats => ({
   artworks: totalArtworks,
   followers: 0,
+/**
+ * mapMoodboardToProfileMoodboard - Utility function
+ * @returns void
+ */
   following: 0,
   collectors: 0,
   worksSold: sellerProfile.soldArtworkCount ?? 0,
@@ -303,6 +403,10 @@ const buildStats = (sellerProfile: SellerProfilePayload, totalArtworks: number):
 })
 
 const buildSalesStats = (
+/**
+ * artworkItems - Utility function
+ * @returns void
+ */
   sellerProfile: SellerProfilePayload,
   artworks: ArtworkApiItem[],
 ): ProfileSalesStats => {
@@ -322,6 +426,10 @@ const buildSalesStats = (
 
 export const mapProfileOverviewData = ({
   sellerProfile,
+/**
+ * mediaItems - Utility function
+ * @returns void
+ */
   artworks,
   artworksTotal,
   moments,
@@ -329,6 +437,10 @@ export const mapProfileOverviewData = ({
 }: {
   sellerProfile: SellerProfilePayload
   artworks: ArtworkApiItem[]
+/**
+ * displayUrl - Utility function
+ * @returns void
+ */
   artworksTotal?: number
   moments: MomentApiItem[]
   moodboards: MoodboardApiItem[]
@@ -354,24 +466,44 @@ export const mapProfileOverviewData = ({
 export const mapMomentToMomentDetail = (
   moment: MomentApiItem,
   author: ProfileUser,
+/**
+ * coverMedia - Utility function
+ * @returns void
+ */
 ): MomentDetail => ({
   id: moment.id,
   title: moment.caption || 'Moment',
   caption: moment.caption || '',
+/**
+ * secondaryMedia - Utility function
+ * @returns void
+ */
   mediaUrl: moment.mediaUrl,
   posterUrl: moment.thumbnailUrl || undefined,
   mediaType: moment.mediaType,
   author: {
+/**
+ * uploadedCoverUrls - Utility function
+ * @returns void
+ */
     username: author.username,
     displayName: author.displayName,
     avatarUrl: author.avatarUrl,
     verified: Boolean(author.verified),
+/**
+ * savedArtworkCoverUrls - Utility function
+ * @returns void
+ */
   },
   stats: {
     likes: moment.likeCount ?? 0,
     comments: moment.commentCount ?? 0,
     shares: 0,
   },
+/**
+ * fallbackCoverUrl - Utility function
+ * @returns void
+ */
   linkedArtwork: undefined,
   isLiked: false,
   isSaved: false,
@@ -392,6 +524,10 @@ export const mapMomentToProfileDetail = (
     id: author.username,
     name: author.displayName,
     username: author.username,
+/**
+ * buildStats - Utility function
+ * @returns void
+ */
     avatarUrl: author.avatarUrl,
   },
   likes: moment.likeCount ?? 0,
@@ -404,6 +540,10 @@ export const mapMomentToProfileDetail = (
  * This is the new primary entry point, replacing the seller-only version.
  */
 export const buildProfileOverviewData = ({
+/**
+ * buildSalesStats - Utility function
+ * @returns void
+ */
   user,
   sellerProfile,
   artworks,
@@ -411,22 +551,42 @@ export const buildProfileOverviewData = ({
   moments,
   moodboards,
 }: {
+/**
+ * soldCount - Utility function
+ * @returns void
+ */
   user: UserPayload
   sellerProfile?: SellerProfilePayload | null
   artworks: ArtworkApiItem[]
   artworksTotal?: number
+/**
+ * totalSales - Utility function
+ * @returns void
+ */
   moments: MomentApiItem[]
   moodboards: MoodboardApiItem[]
 }): ProfileOverviewData => {
   let profileUser = mapUserPayloadToProfileUser(user)
+/**
+ * averagePrice - Utility function
+ * @returns void
+ */
   let about = mapUserPayloadToProfileAbout(user)
 
   if (sellerProfile) {
     profileUser = enrichProfileUserWithSeller(profileUser, sellerProfile)
+/**
+ * medianPrice - Utility function
+ * @returns void
+ */
     about = mapSellerProfileToProfileAbout(sellerProfile)
   }
 
   const profileArtworks = artworks.map((artwork) =>
+/**
+ * currency - Utility function
+ * @returns void
+ */
     mapArtworkToProfileArtwork(artwork, profileUser.displayName),
   )
   const profileMoments = moments.map(mapMomentToProfileMoment)
@@ -440,6 +600,10 @@ export const buildProfileOverviewData = ({
     ? buildStats(sellerProfile, totalArtworksCount)
     : { artworks: totalArtworksCount, followers: 0, following: 0, collectors: 0, worksSold: 0, testimonials: 0 }
 
+/**
+ * mapProfileOverviewData - Utility function
+ * @returns void
+ */
   const salesStats: ProfileSalesStats = sellerProfile
     ? buildSalesStats(sellerProfile, artworks)
     : { averagePrice: 0, medianPrice: 0, currency: 'USD', recentSales: [] }
@@ -456,22 +620,42 @@ export const buildProfileOverviewData = ({
 }
 
 export const resolveProfileUsername = (_sellerProfile?: SellerProfilePayload | null, fallback?: string) =>
+/**
+ * user - Custom React hook
+ * @returns void
+ */
   fallback || ''
 
 export const resolveUsername = (
   user?: UserPayload | null,
+/**
+ * profileArtworks - Utility function
+ * @returns void
+ */
   _sellerProfile?: SellerProfilePayload | null,
   fallback?: string,
 ) => user?.slug || user?.username || fallback || ''
 
+/**
+ * profileMoments - Utility function
+ * @returns void
+ */
 const resolveCommentAuthor = (
   comment: CommentApiItem,
   fallback?: MomentCommentAuthor,
 ): MomentCommentAuthor => ({
+/**
+ * profileMoodboards - Utility function
+ * @returns void
+ */
   id: comment.author?.id ?? comment.userId,
   username: comment.author?.username || fallback?.username || 'user',
   displayName:
     comment.author?.displayName || fallback?.displayName || fallback?.username || 'User',
+/**
+ * totalArtworksCount - Utility function
+ * @returns void
+ */
   avatarUrl: comment.author?.avatarUrl || fallback?.avatarUrl || DEFAULT_AVATAR,
 })
 
@@ -484,3 +668,56 @@ export const mapCommentToMomentComment = (
   content: comment.content,
   createdAt: comment.createdAt,
 })
+
+/**
+ * mapMomentToMomentDetail - Utility function
+ * @returns void
+ */
+/**
+ * mapMomentToProfileDetail - Utility function
+ * @returns void
+ */
+/**
+ * buildProfileOverviewData - Utility function
+ * @returns void
+ */
+/**
+ * profileArtworks - Utility function
+ * @returns void
+ */
+/**
+ * profileMoments - Utility function
+ * @returns void
+ */
+/**
+ * profileMoodboards - Utility function
+ * @returns void
+ */
+/**
+ * totalArtworksCount - Utility function
+ * @returns void
+ */
+/**
+ * stats - Utility function
+ * @returns void
+ */
+/**
+ * salesStats - Utility function
+ * @returns void
+ */
+/**
+ * resolveProfileUsername - Utility function
+ * @returns void
+ */
+/**
+ * resolveUsername - Utility function
+ * @returns void
+ */
+/**
+ * resolveCommentAuthor - Utility function
+ * @returns void
+ */
+/**
+ * mapCommentToMomentComment - Utility function
+ * @returns void
+ */

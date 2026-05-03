@@ -7,14 +7,26 @@ type UseFollowUserOptions = {
   onFollowChange?: (isFollowing: boolean) => void
 }
 
+/**
+ * useFollowUser - Custom React hook
+ * @returns void
+ */
 export const useFollowUser = ({ targetUserId, onFollowChange }: UseFollowUserOptions) => {
   const authUser = useAuthStore((state) => state.user)
   const isAuthenticated = Boolean(authUser?.id)
   const [isFollowing, setIsFollowing] = useState(false)
+  /**
+   * authUser - Utility function
+   * @returns void
+   */
   const [isLoading, setIsLoading] = useState(false)
   const [isChecking, setIsChecking] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  /**
+   * isAuthenticated - Utility function
+   * @returns void
+   */
   // Check initial follow status
   useEffect(() => {
     if (!isAuthenticated || !targetUserId || authUser?.id === targetUserId) {
@@ -31,12 +43,20 @@ export const useFollowUser = ({ targetUserId, onFollowChange }: UseFollowUserOpt
         console.error('[useFollowUser] Error checking follow status:', err)
         setIsFollowing(false)
       } finally {
+        /**
+         * checkStatus - Utility function
+         * @returns void
+         */
         setIsChecking(false)
       }
     }
 
     checkStatus()
   }, [targetUserId, isAuthenticated, authUser?.id])
+  /**
+   * status - Utility function
+   * @returns void
+   */
 
   const followUser = useCallback(async () => {
     if (!isAuthenticated || !authUser?.id) {
@@ -53,6 +73,10 @@ export const useFollowUser = ({ targetUserId, onFollowChange }: UseFollowUserOpt
       setIsLoading(true)
       setError(null)
       await followersApis.followUser({
+        /**
+         * followUser - Utility function
+         * @returns void
+         */
         followedUserId: targetUserId,
         followSource: 'profile',
       })
@@ -84,6 +108,10 @@ export const useFollowUser = ({ targetUserId, onFollowChange }: UseFollowUserOpt
     } finally {
       setIsLoading(false)
     }
+    /**
+     * unfollowUser - Utility function
+     * @returns void
+     */
   }, [targetUserId, isAuthenticated, authUser?.id, onFollowChange])
 
   const toggleFollow = useCallback(async () => {
@@ -104,3 +132,8 @@ export const useFollowUser = ({ targetUserId, onFollowChange }: UseFollowUserOpt
     toggleFollow,
   }
 }
+
+/**
+ * toggleFollow - Utility function
+ * @returns void
+ */

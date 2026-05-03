@@ -19,6 +19,10 @@ type AuctionCategoryKey = AuctionFilterCategoryKey
 
 type AuctionStatusKey = AuctionFilterStatusKey
 
+/**
+ * spaceGrotesk - Utility function
+ * @returns void
+ */
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   weight: ['500', '700'],
@@ -27,6 +31,10 @@ const spaceGrotesk = Space_Grotesk({
 const headlineFont = {
   fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
+/**
+ * headlineFont - Utility function
+ * @returns void
+ */
 
 const bodyFont = {
   fontFamily: 'Inter, "Segoe UI", Tahoma, sans-serif',
@@ -34,6 +42,10 @@ const bodyFont = {
 
 const categoryOptions: Array<{ key: AuctionCategoryKey; label: string; helper: string }> = [
   { key: 'all', label: 'ALL WORKS', helper: 'Show every category' },
+  /**
+   * bodyFont - Utility function
+   * @returns void
+   */
   { key: 'architectural', label: 'ARCHITECTURAL', helper: 'Built-form studies and facades' },
   { key: 'sculpture', label: 'SCULPTURE', helper: 'Objects, forms, and physical studies' },
   { key: 'digital', label: 'DIGITAL', helper: 'Synthetic and virtual compositions' },
@@ -41,6 +53,10 @@ const categoryOptions: Array<{ key: AuctionCategoryKey; label: string; helper: s
 ]
 
 const statusOptions: Array<{ key: AuctionStatusKey; label: string; helper: string }> = [
+  /**
+   * categoryOptions - Utility function
+   * @returns void
+   */
   { key: 'all', label: 'ALL STATUSES', helper: 'Show every auction state' },
   { key: 'active', label: 'ACTIVE BIDDING', helper: 'Lots currently accepting bids' },
   { key: 'ending-soon', label: 'ENDING SOON', helper: 'Auctions closing shortly' },
@@ -52,6 +68,10 @@ const statusOptions: Array<{ key: AuctionStatusKey; label: string; helper: strin
 const MIN_ETH = 0.5
 const MAX_ETH = 50
 const ITEMS_PER_PAGE = 24
+/**
+ * statusOptions - Utility function
+ * @returns void
+ */
 
 const formatBidDisplay = (value: number) => {
   const normalizedValue = Math.min(MAX_ETH, Math.max(MIN_ETH, Number(value.toFixed(1))))
@@ -64,23 +84,43 @@ const statusBadgeClass: Record<AuctionLotStatusKey, string> = {
   closed: 'bg-[#9ca3af]',
   'newly-listed': 'bg-[#2563eb]',
   paused: 'bg-[#eab308]',
+  /**
+   * MIN_ETH - React component
+   * @returns React element
+   */
 }
 
 const lotActionLabel: Record<AuctionLotStatusKey, string> = {
   active: 'Place Bid',
+  /**
+   * MAX_ETH - React component
+   * @returns React element
+   */
   'ending-soon': 'Place Bid',
   'newly-listed': 'Enter Auction',
   paused: 'View Artwork',
   closed: 'View Results',
+  /**
+   * ITEMS_PER_PAGE - React component
+   * @returns React element
+   */
 }
 
 const clampEthValue = (value: number) => {
   if (Number.isNaN(value)) {
     return MIN_ETH
+    /**
+     * formatBidDisplay - Utility function
+     * @returns void
+     */
   }
 
   return Math.min(MAX_ETH, Math.max(MIN_ETH, Number(value.toFixed(1))))
 }
+/**
+ * normalizedValue - Utility function
+ * @returns void
+ */
 
 const parseEthInput = (value: string, fallback: number) => {
   const normalized = value.replace('+', '').trim()
@@ -88,6 +128,10 @@ const parseEthInput = (value: string, fallback: number) => {
 
   if (Number.isNaN(parsed)) {
     return fallback
+    /**
+     * statusBadgeClass - Utility function
+     * @returns void
+     */
   }
 
   return clampEthValue(parsed)
@@ -99,6 +143,10 @@ const formatEthDisplay = (value: number) => {
   }
 
   return Number.isInteger(value) ? `${value}` : value.toFixed(1)
+  /**
+   * lotActionLabel - Utility function
+   * @returns void
+   */
 }
 
 const isBidActionStatus = (statusKey: AuctionLotStatusKey) =>
@@ -110,6 +158,10 @@ const LiveAuctionPage = () => {
   const [isMobileViewport, setIsMobileViewport] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<AuctionCategoryKey>('all')
   const [selectedStatus, setSelectedStatus] = useState<AuctionStatusKey>('all')
+  /**
+   * clampEthValue - Utility function
+   * @returns void
+   */
   const [appliedMinPrice, setAppliedMinPrice] = useState(MIN_ETH)
   const [appliedMaxPrice, setAppliedMaxPrice] = useState(MAX_ETH)
   const [mobileSelectedCategory, setMobileSelectedCategory] = useState<AuctionCategoryKey>('all')
@@ -121,14 +173,26 @@ const LiveAuctionPage = () => {
   const [draftMinPrice, setDraftMinPrice] = useState(MIN_ETH)
   const [draftMaxPrice, setDraftMaxPrice] = useState(MAX_ETH)
   const [minInputValue, setMinInputValue] = useState(`${MIN_ETH}`)
+  /**
+   * parseEthInput - Utility function
+   * @returns void
+   */
   const [maxInputValue, setMaxInputValue] = useState(`${MAX_ETH}`)
   const [isStatusOpen, setIsStatusOpen] = useState(false)
   const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false)
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
+  /**
+   * normalized - Utility function
+   * @returns void
+   */
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
   const [selectedBidLot, setSelectedBidLot] = useState<AuctionLot | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const categoryRef = useRef<HTMLDivElement>(null)
+  /**
+   * parsed - Utility function
+   * @returns void
+   */
   const statusRef = useRef<HTMLDivElement>(null)
   const priceRangeRef = useRef<HTMLDivElement>(null)
   const resultsRef = useRef<HTMLElement>(null)
@@ -141,6 +205,10 @@ const LiveAuctionPage = () => {
   const mobileSelectedCategoryOption =
     categoryOptions.find((option) => option.key === mobileSelectedCategory) ?? categoryOptions[0]
   const mobileSelectedStatusOption =
+    /**
+     * formatEthDisplay - Utility function
+     * @returns void
+     */
     statusOptions.find((option) => option.key === mobileSelectedStatus) ?? statusOptions[0]
   const minPercent = ((draftMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const maxPercent = ((draftMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
@@ -152,16 +220,28 @@ const LiveAuctionPage = () => {
     isLoading,
     error,
     refresh,
+    /**
+     * isBidActionStatus - Utility function
+     * @returns void
+     */
     refreshAuctionById,
   } = useAuctionLots({
     category: selectedCategory === 'all' ? undefined : selectedCategory,
     status: selectedStatus === 'all' ? undefined : selectedStatus,
     minBidEth: appliedMinPrice,
     maxBidEth: appliedMaxPrice,
+    /**
+     * LiveAuctionPage - React component
+     * @returns React element
+     */
     skip: 0,
     take: 50,
   })
 
+  /**
+   * router - Utility function
+   * @returns void
+   */
   useEffect(() => {
     if (typeof window === 'undefined') {
       return
@@ -188,62 +268,118 @@ const LiveAuctionPage = () => {
         setIsStatusOpen(false)
       }
 
+      /**
+       * categoryRef - Utility function
+       * @returns void
+       */
       if (!priceRangeRef.current?.contains(event.target as Node)) {
         setIsPriceRangeOpen(false)
       }
     }
+    /**
+     * statusRef - Utility function
+     * @returns void
+     */
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+  /**
+   * priceRangeRef - Utility function
+   * @returns void
+   */
 
   useEffect(() => {
     if (!isMobileFiltersOpen) {
       return
+      /**
+       * resultsRef - Utility function
+       * @returns void
+       */
     }
 
     const { overflow } = document.body.style
     document.body.style.overflow = 'hidden'
+    /**
+     * mobileFilterButtonRef - Utility function
+     * @returns void
+     */
 
     return () => {
       document.body.style.overflow = overflow
     }
+    /**
+     * mobileFilterCloseButtonRef - Utility function
+     * @returns void
+     */
   }, [isMobileFiltersOpen])
 
   useEffect(() => {
     if (!isMobileFiltersOpen) {
+      /**
+       * selectedCategoryOption - Utility function
+       * @returns void
+       */
       return
     }
 
     mobileFilterCloseButtonRef.current?.focus()
 
+    /**
+     * selectedStatusOption - Utility function
+     * @returns void
+     */
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsMobileFiltersOpen(false)
       }
     }
+    /**
+     * mobileSelectedCategoryOption - Utility function
+     * @returns void
+     */
 
     document.addEventListener('keydown', handleEscapeKey)
     return () => document.removeEventListener('keydown', handleEscapeKey)
   }, [isMobileFiltersOpen])
 
+  /**
+   * mobileSelectedStatusOption - Utility function
+   * @returns void
+   */
   useEffect(() => {
     if (isMobileFiltersOpen) {
       return
     }
 
+    /**
+     * minPercent - Utility function
+     * @returns void
+     */
     mobileFilterButtonRef.current?.focus()
   }, [isMobileFiltersOpen])
 
   const syncMobileFiltersWithApplied = () => {
+    /**
+     * maxPercent - Utility function
+     * @returns void
+     */
     setMobileSelectedCategory(selectedCategory)
     setMobileSelectedStatus(selectedStatus)
     setMobileAppliedMinPrice(appliedMinPrice)
     setMobileAppliedMaxPrice(appliedMaxPrice)
+    /**
+     * mobileMinPercent - Utility function
+     * @returns void
+     */
     setMobileMinInputValue(`${appliedMinPrice}`)
     setMobileMaxInputValue(`${appliedMaxPrice}`)
   }
 
+  /**
+   * mobileMaxPercent - Utility function
+   * @returns void
+   */
   const applyDesktopPriceRange = () => {
     const nextMin = Math.min(parseEthInput(minInputValue, draftMinPrice), draftMaxPrice)
     const nextMax = Math.max(parseEthInput(maxInputValue, draftMaxPrice), nextMin)
@@ -269,10 +405,18 @@ const LiveAuctionPage = () => {
     setSelectedStatus('all')
     setAppliedMinPrice(MIN_ETH)
     setAppliedMaxPrice(MAX_ETH)
+    /**
+     * mediaQuery - Utility function
+     * @returns void
+     */
     setDraftMinPrice(MIN_ETH)
     setDraftMaxPrice(MAX_ETH)
     setMinInputValue(`${MIN_ETH}`)
     setMaxInputValue(`${MAX_ETH}`)
+    /**
+     * syncViewportMode - Utility function
+     * @returns void
+     */
     setIsCategoryOpen(false)
     setIsStatusOpen(false)
     setIsPriceRangeOpen(false)
@@ -287,15 +431,16 @@ const LiveAuctionPage = () => {
     setMobileMaxInputValue(`${MAX_ETH}`)
   }
 
+  /**
+   * handleClickOutside - Utility function
+   * @returns void
+   */
   const applyMobileFilters = () => {
     const nextMin = Math.min(
       parseEthInput(mobileMinInputValue, mobileAppliedMinPrice),
       mobileAppliedMaxPrice,
     )
-    const nextMax = Math.max(
-      parseEthInput(mobileMaxInputValue, mobileAppliedMaxPrice),
-      nextMin,
-    )
+    const nextMax = Math.max(parseEthInput(mobileMaxInputValue, mobileAppliedMaxPrice), nextMin)
 
     setMobileAppliedMinPrice(nextMin)
     setMobileAppliedMaxPrice(nextMax)
@@ -328,6 +473,10 @@ const LiveAuctionPage = () => {
     () =>
       filterLots(
         lots,
+        /**
+         * handleEscapeKey - Utility function
+         * @returns void
+         */
         selectedCategory,
         selectedStatus,
         appliedMinPrice,
@@ -349,6 +498,10 @@ const LiveAuctionPage = () => {
       mobileAppliedMaxPrice,
       mobileAppliedMinPrice,
       mobileSelectedCategory,
+      /**
+       * syncMobileFiltersWithApplied - Utility function
+       * @returns void
+       */
       mobileSelectedStatus,
     ],
   )
@@ -361,14 +514,26 @@ const LiveAuctionPage = () => {
   )
   const effectiveViewMode = isMobileViewport ? 'list' : viewMode
   const displayedAuctionIds = useMemo(
+    /**
+     * applyDesktopPriceRange - Utility function
+     * @returns void
+     */
     () => displayedLots.map((lot) => lot.auctionId),
     [displayedLots],
   )
   const handleRealtimeAuctionChange = useCallback(
+    /**
+     * nextMin - Utility function
+     * @returns void
+     */
     (auctionId: string) => {
       void refreshAuctionById(auctionId).catch(() => refresh())
     },
     [refresh, refreshAuctionById],
+    /**
+     * nextMax - Utility function
+     * @returns void
+     */
   )
 
   useAuctionRealtime({
@@ -384,7 +549,11 @@ const LiveAuctionPage = () => {
     appliedMinPrice !== MIN_ETH ||
     appliedMaxPrice !== MAX_ETH
   const footerLabel = hasActiveFilters
-    ? `Page ${safeCurrentPage} of ${totalPages} • ${visibleLots.length} matching lots`
+    ? /**
+       * openMobileFilters - Utility function
+       * @returns void
+       */
+      `Page ${safeCurrentPage} of ${totalPages} • ${visibleLots.length} matching lots`
     : `Page ${safeCurrentPage} of ${totalPages} • ${total} total lots`
   const emptyStateBody = hasActiveFilters
     ? 'Adjust or clear your filters to view other auction lots.'
@@ -392,6 +561,10 @@ const LiveAuctionPage = () => {
 
   const scrollResultsToTop = () => {
     if (typeof window === 'undefined') {
+      /**
+       * resetDesktopFilters - Utility function
+       * @returns void
+       */
       return
     }
 
@@ -410,6 +583,10 @@ const LiveAuctionPage = () => {
     })
   }
 
+  /**
+   * resetMobileFilters - Utility function
+   * @returns void
+   */
   const handlePageChange = (nextPage: number) => {
     if (nextPage === safeCurrentPage) {
       return
@@ -422,10 +599,18 @@ const LiveAuctionPage = () => {
   const openBidModal = (lot: AuctionLot) => {
     if (!isBidActionStatus(lot.statusKey)) {
       return
+      /**
+       * applyMobileFilters - Utility function
+       * @returns void
+       */
     }
 
     setSelectedBidLot(lot)
   }
+  /**
+   * nextMin - Utility function
+   * @returns void
+   */
 
   const handleViewOrderStatus = ({ lot }: BidOrderStatusPayload) => {
     if (!lot.onChainOrderId) {
@@ -433,6 +618,10 @@ const LiveAuctionPage = () => {
     }
 
     void router.push(`/orders/on-chain/${encodeURIComponent(lot.onChainOrderId)}`)
+    /**
+     * nextMax - Utility function
+     * @returns void
+     */
   }
 
   return (
@@ -442,21 +631,21 @@ const LiveAuctionPage = () => {
         description="A curated auction showcase for architectural masterworks and digital artifacts on Artium."
       />
       <div className="min-h-screen bg-white text-[#1a1c1c]" style={bodyFont}>
-        <main className="mx-auto max-w-[1600px] px-6 pt-12 pb-20 md:px-12 md:pt-16">
+        <main className="mx-auto max-w-[1600px] px-6 pb-20 pt-12 md:px-12 md:pt-16">
           <header className="mb-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <h1
-                className={`${spaceGrotesk.className} mb-6 text-5xl leading-none font-bold tracking-[0.04em] text-black uppercase md:text-7xl`}
+                className={`${spaceGrotesk.className} mb-6 text-5xl font-bold uppercase leading-none tracking-[0.04em] text-black md:text-7xl`}
               >
                 Live Auctions
               </h1>
-              <p className="text-lg leading-8 font-light text-[#444747]">
+              <p className="text-lg font-light leading-8 text-[#444747]">
                 A curated selection of architectural masterworks and digital artifacts. Each piece
-                is verified via blockchain provenance, ensuring institutional-grade collectible
-                security.
+                is verified via blockchain provenance, ensuring institutional-grade collectible /**
+                * filterLots - Utility function * @returns void */ security.
               </p>
             </div>
-            <div className="flex items-center gap-4 text-[11px] tracking-[0.22em] text-black/40 uppercase">
+            <div className="flex items-center gap-4 text-[11px] uppercase tracking-[0.22em] text-black/40">
               <span className="h-2 w-2 animate-pulse bg-black" />
               <span>Live updating from on-chain data</span>
             </div>
@@ -464,22 +653,35 @@ const LiveAuctionPage = () => {
 
           <section className="mb-12 flex flex-wrap items-center justify-between gap-8 border-y border-[#c4c7c7]/30 py-8">
             <div className="hidden flex-wrap items-center gap-10 md:flex">
+              /** * matchesCategory - Utility function * @returns void */
               <div ref={categoryRef} className="relative">
                 <button
                   type="button"
                   onClick={() => {
+                    /**
+                     * matchesPrice - Utility function
+                     * @returns void
+                     */
                     setIsStatusOpen(false)
                     setIsPriceRangeOpen(false)
                     setIsCategoryOpen((prev) => !prev)
                   }}
+                  /**
+                   * matchesStatus - Utility function
+                   * @returns void
+                   */
                   className="group text-left"
                   aria-expanded={isCategoryOpen}
                   aria-haspopup="listbox"
                 >
-                  <span className="mb-2 block text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                  <span className="mb-2 block text-[10px] uppercase tracking-[0.25em] text-[#747777]">
                     Category
                   </span>
                   <span
+                    /**
+                     * visibleLots - Utility function
+                     * @returns void
+                     */
                     className="flex items-center gap-2 text-sm font-bold text-black transition-colors group-hover:text-black/70"
                     style={headlineFont}
                   >
@@ -491,9 +693,13 @@ const LiveAuctionPage = () => {
                 </button>
 
                 {isCategoryOpen ? (
-                  <div className="absolute top-full left-0 z-20 mt-4 min-w-[280px] border border-[#c4c7c7]/40 bg-white p-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.18)]">
+                  <div className="absolute left-0 top-full z-20 mt-4 min-w-[280px] border border-[#c4c7c7]/40 bg-white p-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.18)]">
                     <div className="space-y-1" role="listbox" aria-label="Category options">
                       {categoryOptions.map((option) => (
+                        /**
+                         * mobilePreviewLots - Utility function
+                         * @returns void
+                         */
                         <button
                           key={option.key}
                           type="button"
@@ -512,20 +718,33 @@ const LiveAuctionPage = () => {
                             {option.label}
                           </span>
                           <span
-                            className={`mt-1 block text-[11px] tracking-[0.08em] uppercase ${
+                            className={`mt-1 block text-[11px] uppercase tracking-[0.08em] ${
                               option.key === selectedCategory ? 'text-white/70' : 'text-[#747777]'
+                              /**
+                               * totalPages - Utility function
+                               * @returns void
+                               */
                             }`}
                           >
                             {option.helper}
                           </span>
+                          /** * safeCurrentPage - Utility function * @returns void */
                         </button>
                       ))}
                     </div>
                   </div>
-                ) : null}
+                ) : /**
+                 * pageStart - Utility function
+                 * @returns void
+                 */
+                null}
               </div>
               <div ref={statusRef} className="relative">
                 <button
+                  /**
+                   * displayedLots - Utility function
+                   * @returns void
+                   */
                   type="button"
                   onClick={() => {
                     setIsCategoryOpen(false)
@@ -533,17 +752,22 @@ const LiveAuctionPage = () => {
                     setIsStatusOpen((prev) => !prev)
                   }}
                   className="group text-left"
+                  /**
+                   * effectiveViewMode - Utility function
+                   * @returns void
+                   */
                   aria-expanded={isStatusOpen}
                   aria-haspopup="listbox"
                 >
-                  <span className="mb-2 block text-[10px] tracking-[0.25em] text-[#747777] uppercase">
-                    Status
+                  <span className="mb-2 block text-[10px] uppercase tracking-[0.25em] text-[#747777]">
+                    /** * displayedAuctionIds - Utility function * @returns void */ Status
                   </span>
                   <span
                     className="flex items-center gap-2 text-sm font-bold text-black transition-colors group-hover:text-black/70"
                     style={headlineFont}
                   >
                     {selectedStatusOption.label}
+                    /** * handleRealtimeAuctionChange - Utility function * @returns void */
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${isStatusOpen ? 'rotate-180' : ''}`}
                     />
@@ -551,7 +775,7 @@ const LiveAuctionPage = () => {
                 </button>
 
                 {isStatusOpen ? (
-                  <div className="absolute top-full left-0 z-20 mt-4 min-w-[280px] border border-[#c4c7c7]/40 bg-white p-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.18)]">
+                  <div className="absolute left-0 top-full z-20 mt-4 min-w-[280px] border border-[#c4c7c7]/40 bg-white p-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.18)]">
                     <div className="space-y-1" role="listbox" aria-label="Status options">
                       {statusOptions.map((option) => (
                         <button
@@ -559,28 +783,45 @@ const LiveAuctionPage = () => {
                           type="button"
                           onClick={() => {
                             setCurrentPage(1)
+                            /**
+                             * resultsLabel - Utility function
+                             * @returns void
+                             */
                             setSelectedStatus(option.key)
                             setIsStatusOpen(false)
                           }}
                           className={`block w-full px-3 py-3 text-left transition-colors ${
+                            /**
+                             * mobilePreviewLabel - Utility function
+                             * @returns void
+                             */
                             option.key === selectedStatus
                               ? 'bg-black text-white'
                               : 'text-black hover:bg-[#f5f5f5]'
                           }`}
+                          /**
+                           * hasActiveFilters - Utility function
+                           * @returns void
+                           */
                         >
                           <span className="block text-sm font-bold uppercase" style={headlineFont}>
                             {option.label}
                           </span>
                           <span
-                            className={`mt-1 block text-[11px] tracking-[0.08em] uppercase ${
+                            className={`mt-1 block text-[11px] uppercase tracking-[0.08em] ${
                               option.key === selectedStatus ? 'text-white/70' : 'text-[#747777]'
                             }`}
+                            /**
+                             * footerLabel - Utility function
+                             * @returns void
+                             */
                           >
                             {option.helper}
                           </span>
                         </button>
                       ))}
                     </div>
+                    /** * emptyStateBody - Utility function * @returns void */
                   </div>
                 ) : null}
               </div>
@@ -588,6 +829,10 @@ const LiveAuctionPage = () => {
                 <button
                   type="button"
                   onClick={() => {
+                    /**
+                     * scrollResultsToTop - Utility function
+                     * @returns void
+                     */
                     setIsCategoryOpen(false)
                     setIsStatusOpen(false)
                     if (!isPriceRangeOpen) {
@@ -596,6 +841,10 @@ const LiveAuctionPage = () => {
                       setMinInputValue(`${appliedMinPrice}`)
                       setMaxInputValue(`${appliedMaxPrice}`)
                     }
+                    /**
+                     * resultsTop - Utility function
+                     * @returns void
+                     */
 
                     setIsPriceRangeOpen((prev) => !prev)
                   }}
@@ -603,14 +852,19 @@ const LiveAuctionPage = () => {
                   aria-expanded={isPriceRangeOpen}
                   aria-haspopup="dialog"
                 >
-                  <span className="mb-2 block text-[10px] tracking-[0.25em] text-[#747777] uppercase">
-                    Price Range
+                  <span className="mb-2 block text-[10px] uppercase tracking-[0.25em] text-[#747777]">
+                    Price Range /** * isMobile - Utility function * @returns void */
                   </span>
                   <span
                     className="flex items-center gap-2 text-sm font-bold text-black transition-colors group-hover:text-black/70"
                     style={headlineFont}
+                    /**
+                     * stickyHeaderOffset - Utility function
+                     * @returns void
+                     */
                   >
-                    {formatEthDisplay(appliedMinPrice)} ETH - {formatEthDisplay(appliedMaxPrice)} ETH
+                    {formatEthDisplay(appliedMinPrice)} ETH - {formatEthDisplay(appliedMaxPrice)}{' '}
+                    ETH
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${isPriceRangeOpen ? 'rotate-180' : ''}`}
                     />
@@ -618,9 +872,10 @@ const LiveAuctionPage = () => {
                 </button>
 
                 {isPriceRangeOpen ? (
-                  <div className="absolute top-full left-0 z-20 mt-4 w-[min(92vw,360px)] border-2 border-black/70 bg-white px-4 py-5 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.25)] sm:px-5 sm:py-5">
+                  <div className="absolute left-0 top-full z-20 mt-4 w-[min(92vw,360px)] border-2 border-black/70 bg-white px-4 py-5 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.25)] sm:px-5 sm:py-5">
                     <div className="mb-5 flex items-center justify-between gap-3">
-                      <span className="text-[12px] font-extrabold tracking-[0.2em] text-[#8a8a8a] uppercase">
+                      /** * handlePageChange - Utility function * @returns void */
+                      <span className="text-[12px] font-extrabold uppercase tracking-[0.2em] text-[#8a8a8a]">
                         Range (ETH)
                       </span>
                       <span className="text-lg font-black text-black" style={bodyFont}>
@@ -632,6 +887,10 @@ const LiveAuctionPage = () => {
                       <div className="h-1 bg-black" />
                       <div
                         className="absolute top-1/2 h-6 w-6 -translate-y-1/2 border-2 border-[#d9d9d9] bg-black shadow-[0_0_0_2px_white]"
+                        /**
+                         * openBidModal - Utility function
+                         * @returns void
+                         */
                         style={{ left: `calc(${minPercent}% - 12px)` }}
                       />
                       <div
@@ -643,6 +902,10 @@ const LiveAuctionPage = () => {
                         min={MIN_ETH}
                         max={MAX_ETH}
                         step={0.1}
+                        /**
+                         * handleViewOrderStatus - Utility function
+                         * @returns void
+                         */
                         value={draftMinPrice}
                         onChange={(event) => {
                           const nextValue = Math.min(Number(event.target.value), draftMaxPrice)
@@ -670,7 +933,7 @@ const LiveAuctionPage = () => {
 
                     <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                       <label className="block">
-                        <span className="mb-2 block text-[10px] tracking-[0.16em] text-[#8a8a8a] uppercase">
+                        <span className="mb-2 block text-[10px] uppercase tracking-[0.16em] text-[#8a8a8a]">
                           Min
                         </span>
                         <input
@@ -679,7 +942,10 @@ const LiveAuctionPage = () => {
                           value={minInputValue}
                           onChange={(event) => setMinInputValue(event.target.value)}
                           onBlur={() => {
-                            const nextValue = Math.min(parseEthInput(minInputValue, draftMinPrice), draftMaxPrice)
+                            const nextValue = Math.min(
+                              parseEthInput(minInputValue, draftMinPrice),
+                              draftMaxPrice,
+                            )
                             setDraftMinPrice(nextValue)
                             setMinInputValue(`${nextValue}`)
                           }}
@@ -687,7 +953,7 @@ const LiveAuctionPage = () => {
                         />
                       </label>
                       <label className="block">
-                        <span className="mb-2 block text-[10px] tracking-[0.16em] text-[#8a8a8a] uppercase">
+                        <span className="mb-2 block text-[10px] uppercase tracking-[0.16em] text-[#8a8a8a]">
                           Max
                         </span>
                         <input
@@ -696,7 +962,10 @@ const LiveAuctionPage = () => {
                           value={maxInputValue}
                           onChange={(event) => setMaxInputValue(event.target.value)}
                           onBlur={() => {
-                            const nextValue = Math.max(parseEthInput(maxInputValue, draftMaxPrice), draftMinPrice)
+                            const nextValue = Math.max(
+                              parseEthInput(maxInputValue, draftMaxPrice),
+                              draftMinPrice,
+                            )
                             setDraftMaxPrice(nextValue)
                             setMaxInputValue(`${nextValue}`)
                           }}
@@ -708,7 +977,7 @@ const LiveAuctionPage = () => {
                     <button
                       type="button"
                       onClick={applyDesktopPriceRange}
-                      className="w-full bg-black px-5 py-3.5 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90"
+                      className="w-full bg-black px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-black/90"
                       style={headlineFont}
                     >
                       Apply Range
@@ -747,7 +1016,7 @@ const LiveAuctionPage = () => {
                 </button>
               </div>
               <p
-                className="hidden text-xs tracking-[0.22em] text-[#747777] uppercase md:block"
+                className="hidden text-xs uppercase tracking-[0.22em] text-[#747777] md:block"
                 style={headlineFont}
               >
                 Showing {resultsLabel}
@@ -756,7 +1025,7 @@ const LiveAuctionPage = () => {
                 type="button"
                 onClick={resetDesktopFilters}
                 disabled={!hasActiveFilters}
-                className={`hidden text-xs tracking-[0.22em] uppercase transition md:block ${
+                className={`hidden text-xs uppercase tracking-[0.22em] transition md:block ${
                   hasActiveFilters
                     ? 'cursor-pointer text-black hover:text-black/60'
                     : 'cursor-not-allowed text-black/30'
@@ -766,7 +1035,7 @@ const LiveAuctionPage = () => {
                 Clear Filters
               </button>
               <p
-                className="text-[11px] tracking-[0.2em] text-[#747777] uppercase md:hidden"
+                className="text-[11px] uppercase tracking-[0.2em] text-[#747777] md:hidden"
                 style={headlineFont}
               >
                 {resultsLabel}
@@ -775,7 +1044,7 @@ const LiveAuctionPage = () => {
                 ref={mobileFilterButtonRef}
                 type="button"
                 onClick={openMobileFilters}
-                className="border border-black px-4 py-2 text-xs tracking-[0.22em] text-black uppercase transition hover:bg-black hover:text-white md:hidden"
+                className="border border-black px-4 py-2 text-xs uppercase tracking-[0.22em] text-black transition hover:bg-black hover:text-white md:hidden"
                 style={headlineFont}
               >
                 Open Filters
@@ -795,7 +1064,7 @@ const LiveAuctionPage = () => {
                   onClick={() => {
                     void refresh()
                   }}
-                  className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800"
+                  className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-neutral-800"
                   style={headlineFont}
                 >
                   Refresh
@@ -806,7 +1075,10 @@ const LiveAuctionPage = () => {
 
           {isLoading && lots.length === 0 ? (
             <section className="mb-8 border border-[#c4c7c7]/30 bg-[#fafafa] px-6 py-5">
-              <p className="text-[11px] tracking-[0.2em] text-[#747777] uppercase" style={headlineFont}>
+              <p
+                className="text-[11px] uppercase tracking-[0.2em] text-[#747777]"
+                style={headlineFont}
+              >
                 Syncing auction state...
               </p>
             </section>
@@ -833,7 +1105,7 @@ const LiveAuctionPage = () => {
                   className={`relative overflow-hidden bg-[#f7f7f7] ${
                     effectiveViewMode === 'grid'
                       ? 'mb-5 aspect-[4/5] md:mb-6 md:aspect-[3/4]'
-                      : 'mb-4 aspect-[5/4] md:mb-0 md:h-full md:w-full md:aspect-auto'
+                      : 'mb-4 aspect-[5/4] md:mb-0 md:aspect-auto md:h-full md:w-full'
                   }`}
                 >
                   {lot.imageSrc ? (
@@ -849,11 +1121,11 @@ const LiveAuctionPage = () => {
                       className="object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
                     />
                   ) : (
-                    <div className="flex h-full min-h-64 items-center justify-center px-6 text-center text-[11px] tracking-[0.2em] text-[#747777] uppercase">
+                    <div className="flex h-full min-h-64 items-center justify-center px-6 text-center text-[11px] uppercase tracking-[0.2em] text-[#747777]">
                       Image syncing
                     </div>
                   )}
-                  <div className="absolute top-4 left-4 flex items-center gap-2 border border-[#c4c7c7]/30 bg-white/90 px-3 py-1 backdrop-blur-md">
+                  <div className="absolute left-4 top-4 flex items-center gap-2 border border-[#c4c7c7]/30 bg-white/90 px-3 py-1 backdrop-blur-md">
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[lot.statusKey]} ${
                         lot.statusKey === 'active' || lot.statusKey === 'ending-soon'
@@ -861,15 +1133,16 @@ const LiveAuctionPage = () => {
                           : ''
                       }`}
                     />
-                    <span className="text-[10px] tracking-[0.08em] text-black uppercase">
+                    <span className="text-[10px] uppercase tracking-[0.08em] text-black">
                       {lot.status}
                     </span>
+                    /** * nextValue - Utility function * @returns void */
                   </div>
                 </div>
                 <div
                   className={`space-y-4 ${
                     effectiveViewMode === 'list'
-                      ? 'min-w-0 flex flex-col justify-between md:py-2'
+                      ? 'flex min-w-0 flex-col justify-between md:py-2'
                       : ''
                   }`}
                 >
@@ -881,17 +1154,21 @@ const LiveAuctionPage = () => {
                     <div>
                       <h2
                         className={`font-bold uppercase text-black ${
+                          /**
+                           * nextValue - Utility function
+                           * @returns void
+                           */
                           effectiveViewMode === 'grid'
                             ? 'text-lg tracking-[-0.04em]'
                             : 'text-2xl tracking-[0.02em] md:text-3xl'
                         }`}
                         style={headlineFont}
-                    >
-                      {lot.title}
-                    </h2>
+                      >
+                        {lot.title}
+                      </h2>
                       <Link
                         href={`/artworks/${lot.artworkId}`}
-                        className="mt-3 inline-block text-[11px] tracking-[0.2em] text-black/55 uppercase transition hover:text-black"
+                        className="mt-3 inline-block text-[11px] uppercase tracking-[0.2em] text-black/55 transition hover:text-black"
                         style={headlineFont}
                       >
                         View artwork details
@@ -904,6 +1181,7 @@ const LiveAuctionPage = () => {
                       ) : null}
                     </div>
                     <ShieldCheck className="h-5 w-5 shrink-0 text-[#747777] transition-colors group-hover:text-black" />
+                    /** * nextValue - Utility function * @returns void */
                   </div>
                   <div
                     className={`flex gap-4 border-[#c4c7c7]/30 ${
@@ -913,23 +1191,24 @@ const LiveAuctionPage = () => {
                     }`}
                   >
                     <div>
-                      <p className="mb-1 text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                      <p className="mb-1 text-[10px] uppercase tracking-[0.25em] text-[#747777]">
                         Current Bid
                       </p>
                       <p
-                        className={`font-bold text-black uppercase ${
+                        className={`font-bold uppercase text-black ${
                           effectiveViewMode === 'grid' ? 'text-lg' : 'text-2xl md:text-3xl'
                         }`}
                         style={headlineFont}
                       >
                         {formatBidDisplay(lot.bidValue)}
                       </p>
+                      /** * nextValue - Utility function * @returns void */
                     </div>
                     {isBidActionStatus(lot.statusKey) ? (
                       <button
                         type="button"
                         onClick={() => openBidModal(lot)}
-                        className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
+                        className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-white transition hover:bg-neutral-800"
                         style={headlineFont}
                       >
                         {lotActionLabel[lot.statusKey]}
@@ -937,7 +1216,7 @@ const LiveAuctionPage = () => {
                     ) : (
                       <Link
                         href={`/artworks/${lot.artworkId}`}
-                        className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
+                        className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-white transition hover:bg-neutral-800"
                         style={headlineFont}
                       >
                         {lotActionLabel[lot.statusKey]}
@@ -951,7 +1230,7 @@ const LiveAuctionPage = () => {
 
           {visibleLots.length === 0 ? (
             <section className="mt-12 border border-[#c4c7c7]/30 bg-[#fafafa] px-6 py-10 text-center">
-              <p className="text-sm tracking-[0.14em] text-black uppercase" style={headlineFont}>
+              <p className="text-sm uppercase tracking-[0.14em] text-black" style={headlineFont}>
                 No live auctions match your filters.
               </p>
               <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#747777]">
@@ -967,7 +1246,7 @@ const LiveAuctionPage = () => {
                   type="button"
                   onClick={() => handlePageChange(Math.max(1, safeCurrentPage - 1))}
                   disabled={safeCurrentPage === 1}
-                  className={`border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
+                  className={`border px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition ${
                     safeCurrentPage === 1
                       ? 'cursor-not-allowed border-black/15 text-black/25'
                       : 'border-black text-black hover:bg-black hover:text-white'
@@ -986,7 +1265,7 @@ const LiveAuctionPage = () => {
                       type="button"
                       onClick={() => handlePageChange(pageNumber)}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`min-w-10 border px-3 py-2 text-[11px] tracking-[0.18em] uppercase transition ${
+                      className={`min-w-10 border px-3 py-2 text-[11px] uppercase tracking-[0.18em] transition ${
                         isActive
                           ? 'border-black bg-black text-white'
                           : 'border-black/25 text-black hover:border-black hover:bg-black hover:text-white'
@@ -1001,7 +1280,7 @@ const LiveAuctionPage = () => {
                   type="button"
                   onClick={() => handlePageChange(Math.min(totalPages, safeCurrentPage + 1))}
                   disabled={safeCurrentPage === totalPages}
-                  className={`border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
+                  className={`border px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition ${
                     safeCurrentPage === totalPages
                       ? 'cursor-not-allowed border-black/15 text-black/25'
                       : 'border-black text-black hover:bg-black hover:text-white'
@@ -1012,9 +1291,7 @@ const LiveAuctionPage = () => {
                 </button>
               </div>
             ) : null}
-            <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
-              {footerLabel}
-            </p>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-[#747777]">{footerLabel}</p>
           </section>
         </main>
 
@@ -1032,12 +1309,12 @@ const LiveAuctionPage = () => {
             >
               <div className="flex items-center justify-between border-b border-[#c4c7c7]/30 px-6 py-5">
                 <div>
-                  <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-[#747777]">
                     Filter Auctions
                   </p>
                   <p
                     id="mobile-auction-filters-title"
-                    className="mt-1 text-lg font-bold text-black uppercase"
+                    className="mt-1 text-lg font-bold uppercase text-black"
                     style={headlineFont}
                   >
                     Previewing {mobilePreviewLabel}
@@ -1047,7 +1324,7 @@ const LiveAuctionPage = () => {
                   <button
                     type="button"
                     onClick={resetMobileFilters}
-                    className="border border-black/15 px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-black uppercase transition hover:border-black hover:bg-black hover:text-white"
+                    className="border border-black/15 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-black transition hover:border-black hover:bg-black hover:text-white"
                     style={headlineFont}
                   >
                     Clear
@@ -1056,7 +1333,7 @@ const LiveAuctionPage = () => {
                     ref={mobileFilterCloseButtonRef}
                     type="button"
                     onClick={() => setIsMobileFiltersOpen(false)}
-                    className="border border-black bg-black px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800"
+                    className="border border-black bg-black px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-neutral-800"
                     style={headlineFont}
                   >
                     Close
@@ -1067,10 +1344,13 @@ const LiveAuctionPage = () => {
               <div className="flex-1 space-y-8 overflow-y-auto px-6 py-6">
                 <section>
                   <div className="mb-3 flex items-center justify-between gap-3">
-                    <span className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                    <span className="text-[10px] uppercase tracking-[0.25em] text-[#747777]">
                       Category
                     </span>
-                    <span className="text-[11px] tracking-[0.14em] text-black uppercase" style={headlineFont}>
+                    <span
+                      className="text-[11px] uppercase tracking-[0.14em] text-black"
+                      style={headlineFont}
+                    >
                       {mobileSelectedCategoryOption.label}
                     </span>
                   </div>
@@ -1090,8 +1370,10 @@ const LiveAuctionPage = () => {
                           {option.label}
                         </span>
                         <span
-                          className={`mt-1 block text-[11px] tracking-[0.08em] uppercase ${
-                            option.key === mobileSelectedCategory ? 'text-white/70' : 'text-[#747777]'
+                          className={`mt-1 block text-[11px] uppercase tracking-[0.08em] ${
+                            option.key === mobileSelectedCategory
+                              ? 'text-white/70'
+                              : 'text-[#747777]'
                           }`}
                         >
                           {option.helper}
@@ -1103,10 +1385,13 @@ const LiveAuctionPage = () => {
 
                 <section>
                   <div className="mb-3 flex items-center justify-between gap-3">
-                    <span className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                    <span className="text-[10px] uppercase tracking-[0.25em] text-[#747777]">
                       Status
                     </span>
-                    <span className="text-[11px] tracking-[0.14em] text-black uppercase" style={headlineFont}>
+                    <span
+                      className="text-[11px] uppercase tracking-[0.14em] text-black"
+                      style={headlineFont}
+                    >
                       {mobileSelectedStatusOption.label}
                     </span>
                   </div>
@@ -1126,7 +1411,7 @@ const LiveAuctionPage = () => {
                           {option.label}
                         </span>
                         <span
-                          className={`mt-1 block text-[11px] tracking-[0.08em] uppercase ${
+                          className={`mt-1 block text-[11px] uppercase tracking-[0.08em] ${
                             option.key === mobileSelectedStatus ? 'text-white/70' : 'text-[#747777]'
                           }`}
                         >
@@ -1139,11 +1424,12 @@ const LiveAuctionPage = () => {
 
                 <section>
                   <div className="mb-5 flex items-center justify-between gap-3">
-                    <span className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                    <span className="text-[10px] uppercase tracking-[0.25em] text-[#747777]">
                       Price Range
                     </span>
                     <span className="text-lg font-black text-black" style={bodyFont}>
-                      {formatEthDisplay(mobileAppliedMinPrice)} - {formatEthDisplay(mobileAppliedMaxPrice)} ETH
+                      {formatEthDisplay(mobileAppliedMinPrice)} -{' '}
+                      {formatEthDisplay(mobileAppliedMaxPrice)} ETH
                     </span>
                   </div>
 
@@ -1164,7 +1450,10 @@ const LiveAuctionPage = () => {
                       step={0.1}
                       value={mobileAppliedMinPrice}
                       onChange={(event) => {
-                        const nextValue = Math.min(Number(event.target.value), mobileAppliedMaxPrice)
+                        const nextValue = Math.min(
+                          Number(event.target.value),
+                          mobileAppliedMaxPrice,
+                        )
                         setMobileAppliedMinPrice(nextValue)
                         setMobileMinInputValue(`${nextValue}`)
                       }}
@@ -1178,7 +1467,10 @@ const LiveAuctionPage = () => {
                       step={0.1}
                       value={mobileAppliedMaxPrice}
                       onChange={(event) => {
-                        const nextValue = Math.max(Number(event.target.value), mobileAppliedMinPrice)
+                        const nextValue = Math.max(
+                          Number(event.target.value),
+                          mobileAppliedMinPrice,
+                        )
                         setMobileAppliedMaxPrice(nextValue)
                         setMobileMaxInputValue(`${nextValue}`)
                       }}
@@ -1189,7 +1481,7 @@ const LiveAuctionPage = () => {
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="block">
-                      <span className="mb-2 block text-[10px] tracking-[0.16em] text-[#8a8a8a] uppercase">
+                      <span className="mb-2 block text-[10px] uppercase tracking-[0.16em] text-[#8a8a8a]">
                         Min
                       </span>
                       <input
@@ -1208,10 +1500,12 @@ const LiveAuctionPage = () => {
                         className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.35rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                       />
                     </label>
+                    /** * pageNumber - Utility function * @returns void */
                     <label className="block">
-                      <span className="mb-2 block text-[10px] tracking-[0.16em] text-[#8a8a8a] uppercase">
+                      <span className="mb-2 block text-[10px] uppercase tracking-[0.16em] text-[#8a8a8a]">
                         Max
                       </span>
+                      /** * isActive - Utility function * @returns void */
                       <input
                         type="text"
                         inputMode="decimal"
@@ -1236,7 +1530,7 @@ const LiveAuctionPage = () => {
                 <button
                   type="button"
                   onClick={applyMobileFilters}
-                  className="w-full bg-black px-5 py-4 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90"
+                  className="w-full bg-black px-5 py-4 text-center text-[13px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-black/90"
                   style={headlineFont}
                 >
                   Apply Filters ({mobilePreviewLots.length})
@@ -1254,7 +1548,6 @@ const LiveAuctionPage = () => {
           onRefreshLot={refreshAuctionById}
           onViewOrderStatus={handleViewOrderStatus}
         />
-
       </div>
     </>
   )
@@ -1263,3 +1556,20 @@ const LiveAuctionPage = () => {
 export { LiveAuctionPage }
 
 export default LiveAuctionPage
+
+/**
+ * nextValue - Utility function
+ * @returns void
+ */
+/**
+ * nextValue - Utility function
+ * @returns void
+ */
+/**
+ * nextValue - Utility function
+ * @returns void
+ */
+/**
+ * nextValue - Utility function
+ * @returns void
+ */

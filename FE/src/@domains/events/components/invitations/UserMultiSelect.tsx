@@ -1,62 +1,85 @@
-import { useState, useId } from "react";
-import { Check, ChevronDown, X } from "lucide-react";
+import { useState, useId } from 'react'
+import { Check, ChevronDown, X } from 'lucide-react'
 
 // @shared
-import { cn } from "@shared/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "@shared/components/ui/popover";
+import { cn } from '@shared/lib/utils'
+import { Popover, PopoverContent, PopoverTrigger } from '@shared/components/ui/popover'
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@shared/components/ui/command";
+} from '@shared/components/ui/command'
 
 // @domains
-import { mockProfiles, type DiscoverProfile } from "@domains/discover/mock/mockProfiles";
-import { SelectedUserChip } from "./SelectedUserChip";
+import { mockProfiles, type DiscoverProfile } from '@domains/discover/mock/mockProfiles'
+import { SelectedUserChip } from './SelectedUserChip'
 
 type UserMultiSelectProps = {
-  value: string[]; // Array of user IDs
-  onChange: (value: string[]) => void;
-  placeholder?: string;
-};
+  value: string[] // Array of user IDs
+  onChange: (value: string[]) => void
+  placeholder?: string
+}
 
+/**
+ * UserMultiSelect - React component
+ * @returns React element
+ */
 export function UserMultiSelect({
   value,
   onChange,
-  placeholder = "Search users to invite...",
+  placeholder = 'Search users to invite...',
 }: UserMultiSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const listId = useId();
+  const [isOpen, setIsOpen] = useState(false)
+  const listId = useId()
 
   // Get selected users
-  const selectedUsers = mockProfiles.filter((profile) =>
-    value.includes(profile.id)
-  );
+  /**
+   * listId - Utility function
+   * @returns void
+   */
+  const selectedUsers = mockProfiles.filter((profile) => value.includes(profile.id))
 
-  const MAX_VISIBLE = 3;
-  const visibleUsers = selectedUsers.slice(0, MAX_VISIBLE);
-  const hiddenCount = Math.max(0, selectedUsers.length - MAX_VISIBLE);
+  const MAX_VISIBLE = 3
+  const visibleUsers = selectedUsers.slice(0, MAX_VISIBLE)
+  /**
+   * selectedUsers - Utility function
+   * @returns void
+   */
+  const hiddenCount = Math.max(0, selectedUsers.length - MAX_VISIBLE)
 
   const handleToggle = (userId: string) => {
     if (value.includes(userId)) {
-      onChange(value.filter((id) => id !== userId));
+      onChange(value.filter((id) => id !== userId))
     } else {
-      onChange([...value, userId]);
+      onChange([...value, userId])
+      /**
+       * MAX_VISIBLE - React component
+       * @returns React element
+       */
     }
-  };
+  }
 
   const handleRemoveUser = (userId: string) => {
-    onChange(value.filter((id) => id !== userId));
-  };
+    /**
+     * visibleUsers - Utility function
+     * @returns void
+     */
+    onChange(value.filter((id) => id !== userId))
+  }
 
   const handleClearAll = () => {
-    onChange([]);
-  };
+    /**
+     * hiddenCount - Utility function
+     * @returns void
+     */
+    onChange([])
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen} modal={false}>
+      /** * handleToggle - Utility function * @returns void */
       <PopoverTrigger asChild>
         <button
           type="button"
@@ -68,6 +91,10 @@ export function UserMultiSelect({
         >
           <div className="flex flex-1 items-center gap-2 overflow-hidden">
             {value.length ? (
+              /**
+               * handleRemoveUser - Utility function
+               * @returns void
+               */
               <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
                 {visibleUsers.map((user) => (
                   <SelectedUserChip
@@ -75,6 +102,10 @@ export function UserMultiSelect({
                     user={user}
                     onRemove={() => handleRemoveUser(user.id)}
                   />
+                  /**
+                   * handleClearAll - Utility function
+                   * @returns void
+                   */
                 ))}
                 {hiddenCount > 0 ? (
                   <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
@@ -82,9 +113,9 @@ export function UserMultiSelect({
                     <button
                       type="button"
                       onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        handleClearAll();
+                        event.preventDefault()
+                        event.stopPropagation()
+                        handleClearAll()
                       }}
                       className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 text-[10px] hover:bg-slate-100"
                       aria-label="Clear selection"
@@ -104,9 +135,9 @@ export function UserMultiSelect({
                 <button
                   type="button"
                   onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    handleClearAll();
+                    event.preventDefault()
+                    event.stopPropagation()
+                    handleClearAll()
                   }}
                   className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
                   aria-label="Clear selection"
@@ -127,7 +158,7 @@ export function UserMultiSelect({
         sideOffset={8}
         onWheel={(e) => e.stopPropagation()}
       >
-        <Command className="rounded-xl border-0 bg-white text-slate-900 shadow-none [&_[cmdk-input-wrapper]]:border-b [&_[cmdk-input-wrapper]]:border-slate-200 [&_[cmdk-input]]:text-slate-900 [&_[cmdk-input]]:placeholder:text-slate-500 [&_[cmdk-input-wrapper]_svg]:text-slate-500">
+        <Command className="rounded-xl border-0 bg-white text-slate-900 shadow-none [&_[cmdk-input-wrapper]]:border-b [&_[cmdk-input-wrapper]]:border-slate-200 [&_[cmdk-input-wrapper]_svg]:text-slate-500 [&_[cmdk-input]]:text-slate-900 [&_[cmdk-input]]:placeholder:text-slate-500">
           <CommandInput
             placeholder="Search by name or username..."
             className="h-10 text-slate-900 placeholder:text-slate-500"
@@ -142,16 +173,16 @@ export function UserMultiSelect({
                 value={`${profile.fullName} ${profile.username}`}
                 onSelect={() => handleToggle(profile.id)}
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 py-3 text-slate-900 transition hover:bg-slate-100 active:bg-slate-200",
-                  value.includes(profile.id) && "bg-blue-50 text-blue-700"
+                  'flex cursor-pointer items-center gap-3 py-3 text-slate-900 transition hover:bg-slate-100 active:bg-slate-200',
+                  value.includes(profile.id) && 'bg-blue-50 text-blue-700',
                 )}
               >
                 <span
                   className={cn(
-                    "flex h-4 w-4 shrink-0 items-center justify-center rounded border border-slate-300",
+                    'flex h-4 w-4 shrink-0 items-center justify-center rounded border border-slate-300',
                     value.includes(profile.id)
-                      ? "border-blue-600 bg-blue-600 text-white"
-                      : "bg-white"
+                      ? 'border-blue-600 bg-blue-600 text-white'
+                      : 'bg-white',
                   )}
                 >
                   {value.includes(profile.id) ? <Check className="h-3 w-3" /> : null}
@@ -178,9 +209,7 @@ export function UserMultiSelect({
                       </svg>
                     )}
                   </div>
-                  <span className="truncate text-xs text-slate-500">
-                    @{profile.username}
-                  </span>
+                  <span className="truncate text-xs text-slate-500">@{profile.username}</span>
                 </div>
               </CommandItem>
             ))}
@@ -188,5 +217,5 @@ export function UserMultiSelect({
         </Command>
       </PopoverContent>
     </Popover>
-  );
+  )
 }

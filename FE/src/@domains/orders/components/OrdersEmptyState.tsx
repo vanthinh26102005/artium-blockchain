@@ -7,6 +7,10 @@ type OrdersEmptyStateProps = {
   onResetFilters: () => void
 }
 
+/**
+ * OrdersEmptyState - React component
+ * @returns React element
+ */
 export const OrdersEmptyState = ({
   isFiltered,
   scopeLabel,

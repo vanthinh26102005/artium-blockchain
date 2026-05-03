@@ -4,6 +4,10 @@ import type { Engine, ISourceOptions } from 'tsparticles-engine'
 import { loadSlim } from 'tsparticles-slim'
 
 // -- dynamic imports --
+/**
+ * Particles - React component
+ * @returns React element
+ */
 const Particles = dynamic(() => import('react-tsparticles').then((mod) => mod.default), {
   ssr: false,
 })
@@ -11,11 +15,19 @@ const Particles = dynamic(() => import('react-tsparticles').then((mod) => mod.de
 export const HeroParticles = () => {
   // -- handlers --
   const particlesInit = useCallback(async (engine: Engine) => {
+    /**
+     * HeroParticles - React component
+     * @returns React element
+     */
     await loadSlim(engine)
   }, [])
 
   // -- config --
   const options = useMemo<ISourceOptions>(
+    /**
+     * particlesInit - Utility function
+     * @returns void
+     */
     () => ({
       fullScreen: { enable: false },
       background: { color: 'transparent' },
@@ -24,6 +36,10 @@ export const HeroParticles = () => {
       interactivity: {
         detectsOn: 'window',
         events: {
+          /**
+           * options - Utility function
+           * @returns void
+           */
           onHover: {
             enable: true,
             mode: ['grab', 'repulse'],

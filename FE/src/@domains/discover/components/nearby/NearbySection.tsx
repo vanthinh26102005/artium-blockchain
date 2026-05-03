@@ -8,6 +8,10 @@ import { MapPin } from 'lucide-react'
 import { ChangeLocationModal } from '@domains/discover/components/nearby/ChangeLocationModal'
 import { useNearbyLocation } from '@domains/discover/state/useNearbyLocation'
 
+/**
+ * NearbySection - React component
+ * @returns React element
+ */
 export const NearbySection = () => {
   // -- state --
   const { placeName, radiusMiles, setPlaceName, setRadiusMiles } = useNearbyLocation()
@@ -19,6 +23,10 @@ export const NearbySection = () => {
   const handleApply = (next: { location: string; radiusMiles: number }) => {
     setPlaceName(next.location)
     setRadiusMiles(next.radiusMiles)
+    /**
+     * handleApply - Utility function
+     * @returns void
+     */
     setIsModalOpen(false)
   }
 

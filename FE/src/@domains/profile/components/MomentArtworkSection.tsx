@@ -13,6 +13,10 @@ type MomentArtworkSectionProps = {
   username: string
 }
 
+/**
+ * MomentArtworkSection - React component
+ * @returns React element
+ */
 export const MomentArtworkSection = ({ artwork, username }: MomentArtworkSectionProps) => {
   return (
     <CollapsibleSection title="Artwork" defaultOpen={false}>

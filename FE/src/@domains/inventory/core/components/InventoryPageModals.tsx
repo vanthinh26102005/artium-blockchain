@@ -45,6 +45,10 @@ type InventoryPageModalsProps = {
   onCloseToast: () => void
 }
 
+/**
+ * InventoryPageModals - React component
+ * @returns React element
+ */
 export const InventoryPageModals = ({
   isCreateFolderOpen,
   onCloseCreateFolder,

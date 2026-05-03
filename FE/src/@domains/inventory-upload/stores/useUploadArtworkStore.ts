@@ -3,10 +3,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 // @shared - apis
-import type {
-  ArtworkUploadDraft,
-  SaveArtworkDraftInput,
-} from '@shared/apis/artworkApis'
+import type { ArtworkUploadDraft, SaveArtworkDraftInput } from '@shared/apis/artworkApis'
 
 // @domains - inventory upload
 import {
@@ -89,6 +86,10 @@ type UploadArtworkState = {
   setHasSubmitted: (hasSubmitted: boolean) => void
 }
 
+/**
+ * createLocalId - Utility function
+ * @returns void
+ */
 const createLocalId = () => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID()
@@ -99,6 +100,10 @@ const createLocalId = () => {
 const createPreviewUrl = (file: File) => {
   if (typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
     return undefined
+    /**
+     * createPreviewUrl - Utility function
+     * @returns void
+     */
   }
   return URL.createObjectURL(file)
 }
@@ -109,6 +114,10 @@ const revokePreviewUrl = (previewUrl?: string) => {
   }
   URL.revokeObjectURL(previewUrl)
 }
+/**
+ * revokePreviewUrl - Utility function
+ * @returns void
+ */
 
 const createEmptyListing = (): UploadListingState => ({
   status: 'sale',
@@ -119,6 +128,10 @@ const createEmptyListing = (): UploadListingState => ({
 })
 
 const createEmptyStory = (): UploadStoryState => ({
+  /**
+   * createEmptyListing - Utility function
+   * @returns void
+   */
   tags: {
     vibes: [],
     values: [],
@@ -130,6 +143,10 @@ const createEmptyStory = (): UploadStoryState => ({
       question: '',
       answer: '',
     },
+    /**
+     * createEmptyStory - Utility function
+     * @returns void
+     */
   ],
   moment: {
     caption: '',
@@ -152,6 +169,10 @@ const createEmptyLocationDraft = (): UploadLocationDraft => ({
   country: '',
   postalCode: '',
 })
+/**
+ * createEmptyMedia - Utility function
+ * @returns void
+ */
 
 const createEmptyDetails = (): UploadDetailsState => ({
   title: '',
@@ -161,6 +182,10 @@ const createEmptyDetails = (): UploadDetailsState => ({
   dimensions: {
     height: '',
     width: '',
+    /**
+     * createEmptyLocationDraft - Utility function
+     * @returns void
+     */
     depth: '',
     unit: 'in',
   },
@@ -174,6 +199,10 @@ const createEmptyDetails = (): UploadDetailsState => ({
   customTags: [],
   customTagInput: '',
   deliveryNote: '',
+  /**
+   * createEmptyDetails - Utility function
+   * @returns void
+   */
 })
 
 const createMediaItem = (file: File, id = createLocalId()): UploadMediaItem => ({
@@ -200,6 +229,10 @@ const buildTouchedFromErrors = (errors: UploadValidationErrors) =>
   }, {})
 
 const setNestedValue = <T extends Record<string, unknown>>(
+  /**
+   * createMediaItem - Utility function
+   * @returns void
+   */
   target: T,
   path: string[],
   value: string | number | boolean,
@@ -213,6 +246,10 @@ const setNestedValue = <T extends Record<string, unknown>>(
     next[key] = value
     return next as T
   }
+  /**
+   * buildValidationState - Utility function
+   * @returns void
+   */
   const currentChild = (target[key] ?? {}) as Record<string, unknown>
   next[key] = setNestedValue(currentChild, rest, value)
   return next as T
@@ -223,6 +260,10 @@ const serializeMediaItem = (item: UploadMediaItem | null) => {
     return null
   }
   return {
+    /**
+     * buildTouchedFromErrors - Utility function
+     * @returns void
+     */
     id: item.id,
     uploaded: item.uploaded,
     publicId: item.publicId,
@@ -232,6 +273,10 @@ const serializeMediaItem = (item: UploadMediaItem | null) => {
     width: item.width,
     height: item.height,
     bucket: item.bucket,
+    /**
+     * setNestedValue - Utility function
+     * @returns void
+     */
     name: item.name,
     size: item.size,
     type: item.type,
@@ -244,6 +289,10 @@ const stringifyOptional = (value: string | number | null | undefined) =>
 
 const parseOptionalNumber = (value: string) => {
   const trimmed = value.trim()
+  /**
+   * next - Utility function
+   * @returns void
+   */
   if (!trimmed) {
     return undefined
   }
@@ -252,6 +301,10 @@ const parseOptionalNumber = (value: string) => {
 }
 
 const getLocationName = (locations: UploadLocation[], locationId: string) =>
+  /**
+   * currentChild - Utility function
+   * @returns void
+   */
   locations.find((location) => location.id === locationId)?.name ?? locationId
 
 const createUploadedMediaItem = (
@@ -260,6 +313,10 @@ const createUploadedMediaItem = (
 ): UploadMediaItem => {
   const imageId = image.publicId ?? image.id ?? fallbackName
 
+  /**
+   * serializeMediaItem - Utility function
+   * @returns void
+   */
   return {
     id: imageId,
     uploaded: true,
@@ -284,23 +341,40 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
       media: createEmptyMedia(),
       details: createEmptyDetails(),
       locations: [],
+      /**
+       * stringifyOptional - Utility function
+       * @returns void
+       */
       listing: createEmptyListing(),
       story: createEmptyStory(),
       isDirty: false,
       isSaving: false,
       isHydrated: false,
       hydrationError: null,
+      /**
+       * parseOptionalNumber - Utility function
+       * @returns void
+       */
       errors: {},
       touched: {},
       hasSubmitted: false,
       markFieldTouched: (path: string) =>
+        /**
+         * trimmed - Utility function
+         * @returns void
+         */
         set((state) => ({
           touched: { ...state.touched, [path]: true },
         })),
       setHasSubmitted: (hasSubmitted) => set({ hasSubmitted }),
-      setStep: (step) => set({ step: Math.max(1, Math.min(2, step)) as UploadStep, hasSubmitted: false }),
+      setStep: (step) =>
+        set({ step: Math.max(1, Math.min(2, step)) as UploadStep, hasSubmitted: false }),
       nextStep: () => {
         set({ hasSubmitted: true })
+        /**
+         * parsed - Utility function
+         * @returns void
+         */
         const { step } = get()
         const isValid = get().validateStep(step)
         if (!isValid) {
@@ -308,19 +382,31 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
         }
         if (step < 2) {
           set({ step: 2, hasSubmitted: false })
+          /**
+           * getLocationName - Utility function
+           * @returns void
+           */
           return true
         }
         get().clearDirty()
         return true
       },
       prevStep: () =>
+        /**
+         * createUploadedMediaItem - Utility function
+         * @returns void
+         */
         set((state) => ({
           step: Math.max(1, state.step - 1) as UploadStep,
-          hasSubmitted: false
+          hasSubmitted: false,
         })),
       setField: (path, value) =>
         set((state) => {
           const [scope, ...rest] = path.split('.')
+          /**
+           * imageId - Utility function
+           * @returns void
+           */
           let nextDetails = state.details
           let nextListing = state.listing
           let nextStory = state.story
@@ -342,6 +428,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             story: nextStory,
           }
           const errors = validateUploadState(buildValidationState(nextState))
+          /**
+           * useUploadArtworkStore - Custom React hook
+           * @returns void
+           */
 
           return {
             details: nextDetails,
@@ -371,6 +461,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           }
 
           const nextId = state.media.coverImage?.id ?? createLocalId()
+          /**
+           * isValid - Utility function
+           * @returns void
+           */
           const validationError = validateUploadState({
             media: {
               ...state.media,
@@ -407,6 +501,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             media: nextMedia,
             errors,
             touched: { ...state.touched, 'media.coverImage': true },
+            /**
+             * nextState - Utility function
+             * @returns void
+             */
             isDirty: true,
           }
         }),
@@ -416,6 +514,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             UPLOAD_MEDIA_RULES.MAX_ADDITIONAL_IMAGES - state.media.additionalImages.length
           if (remainingSlots <= 0) {
             return {
+              /**
+               * errors - Utility function
+               * @returns void
+               */
               errors: {
                 ...state.errors,
                 'media.additionalImages': `You can add up to ${UPLOAD_MEDIA_RULES.MAX_ADDITIONAL_IMAGES} additional images.`,
@@ -437,14 +539,26 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
                 additionalImages: [...state.media.additionalImages, mediaItem],
               },
             }
+            /**
+             * nextMedia - Utility function
+             * @returns void
+             */
             const error = validateUploadState(buildValidationState(nextState))[
               'media.additionalImages'
             ]
             if (error) {
+              /**
+               * nextState - Utility function
+               * @returns void
+               */
               validationError = error
               revokePreviewUrl(mediaItem.previewUrl)
               return
             }
+            /**
+             * errors - Utility function
+             * @returns void
+             */
             saveStoredFile(mediaItem.id, file).catch(() => {})
             newItems.push(mediaItem)
           })
@@ -457,10 +571,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           }
 
           const nextMedia = {
+            /**
+             * nextId - Utility function
+             * @returns void
+             */
             ...state.media,
             additionalImages: [...state.media.additionalImages, ...newItems],
           }
           const nextState = { ...state, media: nextMedia }
+          /**
+           * validationError - Utility function
+           * @returns void
+           */
           const errors = {
             ...validateUploadState(buildValidationState(nextState)),
             ...(validationError ? { 'media.additionalImages': validationError } : {}),
@@ -489,20 +611,36 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             size: file.size,
             type: file.type,
             lastModified: file.lastModified,
+            /**
+             * nextItem - Utility function
+             * @returns void
+             */
           }
 
           const validationError = validateUploadState({
             media: {
               ...state.media,
               additionalImages: nextAdditionalImages,
+              /**
+               * nextMedia - Utility function
+               * @returns void
+               */
             },
             details: state.details,
             listing: state.listing,
             story: state.story,
+            /**
+             * nextState - Utility function
+             * @returns void
+             */
           })['media.additionalImages']
 
           if (validationError) {
             return {
+              /**
+               * errors - Utility function
+               * @returns void
+               */
               errors: { ...state.errors, 'media.additionalImages': validationError },
               touched: { ...state.touched, 'media.additionalImages': true },
             }
@@ -517,6 +655,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             ...state.media,
             additionalImages: nextAdditionalImages,
           }
+          /**
+           * remainingSlots - Utility function
+           * @returns void
+           */
           const nextState = { ...state, media: nextMedia }
           const errors = validateUploadState(buildValidationState(nextState))
 
@@ -532,10 +674,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           const target = state.media.additionalImages.find((item) => item.id === id)
           if (target?.previewUrl) {
             revokePreviewUrl(target.previewUrl)
+            /**
+             * acceptedFiles - Utility function
+             * @returns void
+             */
           }
           removeStoredFile(id).catch(() => {})
           const nextMedia = {
             ...state.media,
+            /**
+             * newItems - Utility function
+             * @returns void
+             */
             additionalImages: state.media.additionalImages.filter((item) => item.id !== id),
           }
           const nextState = { ...state, media: nextMedia }
@@ -543,10 +693,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           return {
             media: nextMedia,
             errors,
+            /**
+             * mediaItem - Utility function
+             * @returns void
+             */
             touched: { ...state.touched, 'media.additionalImages': true },
             isDirty: true,
           }
         }),
+      /**
+       * nextState - Utility function
+       * @returns void
+       */
       setMomentVideo: (file) =>
         set((state) => {
           if (!file) {
@@ -557,6 +715,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             const nextMedia = { ...state.media, momentVideo: null }
             const nextState = { ...state, media: nextMedia }
             const errors = validateUploadState(buildValidationState(nextState))
+            /**
+             * error - Utility function
+             * @returns void
+             */
             return {
               media: nextMedia,
               errors,
@@ -579,6 +741,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
               },
             },
             details: state.details,
+            /**
+             * nextMedia - Utility function
+             * @returns void
+             */
             listing: state.listing,
             story: state.story,
           })['media.momentVideo']
@@ -586,10 +752,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           if (validationError) {
             return {
               errors: { ...state.errors, 'media.momentVideo': validationError },
+              /**
+               * nextState - Utility function
+               * @returns void
+               */
               touched: { ...state.touched, 'media.momentVideo': true },
             }
           }
 
+          /**
+           * errors - Utility function
+           * @returns void
+           */
           revokePreviewUrl(state.media.momentVideo?.previewUrl)
           const nextItem = createMediaItem(file, nextId)
           saveStoredFile(nextItem.id, file).catch(() => {})
@@ -607,6 +781,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
       addTag: (group, value) =>
         set((state) => {
           const trimmed = value.trim()
+          /**
+           * targetIndex - Utility function
+           * @returns void
+           */
           if (!trimmed || state.story.tags[group].includes(trimmed)) {
             return {}
           }
@@ -615,10 +793,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             [group]: [...state.story.tags[group], trimmed],
           }
           const nextStory = {
+            /**
+             * existing - Utility function
+             * @returns void
+             */
             ...state.story,
             tags: nextTags,
           }
           const nextState = { ...state, story: nextStory }
+          /**
+           * nextAdditionalImages - Utility function
+           * @returns void
+           */
           const errors = validateUploadState(buildValidationState(nextState))
           return {
             story: nextStory,
@@ -632,6 +818,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             ...state.story.tags,
             [group]: state.story.tags[group].filter((tag) => tag !== value),
           }
+          /**
+           * validationError - Utility function
+           * @returns void
+           */
           const nextStory = {
             ...state.story,
             tags: nextTags,
@@ -655,11 +845,19 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
       addLocation: () =>
         set((state) => {
           const rawDraft = state.details.locationDraft ?? {}
+          /**
+           * nextItem - Utility function
+           * @returns void
+           */
           const draft = {
             name: rawDraft.name ?? '',
             address1: rawDraft.address1 ?? '',
             address2: rawDraft.address2 ?? '',
             city: rawDraft.city ?? '',
+            /**
+             * nextMedia - Utility function
+             * @returns void
+             */
             state: rawDraft.state ?? '',
             country: rawDraft.country ?? '',
             postalCode: rawDraft.postalCode ?? '',
@@ -667,10 +865,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           const name = draft.name.trim()
           if (!name) {
             return {}
+            /**
+             * nextState - Utility function
+             * @returns void
+             */
           }
           const nextLocation: UploadLocation = {
             id: createLocalId(),
             name,
+            /**
+             * errors - Utility function
+             * @returns void
+             */
             address1: draft.address1.trim(),
             address2: draft.address2.trim(),
             city: draft.city.trim(),
@@ -685,6 +891,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           }
           return {
             locations: [...state.locations, nextLocation],
+            /**
+             * target - Utility function
+             * @returns void
+             */
             details: nextDetails,
             isDirty: true,
           }
@@ -693,6 +903,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
         set((state) => {
           const nextLocations = state.locations.filter((location) => location.id !== id)
           const nextDetails = {
+            /**
+             * nextMedia - Utility function
+             * @returns void
+             */
             ...state.details,
             locationId: state.details.locationId === id ? '' : state.details.locationId,
           }
@@ -700,10 +914,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             locations: nextLocations,
             details: nextDetails,
             isDirty: true,
+            /**
+             * nextState - Utility function
+             * @returns void
+             */
           }
         }),
       clearLocationDraft: () =>
         set((state) => ({
+          /**
+           * errors - Utility function
+           * @returns void
+           */
           details: {
             ...state.details,
             locationDraft: createEmptyLocationDraft(),
@@ -722,14 +944,26 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
               },
             }
           }
+          /**
+           * nextMedia - Utility function
+           * @returns void
+           */
           return {
             details: {
               ...state.details,
               customTags: [...customTags, nextValue],
+              /**
+               * nextState - Utility function
+               * @returns void
+               */
               customTagInput: '',
             },
             isDirty: true,
           }
+          /**
+           * errors - Utility function
+           * @returns void
+           */
         }),
       removeCustomTag: (value) =>
         set((state) => {
@@ -742,10 +976,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             isDirty: true,
           }
         }),
+      /**
+       * nextId - Utility function
+       * @returns void
+       */
       clearCustomTags: () =>
         set((state) => ({
           details: {
             ...state.details,
+            /**
+             * validationError - Utility function
+             * @returns void
+             */
             customTags: [],
           },
           isDirty: true,
@@ -774,19 +1016,35 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           const nextTrivia = state.story.trivia.map((item) =>
             item.id === id ? { ...item, [field]: value } : item,
           )
+          /**
+           * nextItem - Utility function
+           * @returns void
+           */
           const nextStory = {
             ...state.story,
             trivia: nextTrivia,
           }
           const nextState = { ...state, story: nextStory }
+          /**
+           * nextMedia - Utility function
+           * @returns void
+           */
           const errors = validateUploadState(buildValidationState(nextState))
           return {
             story: nextStory,
             errors,
+            /**
+             * nextState - Utility function
+             * @returns void
+             */
             touched: { ...state.touched, [`story.trivia.${id}.${field}`]: true },
             isDirty: true,
           }
         }),
+      /**
+       * errors - Utility function
+       * @returns void
+       */
       removeTrivia: (id) =>
         set((state) => {
           const nextTrivia = state.story.trivia.filter((item) => item.id !== id)
@@ -801,6 +1059,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           delete nextTouched[`story.trivia.${id}.question`]
           return {
             story: nextStory,
+            /**
+             * trimmed - Utility function
+             * @returns void
+             */
             errors,
             touched: nextTouched,
             isDirty: true,
@@ -808,6 +1070,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
         }),
       resetDraft: () => {
         const { media } = get()
+        /**
+         * nextTags - Utility function
+         * @returns void
+         */
         revokePreviewUrl(media.coverImage?.previewUrl)
         revokePreviewUrl(media.momentVideo?.previewUrl)
         media.additionalImages.forEach((item) => revokePreviewUrl(item.previewUrl))
@@ -815,6 +1081,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
         set({
           step: 1,
           draftId: null,
+          /**
+           * nextStory - Utility function
+           * @returns void
+           */
           media: createEmptyMedia(),
           details: createEmptyDetails(),
           locations: [],
@@ -822,10 +1092,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           story: createEmptyStory(),
           isDirty: false,
           isSaving: false,
+          /**
+           * nextState - Utility function
+           * @returns void
+           */
           isHydrated: false,
           hydrationError: null,
           errors: {},
           touched: {},
+          /**
+           * errors - Utility function
+           * @returns void
+           */
           hasSubmitted: false,
         })
       },
@@ -838,6 +1116,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
       hydrateFromBackendDraft: (draft) =>
         set((state) => {
           const images = draft.images ?? []
+          /**
+           * nextTags - Utility function
+           * @returns void
+           */
           const primaryImage = images.find((image) => image.isPrimary === true) ?? images[0]
           const additionalImages = images
             .filter((image) => image !== primaryImage)
@@ -845,24 +1127,36 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           const backendLocation = typeof draft.location === 'string' ? draft.location : ''
           const nextLocations =
             backendLocation && !state.locations.some((location) => location.id === backendLocation)
-              ? [
+              ? /**
+                 * nextStory - Utility function
+                 * @returns void
+                 */
+                [
                   ...state.locations,
                   {
                     id: backendLocation,
                     name: backendLocation,
                     address1: '',
                     address2: '',
+                    /**
+                     * nextState - Utility function
+                     * @returns void
+                     */
                     city: '',
                     state: '',
                     country: '',
                     postalCode: '',
+                    /**
+                     * errors - Utility function
+                     * @returns void
+                     */
                   },
                 ]
               : state.locations
 
           const nextDetails: UploadDetailsState = {
             ...state.details,
-            title: draft.title === 'Untitled draft' ? '' : draft.title ?? '',
+            title: draft.title === 'Untitled draft' ? '' : (draft.title ?? ''),
             description: draft.description ?? '',
             year: stringifyOptional(draft.creationYear),
             editionRun: draft.editionRun ?? '',
@@ -876,10 +1170,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
               value: stringifyOptional(draft.weight?.value),
               unit: draft.weight?.unit === 'kg' ? 'kg' : 'lbs',
             },
+            /**
+             * rawDraft - Utility function
+             * @returns void
+             */
             materials: draft.materials ?? '',
             locationId: backendLocation,
             customTags: draft.tagIds ?? state.details.customTags,
           }
+          /**
+           * draft - Utility function
+           * @returns void
+           */
           const nextListing: UploadListingState = {
             ...state.listing,
             status:
@@ -892,6 +1194,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             quantity: stringifyOptional(draft.quantity),
           }
           const nextMedia: UploadMediaState = {
+            /**
+             * name - Utility function
+             * @returns void
+             */
             coverImage: primaryImage
               ? createUploadedMediaItem(primaryImage, 'Cover image')
               : state.media.coverImage,
@@ -899,6 +1205,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             momentVideo: state.media.momentVideo,
           }
           const nextState = {
+            /**
+             * nextLocation - Utility function
+             * @returns void
+             */
             ...state,
             details: nextDetails,
             listing: nextListing,
@@ -912,6 +1222,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             media: nextMedia,
             details: nextDetails,
             locations: nextLocations,
+            /**
+             * nextDetails - Utility function
+             * @returns void
+             */
             listing: nextListing,
             isDirty: false,
             isHydrated: true,
@@ -928,10 +1242,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
         const { details, listing, locations } = get()
         const height = parseOptionalNumber(details.dimensions.height)
         const width = parseOptionalNumber(details.dimensions.width)
+        /**
+         * nextLocations - Utility function
+         * @returns void
+         */
         const depth = parseOptionalNumber(details.dimensions.depth)
         const weightValue = parseOptionalNumber(details.weight.value)
         const quantity = parseOptionalNumber(listing.quantity)
         const creatorName = options?.creatorName?.trim()
+        /**
+         * nextDetails - Utility function
+         * @returns void
+         */
 
         return {
           title: details.title.trim(),
@@ -954,14 +1276,26 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
                   value: weightValue,
                   unit: details.weight.unit,
                 }
-              : undefined,
+              : /**
+                 * customTags - Utility function
+                 * @returns void
+                 */
+                undefined,
           materials: details.materials.trim() || undefined,
           location: details.locationId
             ? getLocationName(locations, details.locationId)
-            : undefined,
+            : /**
+               * customTagInput - Utility function
+               * @returns void
+               */
+              undefined,
           price: listing.price.trim() || undefined,
           currency: 'USD',
           quantity: quantity !== undefined ? quantity : undefined,
+          /**
+           * nextValue - Utility function
+           * @returns void
+           */
           isPublished: listing.status === 'sale',
           tagIds: details.customTags.length > 0 ? details.customTags : undefined,
         }
@@ -985,6 +1319,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
         }))
         return Object.keys(errors).length === 0
       },
+      /**
+       * customTags - Utility function
+       * @returns void
+       */
       getStepStatus: (step) => {
         const errors = validateUploadState(buildValidationState(get()))
         const stepErrors = filterErrorsByStep(errors, step)
@@ -1007,6 +1345,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
             file,
             previewUrl: createPreviewUrl(file),
             name: item.name ?? file.name,
+            /**
+             * nextTrivia - Utility function
+             * @returns void
+             */
             size: item.size ?? file.size,
             type: item.type ?? file.type,
             lastModified: item.lastModified ?? file.lastModified,
@@ -1015,6 +1357,10 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
 
         const { media } = get()
 
+        /**
+         * nextStory - Utility function
+         * @returns void
+         */
         Promise.all([
           hydrateItem(media.coverImage),
           Promise.all(media.additionalImages.map((item) => hydrateItem(item))),
@@ -1022,10 +1368,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
         ]).then(([coverImage, additionalImages, momentVideo]) => {
           const nextMedia = {
             coverImage: coverImage ?? null,
+            /**
+             * nextState - Utility function
+             * @returns void
+             */
             additionalImages: additionalImages as UploadMediaItem[],
             momentVideo: momentVideo ?? null,
           }
           const nextState = { ...get(), media: nextMedia }
+          /**
+           * errors - Utility function
+           * @returns void
+           */
           const errors = validateUploadState(buildValidationState(nextState))
           set({
             media: nextMedia,
@@ -1038,12 +1392,20 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
         const { media } = get()
         revokePreviewUrl(media.coverImage?.previewUrl)
         revokePreviewUrl(media.momentVideo?.previewUrl)
+        /**
+         * nextTrivia - Utility function
+         * @returns void
+         */
         media.additionalImages.forEach((item) => revokePreviewUrl(item.previewUrl))
       },
     }),
     {
       name: 'artium.inventoryUpload.state',
       partialize: (state) => ({
+        /**
+         * nextStory - Utility function
+         * @returns void
+         */
         step: state.step,
         draftId: state.draftId,
         media: {
@@ -1051,10 +1413,18 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
           additionalImages: state.media.additionalImages.map((item) => serializeMediaItem(item)),
           momentVideo: serializeMediaItem(state.media.momentVideo),
         },
+        /**
+         * nextState - Utility function
+         * @returns void
+         */
         details: state.details,
         locations: state.locations,
         listing: state.listing,
         story: state.story,
+        /**
+         * errors - Utility function
+         * @returns void
+         */
         isDirty: state.isDirty,
       }),
       onRehydrateStorage: () => (state) => {
@@ -1065,3 +1435,128 @@ export const useUploadArtworkStore = create<UploadArtworkState>()(
 )
 
 export { UPLOAD_MEDIA_RULES }
+
+/**
+ * nextTrivia - Utility function
+ * @returns void
+ */
+/**
+ * nextStory - Utility function
+ * @returns void
+ */
+/**
+ * nextState - Utility function
+ * @returns void
+ */
+/**
+ * errors - Utility function
+ * @returns void
+ */
+/**
+ * nextTouched - Utility function
+ * @returns void
+ */
+/**
+ * images - Utility function
+ * @returns void
+ */
+/**
+ * primaryImage - Utility function
+ * @returns void
+ */
+/**
+ * additionalImages - Utility function
+ * @returns void
+ */
+/**
+ * backendLocation - Utility function
+ * @returns void
+ */
+/**
+ * nextLocations - Utility function
+ * @returns void
+ */
+/**
+ * nextDetails - Utility function
+ * @returns void
+ */
+/**
+ * nextListing - Utility function
+ * @returns void
+ */
+/**
+ * nextMedia - Utility function
+ * @returns void
+ */
+/**
+ * nextState - Utility function
+ * @returns void
+ */
+/**
+ * errors - Utility function
+ * @returns void
+ */
+/**
+ * height - Utility function
+ * @returns void
+ */
+/**
+ * width - Utility function
+ * @returns void
+ */
+/**
+ * depth - Utility function
+ * @returns void
+ */
+/**
+ * weightValue - Utility function
+ * @returns void
+ */
+/**
+ * quantity - Utility function
+ * @returns void
+ */
+/**
+ * creatorName - Utility function
+ * @returns void
+ */
+/**
+ * errors - Utility function
+ * @returns void
+ */
+/**
+ * stepErrors - Utility function
+ * @returns void
+ */
+/**
+ * errors - Utility function
+ * @returns void
+ */
+/**
+ * errors - Utility function
+ * @returns void
+ */
+/**
+ * stepErrors - Utility function
+ * @returns void
+ */
+/**
+ * hydrateItem - Utility function
+ * @returns void
+ */
+/**
+ * file - Utility function
+ * @returns void
+ */
+/**
+ * nextMedia - Utility function
+ * @returns void
+ */
+/**
+ * nextState - Utility function
+ * @returns void
+ */
+/**
+ * errors - Utility function
+ * @returns void
+ */

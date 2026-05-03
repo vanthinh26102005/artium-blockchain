@@ -32,12 +32,21 @@ import {
   getShippingPresentation,
 } from '../utils/orderPresentation'
 
+/**
+ * formatAddress - Utility function
+ * @returns void
+ */
 const formatAddress = (address?: Record<string, string | undefined> | null) => {
   if (!address) {
     return []
   }
 
-  return [address.line1, address.line2, `${address.city ?? ''}${address.city && address.state ? ', ' : ''}${address.state ?? ''}`, `${address.postalCode ?? ''} ${address.country ?? ''}`]
+  return [
+    address.line1,
+    address.line2,
+    `${address.city ?? ''}${address.city && address.state ? ', ' : ''}${address.state ?? ''}`,
+    `${address.postalCode ?? ''} ${address.country ?? ''}`,
+  ]
     .map((line) => line?.trim())
     .filter(Boolean) as string[]
 }
@@ -45,6 +54,10 @@ const formatAddress = (address?: Record<string, string | undefined> | null) => {
 const trimHash = (value?: string | null) => {
   if (!value) {
     return 'Not available'
+    /**
+     * trimHash - Utility function
+     * @returns void
+     */
   }
 
   if (value.length <= 16) {
@@ -60,15 +73,27 @@ const isInvoiceUnavailableError = (message?: string | null) => {
   const normalized = message?.toLowerCase() ?? ''
 
   return (
+    /**
+     * INVOICE_RETRY_COPY - React component
+     * @returns React element
+     */
     normalized.includes('not found') ||
     normalized.includes('forbidden') ||
     normalized.includes('unauthorized') ||
     normalized.includes('404') ||
     normalized.includes('403')
+    /**
+     * isInvoiceUnavailableError - Utility function
+     * @returns void
+     */
   )
 }
 
 export const OrderDetailPageView = () => {
+  /**
+   * normalized - Utility function
+   * @returns void
+   */
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
   const { orderId, scope } = router.query
@@ -83,14 +108,26 @@ export const OrderDetailPageView = () => {
   const [isInvoiceUnavailable, setIsInvoiceUnavailable] = useState(false)
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false)
   const invoicePanelRef = useRef<HTMLDivElement | null>(null)
+  /**
+   * OrderDetailPageView - React component
+   * @returns React element
+   */
   const invoiceFocusOrderRef = useRef<string | null>(null)
   const latestInvoiceOrderIdRef = useRef<string | null>(null)
 
   const preferredScope: OrdersWorkspaceScope | null =
+    /**
+     * router - Utility function
+     * @returns void
+     */
     scope === 'seller' || scope === 'buyer' ? scope : null
 
   const loadInvoice = useCallback(async (order: Pick<OrderResponse, 'id'>) => {
     const targetOrderId = order.id
+    /**
+     * user - Custom React hook
+     * @returns void
+     */
     latestInvoiceOrderIdRef.current = targetOrderId
     setIsInvoiceLoading(true)
     setInvoiceErrorMessage(null)
@@ -106,29 +143,53 @@ export const OrderDetailPageView = () => {
       setInvoice(response)
       setInvoiceErrorMessage(null)
       setIsInvoiceUnavailable(false)
+      /**
+       * invoicePanelRef - Utility function
+       * @returns void
+       */
     } catch (error) {
       if (latestInvoiceOrderIdRef.current !== targetOrderId) {
         return
       }
+      /**
+       * invoiceFocusOrderRef - Utility function
+       * @returns void
+       */
 
       const message = error instanceof Error ? error.message : INVOICE_RETRY_COPY
       setInvoice(null)
 
+      /**
+       * latestInvoiceOrderIdRef - Utility function
+       * @returns void
+       */
       if (isInvoiceUnavailableError(message)) {
         setIsInvoiceUnavailable(true)
         setInvoiceErrorMessage(INVOICE_UNAVAILABLE_COPY)
       } else {
         setIsInvoiceUnavailable(false)
+        /**
+         * preferredScope - Utility function
+         * @returns void
+         */
         setInvoiceErrorMessage(INVOICE_RETRY_COPY)
       }
     } finally {
       if (latestInvoiceOrderIdRef.current === targetOrderId) {
         setIsInvoiceLoading(false)
       }
+      /**
+       * loadInvoice - Utility function
+       * @returns void
+       */
     }
   }, [])
 
   useEffect(() => {
+    /**
+     * targetOrderId - Utility function
+     * @returns void
+     */
     if (!router.isReady || typeof orderId !== 'string') {
       return
     }
@@ -139,6 +200,10 @@ export const OrderDetailPageView = () => {
     setInvoice(null)
     setIsInvoiceLoading(false)
     setInvoiceErrorMessage(null)
+    /**
+     * response - Utility function
+     * @returns void
+     */
     setIsInvoiceUnavailable(false)
     setIsInvoiceModalOpen(false)
     latestInvoiceOrderIdRef.current = null
@@ -156,6 +221,10 @@ export const OrderDetailPageView = () => {
         setOrder({
           ...response,
           items: hydratedItems,
+          /**
+           * message - Utility function
+           * @returns void
+           */
         })
       } catch (error) {
         if (!isActive) {
@@ -192,15 +261,27 @@ export const OrderDetailPageView = () => {
     }
 
     if (invoiceFocusOrderRef.current === order.id) {
+      /**
+       * loadOrder - Utility function
+       * @returns void
+       */
       return
     }
 
     invoiceFocusOrderRef.current = order.id
     window.setTimeout(() => {
+      /**
+       * response - Utility function
+       * @returns void
+       */
       invoicePanelRef.current?.focus()
     }, 0)
   }, [order?.id, router.query.invoice])
 
+  /**
+   * hydratedItems - Utility function
+   * @returns void
+   */
   const role = order && user?.id ? getOrderActorRole(order, user.id, preferredScope) : 'buyer'
   const timelineSteps = order ? buildOrderTimeline(order) : []
   const shippingLines = formatAddress(order?.shippingAddress ?? null)
@@ -258,25 +339,34 @@ export const OrderDetailPageView = () => {
               query: preferredScope ? { scope: preferredScope } : undefined,
             }}
             className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-slate-900"
+            /**
+             * role - Utility function
+             * @returns void
+             */
           >
             <ArrowLeft className="h-4 w-4" />
             Back to orders
           </Link>
+          /** * timelineSteps - Utility function * @returns void */
         </div>
 
         {isLoading ? (
           <div className="mt-6 space-y-5">
+            /** * shippingLines - Utility function * @returns void */
             <div className="h-28 animate-pulse rounded-[32px] border border-slate-200 bg-white" />
             <div className="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.9fr)]">
               <div className="h-[520px] animate-pulse rounded-[32px] border border-slate-200 bg-white" />
               <div className="h-[520px] animate-pulse rounded-[32px] border border-slate-200 bg-white" />
+              /** * shippingPresentation - Utility function * @returns void */
             </div>
           </div>
         ) : errorMessage || !order ? (
           <div className="mt-6 rounded-[32px] border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
+            /** * invoiceAvailability - Utility function * @returns void */
             <h1 className="text-2xl font-semibold text-slate-900">Order unavailable</h1>
             <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">
-              {errorMessage ?? 'This order could not be found or is not available in your workspace.'}
+              {errorMessage ??
+                'This order could not be found or is not available in your workspace.'}
             </p>
             <div className="mt-6">
               <Button asChild>
@@ -286,8 +376,12 @@ export const OrderDetailPageView = () => {
           </div>
         ) : (
           <>
-            <div tabIndex={0} className="mt-6 rounded-[32px] border border-slate-200 bg-white px-6 py-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div
+              tabIndex={0}
+              className="mt-6 rounded-[32px] border border-slate-200 bg-white px-6 py-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                /** * handlePreviewInvoice - Utility function * @returns void */
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                     {role === 'buyer' ? 'Purchase detail' : 'Sale detail'}
@@ -297,10 +391,11 @@ export const OrderDetailPageView = () => {
                     <OrderStatusBadge status={order.status} />
                   </div>
                   <p className="mt-3 text-sm leading-6 text-slate-500">
-                    Created {formatOrderDateTime(order.createdAt)} • Payment {getPaymentStatusLabel(order.paymentStatus)}
+                    Created {formatOrderDateTime(order.createdAt)} • Payment{' '}
+                    {getPaymentStatusLabel(order.paymentStatus)}
                   </p>
+                  /** * handleRetryInvoice - Utility function * @returns void */
                 </div>
-
                 <div className="grid gap-4 rounded-[28px] border border-slate-200 bg-slate-50 px-5 py-4 sm:grid-cols-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
@@ -310,6 +405,7 @@ export const OrderDetailPageView = () => {
                       {formatOrderMoney(order.totalAmount, order.currency)}
                     </p>
                   </div>
+                  /** * handlePrintInvoice - Utility function * @returns void */
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                       Payment method
@@ -338,7 +434,10 @@ export const OrderDetailPageView = () => {
 
             <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.9fr)]">
               <div className="space-y-5">
-                <div tabIndex={1} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div
+                  tabIndex={1}
+                  className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
                   <div className="flex items-center gap-3">
                     <ReceiptText className="h-5 w-5 text-slate-500" />
                     <h2 className="text-xl font-semibold text-slate-900">Artwork summary</h2>
@@ -367,9 +466,12 @@ export const OrderDetailPageView = () => {
                             )}
                           </div>
                           <div>
-                            <h3 className="text-base font-semibold text-slate-900">{item.artworkTitle}</h3>
+                            <h3 className="text-base font-semibold text-slate-900">
+                              {item.artworkTitle}
+                            </h3>
                             <p className="mt-1 text-sm text-slate-500">
-                              Quantity {item.quantity} • {formatOrderMoney(item.priceAtPurchase, item.currency)}
+                              Quantity {item.quantity} •{' '}
+                              {formatOrderMoney(item.priceAtPurchase, item.currency)}
                             </p>
                             <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                               Seller {item.sellerId}
@@ -388,7 +490,10 @@ export const OrderDetailPageView = () => {
                 </div>
 
                 <div className="grid gap-5 lg:grid-cols-2">
-                  <div tabIndex={2} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <div
+                    tabIndex={2}
+                    className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
                     <div className="flex items-center gap-3">
                       <Truck className="h-5 w-5 text-slate-500" />
                       <h2 className="text-xl font-semibold text-slate-900">Shipping</h2>
@@ -416,7 +521,8 @@ export const OrderDetailPageView = () => {
                           </div>
                         ) : (
                           <p className="mt-2">
-                            {shippingPresentation?.emptyAddressLabel ?? 'No shipping address captured for this order yet.'}
+                            {shippingPresentation?.emptyAddressLabel ??
+                              'No shipping address captured for this order yet.'}
                           </p>
                         )}
                       </div>
@@ -435,13 +541,18 @@ export const OrderDetailPageView = () => {
                           {shippingPresentation?.records[2]?.label ?? 'Shipping method'}
                         </p>
                         <p className="mt-2 text-slate-900">
-                          {shippingPresentation?.records[2]?.value ?? order.shippingMethod ?? 'Not available'}
+                          {shippingPresentation?.records[2]?.value ??
+                            order.shippingMethod ??
+                            'Not available'}
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div tabIndex={3} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <div
+                    tabIndex={3}
+                    className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
                     <div className="flex items-center gap-3">
                       <MapPin className="h-5 w-5 text-slate-500" />
                       <h2 className="text-xl font-semibold text-slate-900">Payment & records</h2>
@@ -452,13 +563,17 @@ export const OrderDetailPageView = () => {
                           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                             Payment status
                           </p>
-                          <p className="mt-2 text-slate-900">{getPaymentStatusLabel(order.paymentStatus)}</p>
+                          <p className="mt-2 text-slate-900">
+                            {getPaymentStatusLabel(order.paymentStatus)}
+                          </p>
                         </div>
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                             Payment method
                           </p>
-                          <p className="mt-2 text-slate-900">{getPaymentMethodLabel(order.paymentMethod)}</p>
+                          <p className="mt-2 text-slate-900">
+                            {getPaymentMethodLabel(order.paymentMethod)}
+                          </p>
                         </div>
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2">
@@ -488,7 +603,10 @@ export const OrderDetailPageView = () => {
                   </div>
                 </div>
 
-                <div tabIndex={4} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div
+                  tabIndex={4}
+                  className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
                   <h2 className="text-xl font-semibold text-slate-900">Lifecycle timeline</h2>
                   <div className="mt-6">
                     <OrderTimeline steps={timelineSteps} />
@@ -519,7 +637,10 @@ export const OrderDetailPageView = () => {
                   panelRef={invoicePanelRef}
                 />
 
-                <div tabIndex={5} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div
+                  tabIndex={5}
+                  className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
                   <h2 className="text-xl font-semibold text-slate-900">Order totals</h2>
                   <div className="mt-6 space-y-4 text-sm text-slate-600">
                     <div className="flex items-center justify-between">

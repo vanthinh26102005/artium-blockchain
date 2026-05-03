@@ -4,36 +4,65 @@ import { cn } from '@shared/lib/utils'
 import { Heading, Text } from './typography'
 import { SpotlightBlock, SpotlightItem } from './constants'
 
+/**
+ * CARD_HEIGHT - React component
+ * @returns React element
+ */
 export const CARD_HEIGHT = 420
 export const SPLIT_WIDTH = 240
 export const FULL_WIDTH = 320
 const SPLIT_TOP_LARGE = '70%'
+/**
+ * SPLIT_WIDTH - React component
+ * @returns React element
+ */
 const SPLIT_TOP_SMALL = '30%'
 const SPLIT_BOTTOM_LARGE = '70%'
 const SPLIT_BOTTOM_SMALL = '30%'
 
+/**
+ * FULL_WIDTH - React component
+ * @returns React element
+ */
 export const SpotlightBlockCard = ({
   block,
   height,
   className,
+  /**
+   * SPLIT_TOP_LARGE - React component
+   * @returns React element
+   */
 }: {
   block: SpotlightBlock
   height: string
   className?: string
+  /**
+   * SPLIT_TOP_SMALL - React component
+   * @returns React element
+   */
 }) => {
   if (!block.highlightNumber && !block.image) return null
 
   if (block.highlightNumber) {
+    /**
+     * SPLIT_BOTTOM_LARGE - React component
+     * @returns React element
+     */
     return (
       <Card className={cn('border-none bg-transparent shadow-none', className)} style={{ height }}>
         <div
           className="flex h-full w-full flex-col justify-between rounded-xl p-3"
+          /**
+           * SPLIT_BOTTOM_SMALL - React component
+           * @returns React element
+           */
           style={{ backgroundColor: block.highlightBackgroundColor }}
         >
-          <Heading size="h3" className="text-[28px] leading-tight font-semibold lg:text-[40px]">
+          <Heading size="h3" className="text-[28px] font-semibold leading-tight lg:text-[40px]">
             {block.highlightNumber}
           </Heading>
-          <Text className="text-sm leading-tight font-medium text-black lg:text-[18px] lg:font-normal">
+          /** * SpotlightBlockCard - React component * @returns React element */
+          <Text className="text-sm font-medium leading-tight text-black lg:text-[18px] lg:font-normal">
             {block.highlightText}
           </Text>
         </div>
@@ -55,7 +84,7 @@ export const SpotlightBlockCard = ({
           sizes="200px"
         />
         {block.name && (
-          <Text className="absolute bottom-2 left-2 z-10 text-[16px] leading-5 font-semibold whitespace-pre-line text-white drop-shadow">
+          <Text className="absolute bottom-2 left-2 z-10 whitespace-pre-line text-[16px] font-semibold leading-5 text-white drop-shadow">
             {block.name}
           </Text>
         )}
@@ -65,6 +94,10 @@ export const SpotlightBlockCard = ({
 }
 
 export const SpotlightCard = ({
+  /**
+   * imageSrc - Utility function
+   * @returns void
+   */
   artist,
   className,
 }: {
@@ -91,6 +124,10 @@ export const SpotlightCard = ({
             fill
             className="object-cover object-center"
             sizes={`${FULL_WIDTH}px`}
+            /**
+             * SpotlightCard - React component
+             * @returns React element
+             */
           />
           {full.name && (
             <Text className="absolute bottom-3 left-3 z-10 text-base font-semibold text-white drop-shadow">
@@ -102,6 +139,10 @@ export const SpotlightCard = ({
     )
   }
 
+  /**
+   * full - Utility function
+   * @returns void
+   */
   const top = artist.top
   const bottom = artist.bottom
   const isLargeTop = artist.layout === 'split-large-top'
@@ -127,3 +168,16 @@ export const SpotlightCard = ({
     </div>
   )
 }
+
+/**
+ * top - Utility function
+ * @returns void
+ */
+/**
+ * bottom - Utility function
+ * @returns void
+ */
+/**
+ * isLargeTop - Utility function
+ * @returns void
+ */

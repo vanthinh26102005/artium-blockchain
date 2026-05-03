@@ -20,6 +20,10 @@ type BaseInputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   errorInputClassName?: string
 }
 
+/**
+ * BaseInputField - React component
+ * @returns React element
+ */
 export const BaseInputField = forwardRef<HTMLInputElement, BaseInputFieldProps>(
   (
     {
@@ -43,15 +47,28 @@ export const BaseInputField = forwardRef<HTMLInputElement, BaseInputFieldProps>(
   ) => {
     const messageId = id ? `${id}-message` : undefined
     const isInvalid = hasError || Boolean(errorMessage)
-    const describedBy = [props['aria-describedby'], messageId].filter(Boolean).join(' ') || undefined
+    const describedBy =
+      [props['aria-describedby'], messageId].filter(Boolean).join(' ') || undefined
+    /**
+     * messageId - Utility function
+     * @returns void
+     */
 
     return (
       <BaseFormField
         id={id}
+        /**
+         * isInvalid - Utility function
+         * @returns void
+         */
         label={label}
         required={required}
         errorMessage={errorMessage}
         description={description}
+        /**
+         * describedBy - Utility function
+         * @returns void
+         */
         messageId={messageId}
         className={containerClassName}
         labelClassName={labelClassName}

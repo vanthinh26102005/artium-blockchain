@@ -48,65 +48,122 @@ type Step1ColumnProps = {
   sellerProfile?: SellerProfilePayload | null
 }
 
+/**
+ * Step1LeftColumn - React component
+ * @returns React element
+ */
 const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnProps) => {
   // -- state --
   const media = useUploadArtworkStore((state) => state.media)
   const errors = useUploadArtworkStore((state) => state.errors)
   const touched = useUploadArtworkStore((state) => state.touched)
+  /**
+   * media - Utility function
+   * @returns void
+   */
   const hasSubmitted = useUploadArtworkStore((state) => state.hasSubmitted)
-  
+
   const setCoverImage = useUploadArtworkStore((state) => state.setCoverImage)
   const addImages = useUploadArtworkStore((state) => state.addAdditionalImages)
+  /**
+   * errors - Utility function
+   * @returns void
+   */
   const removeImage = useUploadArtworkStore((state) => state.removeAdditionalImage)
 
-  const shouldShowError = (field: string) => Boolean(errors[field]) && (hasSubmitted || touched[field])
+  const shouldShowError = (field: string) =>
+    Boolean(errors[field]) && (hasSubmitted || touched[field])
 
+  /**
+   * touched - Utility function
+   * @returns void
+   */
   // -- refs --
   const coverInputRef = useRef<HTMLInputElement>(null)
   const additionalInputRef = useRef<HTMLInputElement>(null)
   const emptyInputRef = useRef<HTMLInputElement>(null)
+  /**
+   * hasSubmitted - Utility function
+   * @returns void
+   */
 
   // -- handlers --
   const handleCoverChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
+      /**
+       * setCoverImage - Utility function
+       * @returns void
+       */
       setCoverImage(file)
     }
     event.target.value = ''
   }
+  /**
+   * addImages - Utility function
+   * @returns void
+   */
 
   const handleAdditionalChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? [])
     if (files.length > 0) {
+      /**
+       * removeImage - Utility function
+       * @returns void
+       */
       addImages(files)
     }
     event.target.value = ''
   }
 
+  /**
+   * shouldShowError - Utility function
+   * @returns void
+   */
   const handleEmptyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? [])
     if (files.length === 0) {
       return
     }
     const [coverFile, ...additionalFiles] = files
+    /**
+     * coverInputRef - Utility function
+     * @returns void
+     */
     if (coverFile) {
       setCoverImage(coverFile)
     }
     if (additionalFiles.length > 0) {
+      /**
+       * additionalInputRef - Utility function
+       * @returns void
+       */
       addImages(additionalFiles)
     }
     event.target.value = ''
   }
+  /**
+   * emptyInputRef - Utility function
+   * @returns void
+   */
 
   const handleEmptyKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
       emptyInputRef.current?.click()
     }
+    /**
+     * handleCoverChange - Utility function
+     * @returns void
+     */
   }
 
   const canAddMore = media.additionalImages.length < UPLOAD_MEDIA_RULES.MAX_ADDITIONAL_IMAGES
   const isEmptyState = !media.coverImage && media.additionalImages.length === 0
+  /**
+   * file - Utility function
+   * @returns void
+   */
   const artistName = resolveUploadArtistName(currentUser, sellerProfile)
   const artistAvatarUrl = resolveUploadArtistAvatarUrl(currentUser, sellerProfile)
   const artistInitials = getUploadArtistInitials(artistName)
@@ -115,12 +172,14 @@ const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnP
   return (
     <div className={cn('space-y-4 lg:space-y-8', className)}>
       <div className="rounded-3xl border border-black/10 bg-white p-4 lg:p-6">
-        <p className="text-[12px] font-extrabold tracking-[0.05em] text-black/50 uppercase lg:text-[13px]">
+        <p className="text-[12px] font-extrabold uppercase tracking-[0.05em] text-black/50 lg:text-[13px]">
           Artist name <span className="text-red-500">*</span>
+          /** * handleAdditionalChange - Utility function * @returns void */
         </p>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/10 bg-white px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <Avatar className="h-10 w-10 border border-black/10 bg-[#F5F5F5]">
+              /** * files - Utility function * @returns void */
               {artistAvatarUrl ? (
                 <AvatarImage src={artistAvatarUrl} alt={artistName} className="object-cover" />
               ) : null}
@@ -131,10 +190,12 @@ const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnP
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-[#191414] lg:text-base">
                 {artistName}
+                /** * handleEmptyChange - Utility function * @returns void */
               </p>
               <p className="truncate text-sm text-[#898788]">
                 {currentUser?.email ?? 'Signed-in account'}
               </p>
+              /** * files - Utility function * @returns void */
             </div>
           </div>
           <span className="rounded-full bg-[#F5F5F5] px-3 py-1 text-xs font-semibold text-black/50">
@@ -145,13 +206,17 @@ const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnP
 
       <div className="rounded-3xl border border-black/10 bg-white p-4 lg:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[12px] font-extrabold tracking-[0.05em] text-black/50 uppercase lg:text-[13px]">
+          <p className="text-[12px] font-extrabold uppercase tracking-[0.05em] text-black/50 lg:text-[13px]">
             Artwork images <span className="text-red-500">*</span>
           </p>
           <span className="text-sm text-[#898788]">Upload up to 5 images.</span>
         </div>
         {isEmptyState ? (
           <div
+            /**
+             * handleEmptyKeyDown - Utility function
+             * @returns void
+             */
             role="button"
             tabIndex={0}
             onClick={() => emptyInputRef.current?.click()}
@@ -162,27 +227,34 @@ const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnP
               <img
                 src="/images/upload-inventory/upload-and-drag.svg"
                 alt=""
-                className="h-24 w-24 lg:h-40 lg:w-40 2xl:h-50 2xl:w-50"
+                /**
+                 * canAddMore - Utility function
+                 * @returns void
+                 */
+                className="2xl:h-50 2xl:w-50 h-24 w-24 lg:h-40 lg:w-40"
               />
               <p className="mt-6 text-[18px] font-semibold text-[#191414] lg:text-[20px]">
-                Drag images of your artwork here,
+                Drag images of your artwork here, /** * isEmptyState - Utility function * @returns
+                void */
                 <br />
                 or upload from your device
               </p>
               <p className="mt-4 text-sm text-[#898788]">
-                Supported formats: GIF, PNG, JPG, JPEG, HEIC.
+                /** * artistName - Utility function * @returns void */ Supported formats: GIF, PNG,
+                JPG, JPEG, HEIC.
               </p>
               <p className="text-sm text-[#898788]">
-                Maximum file size: {UPLOAD_MEDIA_RULES.MAX_IMAGE_SIZE_MB}MB
+                Maximum file size: {UPLOAD_MEDIA_RULES.MAX_IMAGE_SIZE_MB}MB /** * artistAvatarUrl -
+                Utility function * @returns void */
               </p>
               <p className="mt-3 text-sm text-[#898788]">
                 View our{' '}
                 <a href="#" className="font-semibold text-[#0F6BFF] underline">
-                  Uploading Guidelines
+                  /** * artistInitials - Utility function * @returns void */ Uploading Guidelines
                 </a>{' '}
                 and{' '}
                 <a href="#" className="font-semibold text-[#0F6BFF] underline">
-                  Shipping Guidelines
+                  /** * artistSourceLabel - Utility function * @returns void */ Shipping Guidelines
                 </a>{' '}
                 for more details.
               </p>
@@ -222,7 +294,7 @@ const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnP
                     Main image
                   </span>
                 )}
-                <span className="absolute top-2 left-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-black/60 uppercase">
+                <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase text-black/60">
                   Main image
                 </span>
                 {media.coverImage ? (
@@ -232,7 +304,7 @@ const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnP
                       event.stopPropagation()
                       setCoverImage(null)
                     }}
-                    className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-black/60 shadow-sm transition hover:text-black"
+                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-black/60 shadow-sm transition hover:text-black"
                   >
                     <XMarkIcon className="h-4 w-4" />
                   </button>
@@ -255,7 +327,7 @@ const Step1LeftColumn = ({ className, currentUser, sellerProfile }: Step1ColumnP
                   <button
                     type="button"
                     onClick={() => removeImage(image.id)}
-                    className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-black/60 shadow-sm transition hover:text-black"
+                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-black/60 shadow-sm transition hover:text-black"
                   >
                     <XMarkIcon className="h-4 w-4" />
                   </button>
@@ -319,7 +391,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
   const errors = useUploadArtworkStore((state) => state.errors)
   const touched = useUploadArtworkStore((state) => state.touched)
   const hasSubmitted = useUploadArtworkStore((state) => state.hasSubmitted)
-  
+
   const setField = useUploadArtworkStore((state) => state.setField)
   const addLocation = useUploadArtworkStore((state) => state.addLocation)
   const clearLocationDraft = useUploadArtworkStore((state) => state.clearLocationDraft)
@@ -327,18 +399,19 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
   const removeCustomTag = useUploadArtworkStore((state) => state.removeCustomTag)
   const clearCustomTags = useUploadArtworkStore((state) => state.clearCustomTags)
   const markFieldTouched = useUploadArtworkStore((state) => state.markFieldTouched)
-  
+
   const [locationSearch, setLocationSearch] = useState('')
   const [tagSearch, setTagSearch] = useState('')
   const [isLocationOpen, setIsLocationOpen] = useState(false)
   const [isTagOpen, setIsTagOpen] = useState(false)
   const [isLocationFormOpen, setIsLocationFormOpen] = useState(false)
   const [isTagFormOpen, setIsTagFormOpen] = useState(false)
-  
+
   const locationNameRef = useRef<HTMLInputElement>(null)
   const tagInputRef = useRef<HTMLInputElement>(null)
 
-  const shouldShowError = (field: string) => Boolean(errors[field]) && (hasSubmitted || touched[field])
+  const shouldShowError = (field: string) =>
+    Boolean(errors[field]) && (hasSubmitted || touched[field])
 
   const inputBaseClassName = 'h-[52px] text-[15px] lg:h-14 lg:text-[16px]'
   const textareaBaseClassName = 'min-h-[140px] text-[15px] lg:min-h-[160px] lg:text-[16px]'
@@ -386,60 +459,101 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
             />
             {shouldShowError('details.title') ? (
               <p className="mt-2 text-sm text-red-600">{errors['details.title']}</p>
-            ) : null}
+            ) : /**
+             * Step1RightColumn - React component
+             * @returns React element
+             */
+            null}
           </div>
           <div>
             <label className={labelClassName}>Description</label>
             <Textarea
+              /**
+               * details - Utility function
+               * @returns void
+               */
               value={details.description}
               onChange={(event) => setField('details.description', event.target.value)}
               onBlur={() => markFieldTouched('details.description')}
               placeholder="Share a brief description"
+              /**
+               * listing - Utility function
+               * @returns void
+               */
               className={cn('mt-2', textareaBaseClassName)}
             />
-            <p className="mt-1 text-right text-[11px] tracking-[0.2em] text-black/30 uppercase">
-              {details.description.length}/5000 characters
+            <p className="mt-1 text-right text-[11px] uppercase tracking-[0.2em] text-black/30">
+              {details.description.length}/5000 characters /** * locations - Utility function *
+              @returns void */
             </p>
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
+              /** * errors - Utility function * @returns void */
               <label className={labelClassName}>
                 Year <span className="text-red-500">*</span>
               </label>
               <Input
+                /**
+                 * touched - Utility function
+                 * @returns void
+                 */
                 value={details.year}
                 onChange={(event) => setField('details.year', event.target.value)}
                 onBlur={() => markFieldTouched('details.year')}
                 placeholder="2024"
+                /**
+                 * hasSubmitted - Utility function
+                 * @returns void
+                 */
                 className={cn('mt-2', inputBaseClassName)}
                 aria-invalid={shouldShowError('details.year')}
               />
               {shouldShowError('details.year') ? (
                 <p className="mt-2 text-sm text-red-600">{errors['details.year']}</p>
-              ) : null}
+              ) : /**
+               * setField - Utility function
+               * @returns void
+               */
+              null}
             </div>
             <div>
               <label className={labelClassName}>Total edition run</label>
+              /** * addLocation - Utility function * @returns void */
               <Input
                 value={details.editionRun}
                 onChange={(event) => setField('details.editionRun', event.target.value)}
                 onBlur={() => markFieldTouched('details.editionRun')}
+                /**
+                 * clearLocationDraft - Utility function
+                 * @returns void
+                 */
                 placeholder="1 of 12"
                 className={cn('mt-2', inputBaseClassName)}
               />
             </div>
+            /** * addCustomTag - Utility function * @returns void */
           </div>
           <div className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
             <div>
               <label className={labelClassName}>
-                Dimensions <span className="text-red-500">*</span>
+                /** * removeCustomTag - Utility function * @returns void */ Dimensions{' '}
+                <span className="text-red-500">*</span>
               </label>
               <div className="mt-2 flex items-center gap-3 text-sm">
                 {['in', 'cm'].map((unit) => (
+                  /**
+                   * clearCustomTags - Utility function
+                   * @returns void
+                   */
                   <Button
                     key={unit}
                     type="button"
                     variant="outline"
+                    /**
+                     * markFieldTouched - Utility function
+                     * @returns void
+                     */
                     size="xs"
                     onClick={() => setField('details.dimensions.unit', unit)}
                     className={cn(
@@ -452,48 +566,79 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
                     {unit}
                   </Button>
                 ))}
+                /** * locationNameRef - Utility function * @returns void */
               </div>
               <div className="mt-3 grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2">
                 <Input
                   value={details.dimensions.height}
+                  /**
+                   * tagInputRef - Utility function
+                   * @returns void
+                   */
                   onChange={(event) => setField('details.dimensions.height', event.target.value)}
                   onBlur={() => markFieldTouched('details.dimensions.height')}
                   placeholder="Height"
                   className={inputBaseClassName}
                   aria-invalid={shouldShowError('details.dimensions.height')}
+                  /**
+                   * shouldShowError - Utility function
+                   * @returns void
+                   */
                 />
                 <span className="text-xs text-black/40">x</span>
                 <Input
                   value={details.dimensions.width}
                   onChange={(event) => setField('details.dimensions.width', event.target.value)}
+                  /**
+                   * inputBaseClassName - Utility function
+                   * @returns void
+                   */
                   onBlur={() => markFieldTouched('details.dimensions.width')}
                   placeholder="Width"
                   className={inputBaseClassName}
                   aria-invalid={shouldShowError('details.dimensions.width')}
+                  /**
+                   * textareaBaseClassName - Utility function
+                   * @returns void
+                   */
                 />
                 <span className="text-xs text-black/40">x</span>
                 <Input
                   value={details.dimensions.depth}
+                  /**
+                   * labelClassName - Utility function
+                   * @returns void
+                   */
                   onChange={(event) => setField('details.dimensions.depth', event.target.value)}
                   onBlur={() => markFieldTouched('details.dimensions.depth')}
                   placeholder="Depth"
                   className={inputBaseClassName}
                   aria-invalid={shouldShowError('details.dimensions.depth')}
+                  /**
+                   * sectionTitleClassName - Utility function
+                   * @returns void
+                   */
                 />
               </div>
               {shouldShowError('details.dimensions.height') ||
-                shouldShowError('details.dimensions.width') ||
-                shouldShowError('details.dimensions.depth') ? (
+              shouldShowError('details.dimensions.width') ||
+              shouldShowError('details.dimensions.depth') ? (
+                /**
+                 * selectedLocation - Utility function
+                 * @returns void
+                 */
                 <p className="mt-2 text-sm text-red-600">
                   {errors['details.dimensions.height'] ||
                     errors['details.dimensions.width'] ||
                     errors['details.dimensions.depth']}
+                  /** * filteredLocations - Utility function * @returns void */
                 </p>
               ) : null}
             </div>
             <div>
               <label className={labelClassName}>Weight</label>
               <div className="mt-2 flex items-center gap-3 text-sm">
+                /** * locationDraft - Utility function * @returns void */
                 {['lbs', 'kg'].map((unit) => (
                   <Button
                     key={unit}
@@ -506,23 +651,43 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
                       details.weight.unit === unit
                         ? 'border-[#0F6BFF] text-[#0F6BFF]'
                         : 'border-black/10 text-black/60',
+                      /**
+                       * customTags - Utility function
+                       * @returns void
+                       */
                     )}
                   >
                     {unit}
                   </Button>
+                  /**
+                   * customTagInput - Utility function
+                   * @returns void
+                   */
                 ))}
               </div>
               <Input
                 value={details.weight.value}
+                /**
+                 * shouldShowLocationForm - Utility function
+                 * @returns void
+                 */
                 onChange={(event) => setField('details.weight.value', event.target.value)}
                 onBlur={() => markFieldTouched('details.weight.value')}
                 placeholder={`Weight (${details.weight.unit})`}
                 className={cn('mt-3', inputBaseClassName)}
+                /**
+                 * shouldShowTagForm - Utility function
+                 * @returns void
+                 */
                 aria-invalid={shouldShowError('details.weight.value')}
               />
               {shouldShowError('details.weight.value') ? (
                 <p className="mt-2 text-sm text-red-600">{errors['details.weight.value']}</p>
-              ) : null}
+              ) : /**
+               * filteredTags - Utility function
+               * @returns void
+               */
+              null}
             </div>
           </div>
           <div>
@@ -892,6 +1057,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
               </div>
             </div>
           </PopoverTrigger>
+          /** * isActive - Utility function * @returns void */
           <PopoverContent
             align="start"
             className="z-[220] w-[360px] rounded-[18px] border border-black/10 bg-white p-0 text-[#191414] shadow-[0_16px_40px_rgba(0,0,0,0.08)]"
@@ -999,7 +1165,7 @@ const Step1RightColumn = ({ className }: Step1ColumnProps) => {
           placeholder="Share a note..."
           className={cn('mt-4', textareaBaseClassName)}
         />
-        <p className="mt-2 text-right text-[11px] tracking-[0.2em] text-black/30 uppercase">
+        <p className="mt-2 text-right text-[11px] uppercase tracking-[0.2em] text-black/30">
           {details.deliveryNote.length}/5000 characters
         </p>
       </div>
@@ -1023,3 +1189,8 @@ export const Step1Layout = ({ className, currentUser, sellerProfile }: Step1Layo
 }
 
 export { Step1LeftColumn, Step1RightColumn }
+
+/**
+ * Step1Layout - React component
+ * @returns React element
+ */

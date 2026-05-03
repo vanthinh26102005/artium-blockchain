@@ -5,4 +5,8 @@ export type ClassValue = string | number | boolean | null | undefined | ClassDic
 type ClassDictionary = Record<string, boolean | null | undefined>
 type ClassArray = ClassValue[]
 
+/**
+ * cn - Utility function
+ * @returns void
+ */
 export const cn = (...inputs: ClassValue[]) => classNames(...inputs)

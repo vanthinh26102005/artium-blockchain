@@ -11,11 +11,19 @@ type CommunitySpotlightSectionProps = {
   className?: string
 }
 
+/**
+ * MARQUEE_DURATION_SECONDS - React component
+ * @returns React element
+ */
 const MARQUEE_DURATION_SECONDS = 40
 
 const CommunitySpotlight = ({ className }: CommunitySpotlightSectionProps) => {
   // -- state --
   const [paused, setPaused] = useState(false)
+  /**
+   * CommunitySpotlight - React component
+   * @returns React element
+   */
 
   // -- derived --
   const marqueeStyle = useMemo<CSSProperties>(
@@ -24,6 +32,10 @@ const CommunitySpotlight = ({ className }: CommunitySpotlightSectionProps) => {
   )
 
   return (
+    /**
+     * marqueeStyle - Utility function
+     * @returns void
+     */
     <div className={cn('bg-black', className)}>
       <LandingPageSection className="!max-w-full !px-0 lg:!px-0">
         <div

@@ -8,6 +8,10 @@ type OrderInvoiceStatusChipProps = {
   className?: string
 }
 
+/**
+ * toneByState - Utility function
+ * @returns void
+ */
 const toneByState: Record<OrderInvoiceAvailability['state'], string> = {
   checking: 'border-amber-200 bg-amber-50 text-amber-700',
   ready: 'border-emerald-200 bg-emerald-50 text-emerald-700',
@@ -18,6 +22,10 @@ const toneByState: Record<OrderInvoiceAvailability['state'], string> = {
 const iconByState = {
   checking: Loader2,
   ready: ReceiptText,
+  /**
+   * iconByState - Utility function
+   * @returns void
+   */
   unavailable: AlertCircle,
   retry: RefreshCcw,
 }
@@ -28,6 +36,10 @@ export const OrderInvoiceStatusChip = ({
 }: OrderInvoiceStatusChipProps) => {
   const Icon = iconByState[availability.state]
 
+  /**
+   * OrderInvoiceStatusChip - React component
+   * @returns React element
+   */
   return (
     <Badge
       variant="outline"
@@ -35,6 +47,10 @@ export const OrderInvoiceStatusChip = ({
         'inline-flex items-center gap-1.5 border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]',
         toneByState[availability.state],
         className,
+        /**
+         * Icon - React component
+         * @returns React element
+         */
       )}
       title={availability.description}
     >

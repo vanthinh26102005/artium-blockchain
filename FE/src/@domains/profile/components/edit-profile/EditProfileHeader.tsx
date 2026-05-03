@@ -3,6 +3,10 @@ type EditProfileHeaderProps = {
   isSaving: boolean
 }
 
+/**
+ * EditProfileHeader - React component
+ * @returns React element
+ */
 export const EditProfileHeader = ({ isDirty, isSaving }: EditProfileHeaderProps) => {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">

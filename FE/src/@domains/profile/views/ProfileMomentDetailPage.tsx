@@ -24,7 +24,10 @@ import {
 import { MediaViewer } from '@domains/profile/components/MediaViewer'
 import profileApis from '@shared/apis/profileApis'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
-import { mapCommentToMomentComment, mapMomentToProfileDetail } from '@domains/profile/utils/profileApiMapper'
+import {
+  mapCommentToMomentComment,
+  mapMomentToProfileDetail,
+} from '@domains/profile/utils/profileApiMapper'
 import type { Moment } from '@domains/profile/constants/moments'
 import { MomentComment } from '@domains/profile/types'
 import {
@@ -39,17 +42,34 @@ type ProfileMomentDetailPageViewProps = {
   momentId?: string | string[]
 }
 
+/**
+ * ProfileMomentDetailPageView - React component
+ * @returns React element
+ */
 export const ProfileMomentDetailPageView = ({
   username: _username,
   momentId: _momentId,
 }: ProfileMomentDetailPageViewProps) => {
   const router = useRouter()
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
-  const { data: baseData, isLoading, error, resolvedUsername } = useProfileOverview({
+  const {
+    data: baseData,
+    isLoading,
+    error,
+    resolvedUsername,
+  } = useProfileOverview({
+    /**
+     * router - Utility function
+     * @returns void
+     */
     username: usernameFromRoute,
   })
   const profileData = baseData
   const profileHandle = resolvedUsername || profileData?.user.username || usernameFromRoute || ''
+  /**
+   * usernameFromRoute - Custom React hook
+   * @returns void
+   */
   const momentId = Array.isArray(_momentId) ? _momentId[0] : _momentId
   const [moment, setMoment] = useState<Moment | null>(null)
   const [momentLoading, setMomentLoading] = useState(false)
@@ -57,35 +77,57 @@ export const ProfileMomentDetailPageView = ({
   const [commentsLoading, setCommentsLoading] = useState(false)
   const [commentsError, setCommentsError] = useState<string | null>(null)
   const [commentSubmitting, setCommentSubmitting] = useState(false)
+  /**
+   * profileData - Utility function
+   * @returns void
+   */
   const [isLiked, setIsLiked] = useState(false)
   const [likePending, setLikePending] = useState(false)
   const [likeError, setLikeError] = useState<string | null>(null)
   const authUser = useAuthStore((state) => state.user)
+  /**
+   * profileHandle - Utility function
+   * @returns void
+   */
   const isAuthenticated = Boolean(authUser?.id)
   const currentUser = useMemo(
     () =>
       isAuthenticated
-        ? {
-          id: authUser?.id,
-          username: authUser?.username || 'guest',
-          displayName: authUser?.displayName || authUser?.username || 'Guest',
-          avatarUrl: authUser?.avatarUrl || '/images/logo-dark-mode.png',
-        }
+        ? /**
+           * momentId - Utility function
+           * @returns void
+           */
+          {
+            id: authUser?.id,
+            username: authUser?.username || 'guest',
+            displayName: authUser?.displayName || authUser?.username || 'Guest',
+            avatarUrl: authUser?.avatarUrl || '/images/logo-dark-mode.png',
+          }
         : undefined,
     [authUser, isAuthenticated],
   )
-  const baseHref = profileHandle
-    ? `/profile/${encodeURIComponent(profileHandle)}/moments`
-    : '/'
+  const baseHref = profileHandle ? `/profile/${encodeURIComponent(profileHandle)}/moments` : '/'
   const {
+    /**
+     * authUser - Utility function
+     * @returns void
+     */
     register: registerComment,
     handleSubmit: handleCommentSubmit,
     reset: resetCommentForm,
     formState: { errors: commentFormErrors },
+    /**
+     * isAuthenticated - Utility function
+     * @returns void
+     */
     control: commentControl,
   } = useForm<CommentFormValues>({
     resolver: zodResolver(commentFormSchema),
     mode: 'onBlur',
+    /**
+     * currentUser - Utility function
+     * @returns void
+     */
     reValidateMode: 'onChange',
     defaultValues: {
       content: '',
@@ -101,6 +143,10 @@ export const ProfileMomentDetailPageView = ({
 
     const loadMoment = async () => {
       if (!momentId || !profileData) {
+        /**
+         * baseHref - Utility function
+         * @returns void
+         */
         setMoment(null)
         return
       }
@@ -121,15 +167,27 @@ export const ProfileMomentDetailPageView = ({
       } finally {
         if (isActive) {
           setMomentLoading(false)
+          /**
+           * commentDraft - Utility function
+           * @returns void
+           */
         }
       }
     }
 
+    /**
+     * commentField - Utility function
+     * @returns void
+     */
     void loadMoment()
 
     return () => {
       isActive = false
     }
+    /**
+     * hasArtwork - Utility function
+     * @returns void
+     */
   }, [momentId, profileData])
 
   useEffect(() => {
@@ -138,6 +196,10 @@ export const ProfileMomentDetailPageView = ({
     const loadComments = async () => {
       if (!momentId) {
         setComments([])
+        /**
+         * loadMoment - Utility function
+         * @returns void
+         */
         return
       }
 
@@ -150,6 +212,10 @@ export const ProfileMomentDetailPageView = ({
         const mapped = response.map((comment) => mapCommentToMomentComment(comment, currentUser))
         setComments(mapped)
       } catch {
+        /**
+         * response - Utility function
+         * @returns void
+         */
         if (!isActive) return
         setCommentsError('Unable to load comments right now.')
       } finally {
@@ -180,6 +246,10 @@ export const ProfileMomentDetailPageView = ({
         if (!isActive) return
         setIsLiked(response.liked)
       } catch {
+        /**
+         * loadComments - Utility function
+         * @returns void
+         */
         if (!isActive) return
       }
     }
@@ -193,11 +263,19 @@ export const ProfileMomentDetailPageView = ({
 
   const handleToggleLike = async () => {
     if (!moment || likePending) return
+    /**
+     * response - Utility function
+     * @returns void
+     */
     if (!isAuthenticated) {
       setLikeError('Please sign in to like this moment.')
       return
     }
 
+    /**
+     * mapped - Utility function
+     * @returns void
+     */
     const nextLiked = !isLiked
     const previousLiked = isLiked
     const previousLikes = moment.likes ?? 0
@@ -208,9 +286,9 @@ export const ProfileMomentDetailPageView = ({
     setMoment((prev) =>
       prev
         ? {
-          ...prev,
-          likes: nextLiked ? (prev.likes ?? 0) + 1 : Math.max((prev.likes ?? 0) - 1, 0),
-        }
+            ...prev,
+            likes: nextLiked ? (prev.likes ?? 0) + 1 : Math.max((prev.likes ?? 0) - 1, 0),
+          }
         : prev,
     )
 
@@ -223,6 +301,10 @@ export const ProfileMomentDetailPageView = ({
     } finally {
       setLikePending(false)
     }
+    /**
+     * loadLikeStatus - Utility function
+     * @returns void
+     */
   }
 
   const handlePostComment = async (content: string) => {
@@ -233,6 +315,10 @@ export const ProfileMomentDetailPageView = ({
 
     if (commentSubmitting) {
       return
+      /**
+       * response - Utility function
+       * @returns void
+       */
     }
 
     const tempId = `temp-${moment.id}-${Date.now()}`
@@ -251,24 +337,40 @@ export const ProfileMomentDetailPageView = ({
     try {
       const created = await profileApis.createMomentComment(moment.id, { content })
       const mapped = mapCommentToMomentComment(created, currentUser)
+      /**
+       * handleToggleLike - Utility function
+       * @returns void
+       */
       setComments((prev) => prev.map((item) => (item.id === tempId ? mapped : item)))
       setMoment((prev) =>
         prev
           ? {
-            ...prev,
-            comments: (prev.comments ?? 0) + 1,
-          }
+              ...prev,
+              comments: (prev.comments ?? 0) + 1,
+            }
           : prev,
       )
     } catch {
+      /**
+       * nextLiked - Utility function
+       * @returns void
+       */
       setComments((prev) => prev.filter((item) => item.id !== tempId))
       setCommentsError('Unable to post comment. Please try again.')
     } finally {
       setCommentSubmitting(false)
+      /**
+       * previousLiked - Utility function
+       * @returns void
+       */
     }
   }
 
   const canSubmitComment =
+    /**
+     * previousLikes - Utility function
+     * @returns void
+     */
     commentDraft.trim().length > 0 && !commentSubmitting && isAuthenticated
 
   if (!momentId) {
@@ -296,7 +398,7 @@ export const ProfileMomentDetailPageView = ({
             The moment you are looking for does not exist or has been removed.
           </p>
           <Link href={baseHref} className="text-sm font-semibold text-blue-600 hover:text-blue-700">
-            Back to Moments
+            Back to Moments /** * handlePostComment - Utility function * @returns void */
           </Link>
         </div>
       </div>
@@ -310,11 +412,15 @@ export const ProfileMomentDetailPageView = ({
         <div className="container space-y-6 py-6 lg:py-10">
           <header className="flex items-center justify-between gap-4">
             <button
+              /**
+               * tempId - Utility function
+               * @returns void
+               */
               type="button"
               onClick={() => router.back()}
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300"
             >
-              Back
+              /** * optimistic - Utility function * @returns void */ Back
             </button>
           </header>
 
@@ -330,10 +436,15 @@ export const ProfileMomentDetailPageView = ({
 
               <div className="relative flex h-full flex-col overflow-hidden">
                 <div className="space-y-6 p-6 pb-24 sm:p-8">
+                  /** * created - Utility function * @returns void */
                   <div className="flex items-center gap-3">
                     <div className="relative h-11 w-11 overflow-hidden rounded-full bg-slate-200">
                       <Image
                         src={moment.author.avatarUrl}
+                        /**
+                         * mapped - Utility function
+                         * @returns void
+                         */
                         alt={moment.author.name}
                         fill
                         sizes="44px"
@@ -345,9 +456,8 @@ export const ProfileMomentDetailPageView = ({
                       <p className="text-sm text-slate-500">@{moment.author.username}</p>
                     </div>
                   </div>
-
                   <div className="space-y-3">
-                    <p className="text-lg leading-snug font-medium text-slate-900">
+                    <p className="text-lg font-medium leading-snug text-slate-900">
                       {moment.caption}
                     </p>
                     <div className="inline-flex items-center divide-x divide-slate-200 rounded-full border border-slate-200 bg-white">
@@ -355,6 +465,10 @@ export const ProfileMomentDetailPageView = ({
                         type="button"
                         onClick={handleToggleLike}
                         disabled={likePending || !isAuthenticated}
+                        /**
+                         * canSubmitComment - Utility function
+                         * @returns void
+                         */
                         className={cn(
                           'inline-flex items-center gap-2 px-4 py-2.5 text-sm transition-colors first:rounded-l-full',
                           isLiked
@@ -381,9 +495,7 @@ export const ProfileMomentDetailPageView = ({
                         <span>Share</span>
                       </button>
                     </div>
-                    {likeError ? (
-                      <p className="text-xs text-rose-500">{likeError}</p>
-                    ) : null}
+                    {likeError ? <p className="text-xs text-rose-500">{likeError}</p> : null}
                   </div>
                 </div>
 
@@ -392,7 +504,7 @@ export const ProfileMomentDetailPageView = ({
                     type="single"
                     collapsible
                     defaultValue={hasArtwork ? 'artwork' : undefined}
-                    className="space-y-3 rounded-t-[28px] border-t border-slate-200 bg-slate-50 px-4 pt-3 pb-5 sm:px-6"
+                    className="space-y-3 rounded-t-[28px] border-t border-slate-200 bg-slate-50 px-4 pb-5 pt-3 sm:px-6"
                   >
                     <AccordionItem
                       value="artwork"
@@ -401,7 +513,7 @@ export const ProfileMomentDetailPageView = ({
                       <AccordionTrigger className="bg-white px-4 py-4 text-base font-semibold text-slate-900 hover:bg-slate-50 data-[state=open]:border-t data-[state=open]:border-slate-200 sm:px-6">
                         Artwork
                       </AccordionTrigger>
-                      <AccordionContent className="px-4 pt-4 pb-4 sm:px-6">
+                      <AccordionContent className="px-4 pb-4 pt-4 sm:px-6">
                         {moment.artworkPreview ? (
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                             <div className="relative h-40 w-40 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
@@ -446,7 +558,7 @@ export const ProfileMomentDetailPageView = ({
                       <AccordionTrigger className="bg-white px-4 py-4 text-base font-semibold text-slate-900 hover:bg-slate-50 data-[state=open]:border-t data-[state=open]:border-slate-200 sm:px-6">
                         Comments
                       </AccordionTrigger>
-                      <AccordionContent className="px-4 pt-4 pb-4 sm:px-6">
+                      <AccordionContent className="px-4 pb-4 pt-4 sm:px-6">
                         <div className="space-y-4">
                           {commentsLoading ? (
                             <div className="space-y-3">
@@ -540,14 +652,17 @@ export const ProfileMomentDetailPageView = ({
                             <input
                               type="text"
                               placeholder={
-                                isAuthenticated ? 'Respond with your thoughts...' : 'Sign in to comment.'
+                                isAuthenticated
+                                  ? 'Respond with your thoughts...'
+                                  : 'Sign in to comment.'
                               }
                               disabled={!isAuthenticated || commentSubmitting}
                               className={cn(
                                 'flex-1 bg-transparent text-sm text-slate-600 outline-none placeholder:text-slate-400',
-                                commentFormErrors.content && 'text-rose-500 placeholder:text-rose-300',
+                                commentFormErrors.content &&
+                                  'text-rose-500 placeholder:text-rose-300',
                                 (!isAuthenticated || commentSubmitting) &&
-                                'cursor-not-allowed text-slate-400',
+                                  'cursor-not-allowed text-slate-400',
                               )}
                               {...commentField}
                             />

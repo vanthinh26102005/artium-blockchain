@@ -1,8 +1,4 @@
-import {
-  apiFetch,
-  encodePathSegment,
-  withQuery,
-} from '@shared/services/apiClient'
+import { apiFetch, encodePathSegment, withQuery } from '@shared/services/apiClient'
 import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
 type ArtworkImage = {
@@ -173,6 +169,10 @@ type ArtworkListResponse = {
   pagination?: ArtworkPagination
 }
 
+/**
+ * normalizeArtworkList - Utility function
+ * @returns void
+ */
 const normalizeArtworkList = (
   response: ArtworkApiItem[] | ArtworkListResponse,
 ): ArtworkApiItem[] => {
@@ -190,6 +190,10 @@ const normalizeArtworkList = (
 const normalizeArtworkPage = (
   response: ArtworkApiItem[] | ArtworkListResponse,
 ): { data: ArtworkApiItem[]; pagination: ArtworkPagination } => {
+  /**
+   * normalizeArtworkPage - Utility function
+   * @returns void
+   */
   if (!Array.isArray(response) && response?.data && response.pagination) {
     return {
       data: response.data,
@@ -203,10 +207,18 @@ const normalizeArtworkPage = (
     data,
     pagination: {
       total: take,
+      /**
+       * data - Utility function
+       * @returns void
+       */
       skip: 0,
       take,
       totalPages: take > 0 ? 1 : 0,
       currentPage: take > 0 ? 1 : 0,
+      /**
+       * take - Utility function
+       * @returns void
+       */
       hasNext: false,
       hasPrev: false,
     },
@@ -225,11 +237,19 @@ const artworkApis = {
   },
   listArtworksPaginated: async (params?: ListArtworksParams) => {
     const response = await apiFetch<ArtworkApiItem[] | ArtworkListResponse>(
+      /**
+       * artworkApis - Utility function
+       * @returns void
+       */
       withQuery('/artwork', params),
       {
         cache: 'no-store',
       },
     )
+    /**
+     * response - Utility function
+     * @returns void
+     */
     return normalizeArtworkPage(response)
   },
   getArtworkById: (id: string) =>
@@ -242,6 +262,10 @@ const artworkApis = {
     return artworks[0] ?? null
   },
   getArtworkLikeStatus: (id: string) =>
+    /**
+     * response - Utility function
+     * @returns void
+     */
     apiFetch<{ liked: boolean }>(`/artwork/${encodePathSegment(id)}/likes/me`, {
       auth: true,
       cache: 'no-store',
@@ -253,36 +277,28 @@ const artworkApis = {
       auth: true,
     }),
   createUploadDraft: (draftArtworkId: string) =>
-    apiFetch<ArtworkUploadDraft>(
-      `/artwork/drafts/${encodePathSegment(draftArtworkId)}`,
-      {
-        method: 'POST',
-        body: JSON.stringify({}),
-      },
-    ),
+    apiFetch<ArtworkUploadDraft>(`/artwork/drafts/${encodePathSegment(draftArtworkId)}`, {
+      /**
+       * artworks - Utility function
+       * @returns void
+       */
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
   getUploadDraft: (draftArtworkId: string) =>
-    apiFetch<ArtworkUploadDraft>(
-      `/artwork/drafts/${encodePathSegment(draftArtworkId)}`,
-      {
-        cache: 'no-store',
-      },
-    ),
+    apiFetch<ArtworkUploadDraft>(`/artwork/drafts/${encodePathSegment(draftArtworkId)}`, {
+      cache: 'no-store',
+    }),
   saveUploadDraft: (draftArtworkId: string, input: SaveArtworkDraftInput) =>
-    apiFetch<ArtworkUploadDraft>(
-      `/artwork/drafts/${encodePathSegment(draftArtworkId)}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(input),
-      },
-    ),
+    apiFetch<ArtworkUploadDraft>(`/artwork/drafts/${encodePathSegment(draftArtworkId)}`, {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    }),
   submitUploadDraft: (draftArtworkId: string, input: SubmitArtworkDraftInput) =>
-    apiFetch<ArtworkUploadDraft>(
-      `/artwork/drafts/${encodePathSegment(draftArtworkId)}/submit`,
-      {
-        method: 'POST',
-        body: JSON.stringify(input),
-      },
-    ),
+    apiFetch<ArtworkUploadDraft>(`/artwork/drafts/${encodePathSegment(draftArtworkId)}/submit`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
   createArtwork: (input: CreateArtworkInput) =>
     apiFetch<ArtworkApiItem>('/artwork', {
       method: 'POST',

@@ -4,6 +4,10 @@
 import type { CheckoutBuyerAddress } from '../types/checkoutTypes'
 
 // US State tax rates (simplified)
+/**
+ * US_STATE_TAX_RATES - React component
+ * @returns React element
+ */
 const US_STATE_TAX_RATES: Record<string, number> = {
   CA: 7.25, // California
   NY: 8.0, // New York
@@ -62,6 +66,10 @@ const US_STATE_TAX_RATES: Record<string, number> = {
 const SHIPPING_TIERS = {
   FREE_THRESHOLD: 500, // Free shipping over $500
   DOMESTIC: {
+/**
+ * SHIPPING_TIERS - React component
+ * @returns React element
+ */
     BASE: 15,
     RATE_PER_100: 5, // $5 per $100 of subtotal
     MAX: 75,
@@ -86,10 +94,18 @@ export const calculateMockShipping = (address: CheckoutBuyerAddress, subtotal: n
   // Free shipping threshold for domestic
   if (isDomestic && subtotal >= SHIPPING_TIERS.FREE_THRESHOLD) {
     return 0
+/**
+ * calculateMockShipping - Utility function
+ * @returns void
+ */
   }
 
   const tier = isDomestic ? SHIPPING_TIERS.DOMESTIC : SHIPPING_TIERS.INTERNATIONAL
 
+/**
+ * isDomestic - Utility function
+ * @returns void
+ */
   // Calculate rate based on subtotal
   const hundredsOfDollars = Math.floor(subtotal / 100)
   const calculatedRate = tier.BASE + hundredsOfDollars * tier.RATE_PER_100
@@ -100,16 +116,28 @@ export const calculateMockShipping = (address: CheckoutBuyerAddress, subtotal: n
 
 /**
  * Calculate mock tax based on zip code and subtotal
+/**
+ * tier - Utility function
+ * @returns void
+ */
  * Returns tax rate percent and calculated amount
  */
 export const calculateMockTax = (
   zipCode: string,
   state: string,
   subtotalAfterDiscount: number,
+/**
+ * hundredsOfDollars - Utility function
+ * @returns void
+ */
   shippingFee: number,
 ): { ratePercent: number; taxAmount: number } => {
   // Get state tax rate
   const stateCode = state.toUpperCase().trim()
+/**
+ * calculatedRate - Utility function
+ * @returns void
+ */
   const baseRate = US_STATE_TAX_RATES[stateCode] ?? 0
 
   // Some zip codes have additional local taxes (simplified simulation)
@@ -123,6 +151,10 @@ export const calculateMockTax = (
   if (stateCode === 'CA' && (zipCode.startsWith('90') || zipCode.startsWith('91'))) {
     localRate = 2.25
   }
+/**
+ * calculateMockTax - Utility function
+ * @returns void
+ */
   // Chicago
   if (stateCode === 'IL' && zipCode.startsWith('606')) {
     localRate = 4.0
@@ -133,10 +165,18 @@ export const calculateMockTax = (
   // Tax is applied to (subtotal after discount + shipping) in most states
   const taxableAmount = subtotalAfterDiscount + shippingFee
   const taxAmount = Math.round(taxableAmount * (ratePercent / 100) * 100) / 100
+/**
+ * stateCode - Utility function
+ * @returns void
+ */
 
   return {
     ratePercent,
     taxAmount,
+/**
+ * baseRate - Utility function
+ * @returns void
+ */
   }
 }
 
@@ -158,6 +198,31 @@ export const formatAddressOneLine = (address: CheckoutBuyerAddress): string => {
     address.postalCode,
     address.country,
   ].filter(Boolean)
+/**
+ * ratePercent - Utility function
+ * @returns void
+ */
 
   return parts.join(', ')
 }
+
+/**
+ * taxableAmount - Utility function
+ * @returns void
+ */
+/**
+ * taxAmount - Utility function
+ * @returns void
+ */
+/**
+ * isAddressValidForPricing - Utility function
+ * @returns void
+ */
+/**
+ * formatAddressOneLine - Utility function
+ * @returns void
+ */
+/**
+ * parts - Utility function
+ * @returns void
+ */

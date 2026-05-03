@@ -10,12 +10,20 @@ type MessageReactionsProps = {
   onReact?: (emoji: string) => void
 }
 
+/**
+ * MessageReactions - React component
+ * @returns React element
+ */
 export const MessageReactions = ({ reactions, currentUserId, onReact }: MessageReactionsProps) => {
   if (!reactions || reactions.length === 0) return null
 
   const reactionGroups = reactions.reduce(
     (acc, reaction) => {
       if (!acc[reaction.emoji]) {
+        /**
+         * reactionGroups - Utility function
+         * @returns void
+         */
         acc[reaction.emoji] = []
       }
       acc[reaction.emoji].push(reaction)
@@ -33,11 +41,19 @@ export const MessageReactions = ({ reactions, currentUserId, onReact }: MessageR
         return (
           <button
             key={emoji}
+            /**
+             * hasReacted - Utility function
+             * @returns void
+             */
             onClick={() => onReact?.(emoji)}
             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-colors ${
               hasReacted
                 ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-300'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                : /**
+                   * count - Utility function
+                   * @returns void
+                   */
+                  'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
             <span>{emoji}</span>

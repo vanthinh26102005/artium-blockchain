@@ -15,6 +15,10 @@ type EditorialDetailProps = {
   article: EditorialItem
 }
 
+/**
+ * EditorialDetailPage - React component
+ * @returns React element
+ */
 const EditorialDetailPage: NextPageWithLayout<EditorialDetailProps> = ({ article }) => {
   return <EditorialDetailView article={article} />
 }
@@ -24,10 +28,18 @@ EditorialDetailPage.getLayout = (page) => <MarketingLayout>{page}</MarketingLayo
 export const getStaticPaths: GetStaticPaths = async () => {
   const paths = EDITORIAL_ITEMS.map((item) => ({
     params: { id: item.id },
+    /**
+     * getStaticPaths - Utility function
+     * @returns void
+     */
   }))
   return { paths, fallback: false }
 }
 
+/**
+ * paths - Utility function
+ * @returns void
+ */
 export const getStaticProps: GetStaticProps<EditorialDetailProps> = async (context) => {
   const id = context.params?.id as string
   const article = EDITORIAL_ITEMS.find((item) => item.id === id)
@@ -37,10 +49,23 @@ export const getStaticProps: GetStaticProps<EditorialDetailProps> = async (conte
   }
 
   return {
+    /**
+     * getStaticProps - Utility function
+     * @returns void
+     */
     props: {
       article,
     },
   }
+  /**
+   * id - Utility function
+   * @returns void
+   */
 }
 
 export default EditorialDetailPage
+
+/**
+ * article - Utility function
+ * @returns void
+ */

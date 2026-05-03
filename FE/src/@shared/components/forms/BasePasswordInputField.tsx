@@ -26,6 +26,10 @@ type BasePasswordInputFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, '
   iconClassName?: string
 }
 
+/**
+ * BasePasswordInputField - React component
+ * @returns React element
+ */
 export const BasePasswordInputField = forwardRef<HTMLInputElement, BasePasswordInputFieldProps>(
   (
     {
@@ -53,15 +57,28 @@ export const BasePasswordInputField = forwardRef<HTMLInputElement, BasePasswordI
     const [isVisible, setIsVisible] = useState(false)
     const messageId = id ? `${id}-message` : undefined
     const isInvalid = hasError || Boolean(errorMessage)
-    const describedBy = [props['aria-describedby'], messageId].filter(Boolean).join(' ') || undefined
+    const describedBy =
+      [props['aria-describedby'], messageId].filter(Boolean).join(' ') || undefined
+    /**
+     * messageId - Utility function
+     * @returns void
+     */
 
     return (
       <BaseFormField
         id={id}
+        /**
+         * isInvalid - Utility function
+         * @returns void
+         */
         label={label}
         required={required}
         errorMessage={errorMessage}
         description={description}
+        /**
+         * describedBy - Utility function
+         * @returns void
+         */
         messageId={messageId}
         className={containerClassName}
         labelClassName={labelClassName}
@@ -69,7 +86,9 @@ export const BasePasswordInputField = forwardRef<HTMLInputElement, BasePasswordI
         messageClassName={messageClassName}
         descriptionClassName={descriptionClassName}
       >
-        <InputGroup className={cn(fieldContainerClassName, isInvalid && errorFieldContainerClassName)}>
+        <InputGroup
+          className={cn(fieldContainerClassName, isInvalid && errorFieldContainerClassName)}
+        >
           <InputGroupInput
             ref={ref}
             id={id}
@@ -79,7 +98,7 @@ export const BasePasswordInputField = forwardRef<HTMLInputElement, BasePasswordI
             className={cn(inputClassName, className)}
             {...props}
           />
-          <InputGroupAddon className='p-0! bg-transparent' align="inline-end">
+          <InputGroupAddon className="p-0! bg-transparent" align="inline-end">
             <Button
               type="button"
               onClick={() => setIsVisible((prev) => !prev)}

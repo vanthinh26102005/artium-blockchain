@@ -13,6 +13,10 @@ type JourneyCardProps = {
   cta?: string
 }
 
+/**
+ * JourneyCard - React component
+ * @returns React element
+ */
 export const JourneyCard = ({
   className,
   title,
@@ -37,7 +41,7 @@ export const JourneyCard = ({
         <Heading
           as="h3"
           size="h3"
-          className="font-inter text-[18px] leading-[120%] font-semibold text-black lg:text-[40px] lg:leading-[36px] lg:font-medium lg:tracking-[-0.4px]"
+          className="font-inter text-[18px] font-semibold leading-[120%] text-black lg:text-[40px] lg:font-medium lg:leading-[36px] lg:tracking-[-0.4px]"
         >
           {title}
         </Heading>
@@ -45,7 +49,7 @@ export const JourneyCard = ({
         <Button
           asChild
           size="lg"
-          className="h-[38px] min-w-25 rounded-4xl bg-[#0F6BFF] px-4 text-[12px] leading-[14px] text-white hover:bg-[#0d5edc] lg:h-12 lg:min-w-[151px] lg:px-6 lg:text-[20px] lg:leading-[18px]"
+          className="min-w-25 rounded-4xl h-[38px] bg-[#0F6BFF] px-4 text-[12px] leading-[14px] text-white hover:bg-[#0d5edc] lg:h-12 lg:min-w-[151px] lg:px-6 lg:text-[20px] lg:leading-[18px]"
         >
           <Link href={href} className="block shrink-0">
             {cta}

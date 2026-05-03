@@ -2,6 +2,10 @@ import { SidebarLayout } from '@shared/components/layout/SidebarLayout'
 import type { NextPageWithLayout } from '@shared/types/next'
 import { Metadata } from '@/components/SEO/Metadata'
 
+/**
+ * PromotionsPage - React component
+ * @returns React element
+ */
 const PromotionsPage: NextPageWithLayout = () => {
   return (
     <>

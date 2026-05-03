@@ -6,6 +6,10 @@ type InventoryArtistGridProps = {
   artists: InventoryArtist[]
 }
 
+/**
+ * InventoryArtistGrid - React component
+ * @returns React element
+ */
 export const InventoryArtistGrid = ({ artists }: InventoryArtistGridProps) => {
   if (artists.length === 0) {
     return (

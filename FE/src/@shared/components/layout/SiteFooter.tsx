@@ -3,6 +3,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUp } from 'lucide-react'
 
+/**
+ * footerLinks - Utility function
+ * @returns void
+ */
 const footerLinks = {
   Company: ['Pricing', 'About us', 'Contact us', 'Editorial'],
   'Join the Community': [
@@ -18,6 +22,10 @@ const footerLinks = {
 export const SiteFooter = () => {
   const [showBackToTop, setShowBackToTop] = useState(false)
 
+  /**
+   * SiteFooter - React component
+   * @returns React element
+   */
   useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 240)
@@ -25,6 +33,10 @@ export const SiteFooter = () => {
 
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
+    /**
+     * handleScroll - Utility function
+     * @returns void
+     */
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -37,13 +49,17 @@ export const SiteFooter = () => {
 
   return (
     <footer
+      /**
+       * handleBackToTop - Utility function
+       * @returns void
+       */
       className="relative"
       style={{
         fontFamily: '"ABC Monument Grotesk", "Segoe UI", Tahoma, sans-serif',
       }}
     >
       <svg
-        className="absolute top-0 left-0 h-24 w-full sm:h-28"
+        className="absolute left-0 top-0 h-24 w-full sm:h-28"
         viewBox="0 0 1440 120"
         preserveAspectRatio="none"
         aria-hidden="true"
@@ -52,7 +68,7 @@ export const SiteFooter = () => {
       </svg>
 
       <div className="mt-24 -translate-y-px bg-black text-white sm:mt-28">
-        <div className="relative w-full px-10 pt-1 pb-8 sm:px-16 sm:pt-2 lg:px-24">
+        <div className="relative w-full px-10 pb-8 pt-1 sm:px-16 sm:pt-2 lg:px-24">
           <div className="grid gap-12 md:grid-cols-12 md:gap-12 lg:gap-16">
             <div className="md:col-span-8">
               <div className="grid gap-8 sm:grid-cols-3 sm:gap-12 lg:gap-14">
@@ -99,7 +115,7 @@ export const SiteFooter = () => {
 
             <div className="space-y-8 md:col-span-4">
               <div>
-                <p className="mb-4 text-xs font-semibold tracking-widest text-white/50 uppercase">
+                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/50">
                   Stay in touch
                 </p>
                 <div className="flex items-center gap-3">
@@ -159,7 +175,7 @@ export const SiteFooter = () => {
               </div>
 
               <div>
-                <p className="mb-4 text-xs font-semibold tracking-widest text-white/50 uppercase">
+                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/50">
                   Find us on
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -181,7 +197,7 @@ export const SiteFooter = () => {
               </div>
 
               <div>
-                <p className="mb-4 text-xs font-semibold tracking-widest text-white/50 uppercase">
+                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/50">
                   Subscribe to our newsletter
                 </p>
                 <div className="flex flex-col gap-3.5">
@@ -216,7 +232,7 @@ export const SiteFooter = () => {
         type="button"
         aria-label="Back to top"
         onClick={handleBackToTop}
-        className={`fixed right-6 bottom-6 inline-flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition ${
+        className={`fixed bottom-6 right-6 inline-flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition ${
           showBackToTop
             ? 'translate-y-0 opacity-100'
             : 'pointer-events-none translate-y-2 opacity-0'

@@ -7,6 +7,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 // @domains - auth
 import { SignUpPage } from '@domains/auth/views/SignUpPage'
 
+/**
+ * SignUpRoute - React component
+ * @returns React element
+ */
 const SignUpRoute: NextPageWithLayout = () => {
   // -- state --
 

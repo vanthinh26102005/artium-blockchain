@@ -13,6 +13,10 @@ import {
 
 // --- Configuration ---
 // Set NEXT_PUBLIC_USE_MOCK_API=true to force mock responses
+/**
+ * USE_MOCK_API - React component
+ * @returns React element
+ */
 const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true'
 
 // --- Request Types ---
@@ -132,6 +136,10 @@ export type CreateInvoicePaymentIntentResponse = {
 const invoiceApis = {
   /**
    * Create a new Quick Sell invoice
+/**
+ * invoiceApis - Utility function
+ * @returns void
+ */
    * POST /store/sale/invoice
    */
   createQuickSellInvoice: async (payload: CreateInvoiceRequest): Promise<CreateInvoiceResponse> => {

@@ -39,10 +39,18 @@ type ProfileEditPageViewProps = {
 
 type SaveStatus = 'idle' | 'saving' | 'success'
 
+/**
+ * splitName - Utility function
+ * @returns void
+ */
 const splitName = (displayName: string) => {
   const parts = displayName.trim().split(' ')
   if (parts.length === 0) return { firstName: '', lastName: '' }
   return {
+    /**
+     * parts - Utility function
+     * @returns void
+     */
     firstName: parts[0],
     lastName: parts.slice(1).join(' '),
   }
@@ -54,6 +62,10 @@ const buildInitialValues = (
   resolvedUsername: string,
   sellerProfile?: SellerProfilePayload | null,
 ): FormValues => {
+  /**
+   * buildInitialValues - Utility function
+   * @returns void
+   */
   const { firstName, lastName } = splitName(user.displayName)
   const businessAddress = sellerProfile?.businessAddress ?? null
   return {
@@ -64,6 +76,10 @@ const buildInitialValues = (
     phoneNumber: sellerProfile?.businessPhone || '',
     addressLine1: businessAddress?.line1 || '',
     addressLine2: businessAddress?.line2 || '',
+    /**
+     * businessAddress - Utility function
+     * @returns void
+     */
     district: businessAddress?.city || '',
     province: businessAddress?.state || '',
     country: businessAddress?.country || 'VN',
@@ -105,10 +121,18 @@ export const ProfileEditPageView = ({ username: _username }: ProfileEditPageView
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
+  /**
+   * ProfileEditPageView - React component
+   * @returns React element
+   */
   const finalUsername = resolvedUsername || profileData?.user.username || ''
   const pageTitle = profileData ? `Edit Profile | ${profileData.user.displayName}` : 'Edit Profile'
   const initialValues = useMemo(
     () =>
+      /**
+       * usernameFromRoute - Custom React hook
+       * @returns void
+       */
       profileData
         ? buildInitialValues(profileData.user, profileData.about, finalUsername, sellerProfile)
         : null,
@@ -122,19 +146,32 @@ export const ProfileEditPageView = ({ username: _username }: ProfileEditPageView
             initialValues.firstName,
             initialValues.lastName,
             initialValues.avatarUrl,
+            /**
+             * profileData - Utility function
+             * @returns void
+             */
           ].join('|')
         : 'profile-edit-loading',
     [initialValues],
   )
+  /**
+   * finalUsername - Utility function
+   * @returns void
+   */
 
   return (
     <>
       <Metadata title={pageTitle} />
+      /** * pageTitle - Utility function * @returns void */
       {isLoading ? (
         <div className="container py-10 text-sm text-slate-500">Loading profile...</div>
       ) : error || !initialValues ? (
         <div className="container py-10 text-sm text-rose-600">{error ?? 'Profile not found.'}</div>
       ) : (
+        /**
+         * initialValues - Utility function
+         * @returns void
+         */
         <ProfileEditForm
           key={formKey}
           initialValues={initialValues}
@@ -144,6 +181,10 @@ export const ProfileEditPageView = ({ username: _username }: ProfileEditPageView
     </>
   )
 }
+/**
+ * formKey - Utility function
+ * @returns void
+ */
 
 type ProfileEditFormProps = {
   initialValues: FormValues
@@ -183,18 +224,34 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
 
   useEffect(() => {
     const saveTimer = saveTimerRef.current
+    /**
+     * ProfileEditForm - React component
+     * @returns React element
+     */
     const toastTimer = toastTimerRef.current
 
     return () => {
       if (saveTimer) {
+        /**
+         * router - Utility function
+         * @returns void
+         */
         window.clearTimeout(saveTimer)
       }
       if (toastTimer) {
         window.clearTimeout(toastTimer)
+        /**
+         * authUser - Utility function
+         * @returns void
+         */
       }
     }
   }, [saveStatus])
 
+  /**
+   * refreshMe - Utility function
+   * @returns void
+   */
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!isDirty) return
@@ -205,18 +262,34 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     window.addEventListener('beforeunload', handleBeforeUnload)
 
     return () => {
+      /**
+       * avatarInputRef - Utility function
+       * @returns void
+       */
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }, [isDirty])
 
+  /**
+   * pendingRouteRef - Utility function
+   * @returns void
+   */
   useEffect(() => {
     router.beforePopState(({ as }) => {
       if (!isDirty) return true
       pendingRouteRef.current = as
+      /**
+       * saveTimerRef - Utility function
+       * @returns void
+       */
       setShowExitConfirm(true)
       return false
     })
 
+    /**
+     * toastTimerRef - Utility function
+     * @returns void
+     */
     return () => {
       router.beforePopState(() => true)
     }
@@ -236,16 +309,28 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
       setShowExitConfirm(true)
       router.events.emit('routeChangeError')
       throw 'Route change aborted by user confirmation'
+      /**
+       * avatarValue - Utility function
+       * @returns void
+       */
     }
 
     router.events.on('routeChangeStart', handleRouteChangeStart)
 
     return () => {
       router.events.off('routeChangeStart', handleRouteChangeStart)
+      /**
+       * saveTimer - Utility function
+       * @returns void
+       */
     }
   }, [isDirty, router])
 
   // Lock body scroll when modal is open
+  /**
+   * toastTimer - Utility function
+   * @returns void
+   */
   useEffect(() => {
     if (showExitConfirm) {
       const scrollY = window.scrollY
@@ -262,6 +347,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
         window.scrollTo(0, scrollY)
       }
     }
+    /**
+     * handleBeforeUnload - Utility function
+     * @returns void
+     */
   }, [showExitConfirm])
 
   const normalizeUrl = (value: string) => {
@@ -293,6 +382,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     postalCode: sellerProfile ? data.postalCode.trim() : initialValues.postalCode,
     headline: sellerProfile ? data.headline.trim() : initialValues.headline,
     biography: sellerProfile ? data.biography.trim() : initialValues.biography,
+    /**
+     * handleRouteChangeStart - Utility function
+     * @returns void
+     */
     websiteUrl:
       sellerProfile && data.websiteUrl ? normalizeUrl(data.websiteUrl) : initialValues.websiteUrl,
     instagram:
@@ -320,6 +413,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
 
     if (saveTimerRef.current) {
       window.clearTimeout(saveTimerRef.current)
+      /**
+       * scrollY - Utility function
+       * @returns void
+       */
     }
     if (toastTimerRef.current) {
       window.clearTimeout(toastTimerRef.current)
@@ -339,10 +436,18 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
 
       // Step 2: Update seller profile if user is a seller
       if (sellerProfile) {
+        /**
+         * normalizeUrl - Utility function
+         * @returns void
+         */
         const sellerProfileId = sellerProfile.profileId ?? sellerProfile.id
         if (sellerProfileId) {
           const businessAddress = {
             line1: data.addressLine1?.trim() || null,
+            /**
+             * trimmed - Utility function
+             * @returns void
+             */
             line2: data.addressLine2?.trim() || null,
             city: data.district?.trim() || null,
             state: data.province?.trim() || null,
@@ -354,10 +459,18 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
             displayName: displayName || sellerProfile.displayName,
             bio: data.biography?.trim() || null,
             profileImageUrl: avatarUrl,
+            /**
+             * buildLocation - Utility function
+             * @returns void
+             */
             websiteUrl: data.websiteUrl ? normalizeUrl(data.websiteUrl) : null,
             instagramUrl: data.instagram ? normalizeUrl(data.instagram) : null,
             twitterUrl: data.twitter ? normalizeUrl(data.twitter) : null,
             location: buildLocation(data.district, data.province, data.country) ?? null,
+            /**
+             * parts - Utility function
+             * @returns void
+             */
             businessPhone: data.phoneNumber?.trim() || null,
             businessAddress,
             metaDescription: data.headline?.trim() || null,
@@ -365,6 +478,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
 
           await profileApis.updateSellerProfile(sellerProfileId, sellerPayload)
         }
+        /**
+         * buildCanonicalSavedValues - Utility function
+         * @returns void
+         */
       }
 
       await refreshMe()
@@ -399,6 +516,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
 
   const handleFormChange = () => {
     if (saveStatus === 'success') {
+      /**
+       * handleFormSubmit - Utility function
+       * @returns void
+       */
       setSaveStatus('idle')
     }
     if (submitError) {
@@ -419,14 +540,26 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
       return
     }
 
+    /**
+     * displayName - Utility function
+     * @returns void
+     */
     const localPreview = URL.createObjectURL(file)
     setAvatarPreview(localPreview)
     setAvatarUploading(true)
 
+    /**
+     * slug - Utility function
+     * @returns void
+     */
     void (async () => {
       try {
         const response = await artworkUploadApi.uploadAvatar({
           file,
+          /**
+           * avatarUrl - Utility function
+           * @returns void
+           */
           userId: targetUserId,
         })
         const uploadedUrl = response.secureUrl || response.url
@@ -441,11 +574,19 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
       }
     })()
   }
+  /**
+   * sellerProfileId - Utility function
+   * @returns void
+   */
 
   const handleAvatarRemove = () => {
     setAvatarPreview(null)
     avatarField.onChange('')
   }
+  /**
+   * businessAddress - Utility function
+   * @returns void
+   */
 
   const avatarSrc = avatarPreview || avatarValue || ''
   const showErrors = submitCount > 0
@@ -458,6 +599,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     if (nextRoute) {
       router.push(nextRoute)
       return
+      /**
+       * sellerPayload - Utility function
+       * @returns void
+       */
     }
     router.back()
   }
@@ -485,7 +630,11 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
             <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
               Uploading avatar...
             </div>
-          ) : null}
+          ) : /**
+           * previousSlug - Utility function
+           * @returns void
+           */
+          null}
 
           <div className="mt-6 flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:gap-6">
             <div className="space-y-6">
@@ -501,6 +650,7 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                 onAvatarChange={handleAvatarChange}
                 showSellerContactFields={Boolean(sellerProfile)}
               />
+              /** * message - Utility function * @returns void */
             </div>
             <div className="space-y-6">
               {sellerProfile ? (
@@ -510,13 +660,18 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                   errors={errors}
                   showErrors={showErrors}
                   showClassificationFields={false}
+                  /**
+                   * handleFormSubmitEvent - Utility function
+                   * @returns void
+                   */
                 />
               ) : null}
               {!sellerProfile ? (
                 <section className="rounded-3xl border border-dashed border-slate-300 bg-slate-50/50 p-6">
-                  <h2 className="text-sm font-semibold tracking-[0.2em] text-slate-400 uppercase">
+                  <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
                     Become a Seller
                   </h2>
+                  /** * handleFormChange - Utility function * @returns void */
                   <p className="mt-3 text-sm text-slate-600">
                     Register as a seller to unlock advanced profile fields and seller-only auction
                     preparation. Verification and payment onboarding remain separate policy steps.
@@ -529,22 +684,38 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                     Register as Seller
                   </button>
                 </section>
-              ) : null}
+              ) : /**
+               * handleAvatarPick - Utility function
+               * @returns void
+               */
+              null}
             </div>
           </div>
         </form>
       </div>
 
       {saveStatus !== 'idle' ? (
+        /**
+         * handleAvatarChange - Utility function
+         * @returns void
+         */
         <Portal>
           <SaveStatusToast
             status={saveStatus === 'saving' ? 'saving' : 'success'}
             onClose={() => setSaveStatus('idle')}
+            /**
+             * file - Utility function
+             * @returns void
+             */
           />
         </Portal>
       ) : null}
 
       {showExitConfirm ? (
+        /**
+         * targetUserId - Utility function
+         * @returns void
+         */
         <Portal>
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
             <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-lg">
@@ -554,6 +725,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
               </p>
               <div className="mt-6 flex items-center justify-end gap-3">
                 <button
+                  /**
+                   * localPreview - Utility function
+                   * @returns void
+                   */
                   type="button"
                   onClick={handleCancelExit}
                   className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300"
@@ -563,6 +738,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                 <button
                   type="button"
                   onClick={handleConfirmExit}
+                  /**
+                   * response - Utility function
+                   * @returns void
+                   */
                   className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
                 >
                   Leave
@@ -570,8 +749,42 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
               </div>
             </div>
           </div>
+          /** * uploadedUrl - Utility function * @returns void */
         </Portal>
       ) : null}
     </>
   )
 }
+
+/**
+ * message - Utility function
+ * @returns void
+ */
+/**
+ * handleAvatarRemove - Utility function
+ * @returns void
+ */
+/**
+ * avatarSrc - Utility function
+ * @returns void
+ */
+/**
+ * showErrors - Utility function
+ * @returns void
+ */
+/**
+ * isSaving - Utility function
+ * @returns void
+ */
+/**
+ * handleConfirmExit - Utility function
+ * @returns void
+ */
+/**
+ * nextRoute - Utility function
+ * @returns void
+ */
+/**
+ * handleCancelExit - Utility function
+ * @returns void
+ */

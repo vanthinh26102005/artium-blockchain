@@ -26,6 +26,10 @@ type SearchDropdownProps = {
   onClose: () => void
 }
 
+/**
+ * SearchDropdown - React component
+ * @returns React element
+ */
 export const SearchDropdown = ({
   isOpen,
   searchQuery,
@@ -42,6 +46,10 @@ export const SearchDropdown = ({
   const hasContent =
     recentSearches.length > 0 || recentlyViewed.length > 0 || suggestions.length > 0
 
+  /**
+   * hasContent - Utility function
+   * @returns void
+   */
   // Mock images for suggestions
   const suggestionImages = [
     'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=200&h=200&fit=crop',
@@ -49,6 +57,10 @@ export const SearchDropdown = ({
     'https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=200&h=200&fit=crop',
     'https://images.unsplash.com/photo-1582561833197-7d54b3c2e9e5?w=200&h=200&fit=crop',
   ]
+  /**
+   * suggestionImages - Utility function
+   * @returns void
+   */
 
   return (
     <>
@@ -56,7 +68,7 @@ export const SearchDropdown = ({
       <div className="fixed inset-0 z-30" onClick={onClose} />
 
       {/* Dropdown */}
-      <div className="animate-in slide-in-from-top-2 fade-in-0 absolute top-full left-0 z-40 mt-2 w-full rounded-3xl border border-slate-200 bg-white shadow-2xl duration-200">
+      <div className="absolute left-0 top-full z-40 mt-2 w-full rounded-3xl border border-slate-200 bg-white shadow-2xl duration-200 animate-in fade-in-0 slide-in-from-top-2">
         <div className="max-h-[70vh] overflow-y-auto p-6">
           {/* Search Suggestions with Overlapping Images */}
           {suggestions.length > 0 && (
@@ -103,7 +115,7 @@ export const SearchDropdown = ({
           {/* Recent Searches */}
           {recentSearches.length > 0 && (
             <div className="mb-6">
-              <h3 className="mb-3 text-xs font-semibold tracking-wider text-slate-500 uppercase">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Recent Searches
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -133,7 +145,7 @@ export const SearchDropdown = ({
           {/* Recently Viewed */}
           {recentlyViewed.length > 0 && (
             <div>
-              <h3 className="mb-3 text-xs font-semibold tracking-wider text-slate-500 uppercase">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Recently Viewed
               </h3>
               <div className="grid grid-cols-4 gap-3">
@@ -149,7 +161,7 @@ export const SearchDropdown = ({
                     />
                     <button
                       onClick={() => onRemoveRecentlyViewed(item.id)}
-                      className="absolute top-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-white/95 opacity-0 shadow-md backdrop-blur-sm transition-all duration-200 group-hover:opacity-100 hover:bg-white"
+                      className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-white/95 opacity-0 shadow-md backdrop-blur-sm transition-all duration-200 hover:bg-white group-hover:opacity-100"
                       aria-label="Remove from recently viewed"
                     >
                       <X className="h-3.5 w-3.5 text-slate-700" />
@@ -162,7 +174,7 @@ export const SearchDropdown = ({
 
           {/* Call to Action Banner */}
           {hasContent && (
-            <div className="mt-6 rounded-2xl bg-linear-to-r from-green-100 to-emerald-100 p-6 text-center">
+            <div className="bg-linear-to-r mt-6 rounded-2xl from-green-100 to-emerald-100 p-6 text-center">
               <p className="text-sm text-slate-800">
                 Ready to fill your blank wall? Take our{' '}
                 <a href="/quiz" className="font-semibold text-blue-600 hover:underline">

@@ -3,10 +3,18 @@ import { ProfileMomentsPageView } from '@domains/profile/views/ProfileMomentsPag
 import { SidebarLayout } from '@shared/components/layout/SidebarLayout'
 import type { NextPageWithLayout } from '@shared/types/next'
 
+/**
+ * ProfileMomentsPage - React component
+ * @returns React element
+ */
 const ProfileMomentsPage: NextPageWithLayout = () => {
   const router = useRouter()
   const { username } = router.query
 
+  /**
+   * router - Utility function
+   * @returns void
+   */
   return <ProfileMomentsPageView username={username} />
 }
 

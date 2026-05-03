@@ -159,6 +159,10 @@ export type GetAuctionsInput = {
   take?: number
 }
 
+/**
+ * auctionApis - Utility function
+ * @returns void
+ */
 const auctionApis = {
   getAuctions: async (input: GetAuctionsInput = {}): Promise<PaginatedAuctionsResponse> => {
     return apiFetch<PaginatedAuctionsResponse>(withQuery('/auctions', input), { auth: false })

@@ -1,6 +1,10 @@
 // @domains - inventory
 import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
 
+/**
+ * mockInventoryArtworks - Utility function
+ * @returns void
+ */
 export const mockInventoryArtworks: InventoryArtwork[] = [
   {
     id: 'artwork-01',

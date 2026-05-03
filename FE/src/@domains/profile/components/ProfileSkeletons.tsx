@@ -5,6 +5,10 @@ type CountProps = {
   count?: number
 }
 
+/**
+ * ProfileHeroSkeleton - React component
+ * @returns React element
+ */
 export const ProfileHeroSkeleton = () => (
   <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
     <Skeleton className="h-40 w-full rounded-none sm:h-52" />
@@ -36,6 +40,10 @@ export const ProfileHeroSkeleton = () => (
 export const ProfileTabsSkeleton = () => (
   <div className="flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2">
     {Array.from({ length: 4 }).map((_, index) => (
+      /**
+       * ProfileTabsSkeleton - React component
+       * @returns React element
+       */
       <Skeleton key={index} className="h-10 w-28 shrink-0 rounded-full" />
     ))}
   </div>
@@ -47,6 +55,7 @@ const SectionHeaderSkeleton = () => (
       <Skeleton className="h-7 w-36" />
       <Skeleton className="h-4 w-44" />
     </div>
+    /** * SectionHeaderSkeleton - React component * @returns React element */
     <Skeleton className="h-4 w-16" />
   </div>
 )
@@ -60,6 +69,7 @@ const ArtworkCardSkeleton = ({ className }: { className?: string }) => (
   >
     <Skeleton className="h-[320px] w-full rounded-none" />
     <div className="space-y-3 p-4">
+      /** * ArtworkCardSkeleton - React component * @returns React element */
       <Skeleton className="h-5 w-3/4" />
       <Skeleton className="h-3 w-1/2" />
       <Skeleton className="h-9 w-full rounded-full" />
@@ -79,6 +89,10 @@ export const ProfileArtworksSectionSkeleton = ({
           ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
           : 'flex gap-4 overflow-x-auto pb-2',
       )}
+      /**
+       * ProfileArtworksSectionSkeleton - React component
+       * @returns React element
+       */
     >
       {Array.from({ length: count }).map((_, index) => (
         <ArtworkCardSkeleton
@@ -105,10 +119,14 @@ export const ProfileMomentsSectionSkeleton = ({
     >
       {Array.from({ length: count }).map((_, index) => (
         <div
+          /**
+           * ProfileMomentsSectionSkeleton - React component
+           * @returns React element
+           */
           key={index}
           className={cn(
             'overflow-hidden rounded-xl border border-slate-200 bg-white',
-            layout === 'row' ? 'max-w-[220px] min-w-[200px] shrink-0' : 'w-full',
+            layout === 'row' ? 'min-w-[200px] max-w-[220px] shrink-0' : 'w-full',
           )}
         >
           <Skeleton
@@ -137,7 +155,7 @@ export const ProfileMoodboardsSectionSkeleton = ({
     <div
       className={cn(
         size === 'large'
-          ? 'grid [grid-template-columns:repeat(auto-fit,minmax(200px,220px))] justify-start gap-5'
+          ? 'grid justify-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(200px,220px))]'
           : 'flex gap-4 overflow-x-auto pb-2',
       )}
     >
@@ -146,6 +164,10 @@ export const ProfileMoodboardsSectionSkeleton = ({
           key={index}
           className={cn(
             'overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm',
+            /**
+             * ProfileMoodboardsSectionSkeleton - React component
+             * @returns React element
+             */
             size === 'large' ? 'w-[220px]' : 'w-[200px] shrink-0',
           )}
         >
@@ -181,3 +203,8 @@ export const ProfileOverviewSkeleton = () => (
     </section>
   </div>
 )
+
+/**
+ * ProfileOverviewSkeleton - React component
+ * @returns React element
+ */

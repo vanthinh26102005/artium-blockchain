@@ -7,6 +7,10 @@ interface ArtworkCardProps {
   artwork: Artwork
 }
 
+/**
+ * ArtworkCard - React component
+ * @returns React element
+ */
 export const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork }) => {
   return (
     <Link href={`/artworks/${artwork.id}`} className="group block">

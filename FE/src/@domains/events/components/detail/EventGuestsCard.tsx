@@ -1,17 +1,21 @@
 // third-party
-import { Users } from "lucide-react";
+import { Users } from 'lucide-react'
 
 // @shared - utils
-import { cn } from "@shared/lib/utils";
+import { cn } from '@shared/lib/utils'
 
 type EventGuestsCardProps = {
-  going: number;
-  maybe: number;
-  invited: number;
-  className?: string;
-  onSeeAll?: () => void;
-};
+  going: number
+  maybe: number
+  invited: number
+  className?: string
+  onSeeAll?: () => void
+}
 
+/**
+ * EventGuestsCard - React component
+ * @returns React element
+ */
 export const EventGuestsCard = ({
   going,
   maybe,
@@ -20,13 +24,19 @@ export const EventGuestsCard = ({
   onSeeAll,
 }: EventGuestsCardProps) => {
   const stats = [
-    { label: "Going", value: going },
-    { label: "Maybe", value: maybe },
-    { label: "Invited", value: invited },
-  ];
+    { label: 'Going', value: going },
+    { label: 'Maybe', value: maybe },
+    /**
+     * stats - Utility function
+     * @returns void
+     */
+    { label: 'Invited', value: invited },
+  ]
 
   return (
-    <div className={cn("rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6", className)}>
+    <div
+      className={cn('rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6', className)}
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700">
@@ -56,5 +66,5 @@ export const EventGuestsCard = ({
         ))}
       </div>
     </div>
-  );
-};
+  )
+}

@@ -6,6 +6,10 @@ import { cn } from '@shared/lib/utils'
 
 import type { BuyerCheckoutContactStepValues } from '../validations/buyerCheckout.schema'
 
+/**
+ * BuyerCheckoutContactForm - React component
+ * @returns React element
+ */
 export const BuyerCheckoutContactForm = () => {
   const {
     control,
@@ -17,39 +21,68 @@ export const BuyerCheckoutContactForm = () => {
   const contact = useWatch({ control, name: 'contact' })
   const deliveryMethod = useWatch({ control, name: 'deliveryMethod' })
   const labelClassName = 'text-[11px] font-bold uppercase tracking-wider text-[#989898]'
+  /**
+   * contact - Utility function
+   * @returns void
+   */
   const requiredMarkClassName = 'text-red-500'
   const messageClassName = 'text-[11px] text-red-500'
   const helperClassName = 'text-[11px] text-[#989898]'
   const inputClassName =
+    /**
+     * deliveryMethod - Utility function
+     * @returns void
+     */
     'h-12 rounded-xl border bg-white text-[15px] font-medium text-[#191414] placeholder:text-[#989898] focus:ring-0'
   const defaultInputClassName = 'border-[#E5E5E5] focus:border-[#0066FF]'
   const errorInputClassName = 'border-red-500 focus:border-red-500'
 
+  /**
+   * labelClassName - Utility function
+   * @returns void
+   */
   return (
     <div className="space-y-8">
       <section className="rounded-3xl bg-white p-6 shadow-sm">
         <h2 className="mb-6 text-[13px] font-bold uppercase tracking-wider text-[#191414]">
-          Contact Information
+          /** * requiredMarkClassName - Utility function * @returns void */ Contact Information
         </h2>
 
         <div className="space-y-5">
+          /** * messageClassName - Utility function * @returns void */
           <div className="grid grid-cols-2 gap-4">
             <BaseInputField
               {...register('contact.firstName')}
               id="checkout-contact-first-name"
+              /**
+               * helperClassName - Utility function
+               * @returns void
+               */
               label="First Name"
               required
               placeholder="First name"
               maxLength={50}
+              /**
+               * inputClassName - Utility function
+               * @returns void
+               */
               errorMessage={errors.contact?.firstName?.message}
               description={`${contact?.firstName?.length ?? 0}/50`}
               containerClassName="space-y-2"
               labelClassName={labelClassName}
               requiredMarkClassName={requiredMarkClassName}
+              /**
+               * defaultInputClassName - Utility function
+               * @returns void
+               */
               messageClassName={messageClassName}
               descriptionClassName={helperClassName}
               inputClassName={cn(inputClassName, defaultInputClassName)}
               errorInputClassName={errorInputClassName}
+              /**
+               * errorInputClassName - Utility function
+               * @returns void
+               */
             />
 
             <BaseInputField
@@ -70,7 +103,6 @@ export const BuyerCheckoutContactForm = () => {
               errorInputClassName={errorInputClassName}
             />
           </div>
-
           <BaseInputField
             {...register('contact.email')}
             id="checkout-contact-email"
@@ -86,7 +118,6 @@ export const BuyerCheckoutContactForm = () => {
             inputClassName={cn(inputClassName, defaultInputClassName)}
             errorInputClassName={errorInputClassName}
           />
-
           <BaseFormField
             id="checkout-contact-phone"
             label="Phone Number"
@@ -105,7 +136,7 @@ export const BuyerCheckoutContactForm = () => {
                 id="checkout-contact-phone-country-code"
                 {...register('contact.phoneCountryCode')}
                 className={cn(
-                  'h-12 w-25 rounded-xl border bg-white px-3 text-[15px] font-medium text-[#191414] focus:ring-0',
+                  'w-25 h-12 rounded-xl border bg-white px-3 text-[15px] font-medium text-[#191414] focus:ring-0',
                   defaultInputClassName,
                 )}
               >
@@ -147,23 +178,30 @@ export const BuyerCheckoutContactForm = () => {
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => setValue('deliveryMethod', 'pickup', { shouldDirty: true, shouldValidate: true })}
-            className={`flex-1 rounded-full border-2 py-3 text-[14px] font-bold transition ${deliveryMethod === 'pickup'
-              ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
-              : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]'
-              }`}
+            onClick={() =>
+              setValue('deliveryMethod', 'pickup', { shouldDirty: true, shouldValidate: true })
+            }
+            className={`flex-1 rounded-full border-2 py-3 text-[14px] font-bold transition ${
+              deliveryMethod === 'pickup'
+                ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
+                : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]'
+            }`}
           >
             Pick up / Ship by seller
           </button>
           <button
             type="button"
             onClick={() =>
-              setValue('deliveryMethod', 'ship_by_platform', { shouldDirty: true, shouldValidate: true })
+              setValue('deliveryMethod', 'ship_by_platform', {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
             }
-            className={`flex-1 rounded-full border-2 py-3 text-[14px] font-bold transition ${deliveryMethod === 'ship_by_platform'
-              ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
-              : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]'
-              }`}
+            className={`flex-1 rounded-full border-2 py-3 text-[14px] font-bold transition ${
+              deliveryMethod === 'ship_by_platform'
+                ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
+                : 'border-[#E5E5E5] text-[#595959] hover:border-[#D4D4D4]'
+            }`}
           >
             Ship by Artium
           </button>

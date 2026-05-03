@@ -3,10 +3,18 @@ import { ProfileMoodboardsPageView } from '@domains/profile/views/ProfileMoodboa
 import { SidebarLayout } from '@shared/components/layout/SidebarLayout'
 import type { NextPageWithLayout } from '@shared/types/next'
 
+/**
+ * ProfileMoodboardsPage - React component
+ * @returns React element
+ */
 const ProfileMoodboardsPage: NextPageWithLayout = () => {
   const router = useRouter()
   const { username } = router.query
 
+  /**
+   * router - Utility function
+   * @returns void
+   */
   return <ProfileMoodboardsPageView username={username} />
 }
 

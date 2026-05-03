@@ -33,6 +33,10 @@ export type ProfileMoodboardUploadItem = {
   uploadedMedia: ProfileMediaUploadResponse | null
 }
 
+/**
+ * PROFILE_MOODBOARD_ACCEPT - React component
+ * @returns React element
+ */
 export const PROFILE_MOODBOARD_ACCEPT = [
   ...PROFILE_IMAGE_MIME_TYPES,
   ...PROFILE_VIDEO_MIME_TYPES,
@@ -41,15 +45,27 @@ export const PROFILE_MOODBOARD_ACCEPT = [
 const isProfileImageFile = (file: File) => PROFILE_IMAGE_MIME_TYPES.includes(file.type)
 const isProfileVideoFile = (file: File) => PROFILE_VIDEO_MIME_TYPES.includes(file.type)
 
+/**
+ * isProfileImageFile - Utility function
+ * @returns void
+ */
 const getUploadErrorMessage = (error: unknown) => {
   if (error instanceof Error && error.message) {
     return error.message
   }
+  /**
+   * isProfileVideoFile - Utility function
+   * @returns void
+   */
 
   return 'We could not upload every file. Retry failed uploads or remove them before creating the moodboard.'
 }
 
 const validateProfileMoodboardFile = (file: File, durationSeconds?: number) => {
+  /**
+   * getUploadErrorMessage - Utility function
+   * @returns void
+   */
   if (isProfileImageFile(file)) {
     if (file.size > PROFILE_MAX_IMAGE_SIZE_BYTES) {
       return `Image files must be ${formatProfileMediaSize(PROFILE_MAX_IMAGE_SIZE_BYTES)} or smaller.`
@@ -61,6 +77,10 @@ const validateProfileMoodboardFile = (file: File, durationSeconds?: number) => {
   if (isProfileVideoFile(file)) {
     if (file.size > PROFILE_MAX_VIDEO_SIZE_BYTES) {
       return `Video files must be ${formatProfileMediaSize(PROFILE_MAX_VIDEO_SIZE_BYTES)} or smaller.`
+      /**
+       * validateProfileMoodboardFile - Utility function
+       * @returns void
+       */
     }
 
     if (
@@ -90,13 +110,20 @@ export const useProfileMoodboardUpload = () => {
 
   const setUploadItems = useCallback(
     (
-      updater:
+      updater: /**
+         * isUploadedItem - Utility function
+         * @returns void
+         */
         | ProfileMoodboardUploadItem[]
         | ((current: ProfileMoodboardUploadItem[]) => ProfileMoodboardUploadItem[]),
     ) => {
       setItems((current) => {
         const nextItems = typeof updater === 'function' ? updater(current) : updater
         itemsRef.current = nextItems
+        /**
+         * useProfileMoodboardUpload - Custom React hook
+         * @returns void
+         */
         return nextItems
       })
     },
@@ -104,23 +131,43 @@ export const useProfileMoodboardUpload = () => {
   )
 
   const abortActiveUploads = useCallback(() => {
+    /**
+     * itemsRef - Utility function
+     * @returns void
+     */
     abortControllersRef.current.forEach((controller) => controller.abort())
     abortControllersRef.current.clear()
   }, [])
 
+  /**
+   * localIdRef - Utility function
+   * @returns void
+   */
   const revokePreview = (item: ProfileMoodboardUploadItem) => {
     URL.revokeObjectURL(item.previewUrl)
   }
 
+  /**
+   * uploadRunRef - Utility function
+   * @returns void
+   */
   const resetUpload = useCallback(() => {
     uploadRunRef.current += 1
     abortActiveUploads()
     itemsRef.current.forEach(revokePreview)
+    /**
+     * abortControllersRef - Utility function
+     * @returns void
+     */
     setUploadItems([])
     setCoverItemId(null)
     setQueueErrorMessage(null)
   }, [abortActiveUploads, setUploadItems])
 
+  /**
+   * setUploadItems - Utility function
+   * @returns void
+   */
   useEffect(
     () => () => {
       uploadRunRef.current += 1
@@ -131,6 +178,10 @@ export const useProfileMoodboardUpload = () => {
   )
 
   const uploadItems = useCallback(
+    /**
+     * nextItems - Utility function
+     * @returns void
+     */
     async (queuedItems: ProfileMoodboardUploadItem[]) => {
       if (queuedItems.length === 0) {
         return
@@ -142,6 +193,10 @@ export const useProfileMoodboardUpload = () => {
       abortControllersRef.current.add(abortController)
 
       setUploadItems((current) =>
+        /**
+         * abortActiveUploads - Utility function
+         * @returns void
+         */
         current.map((item) =>
           queuedIds.includes(item.localId)
             ? { ...item, status: 'uploading', progress: 0, errorMessage: null, uploadedMedia: null }
@@ -150,6 +205,10 @@ export const useProfileMoodboardUpload = () => {
       )
 
       try {
+        /**
+         * revokePreview - Utility function
+         * @returns void
+         */
         const durationSecondsByFileName = queuedItems.reduce<Record<string, number>>(
           (durations, item) => {
             if (typeof item.durationSeconds === 'number') {
@@ -157,6 +216,10 @@ export const useProfileMoodboardUpload = () => {
             }
             return durations
           },
+          /**
+           * resetUpload - Utility function
+           * @returns void
+           */
           {},
         )
         const uploadedMedia = await uploadProfileMoodboardMedia(
@@ -178,7 +241,11 @@ export const useProfileMoodboardUpload = () => {
                 current.map((item) =>
                   queuedIds.includes(item.localId)
                     ? { ...item, status: 'uploading', progress: percentage }
-                    : item,
+                    : /**
+                       * uploadItems - Utility function
+                       * @returns void
+                       */
+                      item,
                 ),
               )
             },
@@ -187,14 +254,26 @@ export const useProfileMoodboardUpload = () => {
 
         if (uploadRunRef.current !== runId || abortController.signal.aborted) {
           return
+          /**
+           * runId - Utility function
+           * @returns void
+           */
         }
 
         abortControllersRef.current.delete(abortController)
         setUploadItems((current) =>
+          /**
+           * queuedIds - Utility function
+           * @returns void
+           */
           current.map((item) => {
             const itemIndex = queuedIds.indexOf(item.localId)
             if (itemIndex === -1) {
               return item
+              /**
+               * abortController - Utility function
+               * @returns void
+               */
             }
 
             const response = uploadedMedia[itemIndex]
@@ -210,6 +289,10 @@ export const useProfileMoodboardUpload = () => {
 
             return {
               ...item,
+              /**
+               * durationSecondsByFileName - Utility function
+               * @returns void
+               */
               status: 'uploaded',
               progress: 100,
               errorMessage: null,
@@ -222,6 +305,10 @@ export const useProfileMoodboardUpload = () => {
         setCoverItemId((currentCoverId) => {
           const currentItems = itemsRef.current
           const currentCover = currentItems.find((item) => item.localId === currentCoverId)
+          /**
+           * uploadedMedia - Utility function
+           * @returns void
+           */
           if (currentCover && isUploadedItem(currentCover)) {
             return currentCoverId
           }
@@ -239,12 +326,12 @@ export const useProfileMoodboardUpload = () => {
           current.map((item) =>
             queuedIds.includes(item.localId)
               ? {
-                ...item,
-                status: 'upload-failed',
-                progress: 0,
-                errorMessage: message,
-                uploadedMedia: null,
-              }
+                  ...item,
+                  status: 'upload-failed',
+                  progress: 0,
+                  errorMessage: message,
+                  uploadedMedia: null,
+                }
               : item,
           ),
         )
@@ -258,6 +345,10 @@ export const useProfileMoodboardUpload = () => {
     async (fileList: File[] | FileList) => {
       const incomingFiles = Array.from(fileList)
       if (incomingFiles.length === 0) {
+        /**
+         * itemIndex - Utility function
+         * @returns void
+         */
         return
       }
 
@@ -266,6 +357,10 @@ export const useProfileMoodboardUpload = () => {
         setQueueErrorMessage(`Upload up to ${PROFILE_MAX_MOODBOARD_FILES} files per moodboard.`)
         return
       }
+      /**
+       * response - Utility function
+       * @returns void
+       */
 
       const acceptedFiles = incomingFiles.slice(0, remainingSlots)
       if (incomingFiles.length > remainingSlots) {
@@ -292,14 +387,22 @@ export const useProfileMoodboardUpload = () => {
       const validatedItems = await Promise.all(
         baseItems.map(async (item) => {
           const durationSeconds = isProfileVideoFile(item.file)
-            ? await readVideoDuration(item.file)
+            ? /**
+               * currentItems - Utility function
+               * @returns void
+               */
+              await readVideoDuration(item.file)
             : undefined
           const validationError = validateProfileMoodboardFile(item.file, durationSeconds)
 
+          /**
+           * currentCover - Utility function
+           * @returns void
+           */
           return {
             ...item,
             durationSeconds,
-            status: validationError ? 'validation-error' as const : 'uploading' as const,
+            status: validationError ? ('validation-error' as const) : ('uploading' as const),
             errorMessage: validationError,
           }
         }),
@@ -310,8 +413,14 @@ export const useProfileMoodboardUpload = () => {
 
       setUploadItems((current) =>
         current.map((item) => {
-          const validatedItem = validatedItems.find((candidate) => candidate.localId === item.localId)
+          const validatedItem = validatedItems.find(
+            (candidate) => candidate.localId === item.localId,
+          )
           return validatedItem ?? item
+          /**
+           * message - Utility function
+           * @returns void
+           */
         }),
       )
 
@@ -335,11 +444,19 @@ export const useProfileMoodboardUpload = () => {
         return current.filter((item) => item.localId !== localId)
       })
       setCoverItemId((currentCoverId) => (currentCoverId === localId ? null : currentCoverId))
+      /**
+       * addFiles - Utility function
+       * @returns void
+       */
     },
     [setUploadItems],
   )
 
   const moveMedia = useCallback(
+    /**
+     * incomingFiles - Utility function
+     * @returns void
+     */
     (localId: string, direction: 'up' | 'down') => {
       setUploadItems((current) => {
         const index = current.findIndex((item) => item.localId === localId)
@@ -348,6 +465,10 @@ export const useProfileMoodboardUpload = () => {
         }
 
         const targetIndex = direction === 'up' ? index - 1 : index + 1
+        /**
+         * remainingSlots - Utility function
+         * @returns void
+         */
         if (targetIndex < 0 || targetIndex >= current.length) {
           return current
         }
@@ -357,21 +478,26 @@ export const useProfileMoodboardUpload = () => {
         nextItems.splice(targetIndex, 0, movedItem)
         return nextItems
       })
+      /**
+       * acceptedFiles - Utility function
+       * @returns void
+       */
     },
     [setUploadItems],
   )
 
-  const setCover = useCallback(
-    (localId: string) => {
-      const item = itemsRef.current.find((candidate) => candidate.localId === localId)
-      if (!item || !isUploadedItem(item)) {
-        return
-      }
+  const setCover = useCallback((localId: string) => {
+    const item = itemsRef.current.find((candidate) => candidate.localId === localId)
+    if (!item || !isUploadedItem(item)) {
+      return
+    }
+    /**
+     * baseItems - Utility function
+     * @returns void
+     */
 
-      setCoverItemId(localId)
-    },
-    [],
-  )
+    setCoverItemId(localId)
+  }, [])
 
   const retryUpload = useCallback(
     async (localId: string) => {
@@ -385,19 +511,34 @@ export const useProfileMoodboardUpload = () => {
     },
     [uploadItems],
   )
+  /**
+   * validatedItems - Utility function
+   * @returns void
+   */
 
   const uploadedItems = useMemo(() => items.filter(isUploadedItem), [items])
   const resolvedCoverItem =
     uploadedItems.find((item) => item.localId === coverItemId) ?? uploadedItems[0] ?? null
   const mediaIds = uploadedItems
+    /**
+     * durationSeconds - Utility function
+     * @returns void
+     */
     .map((item) => item.uploadedMedia?.mediaId)
     .filter((mediaId): mediaId is string => Boolean(mediaId))
   const coverMediaId = resolvedCoverItem?.uploadedMedia?.mediaId ?? null
-  const isUploading = items.some((item) => item.status === 'uploading' || item.status === 'validating')
+  const isUploading = items.some(
+    (item) => item.status === 'uploading' || item.status === 'validating',
+  )
   const hasBlockingFailure = items.some(
     (item) => item.status === 'upload-failed' || item.status === 'validation-error',
+    /**
+     * validationError - Utility function
+     * @returns void
+     */
   )
-  const canCreate = mediaIds.length > 0 && Boolean(coverMediaId) && !isUploading && !hasBlockingFailure
+  const canCreate =
+    mediaIds.length > 0 && Boolean(coverMediaId) && !isUploading && !hasBlockingFailure
   const statusMessage = isUploading
     ? 'Uploading media'
     : hasBlockingFailure
@@ -410,10 +551,18 @@ export const useProfileMoodboardUpload = () => {
     items,
     uploadedItems,
     mediaIds,
+    /**
+     * validItems - Utility function
+     * @returns void
+     */
     coverMediaId,
     coverItemId: resolvedCoverItem?.localId ?? null,
     isUploading,
     hasBlockingFailure,
+    /**
+     * invalidItems - Utility function
+     * @returns void
+     */
     canCreate,
     queueErrorMessage,
     statusMessage,
@@ -421,7 +570,84 @@ export const useProfileMoodboardUpload = () => {
     removeMedia,
     moveMedia,
     setCover,
+    /**
+     * validatedItem - Utility function
+     * @returns void
+     */
     retryUpload,
     resetUpload,
   }
 }
+
+/**
+ * removeMedia - Utility function
+ * @returns void
+ */
+/**
+ * itemToRemove - Utility function
+ * @returns void
+ */
+/**
+ * moveMedia - Utility function
+ * @returns void
+ */
+/**
+ * index - Utility function
+ * @returns void
+ */
+/**
+ * targetIndex - Utility function
+ * @returns void
+ */
+/**
+ * nextItems - Utility function
+ * @returns void
+ */
+/**
+ * setCover - Utility function
+ * @returns void
+ */
+/**
+ * item - Utility function
+ * @returns void
+ */
+/**
+ * retryUpload - Utility function
+ * @returns void
+ */
+/**
+ * item - Utility function
+ * @returns void
+ */
+/**
+ * uploadedItems - Utility function
+ * @returns void
+ */
+/**
+ * resolvedCoverItem - Utility function
+ * @returns void
+ */
+/**
+ * mediaIds - Utility function
+ * @returns void
+ */
+/**
+ * coverMediaId - Utility function
+ * @returns void
+ */
+/**
+ * isUploading - Utility function
+ * @returns void
+ */
+/**
+ * hasBlockingFailure - Utility function
+ * @returns void
+ */
+/**
+ * canCreate - Utility function
+ * @returns void
+ */
+/**
+ * statusMessage - Utility function
+ * @returns void
+ */

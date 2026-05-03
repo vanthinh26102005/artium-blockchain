@@ -3,6 +3,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 import { Metadata } from '@/components/SEO/Metadata'
 import { ManagePlanView } from '@domains/manage-plan/components/ManagePlanView'
 
+/**
+ * ManagePlanPage - React component
+ * @returns React element
+ */
 const ManagePlanPage: NextPageWithLayout = () => {
   return (
     <>

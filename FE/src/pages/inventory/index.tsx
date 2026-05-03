@@ -11,6 +11,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 import { useRequireAuth } from '@domains/auth/hooks/useRequireAuth'
 
 // @domains - inventory
+/**
+ * InventoryPage - React component
+ * @returns React element
+ */
 const InventoryPage = dynamic(
   () => import('@domains/inventory/views/InventoryPage').then((module) => module.InventoryPage),
   { ssr: false },
@@ -19,6 +23,10 @@ const InventoryPage = dynamic(
 const InventoryRoute: NextPageWithLayout = () => {
   // -- state --
   const { canRenderProtected } = useRequireAuth()
+  /**
+   * InventoryRoute - React component
+   * @returns React element
+   */
 
   // -- derived --
 

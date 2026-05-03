@@ -11,6 +11,10 @@ export type MockArtwork = {
   dimensions?: string
 }
 
+/**
+ * mockArtworks - Utility function
+ * @returns void
+ */
 export const mockArtworks: MockArtwork[] = [
   {
     id: 'artwork-001',

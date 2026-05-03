@@ -1,5 +1,9 @@
 import { z } from 'zod'
 
+/**
+ * quickSellCheckoutAddressSchema - Utility function
+ * @returns void
+ */
 export const quickSellCheckoutAddressSchema = z.object({
   firstName: z.string().trim().min(1, 'First name is required'),
   lastName: z.string().trim().min(1, 'Last name is required'),
@@ -16,6 +20,10 @@ export const quickSellCheckoutAddressSchema = z.object({
 export const quickSellCheckoutFormSchema = z.object({
   address: quickSellCheckoutAddressSchema,
   deliveryMethod: z.enum(['pickup', 'Artium', 'invoice_only']),
+  /**
+   * quickSellCheckoutFormSchema - Utility function
+   * @returns void
+   */
   paymentCountry: z.string().trim().min(1, 'Country is required'),
 })
 

@@ -31,6 +31,10 @@ export interface DiscoverArtwork {
   auction?: DiscoverArtworkAuction
 }
 
+/**
+ * baseMockArtworks - Utility function
+ * @returns void
+ */
 const baseMockArtworks: DiscoverArtwork[] = [
   {
     id: 'aw-001',
@@ -816,12 +820,20 @@ const baseMockArtworks: DiscoverArtwork[] = [
 const createEndsAt = (offsetInSeconds: number) =>
   new Date(Date.now() + offsetInSeconds * 1000).toISOString()
 
+/**
+ * createEndsAt - Utility function
+ * @returns void
+ */
 const createAuction = (
   statusKey: DiscoverArtworkAuctionStatusKey,
   statusLabel: string,
   currentBidEth: number,
   offsetInSeconds?: number,
 ): DiscoverArtworkAuction => ({
+  /**
+   * createAuction - Utility function
+   * @returns void
+   */
   statusKey,
   statusLabel,
   currentBidEth,
@@ -837,6 +849,10 @@ const mockArtworkAuctionById: Partial<Record<DiscoverArtwork['id'], DiscoverArtw
   'aw-007': createAuction('active', '8h 30m remaining', 17.5, 8 * 60 * 60 + 30 * 60),
   'aw-009': createAuction('paused', 'Reserve Not Met', 9.4),
   'aw-010': createAuction('ending-soon', '45m remaining', 14.2, 45 * 60),
+  /**
+   * mockArtworkAuctionById - Utility function
+   * @returns void
+   */
   'aw-011': createAuction('active', '5h 20m remaining', 11.6, 5 * 60 * 60 + 20 * 60),
   'aw-012': createAuction('newly-listed', 'Just Listed', 4.8),
   'aw-013': createAuction('active', '9h remaining', 31.5, 9 * 60 * 60),
@@ -861,3 +877,8 @@ export const mockArtworks: DiscoverArtwork[] = baseMockArtworks.map((artwork) =>
   ...artwork,
   auction: mockArtworkAuctionById[artwork.id],
 }))
+
+/**
+ * mockArtworks - Utility function
+ * @returns void
+ */

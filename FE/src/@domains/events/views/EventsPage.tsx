@@ -1,11 +1,15 @@
 // @shared - metadata
-import { Metadata } from "@/components/SEO/Metadata";
+import { Metadata } from '@/components/SEO/Metadata'
 
 // @domains - events
-import { EventsHostingSection } from "@domains/events/components/sections/EventsHostingSection";
-import { YourEventsSection } from "@domains/events/components/sections/YourEventsSection";
-import { DiscoverEventsSection } from "@domains/events/components/sections/DiscoverEventsSection";
+import { EventsHostingSection } from '@domains/events/components/sections/EventsHostingSection'
+import { YourEventsSection } from '@domains/events/components/sections/YourEventsSection'
+import { DiscoverEventsSection } from '@domains/events/components/sections/DiscoverEventsSection'
 
+/**
+ * EventsPage - React component
+ * @returns React element
+ */
 export const EventsPage = () => {
   // -- render --
   return (
@@ -17,5 +21,5 @@ export const EventsPage = () => {
         <DiscoverEventsSection />
       </div>
     </>
-  );
-};
+  )
+}

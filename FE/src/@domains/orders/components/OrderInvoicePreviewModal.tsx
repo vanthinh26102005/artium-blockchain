@@ -1,11 +1,6 @@
 import type { OrderInvoiceResponse } from '@shared/apis/orderApis'
 import { Button } from '@shared/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from '@shared/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@shared/components/ui/dialog'
 import {
   canPrintOrderInvoice,
   type OrderInvoiceAvailability,
@@ -22,6 +17,10 @@ type OrderInvoicePreviewModalProps = {
   onRetry: () => void
 }
 
+/**
+ * OrderInvoicePreviewModal - React component
+ * @returns React element
+ */
 export const OrderInvoicePreviewModal = ({
   open,
   invoice,
@@ -33,10 +32,18 @@ export const OrderInvoicePreviewModal = ({
   const isReady = availability.state === 'ready' && Boolean(invoice)
   const canPrint = canPrintOrderInvoice(availability)
 
+  /**
+   * isReady - Utility function
+   * @returns void
+   */
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="9xl"
+        /**
+         * canPrint - Utility function
+         * @returns void
+         */
         className="order-invoice-modal-frame h-[100dvh] max-h-[100dvh] overflow-hidden rounded-none border border-slate-200 bg-[#F7F8FA] p-0 shadow-2xl sm:h-[92vh] sm:max-h-[92vh] sm:rounded-[28px]"
         closeButtonClassName="order-invoice-screen-only"
       >

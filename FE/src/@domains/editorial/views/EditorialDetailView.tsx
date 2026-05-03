@@ -11,22 +11,30 @@ type EditorialDetailViewProps = {
   article: EditorialItem
 }
 
+/**
+ * EditorialDetailView - React component
+ * @returns React element
+ */
 export const EditorialDetailView = ({ article }: EditorialDetailViewProps) => {
   const authorAvatar = `https://i.pravatar.cc/96?u=${encodeURIComponent(article.author)}`
 
   return (
+    /**
+     * authorAvatar - Utility function
+     * @returns void
+     */
     <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:px-10 lg:px-12">
       <Metadata title={`${article.title} | Editorial`} />
 
       {/* header */}
-      <div className="mb-4 text-[16px] leading-tight font-extrabold text-[#191414]">
+      <div className="mb-4 text-[16px] font-extrabold leading-tight text-[#191414]">
         {article.category}
       </div>
-      <h1 className="text-3xl leading-tight font-bold text-[#191414] sm:text-4xl">
+      <h1 className="text-3xl font-bold leading-tight text-[#191414] sm:text-4xl">
         {article.title}
       </h1>
-      <div className="mt-4 flex flex-wrap items-center gap-3 text-[14px] leading-tight font-normal text-[#191414]">
-        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-[11px] font-semibold text-white uppercase">
+      <div className="mt-4 flex flex-wrap items-center gap-3 text-[14px] font-normal leading-tight text-[#191414]">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-[11px] font-semibold uppercase text-white">
           {article.author.charAt(0)}
         </span>
         <span>{article.author}</span>
@@ -80,8 +88,8 @@ export const EditorialDetailView = ({ article }: EditorialDetailViewProps) => {
               className="h-12 w-12 rounded-full object-cover"
             />
             <div className="space-y-1">
-              <p className="text-[14px] leading-tight font-normal text-[#191414]">Written by</p>
-              <p className="ml-[8px] text-[16px] leading-tight font-semibold text-[#191414]">
+              <p className="text-[14px] font-normal leading-tight text-[#191414]">Written by</p>
+              <p className="ml-[8px] text-[16px] font-semibold leading-tight text-[#191414]">
                 {article.author}
               </p>
             </div>

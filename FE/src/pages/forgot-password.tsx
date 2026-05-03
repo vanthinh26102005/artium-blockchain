@@ -7,6 +7,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 // @domains - auth
 import { ForgotPasswordPage } from '@domains/auth/views/ForgotPasswordPage'
 
+/**
+ * ForgotPasswordRoute - React component
+ * @returns React element
+ */
 const ForgotPasswordRoute: NextPageWithLayout = () => {
   // -- state --
 

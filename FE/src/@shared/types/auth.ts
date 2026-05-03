@@ -31,14 +31,26 @@ export type UserPayload = {
  * Normalizes a raw BE user response into the full UserPayload shape,
  * populating legacy aliases from the primary BE fields.
  */
+/**
+ * normalizeUserPayload - Utility function
+ * @returns void
+ */
 export function normalizeUserPayload(raw: Record<string, unknown>): UserPayload {
   const slug = (raw.slug as string) ?? null
   const fullName = (raw.fullName as string) ?? null
 
+  /**
+   * slug - Utility function
+   * @returns void
+   */
   return {
     id: raw.id as string,
     email: raw.email as string,
     slug,
+    /**
+     * fullName - Utility function
+     * @returns void
+     */
     fullName,
     avatarUrl: (raw.avatarUrl as string) ?? null,
     roles: (raw.roles as string[]) ?? [],
@@ -66,6 +78,10 @@ export function normalizeLoginResponse(raw: Record<string, unknown>): LoginRespo
 }
 
 export type LoginResponse = {
+  /**
+   * normalizeLoginResponse - Utility function
+   * @returns void
+   */
   accessToken: string
   refreshToken: string
   user: UserPayload

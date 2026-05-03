@@ -19,6 +19,10 @@ type DraggableArtworkItemProps = {
   onStartAuction: (artwork: InventoryArtwork) => void
 }
 
+/**
+ * DraggableArtworkItem - React component
+ * @returns React element
+ */
 export const DraggableArtworkItem = ({
   artwork,
   onEdit,
@@ -36,6 +40,10 @@ export const DraggableArtworkItem = ({
   const style: CSSProperties = {
     transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.5 : 1,
+    /**
+     * style - Utility function
+     * @returns void
+     */
     zIndex: isDragging ? 999 : undefined,
     position: 'relative',
     touchAction: 'none',

@@ -12,10 +12,11 @@ type QuickSellArtworkItemRowProps = {
   onRemove: (index: number) => void
 }
 
-export const QuickSellArtworkItemRow = ({
-  index,
-  onRemove,
-}: QuickSellArtworkItemRowProps) => {
+/**
+ * QuickSellArtworkItemRow - React component
+ * @returns React element
+ */
+export const QuickSellArtworkItemRow = ({ index, onRemove }: QuickSellArtworkItemRowProps) => {
   const {
     control,
     formState: { errors },
@@ -24,14 +25,22 @@ export const QuickSellArtworkItemRow = ({
   const item = useWatch({
     control,
     name: `items.${index}` as const,
+    /**
+     * item - Utility function
+     * @returns void
+     */
   }) as ArtworkLineItem
 
   const itemErrors = errors.items?.[index] as
     | {
-      price?: { message?: string }
-      discountPercent?: { message?: string }
-    }
+        price?: { message?: string }
+        discountPercent?: { message?: string }
+      }
     | undefined
+  /**
+   * itemErrors - Utility function
+   * @returns void
+   */
   const labelClassName = 'text-[11px] font-bold uppercase tracking-wider text-[#191414]'
   const messageClassName = 'text-xs text-red-500'
   const inputClassName =
@@ -41,14 +50,19 @@ export const QuickSellArtworkItemRow = ({
     <div className="overflow-hidden rounded-2xl border border-[#E5E5E5] bg-white">
       <div className="flex items-center justify-between border-b border-[#E5E5E5] px-6 py-4">
         <h3 className="text-[14px] font-bold uppercase tracking-wide text-[#191414]">
-          ITEM #{index + 1}
+          /** * labelClassName - Utility function * @returns void */ ITEM #{index + 1}
         </h3>
         <button
           type="button"
+          /**
+           * messageClassName - Utility function
+           * @returns void
+           */
           onClick={() => onRemove(index)}
           className="p-1 text-[#989898] transition hover:text-[#191414]"
         >
           <X className="h-5 w-5" />
+          /** * inputClassName - Utility function * @returns void */
         </button>
       </div>
 
@@ -70,7 +84,9 @@ export const QuickSellArtworkItemRow = ({
 
           <div className="flex flex-col justify-center">
             <h4 className="text-[18px] font-bold text-[#191414]">{item?.artworkName}</h4>
-            {item?.artistName && <p className="mt-1 text-[14px] text-[#595959]">{item.artistName}</p>}
+            {item?.artistName && (
+              <p className="mt-1 text-[14px] text-[#595959]">{item.artistName}</p>
+            )}
             <div className="mt-3 space-y-1 text-[14px] text-[#595959]">
               {item?.year && <p>{item.year}</p>}
               {item?.dimensions && <p>{item.dimensions}</p>}
@@ -92,7 +108,9 @@ export const QuickSellArtworkItemRow = ({
             messageClassName={messageClassName}
           >
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-[#191414]">$</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-[#191414]">
+                $
+              </span>
               <Controller
                 name={`items.${index}.price` as const}
                 control={control}

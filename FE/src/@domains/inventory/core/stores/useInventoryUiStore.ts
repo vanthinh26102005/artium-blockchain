@@ -14,6 +14,10 @@ type InventoryUiState = {
   setActiveTab: (tab: InventoryTab) => void
 }
 
+/**
+ * useInventoryUiStore - Custom React hook
+ * @returns void
+ */
 export const useInventoryUiStore = create<InventoryUiState>()(
   persist(
     (set) => ({

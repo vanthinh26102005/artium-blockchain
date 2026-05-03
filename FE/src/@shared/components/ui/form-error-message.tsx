@@ -8,12 +8,16 @@ type FormErrorMessageProps = {
   visible?: boolean
 }
 
+/**
+ * FormErrorMessage - React component
+ * @returns React element
+ */
 export const FormErrorMessage = ({ id, message, visible = true }: FormErrorMessageProps) => {
   return (
     <div
       id={id}
       className={cn(
-        'flex min-h-5.5 items-center gap-2 text-sm font-semibold text-auth-error',
+        'min-h-5.5 flex items-center gap-2 text-sm font-semibold text-auth-error',
         !visible && 'opacity-0',
       )}
       aria-live="polite"

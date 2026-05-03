@@ -4,6 +4,10 @@ import { useRequireAuth } from '@domains/auth/hooks/useRequireAuth'
 import { SidebarLayout } from '@shared/components/layout/SidebarLayout'
 import type { NextPageWithLayout } from '@shared/types/next'
 
+/**
+ * SellerRegistrationPage - React component
+ * @returns React element
+ */
 const SellerRegistrationPage = dynamic(
   () =>
     import('@domains/seller/views/SellerRegistrationPage').then(
@@ -15,6 +19,10 @@ const SellerRegistrationPage = dynamic(
 const SellerRegisterRoute: NextPageWithLayout = () => {
   const { canRenderProtected } = useRequireAuth()
 
+  /**
+   * SellerRegisterRoute - React component
+   * @returns React element
+   */
   if (!canRenderProtected) {
     return null
   }

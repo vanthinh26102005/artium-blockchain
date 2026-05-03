@@ -2,15 +2,27 @@ import type { FieldErrors } from 'react-hook-form'
 import type { EthereumQuoteResponse } from '@shared/apis/paymentApis'
 import type { WalletErrorState } from '../hooks/useWalletCheckout'
 
+/**
+ * DEFAULT_CHAIN_NAME - React component
+ * @returns React element
+ */
 const DEFAULT_CHAIN_NAME = process.env.NEXT_PUBLIC_ETH_CHAIN_NAME ?? 'Sepolia'
 
 function formatEthAmount(ethAmount: string): string {
   const numeric = Number(ethAmount)
   if (!Number.isFinite(numeric)) {
+    /**
+     * formatEthAmount - Utility function
+     * @returns void
+     */
     return ethAmount
   }
 
   return numeric.toLocaleString('en-US', {
+    /**
+     * numeric - Utility function
+     * @returns void
+     */
     minimumFractionDigits: 0,
     maximumFractionDigits: 6,
   })
@@ -47,6 +59,10 @@ export const WalletPaymentSection = ({
   onRefreshQuote,
   walletAddress,
   txHash,
+  /**
+   * WalletPaymentSection - React component
+   * @returns React element
+   */
   isConnecting,
   isSubmittingPayment,
   connectError,
@@ -59,7 +75,7 @@ export const WalletPaymentSection = ({
   errors,
 }: Props) => {
   return (
-    <div className="overflow-hidden rounded-3xl bg-white p-6 shadow-sm space-y-4">
+    <div className="space-y-4 overflow-hidden rounded-3xl bg-white p-6 shadow-sm">
       <div className="rounded-2xl border border-[#E5E5E5] bg-[#FAFAFA] p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -82,7 +98,9 @@ export const WalletPaymentSection = ({
         </div>
 
         {quoteStatus === 'loading' && (
-          <p className="mt-3 text-[12px] text-[#595959]">Fetching a live ETH quote from the server…</p>
+          <p className="mt-3 text-[12px] text-[#595959]">
+            Fetching a live ETH quote from the server…
+          </p>
         )}
 
         {quoteStatus === 'error' && (
@@ -105,9 +123,7 @@ export const WalletPaymentSection = ({
                   isQuoteExpired ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-700'
                 }`}
               >
-                {isQuoteExpired
-                  ? 'Quote expired'
-                  : `Expires in ${quoteExpiresInSeconds ?? 0}s`}
+                {isQuoteExpired ? 'Quote expired' : `Expires in ${quoteExpiresInSeconds ?? 0}s`}
               </span>
             </div>
             <p className="mt-3 text-[15px] font-semibold text-[#191414]">
@@ -128,7 +144,7 @@ export const WalletPaymentSection = ({
       {!walletAddress ? (
         <div className="flex flex-col items-center gap-4 py-4">
           <span className="text-4xl">🦊</span>
-          <p className="text-[14px] text-[#595959] text-center">
+          <p className="text-center text-[14px] text-[#595959]">
             Connect MetaMask to pay with Sepolia ETH
           </p>
           <button
@@ -156,7 +172,7 @@ export const WalletPaymentSection = ({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-xl bg-green-50 border border-green-200 px-4 py-3">
+          <div className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-green-500" />
               <span className="text-[13px] font-medium text-green-800">
@@ -166,7 +182,7 @@ export const WalletPaymentSection = ({
             <button
               type="button"
               onClick={disconnectWallet}
-              className="text-[11px] text-[#989898] hover:text-[#595959] underline"
+              className="text-[11px] text-[#989898] underline hover:text-[#595959]"
             >
               Disconnect
             </button>
@@ -212,9 +228,11 @@ export const WalletPaymentSection = ({
           </div>
 
           {txHash && (
-            <div className="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[#0066FF]">Transaction Sent</p>
-              <p className="mt-1 text-[12px] font-mono text-[#191414] break-all">
+            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#0066FF]">
+                Transaction Sent
+              </p>
+              <p className="mt-1 break-all font-mono text-[12px] text-[#191414]">
                 {txHash.slice(0, 10)}…{txHash.slice(-8)}
               </p>
               {quote?.blockExplorerUrl && (

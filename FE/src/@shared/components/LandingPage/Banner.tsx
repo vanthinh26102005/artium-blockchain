@@ -11,6 +11,10 @@ type BannerProps = {
   className?: string
 }
 
+/**
+ * Banner - React component
+ * @returns React element
+ */
 const Banner = ({ className }: BannerProps) => {
   return (
     <section className={cn('relative isolate w-full overflow-hidden bg-black', className)}>

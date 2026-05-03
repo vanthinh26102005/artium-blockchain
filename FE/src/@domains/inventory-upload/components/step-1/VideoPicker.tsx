@@ -49,6 +49,10 @@ type VideoPickerProps = {
   onRemove: () => void
 }
 
+/**
+ * VideoPicker - React component
+ * @returns React element
+ */
 export const VideoPicker = ({
   video,
   error,
@@ -72,10 +76,18 @@ export const VideoPicker = ({
   const isMoments = mode === 'moments'
   const titleLabelClassName =
     'text-[13px] font-extrabold uppercase tracking-[0.05em] text-black/50 lg:text-[17px]'
+  /**
+   * isMoments - Utility function
+   * @returns void
+   */
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDiscardOpen, setIsDiscardOpen] = useState(false)
   const [localCaption, setLocalCaption] = useState('')
   const [localVideoType, setLocalVideoType] = useState('')
+  /**
+   * titleLabelClassName - Utility function
+   * @returns void
+   */
   const videoTypePlaceholderValue = '__placeholder__'
   const videoTypePlaceholderLabel = 'Select a video type from the dropdown'
   const videoTypeOptions = [
@@ -85,11 +97,19 @@ export const VideoPicker = ({
     'Installation/Exhibitions / Out in the Wild',
     'Testimony / Review',
   ]
+  /**
+   * videoTypePlaceholderValue - Utility function
+   * @returns void
+   */
 
   const currentCaption = caption ?? localCaption
   const currentVideoType = videoType ?? localVideoType
 
   const handleCaptionChange = (value: string) => {
+    /**
+     * videoTypeOptions - Utility function
+     * @returns void
+     */
     if (onCaptionChange) {
       onCaptionChange(value)
       return
@@ -101,15 +121,27 @@ export const VideoPicker = ({
     if (onVideoTypeChange) {
       onVideoTypeChange(value)
       return
+      /**
+       * currentCaption - Utility function
+       * @returns void
+       */
     }
     setLocalVideoType(value)
   }
 
+  /**
+   * currentVideoType - Utility function
+   * @returns void
+   */
   const handleSelectFile = (file: File) => {
     onSelect(file)
     if (isMoments) {
       setIsEditOpen(true)
     }
+    /**
+     * handleCaptionChange - Utility function
+     * @returns void
+     */
   }
 
   const handleRemove = () => {
@@ -121,6 +153,10 @@ export const VideoPicker = ({
 
   const handleEditOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
+      /**
+       * handleVideoTypeChange - Utility function
+       * @returns void
+       */
       setIsEditOpen(true)
       return
     }
@@ -132,6 +168,10 @@ export const VideoPicker = ({
     handleRemove()
   }
 
+  /**
+   * handleSelectFile - Utility function
+   * @returns void
+   */
   return (
     <>
       <DropzoneBase
@@ -142,7 +182,11 @@ export const VideoPicker = ({
             ? undefined
             : (helperText ??
               (disabled
-                ? 'Video uploads are available in Step 2.'
+                ? /**
+                   * handleRemove - Utility function
+                   * @returns void
+                   */
+                  'Video uploads are available in Step 2.'
                 : `Supported MP4, MOV, WEBM. ${maxSizeLabel}`))
         }
         accept={accept}
@@ -152,8 +196,12 @@ export const VideoPicker = ({
         hideHeader={isMoments}
         containerClassName={containerClassName}
         dropzoneClassName={cn(
+          /**
+           * handleEditOpenChange - Utility function
+           * @returns void
+           */
           isMoments &&
-          'min-h-[320px] items-stretch justify-start rounded-4xl border-black/20 bg-white px-0 py-0 text-left lg:min-h-[420px]',
+            'min-h-[320px] items-stretch justify-start rounded-4xl border-black/20 bg-white px-0 py-0 text-left lg:min-h-[420px]',
           isMoments && 'border-dashed',
           isMoments && '!mt-0',
           isMoments && '!text-[#191414]',
@@ -163,100 +211,104 @@ export const VideoPicker = ({
         renderDropzoneContent={
           isMoments
             ? (inputId) => {
-              if (!video?.previewUrl) {
+                /**
+                 * handleDiscardVideo - Utility function
+                 * @returns void
+                 */
+                if (!video?.previewUrl) {
+                  return (
+                    <div className="flex h-full w-full flex-col">
+                      <div className="px-6 pt-6">
+                        <p className={titleLabelClassName}>Artwork moments</p>
+                      </div>
+                      <div className="flex flex-1 flex-col items-center justify-center px-6 pb-8 text-center">
+                        <img
+                          src="/images/upload-inventory/upload-and-drag.svg"
+                          alt=""
+                          className="lg:h-30 lg:w-30 mt-3 h-24 w-24 2xl:h-40 2xl:w-40"
+                        />
+                        <p className="mt-6 text-[18px] font-semibold text-[#191414] lg:text-[20px]">
+                          {description ?? 'Upload moments of your artwork'}
+                        </p>
+                        <p className="mt-4 text-sm text-[#898788]">
+                          Supported formats: MOV, MP4, QT. Maximum file duration: 60 seconds.
+                        </p>
+                        <p className="text-sm text-[#898788]">Maximum file size: {maxSizeLabel}</p>
+                        <p className="mt-3 text-sm text-[#898788]">
+                          View our{' '}
+                          <a href="#" className="font-semibold text-[#0F6BFF] underline">
+                            Share and Engage with Moments Guidelines
+                          </a>{' '}
+                          for more details.
+                        </p>
+                        <Button
+                          asChild
+                          variant="outline"
+                          size="sm"
+                          className="mt-6 rounded-full px-6 text-[13px] font-semibold"
+                        >
+                          <label htmlFor={inputId} onClick={(event) => event.stopPropagation()}>
+                            Upload moments
+                          </label>
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                }
+
                 return (
                   <div className="flex h-full w-full flex-col">
                     <div className="px-6 pt-6">
                       <p className={titleLabelClassName}>Artwork moments</p>
                     </div>
-                    <div className="flex flex-1 flex-col items-center justify-center px-6 pb-8 text-center">
-                      <img
-                        src="/images/upload-inventory/upload-and-drag.svg"
-                        alt=""
-                        className="mt-3 h-24 w-24 lg:h-30 lg:w-30 2xl:h-40 2xl:w-40"
-                      />
-                      <p className="mt-6 text-[18px] font-semibold text-[#191414] lg:text-[20px]">
-                        {description ?? 'Upload moments of your artwork'}
-                      </p>
-                      <p className="mt-4 text-sm text-[#898788]">
-                        Supported formats: MOV, MP4, QT. Maximum file duration: 60 seconds.
-                      </p>
-                      <p className="text-sm text-[#898788]">Maximum file size: {maxSizeLabel}</p>
-                      <p className="mt-3 text-sm text-[#898788]">
-                        View our{' '}
-                        <a href="#" className="font-semibold text-[#0F6BFF] underline">
-                          Share and Engage with Moments Guidelines
-                        </a>{' '}
-                        for more details.
-                      </p>
-                      <Button
-                        asChild
-                        variant="outline"
-                        size="sm"
-                        className="mt-6 rounded-full px-6 text-[13px] font-semibold"
+                    <div className="flex flex-1 flex-wrap items-start gap-6 px-6 py-6">
+                      <div
+                        className="relative h-[240px] w-[180px] overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm"
+                        onClick={(event) => event.stopPropagation()}
                       >
-                        <label htmlFor={inputId} onClick={(event) => event.stopPropagation()}>
-                          Upload moments
-                        </label>
-                      </Button>
+                        <video
+                          src={video.previewUrl}
+                          className="h-full w-full object-cover"
+                          controls
+                        />
+                        <div className="absolute left-2 top-2 flex gap-2">
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              setIsEditOpen(true)
+                            }}
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-black/70 shadow-sm transition hover:text-black"
+                          >
+                            <PencilSquareIcon className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              handleRemove()
+                            }}
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-black/70 shadow-sm transition hover:text-black"
+                          >
+                            <XMarkIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <label
+                        htmlFor={inputId}
+                        onClick={(event) => event.stopPropagation()}
+                        className="flex h-[240px] w-[180px] flex-col items-center justify-center rounded-2xl border border-dashed border-black/20 bg-white text-[15px] font-semibold text-[#191414]"
+                      >
+                        <span className="text-2xl font-semibold">+</span>
+                        Add another video
+                      </label>
+                    </div>
+                    <div className="mt-auto border-t border-black/10 bg-[#F5F5F5] px-6 py-3 text-sm text-[#898788]">
+                      Drag and drop videos to change the order of your artwork videos
                     </div>
                   </div>
                 )
               }
-
-              return (
-                <div className="flex h-full w-full flex-col">
-                  <div className="px-6 pt-6">
-                    <p className={titleLabelClassName}>Artwork moments</p>
-                  </div>
-                  <div className="flex flex-1 flex-wrap items-start gap-6 px-6 py-6">
-                    <div
-                      className="relative h-[240px] w-[180px] overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm"
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      <video
-                        src={video.previewUrl}
-                        className="h-full w-full object-cover"
-                        controls
-                      />
-                      <div className="absolute top-2 left-2 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            setIsEditOpen(true)
-                          }}
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-black/70 shadow-sm transition hover:text-black"
-                        >
-                          <PencilSquareIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            handleRemove()
-                          }}
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-black/70 shadow-sm transition hover:text-black"
-                        >
-                          <XMarkIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                    <label
-                      htmlFor={inputId}
-                      onClick={(event) => event.stopPropagation()}
-                      className="flex h-[240px] w-[180px] flex-col items-center justify-center rounded-2xl border border-dashed border-black/20 bg-white text-[15px] font-semibold text-[#191414]"
-                    >
-                      <span className="text-2xl font-semibold">+</span>
-                      Add another video
-                    </label>
-                  </div>
-                  <div className="mt-auto border-t border-black/10 bg-[#F5F5F5] px-6 py-3 text-sm text-[#898788]">
-                    Drag and drop videos to change the order of your artwork videos
-                  </div>
-                </div>
-              )
-            }
             : undefined
         }
         error={error}
@@ -285,13 +337,13 @@ export const VideoPicker = ({
       </DropzoneBase>
 
       <Dialog open={isEditOpen} onOpenChange={handleEditOpenChange}>
-        <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">
+        <DialogContent size="4xl" className="rounded-4xl overflow-hidden bg-white p-0">
           <div className="border-b border-black/10 px-8 py-6">
             <h2 className="text-[22px] font-bold text-[#191414]">Edit Video</h2>
           </div>
-          <div className="grid gap-6 px-8 pt-6 pb-8 lg:grid-cols-[280px_1fr]">
+          <div className="grid gap-6 px-8 pb-8 pt-6 lg:grid-cols-[280px_1fr]">
             <div className="rounded-3xl border border-black/10 bg-white p-4">
-              <p className="text-[12px] font-semibold tracking-[0.2em] text-black/50 uppercase">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-black/50">
                 Preview
               </p>
               <div className="mt-4 overflow-hidden rounded-2xl border border-black/10 bg-black">
@@ -310,7 +362,7 @@ export const VideoPicker = ({
             </div>
             <div className="space-y-6">
               <div className="rounded-3xl border border-black/10 bg-white p-4">
-                <p className="text-[12px] font-semibold tracking-[0.2em] text-[#0F6BFF] uppercase">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#0F6BFF]">
                   Caption <span className="text-emerald-500">*</span>
                 </p>
                 <Textarea
@@ -320,12 +372,12 @@ export const VideoPicker = ({
                   placeholder="Tell the audience a little more about this video"
                   className="mt-3 min-h-[140px] text-[15px]"
                 />
-                <p className="mt-2 text-right text-[11px] tracking-[0.2em] text-black/30 uppercase">
+                <p className="mt-2 text-right text-[11px] uppercase tracking-[0.2em] text-black/30">
                   {currentCaption.length}/120 characters
                 </p>
               </div>
               <div className="rounded-3xl border border-black/10 bg-white p-4">
-                <p className="text-[12px] font-semibold tracking-[0.2em] text-black/50 uppercase">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-black/50">
                   Video type
                 </p>
                 <Select
@@ -375,9 +427,9 @@ export const VideoPicker = ({
         </DialogContent>
       </Dialog>
       <Dialog open={isDiscardOpen} onOpenChange={setIsDiscardOpen}>
-        <DialogContent size="2xl" className="overflow-hidden rounded-4xl bg-white p-0">
+        <DialogContent size="2xl" className="rounded-4xl overflow-hidden bg-white p-0">
           <div className="px-8 py-6">
-            <h2 className="text-[20px] font-bold text-[#191414] uppercase">
+            <h2 className="text-[20px] font-bold uppercase text-[#191414]">
               Are you sure you want to exit?
             </h2>
             <p className="mt-4 text-[16px] text-[#191414]">

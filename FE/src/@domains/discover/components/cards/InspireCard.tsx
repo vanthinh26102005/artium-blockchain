@@ -8,24 +8,41 @@ type InspireCardProps = {
   item: DiscoverInspireItem
 }
 
+/**
+ * InspireCard - React component
+ * @returns React element
+ */
 export const InspireCard = ({ item }: InspireCardProps) => {
   // -- state --
   const router = useRouter()
 
   // -- derived --
+  /**
+   * router - Utility function
+   * @returns void
+   */
   const isImageLayout = item.layoutVariant === 'image'
 
   // -- handlers --
   const handleClick = () => {
     router.push(`/editorial/${item.id}`)
   }
+  /**
+   * isImageLayout - Utility function
+   * @returns void
+   */
 
   // -- render --
   return (
     <article
       onClick={handleClick}
-      className={`cursor-pointer rounded-2xl border border-slate-200 bg-white shadow-[0_6px_16px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(15,23,42,0.12)] ${isImageLayout ? 'overflow-hidden' : 'p-6'
-        }`}
+      className={`cursor-pointer rounded-2xl border border-slate-200 bg-white shadow-[0_6px_16px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(15,23,42,0.12)] ${
+        isImageLayout ? 'overflow-hidden' : 'p-6'
+        /**
+         * handleClick - Utility function
+         * @returns void
+         */
+      }`}
     >
       {isImageLayout ? (
         <>
@@ -41,13 +58,13 @@ export const InspireCard = ({ item }: InspireCardProps) => {
                 />
               </div>
             ) : (
-              <div className="aspect-4/3 w-full bg-linear-to-br from-slate-100 via-slate-200 to-slate-100" />
+              <div className="bg-linear-to-br aspect-4/3 w-full from-slate-100 via-slate-200 to-slate-100" />
             )}
 
             {/* content */}
-            <div className="space-y-2 px-4 pt-4 pb-5">
+            <div className="space-y-2 px-4 pb-5 pt-4">
               {/* meta */}
-              <div className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                 {item.categoryLabel}
               </div>
               {/* title */}
@@ -76,7 +93,7 @@ export const InspireCard = ({ item }: InspireCardProps) => {
             {/* content */}
             <div className="space-y-3">
               {/* meta */}
-              <div className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                 {item.categoryLabel}
               </div>
               {/* title */}
@@ -98,8 +115,7 @@ export const InspireCard = ({ item }: InspireCardProps) => {
             </div>
           </div>
         </>
-      )
-      }
-    </article >
+      )}
+    </article>
   )
 }

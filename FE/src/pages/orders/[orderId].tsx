@@ -3,6 +3,10 @@ import { SidebarLayout } from '@shared/components/layout/SidebarLayout'
 import type { NextPageWithLayout } from '@shared/types/next'
 import { useRequireAuth } from '@domains/auth/hooks/useRequireAuth'
 
+/**
+ * OrderDetailPageView - React component
+ * @returns React element
+ */
 const OrderDetailPageView = dynamic(
   () =>
     import('@domains/orders/views/OrderDetailPageView').then(
@@ -14,6 +18,10 @@ const OrderDetailPageView = dynamic(
 const OrderDetailRoute: NextPageWithLayout = () => {
   const { canRenderProtected } = useRequireAuth()
 
+  /**
+   * OrderDetailRoute - React component
+   * @returns React element
+   */
   if (!canRenderProtected) {
     return null
   }

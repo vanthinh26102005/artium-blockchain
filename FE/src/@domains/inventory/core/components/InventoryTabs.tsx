@@ -5,6 +5,10 @@ type InventoryTabsProps = {
   onTabChange: (tab: InventoryTab) => void
 }
 
+/**
+ * InventoryTabs - React component
+ * @returns React element
+ */
 export const InventoryTabs = ({ activeTab, onTabChange }: InventoryTabsProps) => {
   return (
     <div className="flex gap-1">

@@ -7,21 +7,37 @@ import { useOnClickOutside } from 'usehooks-ts'
 import { cn } from '@shared/lib/utils'
 import { Button, buttonVariants } from '@shared/components/ui/button'
 
+/**
+ * AlertDialog - React component
+ * @returns React element
+ */
 const AlertDialog = AlertDialogPrimitive.Root
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger
 
 const AlertDialogPortal = AlertDialogPrimitive.Portal
+/**
+ * AlertDialogTrigger - React component
+ * @returns React element
+ */
 
 const AlertDialogOverlay = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
+  /**
+   * AlertDialogPortal - React component
+   * @returns React element
+   */
   <AlertDialogPrimitive.Overlay
     className={cn(
-      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[201] bg-black/80',
+      'fixed inset-0 z-[201] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className,
     )}
+    /**
+     * AlertDialogOverlay - React component
+     * @returns React element
+     */
     {...props}
     ref={ref}
   />
@@ -40,6 +56,10 @@ const alertDialogContentVariants = cva(
         xl: 'max-w-xl',
         '2xl': 'max-w-2xl',
         '3xl': 'max-w-3xl',
+        /**
+         * alertDialogContentVariants - Utility function
+         * @returns void
+         */
         '4xl': 'max-w-4xl',
         '5xl': 'max-w-5xl',
         '6xl': 'max-w-6xl',
@@ -57,8 +77,8 @@ const alertDialogContentVariants = cva(
 )
 export interface AlertDialogContentProps
   extends
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>,
-  VariantProps<typeof alertDialogContentVariants> { }
+    React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>,
+    VariantProps<typeof alertDialogContentVariants> {}
 const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
   AlertDialogContentProps & { disableCloseOnOutsideClick?: boolean; onClose: () => void }
@@ -74,6 +94,10 @@ const AlertDialogContent = React.forwardRef<
       setIsAnimating(true)
       setTimeout(() => setIsAnimating(false), 100)
       return
+      /**
+       * AlertDialogContent - React component
+       * @returns React element
+       */
     }
 
     // close dialog
@@ -85,6 +109,10 @@ const AlertDialogContent = React.forwardRef<
       <AlertDialogOverlay />
       <AlertDialogPrimitive.Content
         ref={(node) => {
+          /**
+           * dialogContentRef - Utility function
+           * @returns void
+           */
           // @ts-ignore
           if (ref) ref.current = node
           // @ts-ignore
@@ -100,7 +128,7 @@ const AlertDialogContent = React.forwardRef<
           {children}
 
           {/* close button */}
-          <Button className="absolute top-4 right-4" variant="ghost" size="xs" onClick={onClose}>
+          <Button className="absolute right-4 top-4" variant="ghost" size="xs" onClick={onClose}>
             <X className="!size-6" />
           </Button>
         </div>
@@ -131,6 +159,10 @@ const AlertDialogTitle = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Title
+    /**
+     * AlertDialogHeader - React component
+     * @returns React element
+     */
     ref={ref}
     className={cn('text-center text-lg font-semibold', className)}
     {...props}
@@ -142,9 +174,13 @@ const AlertDialogDescription = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
 >(({ className, children, ...props }, ref) => (
+  /**
+   * AlertDialogFooter - React component
+   * @returns React element
+   */
   <AlertDialogPrimitive.Description
     ref={ref}
-    className={cn('text-kokushoku-black text-center text-base font-normal', className)}
+    className={cn('text-center text-base font-normal text-kokushoku-black', className)}
     {...props}
   >
     <div className="max-h-[min(640px,80vh)] overflow-y-auto px-6">{children}</div>
@@ -153,6 +189,10 @@ const AlertDialogDescription = React.forwardRef<
 AlertDialogDescription.displayName = AlertDialogPrimitive.Description.displayName
 
 const AlertDialogAction = React.forwardRef<
+  /**
+   * AlertDialogTitle - React component
+   * @returns React element
+   */
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
 >(({ className, ...props }, ref) => (
@@ -168,6 +208,10 @@ const AlertDialogCancel = React.forwardRef<
     ref={ref}
     className={cn(buttonVariants({ variant: 'outline' }), 'mt-2 sm:mt-0', className)}
     {...props}
+    /**
+     * AlertDialogDescription - React component
+     * @returns React element
+     */
   />
 ))
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
@@ -185,3 +229,12 @@ export {
   AlertDialogAction,
   AlertDialogCancel,
 }
+/**
+ * AlertDialogAction - React component
+ * @returns React element
+ */
+
+/**
+ * AlertDialogCancel - React component
+ * @returns React element
+ */

@@ -18,30 +18,54 @@ type InventoryBootstrapOptions = {
   includeArtworks?: boolean
 }
 
+/**
+ * useInventoryBootstrap - Custom React hook
+ * @returns void
+ */
 export const useInventoryBootstrap = (
   options?: InventoryBootstrapOptions,
 ): InventoryBootstrapState => {
   const user = useAuthStore((state) => state.user)
   const setArtworks = useInventoryDataStore((state) => state.setArtworks)
   const setFolders = useInventoryDataStore((state) => state.setFolders)
+  /**
+   * user - Custom React hook
+   * @returns void
+   */
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const lastUserIdRef = useRef<string | null>(null)
   const includeArtworks = options?.includeArtworks ?? true
+  /**
+   * setArtworks - Utility function
+   * @returns void
+   */
 
   useEffect(() => {
     if (!user?.id) {
       if (lastUserIdRef.current) {
+        /**
+         * setFolders - Utility function
+         * @returns void
+         */
         setArtworks([])
         setFolders([])
         lastUserIdRef.current = null
       }
       return
     }
+    /**
+     * lastUserIdRef - Utility function
+     * @returns void
+     */
 
     if (lastUserIdRef.current && lastUserIdRef.current !== user.id) {
       setArtworks([])
       setFolders([])
+      /**
+       * includeArtworks - Utility function
+       * @returns void
+       */
     }
 
     lastUserIdRef.current = user.id
@@ -68,11 +92,19 @@ export const useInventoryBootstrap = (
             }),
           )
         }
+        /**
+         * loadInventory - Utility function
+         * @returns void
+         */
 
         const results = await Promise.all(requests)
 
         const folders = results[includeArtworks ? 1 : 0] as Awaited<
           ReturnType<typeof artworkFolderApis.listFolders>
+          /**
+           * requests - Utility function
+           * @returns void
+           */
         >
         const artworks = includeArtworks
           ? (results[0] as Awaited<ReturnType<typeof artworkApis.listArtworks>>)
@@ -93,19 +125,36 @@ export const useInventoryBootstrap = (
 
         const message = err instanceof Error ? err.message : 'Failed to load inventory.'
         setError(message)
+        /**
+         * results - Utility function
+         * @returns void
+         */
       } finally {
         if (isActive) {
           setIsLoading(false)
         }
       }
+      /**
+       * folders - Utility function
+       * @returns void
+       */
     }
 
     void loadInventory()
 
     return () => {
       isActive = false
+      /**
+       * artworks - Utility function
+       * @returns void
+       */
     }
   }, [includeArtworks, setArtworks, setFolders, user?.id])
 
   return { isLoading, error }
 }
+
+/**
+ * message - Utility function
+ * @returns void
+ */

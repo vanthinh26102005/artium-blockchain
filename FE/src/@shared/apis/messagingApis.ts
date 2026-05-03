@@ -1,9 +1,4 @@
-import {
-  apiFetch,
-  apiUpload,
-  encodePathSegment,
-  withQuery,
-} from '@shared/services/apiClient'
+import { apiFetch, apiUpload, encodePathSegment, withQuery } from '@shared/services/apiClient'
 import type {
   Conversation,
   Message,
@@ -14,13 +9,19 @@ import type {
   ReadReceipt,
 } from '@/types/messaging'
 
-const MESSAGING_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_URL ?? ''
-).replace(/\/$/, '')
+/**
+ * MESSAGING_BASE_URL - React component
+ * @returns React element
+ */
+const MESSAGING_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '')
 
 const messagingApis = {
   uploadFile: async (
     file: File,
+    /**
+     * messagingApis - Utility function
+     * @returns void
+     */
   ): Promise<{
     url: string
     filename: string
@@ -36,16 +37,17 @@ const messagingApis = {
     return apiUpload('/messaging/upload', formData, {
       baseUrl: MESSAGING_BASE_URL,
     })
+    /**
+     * formData - Utility function
+     * @returns void
+     */
   },
 
   getConversationsForUser: (userId: string) =>
-    apiFetch<Conversation[]>(
-      `/messaging/conversations/user/${encodePathSegment(userId)}`,
-      {
-        baseUrl: MESSAGING_BASE_URL,
-        cache: 'no-store',
-      },
-    ),
+    apiFetch<Conversation[]>(`/messaging/conversations/user/${encodePathSegment(userId)}`, {
+      baseUrl: MESSAGING_BASE_URL,
+      cache: 'no-store',
+    }),
 
   getConversationById: (conversationId: string, userId: string) =>
     apiFetch<Conversation>(
@@ -63,12 +65,7 @@ const messagingApis = {
       body: JSON.stringify(input),
     }),
 
-  getMessagesInConversation: (
-    conversationId: string,
-    userId: string,
-    limit = 50,
-    offset = 0,
-  ) =>
+  getMessagesInConversation: (conversationId: string, userId: string, limit = 50, offset = 0) =>
     apiFetch<Message[]>(
       withQuery(`/messaging/conversations/${encodePathSegment(conversationId)}/messages`, {
         userId,
@@ -105,13 +102,10 @@ const messagingApis = {
     }),
 
   deleteMessage: (messageId: string, userId: string) =>
-    apiFetch<void>(
-      withQuery(`/messaging/messages/${encodePathSegment(messageId)}`, { userId }),
-      {
-        baseUrl: MESSAGING_BASE_URL,
-        method: 'DELETE',
-      },
-    ),
+    apiFetch<void>(withQuery(`/messaging/messages/${encodePathSegment(messageId)}`, { userId }), {
+      baseUrl: MESSAGING_BASE_URL,
+      method: 'DELETE',
+    }),
 
   markMessageAsRead: (input: MarkMessageReadInput) =>
     apiFetch<ReadReceipt>('/messaging/messages/read', {

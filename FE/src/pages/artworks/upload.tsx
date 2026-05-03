@@ -8,6 +8,10 @@ import { NextPageWithLayout } from '@shared/types/next'
 import { useRequireAuth } from '@domains/auth/hooks/useRequireAuth'
 
 // @domains - inventory upload
+/**
+ * UploadPage - React component
+ * @returns React element
+ */
 const UploadPage = dynamic(
   () => import('@domains/inventory-upload/views/UploadPage').then((module) => module.UploadPage),
   { ssr: false },
@@ -16,6 +20,10 @@ const UploadPage = dynamic(
 const UploadRoute: NextPageWithLayout = () => {
   // -- state --
   const { canRenderProtected } = useRequireAuth()
+  /**
+   * UploadRoute - React component
+   * @returns React element
+   */
 
   // -- render --
   if (!canRenderProtected) {

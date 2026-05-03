@@ -1,5 +1,9 @@
 import { Artwork } from '@shared/types'
 
+/**
+ * MOCK_ARTWORKS - React component
+ * @returns React element
+ */
 export const MOCK_ARTWORKS: Artwork[] = [
   {
     id: '1',

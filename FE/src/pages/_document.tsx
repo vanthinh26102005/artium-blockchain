@@ -1,5 +1,9 @@
 import { Html, Head, Main, NextScript } from 'next/document'
 
+/**
+ * Document - React component
+ * @returns React element
+ */
 export default function Document() {
   return (
     <Html lang="en">

@@ -23,6 +23,10 @@ import {
  * Variants for the multi-select component to handle different styles.
  * Uses class-variance-authority (cva) to define different styles based on "variant" prop.
  */
+/**
+ * multiSelectVariants - Utility function
+ * @returns void
+ */
 const multiSelectVariants = cva(
   'm-1 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300',
   {
@@ -145,6 +149,10 @@ interface MultiSelectProps
    * This function should handle displaying the dialog or performing the necessary action to add a new item.
    */
   onAddNewItem?: () => void
+  /**
+   * should - Utility function
+   * @returns void
+   */
 
   /**
    * Optional. Label text for the "Add New Item" button.
@@ -179,6 +187,10 @@ export const MultiSelect = React.forwardRef<
 >(
   (
     {
+      /**
+       * MultiSelect - React component
+       * @returns React element
+       */
       options,
       isLoading,
       isFirstTimeLoading,
@@ -222,6 +234,10 @@ export const MultiSelect = React.forwardRef<
         setSelectedValues(newSelectedValues)
         onValueChange(newSelectedValues, 'remove')
       }
+      /**
+       * handleInputKeyDown - Utility function
+       * @returns void
+       */
     }
 
     const toggleOption = (option: string) => {
@@ -229,6 +245,10 @@ export const MultiSelect = React.forwardRef<
       const newSelectedValues = isOptionAlreadySelected
         ? selectedValues.filter((value) => value !== option)
         : [...selectedValues, option]
+      /**
+       * newSelectedValues - Utility function
+       * @returns void
+       */
       setSelectedValues(newSelectedValues)
       onValueChange(newSelectedValues, isOptionAlreadySelected ? 'remove' : 'add')
     }
@@ -239,14 +259,26 @@ export const MultiSelect = React.forwardRef<
     }
 
     const handleTogglePopover = () => {
+      /**
+       * toggleOption - Utility function
+       * @returns void
+       */
       setIsPopoverOpen((prev) => !prev)
     }
 
     const clearExtraOptions = () => {
+      /**
+       * isOptionAlreadySelected - Utility function
+       * @returns void
+       */
       const newSelectedValues = selectedValues.slice(0, maxCount)
       setSelectedValues(newSelectedValues)
       onValueChange(newSelectedValues, 'remove')
     }
+    /**
+     * newSelectedValues - Utility function
+     * @returns void
+     */
 
     // const toggleAll = () => {
     //   if (selectedValues.length === options.length) {
@@ -257,6 +289,10 @@ export const MultiSelect = React.forwardRef<
     //     onValueChange(allValues)
     //   }
     // }
+    /**
+     * handleClear - Utility function
+     * @returns void
+     */
 
     React.useEffect(() => {
       if (isPopoverOpen) onPopoverOpen?.()
@@ -265,6 +301,10 @@ export const MultiSelect = React.forwardRef<
       }
     }, [isPopoverOpen])
 
+    /**
+     * handleTogglePopover - Utility function
+     * @returns void
+     */
     return (
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen} modal={modalPopover}>
         <PopoverTrigger asChild>
@@ -272,28 +312,41 @@ export const MultiSelect = React.forwardRef<
             ref={ref}
             {...props}
             onClick={handleTogglePopover}
+            /**
+             * clearExtraOptions - Utility function
+             * @returns void
+             */
             className={cn(
               'flex h-auto min-h-10 w-full items-center justify-between rounded-[8px] border bg-inherit p-1 hover:bg-inherit [&_svg]:pointer-events-auto',
               className,
             )}
+            /**
+             * newSelectedValues - Utility function
+             * @returns void
+             */
           >
             {/* show first time loading state when have selected some values */}
             {isFirstTimeLoading && selectedValues.length > 0 && (
-              <span className="text-muted-foreground mx-3 text-sm">Loading...</span>
+              <span className="mx-3 text-sm text-muted-foreground">Loading...</span>
             )}
 
             {/* placeholder */}
             {selectedValues.length === 0 && (
+              /**
+               * toggleAll - Utility function
+               * @returns void
+               */
               <div className="mx-auto flex w-full items-center justify-between">
                 <span
                   className={cn(
-                    'text-muted-foreground mx-3 text-xs text-wrap break-words',
+                    'mx-3 text-wrap break-words text-xs text-muted-foreground',
                     placeholderClassName,
                   )}
                 >
+                  /** * allValues - Utility function * @returns void */
                   {placeholder}
                 </span>
-                <ChevronDown className="text-muted-foreground mx-2 h-4 cursor-pointer" />
+                <ChevronDown className="mx-2 h-4 cursor-pointer text-muted-foreground" />
               </div>
             )}
 
@@ -331,7 +384,7 @@ export const MultiSelect = React.forwardRef<
                   {selectedValues.length > maxCount && (
                     <Badge
                       className={cn(
-                        'border-foreground/1 text-foreground bg-transparent hover:bg-transparent',
+                        'border-foreground/1 bg-transparent text-foreground hover:bg-transparent',
                         isAnimating ? 'animate-bounce' : '',
                         multiSelectVariants({ variant }),
                       )}
@@ -344,20 +397,25 @@ export const MultiSelect = React.forwardRef<
                           event.stopPropagation()
                           clearExtraOptions()
                         }}
+                        /**
+                         * option - Utility function
+                         * @returns void
+                         */
                       />
                     </Badge>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
+                  /** * IconComponent - React component * @returns React element */
                   <XIcon
-                    className="text-muted-foreground mx-2 h-4 cursor-pointer"
+                    className="mx-2 h-4 cursor-pointer text-muted-foreground"
                     onClick={(event) => {
                       event.stopPropagation()
                       handleClear()
                     }}
                   />
                   <Separator orientation="vertical" className="flex h-full min-h-6" />
-                  <ChevronDown className="text-muted-foreground mx-2 h-4 cursor-pointer" />
+                  <ChevronDown className="mx-2 h-4 cursor-pointer text-muted-foreground" />
                 </div>
               </div>
             )}
@@ -387,7 +445,7 @@ export const MultiSelect = React.forwardRef<
                 <>
                   {options.length > 0 ? (
                     // list options
-                    <CommandGroup className="max-w-[500px] min-w-[300px]">
+                    <CommandGroup className="min-w-[300px] max-w-[500px]">
                       {options.map((option) => {
                         const isSelected = selectedValues.includes(option.value)
                         return (
@@ -408,7 +466,7 @@ export const MultiSelect = React.forwardRef<
                               <CheckIcon className="h-4 w-4" />
                             </div>
                             {option.icon && (
-                              <option.icon className="text-muted-foreground mr-2 h-4 w-4" />
+                              <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />
                             )}
                             <span>{option.label}</span>
                           </CommandItem>
@@ -437,6 +495,10 @@ export const MultiSelect = React.forwardRef<
                     </>
                   )}
                 </>
+                /**
+                 * isSelected - Utility function
+                 * @returns void
+                 */
               )}
             </CommandList>
             {/* add new item action */}

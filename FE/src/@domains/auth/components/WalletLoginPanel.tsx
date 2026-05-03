@@ -25,6 +25,10 @@ type WalletStep = {
   state: StepState
 }
 
+/**
+ * getWalletSteps - Utility function
+ * @returns void
+ */
 const getWalletSteps = ({
   isWrongNetwork,
   shortenedAddress,
@@ -37,10 +41,18 @@ const getWalletSteps = ({
   const hasWallet = Boolean(shortenedAddress)
   const hasSigned = status === 'logging_in' || status === 'authenticated'
 
+  /**
+   * hasWallet - Utility function
+   * @returns void
+   */
   return [
     {
       label: 'Connect wallet',
       state: status === 'connecting' ? 'active' : hasWallet ? 'complete' : 'idle',
+      /**
+       * hasSigned - Utility function
+       * @returns void
+       */
     },
     {
       label: 'Sepolia network',
@@ -63,12 +75,7 @@ const getWalletSteps = ({
     },
     {
       label: 'Create session',
-      state:
-        status === 'logging_in'
-          ? 'active'
-          : status === 'authenticated'
-            ? 'complete'
-            : 'idle',
+      state: status === 'logging_in' ? 'active' : status === 'authenticated' ? 'complete' : 'idle',
     },
   ]
 }
@@ -82,6 +89,10 @@ const WalletStepIcon = ({ state }: { state: StepState }) => {
     return <Loader2 className="h-4 w-4 animate-spin text-[#191414]" />
   }
 
+  /**
+   * WalletStepIcon - React component
+   * @returns React element
+   */
   if (state === 'warning') {
     return <AlertTriangle className="h-4 w-4 text-[#9a3412]" />
   }
@@ -101,6 +112,10 @@ export const WalletLoginPanel = ({
 }: WalletLoginPanelProps) => {
   const steps = getWalletSteps({ isWrongNetwork, shortenedAddress, status })
   const shouldShowSwitchButton = isWrongNetwork && status !== 'switching_network'
+  /**
+   * WalletLoginPanel - React component
+   * @returns React element
+   */
   const networkLabel = isWrongNetwork ? 'Required' : targetChainName
 
   return (
@@ -114,18 +129,23 @@ export const WalletLoginPanel = ({
         {isLoading ? (
           <Loader2 className="h-5 w-5 animate-spin text-white" />
         ) : (
+          /**
+           * steps - Utility function
+           * @returns void
+           */
           <Wallet className="h-5 w-5 text-white" />
         )}
         <span>{buttonLabel}</span>
       </button>
-
+      /** * shouldShowSwitchButton - Utility function * @returns void */
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex min-h-[72px] items-center gap-3 rounded-lg border border-black/10 bg-white px-4 py-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f7f5f2]">
+            /** * networkLabel - Utility function * @returns void */
             <Wallet className="h-5 w-5 text-[#191414]" />
           </span>
           <span className="min-w-0">
-            <span className="block text-xs font-bold tracking-[0.14em] text-[#8d8784] uppercase">
+            <span className="block text-xs font-bold uppercase tracking-[0.14em] text-[#8d8784]">
               Wallet
             </span>
             <span className="block truncate text-sm font-bold text-[#191414]">
@@ -137,9 +157,7 @@ export const WalletLoginPanel = ({
         <div
           className={cn(
             'flex min-h-[72px] items-center gap-3 rounded-lg border px-4 py-3',
-            isWrongNetwork
-              ? 'border-[#f4c36d] bg-[#fff8ed]'
-              : 'border-black/10 bg-white',
+            isWrongNetwork ? 'border-[#f4c36d] bg-[#fff8ed]' : 'border-black/10 bg-white',
           )}
         >
           <span
@@ -155,7 +173,7 @@ export const WalletLoginPanel = ({
             )}
           </span>
           <span className="min-w-0">
-            <span className="block text-xs font-bold tracking-[0.14em] text-[#8d8784] uppercase">
+            <span className="block text-xs font-bold uppercase tracking-[0.14em] text-[#8d8784]">
               Network
             </span>
             <span
@@ -169,7 +187,6 @@ export const WalletLoginPanel = ({
           </span>
         </div>
       </div>
-
       {shouldShowSwitchButton ? (
         <div className="flex flex-col gap-3 rounded-lg border border-[#f4c36d] bg-[#fff8ed] p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
@@ -182,13 +199,12 @@ export const WalletLoginPanel = ({
             type="button"
             onClick={onSwitchNetwork}
             disabled={isLoading}
-            className="h-10 shrink-0 rounded-lg bg-[#191414] px-4 text-xs font-bold tracking-[0.12em] text-white uppercase transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-10 shrink-0 rounded-lg bg-[#191414] px-4 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
           >
             Switch to {targetChainName}
           </button>
         </div>
       ) : null}
-
       <ol className="space-y-2 rounded-lg border border-black/10 bg-[#fbfaf9] p-2">
         {steps.map((step) => (
           <li
@@ -218,7 +234,6 @@ export const WalletLoginPanel = ({
           </li>
         ))}
       </ol>
-
       {status === 'switching_network' ? (
         <div className="h-1.5 overflow-hidden rounded-full bg-black/10" aria-hidden="true">
           <div className="h-full w-1/2 animate-pulse rounded-full bg-[#191414]" />

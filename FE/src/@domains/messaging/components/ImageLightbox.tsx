@@ -12,6 +12,10 @@ type ImageLightboxProps = {
   onClose: () => void
 }
 
+/**
+ * ImageLightbox - React component
+ * @returns React element
+ */
 export const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxProps) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const [zoom, setZoom] = useState(1)
@@ -20,16 +24,28 @@ export const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxPr
   const currentImage = images[currentIndex]
   const hasMultiple = images.length > 1
 
+  /**
+   * currentImage - Utility function
+   * @returns void
+   */
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose()
+        /**
+         * hasMultiple - Utility function
+         * @returns void
+         */
       } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
         handlePrevious()
       } else if (e.key === 'ArrowRight' && currentIndex < images.length - 1) {
         handleNext()
       } else if (e.key === '+' || e.key === '=') {
         handleZoomIn()
+        /**
+         * handleKeyDown - Utility function
+         * @returns void
+         */
       } else if (e.key === '-') {
         handleZoomOut()
       }
@@ -57,6 +73,10 @@ export const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxPr
     }
   }
 
+  /**
+   * handlePrevious - Utility function
+   * @returns void
+   */
   const handleZoomIn = () => {
     setZoom((prev) => Math.min(prev + 0.25, 3))
   }
@@ -66,6 +86,10 @@ export const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxPr
   }
 
   const handleDownload = async () => {
+    /**
+     * handleNext - Utility function
+     * @returns void
+     */
     try {
       const response = await fetch(currentImage.url)
       const blob = await response.blob()
@@ -75,6 +99,10 @@ export const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxPr
       a.download = currentImage.alt || 'image.jpg'
       document.body.appendChild(a)
       a.click()
+      /**
+       * handleZoomIn - Utility function
+       * @returns void
+       */
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
     } catch (error) {
@@ -82,35 +110,51 @@ export const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxPr
     }
   }
 
+  /**
+   * handleZoomOut - Utility function
+   * @returns void
+   */
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
       onClick={onClose}
     >
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4">
+      <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between p-4">
+        /** * handleDownload - Utility function * @returns void */
         <div className="flex items-center gap-2 text-white">
           {hasMultiple && (
             <span className="rounded-full bg-black/50 px-3 py-1 text-sm">
               {currentIndex + 1} / {images.length}
             </span>
+            /**
+             * response - Utility function
+             * @returns void
+             */
           )}
         </div>
-
         <div className="flex items-center gap-2">
+          /** * blob - Utility function * @returns void */
           <Button
             variant="ghost"
             size="icon"
             onClick={(e) => {
+              /**
+               * url - Utility function
+               * @returns void
+               */
               e.stopPropagation()
               handleZoomOut()
             }}
             disabled={zoom <= 0.5}
+            /**
+             * a - Utility function
+             * @returns void
+             */
             className="text-white hover:bg-white/10"
           >
             <ZoomOut className="h-5 w-5" />
           </Button>
-
           <Button
             variant="ghost"
             size="icon"
@@ -123,7 +167,6 @@ export const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxPr
           >
             <ZoomIn className="h-5 w-5" />
           </Button>
-
           <Button
             variant="ghost"
             size="icon"
@@ -135,7 +178,6 @@ export const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxPr
           >
             <Download className="h-5 w-5" />
           </Button>
-
           <Button
             variant="ghost"
             size="icon"

@@ -1,6 +1,10 @@
 import { MomentDetail } from '@domains/profile/types'
 
 // Mock data for image moment (corresponds to moment-01 from moments.ts)
+/**
+ * mockMomentDetailImage - Utility function
+ * @returns void
+ */
 export const mockMomentDetailImage: MomentDetail = {
   id: 'moment-01',
   title: 'Early studies for the series',
@@ -36,6 +40,10 @@ export const mockMomentDetailImage: MomentDetail = {
 export const mockMomentDetail: MomentDetail = {
   id: 'moment-03',
   title: 'Birdie is ready for a new home',
+  /**
+   * mockMomentDetail - Utility function
+   * @returns void
+   */
   caption: 'Birdie is ready for a new home. Beginning Again, oil on canvas panel.',
   mediaUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
   posterUrl:

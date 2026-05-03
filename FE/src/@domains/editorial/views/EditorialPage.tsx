@@ -15,6 +15,10 @@ import { useGetEditorials } from '@domains/editorial/hooks/useGetEditorials'
  * - Render the main editorial layout.
  * - Consume data from useGetEditorials hook.
  */
+/**
+ * EditorialPage - React component
+ * @returns React element
+ */
 export const EditorialPage = () => {
   // -- data --
   const { heroItems, latestItems, popularItems, visibleAllItems } = useGetEditorials()
@@ -28,7 +32,7 @@ export const EditorialPage = () => {
       />
 
       <div className="pb-12 lg:pb-16">
-        <div className="relative right-1/2 left-1/2 -mt-20 w-screen -translate-x-1/2">
+        <div className="relative left-1/2 right-1/2 -mt-20 w-screen -translate-x-1/2">
           <EditorialHero items={heroItems} />
         </div>
 
