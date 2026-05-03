@@ -24,16 +24,28 @@ interface PublicPortfolioData {
     items: PortfolioItem[]
 }
 
+/**
+ * to - Utility function
+ * @returns void
+ */
 // Mock function to fetch portfolio data
 const fetchPortfolioData = (username: string): PublicPortfolioData | null => {
     // In real app, this would be an API call
     // For now, return mock data for "artiumartist"
+/**
+ * fetchPortfolioData - Utility function
+ * @returns void
+ */
     const mockData: PublicPortfolioData = {
         artistName: 'Artium Artist',
         handle: `@${username}`,
         location: 'Ho Chi Minh City, Vietnam',
         avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
         biography: 'A passionate artist exploring the boundaries between digital and traditional art forms.',
+/**
+ * mockData - Utility function
+ * @returns void
+ */
         statement:
             'My work reflects the intersection of technology and human emotion, creating pieces that resonate with the modern soul.',
         cvUrl: null,
@@ -87,10 +99,18 @@ const PublicPortfolioPage: NextPageWithLayout = () => {
     const [email, setEmail] = useState('')
 
     useEffect(() => {
+/**
+ * PublicPortfolioPage - React component
+ * @returns React element
+ */
         if (username && typeof username === 'string') {
             // Simulate API call
             setTimeout(() => {
                 const portfolioData = fetchPortfolioData(username)
+/**
+ * router - Utility function
+ * @returns void
+ */
                 setData(portfolioData)
                 setIsLoading(false)
             }, 500)
@@ -105,6 +125,10 @@ const PublicPortfolioPage: NextPageWithLayout = () => {
         )
     }
 
+/**
+ * portfolioData - Utility function
+ * @returns void
+ */
     if (!data) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-white">
@@ -132,6 +156,10 @@ const PublicPortfolioPage: NextPageWithLayout = () => {
                 <div className="flex flex-col items-center pt-12 pb-6 px-4">
                     <img
                         src={data.avatar}
+/**
+ * visibleItems - Utility function
+ * @returns void
+ */
                         alt={data.artistName}
                         className="h-24 w-24 md:h-28 md:w-28 rounded-full object-cover border-4 border-white shadow-lg"
                     />

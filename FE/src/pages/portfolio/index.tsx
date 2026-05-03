@@ -3,6 +3,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 import { Metadata } from '@/components/SEO/Metadata'
 import { PortfolioLayout } from '@domains/portfolio'
 
+/**
+ * PortfolioPage - React component
+ * @returns React element
+ */
 const PortfolioPage: NextPageWithLayout = () => {
   return (
     <>
