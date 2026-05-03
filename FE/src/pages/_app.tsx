@@ -14,15 +14,27 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout
 }
 
+/**
+ * App - React component
+ * @returns React element
+ */
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page: ReactElement) => <AppLayout>{page}</AppLayout>)
 
   const page = getLayout(<Component {...pageProps} />)
+/**
+ * getLayout - Utility function
+ * @returns void
+ */
 
   return (
     <SessionProvider session={pageProps.session}>
       <ToastProvider>
         <AuthBootstrap />
+/**
+ * page - Utility function
+ * @returns void
+ */
         {page}
       </ToastProvider>
     </SessionProvider>
