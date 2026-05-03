@@ -12,6 +12,10 @@ type StatusButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   status: HostingEventStatus;
 };
 
+/**
+ * statusStyles - Utility function
+ * @returns void
+ */
 const statusStyles: Record<HostingEventStatus, string> = {
   going: "border-[#C5DBFF] bg-[#D7E7FF] text-[#1D4ED8]",
   maybe: "border-[#FDE68A] bg-[#FFF2A8] text-[#111827]",
@@ -22,6 +26,10 @@ const statusStyles: Record<HostingEventStatus, string> = {
 export const StatusButton = forwardRef<HTMLButtonElement, StatusButtonProps>(
   ({ status, className, type = "button", ...props }, ref) => {
     return (
+/**
+ * StatusButton - React component
+ * @returns React element
+ */
       <button
         ref={ref}
         type={type}

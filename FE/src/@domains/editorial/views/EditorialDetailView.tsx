@@ -11,10 +11,18 @@ type EditorialDetailViewProps = {
   article: EditorialItem
 }
 
+/**
+ * EditorialDetailView - React component
+ * @returns React element
+ */
 export const EditorialDetailView = ({ article }: EditorialDetailViewProps) => {
   const authorAvatar = `https://i.pravatar.cc/96?u=${encodeURIComponent(article.author)}`
 
   return (
+/**
+ * authorAvatar - Utility function
+ * @returns void
+ */
     <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:px-10 lg:px-12">
       <Metadata title={`${article.title} | Editorial`} />
 

@@ -50,6 +50,10 @@ type EventCardProps = {
   onClick?: (eventId: string) => void;
 };
 
+/**
+ * statusStyles - Utility function
+ * @returns void
+ */
 const statusStyles: Record<EventStatus, string> = {
   going: "border-blue-500 bg-blue-100 text-blue-700 hover:bg-blue-200",
   maybe: "border-yellow-500 bg-yellow-100 text-yellow-700 hover:bg-yellow-200",
@@ -60,6 +64,10 @@ const statusStyles: Record<EventStatus, string> = {
 const statusLabels: Record<EventStatus, string> = {
   going: "Going",
   maybe: "Maybe",
+/**
+ * statusLabels - Utility function
+ * @returns void
+ */
   notGoing: "Not Going",
   rsvp: "RSVP",
 };
@@ -70,6 +78,10 @@ const StatusIcon = ({ status }: { status: EventStatus }) => {
   }
   if (status === "maybe") {
     return <HelpCircle className="h-4 w-4" />;
+/**
+ * StatusIcon - React component
+ * @returns React element
+ */
   }
   if (status === "notGoing") {
     return <XCircle className="h-4 w-4" />;
@@ -86,10 +98,18 @@ const formatBadge = (date: Date, timeZone?: string) => {
     day: "2-digit",
     timeZone,
   }).format(date);
+/**
+ * formatBadge - Utility function
+ * @returns void
+ */
   return { month, day };
 };
 
 const formatMeta = (event: Event) => {
+/**
+ * month - Utility function
+ * @returns void
+ */
   const date = new Date(event.startDateTime);
   const timeZone = event.timeZone || undefined;
   const weekdayTime = new Intl.DateTimeFormat("en-GB", {
@@ -97,6 +117,10 @@ const formatMeta = (event: Event) => {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+/**
+ * day - Utility function
+ * @returns void
+ */
     timeZone,
   }).format(date);
   return `${event.location} - ${weekdayTime}`;
@@ -107,18 +131,34 @@ export const EventCard = ({
   className,
   onRsvpChange,
   onInvite,
+/**
+ * formatMeta - Utility function
+ * @returns void
+ */
   onShare,
   onClick,
 }: EventCardProps) => {
   const [isRsvpOpen, setIsRsvpOpen] = useState(false);
+/**
+ * date - Utility function
+ * @returns void
+ */
 
   const typeMap = useMemo(() => {
     const map = new Map<string, string>();
     EVENT_TYPE_OPTIONS.forEach((opt) => map.set(opt.value, opt.label));
+/**
+ * timeZone - Utility function
+ * @returns void
+ */
     return map;
   }, []);
 
   const badge = formatBadge(new Date(event.startDateTime), event.timeZone);
+/**
+ * weekdayTime - Utility function
+ * @returns void
+ */
   const meta = formatMeta(event);
   const typeText = event.types.length
     ? event.types.map((type) => typeMap.get(type) ?? type).join(", ")
@@ -132,6 +172,10 @@ export const EventCard = ({
 
   const handleCardClick = () => {
     onClick?.(event.id);
+/**
+ * EventCard - React component
+ * @returns React element
+ */
   };
 
   return (
@@ -145,10 +189,18 @@ export const EventCard = ({
     >
       <div className="relative overflow-hidden rounded-t-2xl">
         <div className="relative aspect-video w-full">
+/**
+ * typeMap - Utility function
+ * @returns void
+ */
           {event.coverImageUrl ? (
             <Image
               src={event.coverImageUrl}
               alt={event.title}
+/**
+ * map - Utility function
+ * @returns void
+ */
               fill
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               className="object-cover"
@@ -157,25 +209,45 @@ export const EventCard = ({
           ) : (
             <div className="h-full w-full bg-linear-to-br from-slate-100 via-slate-200 to-slate-100" />
           )}
+/**
+ * badge - Utility function
+ * @returns void
+ */
         </div>
 
         <div className="absolute right-4 top-4 flex flex-col items-center rounded-xl border border-slate-200 bg-white px-2 py-1 shadow-sm">
           <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold uppercase text-white">
+/**
+ * meta - Utility function
+ * @returns void
+ */
             {badge.month}
           </span>
           <span className="text-lg font-semibold text-slate-900">
             {badge.day}
+/**
+ * typeText - Utility function
+ * @returns void
+ */
           </span>
         </div>
       </div>
 
       <div className="flex flex-1 flex-col space-y-3 px-4 pb-4 pt-3">
         <div className="break-words font-inter text-xs font-normal leading-none text-slate-500" suppressHydrationWarning>
+/**
+ * isPrivate - Utility function
+ * @returns void
+ */
           {meta}
         </div>
 
         <h3 className="break-words font-inter text-lg font-semibold leading-none text-slate-900">
           {event.title}
+/**
+ * handleSelectStatus - Utility function
+ * @returns void
+ */
         </h3>
 
         <p className="flex flex-wrap items-center gap-1 font-inter text-xs leading-none text-muted-foreground">
@@ -184,6 +256,10 @@ export const EventCard = ({
           <span className="whitespace-nowrap" suppressHydrationWarning>
             {event.attendees} attendee{event.attendees === 1 ? "" : "s"}
           </span>
+/**
+ * handleCardClick - Utility function
+ * @returns void
+ */
           {isPrivate ? (
             <Lock className="ml-1 inline-block h-[16px] w-[16px] align-text-bottom" strokeWidth="1.5" />
           ) : (

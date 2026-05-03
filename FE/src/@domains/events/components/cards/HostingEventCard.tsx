@@ -43,6 +43,10 @@ type HostingEventCardProps = {
   onClick?: (eventId: string) => void;
 };
 
+/**
+ * typeLabelMap - Utility function
+ * @returns void
+ */
 const typeLabelMap = new Map<string, string>(
   EVENT_TYPE_OPTIONS.map((option) => [option.value, option.label]),
 );
@@ -50,10 +54,18 @@ const typeLabelMap = new Map<string, string>(
 const formatBadge = (date: Date, timeZone?: string) => {
   const month = new Intl.DateTimeFormat("en-US", {
     month: "short",
+/**
+ * formatBadge - Utility function
+ * @returns void
+ */
     timeZone,
   }).format(date);
   const day = new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
+/**
+ * month - Utility function
+ * @returns void
+ */
     timeZone,
   }).format(date);
   return { month, day };
@@ -61,6 +73,10 @@ const formatBadge = (date: Date, timeZone?: string) => {
 
 const formatMeta = (event: HostingEvent) => {
   const date = new Date(event.startDateTime);
+/**
+ * day - Utility function
+ * @returns void
+ */
   const timeZone = event.timeZone || undefined;
   const weekdayTime = new Intl.DateTimeFormat("en-GB", {
     weekday: "short",
@@ -71,18 +87,34 @@ const formatMeta = (event: HostingEvent) => {
   }).format(date);
   return `${event.location} - ${weekdayTime}`;
 };
+/**
+ * formatMeta - Utility function
+ * @returns void
+ */
 
 export const HostingEventCard = ({
   event,
   className,
+/**
+ * date - Utility function
+ * @returns void
+ */
   onInvite,
   onShare,
   onEdit,
   onCopyLink,
+/**
+ * timeZone - Utility function
+ * @returns void
+ */
   onDelete,
   onClick,
 }: HostingEventCardProps) => {
   const badge = formatBadge(new Date(event.startDateTime), event.timeZone);
+/**
+ * weekdayTime - Utility function
+ * @returns void
+ */
   const meta = formatMeta(event);
   const typeText = useMemo(() => {
     if (!event.types.length) {
@@ -96,6 +128,10 @@ export const HostingEventCard = ({
 
   const handleCardClick = () => {
     if (onClick) {
+/**
+ * HostingEventCard - React component
+ * @returns React element
+ */
       onClick(event.id);
     }
   };
@@ -109,14 +145,26 @@ export const HostingEventCard = ({
     eventAction?.(event);
   };
 
+/**
+ * badge - Utility function
+ * @returns void
+ */
   return (
     <article
       className={cn(
         "flex h-full flex-col rounded-2xl border border-slate-200 bg-white font-inter shadow-[0_6px_16px_rgba(15,23,42,0.08)] transition hover:shadow-[0_10px_22px_rgba(15,23,42,0.12)]",
+/**
+ * meta - Utility function
+ * @returns void
+ */
         onClick && "cursor-pointer",
         className,
       )}
       onClick={handleCardClick}
+/**
+ * typeText - Utility function
+ * @returns void
+ */
     >
       <div className="relative overflow-hidden rounded-t-2xl">
         <div className="relative aspect-video w-full">
@@ -126,16 +174,28 @@ export const HostingEventCard = ({
               alt={event.title}
               fill
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+/**
+ * attendeesLabel - Utility function
+ * @returns void
+ */
               className="object-cover"
               unoptimized
             />
           ) : (
+/**
+ * isPrivate - Utility function
+ * @returns void
+ */
             <div className="h-full w-full bg-linear-to-br from-slate-100 via-slate-200 to-slate-100" />
           )}
         </div>
 
         <div className="absolute right-4 top-4 flex flex-col items-center rounded-xl border border-slate-200 bg-white px-2 py-1 shadow-sm">
           <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold uppercase text-white">
+/**
+ * handleCardClick - Utility function
+ * @returns void
+ */
             {badge.month}
           </span>
           <span className="text-lg font-semibold text-slate-900">
@@ -145,6 +205,10 @@ export const HostingEventCard = ({
       </div>
 
       <div className="flex flex-1 flex-col space-y-3 px-4 pb-4 pt-3">
+/**
+ * handleMenuSelect - Utility function
+ * @returns void
+ */
         <div className="break-words font-inter text-xs font-normal leading-none text-slate-500">
           {meta}
         </div>

@@ -15,6 +15,10 @@ import { useGetEditorials } from '@domains/editorial/hooks/useGetEditorials'
  * - Render the main editorial layout.
  * - Consume data from useGetEditorials hook.
  */
+/**
+ * EditorialPage - React component
+ * @returns React element
+ */
 export const EditorialPage = () => {
   // -- data --
   const { heroItems, latestItems, popularItems, visibleAllItems } = useGetEditorials()
