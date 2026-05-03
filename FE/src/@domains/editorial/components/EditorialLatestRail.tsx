@@ -12,6 +12,10 @@ type EditorialLatestRailProps = {
   title?: string
 }
 
+/**
+ * formatDate - Utility function
+ * @returns void
+ */
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -22,6 +26,10 @@ const formatDate = (value: string) =>
 export const EditorialLatestRail = ({ items, title = 'Latest' }: EditorialLatestRailProps) => {
   return (
     <section className="space-y-3 px-6 sm:px-10 lg:px-14">
+/**
+ * EditorialLatestRail - React component
+ * @returns React element
+ */
       {/* header */}
       <h2 className="text-[30px] font-semibold text-slate-900">{title}</h2>
 
