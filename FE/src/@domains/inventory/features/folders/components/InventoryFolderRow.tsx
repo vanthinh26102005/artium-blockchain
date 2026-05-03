@@ -130,9 +130,7 @@ export const InventoryFolderRow = ({
         />
 
         {/* Nested indicator */}
-        {nestLevel > 0 && (
-          <CornerDownRight className="relative z-10 h-4 w-4 text-slate-300" />
-        )}
+        {nestLevel > 0 && <CornerDownRight className="relative z-10 h-4 w-4 text-slate-300" />}
 
         {/* Drag handle */}
         <button
@@ -149,11 +147,7 @@ export const InventoryFolderRow = ({
           onClick={onToggleExpanded}
           className="relative z-10 flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
         >
-          {isExpanded ? (
-            <ChevronDown className="h-5 w-5" />
-          ) : (
-            <ChevronRight className="h-5 w-5" />
-          )}
+          {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
         </button>
 
         {/* Folder icon */}
@@ -175,7 +169,8 @@ export const InventoryFolderRow = ({
           </Link>
           <p className="text-xs text-slate-500">
             {folder.itemCount} {folder.itemCount === 1 ? 'artwork' : 'artworks'}
-            {childFoldersCount > 0 && ` • \${childFoldersCount} subfolder\${childFoldersCount > 1 ? 's' : ''}`}
+            {childFoldersCount > 0 &&
+              ` • \${childFoldersCount} subfolder\${childFoldersCount > 1 ? 's' : ''}`}
             {folder.isHidden && ' • Hidden'}
           </p>
         </div>
@@ -197,12 +192,15 @@ export const InventoryFolderRow = ({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 opacity-0 transition group-hover:opacity-100 hover:bg-white/80 hover:text-slate-600"
+              className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 opacity-0 transition hover:bg-white/80 hover:text-slate-600 group-hover:opacity-100"
             >
               <MoreHorizontal className="h-4 w-4" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 rounded-xl border-slate-200 bg-white p-1">
+          <DropdownMenuContent
+            align="end"
+            className="w-48 rounded-xl border-slate-200 bg-white p-1"
+          >
             <DropdownMenuItem
               onSelect={() => onRenameFolder?.(folder)}
               className="cursor-pointer gap-2 rounded-lg px-3 py-2"
@@ -249,9 +247,7 @@ export const InventoryFolderRow = ({
               style={{ marginLeft: `\${(nestLevel + 1) * 24}px` }}
               className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-center"
             >
-              <p className="text-sm text-slate-500">
-                Drag artworks or folders here
-              </p>
+              <p className="text-sm text-slate-500">Drag artworks or folders here</p>
             </div>
           )}
         </div>

@@ -33,10 +33,10 @@ export const useFolderActions = ({
   const handleOpenCreateFolder = () => {
     setIsCreateFolderOpen(true)
   }
-/**
- * handleOpenCreateFolder - Utility function
- * @returns void
- */
+  /**
+   * handleOpenCreateFolder - Utility function
+   * @returns void
+   */
 
   const handleCloseCreateFolder = () => {
     setIsCreateFolderOpen(false)
@@ -44,10 +44,10 @@ export const useFolderActions = ({
 
   const handleCreateFolder = async (name: string, _description: string) => {
     if (!user?.id) {
-/**
- * handleCloseCreateFolder - Utility function
- * @returns void
- */
+      /**
+       * handleCloseCreateFolder - Utility function
+       * @returns void
+       */
       setToastMessage('Please log in to create a folder.')
       return
     }
@@ -55,10 +55,10 @@ export const useFolderActions = ({
     try {
       const created = await artworkFolderApis.createFolder({
         sellerId: user.id,
-/**
- * handleCreateFolder - Utility function
- * @returns void
- */
+        /**
+         * handleCreateFolder - Utility function
+         * @returns void
+         */
         name,
       })
       const newFolder: InventoryFolder = {
@@ -69,10 +69,10 @@ export const useFolderActions = ({
       onFolderCreated(newFolder)
       setToastMessage('Folder created successfully.')
     } catch (error) {
-/**
- * created - Utility function
- * @returns void
- */
+      /**
+       * created - Utility function
+       * @returns void
+       */
       const message = error instanceof Error ? error.message : 'Failed to create folder.'
       setToastMessage(message)
     } finally {
@@ -80,10 +80,10 @@ export const useFolderActions = ({
     }
   }
 
-/**
- * newFolder - Utility function
- * @returns void
- */
+  /**
+   * newFolder - Utility function
+   * @returns void
+   */
   const handleOpenRenameFolder = (folder: InventoryFolder) => {
     setRenameFolderTarget(folder)
   }
@@ -95,10 +95,10 @@ export const useFolderActions = ({
   const handleSaveRenameFolder = async (name: string) => {
     if (!renameFolderTarget) {
       return
-/**
- * message - Utility function
- * @returns void
- */
+      /**
+       * message - Utility function
+       * @returns void
+       */
     }
 
     try {
@@ -109,10 +109,10 @@ export const useFolderActions = ({
       const message = error instanceof Error ? error.message : 'Failed to rename folder.'
       setToastMessage(message)
     } finally {
-/**
- * handleOpenRenameFolder - Utility function
- * @returns void
- */
+      /**
+       * handleOpenRenameFolder - Utility function
+       * @returns void
+       */
       setRenameFolderTarget(null)
     }
   }
@@ -120,10 +120,10 @@ export const useFolderActions = ({
   const handleOpenDeleteFolder = (folder: InventoryFolder) => {
     setDeleteFolderTarget(folder)
   }
-/**
- * handleCloseRenameFolder - Utility function
- * @returns void
- */
+  /**
+   * handleCloseRenameFolder - Utility function
+   * @returns void
+   */
 
   const handleCloseDeleteFolder = () => {
     setDeleteFolderTarget(null)
@@ -131,10 +131,10 @@ export const useFolderActions = ({
 
   const handleConfirmDeleteFolder = async () => {
     if (!deleteFolderTarget) {
-/**
- * handleSaveRenameFolder - Utility function
- * @returns void
- */
+      /**
+       * handleSaveRenameFolder - Utility function
+       * @returns void
+       */
       return
     }
 
@@ -148,10 +148,10 @@ export const useFolderActions = ({
     } finally {
       setDeleteFolderTarget(null)
     }
-/**
- * message - Utility function
- * @returns void
- */
+    /**
+     * message - Utility function
+     * @returns void
+     */
   }
 
   const handleOpenHideFolder = (folder: InventoryFolder) => {
@@ -162,10 +162,10 @@ export const useFolderActions = ({
     setHideFolderTarget(null)
   }
 
-/**
- * handleOpenDeleteFolder - Utility function
- * @returns void
- */
+  /**
+   * handleOpenDeleteFolder - Utility function
+   * @returns void
+   */
   const handleConfirmHideFolder = async () => {
     if (!hideFolderTarget) {
       return
@@ -173,10 +173,10 @@ export const useFolderActions = ({
 
     if (!user?.id) {
       setToastMessage('Please log in to hide a folder.')
-/**
- * handleCloseDeleteFolder - Utility function
- * @returns void
- */
+      /**
+       * handleCloseDeleteFolder - Utility function
+       * @returns void
+       */
       return
     }
 
@@ -184,10 +184,10 @@ export const useFolderActions = ({
       await artworkFolderApis.toggleVisibility(hideFolderTarget.id, {
         sellerId: user.id,
         isHidden: true,
-/**
- * handleConfirmDeleteFolder - Utility function
- * @returns void
- */
+        /**
+         * handleConfirmDeleteFolder - Utility function
+         * @returns void
+         */
       })
       onFolderHidden(hideFolderTarget.id, true)
       setToastMessage('Folder hidden successfully.')
@@ -201,10 +201,10 @@ export const useFolderActions = ({
 
   return {
     isCreateFolderOpen,
-/**
- * message - Utility function
- * @returns void
- */
+    /**
+     * message - Utility function
+     * @returns void
+     */
     renameFolderTarget,
     deleteFolderTarget,
     hideFolderTarget,
@@ -215,10 +215,10 @@ export const useFolderActions = ({
     handleCloseRenameFolder,
     handleSaveRenameFolder,
     handleOpenDeleteFolder,
-/**
- * handleOpenHideFolder - Utility function
- * @returns void
- */
+    /**
+     * handleOpenHideFolder - Utility function
+     * @returns void
+     */
     handleCloseDeleteFolder,
     handleConfirmDeleteFolder,
     handleOpenHideFolder,
