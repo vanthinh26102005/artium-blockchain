@@ -119,6 +119,10 @@ export type PaymentTransactionResponse = {
 
 // --- API Functions ---
 
+/**
+ * paymentApis - Utility function
+ * @returns void
+ */
 const paymentApis = {
   createPaymentIntent: async (
     data: CreatePaymentIntentRequest,
@@ -163,6 +167,10 @@ const paymentApis = {
     const normalizedAmount = usdAmount.toFixed(2)
     return apiFetch<EthereumQuoteResponse>(
       withQuery('/payments/ethereum/quote', { usdAmount: normalizedAmount }),
+/**
+ * normalizedAmount - Utility function
+ * @returns void
+ */
     )
   },
 }

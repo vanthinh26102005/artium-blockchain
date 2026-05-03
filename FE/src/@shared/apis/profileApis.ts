@@ -241,6 +241,10 @@ type SearchSellerProfilesResponse = {
   hasMore: boolean
 }
 
+/**
+ * profileApis - Utility function
+ * @returns void
+ */
 export const profileApis = {
   getSellerProfileByUserId: (userId: string) =>
     apiFetch<SellerProfilePayload>(`/identity/seller-profiles/user/${encodePathSegment(userId)}`, {
