@@ -26,6 +26,10 @@ type ProfileMoodboardDetailPageViewProps = {
   moodboardId?: string | string[]
 }
 
+/**
+ * ProfileMoodboardDetailPageView - React component
+ * @returns React element
+ */
 export const ProfileMoodboardDetailPageView = ({
   username: _username,
   moodboardId: _moodboardId,
@@ -33,10 +37,18 @@ export const ProfileMoodboardDetailPageView = ({
   const usernameFromRoute = Array.isArray(_username) ? _username[0] : _username
   const moodboardIdFromRoute = Array.isArray(_moodboardId) ? _moodboardId[0] : _moodboardId
   const { data: baseData, isLoading, error, resolvedUsername } = useProfileOverview({
+/**
+ * usernameFromRoute - Custom React hook
+ * @returns void
+ */
     username: usernameFromRoute,
   })
   const profileData = useProfileDraftData(baseData)
   const [selectedMoodboard, setSelectedMoodboard] = useState<ProfileMoodboard | null>(null)
+/**
+ * moodboardIdFromRoute - Utility function
+ * @returns void
+ */
 
   useEffect(() => {
     let isActive = true
@@ -44,6 +56,10 @@ export const ProfileMoodboardDetailPageView = ({
     const resolveMoodboard = async () => {
       if (!profileData) {
         setSelectedMoodboard(null)
+/**
+ * profileData - Utility function
+ * @returns void
+ */
         return
       }
 
@@ -53,6 +69,10 @@ export const ProfileMoodboardDetailPageView = ({
           : profileData.moodboards[0] ?? null
       const targetMoodboardId = moodboardIdFromRoute ?? existing?.id
 
+/**
+ * resolveMoodboard - Utility function
+ * @returns void
+ */
       if (existing && isActive) {
         setSelectedMoodboard(existing)
       }
@@ -62,6 +82,10 @@ export const ProfileMoodboardDetailPageView = ({
         return
       }
 
+/**
+ * existing - Utility function
+ * @returns void
+ */
       try {
         const moodboard = await profileApis.getMoodboard(targetMoodboardId)
         if (!isActive) return
@@ -69,6 +93,10 @@ export const ProfileMoodboardDetailPageView = ({
           setSelectedMoodboard(mapMoodboardToProfileMoodboard(moodboard, profileData.user))
           return
         }
+/**
+ * targetMoodboardId - Utility function
+ * @returns void
+ */
         setSelectedMoodboard(existing)
       } catch {
         if (!isActive) return
@@ -84,6 +112,10 @@ export const ProfileMoodboardDetailPageView = ({
   }, [moodboardIdFromRoute, profileData])
 
   const moodboard = selectedMoodboard
+/**
+ * moodboard - Utility function
+ * @returns void
+ */
   const orderedMediaItems = (moodboard?.mediaItems ?? [])
     .slice()
     .sort((left, right) => left.displayOrder - right.displayOrder)
@@ -107,30 +139,54 @@ export const ProfileMoodboardDetailPageView = ({
             </div>
           ) : error || !profileData ? (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-600">
+/**
+ * moodboard - Utility function
+ * @returns void
+ */
               {error ?? 'Profile not found.'}
             </div>
           ) : null}
           {profileData ? (
+/**
+ * orderedMediaItems - Utility function
+ * @returns void
+ */
             <>
               <div className="relative">
                 <button
                   type="button"
                   className="absolute top-0 right-0 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900"
                   aria-label="More options"
+/**
+ * coverMedia - Utility function
+ * @returns void
+ */
                 >
                   <MoreHorizontal className="h-5 w-5" />
                 </button>
                 <div className="text-center">
+/**
+ * savedArtworks - Utility function
+ * @returns void
+ */
                   <p className="text-xs font-semibold tracking-[0.3em] text-slate-400 uppercase">
                     Moodboard
                   </p>
                   <h1 className="mt-2 text-3xl font-semibold text-slate-900">
                     {moodboard?.title || 'Moodboard'}
                   </h1>
+/**
+ * relatedArtworks - Utility function
+ * @returns void
+ */
                   <div className="mt-4 flex items-center justify-center gap-3 text-sm text-slate-600">
                     <div className="relative h-8 w-8 overflow-hidden rounded-full bg-slate-200">
                       <Image
                         src={moodboard?.authorAvatarUrl || profileData.user.avatarUrl}
+/**
+ * pageTitle - Utility function
+ * @returns void
+ */
                         alt={moodboard?.author || profileData.user.displayName}
                         fill
                         sizes="32px"
@@ -265,6 +321,10 @@ const SavedMoodboardArtworkSection = ({ artworks }: SavedMoodboardArtworkSection
           </div>
           <div className="space-y-1 px-4 py-3">
             <p className="line-clamp-1 text-sm font-semibold text-slate-900">{artwork.title}</p>
+/**
+ * SavedMoodboardArtworkSection - React component
+ * @returns React element
+ */
             {artwork.price ? (
               <p className="text-sm text-slate-500">{artwork.price}</p>
             ) : null}
@@ -320,3 +380,24 @@ const MoodboardMediaFrame = ({ media, priority = false }: MoodboardMediaFramePro
     </div>
   )
 }
+
+/**
+ * resolveMediaUrl - Utility function
+ * @returns void
+ */
+/**
+ * MoodboardMediaFrame - React component
+ * @returns React element
+ */
+/**
+ * mediaUrl - Utility function
+ * @returns void
+ */
+/**
+ * poster - Utility function
+ * @returns void
+ */
+/**
+ * heightClass - Utility function
+ * @returns void
+ */
