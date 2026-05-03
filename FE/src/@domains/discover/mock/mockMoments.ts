@@ -29,10 +29,10 @@ const SAMPLE_VIDEO_URL =
 export const mockMoments: DiscoverMoment[] = [
   {
     id: 'mo-001',
-/**
- * mockMoments - Utility function
- * @returns void
- */
+    /**
+     * mockMoments - Utility function
+     * @returns void
+     */
     caption: 'Studio morning: layering texture on canvas.',
     user: {
       id: 'u-101',
