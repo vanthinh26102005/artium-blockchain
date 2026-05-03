@@ -39,6 +39,10 @@ type InventoryArtworkActionMenuProps = {
   contentClassName?: string
 }
 
+/**
+ * InventoryArtworkActionMenu - React component
+ * @returns React element
+ */
 export const InventoryArtworkActionMenu = ({
   artwork,
   onOpenDetails,
@@ -54,10 +58,18 @@ export const InventoryArtworkActionMenu = ({
   const isEditLocked = isArtworkEditLocked(artwork)
   const profileVisibilityLabel =
     getProfileVisibilityLabel(artwork) === 'Hide Artwork from Profile'
+/**
+ * isEditLocked - Utility function
+ * @returns void
+ */
       ? 'Hide Artwork from Profile'
       : 'Show Artwork on Profile'
   const auctionHandoffLabel =
     getAuctionHandoffLabel(artwork) === 'Resume Auction Setup'
+/**
+ * profileVisibilityLabel - Utility function
+ * @returns void
+ */
       ? 'Resume Auction Setup'
       : 'Start Auction'
   const showAuctionHandoff = canShowAuctionHandoff(artwork)
@@ -65,6 +77,10 @@ export const InventoryArtworkActionMenu = ({
   // -- render --
   return (
     <DropdownMenu>
+/**
+ * auctionHandoffLabel - Utility function
+ * @returns void
+ */
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -72,6 +88,10 @@ export const InventoryArtworkActionMenu = ({
           onPointerDown={(event) => event.stopPropagation()}
           className={triggerClassName}
           aria-label={`Actions for ${artwork.title}`}
+/**
+ * showAuctionHandoff - Utility function
+ * @returns void
+ */
         >
           <MoreHorizontal className="h-4 w-4" />
         </button>
