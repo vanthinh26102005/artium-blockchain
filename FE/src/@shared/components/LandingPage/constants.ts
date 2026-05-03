@@ -102,10 +102,10 @@ export type Feature = {
 export const FEATURES: Feature[] = [
   {
     title: 'Portfolio',
-/**
- * FEATURES - React component
- * @returns React element
- */
+    /**
+     * FEATURES - React component
+     * @returns React element
+     */
     description:
       'Create a professional portfolio, display your artworks for sale, and collect subscribers for your newsletters.',
     bullets: [
@@ -147,10 +147,10 @@ export const JOURNEY_ITEMS: JourneyItem[] = [
     imageSrc: '/images/homepage-v2/platform-player/artist-3.jpg',
     href: '/discover?tab=profiles',
     cta: 'Learn More',
-/**
- * JOURNEY_ITEMS - React component
- * @returns React element
- */
+    /**
+     * JOURNEY_ITEMS - React component
+     * @returns React element
+     */
   },
   {
     title: 'For Galleries',

@@ -23,10 +23,10 @@ const TestimonialsSection = ({ className }: TestimonialsSectionProps) => {
   const style = useMemo<CSSProperties>(
     () => ({ '--marquee-play': paused ? 'paused' : 'running' }) as CSSProperties,
     [paused],
-/**
- * style - Utility function
- * @returns void
- */
+    /**
+     * style - Utility function
+     * @returns void
+     */
   )
 
   return (
@@ -37,7 +37,7 @@ const TestimonialsSection = ({ className }: TestimonialsSectionProps) => {
           as="h2"
           size="h2"
           tone="light"
-          className="font-monument-grotes mx-auto text-center text-[24px] leading-[42px] font-medium lg:w-[700px] lg:shrink-0 lg:text-[44px] lg:leading-[56px] lg:tracking-[-0.2px]"
+          className="mx-auto text-center font-monument-grotes text-[24px] font-medium leading-[42px] lg:w-[700px] lg:shrink-0 lg:text-[44px] lg:leading-[56px] lg:tracking-[-0.2px]"
         >
           Meet the Community Using Artium to Scale Their Success
         </Heading>
