@@ -18,6 +18,10 @@ type UseRegisterResult = {
   error: string | null
 }
 
+/**
+ * useRegister - Custom React hook
+ * @returns void
+ */
 export const useRegister = (): UseRegisterResult => {
   // -- state --
   const [isInitiating, setIsInitiating] = useState(false)
@@ -28,6 +32,10 @@ export const useRegister = (): UseRegisterResult => {
   const initiate = useCallback(async (payload: RegisterInitiatePayload) => {
     setError(null)
     setIsInitiating(true)
+/**
+ * initiate - Utility function
+ * @returns void
+ */
 
     try {
       await usersApi.registerInitiate(payload)
@@ -38,6 +46,10 @@ export const useRegister = (): UseRegisterResult => {
     } finally {
       setIsInitiating(false)
     }
+/**
+ * message - Utility function
+ * @returns void
+ */
   }, [])
 
   const complete = useCallback(async (payload: RegisterCompletePayload) => {
@@ -49,6 +61,10 @@ export const useRegister = (): UseRegisterResult => {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'OTP verification failed.'
       setError(message)
+/**
+ * complete - Utility function
+ * @returns void
+ */
       throw error
     } finally {
       setIsCompleting(false)
@@ -59,6 +75,10 @@ export const useRegister = (): UseRegisterResult => {
     initiate,
     complete,
     isLoading: isInitiating || isCompleting,
+/**
+ * message - Utility function
+ * @returns void
+ */
     error,
   }
 }
