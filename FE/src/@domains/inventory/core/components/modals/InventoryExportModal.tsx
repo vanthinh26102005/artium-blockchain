@@ -33,10 +33,10 @@ const EXPORT_OPTIONS: { value: ExportFormat; label: string }[] = [
 export const InventoryExportModal = ({ isOpen, onClose, onExport }: InventoryExportModalProps) => {
   // -- state --
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('csv')
-/**
- * InventoryExportModal - React component
- * @returns React element
- */
+  /**
+   * InventoryExportModal - React component
+   * @returns React element
+   */
 
   // -- derived --
 
@@ -47,10 +47,10 @@ export const InventoryExportModal = ({ isOpen, onClose, onExport }: InventoryExp
   }
 
   const handleOpenChange = (open: boolean) => {
-/**
- * handleExport - Utility function
- * @returns void
- */
+    /**
+     * handleExport - Utility function
+     * @returns void
+     */
     if (!open) {
       onClose()
     }
@@ -59,10 +59,7 @@ export const InventoryExportModal = ({ isOpen, onClose, onExport }: InventoryExp
   // -- render --
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-/**
- * handleOpenChange - Utility function
- * @returns void
- */
+      /** * handleOpenChange - Utility function * @returns void */
       <DialogContent
         size="2xl"
         className="overflow-hidden rounded-3xl border border-white/30 bg-white/95 p-0 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] backdrop-blur-xl"
@@ -84,7 +81,7 @@ export const InventoryExportModal = ({ isOpen, onClose, onExport }: InventoryExp
           {/* Content */}
           <div className="px-6 py-6">
             <div className="space-y-3">
-              <p className="text-sm font-bold tracking-wider text-slate-500 uppercase lg:text-base">
+              <p className="text-sm font-bold uppercase tracking-wider text-slate-500 lg:text-base">
                 Choose format
               </p>
               <RadioGroup

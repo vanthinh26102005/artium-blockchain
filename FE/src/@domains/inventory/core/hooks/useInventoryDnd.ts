@@ -5,7 +5,10 @@ import { type DragEndEvent, type DragStartEvent } from '@dnd-kit/core'
 import artworkApis from '@shared/apis/artworkApis'
 import artworkFolderApis from '@shared/apis/artworkFolderApis'
 import { type InventoryFolder } from '@domains/inventory/features/folders/types/inventoryFolder'
-import { type InventoryArtwork, type DragItemData } from '@domains/inventory/features/artworks/types/inventoryArtwork'
+import {
+  type InventoryArtwork,
+  type DragItemData,
+} from '@domains/inventory/features/artworks/types/inventoryArtwork'
 import { type UserPayload } from '@shared/types/auth'
 
 type UseInventoryDndProps = {
@@ -35,10 +38,10 @@ export const useInventoryDnd = ({
   const handleReorderFolders = async (oldIndex: number, newIndex: number) => {
     if (!user?.id) {
       setToastMessage('Please log in to reorder folders.')
-/**
- * handleReorderFolders - Utility function
- * @returns void
- */
+      /**
+       * handleReorderFolders - Utility function
+       * @returns void
+       */
       return
     }
 
@@ -51,18 +54,18 @@ export const useInventoryDnd = ({
         sellerId: user.id,
         folderIds: newOrderIds,
       })
-/**
- * newFolders - Utility function
- * @returns void
- */
+      /**
+       * newFolders - Utility function
+       * @returns void
+       */
     } catch {
       setToastMessage('Failed to save folder order')
       reorderFolders(newIndex, oldIndex)
     }
-/**
- * newOrderIds - Utility function
- * @returns void
- */
+    /**
+     * newOrderIds - Utility function
+     * @returns void
+     */
   }
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -77,10 +80,10 @@ export const useInventoryDnd = ({
 
     if (!over || !user?.id) return
 
-/**
- * handleDragStart - Utility function
- * @returns void
- */
+    /**
+     * handleDragStart - Utility function
+     * @returns void
+     */
     const activeType = active.data.current?.type
     const overType = over.data.current?.type
 
@@ -89,10 +92,10 @@ export const useInventoryDnd = ({
         const oldIndex = folders.findIndex((f) => f.id === active.id)
         const newIndex = folders.findIndex((f) => f.id === over.id)
         await handleReorderFolders(oldIndex, newIndex)
-/**
- * handleDragEnd - Utility function
- * @returns void
- */
+        /**
+         * handleDragEnd - Utility function
+         * @returns void
+         */
       }
     } else if (activeType === 'Artwork' && overType === 'Folder') {
       const artworkId = active.id as string
@@ -103,18 +106,18 @@ export const useInventoryDnd = ({
 
       optimisticMoveArtwork(artworkId, folderId)
 
-/**
- * activeType - Utility function
- * @returns void
- */
+      /**
+       * activeType - Utility function
+       * @returns void
+       */
       try {
         await artworkApis.bulkMoveArtworks({
           artworkIds: [artworkId],
           folderId,
-/**
- * overType - Utility function
- * @returns void
- */
+          /**
+           * overType - Utility function
+           * @returns void
+           */
           sellerId: user.id,
         })
         setToastMessage('Artwork moved to folder')
@@ -122,18 +125,18 @@ export const useInventoryDnd = ({
         optimisticMoveArtwork(artworkId, previousFolderId)
         setToastMessage('Failed to move artwork')
       }
-/**
- * oldIndex - Utility function
- * @returns void
- */
+      /**
+       * oldIndex - Utility function
+       * @returns void
+       */
     }
   }
 
   return {
-/**
- * newIndex - Utility function
- * @returns void
- */
+    /**
+     * newIndex - Utility function
+     * @returns void
+     */
     activeId,
     activeItem,
     handleDragStart,
