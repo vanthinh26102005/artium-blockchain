@@ -10,10 +10,18 @@ type HeroSectionProps = {
     onLikeArtwork?: (liked: boolean) => void | Promise<void>
 }
 
+/**
+ * HeroSection - React component
+ * @returns React element
+ */
 export const HeroSection = ({ artwork, onLikeArtwork }: HeroSectionProps) => {
     const artworkThumbnailUrl = artwork.images?.[0]?.url ?? artwork.coverUrl
 
     return (
+/**
+ * artworkThumbnailUrl - Utility function
+ * @returns void
+ */
         <section className="mb-8">
             <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.3fr_1fr] lg:gap-12">
                 {/* Left Side - Gallery (larger) */}

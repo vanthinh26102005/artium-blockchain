@@ -4,6 +4,10 @@ type AboutArtworkProps = {
     description?: string
 }
 
+/**
+ * AboutArtwork - React component
+ * @returns React element
+ */
 export const AboutArtwork = ({ description }: AboutArtworkProps) => {
     return (
         <div className="max-w-3xl">

@@ -10,12 +10,20 @@ type TabsSectionProps = {
     artwork: ArtworkDetail
 }
 
+/**
+ * TabsSection - React component
+ * @returns React element
+ */
 export const TabsSection = ({ artwork }: TabsSectionProps) => {
     const [activeTab, setActiveTab] = useState<ArtworkDetailTab>('about-artwork')
 
     const tabs = [
         { key: 'about-artwork' as const, label: 'About the Artwork' },
         { key: 'about-creator' as const, label: 'About the Creator' },
+/**
+ * tabs - Utility function
+ * @returns void
+ */
     ]
 
     return (

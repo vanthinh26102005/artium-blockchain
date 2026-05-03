@@ -10,15 +10,27 @@ type AboutCreatorProps = {
     creator: ArtworkDetailCreator
 }
 
+/**
+ * AboutCreator - React component
+ * @returns React element
+ */
 export const AboutCreator = ({ creator }: AboutCreatorProps) => {
     const profileHref = creator.slug ? `/profile/${creator.slug}` : '#'
 
     const handleFollow = () => {
+/**
+ * profileHref - Utility function
+ * @returns void
+ */
         // TODO: Implement follow functionality
     }
 
     return (
         <div className="flex items-start gap-4">
+/**
+ * handleFollow - Utility function
+ * @returns void
+ */
             {/* Avatar */}
             <Link
                 href={profileHref}
