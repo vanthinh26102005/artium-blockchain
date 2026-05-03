@@ -142,10 +142,10 @@ interface SelectProps
 export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { portal?: boolean }>(
   (
     {
-/**
- * SingleSelect - React component
- * @returns React element
- */
+      /**
+       * SingleSelect - React component
+       * @returns React element
+       */
       options,
       isLoading,
       isFirstTimeLoading,
@@ -180,10 +180,10 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
       } else if (clearable && event.key === 'Backspace' && !event.currentTarget.value) {
         setSelectedValue(undefined)
         onValueChange(undefined, 'remove')
-/**
- * handleInputKeyDown - Utility function
- * @returns void
- */
+        /**
+         * handleInputKeyDown - Utility function
+         * @returns void
+         */
       }
     }
 
@@ -196,18 +196,18 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
         clearable ? (isOptionAlreadySelected ? 'remove' : 'add') : 'add',
       )
     }
-/**
- * toggleOption - Utility function
- * @returns void
- */
+    /**
+     * toggleOption - Utility function
+     * @returns void
+     */
 
     const handleClear = () => {
       if (!clearable) return
       setSelectedValue(undefined)
-/**
- * isOptionAlreadySelected - Utility function
- * @returns void
- */
+      /**
+       * isOptionAlreadySelected - Utility function
+       * @returns void
+       */
       onValueChange(undefined, 'remove')
     }
 
@@ -220,10 +220,10 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
       if (!node) return
       setTimeout(() => {
         node.scrollIntoView({ block: 'center' })
-/**
- * handleClear - Utility function
- * @returns void
- */
+        /**
+         * handleClear - Utility function
+         * @returns void
+         */
       }, 0)
     }
 
@@ -233,10 +233,10 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
         if (isPopoverOpen) onPopoverClose?.()
       }
     }, [isPopoverOpen])
-/**
- * handleTogglePopover - Utility function
- * @returns void
- */
+    /**
+     * handleTogglePopover - Utility function
+     * @returns void
+     */
     React.useEffect(() => {
       // reset
       if (['', undefined, null].includes(defaultValue)) {
@@ -245,10 +245,10 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
     }, [defaultValue])
 
     return (
-/**
- * selectedItemCallbackRef - Utility function
- * @returns void
- */
+      /**
+       * selectedItemCallbackRef - Utility function
+       * @returns void
+       */
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen} modal={modalPopover}>
         <PopoverTrigger asChild>
           <Button
@@ -262,14 +262,14 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
           >
             {/* show first time loading state when have selected value */}
             {isFirstTimeLoading && selectedValue && (
-              <span className="text-muted-foreground mx-3 text-sm">Loading...</span>
+              <span className="mx-3 text-sm text-muted-foreground">Loading...</span>
             )}
 
             {/* placeholder */}
             {!selectedValue && (
               <div className="mx-auto flex w-full items-center justify-between">
-                <span className="text-muted-foreground mx-3 text-xs">{placeholder}</span>
-                <ChevronDown className="text-muted-foreground mx-2 h-4 cursor-pointer" />
+                <span className="mx-3 text-xs text-muted-foreground">{placeholder}</span>
+                <ChevronDown className="mx-2 h-4 cursor-pointer text-muted-foreground" />
               </div>
             )}
 
@@ -286,7 +286,7 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
                   {clearable && (
                     <>
                       <XIcon
-                        className="text-muted-foreground mx-2 h-4 cursor-pointer"
+                        className="mx-2 h-4 cursor-pointer text-muted-foreground"
                         onClick={(event) => {
                           event.stopPropagation()
                           handleClear()
@@ -295,7 +295,7 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
                       <Separator orientation="vertical" className="flex h-full min-h-6" />
                     </>
                   )}
-                  <ChevronDown className="text-muted-foreground mx-2 h-4 cursor-pointer" />
+                  <ChevronDown className="mx-2 h-4 cursor-pointer text-muted-foreground" />
                 </div>
               </div>
             )}
@@ -325,7 +325,7 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
                 <>
                   {options.length > 0 ? (
                     // list options
-                    <CommandGroup className="max-w-[500px] min-w-[300px]">
+                    <CommandGroup className="min-w-[300px] max-w-[500px]">
                       {options.map((option) => {
                         const isSelected = selectedValue === option.value
                         return (
@@ -337,10 +337,10 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
                             ref={isSelected ? selectedItemCallbackRef : null}
                           >
                             {isSelected && (
-                              <CheckIcon className="text-primary h-5 w-5" strokeWidth={3} />
+                              <CheckIcon className="h-5 w-5 text-primary" strokeWidth={3} />
                             )}
                             {option.icon && (
-                              <option.icon className="text-muted-foreground mr-2 h-5 w-5" />
+                              <option.icon className="mr-2 h-5 w-5 text-muted-foreground" />
                             )}
                             <span className="w-full">{option.label}</span>
                           </CommandItem>
@@ -351,10 +351,7 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
                     // empty state
                     <div className="py-4 text-center text-sm">No results found.</div>
                   )}
-/**
- * isSelected - Utility function
- * @returns void
- */
+                  /** * isSelected - Utility function * @returns void */
                 </>
               )}
             </CommandList>
