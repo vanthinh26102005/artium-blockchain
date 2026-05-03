@@ -11,6 +11,10 @@ type ConversationsListProps = {
   isLoading?: boolean
 }
 
+/**
+ * ConversationsList - React component
+ * @returns React element
+ */
 export const ConversationsList = ({
   conversations,
   selectedConversationId,
@@ -20,15 +24,27 @@ export const ConversationsList = ({
   const sortedConversations = useMemo(() => {
     return [...conversations].sort((a, b) => {
       const aTime = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0
+/**
+ * sortedConversations - Utility function
+ * @returns void
+ */
       const bTime = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0
       return bTime - aTime
     })
   }, [conversations])
 
+/**
+ * aTime - Utility function
+ * @returns void
+ */
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-sm text-slate-500">Loading conversations...</div>
+/**
+ * bTime - Utility function
+ * @returns void
+ */
       </div>
     )
   }
@@ -61,10 +77,18 @@ export const ConversationsList = ({
             >
               <div className="flex items-start gap-3">
                 <UserAvatar src={conversation.imageUrl} name={conversation.name} size="md" />
+/**
+ * isSelected - Utility function
+ * @returns void
+ */
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <h3
+/**
+ * hasUnread - Utility function
+ * @returns void
+ */
                       className={`truncate text-sm font-semibold ${hasUnread ? 'text-slate-900' : 'text-slate-700'
                         }`}
                     >

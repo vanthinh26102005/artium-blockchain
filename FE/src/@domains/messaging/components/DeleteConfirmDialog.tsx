@@ -13,6 +13,10 @@ type DeleteConfirmDialogProps = {
   message?: string
 }
 
+/**
+ * DeleteConfirmDialog - React component
+ * @returns React element
+ */
 export const DeleteConfirmDialog = ({
   isOpen,
   onClose,
