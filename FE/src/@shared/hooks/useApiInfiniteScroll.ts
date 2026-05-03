@@ -23,35 +23,35 @@ export const useApiInfiniteScroll = <T>({
   const skipRef = useRef(0)
   const isFetchingRef = useRef(false)
   const searchQueryRef = useRef(searchQuery)
-/**
- * skipRef - Utility function
- * @returns void
- */
+  /**
+   * skipRef - Utility function
+   * @returns void
+   */
 
   const fetchData = useCallback(
     async (skip: number, append: boolean) => {
       if (isFetchingRef.current) return
-/**
- * isFetchingRef - Utility function
- * @returns void
- */
+      /**
+       * isFetchingRef - Utility function
+       * @returns void
+       */
       isFetchingRef.current = true
       setIsLoading(true)
       setError(null)
 
-/**
- * searchQueryRef - Utility function
- * @returns void
- */
+      /**
+       * searchQueryRef - Utility function
+       * @returns void
+       */
       try {
         const result = await fetchPage(skip, pageSize)
 
         // Discard stale responses after a reset
         if (!append && skip !== 0) {
-/**
- * fetchData - Utility function
- * @returns void
- */
+          /**
+           * fetchData - Utility function
+           * @returns void
+           */
           return
         }
 
@@ -63,10 +63,10 @@ export const useApiInfiniteScroll = <T>({
       } finally {
         setIsLoading(false)
         isFetchingRef.current = false
-/**
- * result - Utility function
- * @returns void
- */
+        /**
+         * result - Utility function
+         * @returns void
+         */
       }
     },
     [fetchPage, pageSize],
@@ -90,10 +90,10 @@ export const useApiInfiniteScroll = <T>({
   // Reset when searchQuery changes
   useEffect(() => {
     if (searchQueryRef.current !== searchQuery) {
-/**
- * reset - Utility function
- * @returns void
- */
+      /**
+       * reset - Utility function
+       * @returns void
+       */
       searchQueryRef.current = searchQuery
       reset()
     }
