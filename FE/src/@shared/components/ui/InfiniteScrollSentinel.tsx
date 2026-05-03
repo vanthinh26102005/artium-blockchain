@@ -7,6 +7,10 @@ interface InfiniteScrollSentinelProps {
     rootMargin?: string
 }
 
+/**
+ * InfiniteScrollSentinel - React component
+ * @returns React element
+ */
 export const InfiniteScrollSentinel = ({
     onLoadMore,
     hasMore,
@@ -16,12 +20,20 @@ export const InfiniteScrollSentinel = ({
     const sentinelRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
+/**
+ * sentinelRef - Utility function
+ * @returns void
+ */
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && hasMore && !isLoading) {
                     onLoadMore()
                 }
             },
+/**
+ * observer - Utility function
+ * @returns void
+ */
             {
                 rootMargin,
             }

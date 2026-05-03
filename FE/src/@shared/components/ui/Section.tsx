@@ -6,6 +6,10 @@ interface SectionProps {
   className?: string
 }
 
+/**
+ * Section - React component
+ * @returns React element
+ */
 export const Section: React.FC<SectionProps> = ({ title, children, className = '' }) => {
   return (
     <section className={`py-8 ${className}`}>

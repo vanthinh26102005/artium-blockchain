@@ -7,6 +7,10 @@ type PortalProps = {
   children: ReactNode
 }
 
+/**
+ * Portal - React component
+ * @returns React element
+ */
 export const Portal = ({ children }: PortalProps) => {
   const [mounted, setMounted] = useState(false)
 

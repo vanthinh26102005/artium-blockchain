@@ -11,6 +11,10 @@ interface Plan {
     buttonText: string
 }
 
+/**
+ * plans - Utility function
+ * @returns void
+ */
 const plans: Plan[] = [
     {
         name: 'Basic',
@@ -55,6 +59,10 @@ interface PlanUpgradeModalProps {
 export const PlanUpgradeModal = ({ isOpen, onOpenChange }: PlanUpgradeModalProps) => {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
+/**
+ * PlanUpgradeModal - React component
+ * @returns React element
+ */
             <DialogContent size="5xl" className="w-[95vw] bg-white p-6 sm:p-10 rounded-3xl !max-h-[90vh] overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
                     {plans.map((plan) => (
