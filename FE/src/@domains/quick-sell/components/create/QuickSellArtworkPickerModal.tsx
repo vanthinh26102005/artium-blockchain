@@ -35,6 +35,10 @@ type QuickSellArtworkPickerModalProps = {
     onSelect: (artwork: QuickSellArtworkOption) => void
 }
 
+/**
+ * QuickSellArtworkPickerModal - React component
+ * @returns React element
+ */
 export const QuickSellArtworkPickerModal = ({
     isOpen,
     onClose,
@@ -44,6 +48,10 @@ export const QuickSellArtworkPickerModal = ({
     const router = useRouter()
 
     // -- state --
+/**
+ * router - Utility function
+ * @returns void
+ */
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null)
     const [artworks, setArtworks] = useState<QuickSellArtworkOption[]>([])
@@ -56,6 +64,10 @@ export const QuickSellArtworkPickerModal = ({
     useEffect(() => {
         if (!isOpen) return
         if (!user?.id) {
+/**
+ * user - Custom React hook
+ * @returns void
+ */
             setArtworks([])
             setError('Please log in to load your artworks.')
             return
@@ -74,11 +86,19 @@ export const QuickSellArtworkPickerModal = ({
 
                 if (!isMounted) return
 
+/**
+ * loadArtworks - Utility function
+ * @returns void
+ */
                 const mapped = response.map((artwork) => {
                     const rawPrice = typeof artwork.price === 'string'
                         ? parseFloat(artwork.price)
                         : artwork.price
                     const price = typeof rawPrice === 'number' && !Number.isNaN(rawPrice)
+/**
+ * response - Utility function
+ * @returns void
+ */
                         ? rawPrice
                         : 0
 
@@ -89,16 +109,28 @@ export const QuickSellArtworkPickerModal = ({
                         price,
                         imageUrl:
                             artwork.thumbnailUrl ||
+/**
+ * mapped - Utility function
+ * @returns void
+ */
                             artwork.images?.[0]?.secureUrl ||
                             artwork.images?.[0]?.url,
                     }
                 })
+/**
+ * rawPrice - Utility function
+ * @returns void
+ */
 
                 setArtworks(mapped)
             } catch (err) {
                 if (!isMounted) return
                 setArtworks([])
                 setError(err instanceof Error ? err.message : 'Failed to load artworks.')
+/**
+ * price - Utility function
+ * @returns void
+ */
             } finally {
                 if (isMounted) setIsLoading(false)
             }
@@ -136,11 +168,19 @@ export const QuickSellArtworkPickerModal = ({
             onClose()
             resetPicker()
         }
+/**
+ * filteredArtworks - Utility function
+ * @returns void
+ */
     }, [selectedArtwork, onSelect, onClose, resetPicker])
 
     const handleBack = useCallback(() => {
         onClose()
         resetPicker()
+/**
+ * query - Utility function
+ * @returns void
+ */
     }, [onClose, resetPicker])
 
     const handleUploadArtwork = useCallback(() => {
@@ -150,6 +190,10 @@ export const QuickSellArtworkPickerModal = ({
     }, [onClose, resetPicker, router])
 
     // -- render --
+/**
+ * selectedArtwork - Utility function
+ * @returns void
+ */
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="w-[90vw] max-w-[900px] min-w-[600px] p-0 gap-0 overflow-hidden bg-white rounded-2xl">
@@ -158,6 +202,10 @@ export const QuickSellArtworkPickerModal = ({
                     <h2 className="text-center text-[22px] font-bold text-[#191414]">
                         Select Artwork
                     </h2>
+/**
+ * resetPicker - Utility function
+ * @returns void
+ */
                     <button
                         type="button"
                         onClick={onClose}
@@ -166,6 +214,10 @@ export const QuickSellArtworkPickerModal = ({
                         <X className="h-5 w-5" />
                     </button>
                     <p className="mt-3 text-center text-[13px] text-[#595959]">
+/**
+ * handleDone - Utility function
+ * @returns void
+ */
                         Choose the artwork available from your inventory below.<br />
                         You can only select single quantity artworks that are listed as For Sale or Inquire to Purchase.
                     </p>
@@ -177,6 +229,10 @@ export const QuickSellArtworkPickerModal = ({
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#989898]" />
                         <Input
                             type="text"
+/**
+ * handleBack - Utility function
+ * @returns void
+ */
                             placeholder="Search by artwork title..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -185,6 +241,10 @@ export const QuickSellArtworkPickerModal = ({
                     </div>
                 </div>
 
+/**
+ * handleUploadArtwork - Utility function
+ * @returns void
+ */
                 {/* Table */}
                 <div className="px-6 max-h-[400px] overflow-auto">
                     <table className="w-full border-collapse">
@@ -287,6 +347,10 @@ export const QuickSellArtworkPickerModal = ({
 
                 {/* Footer */}
                 <div className="px-8 py-6 border-t border-[#E5E5E5]">
+/**
+ * target - Utility function
+ * @returns void
+ */
                     <p className="mb-5 text-center text-[13px] text-[#595959]">
                         Can&apos;t find the artwork you are looking for?{' '}
                         <button

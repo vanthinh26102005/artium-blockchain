@@ -14,6 +14,10 @@ type QuickSellCustomItemRowProps = {
   onRemove: (index: number) => void
 }
 
+/**
+ * QuickSellCustomItemRow - React component
+ * @returns React element
+ */
 export const QuickSellCustomItemRow = ({
   index,
   onRemove,
@@ -27,6 +31,10 @@ export const QuickSellCustomItemRow = ({
   const item = useWatch({
     control,
     name: `items.${index}` as const,
+/**
+ * item - Utility function
+ * @returns void
+ */
   }) as CustomLineItem
 
   const itemErrors = errors.items?.[index] as
@@ -35,6 +43,10 @@ export const QuickSellCustomItemRow = ({
         price?: { message?: string }
         discountPercent?: { message?: string }
         quantity?: { message?: string }
+/**
+ * itemErrors - Utility function
+ * @returns void
+ */
       }
     | undefined
   const itemTotal = calculateItemTotal(item)
@@ -46,14 +58,26 @@ export const QuickSellCustomItemRow = ({
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-3">
           <BaseInputField
+/**
+ * itemTotal - Utility function
+ * @returns void
+ */
             id={`quick-sell-custom-item-${index}-title`}
             type="text"
             label="Item Title"
             {...register(`items.${index}.title` as const)}
+/**
+ * labelClassName - Utility function
+ * @returns void
+ */
             placeholder="Enter item title"
             errorMessage={itemErrors?.title?.message}
             containerClassName="space-y-1"
             labelClassName={labelClassName}
+/**
+ * messageClassName - Utility function
+ * @returns void
+ */
             messageClassName={messageClassName}
             errorInputClassName="border-red-500"
           />

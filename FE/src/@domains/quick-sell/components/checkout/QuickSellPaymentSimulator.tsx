@@ -18,6 +18,10 @@ type QuickSellPaymentSimulatorProps = {
     isProcessing: boolean
 }
 
+/**
+ * QuickSellPaymentSimulator - React component
+ * @returns React element
+ */
 export const QuickSellPaymentSimulator = ({
     status,
     total,

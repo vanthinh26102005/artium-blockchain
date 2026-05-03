@@ -13,6 +13,10 @@ import { QuickSellCustomItemRow } from './QuickSellCustomItemRow'
 import { createArtworkLineItem, createCustomLineItem } from '../../types/quickSellDraft'
 import type { QuickSellInvoiceFormValues } from '../../validations/quickSellInvoice.schema'
 
+/**
+ * QuickSellInvoiceForm - React component
+ * @returns React element
+ */
 export const QuickSellInvoiceForm = () => {
   const [isArtworkPickerOpen, setIsArtworkPickerOpen] = useState(false)
   const {
@@ -29,15 +33,27 @@ export const QuickSellInvoiceForm = () => {
   const buyerMessage = useWatch({ control, name: 'buyer.message' }) ?? ''
   const isApplySalesTax = useWatch({ control, name: 'isApplySalesTax' }) ?? false
 
+/**
+ * buyerMessage - Utility function
+ * @returns void
+ */
   const handleAddCustomItem = useCallback(() => {
     append(createCustomLineItem())
   }, [append])
 
+/**
+ * isApplySalesTax - Utility function
+ * @returns void
+ */
   const handleSelectArtwork = useCallback(
     (artwork: QuickSellArtworkOption) => {
       append(
         createArtworkLineItem({
           id: artwork.id,
+/**
+ * handleAddCustomItem - Utility function
+ * @returns void
+ */
           name: artwork.name,
           imageUrl: artwork.imageUrl,
           artistName: artwork.artistName,
@@ -45,6 +61,10 @@ export const QuickSellInvoiceForm = () => {
           dimensions: artwork.dimensions,
           materials: artwork.materials,
           price: artwork.price,
+/**
+ * handleSelectArtwork - Utility function
+ * @returns void
+ */
         }),
       )
     },
@@ -66,25 +86,45 @@ export const QuickSellInvoiceForm = () => {
         <h2 className={sectionTitleClass}>BUYER INFORMATION</h2>
         <p className="mb-6 text-[13px] text-[#595959]">
           Enter the buyer details if available. You can update or complete these details anytime
+/**
+ * sectionTitleClass - Utility function
+ * @returns void
+ */
           before sending the invoice.
         </p>
 
         <div className="space-y-5">
           <BaseInputField
+/**
+ * labelClass - Utility function
+ * @returns void
+ */
             id="buyer-name"
             type="text"
             label="FULL NAME"
             {...register('buyer.name')}
             containerClassName="space-y-1.5"
+/**
+ * inputClass - Utility function
+ * @returns void
+ */
             labelClassName={labelClass}
             inputClassName={inputClass}
           />
 
           <BaseInputField
+/**
+ * messageClass - Utility function
+ * @returns void
+ */
             id="buyer-email"
             type="email"
             label="EMAIL ADDRESS"
             {...register('buyer.email')}
+/**
+ * helperClass - Utility function
+ * @returns void
+ */
             errorMessage={errors.buyer?.email?.message}
             containerClassName="space-y-1.5"
             labelClassName={labelClass}
@@ -261,6 +301,10 @@ export const QuickSellInvoiceForm = () => {
           >
             {isApplySalesTax && <Check className="h-3 w-3 text-white" />}
           </button>
+/**
+ * rawValue - Utility function
+ * @returns void
+ */
           <div
             className="cursor-pointer text-[13px] text-[#191414]"
             onClick={() =>
