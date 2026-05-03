@@ -17,6 +17,10 @@ type MomentVideoPlayerProps = {
   className?: string
 }
 
+/**
+ * MomentVideoPlayer - React component
+ * @returns React element
+ */
 export const MomentVideoPlayer = ({
   videoUrl,
   posterUrl,
@@ -26,10 +30,18 @@ export const MomentVideoPlayer = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(autoPlay)
+/**
+ * containerRef - Utility function
+ * @returns void
+ */
   const [isMuted, setIsMuted] = useState(true)
   const [showControls, setShowControls] = useState(true)
 
   const togglePlay = () => {
+/**
+ * videoRef - Utility function
+ * @returns void
+ */
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause()
@@ -38,6 +50,10 @@ export const MomentVideoPlayer = ({
       }
     }
   }
+/**
+ * togglePlay - Utility function
+ * @returns void
+ */
 
   const toggleMute = () => {
     if (videoRef.current) {
@@ -51,6 +67,10 @@ export const MomentVideoPlayer = ({
       if (document.fullscreenElement) {
         document.exitFullscreen()
       } else {
+/**
+ * toggleMute - Utility function
+ * @returns void
+ */
         containerRef.current.requestFullscreen()
       }
     }
@@ -61,6 +81,10 @@ export const MomentVideoPlayer = ({
       ref={containerRef}
       className={cn(
         'group relative h-full w-full overflow-hidden rounded-2xl bg-slate-900 lg:rounded-3xl',
+/**
+ * toggleFullscreen - Utility function
+ * @returns void
+ */
         className,
       )}
       onMouseEnter={() => setShowControls(true)}

@@ -23,6 +23,10 @@ type MomentsSectionProps = {
   onDeleteMoment?: (moment: ProfileMoment) => void
 }
 
+/**
+ * MomentsSection - React component
+ * @returns React element
+ */
 export const MomentsSection = ({
   moments,
   title = 'Moments',
@@ -39,6 +43,10 @@ export const MomentsSection = ({
   const visibleMoments = limit ? moments.slice(0, limit) : moments
 
   return (
+/**
+ * visibleMoments - Utility function
+ * @returns void
+ */
     <section className={cn(className)}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
@@ -71,10 +79,18 @@ export const MomentsSection = ({
               <div className="relative aspect-square overflow-hidden rounded-t-xl bg-slate-100">
                 <Image
                   src={moment.imageUrl}
+/**
+ * href - Utility function
+ * @returns void
+ */
                   alt={moment.title}
                   fill
                   sizes="(min-width: 1280px) 220px, (min-width: 1024px) 200px, (min-width: 640px) 50vw, 90vw"
                   className="object-cover"
+/**
+ * cardContent - Utility function
+ * @returns void
+ */
                 />
                 {moment.mediaType === 'video' ? (
                   <div className="absolute inset-0 flex items-center justify-center">

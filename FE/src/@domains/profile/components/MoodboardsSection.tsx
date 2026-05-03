@@ -23,6 +23,10 @@ type MoodboardsSectionProps = {
   onDeleteMoodboard?: (moodboard: ProfileMoodboard) => void
 }
 
+/**
+ * MoodboardsSection - React component
+ * @returns React element
+ */
 export const MoodboardsSection = ({
   moodboards,
   title = 'Moodboards',
@@ -39,10 +43,18 @@ export const MoodboardsSection = ({
   const isLarge = size === 'large'
   const hasHeaderContent = Boolean(title || subtitle || showSeeAll)
 
+/**
+ * isLarge - Utility function
+ * @returns void
+ */
   return (
     <section className={cn(className)}>
       {hasHeaderContent ? (
         <div className="mb-4 flex items-center justify-between gap-3">
+/**
+ * hasHeaderContent - Utility function
+ * @returns void
+ */
           <div>
             <h3 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
               {title}
@@ -89,10 +101,18 @@ const SeeAllAction = ({ href }: SeeAllActionProps) => {
         SEE ALL &gt;
       </Link>
     )
+/**
+ * SeeAllAction - React component
+ * @returns React element
+ */
   }
 
   return (
     <button type="button" className={className}>
+/**
+ * className - Utility function
+ * @returns void
+ */
       SEE ALL &gt;
     </button>
   )
@@ -122,50 +142,98 @@ const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }:
     ? {
       secondaryCoverClass: 'left-20 bottom-20 h-32 w-26',
       primaryCoverClass: 'left-28 bottom-12 h-48 w-35',
+/**
+ * MoodboardCard - React component
+ * @returns React element
+ */
       coverHeightClass: 'h-44 sm:h-48',
       cardWidthClass: 'w-[220px]',
       contentPaddingClass: 'px-4 pb-5 pt-4',
       titleClassName: 'text-[15px]',
+/**
+ * isLarge - Utility function
+ * @returns void
+ */
     }
     : {
       secondaryCoverClass: 'left-20 bottom-12 h-30 w-24',
       primaryCoverClass: 'left-28 bottom-6 h-45 w-32',
+/**
+ * uploadedMedia - Utility function
+ * @returns void
+ */
       coverHeightClass: 'h-40',
       cardWidthClass: 'w-[200px] shrink-0',
       contentPaddingClass: 'px-3 pb-4 pt-3',
       titleClassName: '',
+/**
+ * coverMedia - Utility function
+ * @returns void
+ */
     }
   const cardBody = (
     <div
       className={cn(
+/**
+ * secondaryMedia - Utility function
+ * @returns void
+ */
         'group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md',
         'w-full',
       )}
     >
+/**
+ * fallbackCoverUrls - Utility function
+ * @returns void
+ */
       <div className={cn('relative overflow-hidden bg-white', sizeStyles.coverHeightClass)}>
         <div
           className={cn(
             'absolute rotate-10 overflow-hidden rounded-xl bg-white shadow-lg',
+/**
+ * primaryCover - Utility function
+ * @returns void
+ */
             sizeStyles.secondaryCoverClass,
           )}
         >
           <MoodboardCoverTile
+/**
+ * secondaryCover - Utility function
+ * @returns void
+ */
             media={secondaryMedia}
             src={secondaryCover}
             alt={`${board.title} secondary`}
             sizes="120px"
+/**
+ * extraCoverCount - Utility function
+ * @returns void
+ */
           />
         </div>
         <div
           className={cn(
+/**
+ * featuredSuffix - Utility function
+ * @returns void
+ */
             'absolute rotate-13 overflow-hidden rounded-xl bg-white shadow-xl',
             sizeStyles.primaryCoverClass,
           )}
         >
+/**
+ * authorAvatarUrl - Utility function
+ * @returns void
+ */
           <MoodboardCoverTile
             media={coverMedia}
             src={primaryCover}
             alt={board.title}
+/**
+ * sizeStyles - Utility function
+ * @returns void
+ */
             sizes="140px"
           />
         </div>
@@ -186,6 +254,10 @@ const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }:
                 }}
                 className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow hover:bg-white hover:text-blue-600"
                 aria-label="Edit moodboard"
+/**
+ * cardBody - Utility function
+ * @returns void
+ */
               >
                 <Pencil className="h-3.5 w-3.5" />
               </button>
@@ -280,3 +352,16 @@ const MoodboardCoverTile = ({ media, src, alt, sizes }: MoodboardCoverTileProps)
 
   return <Image src={imageSrc} alt={alt} fill sizes={sizes} className="object-cover" />
 }
+
+/**
+ * resolveMoodboardCoverSrc - Utility function
+ * @returns void
+ */
+/**
+ * MoodboardCoverTile - React component
+ * @returns React element
+ */
+/**
+ * imageSrc - Utility function
+ * @returns void
+ */

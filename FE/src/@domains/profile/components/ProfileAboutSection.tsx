@@ -16,6 +16,10 @@ type ProfileAboutSectionProps = {
   className?: string
 }
 
+/**
+ * buildHref - Utility function
+ * @returns void
+ */
 const buildHref = (value: string, prefix: string) => {
   if (!value) return ''
   if (value.startsWith('http://') || value.startsWith('https://')) return value
@@ -25,6 +29,10 @@ const buildHref = (value: string, prefix: string) => {
 const splitEntries = (value: string) =>
   value
     .split(/[\n,]+/)
+/**
+ * splitEntries - Utility function
+ * @returns void
+ */
     .map((item) => item.trim())
     .filter(Boolean)
 
@@ -34,19 +42,35 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
   const identityTags = uniqueTags([...about.profileCategories, ...about.roles])
   const aboutWorkTags = uniqueTags([
     ...about.artisticVibes,
+/**
+ * uniqueTags - Utility function
+ * @returns void
+ */
     ...about.artisticValues,
     ...about.artisticMediums,
   ])
   const interestedTags = uniqueTags([
     ...about.inspireVibes,
+/**
+ * ProfileAboutSection - React component
+ * @returns React element
+ */
     ...about.inspireValues,
     ...about.inspireMediums,
   ])
   const affiliations = splitEntries(about.connectionAffiliations)
+/**
+ * identityTags - Utility function
+ * @returns void
+ */
   const seenAt = splitEntries(about.connectionSeenAt)
 
   const socialLinks = [
     {
+/**
+ * aboutWorkTags - Utility function
+ * @returns void
+ */
       label: 'Website',
       value: about.websiteUrl,
       href: buildHref(about.websiteUrl, 'https://'),
@@ -55,6 +79,10 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
     {
       label: 'Instagram',
       value: about.instagram,
+/**
+ * interestedTags - Utility function
+ * @returns void
+ */
       href: buildHref(about.instagram, 'https://'),
       Icon: Instagram,
     },
@@ -63,15 +91,27 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
       value: about.twitter,
       href: buildHref(about.twitter, 'https://'),
       Icon: Twitter,
+/**
+ * affiliations - Utility function
+ * @returns void
+ */
     },
   ].filter((item) => item.value)
 
   return (
+/**
+ * seenAt - Utility function
+ * @returns void
+ */
     <section className={cn(className)}>
       <div className="flex items-center gap-3">
         <h3 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
           About Me
         </h3>
+/**
+ * socialLinks - Utility function
+ * @returns void
+ */
         <Link
           href={editHref}
           className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900"
