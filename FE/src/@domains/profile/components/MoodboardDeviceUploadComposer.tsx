@@ -14,12 +14,7 @@ import {
 
 import type { CreateMoodboardInput } from '@shared/apis/profileApis'
 import { Button } from '@shared/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from '@shared/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@shared/components/ui/dialog'
 import { Input } from '@shared/components/ui/input'
 import { Progress } from '@shared/components/ui/progress'
 import { Switch } from '@shared/components/ui/switch'
@@ -55,10 +50,10 @@ const EMPTY_METADATA = {
 const parseTags = (value: string) =>
   value
     .split(',')
-/**
- * parseTags - Utility function
- * @returns void
- */
+    /**
+     * parseTags - Utility function
+     * @returns void
+     */
     .map((item) => item.trim())
     .filter(Boolean)
 
@@ -68,10 +63,10 @@ const getItemStatusLabel = (item: ProfileMoodboardUploadItem) => {
   }
 
   if (item.status === 'upload-failed' || item.status === 'validation-error') {
-/**
- * getItemStatusLabel - Utility function
- * @returns void
- */
+    /**
+     * getItemStatusLabel - Utility function
+     * @returns void
+     */
     return 'Some files need attention'
   }
 
@@ -87,10 +82,10 @@ export const MoodboardDeviceUploadComposer = ({
 }: MoodboardDeviceUploadComposerProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const {
-/**
- * MoodboardDeviceUploadComposer - React component
- * @returns React element
- */
+    /**
+     * MoodboardDeviceUploadComposer - React component
+     * @returns React element
+     */
     items,
     mediaIds,
     coverMediaId,
@@ -101,10 +96,10 @@ export const MoodboardDeviceUploadComposer = ({
     queueErrorMessage,
     statusMessage,
     addFiles,
-/**
- * fileInputRef - Utility function
- * @returns void
- */
+    /**
+     * fileInputRef - Utility function
+     * @returns void
+     */
     removeMedia,
     moveMedia,
     setCover,
@@ -132,10 +127,10 @@ export const MoodboardDeviceUploadComposer = ({
     event.preventDefault()
     setIsDragging(false)
     void addFiles(event.dataTransfer.files)
-/**
- * openFilePicker - Utility function
- * @returns void
- */
+    /**
+     * openFilePicker - Utility function
+     * @returns void
+     */
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -143,10 +138,10 @@ export const MoodboardDeviceUploadComposer = ({
 
     const trimmedTitle = title.trim()
     if (!trimmedTitle || !coverMediaId || !canCreate || submitting) {
-/**
- * handleFileInputChange - Utility function
- * @returns void
- */
+      /**
+       * handleFileInputChange - Utility function
+       * @returns void
+       */
       return
     }
 
@@ -157,10 +152,10 @@ export const MoodboardDeviceUploadComposer = ({
       isPrivate,
       isCollaborative,
       mediaIds,
-/**
- * handleDrop - Utility function
- * @returns void
- */
+      /**
+       * handleDrop - Utility function
+       * @returns void
+       */
       coverMediaId,
     })
   }
@@ -170,20 +165,20 @@ export const MoodboardDeviceUploadComposer = ({
   const hasItems = items.length > 0
 
   return (
-/**
- * handleSubmit - Utility function
- * @returns void
- */
+    /**
+     * handleSubmit - Utility function
+     * @returns void
+     */
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="5xl"
         className="max-h-[92vh] w-[95vw] overflow-hidden rounded-3xl bg-white p-0"
       >
         <form
-/**
- * trimmedTitle - Utility function
- * @returns void
- */
+          /**
+           * trimmedTitle - Utility function
+           * @returns void
+           */
           onSubmit={handleSubmit}
           className="grid max-h-[92vh] overflow-y-auto lg:grid-cols-[1.15fr_0.85fr]"
         >
@@ -203,19 +198,19 @@ export const MoodboardDeviceUploadComposer = ({
               multiple
               accept={PROFILE_MOODBOARD_ACCEPT}
               className="sr-only"
-/**
- * disableCreate - Utility function
- * @returns void
- */
+              /**
+               * disableCreate - Utility function
+               * @returns void
+               */
               onChange={handleFileInputChange}
             />
 
             <div
               className={cn(
-/**
- * hasItems - Utility function
- * @returns void
- */
+                /**
+                 * hasItems - Utility function
+                 * @returns void
+                 */
                 'rounded-3xl border border-dashed border-slate-300 bg-white p-5 transition',
                 isDragging && 'border-blue-600 bg-blue-50',
               )}
@@ -238,7 +233,8 @@ export const MoodboardDeviceUploadComposer = ({
                       Choose up to 10 files from your device to start uploading.
                     </p>
                     <p className="text-xs text-slate-500">
-                      JPG, PNG, WEBP, GIF up to 10 MB, or MP4, WEBM up to 100 MB and 60 seconds each.
+                      JPG, PNG, WEBP, GIF up to 10 MB, or MP4, WEBM up to 100 MB and 60 seconds
+                      each.
                     </p>
                   </div>
                   <Button type="button" onClick={openFilePicker}>
@@ -304,7 +300,10 @@ export const MoodboardDeviceUploadComposer = ({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700" htmlFor="moodboard-description">
+              <label
+                className="text-sm font-semibold text-slate-700"
+                htmlFor="moodboard-description"
+              >
                 Description
               </label>
               <Textarea
@@ -408,18 +407,11 @@ const MoodboardQueueItem = ({
           </div>
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.previewUrl}
-            alt={item.file.name}
-            className="h-full w-full object-cover"
-          />
+          <img src={item.previewUrl} alt={item.file.name} className="h-full w-full object-cover" />
         )}
-/**
- * MoodboardQueueItem - React component
- * @returns React element
- */
+        /** * MoodboardQueueItem - React component * @returns React element */
         {isCover ? (
-          <span className="absolute top-1 left-1 rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold text-white">
+          <span className="absolute left-1 top-1 rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold text-white">
             Cover
           </span>
         ) : null}
@@ -432,35 +424,32 @@ const MoodboardQueueItem = ({
               {isVideo ? 'Video' : 'Image'} · {formatProfileMediaSize(item.file.size)}
             </p>
           </div>
-/**
- * isUploaded - Utility function
- * @returns void
- */
+          /** * isUploaded - Utility function * @returns void */
           <span
             className={cn(
               'inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold',
               isUploaded
-/**
- * isFailure - Utility function
- * @returns void
- */
-                ? 'bg-emerald-50 text-emerald-700'
+                ? /**
+                   * isFailure - Utility function
+                   * @returns void
+                   */
+                  'bg-emerald-50 text-emerald-700'
                 : isFailure
                   ? 'bg-rose-50 text-rose-700'
                   : 'bg-slate-100 text-slate-600',
-/**
- * isVideo - Utility function
- * @returns void
- */
+              /**
+               * isVideo - Utility function
+               * @returns void
+               */
             )}
           >
             {isUploaded ? (
               <CheckCircle2 className="h-3.5 w-3.5" />
-/**
- * statusLabel - Utility function
- * @returns void
- */
-            ) : isFailure ? (
+            ) : /**
+             * statusLabel - Utility function
+             * @returns void
+             */
+            isFailure ? (
               <AlertCircle className="h-3.5 w-3.5" />
             ) : isVideo ? (
               <Film className="h-3.5 w-3.5" />
@@ -477,7 +466,12 @@ const MoodboardQueueItem = ({
 
         <div className="flex flex-wrap items-center gap-2">
           {isUploaded && !isCover ? (
-            <Button type="button" variant="outline" size="xs" onClick={() => onSetCover(item.localId)}>
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              onClick={() => onSetCover(item.localId)}
+            >
               Set as cover
             </Button>
           ) : null}
@@ -509,12 +503,7 @@ const MoodboardQueueItem = ({
           >
             <ArrowDown className="h-4 w-4" />
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="xs"
-            onClick={() => onRemove(item.localId)}
-          >
+          <Button type="button" variant="outline" size="xs" onClick={() => onRemove(item.localId)}>
             <Trash2 className="h-3.5 w-3.5" />
             Remove
           </Button>

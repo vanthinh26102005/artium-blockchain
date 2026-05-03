@@ -43,14 +43,14 @@ export const MomentsSection = ({
   const visibleMoments = limit ? moments.slice(0, limit) : moments
 
   return (
-/**
- * visibleMoments - Utility function
- * @returns void
- */
+    /**
+     * visibleMoments - Utility function
+     * @returns void
+     */
     <section className={cn(className)}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
+          <h3 className="text-[20px] font-semibold leading-[1.2] text-kokushoku-black lg:text-[28px]">
             {title}
           </h3>
           <p className="text-sm text-slate-500">{subtitle}</p>
@@ -79,18 +79,18 @@ export const MomentsSection = ({
               <div className="relative aspect-square overflow-hidden rounded-t-xl bg-slate-100">
                 <Image
                   src={moment.imageUrl}
-/**
- * href - Utility function
- * @returns void
- */
+                  /**
+                   * href - Utility function
+                   * @returns void
+                   */
                   alt={moment.title}
                   fill
                   sizes="(min-width: 1280px) 220px, (min-width: 1024px) 200px, (min-width: 640px) 50vw, 90vw"
                   className="object-cover"
-/**
- * cardContent - Utility function
- * @returns void
- */
+                  /**
+                   * cardContent - Utility function
+                   * @returns void
+                   */
                 />
                 {moment.mediaType === 'video' ? (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -101,7 +101,7 @@ export const MomentsSection = ({
                 ) : null}
                 {/* Owner controls overlay */}
                 {isOwner && (
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     {onEditMoment && (
                       <button
                         onClick={(e) => {
@@ -156,7 +156,7 @@ export const MomentsSection = ({
               <Link
                 key={moment.id}
                 href={href}
-                className="group max-w-[220px] min-w-[200px] shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
+                className="group min-w-[200px] max-w-[220px] shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
               >
                 {cardContent}
               </Link>
@@ -166,7 +166,7 @@ export const MomentsSection = ({
           return (
             <div
               key={moment.id}
-              className="group max-w-[220px] min-w-[200px] shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
+              className="group min-w-[200px] max-w-[220px] shrink-0 rounded-xl border border-slate-200 bg-white transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
             >
               {cardContent}
             </div>

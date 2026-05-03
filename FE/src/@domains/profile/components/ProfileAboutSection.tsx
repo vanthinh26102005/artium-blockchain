@@ -29,10 +29,10 @@ const buildHref = (value: string, prefix: string) => {
 const splitEntries = (value: string) =>
   value
     .split(/[\n,]+/)
-/**
- * splitEntries - Utility function
- * @returns void
- */
+    /**
+     * splitEntries - Utility function
+     * @returns void
+     */
     .map((item) => item.trim())
     .filter(Boolean)
 
@@ -42,35 +42,35 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
   const identityTags = uniqueTags([...about.profileCategories, ...about.roles])
   const aboutWorkTags = uniqueTags([
     ...about.artisticVibes,
-/**
- * uniqueTags - Utility function
- * @returns void
- */
+    /**
+     * uniqueTags - Utility function
+     * @returns void
+     */
     ...about.artisticValues,
     ...about.artisticMediums,
   ])
   const interestedTags = uniqueTags([
     ...about.inspireVibes,
-/**
- * ProfileAboutSection - React component
- * @returns React element
- */
+    /**
+     * ProfileAboutSection - React component
+     * @returns React element
+     */
     ...about.inspireValues,
     ...about.inspireMediums,
   ])
   const affiliations = splitEntries(about.connectionAffiliations)
-/**
- * identityTags - Utility function
- * @returns void
- */
+  /**
+   * identityTags - Utility function
+   * @returns void
+   */
   const seenAt = splitEntries(about.connectionSeenAt)
 
   const socialLinks = [
     {
-/**
- * aboutWorkTags - Utility function
- * @returns void
- */
+      /**
+       * aboutWorkTags - Utility function
+       * @returns void
+       */
       label: 'Website',
       value: about.websiteUrl,
       href: buildHref(about.websiteUrl, 'https://'),
@@ -79,10 +79,10 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
     {
       label: 'Instagram',
       value: about.instagram,
-/**
- * interestedTags - Utility function
- * @returns void
- */
+      /**
+       * interestedTags - Utility function
+       * @returns void
+       */
       href: buildHref(about.instagram, 'https://'),
       Icon: Instagram,
     },
@@ -91,27 +91,24 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
       value: about.twitter,
       href: buildHref(about.twitter, 'https://'),
       Icon: Twitter,
-/**
- * affiliations - Utility function
- * @returns void
- */
+      /**
+       * affiliations - Utility function
+       * @returns void
+       */
     },
   ].filter((item) => item.value)
 
   return (
-/**
- * seenAt - Utility function
- * @returns void
- */
+    /**
+     * seenAt - Utility function
+     * @returns void
+     */
     <section className={cn(className)}>
       <div className="flex items-center gap-3">
-        <h3 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
+        <h3 className="text-[20px] font-semibold leading-[1.2] text-kokushoku-black lg:text-[28px]">
           About Me
         </h3>
-/**
- * socialLinks - Utility function
- * @returns void
- */
+        /** * socialLinks - Utility function * @returns void */
         <Link
           href={editHref}
           className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900"
@@ -124,7 +121,7 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
       <div className="mt-6 grid gap-20 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="space-y-6">
           <div>
-            <p className="text-[18px] leading-none font-semibold text-black uppercase">Bio</p>
+            <p className="text-[18px] font-semibold uppercase leading-none text-black">Bio</p>
             <p className="text-sx mt-3 leading-6 text-slate-700">{about.biography}</p>
           </div>
 
@@ -150,7 +147,7 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
               {identityTags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold tracking-wide text-slate-700 uppercase"
+                  className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-slate-700"
                 >
                   {tag}
                 </span>
@@ -159,14 +156,14 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
           ) : null}
 
           <div>
-            <p className="text-[18px] leading-none font-semibold text-black uppercase">
+            <p className="text-[18px] font-semibold uppercase leading-none text-black">
               About My Work
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {aboutWorkTags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold tracking-wide text-slate-700 uppercase"
+                  className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-slate-700"
                 >
                   {tag}
                 </span>
@@ -175,14 +172,14 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
           </div>
 
           <div>
-            <p className="text-[18px] leading-none font-semibold text-black uppercase">
+            <p className="text-[18px] font-semibold uppercase leading-none text-black">
               Interested In
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {interestedTags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold tracking-wide text-slate-700 uppercase"
+                  className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-slate-700"
                 >
                   {tag}
                 </span>
@@ -193,7 +190,7 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
 
         <div className="space-y-6">
           <div className="border-b border-slate-200 pb-6">
-            <p className="text-[18px] leading-none font-semibold text-black uppercase">
+            <p className="text-[18px] font-semibold uppercase leading-none text-black">
               Affiliations
             </p>
             <p className="mt-3 text-sm text-slate-700">
@@ -202,7 +199,7 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
           </div>
 
           <div className="border-b border-slate-200 pb-6">
-            <p className="text-[18px] leading-none font-semibold text-black uppercase">
+            <p className="text-[18px] font-semibold uppercase leading-none text-black">
               You Might Have Seen Me At
             </p>
             <div className="mt-3 space-y-1 text-sm text-slate-700">
@@ -211,7 +208,7 @@ export const ProfileAboutSection = ({ about, editHref, className }: ProfileAbout
           </div>
 
           <div className="border-b border-slate-200 pb-6">
-            <p className="text-[18px] leading-none font-semibold text-black uppercase">Currently</p>
+            <p className="text-[18px] font-semibold uppercase leading-none text-black">Currently</p>
             <p className="mt-3 text-sm text-slate-700">{about.connectionCurrently || '-'}</p>
           </div>
         </div>

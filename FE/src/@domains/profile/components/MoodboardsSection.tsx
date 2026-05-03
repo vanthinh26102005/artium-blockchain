@@ -43,20 +43,17 @@ export const MoodboardsSection = ({
   const isLarge = size === 'large'
   const hasHeaderContent = Boolean(title || subtitle || showSeeAll)
 
-/**
- * isLarge - Utility function
- * @returns void
- */
+  /**
+   * isLarge - Utility function
+   * @returns void
+   */
   return (
     <section className={cn(className)}>
       {hasHeaderContent ? (
         <div className="mb-4 flex items-center justify-between gap-3">
-/**
- * hasHeaderContent - Utility function
- * @returns void
- */
+          /** * hasHeaderContent - Utility function * @returns void */
           <div>
-            <h3 className="text-kokushoku-black text-[20px] leading-[1.2] font-semibold lg:text-[28px]">
+            <h3 className="text-[20px] font-semibold leading-[1.2] text-kokushoku-black lg:text-[28px]">
               {title}
             </h3>
             <p className="text-sm text-slate-500">{subtitle}</p>
@@ -68,7 +65,7 @@ export const MoodboardsSection = ({
       <div
         className={cn(
           isLarge
-            ? 'grid [grid-template-columns:repeat(auto-fit,minmax(200px,220px))] justify-start gap-5'
+            ? 'grid justify-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(200px,220px))]'
             : 'flex gap-4 overflow-x-auto pb-2',
         )}
       >
@@ -101,19 +98,15 @@ const SeeAllAction = ({ href }: SeeAllActionProps) => {
         SEE ALL &gt;
       </Link>
     )
-/**
- * SeeAllAction - React component
- * @returns React element
- */
+    /**
+     * SeeAllAction - React component
+     * @returns React element
+     */
   }
 
   return (
     <button type="button" className={className}>
-/**
- * className - Utility function
- * @returns void
- */
-      SEE ALL &gt;
+      /** * className - Utility function * @returns void */ SEE ALL &gt;
     </button>
   )
 }
@@ -127,7 +120,14 @@ type MoodboardCardProps = {
   onDelete?: (board: ProfileMoodboard) => void
 }
 
-const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }: MoodboardCardProps) => {
+const MoodboardCard = ({
+  board,
+  size,
+  href,
+  isOwner = false,
+  onEdit,
+  onDelete,
+}: MoodboardCardProps) => {
   const isLarge = size === 'large'
   const uploadedMedia = board.mediaItems ?? []
   const coverMedia = uploadedMedia.find((media) => media.isCover) ?? uploadedMedia[0]
@@ -140,111 +140,105 @@ const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }:
   const authorAvatarUrl = board.authorAvatarUrl || 'https://placehold.co/64x64.png?text=HP'
   const sizeStyles = isLarge
     ? {
-      secondaryCoverClass: 'left-20 bottom-20 h-32 w-26',
-      primaryCoverClass: 'left-28 bottom-12 h-48 w-35',
-/**
- * MoodboardCard - React component
- * @returns React element
- */
-      coverHeightClass: 'h-44 sm:h-48',
-      cardWidthClass: 'w-[220px]',
-      contentPaddingClass: 'px-4 pb-5 pt-4',
-      titleClassName: 'text-[15px]',
-/**
- * isLarge - Utility function
- * @returns void
- */
-    }
+        secondaryCoverClass: 'left-20 bottom-20 h-32 w-26',
+        primaryCoverClass: 'left-28 bottom-12 h-48 w-35',
+        /**
+         * MoodboardCard - React component
+         * @returns React element
+         */
+        coverHeightClass: 'h-44 sm:h-48',
+        cardWidthClass: 'w-[220px]',
+        contentPaddingClass: 'px-4 pb-5 pt-4',
+        titleClassName: 'text-[15px]',
+        /**
+         * isLarge - Utility function
+         * @returns void
+         */
+      }
     : {
-      secondaryCoverClass: 'left-20 bottom-12 h-30 w-24',
-      primaryCoverClass: 'left-28 bottom-6 h-45 w-32',
-/**
- * uploadedMedia - Utility function
- * @returns void
- */
-      coverHeightClass: 'h-40',
-      cardWidthClass: 'w-[200px] shrink-0',
-      contentPaddingClass: 'px-3 pb-4 pt-3',
-      titleClassName: '',
-/**
- * coverMedia - Utility function
- * @returns void
- */
-    }
+        secondaryCoverClass: 'left-20 bottom-12 h-30 w-24',
+        primaryCoverClass: 'left-28 bottom-6 h-45 w-32',
+        /**
+         * uploadedMedia - Utility function
+         * @returns void
+         */
+        coverHeightClass: 'h-40',
+        cardWidthClass: 'w-[200px] shrink-0',
+        contentPaddingClass: 'px-3 pb-4 pt-3',
+        titleClassName: '',
+        /**
+         * coverMedia - Utility function
+         * @returns void
+         */
+      }
   const cardBody = (
     <div
       className={cn(
-/**
- * secondaryMedia - Utility function
- * @returns void
- */
+        /**
+         * secondaryMedia - Utility function
+         * @returns void
+         */
         'group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md',
         'w-full',
       )}
     >
-/**
- * fallbackCoverUrls - Utility function
- * @returns void
- */
+      /** * fallbackCoverUrls - Utility function * @returns void */
       <div className={cn('relative overflow-hidden bg-white', sizeStyles.coverHeightClass)}>
         <div
           className={cn(
-            'absolute rotate-10 overflow-hidden rounded-xl bg-white shadow-lg',
-/**
- * primaryCover - Utility function
- * @returns void
- */
+            'rotate-10 absolute overflow-hidden rounded-xl bg-white shadow-lg',
+            /**
+             * primaryCover - Utility function
+             * @returns void
+             */
             sizeStyles.secondaryCoverClass,
           )}
         >
           <MoodboardCoverTile
-/**
- * secondaryCover - Utility function
- * @returns void
- */
+            /**
+             * secondaryCover - Utility function
+             * @returns void
+             */
             media={secondaryMedia}
             src={secondaryCover}
             alt={`${board.title} secondary`}
             sizes="120px"
-/**
- * extraCoverCount - Utility function
- * @returns void
- */
+            /**
+             * extraCoverCount - Utility function
+             * @returns void
+             */
           />
         </div>
         <div
           className={cn(
-/**
- * featuredSuffix - Utility function
- * @returns void
- */
-            'absolute rotate-13 overflow-hidden rounded-xl bg-white shadow-xl',
+            /**
+             * featuredSuffix - Utility function
+             * @returns void
+             */
+            'rotate-13 absolute overflow-hidden rounded-xl bg-white shadow-xl',
             sizeStyles.primaryCoverClass,
           )}
         >
-/**
- * authorAvatarUrl - Utility function
- * @returns void
- */
+          /** * authorAvatarUrl - Utility function * @returns void */
           <MoodboardCoverTile
             media={coverMedia}
             src={primaryCover}
             alt={board.title}
-/**
- * sizeStyles - Utility function
- * @returns void
- */
+            /**
+             * sizeStyles - Utility function
+             * @returns void
+             */
             sizes="140px"
           />
         </div>
         {board.isPrivate ? (
-          <span className="absolute top-4 left-4 rounded-full bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white uppercase">
+          <span className="absolute left-4 top-4 rounded-full bg-slate-900 px-3 py-1 text-[11px] font-semibold uppercase text-white">
             Private
           </span>
         ) : null}
         {/* Owner controls overlay */}
         {isOwner && (onEdit || onDelete) && (
-          <div className="absolute top-4 right-4 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="absolute right-4 top-4 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
             {onEdit && (
               <button
                 onClick={(e) => {
@@ -254,10 +248,10 @@ const MoodboardCard = ({ board, size, href, isOwner = false, onEdit, onDelete }:
                 }}
                 className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow hover:bg-white hover:text-blue-600"
                 aria-label="Edit moodboard"
-/**
- * cardBody - Utility function
- * @returns void
- */
+                /**
+                 * cardBody - Utility function
+                 * @returns void
+                 */
               >
                 <Pencil className="h-3.5 w-3.5" />
               </button>
