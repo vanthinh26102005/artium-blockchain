@@ -5,10 +5,7 @@ import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis
 import usersApi from '@shared/apis/usersApi'
 import type { UserPayload } from '@shared/types/auth'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
-import {
-  buildProfileOverviewData,
-  resolveUsername,
-} from '@domains/profile/utils/profileApiMapper'
+import { buildProfileOverviewData, resolveUsername } from '@domains/profile/utils/profileApiMapper'
 import type { ProfileOverviewData } from '@domains/profile/types'
 
 type UseProfileOverviewOptions = {
@@ -35,26 +32,26 @@ export const useProfileOverview = ({
   const authUser = useAuthStore((state) => state.user)
   const isAuthHydrated = useAuthStore((state) => state.isHydrated)
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth)
-/**
- * authUser - Utility function
- * @returns void
- */
+  /**
+   * authUser - Utility function
+   * @returns void
+   */
   const [data, setData] = useState<ProfileOverviewData | null>(null)
   const [user, setUser] = useState<UserPayload | null>(null)
   const [sellerProfile, setSellerProfile] = useState<SellerProfilePayload | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-/**
- * isAuthHydrated - Utility function
- * @returns void
- */
+  /**
+   * isAuthHydrated - Utility function
+   * @returns void
+   */
   const [error, setError] = useState<string | null>(null)
 
   const isOwner = useMemo(() => {
     if (!authUser?.id) return false
-/**
- * hydrateAuth - Utility function
- * @returns void
- */
+    /**
+     * hydrateAuth - Utility function
+     * @returns void
+     */
     if (!username) return true
     if (user?.id && authUser.id === user.id) return true
     const authSlug = authUser.slug ?? authUser.username
@@ -65,10 +62,10 @@ export const useProfileOverview = ({
     let isActive = true
 
     if (!username && !isAuthHydrated && typeof window !== 'undefined') {
-/**
- * isOwner - Utility function
- * @returns void
- */
+      /**
+       * isOwner - Utility function
+       * @returns void
+       */
       hydrateAuth()
       return () => {
         isActive = false
@@ -76,10 +73,10 @@ export const useProfileOverview = ({
     }
 
     const loadProfile = async () => {
-/**
- * authSlug - Utility function
- * @returns void
- */
+      /**
+       * authSlug - Utility function
+       * @returns void
+       */
       setIsLoading(true)
       setError(null)
       setData(null)
@@ -88,7 +85,13 @@ export const useProfileOverview = ({
         // Step 1: Fetch User
         let fetchedUser: UserPayload | null = null
 
-        if (!username || (authUser && (authUser.slug === username || authUser.username === username || authUser.id === username))) {
+        if (
+          !username ||
+          (authUser &&
+            (authUser.slug === username ||
+              authUser.username === username ||
+              authUser.id === username))
+        ) {
           // Own profile — use /identity/users/me
           if (authUser?.id) {
             try {
@@ -97,13 +100,15 @@ export const useProfileOverview = ({
               fetchedUser = authUser
             }
           }
-/**
- * loadProfile - Utility function
- * @returns void
- */
+          /**
+           * loadProfile - Utility function
+           * @returns void
+           */
         } else {
           // Other user's profile — detect UUID vs slug
-          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username)
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            username,
+          )
           try {
             fetchedUser = isUuid
               ? await usersApi.getUserById(username)
@@ -124,10 +129,10 @@ export const useProfileOverview = ({
         setUser(fetchedUser)
 
         // Step 2: Try to fetch seller profile (optional enrichment)
-/**
- * isUuid - Utility function
- * @returns void
- */
+        /**
+         * isUuid - Utility function
+         * @returns void
+         */
         let seller: SellerProfilePayload | null = null
         try {
           seller = await profileApis.getSellerProfileByUserId(fetchedUser.id)
@@ -190,10 +195,10 @@ export const useProfileOverview = ({
     }
 
     void loadProfile()
-/**
- * mapped - Utility function
- * @returns void
- */
+    /**
+     * mapped - Utility function
+     * @returns void
+     */
 
     return () => {
       isActive = false

@@ -29,10 +29,10 @@ export const useGetMomentDetails = (
     const loadMoment = async () => {
       if (!momentId) {
         setData(null)
-/**
- * loadMoment - Utility function
- * @returns void
- */
+        /**
+         * loadMoment - Utility function
+         * @returns void
+         */
         setIsLoading(false)
         return
       }
@@ -47,10 +47,10 @@ export const useGetMomentDetails = (
         }
 
         // Resolve author: look up user (by slug or by userId), then fetch seller profile
-/**
- * moment - Utility function
- * @returns void
- */
+        /**
+         * moment - Utility function
+         * @returns void
+         */
         let authorUserId = moment.userId
         let authorSlug = ''
         if (options?.username) {
@@ -63,10 +63,10 @@ export const useGetMomentDetails = (
         if (!authorSlug) {
           try {
             const authorUser = await usersApi.getUserById(authorUserId)
-/**
- * authorUser - Utility function
- * @returns void
- */
+            /**
+             * authorUser - Utility function
+             * @returns void
+             */
             authorSlug = authorUser.slug || authorUser.username || ''
           } catch {
             authorSlug = ''
@@ -75,20 +75,20 @@ export const useGetMomentDetails = (
 
         if (!isActive) {
           return
-/**
- * authorProfile - Utility function
- * @returns void
- */
+          /**
+           * authorProfile - Utility function
+           * @returns void
+           */
         }
 
         const mapped = mapMomentToMomentDetail(moment, {
           username: authorSlug,
           displayName: authorProfile.displayName,
           bio: authorProfile.bio ?? '',
-/**
- * authorUser - Utility function
- * @returns void
- */
+          /**
+           * authorUser - Utility function
+           * @returns void
+           */
           avatarUrl: authorProfile.profileImageUrl || '/images/logo-dark-mode.png',
           verified: Boolean(authorProfile.isVerified),
         })
@@ -103,10 +103,10 @@ export const useGetMomentDetails = (
       } finally {
         if (isActive) {
           setIsLoading(false)
-/**
- * mapped - Utility function
- * @returns void
- */
+          /**
+           * mapped - Utility function
+           * @returns void
+           */
         }
       }
     }
