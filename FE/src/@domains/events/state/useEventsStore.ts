@@ -37,10 +37,10 @@ export const useEventsStore = create<EventsState>((set) => ({
       const events = await eventsApis.getDiscoverEvents()
       set({
         allEvents: events.map((event) => mapApiEventToEvent(event)),
-/**
- * events - Utility function
- * @returns void
- */
+        /**
+         * events - Utility function
+         * @returns void
+         */
         isLoading: false,
         hasLoaded: true,
       })
