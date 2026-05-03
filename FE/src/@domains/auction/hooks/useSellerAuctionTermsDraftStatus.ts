@@ -6,6 +6,10 @@ import {
 
 type SellerAuctionTermsDraftEvent = CustomEvent<{ artworkId?: string }>
 
+/**
+ * useSellerAuctionTermsDraftStatus - Custom React hook
+ * @returns void
+ */
 export const useSellerAuctionTermsDraftStatus = (artworkId: string) => {
   const [hasDraft, setHasDraft] = useState(() => hasSellerAuctionTermsDraft(artworkId))
 
@@ -15,6 +19,10 @@ export const useSellerAuctionTermsDraftStatus = (artworkId: string) => {
     const refreshDraftStatus = () => {
       if (isCancelled) {
         return
+/**
+ * refreshDraftStatus - Utility function
+ * @returns void
+ */
       }
 
       setHasDraft(hasSellerAuctionTermsDraft(artworkId))
@@ -28,10 +36,18 @@ export const useSellerAuctionTermsDraftStatus = (artworkId: string) => {
       if (!updatedArtworkId || updatedArtworkId === artworkId) {
         refreshDraftStatus()
       }
+/**
+ * handleDraftUpdate - Utility function
+ * @returns void
+ */
     }
 
     const handleStorage = (event: StorageEvent) => {
       if (!event.key || event.key.endsWith(artworkId)) {
+/**
+ * updatedArtworkId - Utility function
+ * @returns void
+ */
         refreshDraftStatus()
       }
     }
@@ -42,6 +58,10 @@ export const useSellerAuctionTermsDraftStatus = (artworkId: string) => {
     return () => {
       isCancelled = true
       window.removeEventListener(SELLER_AUCTION_TERMS_DRAFT_EVENT, handleDraftUpdate)
+/**
+ * handleStorage - Utility function
+ * @returns void
+ */
       window.removeEventListener('storage', handleStorage)
     }
   }, [artworkId])

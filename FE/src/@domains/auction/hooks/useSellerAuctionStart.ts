@@ -5,11 +5,19 @@ import auctionApis, {
   type StartSellerAuctionRequest,
 } from '@shared/apis/auctionApis'
 
+/**
+ * SELLER_AUCTION_START_ARTWORK_KEY - React component
+ * @returns React element
+ */
 const SELLER_AUCTION_START_ARTWORK_KEY = 'artium:seller-auction:start-artwork-id'
 
 const readRememberedArtworkId = () => {
   if (typeof window === 'undefined') {
     return null
+/**
+ * readRememberedArtworkId - Utility function
+ * @returns void
+ */
   }
 
   const value = window.localStorage.getItem(SELLER_AUCTION_START_ARTWORK_KEY)
@@ -18,6 +26,10 @@ const readRememberedArtworkId = () => {
 
 const writeRememberedArtworkId = (artworkId: string | null) => {
   if (typeof window === 'undefined') {
+/**
+ * value - Utility function
+ * @returns void
+ */
     return
   }
 
@@ -25,6 +37,10 @@ const writeRememberedArtworkId = (artworkId: string | null) => {
     window.localStorage.removeItem(SELLER_AUCTION_START_ARTWORK_KEY)
     return
   }
+/**
+ * writeRememberedArtworkId - Utility function
+ * @returns void
+ */
 
   window.localStorage.setItem(SELLER_AUCTION_START_ARTWORK_KEY, artworkId)
 }
@@ -45,6 +61,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
 
   useEffect(() => {
     setRememberedArtworkId(readRememberedArtworkId())
+/**
+ * useSellerAuctionStart - Custom React hook
+ * @returns void
+ */
   }, [])
 
   const setTrackedArtworkId = useCallback((nextArtworkId: string | null) => {
@@ -62,6 +82,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
         return null
       }
 
+/**
+ * setTrackedArtworkId - Utility function
+ * @returns void
+ */
       setError(null)
       setIsRefreshing(true)
       try {
@@ -70,16 +94,28 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
         if (response?.artworkId) {
           setTrackedArtworkId(response.artworkId)
         } else if (targetArtworkId === rememberedArtworkId) {
+/**
+ * effectiveArtworkId - Utility function
+ * @returns void
+ */
           setTrackedArtworkId(null)
         }
         return response
       } catch (nextError) {
         const message =
+/**
+ * refresh - Utility function
+ * @returns void
+ */
           nextError instanceof Error
             ? nextError.message
             : 'Could not load seller auction start status.'
         setError(message)
         throw nextError
+/**
+ * targetArtworkId - Utility function
+ * @returns void
+ */
       } finally {
         setIsRefreshing(false)
       }
@@ -92,6 +128,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
       setStatus(null)
       return
     }
+/**
+ * response - Utility function
+ * @returns void
+ */
 
     let isMounted = true
     setIsHydrating(true)
@@ -104,6 +144,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
           return
         }
 
+/**
+ * message - Utility function
+ * @returns void
+ */
         setStatus(response)
         if (response?.artworkId) {
           setTrackedArtworkId(response.artworkId)
@@ -166,6 +210,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
       } catch (nextError) {
         const message =
           nextError instanceof Error
+/**
+ * start - Utility function
+ * @returns void
+ */
             ? nextError.message
             : 'Could not retry the seller auction start.'
         setError(message)
@@ -174,6 +222,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
         setIsRetrying(false)
       }
     },
+/**
+ * response - Utility function
+ * @returns void
+ */
     [setTrackedArtworkId],
   )
 
@@ -182,6 +234,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
       setIsAttachingTx(true)
       setError(null)
       try {
+/**
+ * message - Utility function
+ * @returns void
+ */
         const response = await auctionApis.attachSellerAuctionStartTx(attemptId, input)
         setStatus(response)
         setTrackedArtworkId(response.artworkId)
@@ -196,6 +252,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
       } finally {
         setIsAttachingTx(false)
       }
+/**
+ * retry - Utility function
+ * @returns void
+ */
     },
     [setTrackedArtworkId],
   )
@@ -204,6 +264,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
 
   return useMemo(
     () => ({
+/**
+ * response - Utility function
+ * @returns void
+ */
       status,
       error,
       effectiveArtworkId,
@@ -212,6 +276,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
       isRefreshing,
       isStarting,
       isRetrying,
+/**
+ * message - Utility function
+ * @returns void
+ */
       isAttachingTx,
       isBusy,
       refresh,
@@ -228,6 +296,10 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
       isBusy,
       isHydrating,
       isRefreshing,
+/**
+ * attachTransaction - Utility function
+ * @returns void
+ */
       isRetrying,
       isStarting,
       refresh,
@@ -236,6 +308,19 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
       setTrackedArtworkId,
       start,
       status,
+/**
+ * response - Utility function
+ * @returns void
+ */
     ],
   )
 }
+
+/**
+ * message - Utility function
+ * @returns void
+ */
+/**
+ * isBusy - Utility function
+ * @returns void
+ */
