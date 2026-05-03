@@ -11,10 +11,10 @@ const ProfileEditPage: NextPageWithLayout = () => {
   const router = useRouter()
   const { username } = router.query
 
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   return <ProfileEditPageView username={username} />
 }
 

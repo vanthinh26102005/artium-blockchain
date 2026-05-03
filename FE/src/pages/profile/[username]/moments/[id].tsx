@@ -10,10 +10,10 @@ const ProfileMomentDetailPageRoute: NextPageWithLayout = () => {
   const router = useRouter()
   const { username, id } = router.query
 
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   return <MomentDetailPage username={username as string} momentId={id as string} />
 }
 
