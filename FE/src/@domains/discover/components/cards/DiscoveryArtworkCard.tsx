@@ -8,6 +8,10 @@ type DiscoveryArtworkCardProps = {
   artwork: DiscoverArtwork
 }
 
+/**
+ * priceFormatter - Utility function
+ * @returns void
+ */
 const priceFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -17,27 +21,47 @@ const priceFormatter = new Intl.NumberFormat('en-US', {
 export const DiscoveryArtworkCard = ({ artwork }: DiscoveryArtworkCardProps) => {
   // -- state --
   const router = useRouter()
+/**
+ * DiscoveryArtworkCard - React component
+ * @returns React element
+ */
 
   // -- derived --
   const priceLabel = artwork.isSold ? 'Sold' : priceFormatter.format(artwork.price)
   const priceDotClass = artwork.isSold ? 'bg-slate-400' : 'bg-blue-500'
 
+/**
+ * router - Utility function
+ * @returns void
+ */
   // Calculate dynamic height based on image dimensions if available
   const imageHeight =
     artwork.imageMediumHeight && artwork.imageMediumWidth
       ? (artwork.imageMediumHeight / artwork.imageMediumWidth) * 160 // 160 is columnWidth
       : 160 // fallback to square
 
+/**
+ * priceLabel - Utility function
+ * @returns void
+ */
   // -- handlers --
   const handleClick = () => {
     void router.push(`/artworks/${artwork.id}`)
   }
+/**
+ * priceDotClass - Utility function
+ * @returns void
+ */
 
   // -- render --
   return (
     <button
       type="button"
       onClick={handleClick}
+/**
+ * imageHeight - Utility function
+ * @returns void
+ */
       className="group w-full text-left focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:outline-none"
       aria-label={`View artwork ${artwork.title}`}
     >
@@ -47,6 +71,10 @@ export const DiscoveryArtworkCard = ({ artwork }: DiscoveryArtworkCardProps) => 
           <img
             src={artwork.imageMedium}
             alt={artwork.title}
+/**
+ * handleClick - Utility function
+ * @returns void
+ */
             loading="lazy"
             className="h-full w-full object-cover"
           />

@@ -6,21 +6,37 @@ type DiscoverTabsProps = {
   onTabChange: (tabKey: DiscoverTabKey) => void
 }
 
+/**
+ * baseTabClasses - Utility function
+ * @returns void
+ */
 const baseTabClasses =
   'inline-flex h-[43px] shrink-0 items-center justify-center rounded-full border px-3 text-sm font-medium uppercase leading-[21px] tracking-[0.3px] transition-colors'
 const activeTabClasses = 'border-black bg-black text-white'
 const inactiveTabClasses =
   'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-800'
+/**
+ * activeTabClasses - Utility function
+ * @returns void
+ */
 
 export const DiscoverTabs = ({ activeTabKey, onTabChange }: DiscoverTabsProps) => {
   // -- state --
 
+/**
+ * inactiveTabClasses - Utility function
+ * @returns void
+ */
   // -- derived --
 
   // -- handlers --
   const handleTabClick = (tabKey: DiscoverTabKey) => {
     onTabChange(tabKey)
   }
+/**
+ * DiscoverTabs - React component
+ * @returns React element
+ */
 
   // -- render --
   return (
@@ -30,6 +46,10 @@ export const DiscoverTabs = ({ activeTabKey, onTabChange }: DiscoverTabsProps) =
         {DISCOVER_TABS.map((tab) => {
           const isActive = tab.key === activeTabKey
 
+/**
+ * handleTabClick - Utility function
+ * @returns void
+ */
           return (
             <button
               key={tab.key}
@@ -43,6 +63,10 @@ export const DiscoverTabs = ({ activeTabKey, onTabChange }: DiscoverTabsProps) =
             </button>
           )
         })}
+/**
+ * isActive - Utility function
+ * @returns void
+ */
       </div>
     </div>
   )

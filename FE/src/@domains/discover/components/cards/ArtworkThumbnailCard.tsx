@@ -11,11 +11,19 @@ type ArtworkThumbnailCardProps = {
   artwork: TopPicksArtwork
 }
 
+/**
+ * ArtworkThumbnailCard - React component
+ * @returns React element
+ */
 export const ArtworkThumbnailCard = ({ artwork }: ArtworkThumbnailCardProps) => {
   // -- state --
   const router = useRouter()
 
   // -- derived --
+/**
+ * router - Utility function
+ * @returns void
+ */
 
   // -- handlers --
   const handleClick = () => {
@@ -24,6 +32,10 @@ export const ArtworkThumbnailCard = ({ artwork }: ArtworkThumbnailCardProps) => 
 
   // -- render --
   return (
+/**
+ * handleClick - Utility function
+ * @returns void
+ */
     <button
       type="button"
       onClick={handleClick}

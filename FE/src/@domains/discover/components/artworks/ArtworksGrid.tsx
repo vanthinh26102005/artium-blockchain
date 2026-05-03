@@ -21,6 +21,10 @@ type ArtworksGridProps = {
   onExitImageSearch: () => void
 }
 
+/**
+ * MasonryCard - React component
+ * @returns React element
+ */
 const MasonryCard = ({ data }: { data: DiscoverArtwork }) => {
   return <DiscoveryArtworkCard artwork={data} />
 }
@@ -28,16 +32,28 @@ const MasonryCard = ({ data }: { data: DiscoverArtwork }) => {
 export const ArtworksGrid = ({ searchQuery = '', isImageSearch, onExitImageSearch }: ArtworksGridProps) => {
   // -- fetch --
   const fetchPage = useCallback(
+/**
+ * ArtworksGrid - React component
+ * @returns React element
+ */
     async (skip: number, take: number) => {
       const result = await artworkApis.listArtworksPaginated({
         skip,
         take,
         q: searchQuery || undefined,
+/**
+ * fetchPage - Utility function
+ * @returns void
+ */
         status: 'ACTIVE',
       })
       return {
         data: result.data.map(mapArtworkToDiscover),
         hasMore: result.pagination.hasNext,
+/**
+ * result - Utility function
+ * @returns void
+ */
       }
     },
     [searchQuery],
