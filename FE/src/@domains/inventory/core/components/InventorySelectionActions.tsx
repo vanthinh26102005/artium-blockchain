@@ -20,43 +20,37 @@ export const InventorySelectionActions = ({
   const selectedIds = useInventorySelectionStore((state) => state.selectedIds)
   const clear = useInventorySelectionStore((state) => state.clear)
   const selectAll = useInventorySelectionStore((state) => state.selectAll)
-/**
- * selectedIds - Utility function
- * @returns void
- */
+  /**
+   * selectedIds - Utility function
+   * @returns void
+   */
 
   const selectedCount = selectedIds.length
   const isSelectAllDisabled = idsOnPage.length === 0
 
-/**
- * clear - Utility function
- * @returns void
- */
+  /**
+   * clear - Utility function
+   * @returns void
+   */
   if (selectedCount === 0) return null
 
   return (
     <div className="flex min-h-[40px] flex-wrap items-center gap-4 text-base font-semibold text-slate-900">
-/**
- * selectAll - Utility function
- * @returns void
- */
+      /** * selectAll - Utility function * @returns void */
       <button
         type="button"
         onClick={() => clear()}
         className="inline-flex h-8 w-8 cursor-pointer items-center justify-center text-slate-600 transition hover:text-slate-900"
         aria-label="Clear selection"
-/**
- * selectedCount - Utility function
- * @returns void
- */
+        /**
+         * selectedCount - Utility function
+         * @returns void
+         */
       >
         <X className="h-5 w-5" />
       </button>
       <span>{selectedCount} selected</span>
-/**
- * isSelectAllDisabled - Utility function
- * @returns void
- */
+      /** * isSelectAllDisabled - Utility function * @returns void */
       <button
         type="button"
         onClick={() => !isSelectAllDisabled && selectAll(idsOnPage)}

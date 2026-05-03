@@ -30,15 +30,15 @@ export const InventorySearchBox = ({
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value)
   }
-/**
- * handleChange - Utility function
- * @returns void
- */
+  /**
+   * handleChange - Utility function
+   * @returns void
+   */
 
   // -- render --
   return (
     <div className="relative w-full">
-      <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
       <Input
         type="search"
         value={value}
@@ -46,7 +46,7 @@ export const InventorySearchBox = ({
         inputMode="search"
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-11 rounded-full border-black/10 bg-white pl-9 text-lg! font-medium text-slate-900 placeholder:text-slate-500 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 sm:h-12"
+        className="text-lg! h-11 rounded-full border-black/10 bg-white pl-9 font-medium text-slate-900 placeholder:text-slate-500 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 sm:h-12"
       />
     </div>
   )
