@@ -13,12 +13,20 @@ type ProfileSalesStatsSectionProps = {
   className?: string
 }
 
+/**
+ * formatCurrency - Utility function
+ * @returns void
+ */
 const formatCurrency = (value: number, currency: string) =>
   `${currency}${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`
 
 const buildChartData = (points: ProfileSalesPoint[]) =>
   points.map((point, index) => ({
     name: point.label,
+/**
+ * buildChartData - Utility function
+ * @returns void
+ */
     x: index + 1,
     y: point.value,
   }))
@@ -29,11 +37,19 @@ export const ProfileSalesStatsSection = ({
   displayName,
   stats,
   className,
+/**
+ * chartTicks - Utility function
+ * @returns void
+ */
 }: ProfileSalesStatsSectionProps) => {
   const data = buildChartData(stats.recentSales)
   const chartTitle = `Last five Sales (${stats.currency})`
   const firstName = displayName.split(' ')[0] || displayName
 
+/**
+ * ProfileSalesStatsSection - React component
+ * @returns React element
+ */
   return (
     <section className={cn(className)}>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:items-center">
@@ -42,14 +58,26 @@ export const ProfileSalesStatsSection = ({
             {firstName}&apos;s Sales Statistics
           </h3>
           <div className="space-y-3">
+/**
+ * data - Utility function
+ * @returns void
+ */
             <p className="text-[24px] leading-[1.4] font-normal text-slate-500">
               Average artwork price:{' '}
               <span className="text-[18px] leading-5 font-bold tracking-[0.02em] text-slate-900">
                 {formatCurrency(stats.averagePrice, stats.currency)}
+/**
+ * chartTitle - Utility function
+ * @returns void
+ */
               </span>
             </p>
             <p className="text-[24px] leading-[1.4] font-normal text-slate-500">
               Median artwork price:{' '}
+/**
+ * firstName - Utility function
+ * @returns void
+ */
               <span className="text-[18px] leading-5 font-bold tracking-[0.02em] text-slate-900">
                 {formatCurrency(stats.medianPrice, stats.currency)}
               </span>

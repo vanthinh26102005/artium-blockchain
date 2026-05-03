@@ -15,6 +15,10 @@ type ProfileArtworkCardProps = {
   mediaClassName?: string
 }
 
+/**
+ * ProfileArtworkCard - React component
+ * @returns React element
+ */
 export const ProfileArtworkCard = ({
   artwork,
   artist,
@@ -25,10 +29,18 @@ export const ProfileArtworkCard = ({
   const isSold = Boolean(artwork.isSold)
   const aspectRatio = '4 / 4'
 
+/**
+ * isSold - Utility function
+ * @returns void
+ */
   // -- render --
   return (
     <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_6px_16px_rgba(15,23,42,0.08)] transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
       <Link
+/**
+ * aspectRatio - Utility function
+ * @returns void
+ */
         href={`/artworks/${artwork.id}`}
         aria-label={`View artwork ${artwork.title}`}
         className={cn(
