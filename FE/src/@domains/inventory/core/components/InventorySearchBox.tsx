@@ -13,6 +13,10 @@ type InventorySearchBoxProps = {
   placeholder?: string
 }
 
+/**
+ * InventorySearchBox - React component
+ * @returns React element
+ */
 export const InventorySearchBox = ({
   value,
   onChange,
@@ -26,6 +30,10 @@ export const InventorySearchBox = ({
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value)
   }
+/**
+ * handleChange - Utility function
+ * @returns void
+ */
 
   // -- render --
   return (

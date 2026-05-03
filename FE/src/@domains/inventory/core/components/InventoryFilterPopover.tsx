@@ -11,6 +11,10 @@ type DraftFilters = {
   maxPrice: string
 }
 
+/**
+ * STATUS_OPTIONS - React component
+ * @returns React element
+ */
 const STATUS_OPTIONS = [
   { value: '', label: 'All statuses' },
   { value: 'ACTIVE', label: 'Active' },
@@ -25,6 +29,10 @@ const STATUS_OPTIONS = [
 const buildDraftFilters = (filters: InventoryFilters): DraftFilters => ({
   status: filters.status ?? '',
   minPrice: filters.minPrice !== undefined ? String(filters.minPrice) : '',
+/**
+ * buildDraftFilters - Utility function
+ * @returns void
+ */
   maxPrice: filters.maxPrice !== undefined ? String(filters.maxPrice) : '',
 })
 
@@ -34,6 +42,10 @@ const parseNumeric = (value: string) => {
   }
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : undefined
+/**
+ * parseNumeric - Utility function
+ * @returns void
+ */
 }
 
 export type InventoryFilterPopoverProps = {
@@ -41,6 +53,10 @@ export type InventoryFilterPopoverProps = {
   onApplyFilters: (filters: InventoryFilters) => void
 }
 
+/**
+ * parsed - Utility function
+ * @returns void
+ */
 export const InventoryFilterPopover = ({
   filters,
   onApplyFilters,
@@ -53,6 +69,10 @@ export const InventoryFilterPopover = ({
     if (open) {
       setDraftFilters(buildDraftFilters(filters))
       setPriceError(null)
+/**
+ * InventoryFilterPopover - React component
+ * @returns React element
+ */
     }
     setIsFilterOpen(open)
   }
@@ -64,6 +84,10 @@ export const InventoryFilterPopover = ({
 
   const handleCloseFilter = () => {
     setIsFilterOpen(false)
+/**
+ * handleFilterOpenChange - Utility function
+ * @returns void
+ */
     setDraftFilters(buildDraftFilters(filters))
     setPriceError(null)
   }
@@ -75,6 +99,10 @@ export const InventoryFilterPopover = ({
     if (minPrice !== undefined && minPrice < 0) {
       setPriceError('Min price cannot be negative')
       return
+/**
+ * handleDraftChange - Utility function
+ * @returns void
+ */
     }
     if (maxPrice !== undefined && maxPrice < 0) {
       setPriceError('Max price cannot be negative')
@@ -83,6 +111,10 @@ export const InventoryFilterPopover = ({
     if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
       setPriceError('Min price cannot be greater than max price')
       return
+/**
+ * handleCloseFilter - Utility function
+ * @returns void
+ */
     }
     
     onApplyFilters({
@@ -92,14 +124,26 @@ export const InventoryFilterPopover = ({
     })
     setIsFilterOpen(false)
   }
+/**
+ * handleApplyFilter - Utility function
+ * @returns void
+ */
 
   const handleResetFilters = () => {
     const resetDraft = buildDraftFilters(DEFAULT_INVENTORY_FILTERS)
     setDraftFilters(resetDraft)
+/**
+ * minPrice - Utility function
+ * @returns void
+ */
     onApplyFilters(DEFAULT_INVENTORY_FILTERS)
     setIsFilterOpen(false)
   }
 
+/**
+ * maxPrice - Utility function
+ * @returns void
+ */
   return (
     <Popover open={isFilterOpen} onOpenChange={handleFilterOpenChange}>
       <PopoverTrigger asChild>
@@ -126,10 +170,18 @@ export const InventoryFilterPopover = ({
 
           <label className="text-sm font-semibold text-slate-600">
             Status
+/**
+ * handleResetFilters - Utility function
+ * @returns void
+ */
             <select
               value={draftFilters.status}
               onChange={(event) => handleDraftChange('status', event.target.value)}
               className="mt-2 h-11 w-full rounded-xl border border-black/10 bg-white px-3 text-base text-slate-700"
+/**
+ * resetDraft - Utility function
+ * @returns void
+ */
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
