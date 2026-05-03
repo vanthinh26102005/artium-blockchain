@@ -7,6 +7,10 @@ import {
     Truck,
 } from 'lucide-react'
 
+/**
+ * ManagePlanView - React component
+ * @returns React element
+ */
 export const ManagePlanView = () => {
     return (
         <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">

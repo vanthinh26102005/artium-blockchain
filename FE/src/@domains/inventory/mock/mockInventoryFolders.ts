@@ -1,6 +1,10 @@
 // @domains - inventory
 import { type InventoryFolder } from '@domains/inventory/features/folders/types/inventoryFolder'
 
+/**
+ * mockInventoryFolders - Utility function
+ * @returns void
+ */
 export const mockInventoryFolders: InventoryFolder[] = [
   {
     id: 'folder-01',
