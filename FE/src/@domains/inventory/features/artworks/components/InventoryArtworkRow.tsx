@@ -8,6 +8,10 @@ import { OrderStatusBadge } from '@domains/orders/components/OrderStatusBadge'
 import { InventoryArtworkActionMenu } from '@domains/inventory/features/artworks/components/InventoryArtworkActionMenu'
 import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
 
+/**
+ * formatInventoryPrice - Utility function
+ * @returns void
+ */
 const formatInventoryPrice = (price?: number) => {
   if (typeof price !== 'number') {
     return 'Not priced'
@@ -35,6 +39,10 @@ export type InventoryArtworkRowProps = {
 export const InventoryArtworkRow = ({
   artwork,
   nestLevel = 0,
+/**
+ * InventoryArtworkRow - React component
+ * @returns React element
+ */
   isSelected,
   isDragging,
   folderLabel,
@@ -54,19 +62,35 @@ export const InventoryArtworkRow = ({
 
   const handleOpenArtwork = () => {
     onOpenDetails(artwork)
+/**
+ * visibilityLabel - Utility function
+ * @returns void
+ */
   }
 
   const handleArtworkKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
+/**
+ * lifecycleLabel - Utility function
+ * @returns void
+ */
       event.preventDefault()
       handleOpenArtwork()
     }
   }
+/**
+ * lifecycleValue - Utility function
+ * @returns void
+ */
 
   return (
     <div
       draggable
       role="button"
+/**
+ * handleOpenArtwork - Utility function
+ * @returns void
+ */
       tabIndex={0}
       onClick={handleOpenArtwork}
       onKeyDown={handleArtworkKeyDown}
@@ -74,6 +98,10 @@ export const InventoryArtworkRow = ({
       onDragEnd={onDragEnd}
       style={{ marginLeft: nestLevel > 0 ? `\${nestLevel * 20}px` : undefined }}
       className={cn(
+/**
+ * handleArtworkKeyDown - Utility function
+ * @returns void
+ */
         'group flex cursor-pointer flex-col gap-5 rounded-[28px] border bg-white p-5 transition outline-none md:flex-row md:items-start md:justify-between',
         isSelected
           ? 'border-blue-300 ring-2 ring-blue-500/15'

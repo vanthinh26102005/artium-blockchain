@@ -16,6 +16,10 @@ type InventoryArtworkGridProps = {
   emptyMessage?: string
 }
 
+/**
+ * InventoryArtworkGrid - React component
+ * @returns React element
+ */
 export const InventoryArtworkGrid = ({
   artworks,
   onEdit,
