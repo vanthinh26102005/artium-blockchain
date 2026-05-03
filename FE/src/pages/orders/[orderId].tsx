@@ -18,10 +18,10 @@ const OrderDetailPageView = dynamic(
 const OrderDetailRoute: NextPageWithLayout = () => {
   const { canRenderProtected } = useRequireAuth()
 
-/**
- * OrderDetailRoute - React component
- * @returns React element
- */
+  /**
+   * OrderDetailRoute - React component
+   * @returns React element
+   */
   if (!canRenderProtected) {
     return null
   }

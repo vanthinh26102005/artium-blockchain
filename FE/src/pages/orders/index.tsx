@@ -15,10 +15,10 @@ const OrdersPageView = dynamic(
 const OrdersRoute: NextPageWithLayout = () => {
   const { canRenderProtected } = useRequireAuth()
 
-/**
- * OrdersRoute - React component
- * @returns React element
- */
+  /**
+   * OrdersRoute - React component
+   * @returns React element
+   */
   if (!canRenderProtected) {
     return null
   }

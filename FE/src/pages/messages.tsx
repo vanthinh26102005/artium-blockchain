@@ -15,10 +15,10 @@ const MessagingView = dynamic(
 const MessagesPage: NextPageWithLayout = () => {
   const { canRenderProtected } = useRequireAuth()
 
-/**
- * MessagesPage - React component
- * @returns React element
- */
+  /**
+   * MessagesPage - React component
+   * @returns React element
+   */
   if (!canRenderProtected) {
     return null
   }
