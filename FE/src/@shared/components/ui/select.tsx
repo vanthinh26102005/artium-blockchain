@@ -4,21 +4,37 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react'
 
 import { cn } from '@shared/lib/utils'
 
+/**
+ * Select - React component
+ * @returns React element
+ */
 const Select = SelectPrimitive.Root
 
 const SelectGroup = SelectPrimitive.Group
 
 const SelectValue = SelectPrimitive.Value
+/**
+ * SelectGroup - React component
+ * @returns React element
+ */
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
+/**
+ * SelectValue - React component
+ * @returns React element
+ */
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
       'border-input bg-background ring-offset-background flex h-[44px] w-full items-center justify-between gap-1 rounded-[8px] border px-3 py-2 text-sm outline-none focus:border-2 focus:border-[#0F6BFF] disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-black/[.3] [&>span]:line-clamp-1',
       className,
+/**
+ * SelectTrigger - React component
+ * @returns React element
+ */
     )}
     {...props}
   >
@@ -42,6 +58,10 @@ const SelectScrollUpButton = React.forwardRef<
     <ChevronUp className="h-4 w-4" />
   </SelectPrimitive.ScrollUpButton>
 ))
+/**
+ * SelectScrollUpButton - React component
+ * @returns React element
+ */
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
 
 const SelectScrollDownButton = React.forwardRef<
@@ -59,6 +79,10 @@ const SelectScrollDownButton = React.forwardRef<
 SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName
 
 const SelectContent = React.forwardRef<
+/**
+ * SelectScrollDownButton - React component
+ * @returns React element
+ */
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = 'popper', ...props }, ref) => (
@@ -76,6 +100,10 @@ const SelectContent = React.forwardRef<
     >
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
+/**
+ * SelectContent - React component
+ * @returns React element
+ */
         className={cn(
           'p-1',
           position === 'popper' &&
@@ -111,6 +139,10 @@ const SelectItem = React.forwardRef<
     className={cn(
       'focus:bg-accent focus:text-accent-foreground relative flex w-full cursor-default items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
+/**
+ * SelectLabel - React component
+ * @returns React element
+ */
     )}
     {...props}
   >
@@ -126,6 +158,10 @@ const SelectItem = React.forwardRef<
 SelectItem.displayName = SelectPrimitive.Item.displayName
 
 const SelectSeparator = React.forwardRef<
+/**
+ * SelectItem - React component
+ * @returns React element
+ */
   React.ElementRef<typeof SelectPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
 >(({ className, ...props }, ref) => (
@@ -149,3 +185,8 @@ export {
   SelectScrollUpButton,
   SelectScrollDownButton,
 }
+
+/**
+ * SelectSeparator - React component
+ * @returns React element
+ */

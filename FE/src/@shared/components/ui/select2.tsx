@@ -22,6 +22,10 @@ import {
  * Variants for the -select component to handle different styles.
  * Uses class-variance-authority (cva) to define different styles based on "variant" prop.
  */
+/**
+ * selectVariants - Utility function
+ * @returns void
+ */
 const selectVariants = cva('m-1', {
   variants: {
     variant: {
@@ -138,6 +142,10 @@ interface SelectProps
 export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { portal?: boolean }>(
   (
     {
+/**
+ * SingleSelect - React component
+ * @returns React element
+ */
       options,
       isLoading,
       isFirstTimeLoading,
@@ -172,6 +180,10 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
       } else if (clearable && event.key === 'Backspace' && !event.currentTarget.value) {
         setSelectedValue(undefined)
         onValueChange(undefined, 'remove')
+/**
+ * handleInputKeyDown - Utility function
+ * @returns void
+ */
       }
     }
 
@@ -184,10 +196,18 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
         clearable ? (isOptionAlreadySelected ? 'remove' : 'add') : 'add',
       )
     }
+/**
+ * toggleOption - Utility function
+ * @returns void
+ */
 
     const handleClear = () => {
       if (!clearable) return
       setSelectedValue(undefined)
+/**
+ * isOptionAlreadySelected - Utility function
+ * @returns void
+ */
       onValueChange(undefined, 'remove')
     }
 
@@ -200,6 +220,10 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
       if (!node) return
       setTimeout(() => {
         node.scrollIntoView({ block: 'center' })
+/**
+ * handleClear - Utility function
+ * @returns void
+ */
       }, 0)
     }
 
@@ -209,6 +233,10 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
         if (isPopoverOpen) onPopoverClose?.()
       }
     }, [isPopoverOpen])
+/**
+ * handleTogglePopover - Utility function
+ * @returns void
+ */
     React.useEffect(() => {
       // reset
       if (['', undefined, null].includes(defaultValue)) {
@@ -217,6 +245,10 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
     }, [defaultValue])
 
     return (
+/**
+ * selectedItemCallbackRef - Utility function
+ * @returns void
+ */
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen} modal={modalPopover}>
         <PopoverTrigger asChild>
           <Button
@@ -319,6 +351,10 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SelectProps & { 
                     // empty state
                     <div className="py-4 text-center text-sm">No results found.</div>
                   )}
+/**
+ * isSelected - Utility function
+ * @returns void
+ */
                 </>
               )}
             </CommandList>
