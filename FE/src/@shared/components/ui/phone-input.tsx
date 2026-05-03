@@ -22,6 +22,10 @@ type PhoneInputProps = Omit<React.ComponentProps<'input'>, 'onChange' | 'value' 
     onChange?: (value: RPNInput.Value) => void
   }
 
+/**
+ * PhoneInput - React component
+ * @returns React element
+ */
 const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> = React.forwardRef<
   React.ElementRef<typeof RPNInput.default>,
   PhoneInputProps
@@ -54,6 +58,10 @@ PhoneInput.displayName = 'PhoneInput'
 const InputComponent = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
   ({ className, ...props }, ref) => (
     <Input className={cn('rounded-s-none rounded-e-lg', className)} {...props} ref={ref} />
+/**
+ * InputComponent - React component
+ * @returns React element
+ */
   ),
 )
 InputComponent.displayName = 'InputComponent'
@@ -73,6 +81,10 @@ const CountrySelect = ({
   options: countryList,
   onChange,
 }: CountrySelectProps) => {
+/**
+ * CountrySelect - React component
+ * @returns React element
+ */
   const scrollAreaRef = React.useRef<HTMLDivElement>(null)
   const [searchValue, setSearchValue] = React.useState('')
   const [isOpen, setIsOpen] = React.useState(false)
@@ -82,6 +94,10 @@ const CountrySelect = ({
       open={isOpen}
       modal
       onOpenChange={(open) => {
+/**
+ * scrollAreaRef - Utility function
+ * @returns void
+ */
         setIsOpen(open)
         open && setSearchValue('')
       }}
@@ -120,6 +136,10 @@ const CountrySelect = ({
             placeholder="Search country..."
           />
           <CommandList>
+/**
+ * viewportElement - Utility function
+ * @returns void
+ */
             <ScrollArea ref={scrollAreaRef} className="h-72">
               <CommandEmpty>No country found.</CommandEmpty>
               <CommandGroup>
@@ -165,6 +185,10 @@ const CountrySelectOption = ({
   return (
     <CommandItem className="gap-2" onSelect={handleSelect}>
       <FlagComponent country={country} countryName={countryName} />
+/**
+ * CountrySelectOption - React component
+ * @returns React element
+ */
       <span className="flex-1 text-sm">{countryName}</span>
       <span className="text-foreground/50 text-sm">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
       <CheckIcon
@@ -175,6 +199,10 @@ const CountrySelectOption = ({
 }
 
 const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
+/**
+ * handleSelect - Utility function
+ * @returns void
+ */
   const Flag = flags[country]
 
   return (
@@ -185,3 +213,12 @@ const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
 }
 
 export { PhoneInput }
+
+/**
+ * FlagComponent - React component
+ * @returns React element
+ */
+/**
+ * Flag - React component
+ * @returns React element
+ */

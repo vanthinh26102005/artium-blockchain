@@ -3,6 +3,10 @@ import * as ProgressPrimitive from '@radix-ui/react-progress'
 
 import { cn } from '@shared/lib/utils'
 
+/**
+ * Progress - React component
+ * @returns React element
+ */
 const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & { indicatorClassName?: string }
