@@ -11,10 +11,10 @@ const ProfilePage: NextPageWithLayout = () => {
   const router = useRouter()
   const { username } = router.query
 
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   // Wait for router to be ready before rendering
   if (!router.isReady) {
     return null
