@@ -49,45 +49,45 @@ export const InventoryArtworkDetailsPanel = ({
   const priceLabel =
     typeof artwork.price === 'number' ? `US$${artwork.price.toLocaleString('en-US')}` : '—'
 
-/**
- * priceLabel - Utility function
- * @returns void
- */
+  /**
+   * priceLabel - Utility function
+   * @returns void
+   */
   const isArtworkSection = activeSection === 'artwork'
   const isEditLocked = isArtworkEditLocked(artwork)
   const profileVisibilityLabel = getProfileVisibilityLabel(artwork)
 
   const handleEdit = () => {
     if (isEditLocked) {
-/**
- * isArtworkSection - Utility function
- * @returns void
- */
+      /**
+       * isArtworkSection - Utility function
+       * @returns void
+       */
       return
     }
     onClose()
     onEdit(artwork)
-/**
- * isEditLocked - Utility function
- * @returns void
- */
+    /**
+     * isEditLocked - Utility function
+     * @returns void
+     */
   }
 
   const handleDelete = () => {
     onClose()
-/**
- * profileVisibilityLabel - Utility function
- * @returns void
- */
+    /**
+     * profileVisibilityLabel - Utility function
+     * @returns void
+     */
     onDelete(artwork)
   }
 
   const handleToggleProfileVisibility = () => {
     onToggleProfileVisibility(artwork)
-/**
- * handleEdit - Utility function
- * @returns void
- */
+    /**
+     * handleEdit - Utility function
+     * @returns void
+     */
   }
 
   // -- render --
@@ -99,22 +99,19 @@ export const InventoryArtworkDetailsPanel = ({
           onClose()
         }
       }}
-/**
- * handleDelete - Utility function
- * @returns void
- */
+      /**
+       * handleDelete - Utility function
+       * @returns void
+       */
     >
       <DialogPortal>
-        <DialogOverlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 bg-black/40 backdrop-blur-sm data-[state=closed]:duration-200 data-[state=open]:duration-300" />
+        <DialogOverlay className="bg-black/40 backdrop-blur-sm data-[state=closed]:duration-200 data-[state=open]:duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
-          className="data-[state=open]:animate-slide-in-right data-[state=closed]:animate-slide-out-right fixed top-0 right-0 z-210 flex h-full w-[99vw] max-w-[1530px] flex-col bg-white shadow-2xl outline-none"
+          className="z-210 fixed right-0 top-0 flex h-full w-[99vw] max-w-[1530px] flex-col bg-white shadow-2xl outline-none data-[state=closed]:animate-slide-out-right data-[state=open]:animate-slide-in-right"
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
           {/* Header */}
-/**
- * handleToggleProfileVisibility - Utility function
- * @returns void
- */
+          /** * handleToggleProfileVisibility - Utility function * @returns void */
           <div className="flex items-center justify-between border-b border-slate-200 px-8 py-4">
             <h2 className="text-xl font-semibold text-slate-900">Artwork Information Details</h2>
             <button
@@ -126,7 +123,6 @@ export const InventoryArtworkDetailsPanel = ({
               <X className="h-5 w-5" />
             </button>
           </div>
-
           {/* Content */}
           <div className="flex-1 overflow-y-auto px-8 py-6">
             <div className="grid items-start gap-8 lg:grid-cols-[1.2fr_0.8fr]">
@@ -170,8 +166,8 @@ export const InventoryArtworkDetailsPanel = ({
 
               <div className="space-y-6">
                 <div>
-                  <p className="text-sm font-semibold text-slate-400 uppercase">{artwork.status}</p>
-                  <h3 className="mt-2 text-[36px] leading-[44px] font-semibold text-slate-900">
+                  <p className="text-sm font-semibold uppercase text-slate-400">{artwork.status}</p>
+                  <h3 className="mt-2 text-[36px] font-semibold leading-[44px] text-slate-900">
                     {artwork.title}
                   </h3>
                   <p className="mt-2 text-lg text-slate-500">
@@ -217,7 +213,7 @@ export const InventoryArtworkDetailsPanel = ({
                 </Button>
 
                 <div className="border-t border-slate-200 pt-4 text-lg text-slate-600">
-                  <div className="flex items-center justify-between text-sm font-semibold text-slate-400 uppercase">
+                  <div className="flex items-center justify-between text-sm font-semibold uppercase text-slate-400">
                     <span>Shipping and taxes</span>
                     <span>^</span>
                   </div>
@@ -231,7 +227,7 @@ export const InventoryArtworkDetailsPanel = ({
                 </div>
 
                 <div className="border-t border-slate-200 pt-4 text-lg text-slate-600">
-                  <div className="flex items-center justify-between text-sm font-semibold text-slate-400 uppercase">
+                  <div className="flex items-center justify-between text-sm font-semibold uppercase text-slate-400">
                     <span>Artium satisfaction guarantee</span>
                     <span>^</span>
                   </div>
@@ -272,7 +268,7 @@ export const InventoryArtworkDetailsPanel = ({
               </div>
 
               <div className="mt-8 text-lg text-slate-600">
-                <p className="text-base font-semibold text-slate-400 uppercase">
+                <p className="text-base font-semibold uppercase text-slate-400">
                   About the {isArtworkSection ? 'Artwork' : 'Creator'}
                 </p>
                 <p className="mt-3">
@@ -281,7 +277,6 @@ export const InventoryArtworkDetailsPanel = ({
               </div>
             </div>
           </div>
-
           <div className="sticky bottom-0 flex items-center justify-between border-t border-slate-200 bg-white px-10 py-6 text-lg">
             <button
               type="button"

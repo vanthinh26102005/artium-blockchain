@@ -48,19 +48,19 @@ export const useInventoryArtworks = (
     const loadArtworks = async () => {
       try {
         const response = await artworkApis.listArtworksPaginated({
-/**
- * loadArtworks - Utility function
- * @returns void
- */
+          /**
+           * loadArtworks - Utility function
+           * @returns void
+           */
           sellerId: userId,
           includeSellerAuctionLifecycle: true,
           q: searchName || undefined,
           status: filters.status,
           minPrice: filters.minPrice,
-/**
- * response - Utility function
- * @returns void
- */
+          /**
+           * response - Utility function
+           * @returns void
+           */
           maxPrice: filters.maxPrice,
           skip: (page - 1) * pageSize,
           take: pageSize,
@@ -79,10 +79,10 @@ export const useInventoryArtworks = (
         if (!isActive) {
           return
         }
-/**
- * mappedArtworks - Utility function
- * @returns void
- */
+        /**
+         * mappedArtworks - Utility function
+         * @returns void
+         */
 
         setArtworks([])
         setTotal(0)

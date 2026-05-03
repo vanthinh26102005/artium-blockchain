@@ -32,27 +32,27 @@ export const useInventoryFolderArtworks = (
     const loadFolderArtworks = async () => {
       try {
         const response = await artworkFolderApis.getArtworksInFolder(folderId)
-/**
- * loadFolderArtworks - Utility function
- * @returns void
- */
+        /**
+         * loadFolderArtworks - Utility function
+         * @returns void
+         */
         const mapped = response.map(mapArtworkToInventory)
 
         if (!isActive) {
           return
         }
-/**
- * response - Utility function
- * @returns void
- */
+        /**
+         * response - Utility function
+         * @returns void
+         */
 
         setFolderArtworks(mapped)
         setMany([])
       } catch (error) {
-/**
- * mapped - Utility function
- * @returns void
- */
+        /**
+         * mapped - Utility function
+         * @returns void
+         */
         if (!isActive) {
           return
         }

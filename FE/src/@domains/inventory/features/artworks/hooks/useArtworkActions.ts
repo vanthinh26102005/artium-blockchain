@@ -39,10 +39,10 @@ export const useArtworkActions = ({
   const router = useRouter()
 
   const [deleteTarget, setDeleteTarget] = useState<InventoryArtwork | null>(null)
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   const [moveTarget, setMoveTarget] = useState<InventoryArtwork | null>(null)
   const [detailsTarget, setDetailsTarget] = useState<InventoryArtwork | null>(null)
   const [isDeletingArtwork, setIsDeletingArtwork] = useState(false)
@@ -53,10 +53,10 @@ export const useArtworkActions = ({
 
   const handleMoveArtwork = (artwork: InventoryArtwork) => {
     setMoveTarget(artwork)
-/**
- * handleEditArtwork - Utility function
- * @returns void
- */
+    /**
+     * handleEditArtwork - Utility function
+     * @returns void
+     */
   }
 
   const handleToggleProfileVisibility = async (artwork: InventoryArtwork) => {
@@ -64,10 +64,10 @@ export const useArtworkActions = ({
       const response = await artworkApis.updateArtwork(
         artwork.id,
         getProfileVisibilityPatch(artwork),
-/**
- * handleMoveArtwork - Utility function
- * @returns void
- */
+        /**
+         * handleMoveArtwork - Utility function
+         * @returns void
+         */
       )
       const updatedArtwork = mapArtworkToInventory(response)
       onArtworkUpdated(updatedArtwork)
@@ -75,19 +75,19 @@ export const useArtworkActions = ({
       setToastMessage('Profile visibility updated.')
     } catch (error) {
       const message =
-/**
- * handleToggleProfileVisibility - Utility function
- * @returns void
- */
+        /**
+         * handleToggleProfileVisibility - Utility function
+         * @returns void
+         */
         error instanceof Error && error.message
           ? error.message
           : 'We could not update this artwork. Try again.'
       setToastMessage(message)
     }
-/**
- * response - Utility function
- * @returns void
- */
+    /**
+     * response - Utility function
+     * @returns void
+     */
   }
 
   const handleStartAuction = (artwork: InventoryArtwork) => {
@@ -95,10 +95,10 @@ export const useArtworkActions = ({
   }
 
   const handleOpenDeleteModal = (artwork: InventoryArtwork) => {
-/**
- * updatedArtwork - Utility function
- * @returns void
- */
+    /**
+     * updatedArtwork - Utility function
+     * @returns void
+     */
     setDeleteTarget(artwork)
   }
 
@@ -107,10 +107,10 @@ export const useArtworkActions = ({
   }
 
   const handleConfirmDelete = async () => {
-/**
- * message - Utility function
- * @returns void
- */
+    /**
+     * message - Utility function
+     * @returns void
+     */
     if (!deleteTarget) {
       return
     }
@@ -122,10 +122,10 @@ export const useArtworkActions = ({
       onArtworkDeleted(deletedId)
       setMany(selectedIds.filter((id) => id !== deletedId))
       setDetailsTarget((current) => (current?.id === deletedId ? null : current))
-/**
- * handleStartAuction - Utility function
- * @returns void
- */
+      /**
+       * handleStartAuction - Utility function
+       * @returns void
+       */
       setToastMessage('Artwork deleted successfully.')
     } catch (error) {
       const message =
@@ -133,10 +133,10 @@ export const useArtworkActions = ({
           ? error.message
           : 'We could not delete this artwork. Try again.'
       setToastMessage(message)
-/**
- * handleOpenDeleteModal - Utility function
- * @returns void
- */
+      /**
+       * handleOpenDeleteModal - Utility function
+       * @returns void
+       */
     } finally {
       setIsDeletingArtwork(false)
       setDeleteTarget(null)
@@ -144,10 +144,10 @@ export const useArtworkActions = ({
   }
 
   const handleCloseMoveModal = () => {
-/**
- * handleCloseDeleteModal - Utility function
- * @returns void
- */
+    /**
+     * handleCloseDeleteModal - Utility function
+     * @returns void
+     */
     setMoveTarget(null)
   }
 
@@ -155,10 +155,10 @@ export const useArtworkActions = ({
     if (!moveTarget) {
       return
     }
-/**
- * handleConfirmDelete - Utility function
- * @returns void
- */
+    /**
+     * handleConfirmDelete - Utility function
+     * @returns void
+     */
 
     if (!user?.id) {
       setToastMessage('Please log in to move artwork.')
@@ -167,10 +167,10 @@ export const useArtworkActions = ({
 
     const targetId = moveTarget.id
     try {
-/**
- * deletedId - Utility function
- * @returns void
- */
+      /**
+       * deletedId - Utility function
+       * @returns void
+       */
       await artworkApis.bulkMoveArtworks({
         artworkIds: [targetId],
         folderId: folderId ?? null,
@@ -183,10 +183,10 @@ export const useArtworkActions = ({
       const message = error instanceof Error ? error.message : 'Failed to move artwork.'
       setToastMessage(message)
     } finally {
-/**
- * message - Utility function
- * @returns void
- */
+      /**
+       * message - Utility function
+       * @returns void
+       */
       setMoveTarget(null)
     }
   }
@@ -201,10 +201,10 @@ export const useArtworkActions = ({
 
   const handleOpenDetails = (artwork: InventoryArtwork) => {
     setDetailsTarget(artwork)
-/**
- * handleCloseMoveModal - Utility function
- * @returns void
- */
+    /**
+     * handleCloseMoveModal - Utility function
+     * @returns void
+     */
   }
 
   const handleCloseDetails = () => {
@@ -212,10 +212,10 @@ export const useArtworkActions = ({
   }
 
   return {
-/**
- * handleConfirmMove - Utility function
- * @returns void
- */
+    /**
+     * handleConfirmMove - Utility function
+     * @returns void
+     */
     deleteTarget,
     moveTarget,
     detailsTarget,
@@ -229,10 +229,10 @@ export const useArtworkActions = ({
     handleConfirmDelete,
     handleCloseMoveModal,
     handleConfirmMove,
-/**
- * targetId - Utility function
- * @returns void
- */
+    /**
+     * targetId - Utility function
+     * @returns void
+     */
     handleMoveSelected,
     handleOpenDetails,
     handleCloseDetails,

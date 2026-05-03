@@ -28,10 +28,10 @@ export const ConfirmDeleteModal = ({
   const handleOpenChange = (open: boolean) => {
     if (!open && !isDeleting) {
       onCancel()
-/**
- * handleOpenChange - Utility function
- * @returns void
- */
+      /**
+       * handleOpenChange - Utility function
+       * @returns void
+       */
     }
   }
 
@@ -50,14 +50,14 @@ export const ConfirmDeleteModal = ({
           {/* Header */}
           <div className="px-6 pt-6">
             <DialogHeader className="px-0 text-left">
-              <DialogTitle className="text-base font-bold tracking-wider text-slate-900 uppercase lg:text-lg">
+              <DialogTitle className="text-base font-bold uppercase tracking-wider text-slate-900 lg:text-lg">
                 Delete artwork?
               </DialogTitle>
             </DialogHeader>
           </div>
 
           {/* Content */}
-          <div className="px-6 pt-2 pb-6 text-base text-slate-700">
+          <div className="px-6 pb-6 pt-2 text-base text-slate-700">
             This will delete the artwork{' '}
             <span className="font-semibold text-slate-900">{artworkTitle}</span>. This action cannot
             be undone.
