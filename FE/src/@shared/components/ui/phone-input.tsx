@@ -57,11 +57,11 @@ PhoneInput.displayName = 'PhoneInput'
 
 const InputComponent = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
   ({ className, ...props }, ref) => (
-    <Input className={cn('rounded-s-none rounded-e-lg', className)} {...props} ref={ref} />
-/**
- * InputComponent - React component
- * @returns React element
- */
+    <Input className={cn('rounded-e-lg rounded-s-none', className)} {...props} ref={ref} />
+    /**
+     * InputComponent - React component
+     * @returns React element
+     */
   ),
 )
 InputComponent.displayName = 'InputComponent'
@@ -81,10 +81,10 @@ const CountrySelect = ({
   options: countryList,
   onChange,
 }: CountrySelectProps) => {
-/**
- * CountrySelect - React component
- * @returns React element
- */
+  /**
+   * CountrySelect - React component
+   * @returns React element
+   */
   const scrollAreaRef = React.useRef<HTMLDivElement>(null)
   const [searchValue, setSearchValue] = React.useState('')
   const [isOpen, setIsOpen] = React.useState(false)
@@ -94,10 +94,10 @@ const CountrySelect = ({
       open={isOpen}
       modal
       onOpenChange={(open) => {
-/**
- * scrollAreaRef - Utility function
- * @returns void
- */
+        /**
+         * scrollAreaRef - Utility function
+         * @returns void
+         */
         setIsOpen(open)
         open && setSearchValue('')
       }}
@@ -106,7 +106,7 @@ const CountrySelect = ({
         <Button
           type="button"
           variant="outline"
-          className="flex !h-[44px] gap-1 rounded-s-lg rounded-e-none border-r-0 px-3 focus:z-10"
+          className="flex !h-[44px] gap-1 rounded-e-none rounded-s-lg border-r-0 px-3 focus:z-10"
           disabled={disabled}
         >
           <FlagComponent country={selectedCountry} countryName={selectedCountry} />
@@ -136,10 +136,7 @@ const CountrySelect = ({
             placeholder="Search country..."
           />
           <CommandList>
-/**
- * viewportElement - Utility function
- * @returns void
- */
+            /** * viewportElement - Utility function * @returns void */
             <ScrollArea ref={scrollAreaRef} className="h-72">
               <CommandEmpty>No country found.</CommandEmpty>
               <CommandGroup>
@@ -185,12 +182,9 @@ const CountrySelectOption = ({
   return (
     <CommandItem className="gap-2" onSelect={handleSelect}>
       <FlagComponent country={country} countryName={countryName} />
-/**
- * CountrySelectOption - React component
- * @returns React element
- */
+      /** * CountrySelectOption - React component * @returns React element */
       <span className="flex-1 text-sm">{countryName}</span>
-      <span className="text-foreground/50 text-sm">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
+      <span className="text-sm text-foreground/50">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
       <CheckIcon
         className={`ml-auto size-4 ${country === selectedCountry ? 'opacity-100' : 'opacity-0'}`}
       />
@@ -199,14 +193,14 @@ const CountrySelectOption = ({
 }
 
 const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
-/**
- * handleSelect - Utility function
- * @returns void
- */
+  /**
+   * handleSelect - Utility function
+   * @returns void
+   */
   const Flag = flags[country]
 
   return (
-    <span className="bg-foreground/20 flex h-4 w-6 overflow-hidden rounded-sm [&_svg:not([class*='size-'])]:size-full">
+    <span className="flex h-4 w-6 overflow-hidden rounded-sm bg-foreground/20 [&_svg:not([class*='size-'])]:size-full">
       {Flag && <Flag title={countryName} />}
     </span>
   )

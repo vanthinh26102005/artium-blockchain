@@ -21,10 +21,10 @@ Pagination.displayName = 'Pagination'
 const PaginationContent = React.forwardRef<HTMLUListElement, React.ComponentProps<'ul'>>(
   ({ className, ...props }, ref) => (
     <ul ref={ref} className={cn('flex flex-row items-center gap-1', className)} {...props} />
-/**
- * PaginationContent - React component
- * @returns React element
- */
+    /**
+     * PaginationContent - React component
+     * @returns React element
+     */
   ),
 )
 PaginationContent.displayName = 'PaginationContent'
@@ -35,10 +35,10 @@ const PaginationItem = React.forwardRef<HTMLLIElement, React.ComponentProps<'li'
 PaginationItem.displayName = 'PaginationItem'
 
 type PaginationLinkProps = {
-/**
- * PaginationItem - React component
- * @returns React element
- */
+  /**
+   * PaginationItem - React component
+   * @returns React element
+   */
   isActive?: boolean
 } & Pick<ButtonProps, 'size'> &
   React.ComponentProps<'a'>
@@ -52,10 +52,10 @@ const PaginationLink = ({ className, isActive, size = 'icon', ...props }: Pagina
         size,
       }),
       className,
-/**
- * PaginationLink - React component
- * @returns React element
- */
+      /**
+       * PaginationLink - React component
+       * @returns React element
+       */
     )}
     {...props}
   />
@@ -74,10 +74,7 @@ const PaginationPrevious = ({
   >
     <ChevronLeft className="h-4 w-4" />
     <span>Previous</span>
-/**
- * PaginationPrevious - React component
- * @returns React element
- */
+    /** * PaginationPrevious - React component * @returns React element */
   </PaginationLink>
 )
 PaginationPrevious.displayName = 'PaginationPrevious'
@@ -97,10 +94,10 @@ PaginationNext.displayName = 'PaginationNext'
 
 const PaginationEllipsis = ({ className, ...props }: React.ComponentProps<'span'>) => (
   <span
-/**
- * PaginationNext - React component
- * @returns React element
- */
+    /**
+     * PaginationNext - React component
+     * @returns React element
+     */
     aria-hidden
     className={cn('flex h-9 w-9 items-center justify-center', className)}
     {...props}
@@ -117,10 +114,10 @@ export {
   PaginationEllipsis,
   PaginationItem,
   PaginationLink,
-/**
- * PaginationEllipsis - React component
- * @returns React element
- */
+  /**
+   * PaginationEllipsis - React component
+   * @returns React element
+   */
   PaginationNext,
   PaginationPrevious,
 }
