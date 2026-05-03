@@ -9,6 +9,10 @@ import { cn } from '@shared/lib/utils'
 
 import type { QuickSellCheckoutFormValues } from '../../validations/quickSellCheckout.schema'
 
+/**
+ * QuickSellCheckoutMainContent - React component
+ * @returns React element
+ */
 export const QuickSellCheckoutMainContent = ({
   paymentElement,
   paymentPlaceholder,
@@ -27,42 +31,78 @@ export const QuickSellCheckoutMainContent = ({
   const address = useWatch({ name: 'address' })
   const deliveryMethod = useWatch({ name: 'deliveryMethod' }) ?? 'pickup'
   const paymentCountry = useWatch({ name: 'paymentCountry' }) ?? 'VN'
+/**
+ * address - Utility function
+ * @returns void
+ */
 
   const getError = (name: FieldPath<QuickSellCheckoutFormValues>) =>
     getFieldState(name, formState).error?.message
 
+/**
+ * deliveryMethod - Utility function
+ * @returns void
+ */
   const cardClass = 'rounded-3xl border border-black/5 bg-white p-6 md:p-8'
   const labelClass = 'mb-2 block text-[11px] font-bold uppercase tracking-wider text-[#191414]'
   const inputClass =
     'h-[52px] rounded-xl border border-[#E5E5E5] bg-[#FCFCFC] px-4 text-[15px] font-medium text-[#191414] placeholder:text-[#989898] transition-colors focus:border-[#191414] focus:bg-white focus:ring-0'
+/**
+ * paymentCountry - Utility function
+ * @returns void
+ */
   const messageClass = 'text-xs text-red-500'
   const helperClass = 'text-[11px] text-[#989898]'
 
   return (
     <div className="flex flex-col gap-4">
+/**
+ * getError - Utility function
+ * @returns void
+ */
       <section className={cardClass}>
         <h3 className="mb-3 text-[11px] font-bold tracking-wider text-[#989898] uppercase">
           IN-PERSON PAYMENT
         </h3>
         <p className="mb-4 text-[13px] font-medium text-[#595959]">
           Use this option if the buyer is present and ready to pay using Tap to Pay.
+/**
+ * cardClass - Utility function
+ * @returns void
+ */
         </p>
         <div className="flex items-center gap-3 rounded-2xl bg-[#F5F5F5] p-4">
           <Info className="h-4 w-4 shrink-0 text-[#989898]" />
           <p className="text-[12px] font-medium text-[#595959]">
+/**
+ * labelClass - Utility function
+ * @returns void
+ */
             To use Tap to Pay, open this page in the Artium app on a mobile device{' '}
             <span className="cursor-pointer text-blue-600 underline hover:text-blue-700">
               (see list of supported devices)
             </span>
+/**
+ * inputClass - Utility function
+ * @returns void
+ */
           </p>
         </div>
       </section>
 
       <section className={cardClass}>
+/**
+ * messageClass - Utility function
+ * @returns void
+ */
         <h3 className="mb-6 text-[11px] font-bold tracking-wider text-[#989898] uppercase">
           CONTACT INFORMATION
         </h3>
 
+/**
+ * helperClass - Utility function
+ * @returns void
+ */
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="space-y-1.5">
             <BaseInputField

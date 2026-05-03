@@ -17,6 +17,10 @@ type QuickSellCheckoutLayoutProps = {
     onDelete?: () => void
 }
 
+/**
+ * QuickSellCheckoutLayout - React component
+ * @returns React element
+ */
 export const QuickSellCheckoutLayout = ({
     invoiceCode,
     sidebar,
@@ -64,6 +68,10 @@ export const QuickSellCheckoutLayout = ({
                                     const url = `${window.location.origin}/artist/invoices/checkout/${invoiceCode}?buyer=true`
                                     navigator.clipboard.writeText(url)
                                     alert('Link copied!')
+/**
+ * url - Utility function
+ * @returns void
+ */
                                 }}
                                 className="rounded-full p-2 text-[#191414] hover:bg-black/5 transition"
                             >

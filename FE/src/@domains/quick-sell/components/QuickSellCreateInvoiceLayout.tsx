@@ -17,6 +17,10 @@ type QuickSellCreateInvoiceLayoutProps = {
     pageTitle?: string
 }
 
+/**
+ * QuickSellCreateInvoiceLayout - React component
+ * @returns React element
+ */
 export const QuickSellCreateInvoiceLayout = ({
     leftColumn,
     rightColumn,

@@ -12,6 +12,10 @@ type QuickSellArtistSharePanelProps = {
     onEnterPaymentForBuyer: () => void
 }
 
+/**
+ * QuickSellArtistSharePanel - React component
+ * @returns React element
+ */
 export const QuickSellArtistSharePanel = ({
     invoiceCode,
     onEnterPaymentForBuyer,
@@ -23,6 +27,10 @@ export const QuickSellArtistSharePanel = ({
     const buyerLink = typeof window !== 'undefined'
         ? `${window.location.origin}/artist/invoices/checkout/${invoiceCode}?buyer=true`
         : `/artist/invoices/checkout/${invoiceCode}?buyer=true`
+/**
+ * buyerLink - Utility function
+ * @returns void
+ */
 
     // -- handlers --
     const handleCopyLink = useCallback(async () => {
@@ -31,6 +39,10 @@ export const QuickSellArtistSharePanel = ({
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
         } catch (error) {
+/**
+ * handleCopyLink - Utility function
+ * @returns void
+ */
             console.error('Failed to copy:', error)
         }
     }, [buyerLink])
@@ -44,6 +56,10 @@ export const QuickSellArtistSharePanel = ({
     // -- render --
     return (
         <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+/**
+ * handlePreviewAsBuyer - Utility function
+ * @returns void
+ */
             <h2 className="mb-4 text-lg font-semibold text-slate-900">Share with Buyer</h2>
 
             <div className="flex flex-col items-center space-y-4">
