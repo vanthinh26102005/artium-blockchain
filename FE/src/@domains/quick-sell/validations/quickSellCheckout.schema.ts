@@ -20,10 +20,10 @@ export const quickSellCheckoutAddressSchema = z.object({
 export const quickSellCheckoutFormSchema = z.object({
   address: quickSellCheckoutAddressSchema,
   deliveryMethod: z.enum(['pickup', 'Artium', 'invoice_only']),
-/**
- * quickSellCheckoutFormSchema - Utility function
- * @returns void
- */
+  /**
+   * quickSellCheckoutFormSchema - Utility function
+   * @returns void
+   */
   paymentCountry: z.string().trim().min(1, 'Country is required'),
 })
 

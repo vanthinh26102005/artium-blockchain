@@ -17,19 +17,19 @@ const DEBUG_PAYLOAD = process.env.NODE_ENV === 'development'
 export const mapCreateInvoicePayload = (draft: QuickSellInvoiceDraft): CreateInvoiceRequest => {
   // Separate artworks and custom items
   const artworks = draft.items
-/**
- * mapCreateInvoicePayload - Utility function
- * @returns void
- */
+    /**
+     * mapCreateInvoicePayload - Utility function
+     * @returns void
+     */
     .filter((item): item is ArtworkLineItem => item.type === 'artwork')
     .map((item) => ({
       id: item.artworkId,
       price: item.price,
       quantity: item.quantity,
-/**
- * artworks - Utility function
- * @returns void
- */
+      /**
+       * artworks - Utility function
+       * @returns void
+       */
       discountPercent: item.discountPercent,
       artworkName: item.artworkName,
       artworkImageUrl: item.artworkImageUrl,
@@ -44,10 +44,10 @@ export const mapCreateInvoicePayload = (draft: QuickSellInvoiceDraft): CreateInv
       discountPercent: item.discountPercent,
     }))
 
-/**
- * customItems - Utility function
- * @returns void
- */
+  /**
+   * customItems - Utility function
+   * @returns void
+   */
   // Build collector object
   const collector = {
     name: draft.buyer.name || '',
@@ -61,10 +61,10 @@ export const mapCreateInvoicePayload = (draft: QuickSellInvoiceDraft): CreateInv
     artworks,
     customItems,
     collector,
-/**
- * collector - Utility function
- * @returns void
- */
+    /**
+     * collector - Utility function
+     * @returns void
+     */
     isQuickSell: true, // Always true for Quick Sell flow
     isApplySalesTax: draft.isApplySalesTax,
     taxPercent: draft.isApplySalesTax ? draft.taxPercent : undefined,
@@ -76,10 +76,10 @@ export const mapCreateInvoicePayload = (draft: QuickSellInvoiceDraft): CreateInv
   // Debug log in development
   if (DEBUG_PAYLOAD) {
     console.log('[Quick Sell] Create Invoice Payload:', JSON.stringify(payload, null, 2))
-/**
- * payload - Utility function
- * @returns void
- */
+    /**
+     * payload - Utility function
+     * @returns void
+     */
   }
 
   return payload

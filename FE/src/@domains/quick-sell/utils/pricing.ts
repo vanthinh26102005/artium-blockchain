@@ -16,18 +16,18 @@ export const calculateItemTotal = (item: QuickSellLineItem): number => {
   const basePrice = item.price * item.quantity
   const discountAmount = basePrice * (item.discountPercent / 100)
   return roundToTwoDecimals(basePrice - discountAmount)
-/**
- * basePrice - Utility function
- * @returns void
- */
+  /**
+   * basePrice - Utility function
+   * @returns void
+   */
 }
 
 // Calculate item's discount amount
 export const calculateItemDiscount = (item: QuickSellLineItem): number => {
-/**
- * discountAmount - Utility function
- * @returns void
- */
+  /**
+   * discountAmount - Utility function
+   * @returns void
+   */
   const basePrice = item.price * item.quantity
   return roundToTwoDecimals(basePrice * (item.discountPercent / 100))
 }
@@ -56,10 +56,10 @@ export const calculateInvoiceTotals = (draft: QuickSellInvoiceDraft): InvoiceTot
   const subtotal = draft.items.reduce((sum, item) => {
     return sum + item.price * item.quantity
   }, 0)
-/**
- * roundToTwoDecimals - Utility function
- * @returns void
- */
+  /**
+   * roundToTwoDecimals - Utility function
+   * @returns void
+   */
 
   // Discount total: Sum of discounts for all items
   const discountTotal = draft.items.reduce((sum, item) => {
@@ -73,19 +73,19 @@ export const calculateInvoiceTotals = (draft: QuickSellInvoiceDraft): InvoiceTot
   const taxableAmount = subtotal - discountTotal + shipping
 
   // Tax: Apply tax percent to taxable amount
-/**
- * calculateInvoiceTotals - Utility function
- * @returns void
- */
+  /**
+   * calculateInvoiceTotals - Utility function
+   * @returns void
+   */
   const tax = draft.isApplySalesTax
     ? roundToTwoDecimals(taxableAmount * ((draft.taxPercent || 0) / 100))
     : 0
 
   // Total: Subtotal - Discount + Shipping + Tax
-/**
- * subtotal - Utility function
- * @returns void
- */
+  /**
+   * subtotal - Utility function
+   * @returns void
+   */
   const total = roundToTwoDecimals(subtotal - discountTotal + shipping + tax)
 
   return {
@@ -94,10 +94,10 @@ export const calculateInvoiceTotals = (draft: QuickSellInvoiceDraft): InvoiceTot
     shipping: roundToTwoDecimals(shipping),
     taxableAmount: roundToTwoDecimals(taxableAmount),
     tax,
-/**
- * discountTotal - Utility function
- * @returns void
- */
+    /**
+     * discountTotal - Utility function
+     * @returns void
+     */
     total,
   }
 }
@@ -106,30 +106,30 @@ export const calculateInvoiceTotals = (draft: QuickSellInvoiceDraft): InvoiceTot
 // Currency: USD hardcoded per blueprint
 export const formatMoney = (amount: number, currency: string = 'USD'): string => {
   const formatted = new Intl.NumberFormat('en-US', {
-/**
- * shipping - Utility function
- * @returns void
- */
+    /**
+     * shipping - Utility function
+     * @returns void
+     */
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount)
 
-/**
- * taxableAmount - Utility function
- * @returns void
- */
+  /**
+   * taxableAmount - Utility function
+   * @returns void
+   */
   return formatted
 }
 
 // Format money without currency symbol (for inputs)
 export const formatMoneyValue = (amount: number): string => {
   return amount.toFixed(2)
-/**
- * tax - Utility function
- * @returns void
- */
+  /**
+   * tax - Utility function
+   * @returns void
+   */
 }
 
 // Parse money input string to number
