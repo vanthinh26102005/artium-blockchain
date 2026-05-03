@@ -14,6 +14,10 @@ import type {
   ReadReceipt,
 } from '@/types/messaging'
 
+/**
+ * MESSAGING_BASE_URL - React component
+ * @returns React element
+ */
 const MESSAGING_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL ?? ''
 ).replace(/\/$/, '')
@@ -21,6 +25,10 @@ const MESSAGING_BASE_URL = (
 const messagingApis = {
   uploadFile: async (
     file: File,
+/**
+ * messagingApis - Utility function
+ * @returns void
+ */
   ): Promise<{
     url: string
     filename: string
@@ -36,6 +44,10 @@ const messagingApis = {
     return apiUpload('/messaging/upload', formData, {
       baseUrl: MESSAGING_BASE_URL,
     })
+/**
+ * formData - Utility function
+ * @returns void
+ */
   },
 
   getConversationsForUser: (userId: string) =>

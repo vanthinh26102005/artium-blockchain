@@ -196,6 +196,10 @@ export type OpenDisputeRequest = {
 
 // --- API Functions ---
 
+/**
+ * orderApis - Utility function
+ * @returns void
+ */
 const orderApis = {
   createOrder: async (data: CreateOrderRequest): Promise<OrderResponse> => {
     return apiPost<OrderResponse>('/orders', data)

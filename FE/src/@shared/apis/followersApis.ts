@@ -25,6 +25,10 @@ type CheckFollowStatusResponse = {
   followedAt?: string | null
 }
 
+/**
+ * followersApis - Utility function
+ * @returns void
+ */
 export const followersApis = {
   followUser: (input: FollowUserInput) =>
     apiPost<FollowerObject>('/community/followers', input, {
