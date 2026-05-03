@@ -6,10 +6,18 @@ type SelectedUserChipProps = {
   onRemove: () => void;
 };
 
+/**
+ * SelectedUserChip - React component
+ * @returns React element
+ */
 export function SelectedUserChip({ user, onRemove }: SelectedUserChipProps) {
   const handleRemove = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+/**
+ * handleRemove - Utility function
+ * @returns void
+ */
     onRemove();
   };
 

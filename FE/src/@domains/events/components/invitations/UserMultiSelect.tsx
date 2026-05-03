@@ -22,6 +22,10 @@ type UserMultiSelectProps = {
   placeholder?: string;
 };
 
+/**
+ * UserMultiSelect - React component
+ * @returns React element
+ */
 export function UserMultiSelect({
   value,
   onChange,
@@ -31,12 +35,20 @@ export function UserMultiSelect({
   const listId = useId();
 
   // Get selected users
+/**
+ * listId - Utility function
+ * @returns void
+ */
   const selectedUsers = mockProfiles.filter((profile) =>
     value.includes(profile.id)
   );
 
   const MAX_VISIBLE = 3;
   const visibleUsers = selectedUsers.slice(0, MAX_VISIBLE);
+/**
+ * selectedUsers - Utility function
+ * @returns void
+ */
   const hiddenCount = Math.max(0, selectedUsers.length - MAX_VISIBLE);
 
   const handleToggle = (userId: string) => {
@@ -44,19 +56,35 @@ export function UserMultiSelect({
       onChange(value.filter((id) => id !== userId));
     } else {
       onChange([...value, userId]);
+/**
+ * MAX_VISIBLE - React component
+ * @returns React element
+ */
     }
   };
 
   const handleRemoveUser = (userId: string) => {
+/**
+ * visibleUsers - Utility function
+ * @returns void
+ */
     onChange(value.filter((id) => id !== userId));
   };
 
   const handleClearAll = () => {
+/**
+ * hiddenCount - Utility function
+ * @returns void
+ */
     onChange([]);
   };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen} modal={false}>
+/**
+ * handleToggle - Utility function
+ * @returns void
+ */
       <PopoverTrigger asChild>
         <button
           type="button"
@@ -68,6 +96,10 @@ export function UserMultiSelect({
         >
           <div className="flex flex-1 items-center gap-2 overflow-hidden">
             {value.length ? (
+/**
+ * handleRemoveUser - Utility function
+ * @returns void
+ */
               <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
                 {visibleUsers.map((user) => (
                   <SelectedUserChip
@@ -75,6 +107,10 @@ export function UserMultiSelect({
                     user={user}
                     onRemove={() => handleRemoveUser(user.id)}
                   />
+/**
+ * handleClearAll - Utility function
+ * @returns void
+ */
                 ))}
                 {hiddenCount > 0 ? (
                   <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700">

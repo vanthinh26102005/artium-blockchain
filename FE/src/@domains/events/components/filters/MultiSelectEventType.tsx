@@ -15,6 +15,10 @@ type MultiSelectEventTypeProps = {
     onSelectionChange: (types: string[]) => void;
 };
 
+/**
+ * MultiSelectEventType - React component
+ * @returns React element
+ */
 export const MultiSelectEventType = ({
     selectedTypes,
     onSelectionChange,
@@ -23,6 +27,10 @@ export const MultiSelectEventType = ({
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown when clicking outside
+/**
+ * dropdownRef - Utility function
+ * @returns void
+ */
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -30,6 +38,10 @@ export const MultiSelectEventType = ({
             }
         };
 
+/**
+ * handleClickOutside - Utility function
+ * @returns void
+ */
         if (isOpen) {
             document.addEventListener("mousedown", handleClickOutside);
         }
@@ -48,6 +60,10 @@ export const MultiSelectEventType = ({
             onSelectionChange([...selectedTypes, typeValue]);
         }
     };
+/**
+ * handleToggleType - Utility function
+ * @returns void
+ */
 
     const handleClearAll = () => {
         onSelectionChange([]);
@@ -61,6 +77,10 @@ export const MultiSelectEventType = ({
                 ? "All Types"
                 : `Event Type`;
 
+/**
+ * handleClearAll - Utility function
+ * @returns void
+ */
     return (
         <div ref={dropdownRef} className="relative">
             {/* Trigger Button */}
@@ -69,6 +89,10 @@ export const MultiSelectEventType = ({
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
                     "flex h-10 w-full cursor-pointer items-center justify-between gap-2 rounded-full border bg-white px-3 font-inter text-[13px] font-semibold text-slate-900 shadow-none transition-colors focus:outline-none md:w-fit",
+/**
+ * displayText - Utility function
+ * @returns void
+ */
                     isOpen
                         ? "border-slate-300 bg-slate-50"
                         : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
@@ -117,6 +141,10 @@ export const MultiSelectEventType = ({
                                     >
                                         {isSelected && <Check className="h-3 w-3 text-white" />}
                                     </div>
+/**
+ * isSelected - Utility function
+ * @returns void
+ */
                                     <span>{option.label}</span>
                                 </button>
                             );

@@ -23,28 +23,52 @@ import { type EventStatusValue } from "@domains/events/constants/eventFilterOpti
 import { type EventsHostingSortValue } from "@domains/events/constants/hostingSortOptions";
 import { mockHomeEvents } from "@domains/home/mock/mockHomeEvents";
 
+/**
+ * DEFAULT_STATUS_FILTER - React component
+ * @returns React element
+ */
 const DEFAULT_STATUS_FILTER: EventStatusValue = "all";
 const DEFAULT_DATE_SORT: EventsHostingSortValue = "eventDateNewest";
 const DEFAULT_ITEMS_PER_PAGE = 12;
 
+/**
+ * DEFAULT_DATE_SORT - React component
+ * @returns React element
+ */
 export const DiscoverEventsSection = () => {
   // -- refs --
   const sectionRef = useRef<HTMLElement>(null);
   const router = useRouter();
+/**
+ * DEFAULT_ITEMS_PER_PAGE - React component
+ * @returns React element
+ */
 
   // -- state --
   const [statusFilter, setStatusFilter] = useState<EventStatusValue>(DEFAULT_STATUS_FILTER);
   const [eventTypeFilter, setEventTypeFilter] = useState<string[]>([]);
   const [dateSortFilter, setDateSortFilter] = useState<EventsHostingSortValue>(DEFAULT_DATE_SORT);
+/**
+ * DiscoverEventsSection - React component
+ * @returns React element
+ */
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+/**
+ * sectionRef - Utility function
+ * @returns void
+ */
   const [inviteModalEvent, setInviteModalEvent] = useState<any>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [shareModalEvent, setShareModalEvent] = useState<any>(null);
   const [toast, setToast] = useState<{ message: string; variant: "success" | "error" } | null>(null);
+/**
+ * router - Utility function
+ * @returns void
+ */
 
   // Use mock data for events
   const events = useMemo(() => mockHomeEvents, []);
@@ -55,6 +79,10 @@ export const DiscoverEventsSection = () => {
   const prevPageRef = useRef(currentPage);
   useEffect(() => {
     // Only scroll if page actually changed (user clicked pagination)
+/**
+ * debouncedSearchQuery - Utility function
+ * @returns void
+ */
     if (prevPageRef.current !== currentPage) {
       sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       prevPageRef.current = currentPage;
@@ -68,20 +96,36 @@ export const DiscoverEventsSection = () => {
 
     // Filter by status
     if (statusFilter !== "all") {
+/**
+ * events - Utility function
+ * @returns void
+ */
       filtered = filtered.filter((event) => {
         const eventStart = new Date(event.startDateTime);
         const eventEnd = new Date(event.endDateTime);
 
+/**
+ * isLoading - Utility function
+ * @returns void
+ */
         if (statusFilter === "upcoming") {
           return eventStart > now;
         } else if (statusFilter === "ongoing") {
           return eventStart <= now && eventEnd >= now;
+/**
+ * updateRsvpStatus - Utility function
+ * @returns void
+ */
         } else if (statusFilter === "past") {
           return eventEnd < now;
         }
         return true;
       });
     }
+/**
+ * prevPageRef - Utility function
+ * @returns void
+ */
 
     // Filter by event type
     if (eventTypeFilter.length > 0) {
@@ -95,10 +139,18 @@ export const DiscoverEventsSection = () => {
       const query = debouncedSearchQuery.toLowerCase();
       filtered = filtered.filter((event) =>
         event.title.toLowerCase().includes(query) ||
+/**
+ * filteredAndSortedEvents - Utility function
+ * @returns void
+ */
         event.location.toLowerCase().includes(query)
       );
     }
 
+/**
+ * now - Utility function
+ * @returns void
+ */
     // Sort by date and other criteria
     filtered.sort((a, b) => {
       const dateA = new Date(a.startDateTime).getTime();
@@ -108,10 +160,18 @@ export const DiscoverEventsSection = () => {
         case "eventDateNewest":
           return dateB - dateA;
         case "eventDateOldest":
+/**
+ * eventStart - Utility function
+ * @returns void
+ */
           return dateA - dateB;
         case "titleAsc":
           return a.title.localeCompare(b.title, "en", { sensitivity: "base" });
         case "titleDesc":
+/**
+ * eventEnd - Utility function
+ * @returns void
+ */
           return b.title.localeCompare(a.title, "en", { sensitivity: "base" });
         default:
           return dateB - dateA;
@@ -137,6 +197,10 @@ export const DiscoverEventsSection = () => {
       variant: "success",
     });
 
+/**
+ * query - Utility function
+ * @returns void
+ */
     // Auto-hide toast after 3 seconds
     window.setTimeout(() => setToast(null), 3000);
   };
@@ -149,10 +213,18 @@ export const DiscoverEventsSection = () => {
     setItemsPerPage(value);
     setCurrentPage(1);
   };
+/**
+ * dateA - Utility function
+ * @returns void
+ */
 
   const handleFilterChange = () => {
     setCurrentPage(1);
   };
+/**
+ * dateB - Utility function
+ * @returns void
+ */
 
   // -- render --
   return (
@@ -175,14 +247,26 @@ export const DiscoverEventsSection = () => {
           eventTypeFilter={eventTypeFilter}
           onEventTypeChange={(value) => {
             setEventTypeFilter(value);
+/**
+ * totalPages - Utility function
+ * @returns void
+ */
             handleFilterChange();
           }}
           dateSortFilter={dateSortFilter}
           onDateSortChange={(value) => {
+/**
+ * paginatedEvents - Utility function
+ * @returns void
+ */
             setDateSortFilter(value);
             handleFilterChange();
           }}
           searchQuery={searchQuery}
+/**
+ * startIndex - Utility function
+ * @returns void
+ */
           onSearchChange={(e) => {
             setSearchQuery(e.target.value);
             handleFilterChange();
@@ -191,6 +275,10 @@ export const DiscoverEventsSection = () => {
       </div>
 
       {toast ? (
+/**
+ * handleRsvpChange - Utility function
+ * @returns void
+ */
         <ToastPortal
           message={toast.message}
           variant={toast.variant}
@@ -207,6 +295,10 @@ export const DiscoverEventsSection = () => {
         <>
           <div className="mt-6 grid auto-rows-fr grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
             {paginatedEvents.map((event) => (
+/**
+ * handlePageChange - Utility function
+ * @returns void
+ */
               <EventCard
                 key={event.id}
                 event={event as any}
@@ -214,6 +306,10 @@ export const DiscoverEventsSection = () => {
                 onInvite={(event) => {
                   setInviteModalEvent(event);
                   setInviteModalOpen(true);
+/**
+ * handleItemsPerPageChange - Utility function
+ * @returns void
+ */
                 }}
                 onShare={(event) => {
                   setShareModalEvent(event);
@@ -222,6 +318,10 @@ export const DiscoverEventsSection = () => {
                 onClick={(id) => router.push(`/events/${id}`)}
               />
             ))}
+/**
+ * handleFilterChange - Utility function
+ * @returns void
+ */
           </div>
 
           {/* Pagination */}

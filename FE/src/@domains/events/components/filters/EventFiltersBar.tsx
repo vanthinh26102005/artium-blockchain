@@ -35,6 +35,10 @@ type EventFiltersBarProps = {
     onSearchChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
+/**
+ * EventFiltersBar - React component
+ * @returns React element
+ */
 export const EventFiltersBar = ({
     statusFilter,
     onStatusChange,
