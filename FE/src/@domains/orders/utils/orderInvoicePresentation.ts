@@ -3,11 +3,7 @@ import type {
   OrderInvoiceResponse,
   OrderResponse,
 } from '@shared/apis/orderApis'
-import {
-  formatOrderDate,
-  formatOrderDateTime,
-  formatOrderMoney,
-} from './orderPresentation'
+import { formatOrderDate, formatOrderDateTime, formatOrderMoney } from './orderPresentation'
 
 export type OrderInvoiceAvailabilityState = 'checking' | 'ready' | 'unavailable' | 'retry'
 
@@ -36,36 +32,36 @@ const RETRY_COPY = 'Unable to load invoice. Try again without leaving this order
 
 const isNonDisclosingUnavailableError = (message?: string | null) => {
   const normalized = message?.toLowerCase() ?? ''
-/**
- * INVOICE_REDACTED_FIELD_COPY - React component
- * @returns React element
- */
+  /**
+   * INVOICE_REDACTED_FIELD_COPY - React component
+   * @returns React element
+   */
 
   return (
     normalized.includes('not found') ||
     normalized.includes('forbidden') ||
     normalized.includes('unauthorized') ||
-/**
- * RETRY_COPY - React component
- * @returns React element
- */
+    /**
+     * RETRY_COPY - React component
+     * @returns React element
+     */
     normalized.includes('404')
   )
 }
 
 export const getOrderInvoiceAvailability = ({
-/**
- * isNonDisclosingUnavailableError - Utility function
- * @returns void
- */
+  /**
+   * isNonDisclosingUnavailableError - Utility function
+   * @returns void
+   */
   invoice,
   isLoading,
   errorMessage,
   isUnavailable,
-/**
- * normalized - Utility function
- * @returns void
- */
+  /**
+   * normalized - Utility function
+   * @returns void
+   */
 }: {
   invoice: OrderInvoiceResponse | null
   isLoading: boolean
@@ -79,10 +75,10 @@ export const getOrderInvoiceAvailability = ({
       description: 'Preview or print the backend invoice for this order.',
       canPreview: true,
       canPrint: true,
-/**
- * getOrderInvoiceAvailability - Utility function
- * @returns void
- */
+      /**
+       * getOrderInvoiceAvailability - Utility function
+       * @returns void
+       */
     }
   }
 
@@ -177,10 +173,10 @@ const getAddressValue = (
   const value = address[key]
 
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null
-/**
- * formatInvoiceField - Utility function
- * @returns void
- */
+  /**
+   * formatInvoiceField - Utility function
+   * @returns void
+   */
 }
 
 export const formatInvoiceAddressLines = (
@@ -189,10 +185,10 @@ export const formatInvoiceAddressLines = (
   if (!address) {
     return []
   }
-/**
- * normalized - Utility function
- * @returns void
- */
+  /**
+   * normalized - Utility function
+   * @returns void
+   */
 
   const city = getAddressValue(address, 'city')
   const state = getAddressValue(address, 'state')
@@ -200,10 +196,10 @@ export const formatInvoiceAddressLines = (
   const country = getAddressValue(address, 'country')
   const cityState = `${city ?? ''}${city && state ? ', ' : ''}${state ?? ''}`.trim()
   const postalCountry = `${postalCode ?? ''} ${country ?? ''}`.trim()
-/**
- * formatInvoicePartyField - Utility function
- * @returns void
- */
+  /**
+   * formatInvoicePartyField - Utility function
+   * @returns void
+   */
 
   return [
     getAddressValue(address, 'name'),

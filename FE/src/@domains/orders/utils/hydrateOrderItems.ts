@@ -21,20 +21,20 @@ export const hydrateOrderItems = async (
   const hydratedEntries = await Promise.all(
     items.map(async (item) => {
       if (!needsArtworkHydration(item)) {
-/**
- * hydrateOrderItems - Utility function
- * @returns void
- */
+        /**
+         * hydrateOrderItems - Utility function
+         * @returns void
+         */
         return item
       }
 
       try {
         const artwork = await artworkApis.getArtworkById(item.artworkId)
         if (!artwork) {
-/**
- * hydratedEntries - Utility function
- * @returns void
- */
+          /**
+           * hydratedEntries - Utility function
+           * @returns void
+           */
           return item
         }
 
@@ -45,10 +45,10 @@ export const hydrateOrderItems = async (
         }
       } catch {
         return item
-/**
- * artwork - Utility function
- * @returns void
- */
+        /**
+         * artwork - Utility function
+         * @returns void
+         */
       }
     }),
   )
