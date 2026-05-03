@@ -15,19 +15,19 @@ const LOCKED_EDIT_LIFECYCLE_STATUSES = new Set([
 const HIDDEN_AUCTION_HANDOFF_STATUSES = new Set(['pending_start', 'auction_active'])
 
 export const isArtworkEditLocked = (artwork: InventoryArtwork) => {
-/**
- * HIDDEN_AUCTION_HANDOFF_STATUSES - React component
- * @returns React element
- */
+  /**
+   * HIDDEN_AUCTION_HANDOFF_STATUSES - React component
+   * @returns React element
+   */
   const lifecycle = artwork.auctionLifecycle
 
   if (!lifecycle?.status) {
     return false
   }
-/**
- * isArtworkEditLocked - Utility function
- * @returns void
- */
+  /**
+   * isArtworkEditLocked - Utility function
+   * @returns void
+   */
 
   return LOCKED_EDIT_LIFECYCLE_STATUSES.has(lifecycle.status) && lifecycle.editAllowed !== true
 }
@@ -58,10 +58,10 @@ export const getEditArtworkHref = (artwork: InventoryArtwork) => ({
 })
 
 export const getAuctionHandoffHref = (artwork: InventoryArtwork) => ({
-/**
- * getProfileVisibilityPatch - Utility function
- * @returns void
- */
+  /**
+   * getProfileVisibilityPatch - Utility function
+   * @returns void
+   */
   pathname: '/artist/auctions/create',
   query: { artworkId: artwork.id },
 })
@@ -81,10 +81,10 @@ export const getAuctionHandoffLabel = (artwork: InventoryArtwork) => {
 }
 
 export const canShowAuctionHandoff = (artwork: InventoryArtwork) => {
-/**
- * getEditArtworkHref - Utility function
- * @returns void
- */
+  /**
+   * getEditArtworkHref - Utility function
+   * @returns void
+   */
   const status = artwork.auctionLifecycle?.status
 
   if (!status) {

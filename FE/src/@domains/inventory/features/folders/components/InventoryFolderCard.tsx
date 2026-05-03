@@ -37,7 +37,7 @@ export const InventoryFolderCard = ({
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-black/10 bg-white transition-shadow hover:shadow-lg">
       {/* actions */}
-      <div className="absolute top-3 right-3 z-10">
+      <div className="absolute right-3 top-3 z-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -82,7 +82,7 @@ export const InventoryFolderCard = ({
         <div className="flex h-[150px] items-center justify-center bg-blue-50">
           <Folder className="h-8 w-8 text-blue-600" />
         </div>
-        <div className="flex min-h-[100px] flex-1 flex-col gap-1 px-3 pt-3 pb-3">
+        <div className="flex min-h-[100px] flex-1 flex-col gap-1 px-3 pb-3 pt-3">
           <p className="text-base font-medium text-slate-900">{folder.name}</p>
           <p className="text-sm text-[#898788]">{folder.itemCount} items</p>
         </div>

@@ -37,10 +37,10 @@ type MoveArtworkModalProps = {
 export const MoveArtworkModal = ({
   isOpen,
   artwork,
-/**
- * MoveArtworkModal - React component
- * @returns React element
- */
+  /**
+   * MoveArtworkModal - React component
+   * @returns React element
+   */
   folders,
   onClose,
   onMove,
@@ -55,20 +55,20 @@ export const MoveArtworkModal = ({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onClose()
-/**
- * titleLabel - Utility function
- * @returns void
- */
+      /**
+       * titleLabel - Utility function
+       * @returns void
+       */
     }
   }
 
   const handleMove = () => {
     const destination =
       selectedDestination === INVENTORY_DESTINATION_ID ? undefined : selectedDestination
-/**
- * handleOpenChange - Utility function
- * @returns void
- */
+    /**
+     * handleOpenChange - Utility function
+     * @returns void
+     */
     onMove(destination)
   }
 
@@ -78,18 +78,18 @@ export const MoveArtworkModal = ({
     }
 
     let isCancelled = false
-/**
- * handleMove - Utility function
- * @returns void
- */
+    /**
+     * handleMove - Utility function
+     * @returns void
+     */
 
     window.queueMicrotask(() => {
       if (isCancelled) {
         return
-/**
- * destination - Utility function
- * @returns void
- */
+        /**
+         * destination - Utility function
+         * @returns void
+         */
       }
 
       setSelectedDestination(artwork?.folderId ?? INVENTORY_DESTINATION_ID)
@@ -124,7 +124,7 @@ export const MoveArtworkModal = ({
           {/* Content */}
           <div className="px-6 py-6">
             <div className="space-y-3">
-              <p className="text-sm font-bold tracking-wider text-slate-500 uppercase lg:text-base">
+              <p className="text-sm font-bold uppercase tracking-wider text-slate-500 lg:text-base">
                 Select destination
               </p>
               <div className="overflow-hidden rounded-2xl border border-black/10 bg-white">
@@ -183,7 +183,7 @@ export const MoveArtworkModal = ({
                 size="lg"
                 onClick={handleMove}
                 disabled={!artwork}
-                className="disabled:bg-muted disabled:text-muted-foreground h-11 rounded-full px-8 text-base font-semibold hover:shadow-lg"
+                className="h-11 rounded-full px-8 text-base font-semibold hover:shadow-lg disabled:bg-muted disabled:text-muted-foreground"
               >
                 Move
               </Button>
