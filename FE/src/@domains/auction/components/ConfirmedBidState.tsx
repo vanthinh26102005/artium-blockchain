@@ -5,12 +5,7 @@ import { Space_Grotesk } from 'next/font/google'
 import { Check, X } from 'lucide-react'
 import { type CSSProperties } from 'react'
 import { WALLET_TARGET_CHAIN } from '@domains/auth/constants/wallet'
-import {
-  Dialog,
-  DialogOverlay,
-  DialogPortal,
-  DialogPrimitive,
-} from '@shared/components/ui/dialog'
+import { Dialog, DialogOverlay, DialogPortal, DialogPrimitive } from '@shared/components/ui/dialog'
 
 type ConfirmedBidStateProps = {
   isOpen: boolean
@@ -55,40 +50,40 @@ export const ConfirmedBidState = ({
   isOpen,
   title,
   imageSrc,
-/**
- * formatEthDisplay - Utility function
- * @returns void
- */
+  /**
+   * formatEthDisplay - Utility function
+   * @returns void
+   */
   imageAlt,
   committedBidValue,
   transactionHash,
   onClose,
   onViewOrderStatus,
-/**
- * getTransactionUrl - Utility function
- * @returns void
- */
+  /**
+   * getTransactionUrl - Utility function
+   * @returns void
+   */
 }: ConfirmedBidStateProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogPortal>
         <DialogOverlay className="bg-black/10 backdrop-blur-sm" />
         <DialogPrimitive.Content
-/**
- * ConfirmedBidState - React component
- * @returns React element
- */
+          /**
+           * ConfirmedBidState - React component
+           * @returns React element
+           */
           aria-labelledby="auction-bid-confirmed-title"
           className="fixed inset-0 z-[210] flex items-center justify-center p-4 outline-none md:p-8"
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
           <div className="relative w-full max-w-xl overflow-hidden bg-white shadow-[0_40px_100px_rgba(0,0,0,0.08)]">
-            <div className="absolute top-0 left-0 h-1 w-full bg-black" />
+            <div className="absolute left-0 top-0 h-1 w-full bg-black" />
 
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/60 transition hover:text-black md:top-6 md:right-6"
+              className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/60 transition hover:text-black md:right-6 md:top-6"
               aria-label="Close confirmed bid panel"
             >
               <X className="h-6 w-6" strokeWidth={1.8} />
@@ -102,19 +97,19 @@ export const ConfirmedBidState = ({
               <div className="mb-10">
                 <h2
                   id="auction-bid-confirmed-title"
-                  className="text-3xl font-bold tracking-[0.1em] text-black uppercase md:text-4xl"
+                  className="text-3xl font-bold uppercase tracking-[0.1em] text-black md:text-4xl"
                   style={headlineFont}
                 >
                   Bid Confirmed
                 </h2>
-                <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-black/58 md:text-base">
+                <p className="text-black/58 mx-auto mt-4 max-w-sm text-sm leading-7 md:text-base">
                   Backend auction state confirms your wallet is the current leading bidder.
                 </p>
               </div>
 
               <div className="mb-10 flex flex-col items-center bg-[#f3f3f3] px-6 py-8">
                 <p
-                  className="mb-2 text-[11px] font-semibold tracking-[0.2em] text-black/48 uppercase"
+                  className="text-black/48 mb-2 text-[11px] font-semibold uppercase tracking-[0.2em]"
                   style={headlineFont}
                 >
                   Transaction Amount
@@ -123,37 +118,31 @@ export const ConfirmedBidState = ({
                   <span className="text-5xl font-bold text-black md:text-6xl" style={headlineFont}>
                     {formatEthDisplay(committedBidValue)}
                   </span>
-                  <span className="text-xl font-medium text-black/48" style={headlineFont}>
+                  <span className="text-black/48 text-xl font-medium" style={headlineFont}>
                     ETH
                   </span>
                 </div>
               </div>
 
-              <div className="mb-10 flex items-center justify-center gap-4 border-y border-black/8 py-6">
+              <div className="border-black/8 mb-10 flex items-center justify-center gap-4 border-y py-6">
                 <div className="relative h-12 w-12 overflow-hidden bg-neutral-200">
-                  <Image
-                    src={imageSrc}
-                    alt={imageAlt}
-                    fill
-                    sizes="48px"
-                    className="object-cover"
-                  />
+                  <Image src={imageSrc} alt={imageAlt} fill sizes="48px" className="object-cover" />
                 </div>
                 <div className="min-w-0 text-left">
                   <p
-                    className="text-[11px] tracking-[0.1em] text-black/48 uppercase"
+                    className="text-black/48 text-[11px] uppercase tracking-[0.1em]"
                     style={headlineFont}
                   >
                     Artwork
                   </p>
                   <p
-                    className="mt-1 truncate text-sm font-bold tracking-[0.12em] text-black uppercase"
+                    className="mt-1 truncate text-sm font-bold uppercase tracking-[0.12em] text-black"
                     style={headlineFont}
                     title={title}
                   >
                     {title}
                   </p>
-                  <p className="mt-1 font-mono text-[11px] text-black/42">
+                  <p className="text-black/42 mt-1 font-mono text-[11px]">
                     {formatTransactionHash(transactionHash)}
                   </p>
                 </div>
@@ -164,7 +153,7 @@ export const ConfirmedBidState = ({
                   <button
                     type="button"
                     onClick={onViewOrderStatus}
-                    className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-[#5f5e5e]"
+                    className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold uppercase tracking-[0.2em] text-white transition hover:bg-[#5f5e5e]"
                     style={headlineFont}
                   >
                     View Order Status
@@ -173,7 +162,7 @@ export const ConfirmedBidState = ({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-[#5f5e5e]"
+                    className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold uppercase tracking-[0.2em] text-white transition hover:bg-[#5f5e5e]"
                     style={headlineFont}
                   >
                     Close
@@ -183,7 +172,7 @@ export const ConfirmedBidState = ({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="inline-flex w-full items-center justify-center py-2 text-[11px] font-bold tracking-[0.15em] text-black/58 uppercase transition hover:text-black"
+                    className="text-black/58 inline-flex w-full items-center justify-center py-2 text-[11px] font-bold uppercase tracking-[0.15em] transition hover:text-black"
                     style={headlineFont}
                   >
                     Stay Here
@@ -193,14 +182,14 @@ export const ConfirmedBidState = ({
                   href={getTransactionUrl(transactionHash)}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex w-full items-center justify-center py-2 text-[11px] font-bold tracking-[0.15em] text-black/58 uppercase transition hover:text-black"
+                  className="text-black/58 inline-flex w-full items-center justify-center py-2 text-[11px] font-bold uppercase tracking-[0.15em] transition hover:text-black"
                   style={headlineFont}
                 >
                   View Transaction
                 </a>
               </div>
 
-              <div className="pointer-events-none absolute right-0 bottom-0 h-8 w-8 border-r border-b border-black/15 opacity-30" />
+              <div className="pointer-events-none absolute bottom-0 right-0 h-8 w-8 border-b border-r border-black/15 opacity-30" />
             </div>
           </div>
         </DialogPrimitive.Content>
