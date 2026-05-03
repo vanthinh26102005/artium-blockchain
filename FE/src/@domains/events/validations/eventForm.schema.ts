@@ -16,26 +16,26 @@ export const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as 
 
 export type CreateEventFormValues = {
   title: string
-/**
- * DESCRIPTION_LIMIT - React component
- * @returns React element
- */
+  /**
+   * DESCRIPTION_LIMIT - React component
+   * @returns React element
+   */
   startDateTime: string
   endDateTime: string
   timeZone: string
   locationType: 'in-person' | 'online'
-/**
- * MAX_IMAGE_SIZE - React component
- * @returns React element
- */
+  /**
+   * MAX_IMAGE_SIZE - React component
+   * @returns React element
+   */
   types: string[]
   address: string
   venueDetails: string
   onlineUrl: string
-/**
- * ALLOWED_IMAGE_TYPES - React component
- * @returns React element
- */
+  /**
+   * ALLOWED_IMAGE_TYPES - React component
+   * @returns React element
+   */
   visibility: 'public' | 'private'
   description: string
   coverImage: File | null
@@ -43,23 +43,17 @@ export type CreateEventFormValues = {
 
 const coverImageSchema = z.custom<File | null>(
   (value) =>
-    value === null ||
-    value === undefined ||
-    (typeof File !== 'undefined' && value instanceof File),
+    value === null || value === undefined || (typeof File !== 'undefined' && value instanceof File),
   'Cover image is required',
 )
 
-export const createEventFormSchema = ({
-  requireCoverImage,
-}: {
-  requireCoverImage: boolean
-}) =>
+export const createEventFormSchema = ({ requireCoverImage }: { requireCoverImage: boolean }) =>
   z
     .object({
-/**
- * coverImageSchema - Utility function
- * @returns void
- */
+      /**
+       * coverImageSchema - Utility function
+       * @returns void
+       */
       title: z
         .string()
         .trim()
@@ -71,10 +65,10 @@ export const createEventFormSchema = ({
       locationType: z.enum(['in-person', 'online'], {
         message: 'Location is required',
       }),
-/**
- * createEventFormSchema - Utility function
- * @returns void
- */
+      /**
+       * createEventFormSchema - Utility function
+       * @returns void
+       */
       types: z.array(z.string()).min(1, 'Event type is required'),
       address: z.string(),
       venueDetails: z.string().max(VENUE_LIMIT, `Max ${VENUE_LIMIT} characters`),
@@ -127,7 +121,11 @@ export const createEventFormSchema = ({
         return
       }
 
-      if (!ALLOWED_IMAGE_TYPES.includes(values.coverImage.type as (typeof ALLOWED_IMAGE_TYPES)[number])) {
+      if (
+        !ALLOWED_IMAGE_TYPES.includes(
+          values.coverImage.type as (typeof ALLOWED_IMAGE_TYPES)[number],
+        )
+      ) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['coverImage'],
@@ -152,9 +150,7 @@ export type InviteEventFormValues = {
 const eventEmailSchema = z.string().trim().email('Please enter valid email addresses')
 
 export const inviteEventFormSchema = z.object({
-  recipientEmails: z
-    .array(eventEmailSchema)
-    .min(1, 'At least one email is required'),
+  recipientEmails: z.array(eventEmailSchema).min(1, 'At least one email is required'),
   personalMessage: z.string().max(2000, 'Message must be 2000 characters or less').optional(),
 })
 
