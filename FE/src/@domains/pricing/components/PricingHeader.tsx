@@ -7,6 +7,10 @@ type PricingHeaderProps = {
   setBillingCycle: (cycle: BillingCycle) => void
 }
 
+/**
+ * PricingHeader - React component
+ * @returns React element
+ */
 export const PricingHeader: React.FC<PricingHeaderProps> = ({ billingCycle, setBillingCycle }) => {
   return (
     <div className="mx-auto mb-16 max-w-3xl text-center">

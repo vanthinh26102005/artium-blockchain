@@ -23,15 +23,27 @@ type PricingPlanCardProps = {
   billingCycle: BillingCycle
 }
 
+/**
+ * PricingPlanCard - React component
+ * @returns React element
+ */
 export const PricingPlanCard: React.FC<PricingPlanCardProps> = ({ plan, billingCycle }) => {
   // -- derived state --
   const price = billingCycle === BILLING_CYCLES.MONTHLY ? plan.price.monthly : plan.price.yearly
   const isFree = price === 0
 
+/**
+ * price - Utility function
+ * @returns void
+ */
   return (
     <div
       className={`relative flex h-full min-h-[460px] flex-col rounded-2xl border bg-white p-8 ${
         plan.isPopular ? 'border-blue-600 shadow-lg ring-1 ring-blue-600' : 'border-slate-200'
+/**
+ * isFree - Utility function
+ * @returns void
+ */
       }`}
     >
       {/* -- popular badge -- */}

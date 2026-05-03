@@ -1,5 +1,9 @@
 import React from 'react'
 
+/**
+ * PricingFooter - React component
+ * @returns React element
+ */
 export const PricingFooter: React.FC = () => {
     return (
         // mb-[-96px] sm:mb-[-112px] pulls SiteFooter up so curve SVG sits on black bridge layer

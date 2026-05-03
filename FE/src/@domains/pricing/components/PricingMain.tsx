@@ -8,6 +8,10 @@ import { PricingSupportServices } from './PricingSupportServices'
 import { PricingComparisonTable } from './PricingComparisonTable'
 import { BILLING_CYCLES, BillingCycle, PRICING_PLANS } from '../constants/pricingData'
 
+/**
+ * PricingMain - React component
+ * @returns React element
+ */
 export const PricingMain: React.FC = () => {
   // -- state --
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(BILLING_CYCLES.MONTHLY)
