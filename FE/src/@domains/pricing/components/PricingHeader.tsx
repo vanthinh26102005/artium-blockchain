@@ -15,12 +15,12 @@ export const PricingHeader: React.FC<PricingHeaderProps> = ({ billingCycle, setB
   return (
     <div className="mx-auto mb-16 max-w-3xl text-center">
       {/* -- title -- */}
-      <h2 className="text-5xl font-black whitespace-nowrap text-[#191414] md:text-6xl">
+      <h2 className="whitespace-nowrap text-5xl font-black text-[#191414] md:text-6xl">
         Choose Your Perfect Plan
       </h2>
 
       {/* -- subtitle/badge -- */}
-      <div className="mt-6 mb-8 inline-flex items-center gap-2 rounded-2xl border border-green-900 !bg-[#A8FF8F] px-4 py-2 text-base font-semibold text-green-800">
+      <div className="mb-8 mt-6 inline-flex items-center gap-2 rounded-2xl border border-green-900 !bg-[#A8FF8F] px-4 py-2 text-base font-semibold text-green-800">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
