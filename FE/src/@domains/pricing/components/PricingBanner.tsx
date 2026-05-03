@@ -1,6 +1,10 @@
 import React from 'react'
 import { Button } from '@shared/components/ui/button'
 
+/**
+ * PricingBanner - React component
+ * @returns React element
+ */
 export const PricingBanner: React.FC = () => {
   return (
     <section

@@ -37,6 +37,10 @@ interface PortfolioContextType {
     avatar: string
 }
 
+/**
+ * defaultItems - Utility function
+ * @returns void
+ */
 const defaultItems: PortfolioItem[] = [
     {
         id: '1',
@@ -75,15 +79,27 @@ const defaultItems: PortfolioItem[] = [
 const PortfolioContext = createContext<PortfolioContextType | null>(null)
 
 export const usePortfolio = () => {
+/**
+ * PortfolioContext - React component
+ * @returns React element
+ */
     const context = useContext(PortfolioContext)
     if (!context) {
         throw new Error('usePortfolio must be used within a PortfolioProvider')
     }
     return context
+/**
+ * usePortfolio - Custom React hook
+ * @returns void
+ */
 }
 
 export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
     const [biography, setBiography] = useState('')
+/**
+ * context - Utility function
+ * @returns void
+ */
     const [statement, setStatement] = useState('')
     const [items, setItems] = useState<PortfolioItem[]>(defaultItems)
     const [cvFileName, setCvFileName] = useState<string | null>(null)
@@ -94,6 +110,10 @@ export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
     const handle = '@artiumartist'
     const location = 'Ho Chi Minh City, Vietnam'
     const avatar = 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face'
+/**
+ * PortfolioProvider - React component
+ * @returns React element
+ */
 
     return (
         <PortfolioContext.Provider
@@ -105,16 +125,32 @@ export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
                 items,
                 setItems,
                 cvFileName,
+/**
+ * artistName - Utility function
+ * @returns void
+ */
                 setCvFileName,
                 salesGraphVisible,
                 setSalesGraphVisible,
                 artistName,
+/**
+ * handle - Utility function
+ * @returns void
+ */
                 handle,
                 location,
                 avatar,
             }}
+/**
+ * location - Utility function
+ * @returns void
+ */
         >
             {children}
         </PortfolioContext.Provider>
     )
+/**
+ * avatar - Utility function
+ * @returns void
+ */
 }

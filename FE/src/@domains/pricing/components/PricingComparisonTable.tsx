@@ -22,53 +22,97 @@ type PlanMeta = {
 }
 
 // Height of the site header (min-h-20 = 80px)
+/**
+ * SITE_HEADER_HEIGHT - React component
+ * @returns React element
+ */
 const SITE_HEADER_HEIGHT = 80
 
 export const PricingComparisonTable: React.FC = () => {
   const [isSticky, setIsSticky] = useState(false)
   const stickyHeaderRef = useRef<HTMLDivElement>(null)
+/**
+ * PricingComparisonTable - React component
+ * @returns React element
+ */
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   const plans: PlanMeta[] = PRICING_PLANS.map((p: PricingPlan) => {
     const id = (p?.id ?? '') as PlanId
     const name = (p?.name ?? '') as string
+/**
+ * stickyHeaderRef - Utility function
+ * @returns void
+ */
 
     const monthlyPrice = p?.price?.monthly
 
     const priceAmountText = typeof monthlyPrice === 'number' ? `$${monthlyPrice}` : ''
+/**
+ * sentinelRef - Utility function
+ * @returns void
+ */
 
     const pricePeriodText = priceAmountText ? '/ month' : ''
 
     const showCta = id !== 'basic'
 
+/**
+ * plans - Utility function
+ * @returns void
+ */
     return { id, name, priceAmountText, pricePeriodText, showCta }
   })
 
   // Detect sticky state using IntersectionObserver
+/**
+ * id - Utility function
+ * @returns void
+ */
   useEffect(() => {
     const sentinel = sentinelRef.current
     if (!sentinel) return
 
+/**
+ * name - Utility function
+ * @returns void
+ */
     const observer = new IntersectionObserver(
       ([entry]) => {
         // When sentinel is not visible (scrolled past), header is sticky
         setIsSticky(!entry.isIntersecting)
       },
+/**
+ * monthlyPrice - Utility function
+ * @returns void
+ */
       {
         threshold: 0,
         rootMargin: `-${SITE_HEADER_HEIGHT}px 0px 0px 0px`,
       }
     )
+/**
+ * priceAmountText - Utility function
+ * @returns void
+ */
 
     observer.observe(sentinel)
     return () => observer.disconnect()
   }, [])
 
+/**
+ * pricePeriodText - Utility function
+ * @returns void
+ */
   const renderValue = (val: string | boolean | undefined) => {
     if (val === true) return <Check className="mx-auto h-5 w-5 text-emerald-600" />
     if (val === false || val === undefined)
       return <Minus className="mx-auto h-5 w-5 text-slate-300" />
     return <span className="font-medium text-slate-700">{val}</span>
+/**
+ * showCta - Utility function
+ * @returns void
+ */
   }
 
   return (
@@ -79,12 +123,20 @@ export const PricingComparisonTable: React.FC = () => {
           <h2 className="text-4xl font-semibold text-slate-900">Compare plans</h2>
           <p className="mt-3 text-slate-600">
             Choose the plan that&apos;s right for you.
+/**
+ * sentinel - Utility function
+ * @returns void
+ */
             <br />
             Whether you&apos;re just starting out or scaling up.
           </p>
 
           {/* Section labels - aligned with table rows */}
           <div className="mt-[198px]">
+/**
+ * observer - Utility function
+ * @returns void
+ */
             {COMPARISON_FEATURES.map((section: ComparisonSection, idx) => (
               <div key={section?.category ?? idx} className={idx !== 0 ? 'mt-0' : ''}>
                 {/* Section title - aligned with empty row in table */}
@@ -103,6 +155,10 @@ export const PricingComparisonTable: React.FC = () => {
                     >
                       <div className="flex items-center gap-3">
                         <span className="whitespace-nowrap text-slate-800">{item.name}</span>
+/**
+ * renderValue - Utility function
+ * @returns void
+ */
                       </div>
                       <span className="text-slate-300">›</span>
                     </div>

@@ -7,6 +7,10 @@ interface PricingBillingToggleProps {
   onChange: (cycle: BillingCycle) => void
 }
 
+/**
+ * PricingBillingToggle - React component
+ * @returns React element
+ */
 export const PricingBillingToggle: React.FC<PricingBillingToggleProps> = ({
   billingCycle,
   onChange,
