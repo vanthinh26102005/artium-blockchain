@@ -20,10 +20,10 @@ export const resolveUploadCreatorName = (
   user?: UserPayload | null,
   sellerProfile?: SellerProfilePayload | null,
 ) =>
-/**
- * getEmailName - Utility function
- * @returns void
- */
+  /**
+   * getEmailName - Utility function
+   * @returns void
+   */
   cleanText(sellerProfile?.displayName) ??
   cleanText(user?.fullName) ??
   cleanText(user?.displayName) ??
@@ -45,10 +45,10 @@ export const resolveUploadArtistAvatarUrl = (
 
 export const getUploadArtistInitials = (artistName: string) => {
   const words = artistName
-/**
- * resolveUploadArtistName - Utility function
- * @returns void
- */
+    /**
+     * resolveUploadArtistName - Utility function
+     * @returns void
+     */
     .split(/\s+/)
     .map((word) => word.trim())
     .filter(Boolean)
@@ -57,10 +57,10 @@ export const getUploadArtistInitials = (artistName: string) => {
     return 'A'
   }
 
-/**
- * resolveUploadArtistAvatarUrl - Utility function
- * @returns void
- */
+  /**
+   * resolveUploadArtistAvatarUrl - Utility function
+   * @returns void
+   */
   return words
     .slice(0, 2)
     .map((word) => word[0]?.toUpperCase())

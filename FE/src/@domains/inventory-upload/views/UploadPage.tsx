@@ -33,87 +33,87 @@ const TOTAL_STEPS = 2
 export const UploadPage = () => {
   // -- router --
   const router = useRouter()
-/**
- * UploadPage - React component
- * @returns React element
- */
+  /**
+   * UploadPage - React component
+   * @returns React element
+   */
 
   // -- auth --
   const user = useAuthStore((state) => state.user)
 
   // -- state --
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
   const step = useUploadArtworkStore((state) => state.step)
   const draftId = useUploadArtworkStore((state) => state.draftId)
   const resetDraft = useUploadArtworkStore((state) => state.resetDraft)
   const nextStep = useUploadArtworkStore((state) => state.nextStep)
   const prevStep = useUploadArtworkStore((state) => state.prevStep)
   const clearDirty = useUploadArtworkStore((state) => state.clearDirty)
-/**
- * user - Custom React hook
- * @returns void
- */
+  /**
+   * user - Custom React hook
+   * @returns void
+   */
   const revokeMediaPreviews = useUploadArtworkStore((state) => state.revokeMediaPreviews)
 
   const [isExitOpen, setIsExitOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [sellerProfile, setSellerProfile] = useState<SellerProfilePayload | null>(null)
   const allowNavigationRef = useRef(false)
-/**
- * step - Utility function
- * @returns void
- */
+  /**
+   * step - Utility function
+   * @returns void
+   */
 
   // -- submission --
   const {
     submit,
-/**
- * draftId - Utility function
- * @returns void
- */
+    /**
+     * draftId - Utility function
+     * @returns void
+     */
     updateExisting,
     submitting,
     progress,
     error,
-/**
- * resetDraft - Utility function
- * @returns void
- */
+    /**
+     * resetDraft - Utility function
+     * @returns void
+     */
     completedArtwork,
     reset: resetSubmit,
   } = useArtworkSubmit()
 
-/**
- * nextStep - Utility function
- * @returns void
- */
+  /**
+   * nextStep - Utility function
+   * @returns void
+   */
   const {
     isDraftLoading,
     isEditingArtwork,
     artworkIdParam,
-/**
- * prevStep - Utility function
- * @returns void
- */
+    /**
+     * prevStep - Utility function
+     * @returns void
+     */
     hydrationError,
     handleRetryDraftLoad,
     handleStartNewDraft,
   } = useUploadDraftInit(allowNavigationRef)
-/**
- * clearDirty - Utility function
- * @returns void
- */
+  /**
+   * clearDirty - Utility function
+   * @returns void
+   */
 
   useUploadNavigationBlocker(allowNavigationRef)
 
   // -- effects --
-/**
- * revokeMediaPreviews - Utility function
- * @returns void
- */
+  /**
+   * revokeMediaPreviews - Utility function
+   * @returns void
+   */
   useEffect(() => {
     if (!user?.id) {
       setSellerProfile(null)
@@ -122,10 +122,10 @@ export const UploadPage = () => {
 
     let isCancelled = false
 
-/**
- * allowNavigationRef - Utility function
- * @returns void
- */
+    /**
+     * allowNavigationRef - Utility function
+     * @returns void
+     */
     const loadSellerProfile = async () => {
       try {
         const profile = await profileApis.getSellerProfileByUserId(user.id)
@@ -162,19 +162,19 @@ export const UploadPage = () => {
         // Fallback alert instead of setting unmanaged hydration error state directly on UI without hook sync
         alert('Please log in to submit artwork.')
         return
-/**
- * loadSellerProfile - Utility function
- * @returns void
- */
+        /**
+         * loadSellerProfile - Utility function
+         * @returns void
+         */
       }
 
       if (isEditingArtwork && !artworkIdParam) {
         alert('Artwork id is missing. Refresh the page and try again.')
         return
-/**
- * profile - Utility function
- * @returns void
- */
+        /**
+         * profile - Utility function
+         * @returns void
+         */
       }
 
       if (!isEditingArtwork && !draftId) {
@@ -201,10 +201,10 @@ export const UploadPage = () => {
           // Success! Navigate to inventory or artwork detail
           allowNavigationRef.current = true
           clearDirty()
-/**
- * handlePrevStep - Utility function
- * @returns void
- */
+          /**
+           * handlePrevStep - Utility function
+           * @returns void
+           */
           router.push(`/inventory`)
         }
       } catch (err) {
@@ -212,10 +212,10 @@ export const UploadPage = () => {
         // Error is already captured in the hook
       } finally {
         setIsSubmitting(false)
-/**
- * handleNextStep - Utility function
- * @returns void
- */
+        /**
+         * handleNextStep - Utility function
+         * @returns void
+         */
       }
     } else {
       // Move to next step
@@ -244,18 +244,15 @@ export const UploadPage = () => {
     setIsExitOpen(false)
     router.push('/inventory')
   }
-/**
- * creatorName - Utility function
- * @returns void
- */
+  /**
+   * creatorName - Utility function
+   * @returns void
+   */
 
   // -- render --
   return (
     <>
-/**
- * artwork - Utility function
- * @returns void
- */
+      /** * artwork - Utility function * @returns void */
       <Metadata title={`${isEditingArtwork ? 'Edit' : 'Upload'} Artwork | Artium`} />
       <UploadWizardShell
         title={isEditingArtwork ? 'Edit Artwork' : 'Upload Artwork'}
@@ -264,9 +261,7 @@ export const UploadPage = () => {
         onCancel={handleClose}
         onPrev={handlePrevStep}
         onNext={handleNextStep}
-        isNextDisabled={
-          isDraftLoading || !!hydrationError || submitting || isSubmitting
-        }
+        isNextDisabled={isDraftLoading || !!hydrationError || submitting || isSubmitting}
       >
         {isDraftLoading ? (
           <div className="mx-auto mt-16 max-w-2xl rounded-[28px] border border-black/10 bg-white p-8 text-center shadow-sm">
@@ -285,10 +280,7 @@ export const UploadPage = () => {
             </h1>
             <p className="mt-3 text-[15px] leading-6 text-black/65">{hydrationError}</p>
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-/**
- * handleClose - Utility function
- * @returns void
- */
+              /** * handleClose - Utility function * @returns void */
               <Button
                 type="button"
                 variant="outline"
@@ -300,10 +292,7 @@ export const UploadPage = () => {
               <Button type="button" onClick={handleStartNewDraft} className="rounded-full px-6">
                 Start New Draft
               </Button>
-/**
- * handleExitDraft - Utility function
- * @returns void
- */
+              /** * handleExitDraft - Utility function * @returns void */
             </div>
           </div>
         ) : step === 1 ? (
@@ -313,13 +302,10 @@ export const UploadPage = () => {
         )}
       </UploadWizardShell>
       <Dialog open={isExitOpen} onOpenChange={setIsExitOpen}>
-        <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">
-/**
- * handleDeleteDraft - Utility function
- * @returns void
- */
+        <DialogContent size="4xl" className="rounded-4xl overflow-hidden bg-white p-0">
+          /** * handleDeleteDraft - Utility function * @returns void */
           <div className="px-8 py-6">
-            <h2 className="text-[22px] font-bold text-[#191414] uppercase">
+            <h2 className="text-[22px] font-bold uppercase text-[#191414]">
               {isEditingArtwork ? 'Exit Editing?' : 'Exit Draft?'}
             </h2>
             <p className="mt-4 text-[18px] text-[#191414]">
@@ -346,7 +332,6 @@ export const UploadPage = () => {
           </div>
         </DialogContent>
       </Dialog>
-
       {/* Submission Progress Dialog */}
       <Dialog
         open={submitting || !!completedArtwork}
@@ -356,7 +341,7 @@ export const UploadPage = () => {
           }
         }}
       >
-        <DialogContent size="4xl" className="overflow-hidden rounded-4xl bg-white p-0">
+        <DialogContent size="4xl" className="rounded-4xl overflow-hidden bg-white p-0">
           <div className="px-8 py-6">
             {progress && (
               <SubmissionProgress

@@ -14,47 +14,47 @@ const isIndexedDbAvailable = () => typeof window !== 'undefined' && typeof index
 
 const openDatabase = () =>
   new Promise<IDBDatabase>((resolve, reject) => {
-/**
- * DB_VERSION - React component
- * @returns React element
- */
+    /**
+     * DB_VERSION - React component
+     * @returns React element
+     */
     const request = indexedDB.open(DB_NAME, DB_VERSION)
 
     request.onupgradeneeded = () => {
       const db = request.result
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-/**
- * isIndexedDbAvailable - Utility function
- * @returns void
- */
+        /**
+         * isIndexedDbAvailable - Utility function
+         * @returns void
+         */
         db.createObjectStore(STORE_NAME)
       }
     }
 
     request.onsuccess = () => {
-/**
- * openDatabase - Utility function
- * @returns void
- */
+      /**
+       * openDatabase - Utility function
+       * @returns void
+       */
       resolve(request.result)
     }
 
     request.onerror = () => {
       reject(request.error)
-/**
- * request - Utility function
- * @returns void
- */
+      /**
+       * request - Utility function
+       * @returns void
+       */
     }
   })
 
 export const saveStoredFile = async (id: string, file: File) => {
   if (!isIndexedDbAvailable()) {
     return
-/**
- * db - Utility function
- * @returns void
- */
+    /**
+     * db - Utility function
+     * @returns void
+     */
   }
   const db = await openDatabase()
   await new Promise<void>((resolve, reject) => {
@@ -73,10 +73,10 @@ export const saveStoredFile = async (id: string, file: File) => {
     transaction.onabort = () => {
       db.close()
       reject(transaction.error)
-/**
- * saveStoredFile - Utility function
- * @returns void
- */
+      /**
+       * saveStoredFile - Utility function
+       * @returns void
+       */
     }
   })
 }
@@ -84,27 +84,27 @@ export const saveStoredFile = async (id: string, file: File) => {
 export const getStoredFile = async (id: string) => {
   if (!isIndexedDbAvailable()) {
     return undefined
-/**
- * db - Utility function
- * @returns void
- */
+    /**
+     * db - Utility function
+     * @returns void
+     */
   }
   const db = await openDatabase()
   return new Promise<File | undefined>((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readonly')
     const store = transaction.objectStore(STORE_NAME)
-/**
- * transaction - Utility function
- * @returns void
- */
+    /**
+     * transaction - Utility function
+     * @returns void
+     */
     const request = store.get(id)
 
     request.onsuccess = () => {
       resolve(request.result as File | undefined)
-/**
- * store - Utility function
- * @returns void
- */
+      /**
+       * store - Utility function
+       * @returns void
+       */
     }
     request.onerror = () => {
       reject(request.error)
@@ -126,10 +126,10 @@ export const removeStoredFile = async (id: string) => {
   if (!isIndexedDbAvailable()) {
     return
   }
-/**
- * getStoredFile - Utility function
- * @returns void
- */
+  /**
+   * getStoredFile - Utility function
+   * @returns void
+   */
   const db = await openDatabase()
   await new Promise<void>((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readwrite')
@@ -137,27 +137,27 @@ export const removeStoredFile = async (id: string) => {
     store.delete(id)
 
     transaction.oncomplete = () => {
-/**
- * db - Utility function
- * @returns void
- */
+      /**
+       * db - Utility function
+       * @returns void
+       */
       db.close()
       resolve()
     }
     transaction.onerror = () => {
       db.close()
-/**
- * transaction - Utility function
- * @returns void
- */
+      /**
+       * transaction - Utility function
+       * @returns void
+       */
       reject(transaction.error)
     }
     transaction.onabort = () => {
       db.close()
-/**
- * store - Utility function
- * @returns void
- */
+      /**
+       * store - Utility function
+       * @returns void
+       */
       reject(transaction.error)
     }
   })
@@ -190,10 +190,10 @@ export const clearStoredFiles = async () => {
       reject(transaction.error)
     }
   })
-/**
- * removeStoredFile - Utility function
- * @returns void
- */
+  /**
+   * removeStoredFile - Utility function
+   * @returns void
+   */
 }
 
 /**
