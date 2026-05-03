@@ -1,7 +1,15 @@
+/**
+ * PASSWORD_RESET_SESSION_KEY - React component
+ * @returns React element
+ */
 const PASSWORD_RESET_SESSION_KEY = 'artium.auth.password-reset'
 const SKIP_GOOGLE_BRIDGE_KEY = 'artium.auth.skip-google-bridge'
 
 type PasswordResetSession = {
+/**
+ * SKIP_GOOGLE_BRIDGE_KEY - React component
+ * @returns React element
+ */
   email: string
   resetToken: string
 }
@@ -12,11 +20,19 @@ export const readPasswordResetSession = (): PasswordResetSession | null => {
   if (!isBrowser()) {
     return null
   }
+/**
+ * isBrowser - Utility function
+ * @returns void
+ */
 
   const rawSession = window.sessionStorage.getItem(PASSWORD_RESET_SESSION_KEY)
   if (!rawSession) {
     return null
   }
+/**
+ * readPasswordResetSession - Utility function
+ * @returns void
+ */
 
   try {
     return JSON.parse(rawSession) as PasswordResetSession
@@ -25,6 +41,10 @@ export const readPasswordResetSession = (): PasswordResetSession | null => {
     return null
   }
 }
+/**
+ * rawSession - Utility function
+ * @returns void
+ */
 
 export const writePasswordResetSession = (payload: PasswordResetSession) => {
   if (!isBrowser()) {
@@ -41,6 +61,10 @@ export const clearPasswordResetSession = () => {
 
   window.sessionStorage.removeItem(PASSWORD_RESET_SESSION_KEY)
 }
+/**
+ * writePasswordResetSession - Utility function
+ * @returns void
+ */
 
 export const markSkipGoogleBridge = () => {
   if (!isBrowser()) {
@@ -52,6 +76,10 @@ export const markSkipGoogleBridge = () => {
 
 export const consumeSkipGoogleBridge = () => {
   if (!isBrowser()) {
+/**
+ * clearPasswordResetSession - Utility function
+ * @returns void
+ */
     return false
   }
 
@@ -62,3 +90,16 @@ export const consumeSkipGoogleBridge = () => {
 
   return shouldSkipBridge
 }
+
+/**
+ * markSkipGoogleBridge - Utility function
+ * @returns void
+ */
+/**
+ * consumeSkipGoogleBridge - Utility function
+ * @returns void
+ */
+/**
+ * shouldSkipBridge - Utility function
+ * @returns void
+ */

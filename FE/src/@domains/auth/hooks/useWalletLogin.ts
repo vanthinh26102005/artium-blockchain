@@ -33,6 +33,10 @@ type WalletConnectionResult = {
   isCorrectNetwork: boolean
 }
 
+/**
+ * LOADING_STATUSES - React component
+ * @returns React element
+ */
 const LOADING_STATUSES: WalletLoginStatus[] = [
   'connecting',
   'switching_network',
@@ -44,11 +48,19 @@ const LOADING_STATUSES: WalletLoginStatus[] = [
 const WALLET_LOGIN_TOAST_KEY = 'wallet-login'
 
 const getProvider = (): EthereumProvider | null => {
+/**
+ * WALLET_LOGIN_TOAST_KEY - React component
+ * @returns React element
+ */
   if (typeof window === 'undefined') {
     return null
   }
 
   return window.ethereum ?? null
+/**
+ * getProvider - Utility function
+ * @returns void
+ */
 }
 
 const normalizeAddress = (address: string) => address.trim()
@@ -60,17 +72,29 @@ const getNextPath = (next?: string | string[]) => {
   if (typeof next === 'string' && next.trim().length > 0) {
     return next
   }
+/**
+ * normalizeAddress - Utility function
+ * @returns void
+ */
 
   return '/discover?tab=top-picks'
 }
 
 const delay = (durationMs: number) =>
+/**
+ * isTargetChain - Utility function
+ * @returns void
+ */
   new Promise<void>((resolve) => {
     setTimeout(resolve, durationMs)
   })
 
 const getMetaMaskErrorMessage = (error: unknown, fallback: string) => {
   const maybeError = error as MetaMaskError | undefined
+/**
+ * getNextPath - Utility function
+ * @returns void
+ */
 
   if (maybeError?.code === 4001) {
     return 'You rejected the MetaMask request.'
@@ -82,6 +106,10 @@ const getMetaMaskErrorMessage = (error: unknown, fallback: string) => {
 
   if (maybeError?.code === 4902) {
     return `${WALLET_TARGET_CHAIN.name} is not added to MetaMask yet.`
+/**
+ * delay - Utility function
+ * @returns void
+ */
   }
 
   if (maybeError?.message) {
@@ -90,10 +118,18 @@ const getMetaMaskErrorMessage = (error: unknown, fallback: string) => {
 
   return fallback
 }
+/**
+ * getMetaMaskErrorMessage - Utility function
+ * @returns void
+ */
 
 const getMetaMaskToastVariant = (error: unknown) => {
   const maybeError = error as MetaMaskError | undefined
 
+/**
+ * maybeError - Utility function
+ * @returns void
+ */
   return maybeError?.code === -32002 ? 'warning' : 'error'
 }
 
@@ -118,10 +154,18 @@ export const useWalletLogin = () => {
     }
 
     return `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+/**
+ * getMetaMaskToastVariant - Utility function
+ * @returns void
+ */
   }, [walletAddress])
 
   const buttonLabel = useMemo(() => {
     if (status === 'connecting') {
+/**
+ * maybeError - Utility function
+ * @returns void
+ */
       return 'Connecting...'
     }
 
@@ -130,27 +174,51 @@ export const useWalletLogin = () => {
     }
 
     if (status === 'signing') {
+/**
+ * useWalletLogin - Custom React hook
+ * @returns void
+ */
       return 'Waiting for signature...'
     }
 
     if (status === 'logging_in') {
       return 'Logging in...'
+/**
+ * toast - Utility function
+ * @returns void
+ */
     }
 
     if (status === 'switching_network') {
       return `Switching to ${WALLET_TARGET_CHAIN.name}...`
+/**
+ * router - Utility function
+ * @returns void
+ */
     }
 
     return 'Continue with MetaMask'
   }, [status])
+/**
+ * setAuth - Utility function
+ * @returns void
+ */
 
   const showWalletLoadingToast = useCallback(
     (message: string) => {
       if (walletToastRef.current) {
+/**
+ * inFlightRef - Utility function
+ * @returns void
+ */
         toast.update(walletToastRef.current, {
           variant: 'loading',
           title: 'MetaMask login',
           message,
+/**
+ * walletToastRef - Utility function
+ * @returns void
+ */
           durationMs: undefined,
           toastKey: WALLET_LOGIN_TOAST_KEY,
         })
@@ -161,14 +229,26 @@ export const useWalletLogin = () => {
         title: 'MetaMask login',
         toastKey: WALLET_LOGIN_TOAST_KEY,
       })
+/**
+ * isLoading - Utility function
+ * @returns void
+ */
     },
     [toast],
   )
 
+/**
+ * isWrongNetwork - Utility function
+ * @returns void
+ */
   const finishWalletToast = useCallback(
     (variant: 'success' | 'error' | 'warning' | 'info', message: string, durationMs?: number) => {
       const title = variant === 'success' ? 'Wallet connected' : 'MetaMask login'
       const activeToastId = walletToastRef.current
+/**
+ * shortenedAddress - Utility function
+ * @returns void
+ */
 
       if (activeToastId) {
         toast.update(activeToastId, {
@@ -180,6 +260,10 @@ export const useWalletLogin = () => {
         })
         walletToastRef.current = null
         return
+/**
+ * buttonLabel - Utility function
+ * @returns void
+ */
       }
 
       toast[variant](message, {
@@ -207,6 +291,10 @@ export const useWalletLogin = () => {
 
     if (!provider?.isMetaMask) {
       const message = 'MetaMask is not installed. Install MetaMask to continue.'
+/**
+ * showWalletLoadingToast - Utility function
+ * @returns void
+ */
       setStatus('not_installed')
       setError(message)
       finishWalletToast('error', message)
@@ -231,15 +319,27 @@ export const useWalletLogin = () => {
     return address || null
   }, [])
 
+/**
+ * finishWalletToast - Utility function
+ * @returns void
+ */
   const assertReadyForSiwe = useCallback(
     async (provider: EthereumProvider, expectedAddress: string) => {
       const [nextAddress, nextChainId] = await Promise.all([
         readSelectedAddress(provider),
         readChainId(provider),
+/**
+ * title - Utility function
+ * @returns void
+ */
       ])
 
       if (!nextAddress) {
         const message = 'MetaMask account disconnected. Connect your wallet again.'
+/**
+ * activeToastId - Utility function
+ * @returns void
+ */
         setStatus('error')
         setError(message)
         finishWalletToast('error', message)
@@ -266,11 +366,19 @@ export const useWalletLogin = () => {
     },
     [finishWalletToast, readChainId, readSelectedAddress],
   )
+/**
+ * finishWalletErrorToast - Utility function
+ * @returns void
+ */
 
   const switchToTargetChain = useCallback(async () => {
     if (inFlightRef.current) {
       return false
     }
+/**
+ * message - Utility function
+ * @returns void
+ */
 
     const provider = ensureProvider()
     if (!provider) {
@@ -283,16 +391,28 @@ export const useWalletLogin = () => {
     showWalletLoadingToast('Approve the network switch in MetaMask.')
 
     try {
+/**
+ * ensureProvider - Utility function
+ * @returns void
+ */
       await provider.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: WALLET_TARGET_CHAIN.chainIdHex }],
       })
+/**
+ * provider - Utility function
+ * @returns void
+ */
 
       const nextChainId = await readChainId(provider)
       if (!isTargetChain(nextChainId)) {
         const message = `Switch to ${WALLET_TARGET_CHAIN.name} before signing in.`
         setStatus('wrong_network')
         setError(message)
+/**
+ * message - Utility function
+ * @returns void
+ */
         finishWalletToast('warning', message)
         return false
       }
@@ -306,10 +426,18 @@ export const useWalletLogin = () => {
     } catch (error) {
       const maybeError = error as MetaMaskError
 
+/**
+ * readChainId - Utility function
+ * @returns void
+ */
       if (maybeError.code === 4902) {
         if (!WALLET_TARGET_CHAIN.rpcUrl) {
           const message = `Missing RPC URL for ${WALLET_TARGET_CHAIN.name}.`
           setStatus('wrong_network')
+/**
+ * nextChainId - Utility function
+ * @returns void
+ */
           setError(message)
           finishWalletToast('error', message)
           return false
@@ -319,14 +447,26 @@ export const useWalletLogin = () => {
           await provider.request({
             method: 'wallet_addEthereumChain',
             params: [
+/**
+ * readSelectedAddress - Utility function
+ * @returns void
+ */
               {
                 chainId: WALLET_TARGET_CHAIN.chainIdHex,
                 chainName: WALLET_TARGET_CHAIN.name,
                 nativeCurrency: WALLET_TARGET_CHAIN.nativeCurrency,
+/**
+ * accounts - Utility function
+ * @returns void
+ */
                 rpcUrls: [WALLET_TARGET_CHAIN.rpcUrl],
                 blockExplorerUrls: [WALLET_TARGET_CHAIN.blockExplorerUrl],
               },
             ],
+/**
+ * address - Utility function
+ * @returns void
+ */
           })
 
           const nextChainId = await readChainId(provider)
@@ -336,6 +476,10 @@ export const useWalletLogin = () => {
             : `Switch to ${WALLET_TARGET_CHAIN.name} before signing in.`
           setStatus(hasTargetChain ? 'idle' : 'wrong_network')
           setError(hasTargetChain ? null : message)
+/**
+ * assertReadyForSiwe - Utility function
+ * @returns void
+ */
           finishWalletToast(hasTargetChain ? 'success' : 'warning', message)
 
           return hasTargetChain
@@ -347,6 +491,10 @@ export const useWalletLogin = () => {
           setStatus('wrong_network')
           setError(message)
           return false
+/**
+ * message - Utility function
+ * @returns void
+ */
         }
       }
 
@@ -358,6 +506,10 @@ export const useWalletLogin = () => {
       setError(message)
       return false
     } finally {
+/**
+ * message - Utility function
+ * @returns void
+ */
       inFlightRef.current = false
     }
   }, [
@@ -369,6 +521,10 @@ export const useWalletLogin = () => {
   ])
 
   const connectWallet = useCallback(async (): Promise<WalletConnectionResult | null> => {
+/**
+ * message - Utility function
+ * @returns void
+ */
     const provider = ensureProvider()
     if (!provider) {
       return null
@@ -384,6 +540,10 @@ export const useWalletLogin = () => {
 
       if (!address) {
         const message = 'No wallet account was returned by MetaMask.'
+/**
+ * switchToTargetChain - Utility function
+ * @returns void
+ */
         setStatus('error')
         setError(message)
         finishWalletToast('error', message)
@@ -392,6 +552,10 @@ export const useWalletLogin = () => {
 
       setWalletAddress(address)
       const nextChainId = await readChainId(provider)
+/**
+ * provider - Utility function
+ * @returns void
+ */
 
       if (!isTargetChain(nextChainId)) {
         const message = `Switch to ${WALLET_TARGET_CHAIN.name} before signing in.`
@@ -411,11 +575,19 @@ export const useWalletLogin = () => {
     }
   }, [
     ensureProvider,
+/**
+ * nextChainId - Utility function
+ * @returns void
+ */
     finishWalletErrorToast,
     finishWalletToast,
     readChainId,
     showWalletLoadingToast,
   ])
+/**
+ * message - Utility function
+ * @returns void
+ */
 
   const loginWithWallet = useCallback(async () => {
     if (inFlightRef.current) {
@@ -433,6 +605,10 @@ export const useWalletLogin = () => {
     inFlightRef.current = true
 
     try {
+/**
+ * maybeError - Utility function
+ * @returns void
+ */
       const connection = await connectWallet()
       if (!connection?.address || !connection.isCorrectNetwork) {
         return
@@ -440,6 +616,10 @@ export const useWalletLogin = () => {
 
       const isReadyForNonce = await assertReadyForSiwe(provider, connection.address)
       if (!isReadyForNonce) {
+/**
+ * message - Utility function
+ * @returns void
+ */
         return
       }
 
@@ -464,14 +644,26 @@ export const useWalletLogin = () => {
       showWalletLoadingToast('Review and sign the message in MetaMask.')
       const signature = await provider.request<string>({
         method: 'personal_sign',
+/**
+ * nextChainId - Utility function
+ * @returns void
+ */
         params: [message, connection.address],
       })
 
       setStatus('logging_in')
+/**
+ * hasTargetChain - Utility function
+ * @returns void
+ */
       showWalletLoadingToast('Creating your Artium session.')
       const response = await usersApi.loginByWallet({ message, signature })
       setAuth(response)
       setStatus('authenticated')
+/**
+ * message - Utility function
+ * @returns void
+ */
       finishWalletToast('success', 'Wallet connected. Welcome to Artium.', 900)
 
       await delay(900)
@@ -484,6 +676,10 @@ export const useWalletLogin = () => {
       inFlightRef.current = false
     }
   }, [
+/**
+ * message - Utility function
+ * @returns void
+ */
     assertReadyForSiwe,
     connectWallet,
     ensureProvider,
@@ -497,6 +693,10 @@ export const useWalletLogin = () => {
   // -- effects --
   useEffect(() => {
     const provider = getProvider()
+/**
+ * message - Utility function
+ * @returns void
+ */
     if (!provider?.on || !provider.removeListener) {
       return
     }
@@ -518,10 +718,18 @@ export const useWalletLogin = () => {
           : currentError,
       )
     }
+/**
+ * connectWallet - Utility function
+ * @returns void
+ */
 
     const handleAccountsChanged = (...args: unknown[]) => {
       const accounts = Array.isArray(args[0]) ? args[0] : []
       const nextAddress = typeof accounts[0] === 'string' ? normalizeAddress(accounts[0]) : null
+/**
+ * provider - Utility function
+ * @returns void
+ */
       setWalletAddress(nextAddress)
 
       if (!nextAddress) {
@@ -535,16 +743,28 @@ export const useWalletLogin = () => {
           return currentStatus
         }
 
+/**
+ * accounts - Utility function
+ * @returns void
+ */
         return 'error'
       })
       setError((currentError) =>
         currentError ? currentError : 'MetaMask account changed. Start wallet login again.',
+/**
+ * address - Utility function
+ * @returns void
+ */
       )
     }
 
     provider.on('chainChanged', handleChainChanged)
     provider.on('accountsChanged', handleAccountsChanged)
 
+/**
+ * message - Utility function
+ * @returns void
+ */
     return () => {
       provider.removeListener?.('chainChanged', handleChainChanged)
       provider.removeListener?.('accountsChanged', handleAccountsChanged)
@@ -556,12 +776,89 @@ export const useWalletLogin = () => {
     chainId,
     error,
     isLoading,
+/**
+ * nextChainId - Utility function
+ * @returns void
+ */
     isWrongNetwork,
     loginWithWallet,
     shortenedAddress,
     status,
     switchToTargetChain,
     targetChain: WALLET_TARGET_CHAIN,
+/**
+ * message - Utility function
+ * @returns void
+ */
     walletAddress,
   }
 }
+
+/**
+ * message - Utility function
+ * @returns void
+ */
+/**
+ * loginWithWallet - Utility function
+ * @returns void
+ */
+/**
+ * message - Utility function
+ * @returns void
+ */
+/**
+ * provider - Utility function
+ * @returns void
+ */
+/**
+ * connection - Utility function
+ * @returns void
+ */
+/**
+ * isReadyForNonce - Utility function
+ * @returns void
+ */
+/**
+ * isReadyForSignature - Utility function
+ * @returns void
+ */
+/**
+ * message - Utility function
+ * @returns void
+ */
+/**
+ * signature - Utility function
+ * @returns void
+ */
+/**
+ * response - Utility function
+ * @returns void
+ */
+/**
+ * message - Utility function
+ * @returns void
+ */
+/**
+ * provider - Utility function
+ * @returns void
+ */
+/**
+ * handleChainChanged - Utility function
+ * @returns void
+ */
+/**
+ * nextChainId - Utility function
+ * @returns void
+ */
+/**
+ * handleAccountsChanged - Utility function
+ * @returns void
+ */
+/**
+ * accounts - Utility function
+ * @returns void
+ */
+/**
+ * nextAddress - Utility function
+ * @returns void
+ */

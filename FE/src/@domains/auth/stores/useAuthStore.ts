@@ -6,6 +6,10 @@ import { signOut } from 'next-auth/react'
 import type { UserPayload } from '@shared/types/auth'
 import { markSkipGoogleBridge } from '../services/browserAuthState'
 
+/**
+ * AUTH_STORAGE_KEY - React component
+ * @returns React element
+ */
 const AUTH_STORAGE_KEY = 'artium.auth-storage'
 
 type AuthPayload = {
@@ -32,17 +36,29 @@ type AuthState = {
 const isBrowser = () => typeof window !== 'undefined'
 
 const getIsAuthenticated = (user: UserPayload | null, accessToken: string | null) =>
+/**
+ * isBrowser - Utility function
+ * @returns void
+ */
   Boolean(user && accessToken)
 
 const readStoredAuth = () => {
   if (!isBrowser()) {
     return null
+/**
+ * getIsAuthenticated - Utility function
+ * @returns void
+ */
   }
 
   const rawAuth = window.localStorage.getItem(AUTH_STORAGE_KEY)
   if (!rawAuth) {
     return null
   }
+/**
+ * readStoredAuth - Utility function
+ * @returns void
+ */
 
   try {
     return JSON.parse(rawAuth) as PersistedAuthPayload
@@ -51,6 +67,10 @@ const readStoredAuth = () => {
     return null
   }
 }
+/**
+ * rawAuth - Utility function
+ * @returns void
+ */
 
 const writeStoredAuth = (payload: PersistedAuthPayload) => {
   if (!isBrowser()) {
@@ -67,6 +87,10 @@ const writeStoredAuth = (payload: PersistedAuthPayload) => {
 const clearStoredAuth = () => {
   if (!isBrowser()) {
     return
+/**
+ * writeStoredAuth - Utility function
+ * @returns void
+ */
   }
 
   window.localStorage.removeItem(AUTH_STORAGE_KEY)
@@ -82,6 +106,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     writeStoredAuth({ accessToken, user })
 
     set({
+/**
+ * clearStoredAuth - Utility function
+ * @returns void
+ */
       accessToken,
       refreshToken,
       user,
@@ -93,6 +121,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     clearStoredAuth()
 
     set({
+/**
+ * useAuthStore - Custom React hook
+ * @returns void
+ */
       accessToken: null,
       refreshToken: null,
       user: null,
@@ -128,6 +160,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       const { default: usersApi } = await import('@shared/apis/usersApi')
+/**
+ * storedAuth - Utility function
+ * @returns void
+ */
       const user = await usersApi.getMe()
       if (!user || (!user.id && !user.email)) {
         get().clearAuth()
@@ -155,6 +191,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (isBrowser()) {
       markSkipGoogleBridge()
 
+/**
+ * user - Custom React hook
+ * @returns void
+ */
       try {
         await signOut({ redirect: false })
       } finally {
@@ -169,3 +209,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 }))
 
 export type { AuthPayload, AuthState }
+
+/**
+ * status - Utility function
+ * @returns void
+ */
