@@ -64,18 +64,18 @@ export const InventoryArtworkList = ({
   const selectedIds = useInventorySelectionStore((state) => state.selectedIds)
   const toggle = useInventorySelectionStore((state) => state.toggle)
 
-/**
- * selectedIds - Utility function
- * @returns void
- */
+  /**
+   * selectedIds - Utility function
+   * @returns void
+   */
   // -- derived --
   const { rootFolders, childFoldersMap } = useMemo(() => {
     const childMap = new Map<string | null, FolderWithCount[]>()
 
-/**
- * toggle - Utility function
- * @returns void
- */
+    /**
+     * toggle - Utility function
+     * @returns void
+     */
     folders.forEach((folder) => {
       const parentId = folder.parentId || null
       const existing = childMap.get(parentId) || []
@@ -83,28 +83,28 @@ export const InventoryArtworkList = ({
     })
 
     return {
-/**
- * childMap - Utility function
- * @returns void
- */
+      /**
+       * childMap - Utility function
+       * @returns void
+       */
       rootFolders: childMap.get(null) || [],
       childFoldersMap: childMap,
     }
   }, [folders])
 
   const folderNameById = useMemo(() => {
-/**
- * parentId - Utility function
- * @returns void
- */
+    /**
+     * parentId - Utility function
+     * @returns void
+     */
     return new Map(folders.map((folder) => [folder.id, folder.name]))
   }, [folders])
 
   const artworksByFolder = useMemo(() => {
-/**
- * existing - Utility function
- * @returns void
- */
+    /**
+     * existing - Utility function
+     * @returns void
+     */
     const grouped = new Map<string | null, InventoryArtwork[]>()
 
     artworks.forEach((artwork) => {
@@ -118,10 +118,10 @@ export const InventoryArtworkList = ({
 
   const rootArtworks = useMemo(() => {
     return artworksByFolder.get(null) || []
-/**
- * folderNameById - Utility function
- * @returns void
- */
+    /**
+     * folderNameById - Utility function
+     * @returns void
+     */
   }, [artworksByFolder])
 
   // -- handlers --
@@ -129,36 +129,36 @@ export const InventoryArtworkList = ({
     setExpandedFolders((prev) => {
       const next = new Set(prev)
       if (next.has(folderId)) {
-/**
- * artworksByFolder - Utility function
- * @returns void
- */
+        /**
+         * artworksByFolder - Utility function
+         * @returns void
+         */
         next.delete(folderId)
       } else {
         next.add(folderId)
       }
-/**
- * grouped - Utility function
- * @returns void
- */
+      /**
+       * grouped - Utility function
+       * @returns void
+       */
       return next
     })
   }
 
   const canDropFolderInto = (draggedId: string, targetId: string): boolean => {
     if (draggedId === targetId) return false
-/**
- * folderId - Utility function
- * @returns void
- */
+    /**
+     * folderId - Utility function
+     * @returns void
+     */
     const checkDescendant = (folderId: string): boolean => {
       const children = childFoldersMap.get(folderId) || []
       for (const child of children) {
         if (child.id === targetId) return true
-/**
- * existing - Utility function
- * @returns void
- */
+        /**
+         * existing - Utility function
+         * @returns void
+         */
         if (checkDescendant(child.id)) return true
       }
       return false
@@ -169,10 +169,10 @@ export const InventoryArtworkList = ({
   const handleFolderDragStart = (index: number, folderId: string) => (e: React.DragEvent) => {
     setDraggedFolderIndex(index)
     setDraggedFolderId(folderId)
-/**
- * rootArtworks - Utility function
- * @returns void
- */
+    /**
+     * rootArtworks - Utility function
+     * @returns void
+     */
     setDraggedArtworkId(null)
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('type', 'folder')
@@ -181,19 +181,19 @@ export const InventoryArtworkList = ({
 
   const handleFolderDragOver = (index: number, folderId: string) => (e: React.DragEvent) => {
     e.preventDefault()
-/**
- * toggleFolderExpanded - Utility function
- * @returns void
- */
+    /**
+     * toggleFolderExpanded - Utility function
+     * @returns void
+     */
     if (draggedFolderId) {
       if (draggedFolderId !== folderId && canDropFolderInto(draggedFolderId, folderId)) {
         e.dataTransfer.dropEffect = 'move'
         setFolderDropTargetId(folderId)
         setDragOverFolderIndex(null)
-/**
- * next - Utility function
- * @returns void
- */
+        /**
+         * next - Utility function
+         * @returns void
+         */
       } else if (draggedFolderIndex !== null && draggedFolderIndex !== index) {
         e.dataTransfer.dropEffect = 'move'
         setDragOverFolderIndex(index)
@@ -207,35 +207,38 @@ export const InventoryArtworkList = ({
     if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
       setDragOverFolderIndex(null)
       setFolderDropTargetId(null)
-/**
- * canDropFolderInto - Utility function
- * @returns void
- */
+      /**
+       * canDropFolderInto - Utility function
+       * @returns void
+       */
     }
   }
 
   const handleFolderDrop = (index: number, targetFolderId: string) => (e: React.DragEvent) => {
     e.preventDefault()
-/**
- * checkDescendant - Utility function
- * @returns void
- */
+    /**
+     * checkDescendant - Utility function
+     * @returns void
+     */
     e.stopPropagation()
 
     const droppedFolderId = e.dataTransfer.getData('folderId')
     if (droppedFolderId && droppedFolderId !== targetFolderId) {
-/**
- * children - Utility function
- * @returns void
- */
-      if (folderDropTargetId === targetFolderId && canDropFolderInto(droppedFolderId, targetFolderId)) {
+      /**
+       * children - Utility function
+       * @returns void
+       */
+      if (
+        folderDropTargetId === targetFolderId &&
+        canDropFolderInto(droppedFolderId, targetFolderId)
+      ) {
         onMoveFolderToFolder?.(droppedFolderId, targetFolderId)
       } else if (draggedFolderIndex !== null && draggedFolderIndex !== index) {
         onReorderFolders?.(draggedFolderIndex, index)
-/**
- * child - Utility function
- * @returns void
- */
+        /**
+         * child - Utility function
+         * @returns void
+         */
       }
     }
 
@@ -248,10 +251,10 @@ export const InventoryArtworkList = ({
   const handleFolderDragEnd = () => {
     setDraggedFolderIndex(null)
     setDraggedFolderId(null)
-/**
- * handleFolderDragStart - Utility function
- * @returns void
- */
+    /**
+     * handleFolderDragStart - Utility function
+     * @returns void
+     */
     setDragOverFolderIndex(null)
     setFolderDropTargetId(null)
   }
@@ -264,10 +267,10 @@ export const InventoryArtworkList = ({
     e.dataTransfer.setData('artworkId', artworkId)
   }
 
-/**
- * handleFolderDragOver - Utility function
- * @returns void
- */
+  /**
+   * handleFolderDragOver - Utility function
+   * @returns void
+   */
   const handleArtworkDragEnd = () => {
     setDraggedArtworkId(null)
     setDropTargetFolderId(null)
@@ -286,18 +289,18 @@ export const InventoryArtworkList = ({
   }
 
   const handleArtworkDropOnFolder = (folderId: string) => (e: React.DragEvent) => {
-/**
- * handleFolderDragLeave - Utility function
- * @returns void
- */
+    /**
+     * handleFolderDragLeave - Utility function
+     * @returns void
+     */
     e.preventDefault()
     e.stopPropagation()
     const artworkId = e.dataTransfer.getData('artworkId')
     if (artworkId && onMoveArtworkToFolder) {
-/**
- * relatedTarget - Utility function
- * @returns void
- */
+      /**
+       * relatedTarget - Utility function
+       * @returns void
+       */
       onMoveArtworkToFolder(artworkId, folderId)
     }
     setDropTargetFolderId(null)
@@ -308,10 +311,10 @@ export const InventoryArtworkList = ({
     if (folder.parentId) {
       onMoveFolderToFolder?.(folder.id, null)
     }
-/**
- * handleFolderDrop - Utility function
- * @returns void
- */
+    /**
+     * handleFolderDrop - Utility function
+     * @returns void
+     */
   }
 
   const renderArtworkRow = (artwork: InventoryArtwork, nestLevel = 0) => {
@@ -319,10 +322,10 @@ export const InventoryArtworkList = ({
     const isDragging = draggedArtworkId === artwork.id
     const folderLabel = artwork.folderId ? folderNameById.get(artwork.folderId) : 'Uncategorized'
 
-/**
- * droppedFolderId - Utility function
- * @returns void
- */
+    /**
+     * droppedFolderId - Utility function
+     * @returns void
+     */
     return (
       <InventoryArtworkRow
         key={artwork.id}
@@ -341,10 +344,10 @@ export const InventoryArtworkList = ({
         onStartAuction={onStartAuction}
         onDelete={onDelete}
       />
-/**
- * handleFolderDragEnd - Utility function
- * @returns void
- */
+      /**
+       * handleFolderDragEnd - Utility function
+       * @returns void
+       */
     )
   }
 
@@ -355,10 +358,10 @@ export const InventoryArtworkList = ({
     const isDragging = draggedFolderId === folder.id
     const isDragOver = dragOverFolderIndex === index && nestLevel === 0
     const isDropTarget = dropTargetFolderId === folder.id
-/**
- * handleArtworkDragStart - Utility function
- * @returns void
- */
+    /**
+     * handleArtworkDragStart - Utility function
+     * @returns void
+     */
     const isFolderDropTarget = folderDropTargetId === folder.id
 
     return (
@@ -370,10 +373,10 @@ export const InventoryArtworkList = ({
         isExpanded={isExpanded}
         isDragging={isDragging}
         isDragOver={isDragOver}
-/**
- * handleArtworkDragEnd - Utility function
- * @returns void
- */
+        /**
+         * handleArtworkDragEnd - Utility function
+         * @returns void
+         */
         isDropTarget={isDropTarget}
         isFolderDropTarget={isFolderDropTarget}
         childFoldersCount={childFolders.length}
@@ -382,10 +385,10 @@ export const InventoryArtworkList = ({
         onDragStart={handleFolderDragStart(index, folder.id)}
         onDragOver={handleFolderDragOver(index, folder.id)}
         onDragLeave={handleFolderDragLeave}
-/**
- * handleFolderDropTarget - Utility function
- * @returns void
- */
+        /**
+         * handleFolderDropTarget - Utility function
+         * @returns void
+         */
         onDrop={(e) => {
           if (draggedArtworkId) {
             handleArtworkDropOnFolder(folder.id)(e)
@@ -397,31 +400,28 @@ export const InventoryArtworkList = ({
         onFolderDropTarget={handleFolderDropTarget(folder.id)}
         onFolderDropTargetLeave={handleFolderDropTargetLeave}
         onArtworkDropOnFolder={handleArtworkDropOnFolder(folder.id)}
-/**
- * handleFolderDropTargetLeave - Utility function
- * @returns void
- */
+        /**
+         * handleFolderDropTargetLeave - Utility function
+         * @returns void
+         */
         onRenameFolder={onRenameFolder}
         onMoveToRoot={handleMoveToRoot}
         onHideFolder={onHideFolder}
         onDeleteFolder={onDeleteFolder}
       >
-        {childFolders.map((childFolder, childIndex) =>
-          renderFolderRow(childFolder, childIndex, nestLevel + 1)
-/**
- * handleArtworkDropOnFolder - Utility function
- * @returns void
- */
+        {childFolders.map(
+          (childFolder, childIndex) => renderFolderRow(childFolder, childIndex, nestLevel + 1),
+          /**
+           * handleArtworkDropOnFolder - Utility function
+           * @returns void
+           */
         )}
         {folderArtworks.length > 0 && (
           <div className="space-y-2">
             {folderArtworks.map((artwork) => renderArtworkRow(artwork, nestLevel + 1))}
           </div>
         )}
-/**
- * artworkId - Utility function
- * @returns void
- */
+        /** * artworkId - Utility function * @returns void */
       </InventoryFolderRow>
     )
   }
@@ -433,10 +433,7 @@ export const InventoryArtworkList = ({
         {artworks.length === 0 && (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-/**
- * handleMoveToRoot - Utility function
- * @returns void
- */
+              /** * handleMoveToRoot - Utility function * @returns void */
               <ImageIcon className="h-6 w-6 text-slate-400" />
             </div>
             <h3 className="text-base font-semibold text-slate-900">No artworks in this folder</h3>
@@ -446,34 +443,25 @@ export const InventoryArtworkList = ({
       </div>
     )
   }
-/**
- * renderArtworkRow - Utility function
- * @returns void
- */
+  /**
+   * renderArtworkRow - Utility function
+   * @returns void
+   */
 
   return (
     <div className="space-y-3">
       {rootFolders.map((folder, index) => renderFolderRow(folder, index, 0))}
-/**
- * isSelected - Utility function
- * @returns void
- */
+      /** * isSelected - Utility function * @returns void */
       {rootFolders.length > 0 && (
         <div className="flex items-center gap-4 py-2">
           <div className="h-px flex-1 bg-slate-200" />
           <div className="text-center">
-/**
- * isDragging - Utility function
- * @returns void
- */
+            /** * isDragging - Utility function * @returns void */
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
               Uncategorized
             </p>
             <p className="mt-1 text-sm text-slate-500">
-/**
- * folderLabel - Utility function
- * @returns void
- */
+              /** * folderLabel - Utility function * @returns void */
               {rootArtworks.length} artwork{rootArtworks.length === 1 ? '' : 's'}
             </p>
           </div>
@@ -495,15 +483,10 @@ export const InventoryArtworkList = ({
             <ImageIcon className="h-6 w-6 text-slate-400" />
           </div>
           <h3 className="text-base font-semibold text-slate-900">No artworks yet</h3>
-          <p className="mt-1 text-sm text-slate-500">
-            Upload your first artwork to get started
-          </p>
+          <p className="mt-1 text-sm text-slate-500">Upload your first artwork to get started</p>
         </div>
       )}
-/**
- * renderFolderRow - Utility function
- * @returns void
- */
+      /** * renderFolderRow - Utility function * @returns void */
     </div>
   )
 }
