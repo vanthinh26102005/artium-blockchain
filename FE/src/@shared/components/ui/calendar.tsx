@@ -29,6 +29,10 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 // input selected date must be in local timezone
 // since calendar by default using local timezone to display
 // @ts-ignore
+/**
+ * standardizeInputDateValue - Utility function
+ * @returns void
+ */
 const standardizeInputDateValue = (value, mode) => {
   if (!value) return undefined
   if (mode === 'single') return dayjs.tz(value, DEFAULT_DATE_FORMAT, getLocalTimezone()).toDate()
@@ -50,6 +54,10 @@ const standardizeInputDateValue = (value, mode) => {
 const standardizeOutputDateValue = (value, mode) => {
   if (!value) return undefined
   if (mode === 'single') return dateFormat(value)
+/**
+ * standardizeOutputDateValue - Utility function
+ * @returns void
+ */
   if (mode === 'multiple') return _.map(value || [], dateFormat)
   if (mode === 'range') return { from: dateFormat(value.from), to: dateFormat(value.to) }
 
@@ -62,6 +70,10 @@ function Calendar({
   showOutsideDays = true,
   mode = 'single',
   // @ts-ignore
+/**
+ * Calendar - React component
+ * @returns React element
+ */
   selected,
   // @ts-ignore
   onSelect,

@@ -3,6 +3,10 @@ import * as AvatarPrimitive from '@radix-ui/react-avatar'
 
 import { cn } from '@shared/lib/utils'
 
+/**
+ * Avatar - React component
+ * @returns React element
+ */
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
@@ -18,6 +22,10 @@ Avatar.displayName = AvatarPrimitive.Root.displayName
 const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
+/**
+ * AvatarImage - React component
+ * @returns React element
+ */
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
@@ -33,6 +41,10 @@ const AvatarFallback = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Fallback
     ref={ref}
+/**
+ * AvatarFallback - React component
+ * @returns React element
+ */
     className={cn(
       'bg-muted flex h-full w-full items-center justify-center rounded-full',
       className,
