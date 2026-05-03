@@ -32,10 +32,10 @@ export const useForgotPassword = (): UseForgotPasswordResult => {
   const requestReset = useCallback(async (payload: RequestPasswordResetPayload) => {
     setError(null)
     setIsRequesting(true)
-/**
- * requestReset - Utility function
- * @returns void
- */
+    /**
+     * requestReset - Utility function
+     * @returns void
+     */
 
     try {
       await usersApi.requestPasswordReset(payload)
@@ -46,10 +46,10 @@ export const useForgotPassword = (): UseForgotPasswordResult => {
     } finally {
       setIsRequesting(false)
     }
-/**
- * message - Utility function
- * @returns void
- */
+    /**
+     * message - Utility function
+     * @returns void
+     */
   }, [])
 
   const verifyReset = useCallback(async (payload: VerifyPasswordResetPayload) => {
@@ -61,10 +61,10 @@ export const useForgotPassword = (): UseForgotPasswordResult => {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Verification failed.'
       setError(message)
-/**
- * verifyReset - Utility function
- * @returns void
- */
+      /**
+       * verifyReset - Utility function
+       * @returns void
+       */
       throw error
     } finally {
       setIsVerifying(false)
@@ -75,10 +75,10 @@ export const useForgotPassword = (): UseForgotPasswordResult => {
     requestReset,
     verifyReset,
     isLoading: isRequesting || isVerifying,
-/**
- * message - Utility function
- * @returns void
- */
+    /**
+     * message - Utility function
+     * @returns void
+     */
     error,
   }
 }

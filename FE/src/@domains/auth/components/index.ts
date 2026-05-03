@@ -1,10 +1,6 @@
 export { AuthProviderButton } from './AuthProviderButton'
 export { AuthDivider } from './AuthDivider'
-export {
-  AuthFormInput,
-  AuthFormOtpInput,
-  AuthFormPasswordInput,
-} from './AuthFormFields'
+export { AuthFormInput, AuthFormOtpInput, AuthFormPasswordInput } from './AuthFormFields'
 export { AuthFooter } from './AuthFooter'
 export { AuthFormCard } from './AuthFormCard'
 export { AuthInput } from './AuthInput'
