@@ -10,6 +10,10 @@ type ArtworkCardCompactProps = {
     className?: string
 }
 
+/**
+ * ArtworkCardCompact - React component
+ * @returns React element
+ */
 export const ArtworkCardCompact = ({ artwork, className }: ArtworkCardCompactProps) => {
     return (
         <Link

@@ -30,12 +30,20 @@ export type ArtworkMoodboardToggleResult =
     | 'already-saved'
     | 'already-removed'
 
+/**
+ * isApiError - Utility function
+ * @returns void
+ */
 const isApiError = (error: unknown): error is ApiError =>
     Boolean(error && typeof error === 'object' && 'status' in error)
 
 const mapMoodboardOption = (
     board: MoodboardApiItem,
     selectedMoodboardIds: Set<string>,
+/**
+ * mapMoodboardOption - Utility function
+ * @returns void
+ */
 ): ArtworkMoodboardOption => ({
     id: board.id,
     title: board.title,
@@ -51,6 +59,10 @@ export const useArtworkMoodboardSave = ({
     artworkPrice,
     artworkSellerId,
     artworkThumbnailUrl,
+/**
+ * useArtworkMoodboardSave - Custom React hook
+ * @returns void
+ */
 }: UseArtworkMoodboardSaveInput) => {
     const authUser = useAuthStore((state) => state.user)
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
@@ -61,18 +73,34 @@ export const useArtworkMoodboardSave = ({
     const [isLoading, setIsLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const [pendingMoodboardIds, setPendingMoodboardIds] = useState<string[]>([])
+/**
+ * authUser - Utility function
+ * @returns void
+ */
 
     const selectedCount = useMemo(
         () => moodboards.filter((board) => board.selected).length,
         [moodboards],
+/**
+ * isAuthenticated - Utility function
+ * @returns void
+ */
     )
     const saved = selectedCount > 0
 
     useEffect(() => {
+/**
+ * isAuthHydrated - Utility function
+ * @returns void
+ */
         if (!isAuthHydrated) {
             hydrateAuth()
         }
     }, [hydrateAuth, isAuthHydrated])
+/**
+ * hydrateAuth - Utility function
+ * @returns void
+ */
 
     useEffect(() => {
         if (!isAuthHydrated || !isAuthenticated || !authUser?.id || !artworkId) {
@@ -83,6 +111,10 @@ export const useArtworkMoodboardSave = ({
         }
 
         let cancelled = false
+/**
+ * selectedCount - Utility function
+ * @returns void
+ */
 
         Promise.resolve()
             .then(async () => {
@@ -90,6 +122,10 @@ export const useArtworkMoodboardSave = ({
                 setIsLoading(true)
                 setErrorMessage(null)
 
+/**
+ * saved - Utility function
+ * @returns void
+ */
                 const [boards, savedMoodboardIds] = await Promise.all([
                     profileApis.listUserMoodboards(authUser.id, { includePrivate: true }),
                     profileApis.listCurrentUserMoodboardIdsForArtwork(artworkId),
@@ -123,6 +159,10 @@ export const useArtworkMoodboardSave = ({
         setPendingMoodboardIds((prev) => {
             if (pending) {
                 return prev.includes(boardId) ? prev : [...prev, boardId]
+/**
+ * savedIdSet - Utility function
+ * @returns void
+ */
             }
 
             return prev.filter((id) => id !== boardId)
@@ -149,6 +189,10 @@ export const useArtworkMoodboardSave = ({
                     artworksCount: nextCount,
                 }
             }),
+/**
+ * setMoodboardPending - Utility function
+ * @returns void
+ */
         )
     }
 
@@ -162,6 +206,10 @@ export const useArtworkMoodboardSave = ({
             artworkTitle,
             artworkImageUrl: artworkThumbnailUrl,
             artworkPrice: artworkPrice && artworkPrice > 0 ? artworkPrice : undefined,
+/**
+ * updateMoodboardSelection - Utility function
+ * @returns void
+ */
             artworkSellerId,
         }
     }
@@ -173,10 +221,18 @@ export const useArtworkMoodboardSave = ({
 
         if (!artworkId) {
             throw new Error('Unable to identify this artwork.')
+/**
+ * countDelta - Utility function
+ * @returns void
+ */
         }
     }
 
     const toggleMoodboard = async (
+/**
+ * nextCount - Utility function
+ * @returns void
+ */
         board: ArtworkMoodboardOption,
         nextState?: boolean,
     ): Promise<ArtworkMoodboardToggleResult | null> => {
@@ -194,6 +250,10 @@ export const useArtworkMoodboardSave = ({
                 await profileApis.addArtworkToMoodboard(board.id, getAddArtworkPayload())
                 updateMoodboardSelection(board.id, true, { coverUrl: artworkThumbnailUrl })
                 return 'saved'
+/**
+ * getAddArtworkPayload - Utility function
+ * @returns void
+ */
             }
 
             await profileApis.removeArtworkFromMoodboard(board.id, artworkId ?? '')
@@ -211,6 +271,10 @@ export const useArtworkMoodboardSave = ({
             if (isApiError(error) && error.status === 404 && !shouldSelect) {
                 updateMoodboardSelection(board.id, false, { preserveCount: true })
                 return 'already-removed'
+/**
+ * ensureCanSave - Utility function
+ * @returns void
+ */
             }
 
             throw error
@@ -224,6 +288,10 @@ export const useArtworkMoodboardSave = ({
         options?: { description?: string; isPrivate?: boolean },
     ): Promise<ArtworkMoodboardOption> => {
         ensureCanSave()
+/**
+ * toggleMoodboard - Utility function
+ * @returns void
+ */
 
         const created = await profileApis.createMoodboard({
             title: title.trim(),
@@ -233,6 +301,10 @@ export const useArtworkMoodboardSave = ({
 
         await profileApis.addArtworkToMoodboard(created.id, getAddArtworkPayload())
 
+/**
+ * shouldSelect - Utility function
+ * @returns void
+ */
         const option: ArtworkMoodboardOption = {
             id: created.id,
             title: created.title,
@@ -260,3 +332,16 @@ export const useArtworkMoodboardSave = ({
         createMoodboardAndSave,
     }
 }
+
+/**
+ * createMoodboardAndSave - Utility function
+ * @returns void
+ */
+/**
+ * created - Utility function
+ * @returns void
+ */
+/**
+ * option - Utility function
+ * @returns void
+ */

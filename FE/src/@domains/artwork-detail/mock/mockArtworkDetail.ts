@@ -4,6 +4,10 @@ import { mockHomeArtworks } from '@domains/home/mock/mockHomeArtworks'
 import { TopPicksArtwork, mockTopPicksArtworks } from '@domains/discover/mock/mockTopPicksArtworks'
 
 // Price formatter
+/**
+ * priceFormatter - Utility function
+ * @returns void
+ */
 const priceFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -14,6 +18,10 @@ const priceFormatter = new Intl.NumberFormat('en-US', {
 const MOCK_DESCRIPTION = `This captivating piece explores the interplay of light and shadow, creating a mesmerizing visual experience. The artist's unique technique brings depth and emotion to every brushstroke.
 
 Signed on the back & ready to hang. Ships with certificate of authenticity. Offered with a white wood floater frame.`
+/**
+ * MOCK_DESCRIPTION - React component
+ * @returns React element
+ */
 
 // Convert DiscoverArtwork to ArtworkDetail
 export const convertToArtworkDetail = (artwork: DiscoverArtwork): ArtworkDetail => {
@@ -22,11 +30,19 @@ export const convertToArtworkDetail = (artwork: DiscoverArtwork): ArtworkDetail 
         {
             id: `${artwork.id}-1`,
             url: artwork.imageMedium,
+/**
+ * convertToArtworkDetail - Utility function
+ * @returns void
+ */
             alt: `${artwork.title} - Main view`,
         },
         {
             id: `${artwork.id}-2`,
             url: artwork.imageMedium.replace(/seed\/[^/]+/, `seed/${artwork.id}-detail1`),
+/**
+ * images - Utility function
+ * @returns void
+ */
             alt: `${artwork.title} - Detail view 1`,
         },
         {
@@ -82,11 +98,19 @@ export const convertTopPicksToArtworkDetail = (artwork: TopPicksArtwork): Artwor
             id: `${artwork.id}-2`,
             url: artwork.imageUrl.replace(/seed\/[^/]+/, `seed/${artwork.id}-detail1`),
             alt: `${artwork.title} - Detail view 1`,
+/**
+ * convertTopPicksToArtworkDetail - Utility function
+ * @returns void
+ */
         },
         {
             id: `${artwork.id}-3`,
             url: artwork.imageUrl.replace(/seed\/[^/]+/, `seed/${artwork.id}-detail2`),
             alt: `${artwork.title} - Detail view 2`,
+/**
+ * images - Utility function
+ * @returns void
+ */
         },
     ]
 
@@ -108,6 +132,10 @@ export const convertTopPicksToArtworkDetail = (artwork: TopPicksArtwork): Artwor
         isUnique: true,
         hasCertificate: true,
         description: MOCK_DESCRIPTION,
+/**
+ * displayName - Utility function
+ * @returns void
+ */
         likedByUser: false,
         savedByUser: false,
         images,
@@ -145,3 +173,24 @@ export const getArtworkDetailById = (id: string): ArtworkDetail | null => {
 
 // Backward compatibility
 export const MOCK_ARTWORK_DETAIL: ArtworkDetail = convertToArtworkDetail(mockArtworks[0])
+
+/**
+ * getArtworkDetailById - Utility function
+ * @returns void
+ */
+/**
+ * artwork - Utility function
+ * @returns void
+ */
+/**
+ * homeArtwork - Utility function
+ * @returns void
+ */
+/**
+ * artwork - Utility function
+ * @returns void
+ */
+/**
+ * MOCK_ARTWORK_DETAIL - React component
+ * @returns React element
+ */
