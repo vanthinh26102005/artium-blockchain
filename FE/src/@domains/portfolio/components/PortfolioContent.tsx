@@ -33,6 +33,10 @@ import { usePortfolio, PortfolioItem } from '../context/PortfolioContext'
 import { CVUpload } from './CVUpload'
 
 // Sortable Item Component
+/**
+ * SortablePortfolioItem - React component
+ * @returns React element
+ */
 const SortablePortfolioItem = ({
     item,
     onToggleVisibility,
@@ -49,6 +53,10 @@ const SortablePortfolioItem = ({
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
+/**
+ * style - Utility function
+ * @returns void
+ */
         opacity: isDragging ? 0.5 : 1,
     }
 
@@ -126,6 +134,10 @@ export const PortfolioContent = () => {
         setBiography,
         statement,
         setStatement,
+/**
+ * PortfolioContent - React component
+ * @returns React element
+ */
         items,
         setItems,
         cvFileName,
@@ -143,15 +155,27 @@ export const PortfolioContent = () => {
             coordinateGetter: sortableKeyboardCoordinates,
         }),
     )
+/**
+ * maxBioLength - Utility function
+ * @returns void
+ */
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event
 
+/**
+ * maxStatementLength - Utility function
+ * @returns void
+ */
         if (over && active.id !== over.id) {
             const oldIndex = items.findIndex((item) => item.id === active.id)
             const newIndex = items.findIndex((item) => item.id === over.id)
             setItems(arrayMove(items, oldIndex, newIndex))
         }
+/**
+ * sensors - Utility function
+ * @returns void
+ */
     }
 
     const toggleVisibility = (id: string) => {
@@ -162,6 +186,10 @@ export const PortfolioContent = () => {
         setItems(items.filter((item) => item.id !== id))
     }
 
+/**
+ * handleDragEnd - Utility function
+ * @returns void
+ */
     return (
         <div className="flex-1 overflow-y-auto py-6 pr-4 space-y-6">
             {/* Biography Section */}
@@ -169,10 +197,18 @@ export const PortfolioContent = () => {
                 <h2 className="text-xl font-bold text-slate-900 text-center mb-1">Biography</h2>
                 <p className="text-sm text-slate-500 text-center mb-4">Tell the world more about you</p>
 
+/**
+ * oldIndex - Utility function
+ * @returns void
+ */
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-600">Biography (Synced with your profile)</label>
                     <Textarea
                         value={biography}
+/**
+ * newIndex - Utility function
+ * @returns void
+ */
                         onChange={(e) => setBiography(e.target.value.slice(0, maxBioLength))}
                         placeholder="Write your biography..."
                         className="min-h-[100px] resize-none rounded-lg border-slate-200"
@@ -181,6 +217,10 @@ export const PortfolioContent = () => {
                         {biography.length}/{maxBioLength} characters
                     </p>
                 </div>
+/**
+ * toggleVisibility - Utility function
+ * @returns void
+ */
             </div>
 
             {/* Action Buttons */}
@@ -188,6 +228,10 @@ export const PortfolioContent = () => {
                 <Button className="flex items-center justify-center gap-2 bg-[#0066FF] hover:bg-[#0052CC] text-white h-11">
                     <Plus className="h-4 w-4" />
                     Add link
+/**
+ * deleteItem - Utility function
+ * @returns void
+ */
                 </Button>
                 <Button className="flex items-center justify-center gap-2 bg-[#0066FF] hover:bg-[#0052CC] text-white h-11">
                     <Image className="h-4 w-4" />

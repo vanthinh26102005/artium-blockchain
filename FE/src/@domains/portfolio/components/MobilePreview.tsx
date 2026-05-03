@@ -5,6 +5,10 @@ import { usePortfolio } from '../context/PortfolioContext'
 import { SharePortfolioModal } from './SharePortfolioModal'
 import { QRCodeModal } from './QRCodeModal'
 
+/**
+ * MobilePreview - React component
+ * @returns React element
+ */
 export const MobilePreview = () => {
     const { biography, statement, items, cvFileName, artistName, handle, location, avatar } = usePortfolio()
 
@@ -16,16 +20,28 @@ export const MobilePreview = () => {
     const visibleItems = items.filter((item) => item.visible)
 
     const portfolioUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/portfolio/${handle.replace('@', '')}`
+/**
+ * visibleItems - Utility function
+ * @returns void
+ */
 
     const copyUrl = async () => {
         try {
             await navigator.clipboard.writeText(portfolioUrl)
             setIsCopied(true)
+/**
+ * portfolioUrl - Utility function
+ * @returns void
+ */
             setTimeout(() => setIsCopied(false), 2000)
         } catch {
             console.error('Failed to copy')
         }
     }
+/**
+ * copyUrl - Utility function
+ * @returns void
+ */
 
     return (
         <>

@@ -11,21 +11,37 @@ interface QRCodeModalProps {
     handle: string
 }
 
+/**
+ * QRCodeModal - React component
+ * @returns React element
+ */
 export const QRCodeModal = ({ isOpen, onClose, artistName, handle }: QRCodeModalProps) => {
     const qrRef = useRef<HTMLDivElement>(null)
 
     // Generate the portfolio URL based on handle
+/**
+ * qrRef - Utility function
+ * @returns void
+ */
     const portfolioUrl = useMemo(() => {
         if (typeof window === 'undefined') return ''
         const cleanHandle = handle.replace('@', '')
         return `${window.location.origin}/portfolio/${cleanHandle}`
     }, [handle])
 
+/**
+ * portfolioUrl - Utility function
+ * @returns void
+ */
     const downloadQRCode = () => {
         const svg = qrRef.current?.querySelector('svg')
         if (!svg) return
 
         // Create canvas and draw SVG
+/**
+ * cleanHandle - Utility function
+ * @returns void
+ */
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
         if (!ctx) return
@@ -33,10 +49,18 @@ export const QRCodeModal = ({ isOpen, onClose, artistName, handle }: QRCodeModal
         const svgData = new XMLSerializer().serializeToString(svg)
         const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
         const url = URL.createObjectURL(svgBlob)
+/**
+ * downloadQRCode - Utility function
+ * @returns void
+ */
 
         const img = new Image()
         img.onload = () => {
             // Set canvas size with padding
+/**
+ * svg - Utility function
+ * @returns void
+ */
             const padding = 40
             canvas.width = img.width + padding * 2
             canvas.height = img.height + padding * 2
@@ -44,35 +68,63 @@ export const QRCodeModal = ({ isOpen, onClose, artistName, handle }: QRCodeModal
             // Draw white background
             ctx.fillStyle = 'white'
             ctx.fillRect(0, 0, canvas.width, canvas.height)
+/**
+ * canvas - Utility function
+ * @returns void
+ */
 
             // Draw QR code
             ctx.drawImage(img, padding, padding)
 
+/**
+ * ctx - Utility function
+ * @returns void
+ */
             // Download
             const pngUrl = canvas.toDataURL('image/png')
             const downloadLink = document.createElement('a')
             downloadLink.href = pngUrl
             downloadLink.download = `${artistName.replace(/\s+/g, '_')}_QRCode.png`
             downloadLink.click()
+/**
+ * svgData - Utility function
+ * @returns void
+ */
 
             URL.revokeObjectURL(url)
         }
         img.src = url
+/**
+ * svgBlob - Utility function
+ * @returns void
+ */
     }
 
     const printQRCode = () => {
         const svg = qrRef.current?.querySelector('svg')
+/**
+ * url - Utility function
+ * @returns void
+ */
         if (!svg) return
 
         const svgData = new XMLSerializer().serializeToString(svg)
         const printWindow = window.open('', '_blank')
         if (!printWindow) return
+/**
+ * img - Utility function
+ * @returns void
+ */
 
         printWindow.document.write(`
             <!DOCTYPE html>
             <html>
             <head>
                 <title>QR Code - ${artistName}</title>
+/**
+ * padding - Utility function
+ * @returns void
+ */
                 <style>
                     body {
                         display: flex;
@@ -88,10 +140,18 @@ export const QRCodeModal = ({ isOpen, onClose, artistName, handle }: QRCodeModal
                         font-weight: bold;
                         margin-bottom: 24px;
                     }
+/**
+ * pngUrl - Utility function
+ * @returns void
+ */
                     .qr-container {
                         padding: 20px;
                         background: white;
                     }
+/**
+ * downloadLink - Utility function
+ * @returns void
+ */
                     @media print {
                         body { padding: 0; }
                     }
@@ -105,20 +165,36 @@ export const QRCodeModal = ({ isOpen, onClose, artistName, handle }: QRCodeModal
                         window.print();
                         window.close();
                     }
+/**
+ * printQRCode - Utility function
+ * @returns void
+ */
                 </script>
             </body>
             </html>
         `)
+/**
+ * svg - Utility function
+ * @returns void
+ */
         printWindow.document.close()
     }
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[420px] p-6 bg-white rounded-2xl">
+/**
+ * svgData - Utility function
+ * @returns void
+ */
                 <DialogHeader className="mb-2">
                     <DialogTitle className="text-2xl font-bold text-center">My QR code</DialogTitle>
                 </DialogHeader>
 
+/**
+ * printWindow - Utility function
+ * @returns void
+ */
                 <p className="text-center text-slate-600 mb-6">
                     Let people access your portfolio instantly by scanning this QR code. Download or print it to share
                     on products, displays, or at events.

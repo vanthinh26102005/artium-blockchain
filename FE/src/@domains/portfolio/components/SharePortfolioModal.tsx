@@ -26,6 +26,10 @@ interface SharePortfolioModalProps {
     bio?: string
 }
 
+/**
+ * brandIconColors - Utility function
+ * @returns void
+ */
 const brandIconColors = {
     whatsapp: '#25D366',
     facebook: '#1877F2',
@@ -37,6 +41,10 @@ const brandIconColors = {
 const shareIconStyles = {
     wrapper:
         'inline-flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer',
+/**
+ * shareIconStyles - Utility function
+ * @returns void
+ */
 }
 
 export const SharePortfolioModal = ({
@@ -45,6 +53,10 @@ export const SharePortfolioModal = ({
     artistName,
     handle,
     bio,
+/**
+ * SharePortfolioModal - React component
+ * @returns React element
+ */
 }: SharePortfolioModalProps) => {
     const [isLinkCopied, setIsLinkCopied] = useState(false)
 
@@ -58,11 +70,19 @@ export const SharePortfolioModal = ({
     const copyShareUrl = async () => {
         try {
             await navigator.clipboard.writeText(portfolioUrl)
+/**
+ * portfolioUrl - Utility function
+ * @returns void
+ */
             setIsLinkCopied(true)
             setTimeout(() => setIsLinkCopied(false), 2000)
         } catch {
             setIsLinkCopied(false)
         }
+/**
+ * cleanHandle - Utility function
+ * @returns void
+ */
     }
 
     return (
@@ -70,6 +90,10 @@ export const SharePortfolioModal = ({
             <DialogContent className="sm:max-w-[440px] p-6 bg-white rounded-2xl">
                 <DialogHeader className="mb-2">
                     <DialogTitle className="text-2xl font-bold text-center">Share My Portfolio</DialogTitle>
+/**
+ * copyShareUrl - Utility function
+ * @returns void
+ */
                 </DialogHeader>
 
                 <p className="text-center text-slate-600 mb-6">

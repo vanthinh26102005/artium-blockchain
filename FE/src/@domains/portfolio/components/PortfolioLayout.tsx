@@ -2,6 +2,10 @@ import { PortfolioContent } from './PortfolioContent'
 import { MobilePreview } from './MobilePreview'
 import { PortfolioProvider } from '../context/PortfolioContext'
 
+/**
+ * PortfolioLayout - React component
+ * @returns React element
+ */
 export const PortfolioLayout = () => {
     return (
         <PortfolioProvider>
