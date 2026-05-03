@@ -1,3 +1,7 @@
+/**
+ * DISCOVER_TABS - React component
+ * @returns React element
+ */
 export const DISCOVER_TABS = [
   { key: 'top-picks', label: 'TOP PICKS' },
   { key: 'artworks', label: 'ARTWORKS' },

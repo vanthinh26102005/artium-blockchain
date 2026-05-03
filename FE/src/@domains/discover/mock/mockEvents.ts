@@ -12,6 +12,10 @@ export interface DiscoverEvent {
   imageUrl?: string
 }
 
+/**
+ * mockEvents - Utility function
+ * @returns void
+ */
 export const mockEvents: DiscoverEvent[] = [
   {
     id: 'ev-001',
