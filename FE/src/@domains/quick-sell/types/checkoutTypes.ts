@@ -62,6 +62,10 @@ export type CheckoutDraft = {
   taxAmount: number
 }
 
+/**
+ * defaultBuyerAddress - Utility function
+ * @returns void
+ */
 export const defaultBuyerAddress: CheckoutBuyerAddress = {
   firstName: '',
   lastName: '',
@@ -78,6 +82,10 @@ export const defaultBuyerAddress: CheckoutBuyerAddress = {
 export const defaultCheckoutDraft: CheckoutDraft = {
   address: defaultBuyerAddress,
   shippingFee: 0,
+/**
+ * defaultCheckoutDraft - Utility function
+ * @returns void
+ */
   taxPercent: 0,
   taxAmount: 0,
 }
