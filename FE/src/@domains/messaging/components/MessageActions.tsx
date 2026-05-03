@@ -19,10 +19,10 @@ type MessageActionsProps = {
 export const MessageActions = ({
   messageId,
   isOwnMessage,
-/**
- * MessageActions - React component
- * @returns React element
- */
+  /**
+   * MessageActions - React component
+   * @returns React element
+   */
   onEdit,
   onDelete,
   onReact,
@@ -35,20 +35,20 @@ export const MessageActions = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false)
-/**
- * menuRef - Utility function
- * @returns void
- */
+        /**
+         * menuRef - Utility function
+         * @returns void
+         */
         setShowEmojiPicker(false)
       }
     }
 
     if (showMenu || showEmojiPicker) {
       document.addEventListener('mousedown', handleClickOutside)
-/**
- * handleClickOutside - Utility function
- * @returns void
- */
+      /**
+       * handleClickOutside - Utility function
+       * @returns void
+       */
     }
 
     return () => {
@@ -66,12 +66,9 @@ export const MessageActions = ({
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="rounded-full p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-200"
+        className="rounded-full p-1 opacity-0 transition-opacity hover:bg-slate-200 group-hover:opacity-100"
       >
-/**
- * handleEmojiClick - Utility function
- * @returns void
- */
+        /** * handleEmojiClick - Utility function * @returns void */
         <MoreVertical className="h-4 w-4 text-slate-500" />
       </button>
 
