@@ -31,19 +31,17 @@ export const OrderInvoicePanel = ({
   const canPrint = canPrintOrderInvoice(availability)
 
   return (
-/**
- * canPrint - Utility function
- * @returns void
- */
+    /**
+     * canPrint - Utility function
+     * @returns void
+     */
     <div
       ref={panelRef}
       tabIndex={-1}
       className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
       <div className="flex flex-col gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-          Document
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Document</p>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold text-slate-900">Invoice</h2>
           <OrderInvoiceStatusChip availability={availability} />
