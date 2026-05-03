@@ -16,7 +16,7 @@ export const EditorialDiscoverBanner = () => {
             Discover Art Tailored to Your Taste
           </p>
           <Button asChild size="sm" className="mt-4 w-[86px]">
-            <Link href="/discover" className="text-[14px] font-bold!">
+            <Link href="/discover" className="font-bold! text-[14px]">
               Browse
             </Link>
           </Button>
