@@ -22,6 +22,10 @@ type LifecycleEvent = {
   timestamp?: string | null
 }
 
+/**
+ * spaceGrotesk - Utility function
+ * @returns void
+ */
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   weight: ['400', '500', '700'],
@@ -30,6 +34,10 @@ const spaceGrotesk = Space_Grotesk({
 const inter = Inter({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
+/**
+ * inter - Utility function
+ * @returns void
+ */
 })
 
 const jetBrainsMono = JetBrains_Mono({
@@ -38,6 +46,10 @@ const jetBrainsMono = JetBrains_Mono({
 })
 
 const headlineFont = {
+/**
+ * jetBrainsMono - Utility function
+ * @returns void
+ */
   fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
 
@@ -46,6 +58,10 @@ const monoFont = {
 } satisfies CSSProperties
 
 const PLACEHOLDER_ARTWORK = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+/**
+ * headlineFont - Utility function
+ * @returns void
+ */
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 1200" fill="none">
     <defs>
       <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
@@ -53,6 +69,10 @@ const PLACEHOLDER_ARTWORK = `data:image/svg+xml;charset=UTF-8,${encodeURICompone
         <stop offset="100%" stop-color="#111111" />
       </linearGradient>
     </defs>
+/**
+ * monoFont - Utility function
+ * @returns void
+ */
     <rect width="960" height="1200" fill="url(#g)" />
     <circle cx="760" cy="210" r="170" fill="rgba(255,255,255,0.08)" />
     <circle cx="210" cy="920" r="230" fill="rgba(255,255,255,0.06)" />
@@ -60,6 +80,10 @@ const PLACEHOLDER_ARTWORK = `data:image/svg+xml;charset=UTF-8,${encodeURICompone
     <text x="72" y="1050" fill="white" font-family="Arial, sans-serif" font-size="76" font-weight="700">ORDER ARTWORK</text>
   </svg>`,
 )}`
+/**
+ * PLACEHOLDER_ARTWORK - React component
+ * @returns React element
+ */
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -79,6 +103,10 @@ const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
 const normalizeEnumLabel = (value: string) =>
   value
     .replace(/_/g, ' ')
+/**
+ * dateFormatter - Utility function
+ * @returns void
+ */
     .toLowerCase()
     .replace(/\b\w/g, (char) => char.toUpperCase())
 
@@ -88,6 +116,10 @@ const formatOrderStatus = (status?: string | null) =>
 const formatPaymentStatus = (status?: string | null) =>
   status ? normalizeEnumLabel(status) : 'Unknown Payment'
 
+/**
+ * dateTimeFormatter - Utility function
+ * @returns void
+ */
 const formatEscrowState = (state?: number | null) => {
   switch (state) {
     case 0:
@@ -100,6 +132,10 @@ const formatEscrowState = (state?: number | null) => {
       return 'Disputed'
     case 4:
       return 'Completed'
+/**
+ * normalizeEnumLabel - Utility function
+ * @returns void
+ */
     case 5:
       return 'Cancelled'
     default:
@@ -109,18 +145,30 @@ const formatEscrowState = (state?: number | null) => {
 
 const getStatusTone = (status?: string | null, escrowState?: number | null): StatusTone => {
   if (escrowState === 3 || status === 'dispute_open' || status === 'cancelled' || status === 'refunded') {
+/**
+ * formatOrderStatus - Utility function
+ * @returns void
+ */
     return 'danger'
   }
 
   if (escrowState === 2 || status === 'shipped' || status === 'confirmed') {
     return 'success'
   }
+/**
+ * formatPaymentStatus - Utility function
+ * @returns void
+ */
 
   if (escrowState === 0 || status === 'escrow_held' || status === 'auction_active') {
     return 'dark'
   }
 
   if (escrowState === 1 || status === 'processing') {
+/**
+ * formatEscrowState - Utility function
+ * @returns void
+ */
     return 'warning'
   }
 
@@ -143,6 +191,10 @@ const formatDate = (value?: string | null, fallback = 'PENDING') => {
   const date = new Date(value)
 
   if (Number.isNaN(date.getTime())) {
+/**
+ * getStatusTone - Utility function
+ * @returns void
+ */
     return fallback
   }
 
@@ -166,6 +218,10 @@ const formatDateTime = (value?: string | null, fallback = 'PENDING') => {
 const shortenHash = (value?: string | null, leading = 6, trailing = 4) => {
   if (!value) {
     return 'N/A'
+/**
+ * toneClassMap - Utility function
+ * @returns void
+ */
   }
 
   if (value.length <= leading + trailing + 3) {
@@ -177,6 +233,10 @@ const shortenHash = (value?: string | null, leading = 6, trailing = 4) => {
 
 const formatNumberishAmount = (
   value: number | string | null | undefined,
+/**
+ * formatDate - Utility function
+ * @returns void
+ */
   currency?: string,
   digits = 2,
 ) => {
@@ -185,6 +245,10 @@ const formatNumberishAmount = (
   }
 
   const numericValue = typeof value === 'number' ? value : Number(value)
+/**
+ * date - Utility function
+ * @returns void
+ */
 
   if (!Number.isFinite(numericValue)) {
     return currency ? `${value} ${currency}` : String(value)
@@ -197,6 +261,10 @@ const formatNumberishAmount = (
         currency,
         maximumFractionDigits: digits,
       }).format(numericValue)
+/**
+ * formatDateTime - Utility function
+ * @returns void
+ */
     } catch {
       return `${numericValue.toFixed(digits)} ${currency}`
     }
@@ -205,6 +273,10 @@ const formatNumberishAmount = (
   return `${numericValue.toFixed(digits)}${currency ? ` ${currency}` : ''}`
 }
 
+/**
+ * date - Utility function
+ * @returns void
+ */
 const formatWeiToEth = (value?: string | null) => {
   if (!value) {
     return 'N/A'
@@ -217,6 +289,10 @@ const formatWeiToEth = (value?: string | null) => {
   }
 
   const unsignedWei = normalized.replace(/^0+/, '') || '0'
+/**
+ * shortenHash - Utility function
+ * @returns void
+ */
   const paddedWei = unsignedWei.padStart(19, '0')
   const whole = paddedWei.slice(0, -18).replace(/^0+/, '') || '0'
   const fractionText = paddedWei.slice(-18).slice(0, 4).replace(/0+$/, '')
@@ -232,6 +308,10 @@ const getExplorerHref = (type: 'tx' | 'address', value?: string | null) => {
   return `${WALLET_TARGET_CHAIN.blockExplorerUrl.replace(/\/$/, '')}/${type}/${encodeURIComponent(value)}`
 }
 
+/**
+ * formatNumberishAmount - Utility function
+ * @returns void
+ */
 const getAddressLines = (address?: Record<string, unknown> | null) => {
   if (!address) {
     return []
@@ -244,6 +324,10 @@ const getAddressLines = (address?: Record<string, unknown> | null) => {
 
   const line1 = [getValue('line1'), getValue('line2')].filter(Boolean).join(', ')
   const locality = [getValue('city'), getValue('state'), getValue('postalCode')]
+/**
+ * numericValue - Utility function
+ * @returns void
+ */
     .filter(Boolean)
     .join(', ')
   const country = getValue('country')
@@ -268,6 +352,10 @@ const getSummaryCopy = (order: OrderResponse, artworkTitle: string) => {
     return `Tracking fulfillment and settlement for "${artworkTitle}". The asset is already in logistics flow and escrow remains monitored.`
   }
 
+/**
+ * formatWeiToEth - Utility function
+ * @returns void
+ */
   if (order.confirmedAt || order.paymentStatus === 'ESCROW') {
     return `Finalizing verification for the acquisition of "${artworkTitle}". Funds are locked and the order is waiting for the next escrow milestone.`
   }
@@ -276,6 +364,10 @@ const getSummaryCopy = (order: OrderResponse, artworkTitle: string) => {
 }
 
 const buildLifecycleEvents = (order: OrderResponse): LifecycleEvent[] => {
+/**
+ * normalized - Utility function
+ * @returns void
+ */
   const hasDispute = Boolean(order.disputeReason || order.disputeOpenedAt)
 
   return [
@@ -285,18 +377,34 @@ const buildLifecycleEvents = (order: OrderResponse): LifecycleEvent[] => {
       timestamp: order.createdAt,
     },
     {
+/**
+ * unsignedWei - Utility function
+ * @returns void
+ */
       label: 'FUNDS_LOCKED_IN_ESCROW',
       description: 'Collector funds are held while the escrow process validates the transaction.',
       timestamp: order.confirmedAt || (order.paymentStatus === 'ESCROW' ? order.updatedAt || order.createdAt : null),
     },
+/**
+ * paddedWei - Utility function
+ * @returns void
+ */
     {
       label: 'LOGISTICS_DISPATCH',
       description: 'Shipment progress and handoff to the selected carrier are tracked here.',
       timestamp: order.shippedAt,
+/**
+ * whole - Utility function
+ * @returns void
+ */
     },
     {
       label: hasDispute ? 'DISPUTE_REVIEW' : 'FINAL_SETTLEMENT',
       description: hasDispute
+/**
+ * fractionText - Utility function
+ * @returns void
+ */
         ? 'The order is under dispute review pending evidence and arbiter resolution.'
         : 'Escrow release and final completion are recorded once delivery closes successfully.',
       timestamp: hasDispute ? order.disputeOpenedAt || order.disputeResolvedAt : order.deliveredAt,
@@ -305,6 +413,10 @@ const buildLifecycleEvents = (order: OrderResponse): LifecycleEvent[] => {
 }
 
 const StatusChip = ({ label, tone }: { label: string; tone: StatusTone }) => (
+/**
+ * getExplorerHref - Utility function
+ * @returns void
+ */
   <span className="flex items-center gap-1 text-[0.6875rem] font-bold tracking-[0.1em] uppercase text-black">
     <span className={`h-2 w-2 ${toneClassMap[tone]}`} />
     {label}
@@ -316,6 +428,10 @@ const InfoLink = ({
   label,
   value,
 }: {
+/**
+ * getAddressLines - Utility function
+ * @returns void
+ */
   href?: string | null
   label: string
   value: string
@@ -324,10 +440,18 @@ const InfoLink = ({
     <span className="text-sm text-[#5f5e5e]">{label}</span>
     {href ? (
       <a
+/**
+ * getValue - Utility function
+ * @returns void
+ */
         href={href}
         target="_blank"
         rel="noreferrer"
         className="inline-flex items-center gap-2 text-right text-xs font-medium text-black underline"
+/**
+ * value - Utility function
+ * @returns void
+ */
         style={monoFont}
       >
         <span>{value}</span>
@@ -335,16 +459,28 @@ const InfoLink = ({
       </a>
     ) : (
       <span className="text-right text-xs font-medium text-black" style={monoFont}>
+/**
+ * line1 - Utility function
+ * @returns void
+ */
         {value}
       </span>
     )}
   </div>
+/**
+ * locality - Utility function
+ * @returns void
+ */
 )
 
 const StatePanel = ({
   icon,
   title,
   description,
+/**
+ * country - Utility function
+ * @returns void
+ */
   children,
 }: {
   icon: ReactNode
@@ -353,10 +489,18 @@ const StatePanel = ({
   children?: ReactNode
 }) => (
   <div className="mx-auto flex min-h-[65vh] max-w-3xl items-center justify-center">
+/**
+ * getUserLabel - Utility function
+ * @returns void
+ */
     <div className="w-full border border-[#c6c6c6] bg-[#eeeeee] px-8 py-10 text-center sm:px-12">
       <div className="mx-auto flex h-16 w-16 items-center justify-center border border-black bg-white text-black">
         {icon}
       </div>
+/**
+ * wallet - Utility function
+ * @returns void
+ */
       <h1
         className="mt-6 text-3xl font-bold uppercase tracking-[0.08em] text-black sm:text-4xl"
         style={headlineFont}
@@ -364,12 +508,20 @@ const StatePanel = ({
         {title}
       </h1>
       <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#5f5e5e]">{description}</p>
+/**
+ * getEstimatedCompletion - Utility function
+ * @returns void
+ */
       {children ? <div className="mt-8 flex flex-wrap items-center justify-center gap-4">{children}</div> : null}
     </div>
   </div>
 )
 
 const PageShell = ({
+/**
+ * getSummaryCopy - Utility function
+ * @returns void
+ */
   children,
 }: {
   children: ReactNode
@@ -389,10 +541,18 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
+/**
+ * buildLifecycleEvents - Utility function
+ * @returns void
+ */
   const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     if (!onChainOrderId) {
+/**
+ * hasDispute - Utility function
+ * @returns void
+ */
       return
     }
 
@@ -424,6 +584,10 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
         if (cancelled) {
           return
         }
+/**
+ * StatusChip - React component
+ * @returns React element
+ */
 
         const nextItems = await orderApis.getOrderItems(nextOrder.id)
         const fallbackArtwork =
@@ -434,6 +598,10 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
         if (cancelled) {
           return
         }
+/**
+ * InfoLink - React component
+ * @returns React element
+ */
 
         setOrder(nextOrder)
         setItems(nextItems)
@@ -467,6 +635,10 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
       cancelled = true
     }
   }, [
+/**
+ * StatePanel - React component
+ * @returns React element
+ */
     isAuthenticated,
     isHydrated,
     onChainOrderId,
@@ -498,6 +670,10 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
       </PageShell>
     )
   }
+/**
+ * PageShell - React component
+ * @returns React element
+ */
 
   if (!isAuthenticated) {
     return (
@@ -511,18 +687,34 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
             href="/login"
             className="inline-flex min-h-[56px] items-center justify-center bg-black px-8 text-center text-[0.75rem] font-bold tracking-[0.2em] uppercase text-white transition hover:bg-[#3c3b3b]"
             style={headlineFont}
+/**
+ * OnChainOrderDetailPageView - React component
+ * @returns React element
+ */
           >
             Go To Login
           </Link>
           <button
+/**
+ * router - Utility function
+ * @returns void
+ */
             type="button"
             onClick={() => router.back()}
             className="inline-flex min-h-[56px] items-center justify-center border border-black px-8 text-center text-[0.75rem] font-bold tracking-[0.2em] uppercase text-black transition hover:bg-[#eeeeee]"
             style={headlineFont}
+/**
+ * isAuthenticated - Utility function
+ * @returns void
+ */
           >
             Go Back
           </button>
         </StatePanel>
+/**
+ * isHydrated - Utility function
+ * @returns void
+ */
       </PageShell>
     )
   }
@@ -561,11 +753,19 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
       <PageShell>
         <StatePanel
           icon={<Receipt className="h-7 w-7" strokeWidth={1.8} />}
+/**
+ * loadOrder - Utility function
+ * @returns void
+ */
           title="Order Not Found"
           description={`No on-chain order snapshot was found for ID ${onChainOrderId}.`}
         >
           <button
             type="button"
+/**
+ * nextOrder - Utility function
+ * @returns void
+ */
             onClick={() => router.back()}
             className="inline-flex min-h-[56px] items-center justify-center border border-black px-8 text-center text-[0.75rem] font-bold tracking-[0.2em] uppercase text-black transition hover:bg-[#eeeeee]"
             style={headlineFont}
@@ -575,10 +775,18 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
         </StatePanel>
       </PageShell>
     )
+/**
+ * nextItems - Utility function
+ * @returns void
+ */
   }
 
   const statusTone = getStatusTone(order.status, order.escrowState)
   const lifecycleEvents = buildLifecycleEvents(order)
+/**
+ * fallbackArtwork - Utility function
+ * @returns void
+ */
   const estimatedCompletion = getEstimatedCompletion(order)
   const summaryCopy = getSummaryCopy(order, artworkTitle)
   const totalLockedLabel = formatNumberishAmount(order.totalAmount, order.currency)
@@ -599,6 +807,10 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
               style={headlineFont}
             >
               {order.onChainOrderId ? `ORDER_${order.onChainOrderId}` : `ORDER_${onChainOrderId}`}
+/**
+ * apiError - Utility function
+ * @returns void
+ */
             </span>
             <StatusChip label={formatOrderStatus(order.status).replace(/\s+/g, '_').toUpperCase()} tone={statusTone} />
             <StatusChip label={formatEscrowState(order.escrowState).replace(/\s+/g, '_').toUpperCase()} tone={statusTone} />
@@ -632,19 +844,35 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
           <span className="text-3xl font-medium text-black" style={headlineFont}>
             {formatDate(estimatedCompletion)}
           </span>
+/**
+ * primaryItem - Utility function
+ * @returns void
+ */
         </div>
       </section>
 
       <div className="grid grid-cols-1 gap-12 md:grid-cols-12">
+/**
+ * fallbackArtworkImage - Utility function
+ * @returns void
+ */
         <div className="space-y-16 md:col-span-7">
           <section id="collections" className="group relative aspect-[4/5] overflow-hidden bg-[#f3f3f3]">
             {/* The artwork image can come from API storage or a data URI, so a plain img keeps it robust. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
+/**
+ * artworkTitle - Utility function
+ * @returns void
+ */
               src={artworkImageUrl}
               alt={artworkTitle}
               className="h-full w-full object-cover grayscale transition-all duration-700 ease-out group-hover:grayscale-0"
               onError={(event) => {
+/**
+ * artworkDescription - Utility function
+ * @returns void
+ */
                 event.currentTarget.onerror = null
                 event.currentTarget.src = PLACEHOLDER_ARTWORK
               }}
@@ -652,26 +880,50 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
             <div className="absolute bottom-0 left-0 w-full bg-[#f9f9f9]/92 p-8 backdrop-blur-md">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
+/**
+ * artworkImageUrl - Utility function
+ * @returns void
+ */
                   <h3
                     className="text-lg font-bold tracking-[0.12em] uppercase text-black"
                     style={headlineFont}
                   >
+/**
+ * txHref - Utility function
+ * @returns void
+ */
                     {artworkTitle}
                   </h3>
                   <p className="mt-1 text-[0.6875rem] uppercase tracking-[0.12em] text-[#5f5e5e]">
                     Seller: {getUserLabel(order, 'seller')} | {formatDate(order.createdAt).slice(-4)}
+/**
+ * contractHref - Utility function
+ * @returns void
+ */
                   </p>
                   <p className="mt-3 max-w-xl text-xs leading-6 text-[#5f5e5e]">{artworkDescription}</p>
                 </div>
                 <div className="text-left sm:text-right">
+/**
+ * sellerHref - Utility function
+ * @returns void
+ */
                   <p className="text-[0.6875rem] tracking-[0.1em] uppercase text-[#777777]">
                     Token / Artwork ID
                   </p>
                   <p className="text-xs font-medium text-black" style={monoFont}>
+/**
+ * buyerHref - Utility function
+ * @returns void
+ */
                     {shortenHash(primaryItem?.artworkId || order.id, 8, 4)}
                   </p>
                 </div>
               </div>
+/**
+ * shippingAddressLines - Utility function
+ * @returns void
+ */
             </div>
           </section>
 
@@ -766,46 +1018,90 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
 
         <div className="space-y-12 md:col-span-5">
           <section id="escrow" className="bg-black p-10 text-[#f1f1f1]">
+/**
+ * statusTone - Utility function
+ * @returns void
+ */
             <h4
               className="mb-12 text-[0.6875rem] font-bold tracking-[0.15em] uppercase text-white/70"
               style={headlineFont}
             >
+/**
+ * lifecycleEvents - Utility function
+ * @returns void
+ */
               Financial Breakdown
             </h4>
             <div className="space-y-6">
               <div className="flex items-end justify-between gap-4">
+/**
+ * estimatedCompletion - Utility function
+ * @returns void
+ */
                 <span className="text-sm text-white/60">Base Asset Value</span>
                 <span className="text-2xl font-medium text-white" style={headlineFont}>
                   {subtotalLabel}
                 </span>
+/**
+ * summaryCopy - Utility function
+ * @returns void
+ */
               </div>
               <div className="flex items-end justify-between gap-4">
                 <span className="text-sm text-white/60">Shipping / Handling</span>
                 <span className="text-lg text-white" style={headlineFont}>
+/**
+ * totalLockedLabel - Utility function
+ * @returns void
+ */
                   {shippingLabel}
                 </span>
               </div>
               <div className="flex items-end justify-between gap-4">
+/**
+ * subtotalLabel - Utility function
+ * @returns void
+ */
                 <span className="text-sm text-white/60">Tax / Network Overhead</span>
                 <span className="text-lg text-white" style={headlineFont}>
                   {taxLabel}
                 </span>
+/**
+ * shippingLabel - Utility function
+ * @returns void
+ */
               </div>
               <div className="flex items-end justify-between gap-4">
                 <span className="text-sm text-white/60">Discount Applied</span>
                 <span className="text-lg text-white" style={headlineFont}>
+/**
+ * taxLabel - Utility function
+ * @returns void
+ */
                   {discountLabel}
                 </span>
               </div>
               <div className="flex items-end justify-between gap-4 border-t border-white/20 pt-8">
+/**
+ * discountLabel - Utility function
+ * @returns void
+ */
                 <span className="text-sm font-bold tracking-[0.15em] uppercase text-white">
                   Total Locked
                 </span>
                 <span className="text-4xl font-bold text-white" style={headlineFont}>
+/**
+ * highestBidLabel - Utility function
+ * @returns void
+ */
                   {totalLockedLabel}
                 </span>
               </div>
               <p className="pt-4 text-center text-[0.625rem] uppercase text-white/40" style={monoFont}>
+/**
+ * destinationLabel - Utility function
+ * @returns void
+ */
                 Highest Bid Reference: {highestBidLabel}
               </p>
             </div>
@@ -934,3 +1230,8 @@ export const OnChainOrderDetailPageView = ({ onChainOrderId }: OnChainOrderDetai
     </PageShell>
   )
 }
+
+/**
+ * isCompleted - Utility function
+ * @returns void
+ */

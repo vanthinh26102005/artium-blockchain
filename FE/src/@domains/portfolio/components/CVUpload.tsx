@@ -6,22 +6,38 @@ interface CVUploadProps {
     onFileChange: (fileName: string | null) => void
 }
 
+/**
+ * CVUpload - React component
+ * @returns React element
+ */
 export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
     const [isDragging, setIsDragging] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB
+/**
+ * fileInputRef - Utility function
+ * @returns void
+ */
 
     const validateFile = (file: File): boolean => {
         setError(null)
 
         // Check file type
+/**
+ * MAX_FILE_SIZE - React component
+ * @returns React element
+ */
         if (file.type !== 'application/pdf') {
             setError('Only PDF files are supported')
             return false
         }
 
+/**
+ * validateFile - Utility function
+ * @returns void
+ */
         // Check file size
         if (file.size > MAX_FILE_SIZE) {
             setError('File size must be less than 20MB')
@@ -43,6 +59,10 @@ export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
         e.preventDefault()
         e.stopPropagation()
         setIsDragging(true)
+/**
+ * handleFile - Utility function
+ * @returns void
+ */
     }
 
     const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
@@ -54,6 +74,10 @@ export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
     const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
         e.preventDefault()
         e.stopPropagation()
+/**
+ * handleDragEnter - Utility function
+ * @returns void
+ */
     }
 
     const handleDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -63,6 +87,10 @@ export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
 
         const files = e.dataTransfer.files
         if (files && files.length > 0) {
+/**
+ * handleDragLeave - Utility function
+ * @returns void
+ */
             handleFile(files[0])
         }
     }
@@ -72,6 +100,10 @@ export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
         if (files && files.length > 0) {
             handleFile(files[0])
         }
+/**
+ * handleDragOver - Utility function
+ * @returns void
+ */
         // Reset input value to allow selecting the same file again
         e.target.value = ''
     }
@@ -80,6 +112,10 @@ export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
         fileInputRef.current?.click()
     }
 
+/**
+ * handleDrop - Utility function
+ * @returns void
+ */
     const handleRemove = () => {
         onFileChange(null)
         setError(null)
@@ -88,6 +124,10 @@ export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
     return (
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold text-slate-900 text-center mb-1">CV</h2>
+/**
+ * files - Utility function
+ * @returns void
+ */
             <p className="text-sm text-slate-500 text-center mb-4">
                 Upload a file to highlight your exhibitions, collaborations, or achievements.
                 <br />
@@ -97,10 +137,18 @@ export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
             {/* Hidden file input */}
             <input
                 ref={fileInputRef}
+/**
+ * handleFileInputChange - Utility function
+ * @returns void
+ */
                 type="file"
                 accept="application/pdf,.pdf"
                 onChange={handleFileInputChange}
                 className="hidden"
+/**
+ * files - Utility function
+ * @returns void
+ */
             />
 
             {cvFileName ? (
@@ -112,6 +160,10 @@ export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
                         </div>
                         <div>
                             <p className="text-sm font-medium text-slate-700">{cvFileName}</p>
+/**
+ * handleClick - Utility function
+ * @returns void
+ */
                             <p className="text-xs text-slate-500">PDF Document</p>
                         </div>
                     </div>
@@ -119,6 +171,10 @@ export const CVUpload = ({ cvFileName, onFileChange }: CVUploadProps) => {
                         onClick={handleRemove}
                         className="p-2 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                         title="Remove file"
+/**
+ * handleRemove - Utility function
+ * @returns void
+ */
                     >
                         <X className="h-5 w-5" />
                     </button>
