@@ -12,6 +12,10 @@ type EditorialAllListProps = {
   title?: string
 }
 
+/**
+ * formatDate - Utility function
+ * @returns void
+ */
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -22,6 +26,10 @@ const formatDate = (value: string) =>
 export const EditorialAllList = ({ items, title = 'All Articles' }: EditorialAllListProps) => {
   return (
     <section className="space-y-3 px-6 sm:px-10 lg:px-14">
+/**
+ * EditorialAllList - React component
+ * @returns React element
+ */
       {/* header */}
       <h2 className="text-[30px] font-semibold text-slate-900">{title}</h2>
 

@@ -2,6 +2,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@shared/components/ui/button'
 
+/**
+ * EditorialDiscoverBanner - React component
+ * @returns React element
+ */
 export const EditorialDiscoverBanner = () => {
   return (
     <div className="mx-auto flex flex-wrap overflow-hidden rounded-lg bg-[#F3F3F3]">
