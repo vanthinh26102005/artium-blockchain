@@ -1,5 +1,5 @@
 // react
-import { useState } from "react";
+import { useState } from 'react'
 
 // third-party
 import {
@@ -8,69 +8,60 @@ import {
   TwitterShareButton,
   LinkedinShareButton,
   TelegramShareButton,
-} from "react-share";
+} from 'react-share'
 
 // @shared - components
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@shared/components/ui/dialog";
-import { Button } from "@shared/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/components/ui/dialog'
+import { Button } from '@shared/components/ui/button'
 
 // @domains - events
-import { type HostingEvent } from "@domains/events/state/useHostingEventsStore";
+import { type HostingEvent } from '@domains/events/state/useHostingEventsStore'
 
 // icons
-import { FaWhatsapp, FaFacebookF, FaXTwitter, FaLinkedinIn, FaTelegram } from "react-icons/fa6";
-import { Check, Copy } from "lucide-react";
+import { FaWhatsapp, FaFacebookF, FaXTwitter, FaLinkedinIn, FaTelegram } from 'react-icons/fa6'
+import { Check, Copy } from 'lucide-react'
 
 type ShareEventModalProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  event: HostingEvent;
-};
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  event: HostingEvent
+}
 
 /**
  * ShareEventModal - React component
  * @returns React element
  */
-export const ShareEventModal = ({
-  open,
-  onOpenChange,
-  event,
-}: ShareEventModalProps) => {
-  const [copied, setCopied] = useState(false);
+export const ShareEventModal = ({ open, onOpenChange, event }: ShareEventModalProps) => {
+  const [copied, setCopied] = useState(false)
 
-  const eventUrl = `https://www.artium.com/event/${event.id}`;
-  const shareTitle = `Check out this event: ${event.title}`;
+  const eventUrl = `https://www.artium.com/event/${event.id}`
+  const shareTitle = `Check out this event: ${event.title}`
 
-/**
- * eventUrl - Utility function
- * @returns void
- */
+  /**
+   * eventUrl - Utility function
+   * @returns void
+   */
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(eventUrl);
-      setCopied(true);
-/**
- * shareTitle - Utility function
- * @returns void
- */
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(eventUrl)
+      setCopied(true)
+      /**
+       * shareTitle - Utility function
+       * @returns void
+       */
+      setTimeout(() => setCopied(false), 2000)
     } catch (error) {
-      console.error("Failed to copy link:", error);
+      console.error('Failed to copy link:', error)
     }
-  };
-/**
- * handleCopyLink - Utility function
- * @returns void
- */
+  }
+  /**
+   * handleCopyLink - Utility function
+   * @returns void
+   */
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[480px] rounded-3xl border-slate-200 bg-white p-0 font-inter [&>button]:bg-white [&>button]:text-slate-600 [&>button]:opacity-100 [&>button:hover]:bg-white">
+      <DialogContent className="max-w-[480px] rounded-3xl border-slate-200 bg-white p-0 font-inter [&>button:hover]:bg-white [&>button]:bg-white [&>button]:text-slate-600 [&>button]:opacity-100">
         <DialogHeader className="px-8 pt-8">
           <DialogTitle className="text-center text-xl font-semibold text-slate-900">
             Share Event
@@ -142,5 +133,5 @@ export const ShareEventModal = ({
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

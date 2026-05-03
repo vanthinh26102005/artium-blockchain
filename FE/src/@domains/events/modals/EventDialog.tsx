@@ -24,19 +24,19 @@ const EventDialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
-/**
- * EventDialogPortal - React component
- * @returns React element
- */
+  /**
+   * EventDialogPortal - React component
+   * @returns React element
+   */
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
       'fixed inset-0 z-[210] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className,
-/**
- * EventDialogOverlay - React component
- * @returns React element
- */
+      /**
+       * EventDialogOverlay - React component
+       * @returns React element
+       */
     )}
     {...props}
   />
@@ -55,10 +55,10 @@ const EventDialogContent = React.forwardRef<
         className={cn(
           'fixed left-[50%] top-[50%] z-[220] w-[min(760px,calc(100%-2rem))] translate-x-[-50%] translate-y-[-50%] rounded-2xl bg-white shadow-2xl',
           className,
-/**
- * EventDialogContent - React component
- * @returns React element
- */
+          /**
+           * EventDialogContent - React component
+           * @returns React element
+           */
         )}
         onPointerDownOutside={(event) => event.preventDefault()}
         onInteractOutside={(event) => event.preventDefault()}
@@ -91,10 +91,10 @@ EventDialogTitle.displayName = DialogPrimitive.Title.displayName
 export {
   EventDialog,
   EventDialogTrigger,
-/**
- * EventDialogTitle - React component
- * @returns React element
- */
+  /**
+   * EventDialogTitle - React component
+   * @returns React element
+   */
   EventDialogContent,
   EventDialogTitle,
 }
