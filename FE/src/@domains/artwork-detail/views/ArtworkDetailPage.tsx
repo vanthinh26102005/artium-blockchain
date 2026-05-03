@@ -10,6 +10,10 @@ type ArtworkDetailPageProps = {
     onLikeArtwork?: (liked: boolean) => void | Promise<void>
 }
 
+/**
+ * ArtworkDetailPage - React component
+ * @returns React element
+ */
 export const ArtworkDetailPage = ({
     artwork,
     onLikeArtwork,

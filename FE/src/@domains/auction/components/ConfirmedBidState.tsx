@@ -23,6 +23,10 @@ type ConfirmedBidStateProps = {
   onViewOrderStatus?: () => void
 }
 
+/**
+ * spaceGrotesk - Utility function
+ * @returns void
+ */
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   weight: ['500', '700'],
@@ -31,6 +35,10 @@ const spaceGrotesk = Space_Grotesk({
 const headlineFont = {
   fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
+/**
+ * headlineFont - Utility function
+ * @returns void
+ */
 
 const formatTransactionHash = (value: string) => `${value.slice(0, 7)}...${value.slice(-4)}`
 
@@ -38,22 +46,38 @@ const formatEthDisplay = (value: number) => value.toFixed(2)
 
 const getTransactionUrl = (transactionHash: string) =>
   `${WALLET_TARGET_CHAIN.blockExplorerUrl.replace(/\/$/, '')}/tx/${encodeURIComponent(transactionHash)}`
+/**
+ * formatTransactionHash - Utility function
+ * @returns void
+ */
 
 export const ConfirmedBidState = ({
   isOpen,
   title,
   imageSrc,
+/**
+ * formatEthDisplay - Utility function
+ * @returns void
+ */
   imageAlt,
   committedBidValue,
   transactionHash,
   onClose,
   onViewOrderStatus,
+/**
+ * getTransactionUrl - Utility function
+ * @returns void
+ */
 }: ConfirmedBidStateProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogPortal>
         <DialogOverlay className="bg-black/10 backdrop-blur-sm" />
         <DialogPrimitive.Content
+/**
+ * ConfirmedBidState - React component
+ * @returns React element
+ */
           aria-labelledby="auction-bid-confirmed-title"
           className="fixed inset-0 z-[210] flex items-center justify-center p-4 outline-none md:p-8"
           onOpenAutoFocus={(event) => event.preventDefault()}
