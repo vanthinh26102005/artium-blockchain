@@ -29,10 +29,10 @@ export const FileTriggerButton = ({
         const files = Array.from(e)
         try {
           await onSelect?.(files)
-/**
- * files - Utility function
- * @returns void
- */
+          /**
+           * files - Utility function
+           * @returns void
+           */
           // eslint-disable-next-line no-empty
         } catch (error) {}
         setLoading(false)

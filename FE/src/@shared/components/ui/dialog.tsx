@@ -26,28 +26,28 @@ const DialogClose = DialogPrimitive.Close
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
-/**
- * DialogPortal - React component
- * @returns React element
- */
+  /**
+   * DialogPortal - React component
+   * @returns React element
+   */
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-/**
- * DialogClose - React component
- * @returns React element
- */
-      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm',
+      /**
+       * DialogClose - React component
+       * @returns React element
+       */
+      'fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className,
     )}
     {...props}
   />
-/**
- * DialogOverlay - React component
- * @returns React element
- */
+  /**
+   * DialogOverlay - React component
+   * @returns React element
+   */
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
@@ -66,10 +66,10 @@ const dialogContentVariants = cva(
         '4xl': 'max-w-4xl',
         '5xl': 'max-w-5xl',
         '6xl': 'max-w-6xl',
-/**
- * dialogContentVariants - Utility function
- * @returns void
- */
+        /**
+         * dialogContentVariants - Utility function
+         * @returns void
+         */
         '7xl': 'max-w-7xl',
         '8xl': 'max-w-[88rem]',
         '9xl': 'max-w-[96rem]',
@@ -104,10 +104,10 @@ const DialogContent = React.forwardRef<
       children,
       ...props
     },
-/**
- * DialogContent - React component
- * @returns React element
- */
+    /**
+     * DialogContent - React component
+     * @returns React element
+     */
     ref,
   ) => {
     // -- is animating --
@@ -136,7 +136,7 @@ const DialogContent = React.forwardRef<
           {children}
           <DialogPrimitive.Close
             className={cn(
-              'absolute top-4 right-5 flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:pointer-events-none',
+              'absolute right-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:pointer-events-none',
               closeButtonClassName,
             )}
           >
@@ -169,12 +169,12 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-center text-lg leading-none font-semibold tracking-tight', className)}
+    className={cn('text-center text-lg font-semibold leading-none tracking-tight', className)}
     {...props}
-/**
- * DialogHeader - React component
- * @returns React element
- */
+    /**
+     * DialogHeader - React component
+     * @returns React element
+     */
   />
 ))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
@@ -186,11 +186,11 @@ const DialogDescription = React.forwardRef<
   <DialogPrimitive.Description
     ref={ref}
     className={cn(
-/**
- * DialogFooter - React component
- * @returns React element
- */
-      'text-kokushoku-black max-h-[min(640px,60vh)] text-center text-base font-normal',
+      /**
+       * DialogFooter - React component
+       * @returns React element
+       */
+      'max-h-[min(640px,60vh)] text-center text-base font-normal text-kokushoku-black',
       className,
     )}
     {...props}
