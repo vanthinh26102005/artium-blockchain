@@ -19,10 +19,10 @@ const SellerAuctionArtworkPickerPage = dynamic(
 const CreateSellerAuctionRoute: NextPageWithLayout = () => {
   const { canRenderProtected } = useRequireAuth()
 
-/**
- * CreateSellerAuctionRoute - React component
- * @returns React element
- */
+  /**
+   * CreateSellerAuctionRoute - React component
+   * @returns React element
+   */
   if (!canRenderProtected) {
     return null
   }
