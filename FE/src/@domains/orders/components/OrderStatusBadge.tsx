@@ -6,6 +6,10 @@ type OrderStatusBadgeProps = {
   status?: string | null
 }
 
+/**
+ * OrderStatusBadge - React component
+ * @returns React element
+ */
 export const OrderStatusBadge = ({ status }: OrderStatusBadgeProps) => {
   return (
     <Badge

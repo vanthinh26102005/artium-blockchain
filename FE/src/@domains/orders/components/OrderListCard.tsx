@@ -23,26 +23,50 @@ type OrderListCardProps = {
   currentUserId?: string | null
 }
 
+/**
+ * OrderListCard - React component
+ * @returns React element
+ */
 export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProps) => {
   const primaryArtwork = getPrimaryArtwork(order.items)
   const role = getOrderActorRole(order, currentUserId, scope)
   const displayStatus = getDisplayOrderStatus(order, role)
+/**
+ * primaryArtwork - Utility function
+ * @returns void
+ */
   const nextStepDescription = getNextStepDescription(order, role)
   const invoiceAvailability = getOrderListInvoiceAvailability(order)
 
   return (
+/**
+ * role - Utility function
+ * @returns void
+ */
     <Link
       href={{
         pathname: `/orders/${order.id}`,
         query: { scope, invoice: '1' },
+/**
+ * displayStatus - Utility function
+ * @returns void
+ */
       }}
       className="group block rounded-[28px] border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm"
     >
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+/**
+ * nextStepDescription - Utility function
+ * @returns void
+ */
         <div className="flex min-w-0 gap-4">
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
             {primaryArtwork?.artworkImageUrl ? (
               <Image
+/**
+ * invoiceAvailability - Utility function
+ * @returns void
+ */
                 src={primaryArtwork.artworkImageUrl}
                 alt={primaryArtwork.artworkTitle}
                 width={80}

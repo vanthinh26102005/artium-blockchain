@@ -6,6 +6,10 @@ type OrderTimelineProps = {
   steps: OrderTimelineStep[]
 }
 
+/**
+ * OrderTimeline - React component
+ * @returns React element
+ */
 export const OrderTimeline = ({ steps }: OrderTimelineProps) => {
   return (
     <div className="space-y-5">
