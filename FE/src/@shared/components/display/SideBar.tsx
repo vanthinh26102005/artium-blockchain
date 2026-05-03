@@ -46,10 +46,10 @@ const topItems: SidebarItemConfig[] = [
 const mainItems: SidebarItemConfig[] = [
   { label: 'Portfolio', href: '/portfolio', icon: Store },
   { label: 'Custom Website', href: '/custom-website', icon: Globe },
-/**
- * mainItems - Utility function
- * @returns void
- */
+  /**
+   * mainItems - Utility function
+   * @returns void
+   */
   { label: 'Events', href: '/events', icon: Calendar },
   { label: 'Inventory', href: '/inventory', icon: ImageIcon },
   {
@@ -82,19 +82,19 @@ const SidebarItem = ({
   badge,
   onUpgradeRequired,
 }: SidebarItemConfig & { onUpgradeRequired: () => void }) => {
-/**
- * messagesCount - Utility function
- * @returns void
- */
+  /**
+   * messagesCount - Utility function
+   * @returns void
+   */
   const router = useRouter()
   const isActive = href
     ? router.asPath === href ||
       router.asPath.startsWith(`${href}/`) ||
       router.pathname === href ||
-/**
- * SidebarItem - React component
- * @returns React element
- */
+      /**
+       * SidebarItem - React component
+       * @returns React element
+       */
       router.pathname.startsWith(`${href}/`)
     : false
 
@@ -105,18 +105,18 @@ const SidebarItem = ({
   }
 
   const handleClick = (e: React.MouseEvent) => {
-/**
- * router - Utility function
- * @returns void
- */
+    /**
+     * router - Utility function
+     * @returns void
+     */
     if (badge) {
       e.preventDefault()
       onUpgradeRequired()
     }
-/**
- * isActive - Utility function
- * @returns void
- */
+    /**
+     * isActive - Utility function
+     * @returns void
+     */
   }
 
   const content = (
@@ -127,37 +127,33 @@ const SidebarItem = ({
       </span>
       {label === 'Messages' && messagesCount > 0 ? (
         <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
-/**
- * badgeColors - Utility function
- * @returns void
- */
+          /** * badgeColors - Utility function * @returns void */
           {messagesCount}
         </span>
       ) : null}
       {badge && (
         <span
-          className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${badgeColors[badge]
-            }`}
+          className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+            badgeColors[badge]
+          }`}
         >
           {badge}
-/**
- * handleClick - Utility function
- * @returns void
- */
+          /** * handleClick - Utility function * @returns void */
         </span>
       )}
     </>
   )
 
-  const className = `flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition hover:bg-slate-100 ${isActive ? 'bg-slate-100' : ''
-    } ${badge ? 'cursor-pointer hover:bg-slate-50' : ''}`
+  const className = `flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition hover:bg-slate-100 ${
+    isActive ? 'bg-slate-100' : ''
+  } ${badge ? 'cursor-pointer hover:bg-slate-50' : ''}`
 
   if (href) {
     return (
-/**
- * content - Utility function
- * @returns void
- */
+      /**
+       * content - Utility function
+       * @returns void
+       */
       <Link href={href} className={className} onClick={handleClick}>
         {content}
       </Link>
@@ -183,10 +179,10 @@ export const SideBar = () => {
     }
 
     const handleClickOutside = (event: MouseEvent) => {
-/**
- * className - Utility function
- * @returns void
- */
+      /**
+       * className - Utility function
+       * @returns void
+       */
       if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
         setIsMoreOpen(false)
       }
@@ -205,62 +201,45 @@ export const SideBar = () => {
 
   return (
     <>
-      <aside className="fixed top-20 left-0 z-40 hidden h-[calc(100vh-80px)] w-[300px] flex-col border-r border-slate-200 bg-white lg:flex">
+      <aside className="fixed left-0 top-20 z-40 hidden h-[calc(100vh-80px)] w-[300px] flex-col border-r border-slate-200 bg-white lg:flex">
         <div className="flex-1 overflow-y-auto px-3 py-6">
           <div className="space-y-1">
-/**
- * SideBar - React component
- * @returns React element
- */
+            /** * SideBar - React component * @returns React element */
             {topItems.map((item) => {
               if (item.label === 'Profile') {
                 return (
                   <SidebarItem
                     key={item.label}
                     {...item}
-/**
- * moreRef - Utility function
- * @returns void
- */
+                    /**
+                     * moreRef - Utility function
+                     * @returns void
+                     */
                     href={`/profile/${encodeURIComponent(profileHandle)}`}
                     onUpgradeRequired={handleUpgradeRequired}
                   />
                 )
-/**
- * logout - Utility function
- * @returns void
- */
+                /**
+                 * logout - Utility function
+                 * @returns void
+                 */
               }
               return (
-                <SidebarItem
-                  key={item.label}
-                  {...item}
-                  onUpgradeRequired={handleUpgradeRequired}
-                />
+                <SidebarItem key={item.label} {...item} onUpgradeRequired={handleUpgradeRequired} />
               )
             })}
           </div>
-/**
- * handleClickOutside - Utility function
- * @returns void
- */
-
-
+          /** * handleClickOutside - Utility function * @returns void */
           <div className="my-4 border-t border-slate-200" />
-
           <div className="space-y-1">
             {mainItems.slice(0, 5).map((item) => (
-              <SidebarItem
-                key={item.label}
-                {...item}
-                onUpgradeRequired={handleUpgradeRequired}
-              />
+              <SidebarItem key={item.label} {...item} onUpgradeRequired={handleUpgradeRequired} />
             ))}
             <SidebarItem
-/**
- * handleUpgradeRequired - Utility function
- * @returns void
- */
+              /**
+               * handleUpgradeRequired - Utility function
+               * @returns void
+               */
               label="Orders"
               href="/orders"
               icon={Package}
@@ -268,18 +247,15 @@ export const SideBar = () => {
             />
             <SidebarItem
               label="Invoices"
-/**
- * user - Custom React hook
- * @returns void
- */
+              /**
+               * user - Custom React hook
+               * @returns void
+               */
               href="/artist/invoices"
               icon={DollarSign}
               onUpgradeRequired={handleUpgradeRequired}
             />
-/**
- * profileHandle - Utility function
- * @returns void
- */
+            /** * profileHandle - Utility function * @returns void */
             <SidebarItem
               label="Auctions"
               href="/artist/auctions/create"
@@ -287,23 +263,13 @@ export const SideBar = () => {
               onUpgradeRequired={handleUpgradeRequired}
             />
             {mainItems.slice(5).map((item) => (
-              <SidebarItem
-                key={item.label}
-                {...item}
-                onUpgradeRequired={handleUpgradeRequired}
-              />
+              <SidebarItem key={item.label} {...item} onUpgradeRequired={handleUpgradeRequired} />
             ))}
           </div>
-
           <div className="my-4 border-t border-slate-200" />
-
           <div className="space-y-1">
             {bottomItems.map((item) => (
-              <SidebarItem
-                key={item.label}
-                {...item}
-                onUpgradeRequired={handleUpgradeRequired}
-              />
+              <SidebarItem key={item.label} {...item} onUpgradeRequired={handleUpgradeRequired} />
             ))}
           </div>
         </div>
@@ -342,10 +308,7 @@ export const SideBar = () => {
         </div>
       </aside>
 
-      <PlanUpgradeModal
-        isOpen={isUpgradeModalOpen}
-        onOpenChange={setIsUpgradeModalOpen}
-      />
+      <PlanUpgradeModal isOpen={isUpgradeModalOpen} onOpenChange={setIsUpgradeModalOpen} />
     </>
   )
 }

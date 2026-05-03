@@ -27,26 +27,26 @@ const badgeStyles: Record<NonNullable<PageItemGroupProps['badge']>, string> = {
 export const PageItemGroup = ({ label, icon: Icon, items, badge }: PageItemGroupProps) => {
   const router = useRouter()
   const hasActiveItem = useMemo(
-/**
- * PageItemGroup - React component
- * @returns React element
- */
+    /**
+     * PageItemGroup - React component
+     * @returns React element
+     */
     () => items.some((item) => (item.href ? router.asPath.startsWith(item.href) : false)),
     [items, router.asPath],
   )
   const [isOpen, setIsOpen] = useState(hasActiveItem)
-/**
- * router - Utility function
- * @returns void
- */
+  /**
+   * router - Utility function
+   * @returns void
+   */
 
   return (
     <div>
       <button
-/**
- * hasActiveItem - Utility function
- * @returns void
- */
+        /**
+         * hasActiveItem - Utility function
+         * @returns void
+         */
         type="button"
         onClick={() => setIsOpen((open) => !open)}
         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-base font-semibold text-[#191414] transition hover:bg-slate-100"

@@ -14,26 +14,26 @@ export const AuthBootstrap = () => {
   const isHydrated = useAuthStore((state) => state.isHydrated)
   const accessToken = useAuthStore((state) => state.accessToken)
   const didRefreshRef = useRef(false)
-/**
- * isHydrated - Utility function
- * @returns void
- */
+  /**
+   * isHydrated - Utility function
+   * @returns void
+   */
 
   // -- effects --
   useEffect(() => {
     hydrateAuth()
-/**
- * accessToken - Utility function
- * @returns void
- */
+    /**
+     * accessToken - Utility function
+     * @returns void
+     */
   }, [])
 
   useEffect(() => {
     if (!isHydrated || didRefreshRef.current) {
-/**
- * didRefreshRef - Utility function
- * @returns void
- */
+      /**
+       * didRefreshRef - Utility function
+       * @returns void
+       */
       return
     }
 
