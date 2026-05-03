@@ -34,25 +34,45 @@ import {
   useHostingEventsStore,
 } from "@domains/events/state/useHostingEventsStore";
 
+/**
+ * DEFAULT_SORT_VALUE - React component
+ * @returns React element
+ */
 const DEFAULT_SORT_VALUE: EventsHostingSortValue =
   EVENTS_HOSTING_SORT_OPTIONS[0].value;
 const DEFAULT_ITEMS_PER_PAGE = 12;
 
 export const EventsHostingSection = () => {
+/**
+ * DEFAULT_ITEMS_PER_PAGE - React component
+ * @returns React element
+ */
   // -- refs --
   const sectionRef = useRef<HTMLElement>(null);
   const router = useRouter();
 
   // -- state --
+/**
+ * EventsHostingSection - React component
+ * @returns React element
+ */
   const [sortValue, setSortValue] = useState<EventsHostingSortValue>(
     DEFAULT_SORT_VALUE,
   );
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+/**
+ * sectionRef - Utility function
+ * @returns void
+ */
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
   const [isCreating, setIsCreating] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: "success" | "error" } | null>(null);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+/**
+ * router - Utility function
+ * @returns void
+ */
   const [inviteModalEvent, setInviteModalEvent] = useState<HostingEvent | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [shareModalEvent, setShareModalEvent] = useState<HostingEvent | null>(null);
@@ -73,34 +93,66 @@ export const EventsHostingSection = () => {
   useEffect(() => {
     // Only scroll if page actually changed (user clicked pagination)
     if (prevPageRef.current !== currentPage) {
+/**
+ * events - Utility function
+ * @returns void
+ */
       sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       prevPageRef.current = currentPage;
     }
   }, [currentPage]);
+/**
+ * isLoading - Utility function
+ * @returns void
+ */
 
   useEffect(() => {
     if (!hasLoaded) {
       void loadEvents();
+/**
+ * hasLoaded - Utility function
+ * @returns void
+ */
     }
   }, [hasLoaded, loadEvents]);
 
   // -- derived --
+/**
+ * loadEvents - Utility function
+ * @returns void
+ */
   const sortedEvents = useMemo(() => {
     const nextEvents = [...events];
 
     switch (sortValue) {
+/**
+ * addEvent - Utility function
+ * @returns void
+ */
       case "eventDateNewest":
         return nextEvents.sort(
           (a, b) => Date.parse(b.startDateTime) - Date.parse(a.startDateTime),
         );
+/**
+ * deleteEvent - Utility function
+ * @returns void
+ */
       case "eventDateOldest":
         return nextEvents.sort(
           (a, b) => Date.parse(a.startDateTime) - Date.parse(b.startDateTime),
         );
+/**
+ * copyLink - Utility function
+ * @returns void
+ */
       case "createdDateNewest":
         return nextEvents.sort(
           (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
         );
+/**
+ * updateEventFromForm - Utility function
+ * @returns void
+ */
       case "createdDateOldest":
         return nextEvents.sort(
           (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt),
@@ -108,6 +160,10 @@ export const EventsHostingSection = () => {
       case "titleAsc":
         return nextEvents.sort((a, b) =>
           a.title.localeCompare(b.title, "en", { sensitivity: "base" }),
+/**
+ * prevPageRef - Utility function
+ * @returns void
+ */
         );
       case "titleDesc":
         return nextEvents.sort((a, b) =>
@@ -127,10 +183,18 @@ export const EventsHostingSection = () => {
 
   const hasEvents = sortedEvents.length > 0;
 
+/**
+ * sortedEvents - Utility function
+ * @returns void
+ */
   // -- handlers --
   const handleCreateEvent = async (values: CreateEventFormValues) => {
     setIsCreating(true);
     try {
+/**
+ * nextEvents - Utility function
+ * @returns void
+ */
       await addEvent(values);
       setToast({ message: "Event created successfully", variant: "success" });
       setIsCreateModalOpen(false);
@@ -166,18 +230,34 @@ export const EventsHostingSection = () => {
     } catch (error) {
       console.warn("Copy failed", error);
     }
+/**
+ * totalPages - Utility function
+ * @returns void
+ */
   };
 
   // -- render --
   return (
+/**
+ * paginatedEvents - Utility function
+ * @returns void
+ */
     <section ref={sectionRef} className="rounded-3xl border border-slate-200 bg-white p-6 font-inter">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-inter text-2xl font-semibold leading-none text-slate-900">
+/**
+ * startIndex - Utility function
+ * @returns void
+ */
             Events You&apos;re Hosting
           </h2>
           {hasEvents ? (
             <button
+/**
+ * endIndex - Utility function
+ * @returns void
+ */
               type="button"
               onClick={() => setIsCreateModalOpen(true)}
               className="inline-flex h-[42px] cursor-pointer items-center justify-center gap-2 rounded-full border border-blue-500 bg-white px-4 text-[14px] font-semibold text-blue-600 transition hover:bg-blue-50"
@@ -185,12 +265,20 @@ export const EventsHostingSection = () => {
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white">
                 <Plus className="h-4 w-4" />
               </span>
+/**
+ * hasEvents - Utility function
+ * @returns void
+ */
               Create event
             </button>
           ) : null}
         </div>
 
         <div className="w-fit">
+/**
+ * handleCreateEvent - Utility function
+ * @returns void
+ */
           <Select
             value={sortValue}
             onValueChange={(value) =>
@@ -210,6 +298,10 @@ export const EventsHostingSection = () => {
                   value={option.value}
                   className="text-[13px] font-medium text-slate-700 focus:bg-slate-50 focus:text-slate-900"
                 >
+/**
+ * handleUpdateEvent - Utility function
+ * @returns void
+ */
                   {option.label}
                 </SelectItem>
               ))}
@@ -229,6 +321,10 @@ export const EventsHostingSection = () => {
 
       {isLoading && !hasEvents ? (
         <div className="mt-6 flex min-h-[240px] items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-6 py-10 text-sm text-slate-600">
+/**
+ * handleCopyLink - Utility function
+ * @returns void
+ */
           Loading events...
         </div>
       ) : hasEvents ? (

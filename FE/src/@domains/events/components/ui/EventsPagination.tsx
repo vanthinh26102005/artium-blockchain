@@ -25,10 +25,18 @@ type EventsPaginationProps = {
   className?: string;
 };
 
+/**
+ * generatePageNumbers - Utility function
+ * @returns void
+ */
 const generatePageNumbers = (currentPage: number, totalPages: number) => {
   const pages: (number | "ellipsis")[] = [];
 
   if (totalPages <= 7) {
+/**
+ * pages - Utility function
+ * @returns void
+ */
     for (let i = 1; i <= totalPages; i++) {
       pages.push(i);
     }
@@ -66,6 +74,10 @@ export const EventsPagination = ({
   onPageChange,
   itemsPerPage,
   totalItems,
+/**
+ * EventsPagination - React component
+ * @returns React element
+ */
   onItemsPerPageChange,
   itemsPerPageOptions = [12, 24, 48],
   className,
@@ -79,6 +91,10 @@ export const EventsPagination = ({
   const canGoNext = currentPage < totalPages;
 
   const startItem = (currentPage - 1) * itemsPerPage + 1;
+/**
+ * pages - Utility function
+ * @returns void
+ */
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
@@ -87,19 +103,35 @@ export const EventsPagination = ({
         "flex flex-col items-center justify-center gap-4 font-inter sm:flex-row sm:justify-between",
         className
       )}
+/**
+ * canGoPrevious - Utility function
+ * @returns void
+ */
     >
       {/* Items per page selector */}
       <div className="flex items-center gap-3">
         <span className="whitespace-nowrap text-[14px] font-medium text-slate-600">
+/**
+ * canGoNext - Utility function
+ * @returns void
+ */
           Items per page
         </span>
         <Select
           value={itemsPerPage.toString()}
           onValueChange={(value) => onItemsPerPageChange(Number(value))}
+/**
+ * startItem - Utility function
+ * @returns void
+ */
         >
           <SelectTrigger
             aria-label="Items per page"
             className="h-10 w-[70px] cursor-pointer rounded-lg border border-slate-200 bg-white px-3 font-inter text-[14px] font-semibold text-slate-700 shadow-none transition-colors hover:bg-slate-50 focus:!border focus:!border-slate-300 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 data-[state=open]:border-slate-300 data-[state=open]:bg-slate-50"
+/**
+ * endItem - Utility function
+ * @returns void
+ */
           >
             <SelectValue />
           </SelectTrigger>
@@ -179,6 +211,10 @@ export const EventsPagination = ({
           {/* Next button */}
           <button
             type="button"
+/**
+ * isActive - Utility function
+ * @returns void
+ */
             onClick={() => canGoNext && onPageChange(currentPage + 1)}
             disabled={!canGoNext}
             aria-label="Next page"

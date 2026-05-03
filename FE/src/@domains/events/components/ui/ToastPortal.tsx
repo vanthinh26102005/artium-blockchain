@@ -14,6 +14,10 @@ type ToastPortalProps = {
     showClose?: boolean;
 };
 
+/**
+ * ToastPortal - React component
+ * @returns React element
+ */
 export const ToastPortal = ({ message, variant, onClose, showClose = true }: ToastPortalProps) => {
     return (
         <Portal>

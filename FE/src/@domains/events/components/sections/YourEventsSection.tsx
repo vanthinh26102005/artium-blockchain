@@ -24,28 +24,52 @@ import { type EventsHostingSortValue } from "@domains/events/constants/hostingSo
 import { type HostingEvent } from "@domains/events/state/useHostingEventsStore";
 import { mockHomeEvents } from "@domains/home/mock/mockHomeEvents";
 
+/**
+ * DEFAULT_STATUS_FILTER - React component
+ * @returns React element
+ */
 const DEFAULT_STATUS_FILTER: EventStatusValue = "upcoming";
 const DEFAULT_DATE_SORT: EventsHostingSortValue = "eventDateNewest";
 const DEFAULT_ITEMS_PER_PAGE = 12;
 
+/**
+ * DEFAULT_DATE_SORT - React component
+ * @returns React element
+ */
 export const YourEventsSection = () => {
   // -- refs --
   const sectionRef = useRef<HTMLElement>(null);
   const router = useRouter();
+/**
+ * DEFAULT_ITEMS_PER_PAGE - React component
+ * @returns React element
+ */
 
   // -- state --
   const [statusFilter, setStatusFilter] = useState<EventStatusValue>(DEFAULT_STATUS_FILTER);
   const [eventTypeFilter, setEventTypeFilter] = useState<string[]>([]);
   const [dateSortFilter, setDateSortFilter] = useState<EventsHostingSortValue>(DEFAULT_DATE_SORT);
+/**
+ * YourEventsSection - React component
+ * @returns React element
+ */
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+/**
+ * sectionRef - Utility function
+ * @returns void
+ */
   const [inviteModalEvent, setInviteModalEvent] = useState<any | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [shareModalEvent, setShareModalEvent] = useState<any | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: "success" | "error" } | null>(null);
+/**
+ * router - Utility function
+ * @returns void
+ */
 
   // Use mock data for events (filtered by 'going' status to simulate 'Your Events')
   const events = useMemo(() => mockHomeEvents.filter((e: any) => e.rsvpStatus === 'going'), []);
@@ -56,6 +80,10 @@ export const YourEventsSection = () => {
   const prevPageRef = useRef(currentPage);
   useEffect(() => {
     // Only scroll if page actually changed (user clicked pagination)
+/**
+ * debouncedSearchQuery - Utility function
+ * @returns void
+ */
     if (prevPageRef.current !== currentPage) {
       sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       prevPageRef.current = currentPage;
@@ -69,20 +97,36 @@ export const YourEventsSection = () => {
 
     // Filter by status
     if (statusFilter !== "all") {
+/**
+ * events - Utility function
+ * @returns void
+ */
       filtered = filtered.filter((event) => {
         const eventStart = new Date(event.startDateTime);
         const eventEnd = new Date(event.endDateTime);
 
+/**
+ * isLoading - Utility function
+ * @returns void
+ */
         if (statusFilter === "upcoming") {
           return eventStart > now;
         } else if (statusFilter === "ongoing") {
           return eventStart <= now && eventEnd >= now;
+/**
+ * updateRsvpStatus - Utility function
+ * @returns void
+ */
         } else if (statusFilter === "past") {
           return eventEnd < now;
         }
         return true;
       });
     }
+/**
+ * prevPageRef - Utility function
+ * @returns void
+ */
 
     // Filter by event type
     if (eventTypeFilter.length > 0) {
@@ -96,10 +140,18 @@ export const YourEventsSection = () => {
       const query = debouncedSearchQuery.toLowerCase();
       filtered = filtered.filter((event) =>
         event.title.toLowerCase().includes(query) ||
+/**
+ * filteredAndSortedEvents - Utility function
+ * @returns void
+ */
         event.location.toLowerCase().includes(query)
       );
     }
 
+/**
+ * now - Utility function
+ * @returns void
+ */
     // Sort by date and other criteria
     filtered.sort((a, b) => {
       const dateA = new Date(a.startDateTime).getTime();
@@ -109,10 +161,18 @@ export const YourEventsSection = () => {
         case "eventDateNewest":
           return dateB - dateA;
         case "eventDateOldest":
+/**
+ * eventStart - Utility function
+ * @returns void
+ */
           return dateA - dateB;
         case "titleAsc":
           return a.title.localeCompare(b.title, "en", { sensitivity: "base" });
         case "titleDesc":
+/**
+ * eventEnd - Utility function
+ * @returns void
+ */
           return b.title.localeCompare(a.title, "en", { sensitivity: "base" });
         default:
           return dateB - dateA;
@@ -138,6 +198,10 @@ export const YourEventsSection = () => {
       variant: "success",
     });
 
+/**
+ * query - Utility function
+ * @returns void
+ */
     // Auto-hide toast after 3 seconds
     window.setTimeout(() => setToast(null), 3000);
   };
@@ -150,10 +214,18 @@ export const YourEventsSection = () => {
     setItemsPerPage(value);
     setCurrentPage(1);
   };
+/**
+ * dateA - Utility function
+ * @returns void
+ */
 
   const handleFilterChange = () => {
     setCurrentPage(1);
   };
+/**
+ * dateB - Utility function
+ * @returns void
+ */
 
   const toHostingEvent = (event: Event): any => ({
     id: event.id,
@@ -176,14 +248,26 @@ export const YourEventsSection = () => {
   });
 
   // -- render --
+/**
+ * totalPages - Utility function
+ * @returns void
+ */
   return (
     <section ref={sectionRef} className="rounded-3xl border border-slate-200 bg-white p-6 font-inter">
       <div className="flex flex-col gap-4">
         {/* Header */}
+/**
+ * paginatedEvents - Utility function
+ * @returns void
+ */
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-inter text-2xl font-semibold leading-none text-slate-900">
             Your events
           </h2>
+/**
+ * startIndex - Utility function
+ * @returns void
+ */
         </div>
 
         {/* Filters Row */}
@@ -192,6 +276,10 @@ export const YourEventsSection = () => {
           onStatusChange={(value) => {
             setStatusFilter(value);
             handleFilterChange();
+/**
+ * handleRsvpChange - Utility function
+ * @returns void
+ */
           }}
           eventTypeFilter={eventTypeFilter}
           onEventTypeChange={(value) => {
@@ -208,6 +296,10 @@ export const YourEventsSection = () => {
             setSearchQuery(e.target.value);
             handleFilterChange();
           }}
+/**
+ * handlePageChange - Utility function
+ * @returns void
+ */
         />
       </div>
 
@@ -215,6 +307,10 @@ export const YourEventsSection = () => {
         <ToastPortal
           message={toast.message}
           variant={toast.variant}
+/**
+ * handleItemsPerPageChange - Utility function
+ * @returns void
+ */
           onClose={() => setToast(null)}
         />
       ) : null}
@@ -223,6 +319,10 @@ export const YourEventsSection = () => {
       {isLoading && paginatedEvents.length === 0 ? (
         <div className="mt-6 flex min-h-[240px] items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-6 py-10 text-sm text-slate-600">
           Loading your events...
+/**
+ * handleFilterChange - Utility function
+ * @returns void
+ */
         </div>
       ) : paginatedEvents.length > 0 ? (
         <>
@@ -230,6 +330,10 @@ export const YourEventsSection = () => {
             {paginatedEvents.map((event) => (
               <EventCard
                 key={event.id}
+/**
+ * toHostingEvent - Utility function
+ * @returns void
+ */
                 event={event as any}
                 onRsvpChange={handleRsvpChange}
                 onInvite={(event) => {
