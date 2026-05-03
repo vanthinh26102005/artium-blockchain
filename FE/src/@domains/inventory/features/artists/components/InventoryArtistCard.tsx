@@ -11,22 +11,42 @@ type InventoryArtistCardProps = {
   artist: InventoryArtist
 }
 
+/**
+ * InventoryArtistCard - React component
+ * @returns React element
+ */
 export const InventoryArtistCard = ({ artist }: InventoryArtistCardProps) => {
   const displayThumbnails = artist.artworkThumbnails.slice(0, 4)
   const remainingCount = Math.max(0, artist.artworkCount - displayThumbnails.length)
   const hasThumbnails = displayThumbnails.length > 0
+/**
+ * displayThumbnails - Utility function
+ * @returns void
+ */
   const overlayIndex = remainingCount > 0 ? displayThumbnails.length - 1 : -1
 
   return (
     <Link
+/**
+ * remainingCount - Utility function
+ * @returns void
+ */
       href={artist.profileHref}
       className="group block h-full rounded-[28px] border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm"
     >
       <div className="flex items-center gap-3">
+/**
+ * hasThumbnails - Utility function
+ * @returns void
+ */
         <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-slate-200">
           {artist.avatarUrl ? (
             <Image
               src={artist.avatarUrl}
+/**
+ * overlayIndex - Utility function
+ * @returns void
+ */
               alt={artist.name}
               width={48}
               height={48}
