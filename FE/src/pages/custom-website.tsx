@@ -3,6 +3,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 import { Metadata } from '@/components/SEO/Metadata'
 import { CustomWebsiteLayout } from '@domains/custom-website'
 
+/**
+ * CustomWebsitePage - React component
+ * @returns React element
+ */
 const CustomWebsitePage: NextPageWithLayout = () => {
   return (
     <>

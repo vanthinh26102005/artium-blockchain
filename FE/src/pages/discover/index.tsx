@@ -7,6 +7,10 @@ import type { NextPageWithLayout } from '@shared/types/next'
 // @domains - discover
 import { DiscoverPage } from '@domains/discover/views/DiscoverPage'
 
+/**
+ * DiscoverRoute - React component
+ * @returns React element
+ */
 const DiscoverRoute: NextPageWithLayout = () => {
   // -- state --
   // -- derived --
