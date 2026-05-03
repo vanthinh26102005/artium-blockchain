@@ -19,10 +19,10 @@ const SellerRegistrationPage = dynamic(
 const SellerRegisterRoute: NextPageWithLayout = () => {
   const { canRenderProtected } = useRequireAuth()
 
-/**
- * SellerRegisterRoute - React component
- * @returns React element
- */
+  /**
+   * SellerRegisterRoute - React component
+   * @returns React element
+   */
   if (!canRenderProtected) {
     return null
   }
