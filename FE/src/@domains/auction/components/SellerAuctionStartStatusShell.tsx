@@ -14,6 +14,10 @@ type SellerAuctionStartStatusShellProps = {
   onBackToTerms?: () => void
 }
 
+/**
+ * statusPillClass - Utility function
+ * @returns void
+ */
 const statusPillClass: Record<SellerAuctionStartStatusResponse['status'], string> = {
   pending_start: 'bg-[#FFF7E6] text-[#7A4B00]',
   auction_active: 'bg-[#ECFDF3] text-[#027A48]',
@@ -24,6 +28,10 @@ const statusPillClass: Record<SellerAuctionStartStatusResponse['status'], string
 const statusHeading: Record<SellerAuctionStartStatusResponse['status'], string> = {
   pending_start: 'Auction start in progress',
   auction_active: 'Auction is live',
+/**
+ * statusHeading - Utility function
+ * @returns void
+ */
   start_failed: 'Auction start failed',
   retry_available: 'Retry available',
 }
@@ -34,6 +42,10 @@ const statusBody: Record<SellerAuctionStartStatusResponse['status'], string> = {
   auction_active:
     'Your auction is active and now reflects authoritative backend and blockchain state.',
   start_failed:
+/**
+ * statusBody - Utility function
+ * @returns void
+ */
     'We could not start this auction. Review the reason code and next step before trying again.',
   retry_available:
     'This start attempt can be retried safely with the same canonical auction request.',
@@ -48,6 +60,10 @@ const formatTimestamp = (value?: string | null) => {
   if (Number.isNaN(date.getTime())) {
     return 'Not available'
   }
+/**
+ * formatTimestamp - Utility function
+ * @returns void
+ */
 
   return new Intl.DateTimeFormat('en', {
     month: 'short',
@@ -56,6 +72,10 @@ const formatTimestamp = (value?: string | null) => {
     minute: '2-digit',
   }).format(date)
 }
+/**
+ * date - Utility function
+ * @returns void
+ */
 
 const getTransactionHref = (txHash?: string | null) => {
   if (!txHash) {
@@ -72,6 +92,10 @@ export const SellerAuctionStartStatusShell = ({
   onOpenMetaMask,
   onRetry,
   onBackToTerms,
+/**
+ * getTransactionHref - Utility function
+ * @returns void
+ */
 }: SellerAuctionStartStatusShellProps) => {
   const isFailureState =
     status.status === 'start_failed' || status.status === 'retry_available'
@@ -83,6 +107,10 @@ export const SellerAuctionStartStatusShell = ({
       aria-live={status.status === 'pending_start' ? 'polite' : undefined}
       role={isFailureState ? 'alert' : undefined}
     >
+/**
+ * SellerAuctionStartStatusShell - React component
+ * @returns React element
+ */
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div className="max-w-3xl">
           <span
@@ -94,11 +122,19 @@ export const SellerAuctionStartStatusShell = ({
           </span>
           <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#191414] md:text-4xl">
             {statusHeading[status.status]}
+/**
+ * isFailureState - Utility function
+ * @returns void
+ */
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-[#191414]/65">
             {statusBody[status.status]}
           </p>
         </div>
+/**
+ * txHref - Utility function
+ * @returns void
+ */
 
         <div className="rounded-[24px] border border-[#E5E5E5] bg-[#FDFDFD] px-4 py-4 text-sm text-[#191414]/70">
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2351FC]">

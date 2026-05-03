@@ -14,10 +14,18 @@ type SellerAuctionTermsPreviewProps = {
   mode?: 'draft' | 'submitted'
 }
 
+/**
+ * formatDurationLabel - Utility function
+ * @returns void
+ */
 const formatDurationLabel = (values: SellerAuctionTermsFormValues) => {
   const presetLabel = SELLER_AUCTION_DURATION_PRESETS.find(
     (preset) => preset.value === values.durationPreset,
   )?.label
+/**
+ * presetLabel - Utility function
+ * @returns void
+ */
 
   if (presetLabel) {
     return presetLabel
@@ -29,6 +37,10 @@ const formatDurationLabel = (values: SellerAuctionTermsFormValues) => {
   }
 
   if (customDurationHours % 24 === 0) {
+/**
+ * customDurationHours - Utility function
+ * @returns void
+ */
     const days = customDurationHours / 24
     return `${days} ${days === 1 ? 'day' : 'days'}`
   }
@@ -38,6 +50,10 @@ const formatDurationLabel = (values: SellerAuctionTermsFormValues) => {
 
 const formatEthAmount = (value: string) => {
   const trimmed = value.trim()
+/**
+ * days - Utility function
+ * @returns void
+ */
   return trimmed ? `${trimmed} ETH` : 'Not set'
 }
 
@@ -48,10 +64,18 @@ const ChecklistRow = ({
   label: string
   complete: boolean
 }) => (
+/**
+ * formatEthAmount - Utility function
+ * @returns void
+ */
   <div
     className={`flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm ${
       complete ? 'bg-[#ECFDF3] text-[#027A48]' : 'bg-[#F7F7F7] text-[#191414]/65'
     }`}
+/**
+ * trimmed - Utility function
+ * @returns void
+ */
   >
     {complete ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <Circle className="h-4 w-4 shrink-0" />}
     <span className="font-medium">{label}</span>
@@ -59,6 +83,10 @@ const ChecklistRow = ({
 )
 
 export const SellerAuctionTermsPreview = ({
+/**
+ * ChecklistRow - React component
+ * @returns React element
+ */
   candidate,
   values,
   isTermsValid,
@@ -79,6 +107,10 @@ export const SellerAuctionTermsPreview = ({
         {mode === 'submitted' ? 'Submitted auction snapshot' : 'Auction preview'}
       </h2>
 
+/**
+ * SellerAuctionTermsPreview - React component
+ * @returns React element
+ */
       <div className="mt-6 overflow-hidden rounded-[28px] border border-[#E5E5E5] bg-[#FDFDFD]">
         {candidate.thumbnailUrl ? (
           <div className="relative aspect-[4/3] w-full overflow-hidden">
@@ -88,10 +120,18 @@ export const SellerAuctionTermsPreview = ({
               fill
               unoptimized
               className="object-cover"
+/**
+ * durationLabel - Utility function
+ * @returns void
+ */
               sizes="(min-width: 1280px) 420px, (min-width: 768px) 60vw, 100vw"
             />
           </div>
         ) : (
+/**
+ * reserveCopy - Utility function
+ * @returns void
+ */
           <div className="flex aspect-[4/3] items-center justify-center bg-[#F5F5F5] text-[#191414]/45">
             <ImageOff className="h-10 w-10" />
           </div>

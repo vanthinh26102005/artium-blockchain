@@ -28,28 +28,52 @@ type SellerAuctionTermsFormProps = {
 
 type SellerAuctionTermsFieldName = keyof SellerAuctionTermsFormValues
 
+/**
+ * fieldLabelClass - Utility function
+ * @returns void
+ */
 const fieldLabelClass = 'text-sm font-bold text-[#191414]'
 const helperClass = 'mt-2 text-sm leading-6 text-[#191414]/60'
 const errorClass = 'mt-2 text-sm font-medium text-[#FF4337]'
 const actionButtonClass = 'w-full md:w-auto'
+/**
+ * helperClass - Utility function
+ * @returns void
+ */
 
 const getFieldMessageId = (field: SellerAuctionTermsFieldName) => `${field}-message`
 
 export const SellerAuctionTermsForm = ({
+/**
+ * errorClass - Utility function
+ * @returns void
+ */
   values,
   errors,
   hasSubmitted,
   onChange,
+/**
+ * actionButtonClass - Utility function
+ * @returns void
+ */
   onValidate,
   onBack,
   onSaveDraft,
   onStartAttempt,
   isStartDisabled,
+/**
+ * getFieldMessageId - Utility function
+ * @returns void
+ */
   isLocked = false,
   isBackDisabled = false,
   isSaveDraftDisabled = false,
   startButtonLabel = 'Start Auction',
   supportingMessage = 'Network gas is shown in MetaMask during activation.',
+/**
+ * SellerAuctionTermsForm - React component
+ * @returns React element
+ */
 }: SellerAuctionTermsFormProps) => {
   const [touchedFields, setTouchedFields] = useState<
     Partial<Record<SellerAuctionTermsFieldName, boolean>>
@@ -73,11 +97,19 @@ export const SellerAuctionTermsForm = ({
 
   const handleValuesChange = (
     field: SellerAuctionTermsFieldName,
+/**
+ * hasErrors - Utility function
+ * @returns void
+ */
     nextValues: SellerAuctionTermsFormValues,
   ) => {
     markFieldTouched(field)
     onChange(nextValues)
   }
+/**
+ * markFieldTouched - Utility function
+ * @returns void
+ */
 
   return (
     <section className="rounded-[32px] border border-black/10 bg-white p-6 md:p-8">
@@ -87,12 +119,20 @@ export const SellerAuctionTermsForm = ({
       <h2 className="mt-3 text-[40px] font-semibold leading-[44px] tracking-[-0.04em] text-[#191414]">
         Set terms before activation
       </h2>
+/**
+ * shouldShowError - Utility function
+ * @returns void
+ */
       <p className="mt-4 max-w-3xl text-base leading-6 text-[#191414]/65">
         Configure the contract-backed rules buyers will see before this auction is started on
         Sepolia.
       </p>
 
       {hasSubmitted && hasErrors ? (
+/**
+ * handleBlur - Utility function
+ * @returns void
+ */
         <div
           className="mt-6 rounded-[24px] border border-[#FF4337]/20 bg-[#FFF5F4] px-4 py-3 text-sm font-medium text-[#FF4337]"
           role="alert"
@@ -101,6 +141,10 @@ export const SellerAuctionTermsForm = ({
         </div>
       ) : null}
 
+/**
+ * handleValuesChange - Utility function
+ * @returns void
+ */
       <div className="mt-8 space-y-8">
         <fieldset>
           <legend className={fieldLabelClass}>Reserve policy</legend>
