@@ -23,10 +23,10 @@ const radiusOptions = [1, 5, 10, 20, 50, 100]
 const locationSuggestions = [
   'Albuquerque, NM, USA',
   'Santa Fe, NM, USA',
-/**
- * locationSuggestions - Utility function
- * @returns void
- */
+  /**
+   * locationSuggestions - Utility function
+   * @returns void
+   */
   'Denver, CO, USA',
   'Phoenix, AZ, USA',
   'Austin, TX, USA',
@@ -47,10 +47,10 @@ export const ChangeLocationModal = ({
   location,
   radiusMiles,
   onApply,
-/**
- * ChangeLocationModal - React component
- * @returns React element
- */
+  /**
+   * ChangeLocationModal - React component
+   * @returns React element
+   */
 }: ChangeLocationModalProps) => {
   // -- state --
   const [locationInput, setLocationInput] = useState(location)
@@ -67,18 +67,18 @@ export const ChangeLocationModal = ({
     return locationSuggestions.filter((item) => item.toLowerCase().includes(value))
   }, [locationInput])
 
-/**
- * visibleSuggestions - Utility function
- * @returns void
- */
+  /**
+   * visibleSuggestions - Utility function
+   * @returns void
+   */
   // -- handlers --
   const handleSelectLocation = (value: string) => {
     setLocationInput(value)
     setSelectedLocation(value)
-/**
- * value - Utility function
- * @returns void
- */
+    /**
+     * value - Utility function
+     * @returns void
+     */
   }
 
   const handleApply = () => {
@@ -91,10 +91,10 @@ export const ChangeLocationModal = ({
       return
     }
 
-/**
- * handleSelectLocation - Utility function
- * @returns void
- */
+    /**
+     * handleSelectLocation - Utility function
+     * @returns void
+     */
     setLocationInput(location)
     setSelectedLocation(location)
     setRadius(radiusMiles)
@@ -102,19 +102,21 @@ export const ChangeLocationModal = ({
 
   // -- render --
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
-/**
- * handleApply - Utility function
- * @returns void
- */
-      <DialogContent size="xl" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+    >
+      /** * handleApply - Utility function * @returns void */
+      <DialogContent
+        size="xl"
+        className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl"
+      >
         {/* header */}
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Change Location</h2>
-/**
- * nextLocation - Utility function
- * @returns void
- */
+          /** * nextLocation - Utility function * @returns void */
           <p className="mt-1 text-sm text-slate-500">Update your city and distance radius.</p>
         </div>
 

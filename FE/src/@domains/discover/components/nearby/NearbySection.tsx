@@ -23,10 +23,10 @@ export const NearbySection = () => {
   const handleApply = (next: { location: string; radiusMiles: number }) => {
     setPlaceName(next.location)
     setRadiusMiles(next.radiusMiles)
-/**
- * handleApply - Utility function
- * @returns void
- */
+    /**
+     * handleApply - Utility function
+     * @returns void
+     */
     setIsModalOpen(false)
   }
 
