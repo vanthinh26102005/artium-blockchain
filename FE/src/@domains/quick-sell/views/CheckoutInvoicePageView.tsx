@@ -22,6 +22,10 @@ export type CheckoutInvoicePageViewProps = {
   quickSellInvoiceJustCreated?: boolean
 }
 
+/**
+ * CheckoutInvoicePageView - React component
+ * @returns React element
+ */
 export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
   invoiceCode,
   quickSellInvoiceJustCreated,
@@ -29,32 +33,60 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
   const router = useRouter()
   const { redirect_status } = router.query
   const stripeRef = useRef<Stripe | null>(null)
+/**
+ * router - Utility function
+ * @returns void
+ */
   const elementsRef = useRef<StripeElements | null>(null)
   const user = useAuthStore((state) => state.user)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
   const stripePromise = useMemo(() => {
+/**
+ * stripeRef - Utility function
+ * @returns void
+ */
     const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
     return key ? loadStripe(key) : null
   }, [])
 
+/**
+ * elementsRef - Utility function
+ * @returns void
+ */
   // -- state --
   const [isLoading, setIsLoading] = useState(true)
   const [invoice, setInvoice] = useState<CheckoutInvoice | null>(null)
   const [viewMode, setViewMode] = useState<'artist' | 'buyer'>('artist')
+/**
+ * user - Custom React hook
+ * @returns void
+ */
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
 
+/**
+ * isAuthenticated - Utility function
+ * @returns void
+ */
   // -- derived --
   const isArtistView = viewMode === 'artist'
   const isPaid = invoice?.status === 'PAID'
   const payButtonLabel = clientSecret ? 'Complete Payment' : 'Enter Card Details'
 
+/**
+ * stripePromise - Utility function
+ * @returns void
+ */
   useEffect(() => {
     let isMounted = true
 
     const loadInvoice = async () => {
+/**
+ * key - Utility function
+ * @returns void
+ */
       try {
         const apiInvoice = await invoiceApis.getInvoiceByCode(invoiceCode)
         const mapped = mapInvoiceResponseToCheckoutInvoice(apiInvoice)
@@ -71,14 +103,26 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
       }
     }
 
+/**
+ * isArtistView - Utility function
+ * @returns void
+ */
     loadInvoice()
 
     return () => {
       isMounted = false
+/**
+ * isPaid - Utility function
+ * @returns void
+ */
     }
   }, [invoiceCode])
 
   // -- handlers --
+/**
+ * payButtonLabel - Utility function
+ * @returns void
+ */
   const handlePayNow = useCallback(async () => {
     if (!invoice) return
     if (!stripePromise) {
@@ -87,15 +131,27 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
     }
     if (!isAuthenticated) {
       const returnUrl = encodeURIComponent(router.asPath)
+/**
+ * loadInvoice - Utility function
+ * @returns void
+ */
       router.push(`/login?returnUrl=${returnUrl}`)
       return
     }
 
     const buyerEmail = invoice.buyer?.email || user?.email
+/**
+ * apiInvoice - Utility function
+ * @returns void
+ */
     if (!buyerEmail) {
       setPaymentError('Please provide a buyer email before paying.')
       return
     }
+/**
+ * mapped - Utility function
+ * @returns void
+ */
 
     try {
       setIsProcessing(true)
@@ -104,6 +160,10 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
       if (!clientSecret) {
         const intent = await invoiceApis.createQuickSellPaymentIntent(invoice.invoiceCode, {
           email: buyerEmail,
+/**
+ * stored - Utility function
+ * @returns void
+ */
           name: invoice.buyer?.name || user?.username || 'N/A',
         })
         setClientSecret(intent.clientSecret)
@@ -124,6 +184,10 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
         confirmParams: { return_url: returnUrl },
         redirect: 'if_required',
       })
+/**
+ * handlePayNow - Utility function
+ * @returns void
+ */
 
       if (result.error) {
         setPaymentError(result.error.message || 'Payment failed. Please try again.')
@@ -134,6 +198,10 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
         const updatedInvoice = { ...invoice, status: 'PAID' as const }
         setInvoice(updatedInvoice)
         saveInvoiceToStorage(updatedInvoice)
+/**
+ * returnUrl - Utility function
+ * @returns void
+ */
       }
     } catch (error) {
       const message =
@@ -142,6 +210,10 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
           : 'Payment failed. Please try again.'
       setPaymentError(message)
     } finally {
+/**
+ * buyerEmail - Utility function
+ * @returns void
+ */
       setIsProcessing(false)
     }
   }, [invoice, stripePromise, isAuthenticated, router, user?.email, user?.username, clientSecret])
@@ -156,6 +228,10 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
   }
 
   if (!invoice) {
+/**
+ * intent - Utility function
+ * @returns void
+ */
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-2">
         <h1 className="text-lg font-semibold text-slate-900">Invoice not found</h1>
@@ -168,10 +244,18 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="border-b border-slate-200 bg-white px-6 py-4">
+/**
+ * stripe - Utility function
+ * @returns void
+ */
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">Invoice {invoice.invoiceCode}</h1>
             <p className="mt-1 text-sm text-slate-600">
+/**
+ * elements - Utility function
+ * @returns void
+ */
               Status: <span className="font-medium">{invoice.status}</span>
             </p>
           </div>
@@ -181,10 +265,18 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
             <button
               onClick={() => setViewMode('artist')}
               className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+/**
+ * returnUrl - Utility function
+ * @returns void
+ */
                 isArtistView ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'
               }`}
             >
               Artist View
+/**
+ * result - Utility function
+ * @returns void
+ */
             </button>
             <button
               onClick={() => setViewMode('buyer')}
@@ -200,6 +292,10 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
         {quickSellInvoiceJustCreated && (
           <div className="mx-auto mt-3 max-w-4xl rounded-md bg-green-50 p-3">
             <p className="text-sm text-green-800">✓ Invoice created successfully!</p>
+/**
+ * updatedInvoice - Utility function
+ * @returns void
+ */
           </div>
         )}
       </div>
@@ -208,6 +304,10 @@ export const CheckoutInvoicePageView: FC<CheckoutInvoicePageViewProps> = ({
       <div className="mx-auto max-w-4xl px-6 py-8">
         {/* Artist View */}
         {isArtistView && (
+/**
+ * message - Utility function
+ * @returns void
+ */
           <div className="space-y-6">
             {/* Quick Sell QR Code Section */}
             <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">

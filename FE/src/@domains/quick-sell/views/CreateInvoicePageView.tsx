@@ -11,12 +11,20 @@ export type CreateInvoicePageViewProps = {
     artworkId?: string
 }
 
+/**
+ * CreateInvoicePageView - React component
+ * @returns React element
+ */
 export const CreateInvoicePageView: FC<CreateInvoicePageViewProps> = ({ artworkId }) => {
     // -- state --
     // TODO PR2: Add form state management with React Hook Form
     const invoice = mockEmptyInvoice
 
     // -- derived --
+/**
+ * invoice - Utility function
+ * @returns void
+ */
 
     // -- handlers --
 
