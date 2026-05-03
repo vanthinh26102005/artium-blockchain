@@ -11,6 +11,10 @@ type TestimonialsSectionProps = {
   className?: string
 }
 
+/**
+ * TestimonialsSection - React component
+ * @returns React element
+ */
 const TestimonialsSection = ({ className }: TestimonialsSectionProps) => {
   // -- state --
   const [paused, setPaused] = useState(false)
@@ -19,6 +23,10 @@ const TestimonialsSection = ({ className }: TestimonialsSectionProps) => {
   const style = useMemo<CSSProperties>(
     () => ({ '--marquee-play': paused ? 'paused' : 'running' }) as CSSProperties,
     [paused],
+/**
+ * style - Utility function
+ * @returns void
+ */
   )
 
   return (

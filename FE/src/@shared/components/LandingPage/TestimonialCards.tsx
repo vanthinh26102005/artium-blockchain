@@ -34,6 +34,10 @@ type TestimonialVideoCardProps = {
   backgroundColor: string
 }
 
+/**
+ * TestimonialVideoCard - React component
+ * @returns React element
+ */
 export const TestimonialVideoCard = ({
   name,
   location,
@@ -82,6 +86,10 @@ type ArtistQuoteCardProps = {
 export const ArtistQuoteCard = ({
   quote,
   name,
+/**
+ * ArtistQuoteCard - React component
+ * @returns React element
+ */
   location,
   avatarSrc,
   backgroundColor,

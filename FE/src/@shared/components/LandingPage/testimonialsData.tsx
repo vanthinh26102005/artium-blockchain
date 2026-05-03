@@ -1,6 +1,10 @@
 import React from 'react'
 import { ArtistCard } from './TestimonialCards'
 
+/**
+ * ARTIST_DATA - React component
+ * @returns React element
+ */
 export const ARTIST_DATA: ArtistCard[] = [
   {
     type: 'quote',
