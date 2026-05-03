@@ -6,11 +6,19 @@ import * as React from 'react'
 import { cn } from '@shared/lib/utils'
 import { Button } from './button'
 
+/**
+ * Tabs - React component
+ * @returns React element
+ */
 const Tabs = TabsPrimitive.Root
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+/**
+ * TabsList - React component
+ * @returns React element
+ */
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
@@ -29,6 +37,10 @@ const TabsTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
+/**
+ * TabsTrigger - React component
+ * @returns React element
+ */
     className={cn(
       'hover:text-muted-foreground focus-visible:outline-ring/70 inline-flex flex-1 items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap outline-offset-2 transition-all focus-visible:outline focus-visible:outline-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-[#0F6BFF] data-[state=active]:text-[#0F6BFF]',
       className,
@@ -50,6 +62,10 @@ const TabsContent = React.forwardRef<
     className={cn(
       'focus-visible:outline-ring/70 mt-2 outline-offset-2 focus-visible:outline focus-visible:outline-2',
       className,
+/**
+ * TabsContent - React component
+ * @returns React element
+ */
     )}
     {...props}
   />

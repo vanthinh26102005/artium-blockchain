@@ -2,6 +2,10 @@ import * as React from "react"
 
 import { cn } from "@shared/lib/utils"
 
+/**
+ * Textarea - React component
+ * @returns React element
+ */
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
     <textarea
