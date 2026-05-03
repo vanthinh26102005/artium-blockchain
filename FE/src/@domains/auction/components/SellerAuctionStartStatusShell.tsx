@@ -28,10 +28,10 @@ const statusPillClass: Record<SellerAuctionStartStatusResponse['status'], string
 const statusHeading: Record<SellerAuctionStartStatusResponse['status'], string> = {
   pending_start: 'Auction start in progress',
   auction_active: 'Auction is live',
-/**
- * statusHeading - Utility function
- * @returns void
- */
+  /**
+   * statusHeading - Utility function
+   * @returns void
+   */
   start_failed: 'Auction start failed',
   retry_available: 'Retry available',
 }
@@ -42,10 +42,10 @@ const statusBody: Record<SellerAuctionStartStatusResponse['status'], string> = {
   auction_active:
     'Your auction is active and now reflects authoritative backend and blockchain state.',
   start_failed:
-/**
- * statusBody - Utility function
- * @returns void
- */
+    /**
+     * statusBody - Utility function
+     * @returns void
+     */
     'We could not start this auction. Review the reason code and next step before trying again.',
   retry_available:
     'This start attempt can be retried safely with the same canonical auction request.',
@@ -60,10 +60,10 @@ const formatTimestamp = (value?: string | null) => {
   if (Number.isNaN(date.getTime())) {
     return 'Not available'
   }
-/**
- * formatTimestamp - Utility function
- * @returns void
- */
+  /**
+   * formatTimestamp - Utility function
+   * @returns void
+   */
 
   return new Intl.DateTimeFormat('en', {
     month: 'short',
@@ -92,13 +92,12 @@ export const SellerAuctionStartStatusShell = ({
   onOpenMetaMask,
   onRetry,
   onBackToTerms,
-/**
- * getTransactionHref - Utility function
- * @returns void
- */
+  /**
+   * getTransactionHref - Utility function
+   * @returns void
+   */
 }: SellerAuctionStartStatusShellProps) => {
-  const isFailureState =
-    status.status === 'start_failed' || status.status === 'retry_available'
+  const isFailureState = status.status === 'start_failed' || status.status === 'retry_available'
   const txHref = getTransactionHref(status.txHash)
 
   return (
@@ -107,10 +106,7 @@ export const SellerAuctionStartStatusShell = ({
       aria-live={status.status === 'pending_start' ? 'polite' : undefined}
       role={isFailureState ? 'alert' : undefined}
     >
-/**
- * SellerAuctionStartStatusShell - React component
- * @returns React element
- */
+      /** * SellerAuctionStartStatusShell - React component * @returns React element */
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div className="max-w-3xl">
           <span
@@ -122,20 +118,13 @@ export const SellerAuctionStartStatusShell = ({
           </span>
           <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#191414] md:text-4xl">
             {statusHeading[status.status]}
-/**
- * isFailureState - Utility function
- * @returns void
- */
+            /** * isFailureState - Utility function * @returns void */
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-[#191414]/65">
             {statusBody[status.status]}
           </p>
         </div>
-/**
- * txHref - Utility function
- * @returns void
- */
-
+        /** * txHref - Utility function * @returns void */
         <div className="rounded-[24px] border border-[#E5E5E5] bg-[#FDFDFD] px-4 py-4 text-sm text-[#191414]/70">
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2351FC]">
             Last updated
@@ -143,7 +132,6 @@ export const SellerAuctionStartStatusShell = ({
           <p className="mt-2 font-medium text-[#191414]">{formatTimestamp(status.updatedAt)}</p>
         </div>
       </div>
-
       <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <div className="rounded-[24px] border border-[#E5E5E5] bg-[#FDFDFD] p-5">
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2351FC]">
@@ -170,7 +158,9 @@ export const SellerAuctionStartStatusShell = ({
               )}
               <div>
                 <p className="font-medium text-[#191414]">
-                  {status.walletActionRequired ? 'Wallet confirmation required' : 'Wallet handoff recorded'}
+                  {status.walletActionRequired
+                    ? 'Wallet confirmation required'
+                    : 'Wallet handoff recorded'}
                 </p>
                 <p className="mt-1 text-[#191414]/60">
                   {status.walletActionRequired
@@ -247,7 +237,9 @@ export const SellerAuctionStartStatusShell = ({
             />
 
             <div className="mt-4 flex flex-col gap-3">
-              {status.status === 'pending_start' && status.walletActionRequired && onOpenMetaMask ? (
+              {status.status === 'pending_start' &&
+              status.walletActionRequired &&
+              onOpenMetaMask ? (
                 <Button
                   type="button"
                   onClick={onOpenMetaMask}
@@ -270,18 +262,17 @@ export const SellerAuctionStartStatusShell = ({
               ) : null}
 
               {status.editAllowed && onBackToTerms ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onBackToTerms}
-                  className="w-full"
-                >
+                <Button type="button" variant="outline" onClick={onBackToTerms} className="w-full">
                   Back to terms
                 </Button>
               ) : null}
 
               {status.status === 'auction_active' ? (
-                <Button asChild type="button" className="w-full bg-[#191414] text-white hover:bg-[#2351FC]">
+                <Button
+                  asChild
+                  type="button"
+                  className="w-full bg-[#191414] text-white hover:bg-[#2351FC]"
+                >
                   <Link href="/auction">View Auction</Link>
                 </Button>
               ) : null}

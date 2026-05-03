@@ -25,10 +25,10 @@ const getProvider = (): EthereumProvider | null => {
 const shortenAddress = (address?: string | null) => {
   if (!address) {
     return null
-/**
- * shortenAddress - Utility function
- * @returns void
- */
+    /**
+     * shortenAddress - Utility function
+     * @returns void
+     */
   }
 
   return `${address.slice(0, 6)}...${address.slice(-4)}`
@@ -40,37 +40,37 @@ const isTargetChain = (chainId?: string | null) =>
   Boolean(chainId && chainId.toLowerCase() === WALLET_TARGET_CHAIN.chainIdHex.toLowerCase())
 
 const getMetaMaskErrorMessage = (error: unknown, fallback: string) => {
-/**
- * normalizeAddress - Utility function
- * @returns void
- */
+  /**
+   * normalizeAddress - Utility function
+   * @returns void
+   */
   const maybeError = error as MetaMaskError | undefined
 
   if (maybeError?.code === 4001) {
     return 'MetaMask request was rejected.'
   }
-/**
- * isTargetChain - Utility function
- * @returns void
- */
+  /**
+   * isTargetChain - Utility function
+   * @returns void
+   */
 
   if (maybeError?.code === -32002) {
     return 'MetaMask already has a pending request. Open MetaMask to continue.'
   }
 
   return maybeError?.message || fallback
-/**
- * getMetaMaskErrorMessage - Utility function
- * @returns void
- */
+  /**
+   * getMetaMaskErrorMessage - Utility function
+   * @returns void
+   */
 }
 
 export const SellerAuctionWalletReadiness = ({
   userWalletAddress,
-/**
- * maybeError - Utility function
- * @returns void
- */
+  /**
+   * maybeError - Utility function
+   * @returns void
+   */
 }: SellerAuctionWalletReadinessProps) => {
   const [connectedAddress, setConnectedAddress] = useState<string | null>(null)
   const [chainId, setChainId] = useState<string | null>(null)
@@ -87,10 +87,10 @@ export const SellerAuctionWalletReadiness = ({
   const connectWallet = useCallback(async () => {
     const provider = getProvider()
 
-/**
- * SellerAuctionWalletReadiness - React component
- * @returns React element
- */
+    /**
+     * SellerAuctionWalletReadiness - React component
+     * @returns React element
+     */
     if (!provider?.isMetaMask) {
       setStatus('error')
       setError('MetaMask is required to activate an auction from this workspace.')
@@ -102,67 +102,67 @@ export const SellerAuctionWalletReadiness = ({
 
     try {
       const accounts = await provider.request<string[]>({ method: 'eth_requestAccounts' })
-/**
- * isLoading - Utility function
- * @returns void
- */
+      /**
+       * isLoading - Utility function
+       * @returns void
+       */
       const address = normalizeAddress(accounts?.[0] ?? '')
 
       if (!address) {
         setStatus('error')
-/**
- * isConnected - Utility function
- * @returns void
- */
+        /**
+         * isConnected - Utility function
+         * @returns void
+         */
         setError('No MetaMask account was selected.')
         return
       }
 
-/**
- * isWrongNetwork - Utility function
- * @returns void
- */
+      /**
+       * isWrongNetwork - Utility function
+       * @returns void
+       */
       setConnectedAddress(address)
       setChainId(await provider.request<string>({ method: 'eth_chainId' }))
       setStatus('idle')
     } catch (nextError) {
-/**
- * isReady - Utility function
- * @returns void
- */
+      /**
+       * isReady - Utility function
+       * @returns void
+       */
       setStatus('error')
       setError(getMetaMaskErrorMessage(nextError, 'Could not connect MetaMask.'))
     }
   }, [])
-/**
- * linkedWalletLabel - Utility function
- * @returns void
- */
+  /**
+   * linkedWalletLabel - Utility function
+   * @returns void
+   */
 
   const switchNetwork = useCallback(async () => {
     const provider = getProvider()
 
-/**
- * connectedWalletLabel - Utility function
- * @returns void
- */
+    /**
+     * connectedWalletLabel - Utility function
+     * @returns void
+     */
     if (!provider?.isMetaMask) {
       setStatus('error')
       setError('MetaMask is required to switch networks.')
       return
     }
-/**
- * connectWallet - Utility function
- * @returns void
- */
+    /**
+     * connectWallet - Utility function
+     * @returns void
+     */
 
     setStatus('switching_network')
     setError(null)
 
-/**
- * provider - Utility function
- * @returns void
- */
+    /**
+     * provider - Utility function
+     * @returns void
+     */
     try {
       await provider.request({
         method: 'wallet_switchEthereumChain',
@@ -178,18 +178,18 @@ export const SellerAuctionWalletReadiness = ({
           await provider.request({
             method: 'wallet_addEthereumChain',
             params: [
-/**
- * accounts - Utility function
- * @returns void
- */
+              /**
+               * accounts - Utility function
+               * @returns void
+               */
               {
                 chainId: WALLET_TARGET_CHAIN.chainIdHex,
                 chainName: WALLET_TARGET_CHAIN.name,
                 nativeCurrency: WALLET_TARGET_CHAIN.nativeCurrency,
-/**
- * address - Utility function
- * @returns void
- */
+                /**
+                 * address - Utility function
+                 * @returns void
+                 */
                 rpcUrls: [WALLET_TARGET_CHAIN.rpcUrl],
                 blockExplorerUrls: [WALLET_TARGET_CHAIN.blockExplorerUrl],
               },
@@ -210,18 +210,18 @@ export const SellerAuctionWalletReadiness = ({
         getMetaMaskErrorMessage(nextError, `Could not switch to ${WALLET_TARGET_CHAIN.name}.`),
       )
     }
-/**
- * switchNetwork - Utility function
- * @returns void
- */
+    /**
+     * switchNetwork - Utility function
+     * @returns void
+     */
   }, [])
 
   useEffect(() => {
     const provider = getProvider()
-/**
- * provider - Utility function
- * @returns void
- */
+    /**
+     * provider - Utility function
+     * @returns void
+     */
 
     if (!provider?.isMetaMask) {
       return
@@ -244,10 +244,10 @@ export const SellerAuctionWalletReadiness = ({
         setChainId(nextChainId)
       })
       .catch(() => null)
-/**
- * maybeError - Utility function
- * @returns void
- */
+    /**
+     * maybeError - Utility function
+     * @returns void
+     */
 
     const handleAccountsChanged = (...args: unknown[]) => {
       const accounts = Array.isArray(args[0]) ? args[0] : []
@@ -285,10 +285,10 @@ export const SellerAuctionWalletReadiness = ({
 
     if (isWrongNetwork) {
       return {
-/**
- * provider - Utility function
- * @returns void
- */
+        /**
+         * provider - Utility function
+         * @returns void
+         */
         title: `${WALLET_TARGET_CHAIN.name} required`,
         body: `Switch ${connectedWalletLabel} before activating this auction.`,
         icon: AlertTriangle,
@@ -316,27 +316,24 @@ export const SellerAuctionWalletReadiness = ({
             className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
               statusCopy.tone === 'ready'
                 ? 'bg-emerald-50 text-emerald-700'
-/**
- * handleAccountsChanged - Utility function
- * @returns void
- */
-                : statusCopy.tone === 'warning'
+                : /**
+                   * handleAccountsChanged - Utility function
+                   * @returns void
+                   */
+                  statusCopy.tone === 'warning'
                   ? 'bg-amber-50 text-amber-700'
                   : 'bg-slate-100 text-slate-700'
             }`}
-/**
- * accounts - Utility function
- * @returns void
- */
+            /**
+             * accounts - Utility function
+             * @returns void
+             */
           >
             <StatusIcon className="h-6 w-6" />
           </span>
           <div className="min-w-0">
-/**
- * nextAddress - Utility function
- * @returns void
- */
-            <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
+            /** * nextAddress - Utility function * @returns void */
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
               Wallet readiness
             </p>
             <h2 className="mt-2 text-xl font-semibold text-slate-900">{statusCopy.title}</h2>
@@ -345,17 +342,17 @@ export const SellerAuctionWalletReadiness = ({
               <p className="mt-2 text-sm font-medium text-rose-600" role="alert">
                 {error}
               </p>
-/**
- * handleChainChanged - Utility function
- * @returns void
- */
-            ) : null}
+            ) : /**
+             * handleChainChanged - Utility function
+             * @returns void
+             */
+            null}
           </div>
         </div>
 
         <div className="grid min-w-[min(100%,360px)] gap-3 sm:grid-cols-2 lg:max-w-[420px]">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-[11px] font-bold tracking-[0.14em] text-slate-400 uppercase">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
               Account wallet
             </p>
             <p className="mt-1 truncate text-sm font-semibold text-slate-900">
@@ -363,15 +360,12 @@ export const SellerAuctionWalletReadiness = ({
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-[11px] font-bold tracking-[0.14em] text-slate-400 uppercase">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
               MetaMask
             </p>
             <p className="mt-1 truncate text-sm font-semibold text-slate-900">
               {connectedWalletLabel ?? 'Not connected'}
-/**
- * statusCopy - Utility function
- * @returns void
- */
+              /** * statusCopy - Utility function * @returns void */
             </p>
           </div>
         </div>
@@ -404,11 +398,8 @@ export const SellerAuctionWalletReadiness = ({
             ) : (
               <Wifi className="h-4 w-4" />
             )}
-/**
- * StatusIcon - React component
- * @returns React element
- */
-            Switch to {WALLET_TARGET_CHAIN.name}
+            /** * StatusIcon - React component * @returns React element */ Switch to{' '}
+            {WALLET_TARGET_CHAIN.name}
           </Button>
         ) : null}
       </div>

@@ -10,7 +10,7 @@ type SellerAuctionDraftBadgeProps = {
  */
 export const SellerAuctionDraftBadge = ({ className }: SellerAuctionDraftBadgeProps) => (
   <span
-    className={`inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-bold tracking-[0.12em] text-amber-800 uppercase shadow-sm ${
+    className={`inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-amber-800 shadow-sm ${
       className ?? ''
     }`}
   >

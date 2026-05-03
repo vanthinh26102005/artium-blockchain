@@ -22,10 +22,10 @@ const formatDurationLabel = (values: SellerAuctionTermsFormValues) => {
   const presetLabel = SELLER_AUCTION_DURATION_PRESETS.find(
     (preset) => preset.value === values.durationPreset,
   )?.label
-/**
- * presetLabel - Utility function
- * @returns void
- */
+  /**
+   * presetLabel - Utility function
+   * @returns void
+   */
 
   if (presetLabel) {
     return presetLabel
@@ -37,10 +37,10 @@ const formatDurationLabel = (values: SellerAuctionTermsFormValues) => {
   }
 
   if (customDurationHours % 24 === 0) {
-/**
- * customDurationHours - Utility function
- * @returns void
- */
+    /**
+     * customDurationHours - Utility function
+     * @returns void
+     */
     const days = customDurationHours / 24
     return `${days} ${days === 1 ? 'day' : 'days'}`
   }
@@ -50,43 +50,41 @@ const formatDurationLabel = (values: SellerAuctionTermsFormValues) => {
 
 const formatEthAmount = (value: string) => {
   const trimmed = value.trim()
-/**
- * days - Utility function
- * @returns void
- */
+  /**
+   * days - Utility function
+   * @returns void
+   */
   return trimmed ? `${trimmed} ETH` : 'Not set'
 }
 
-const ChecklistRow = ({
-  label,
-  complete,
-}: {
-  label: string
-  complete: boolean
-}) => (
-/**
- * formatEthAmount - Utility function
- * @returns void
- */
+const ChecklistRow = ({ label, complete }: { label: string; complete: boolean }) => (
+  /**
+   * formatEthAmount - Utility function
+   * @returns void
+   */
   <div
     className={`flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm ${
       complete ? 'bg-[#ECFDF3] text-[#027A48]' : 'bg-[#F7F7F7] text-[#191414]/65'
     }`}
-/**
- * trimmed - Utility function
- * @returns void
- */
+    /**
+     * trimmed - Utility function
+     * @returns void
+     */
   >
-    {complete ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <Circle className="h-4 w-4 shrink-0" />}
+    {complete ? (
+      <CheckCircle2 className="h-4 w-4 shrink-0" />
+    ) : (
+      <Circle className="h-4 w-4 shrink-0" />
+    )}
     <span className="font-medium">{label}</span>
   </div>
 )
 
 export const SellerAuctionTermsPreview = ({
-/**
- * ChecklistRow - React component
- * @returns React element
- */
+  /**
+   * ChecklistRow - React component
+   * @returns React element
+   */
   candidate,
   values,
   isTermsValid,
@@ -106,11 +104,7 @@ export const SellerAuctionTermsPreview = ({
       <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#191414]">
         {mode === 'submitted' ? 'Submitted auction snapshot' : 'Auction preview'}
       </h2>
-
-/**
- * SellerAuctionTermsPreview - React component
- * @returns React element
- */
+      /** * SellerAuctionTermsPreview - React component * @returns React element */
       <div className="mt-6 overflow-hidden rounded-[28px] border border-[#E5E5E5] bg-[#FDFDFD]">
         {candidate.thumbnailUrl ? (
           <div className="relative aspect-[4/3] w-full overflow-hidden">
@@ -120,18 +114,18 @@ export const SellerAuctionTermsPreview = ({
               fill
               unoptimized
               className="object-cover"
-/**
- * durationLabel - Utility function
- * @returns void
- */
+              /**
+               * durationLabel - Utility function
+               * @returns void
+               */
               sizes="(min-width: 1280px) 420px, (min-width: 768px) 60vw, 100vw"
             />
           </div>
         ) : (
-/**
- * reserveCopy - Utility function
- * @returns void
- */
+          /**
+           * reserveCopy - Utility function
+           * @returns void
+           */
           <div className="flex aspect-[4/3] items-center justify-center bg-[#F5F5F5] text-[#191414]/45">
             <ImageOff className="h-10 w-10" />
           </div>
@@ -139,7 +133,9 @@ export const SellerAuctionTermsPreview = ({
 
         <div className="space-y-6 p-5">
           <div>
-            <h3 className="text-2xl font-semibold leading-tight text-[#191414]">{candidate.title}</h3>
+            <h3 className="text-2xl font-semibold leading-tight text-[#191414]">
+              {candidate.title}
+            </h3>
             <p className="mt-2 text-sm text-[#191414]/60">
               {candidate.creatorName || 'Unknown creator'}
             </p>
@@ -183,7 +179,9 @@ export const SellerAuctionTermsPreview = ({
             <div className="mt-3 space-y-2 text-sm leading-6 text-[#191414]/70">
               <p>Marketplace seller fees follow current policy.</p>
               <p>Network gas is shown in MetaMask during activation.</p>
-              <p>Sepolia is a test network. Confirm wallet and network details before activation.</p>
+              <p>
+                Sepolia is a test network. Confirm wallet and network details before activation.
+              </p>
               <p>Shipping and payment disclosures are shown to buyers before bidding.</p>
             </div>
           </div>
@@ -201,7 +199,8 @@ export const SellerAuctionTermsPreview = ({
                 Shipping and fulfillment notes
               </p>
               <p className="mt-2 break-words text-sm leading-6 text-[#191414]/70">
-                {values.shippingDisclosure.trim() || 'Shipping and payment disclosures are shown to buyers before bidding.'}
+                {values.shippingDisclosure.trim() ||
+                  'Shipping and payment disclosures are shown to buyers before bidding.'}
               </p>
             </div>
             <div>
@@ -209,7 +208,8 @@ export const SellerAuctionTermsPreview = ({
                 Payment and buyer expectations
               </p>
               <p className="mt-2 break-words text-sm leading-6 text-[#191414]/70">
-                {values.paymentDisclosure.trim() || 'Buyer-facing payment expectations will appear here.'}
+                {values.paymentDisclosure.trim() ||
+                  'Buyer-facing payment expectations will appear here.'}
               </p>
             </div>
           </div>
@@ -218,7 +218,9 @@ export const SellerAuctionTermsPreview = ({
             <ChecklistRow label="Eligible artwork selected" complete />
             <ChecklistRow label="Terms validated" complete={isTermsValid} />
             <ChecklistRow
-              label={mode === 'submitted' ? 'Submitted snapshot locked' : 'Ready for wallet handoff'}
+              label={
+                mode === 'submitted' ? 'Submitted snapshot locked' : 'Ready for wallet handoff'
+              }
               complete
             />
           </div>
