@@ -11,6 +11,10 @@ export interface TopPicksArtwork {
   }
 }
 
+/**
+ * mockTopPicksArtworks - Utility function
+ * @returns void
+ */
 export const mockTopPicksArtworks: TopPicksArtwork[] = [
   {
     id: 'tp-001',

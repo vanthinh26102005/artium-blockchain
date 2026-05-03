@@ -19,12 +19,20 @@ export interface DiscoverMoment {
   }
 }
 
+/**
+ * SAMPLE_VIDEO_URL - React component
+ * @returns React element
+ */
 const SAMPLE_VIDEO_URL =
   'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
 
 export const mockMoments: DiscoverMoment[] = [
   {
     id: 'mo-001',
+/**
+ * mockMoments - Utility function
+ * @returns void
+ */
     caption: 'Studio morning: layering texture on canvas.',
     user: {
       id: 'u-101',
