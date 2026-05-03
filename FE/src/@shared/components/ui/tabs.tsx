@@ -15,15 +15,15 @@ const Tabs = TabsPrimitive.Root
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
-/**
- * TabsList - React component
- * @returns React element
- */
+  /**
+   * TabsList - React component
+   * @returns React element
+   */
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'text-muted-foreground/70 bg-muted inline-flex w-full items-center justify-center gap-2 rounded-lg p-0.5',
+      'text-muted-foreground/70 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-muted p-0.5',
       className,
     )}
     {...props}
@@ -37,12 +37,12 @@ const TabsTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
-/**
- * TabsTrigger - React component
- * @returns React element
- */
+    /**
+     * TabsTrigger - React component
+     * @returns React element
+     */
     className={cn(
-      'hover:text-muted-foreground focus-visible:outline-ring/70 inline-flex flex-1 items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap outline-offset-2 transition-all focus-visible:outline focus-visible:outline-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-[#0F6BFF] data-[state=active]:text-[#0F6BFF]',
+      'inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium outline-offset-2 transition-all hover:text-muted-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-[#0F6BFF] data-[state=active]:text-[#0F6BFF]',
       className,
     )}
     asChild
@@ -60,12 +60,12 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      'focus-visible:outline-ring/70 mt-2 outline-offset-2 focus-visible:outline focus-visible:outline-2',
+      'mt-2 outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70',
       className,
-/**
- * TabsContent - React component
- * @returns React element
- */
+      /**
+       * TabsContent - React component
+       * @returns React element
+       */
     )}
     {...props}
   />

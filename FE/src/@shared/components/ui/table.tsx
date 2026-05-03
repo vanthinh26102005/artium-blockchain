@@ -22,14 +22,14 @@ Table.displayName = 'Table'
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
-/**
- * TableHeader - React component
- * @returns React element
- */
+  /**
+   * TableHeader - React component
+   * @returns React element
+   */
 >(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn('bg-background sticky top-0 z-10 shadow-sm [&_tr]:border-b', className)}
+    className={cn('sticky top-0 z-10 bg-background shadow-sm [&_tr]:border-b', className)}
     {...props}
   />
 ))
@@ -53,13 +53,13 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn('bg-muted/50 border-t font-medium [&>tr]:last:border-b-0', className)}
+    className={cn('border-t bg-muted/50 font-medium [&>tr]:last:border-b-0', className)}
     {...props}
   />
-/**
- * TableFooter - React component
- * @returns React element
- */
+  /**
+   * TableFooter - React component
+   * @returns React element
+   */
 ))
 TableFooter.displayName = 'TableFooter'
 
@@ -68,7 +68,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
     <tr
       ref={ref}
       className={cn(
-        'hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors',
+        'border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted',
         className,
       )}
       {...props}
@@ -88,7 +88,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      'text-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0',
+      'h-12 px-4 text-left align-middle font-medium text-foreground [&:has([role=checkbox])]:pr-0',
       className,
     )}
     {...props}
@@ -116,7 +116,7 @@ const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
 >(({ className, ...props }, ref) => (
-  <caption ref={ref} className={cn('text-muted-foreground mt-4 text-sm', className)} {...props} />
+  <caption ref={ref} className={cn('mt-4 text-sm text-muted-foreground', className)} {...props} />
 ))
 /**
  * TableCell - React component
