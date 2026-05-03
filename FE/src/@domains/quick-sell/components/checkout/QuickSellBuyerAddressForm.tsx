@@ -3,7 +3,10 @@ import { type FieldPath, useFormContext, useWatch } from 'react-hook-form'
 import { BaseFormField, BaseInputField } from '@shared/components/forms'
 
 import type { CheckoutBuyerAddress } from '../../types/checkoutTypes'
-import { quickSellCheckoutAddressSchema, type QuickSellCheckoutFormValues } from '../../validations/quickSellCheckout.schema'
+import {
+  quickSellCheckoutAddressSchema,
+  type QuickSellCheckoutFormValues,
+} from '../../validations/quickSellCheckout.schema'
 
 /**
  * US_STATES - React component
@@ -66,10 +69,10 @@ const US_STATES = [
 export const QuickSellBuyerAddressForm = () => {
   const {
     formState,
-/**
- * QuickSellBuyerAddressForm - React component
- * @returns React element
- */
+    /**
+     * QuickSellBuyerAddressForm - React component
+     * @returns React element
+     */
     getFieldState,
     register,
   } = useFormContext<QuickSellCheckoutFormValues>()
@@ -79,45 +82,45 @@ export const QuickSellBuyerAddressForm = () => {
 
   const getError = (name: FieldPath<QuickSellCheckoutFormValues>) =>
     getFieldState(name, formState).error?.message
-/**
- * address - Utility function
- * @returns void
- */
+  /**
+   * address - Utility function
+   * @returns void
+   */
 
   const renderField = (
     field: keyof CheckoutBuyerAddress,
     label: string,
-/**
- * labelClassName - Utility function
- * @returns void
- */
+    /**
+     * labelClassName - Utility function
+     * @returns void
+     */
     placeholder: string,
     type = 'text',
     required = false,
   ) => {
-/**
- * messageClassName - Utility function
- * @returns void
- */
+    /**
+     * messageClassName - Utility function
+     * @returns void
+     */
     const name = `address.${field}` as const
     const error = getError(name)
 
     return (
       <BaseInputField
-/**
- * getError - Utility function
- * @returns void
- */
+        /**
+         * getError - Utility function
+         * @returns void
+         */
         id={`address-${field}`}
         type={type}
         label={label}
         required={required}
         {...register(name)}
         value={address?.[field] ?? ''}
-/**
- * renderField - Utility function
- * @returns void
- */
+        /**
+         * renderField - Utility function
+         * @returns void
+         */
         placeholder={placeholder}
         errorMessage={error}
         containerClassName="space-y-1"
@@ -128,18 +131,15 @@ export const QuickSellBuyerAddressForm = () => {
       />
     )
   }
-/**
- * name - Utility function
- * @returns void
- */
+  /**
+   * name - Utility function
+   * @returns void
+   */
 
   return (
     <div className="space-y-6">
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-/**
- * error - Utility function
- * @returns void
- */
+        /** * error - Utility function * @returns void */
         <h2 className="mb-4 text-lg font-semibold text-slate-900">Contact Information</h2>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -222,9 +222,7 @@ export const QuickSellBuyerAddressForm = () => {
   )
 }
 
-export const validateBuyerAddress = (
-  address: CheckoutBuyerAddress,
-): Record<string, string> => {
+export const validateBuyerAddress = (address: CheckoutBuyerAddress): Record<string, string> => {
   const result = quickSellCheckoutAddressSchema.safeParse(address)
 
   if (result.success) {
