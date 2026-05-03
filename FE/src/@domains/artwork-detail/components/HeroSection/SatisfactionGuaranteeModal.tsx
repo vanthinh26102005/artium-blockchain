@@ -9,6 +9,10 @@ type SatisfactionGuaranteeModalProps = {
     onClose: () => void
 }
 
+/**
+ * SatisfactionGuaranteeModal - React component
+ * @returns React element
+ */
 export const SatisfactionGuaranteeModal = ({
     isOpen,
     onClose,

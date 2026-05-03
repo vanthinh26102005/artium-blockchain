@@ -32,6 +32,10 @@ type ToastState = {
     variant: 'success' | 'error'
 }
 
+/**
+ * getMoodboardToastMessage - Utility function
+ * @returns void
+ */
 const getMoodboardToastMessage = (result: ArtworkMoodboardToggleResult) => {
     switch (result) {
         case 'saved':
@@ -52,6 +56,10 @@ const getMoodboardToastMessage = (result: ArtworkMoodboardToggleResult) => {
 export const ArtworkActions = ({
     likesCount,
     isLiked = false,
+/**
+ * ArtworkActions - React component
+ * @returns React element
+ */
     onLike,
     onSave,
     onShare,
@@ -91,10 +99,18 @@ export const ArtworkActions = ({
     useEffect(() => {
         setLiked(isLiked)
     }, [isLiked])
+/**
+ * toastSkeletonTimer - Utility function
+ * @returns void
+ */
 
     useEffect(() => {
         setCurrentLikes(Math.max(0, likesCount))
     }, [likesCount])
+/**
+ * toastAutoHideTimer - Utility function
+ * @returns void
+ */
 
     const clearToastTimers = () => {
         if (toastSkeletonTimer.current) {
@@ -108,6 +124,10 @@ export const ArtworkActions = ({
     }
 
     const queueToast = (message: string, variant: 'success' | 'error', withSkeleton: boolean) => {
+/**
+ * clearToastTimers - Utility function
+ * @returns void
+ */
         clearToastTimers()
         setToastState(null)
         setToastLoading(false)
@@ -122,6 +142,10 @@ export const ArtworkActions = ({
                 setPendingToastMessage(null)
                 setToastState({ message, variant })
                 toastAutoHideTimer.current = setTimeout(() => {
+/**
+ * queueToast - Utility function
+ * @returns void
+ */
                     setToastState(null)
                 }, 3000)
             }, 700)
@@ -153,6 +177,10 @@ export const ArtworkActions = ({
             return
         }
 
+/**
+ * closeToast - Utility function
+ * @returns void
+ */
         if (!onLike) {
             queueToast('Artwork likes are not available from the API yet.', 'error', false)
             return
@@ -168,6 +196,10 @@ export const ArtworkActions = ({
             setLiked(!nextLiked)
             setCurrentLikes((prev) => (nextLiked ? Math.max(prev - 1, 0) : prev + 1))
             queueToast('Unable to update like. Please try again.', 'error', false)
+/**
+ * handleLike - Utility function
+ * @returns void
+ */
         }
     }
 
@@ -182,6 +214,10 @@ export const ArtworkActions = ({
     }
 
     const handleToggleMoodboard = async (board: ArtworkMoodboardOption, nextState?: boolean) => {
+/**
+ * nextLiked - Utility function
+ * @returns void
+ */
         try {
             const result = await toggleMoodboard(board, nextState)
             if (result) {
@@ -198,6 +234,10 @@ export const ArtworkActions = ({
         }
     }
 
+/**
+ * handleShare - Utility function
+ * @returns void
+ */
     const handleCreateMoodboard = async (name: string) => {
         try {
             await createMoodboardAndSave(name)
@@ -211,16 +251,28 @@ export const ArtworkActions = ({
                 'error',
                 false,
             )
+/**
+ * handleToggleMoodboard - Utility function
+ * @returns void
+ */
             throw error
         }
     }
 
     const handleOpenCreateModal = () => {
+/**
+ * result - Utility function
+ * @returns void
+ */
         if (!isAuthenticated) {
             queueToast('Please sign in to create a moodboard.', 'error', false)
             return
         }
 
+/**
+ * toast - Utility function
+ * @returns void
+ */
         setPopoverOpen(false)
         setCreateModalOpen(true)
     }
@@ -237,6 +289,10 @@ export const ArtworkActions = ({
                     <Heart
                         className={cn(
                             'h-5 w-5 transition-all duration-200',
+/**
+ * handleCreateMoodboard - Utility function
+ * @returns void
+ */
                             liked ? 'fill-rose-500 text-rose-500' : 'text-slate-800',
                         )}
                     />
@@ -257,6 +313,10 @@ export const ArtworkActions = ({
                                 className={cn(
                                     'h-5 w-5 transition-colors',
                                     saved ? 'text-blue-600 fill-blue-600' : 'text-slate-800',
+/**
+ * handleOpenCreateModal - Utility function
+ * @returns void
+ */
                                 )}
                             />
                             <span className="flex items-center gap-1">
@@ -401,6 +461,10 @@ const MoodboardRow = ({ board, disabled = false, onToggle }: MoodboardRowProps) 
         </div>
 
         <Checkbox
+/**
+ * MoodboardRow - React component
+ * @returns React element
+ */
             checked={board.selected}
             disabled={disabled}
             onClick={(event) => event.stopPropagation()}

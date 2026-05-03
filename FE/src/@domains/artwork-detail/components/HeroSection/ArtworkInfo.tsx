@@ -13,10 +13,18 @@ type ArtworkInfoProps = {
     artwork: ArtworkDetail
 }
 
+/**
+ * ArtworkInfo - React component
+ * @returns React element
+ */
 export const ArtworkInfo = ({ artwork }: ArtworkInfoProps) => {
     const router = useRouter()
     const [isGuaranteeExpanded, setIsGuaranteeExpanded] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
+/**
+ * router - Utility function
+ * @returns void
+ */
     const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(null)
 
     const handlePurchase = () => {
@@ -25,6 +33,10 @@ export const ArtworkInfo = ({ artwork }: ArtworkInfoProps) => {
                 message: 'This artwork is temporarily out of stock.',
                 variant: 'error',
             })
+/**
+ * handlePurchase - Utility function
+ * @returns void
+ */
             setTimeout(() => setToast(null), 3000)
             return
         }
@@ -40,6 +52,10 @@ export const ArtworkInfo = ({ artwork }: ArtworkInfoProps) => {
             <div className="flex flex-col space-y-5">
                 {/* Title and Year */}
                 <div>
+/**
+ * handleMakeOffer - Utility function
+ * @returns void
+ */
                     <h1 className="font-semibold text-slate-900" style={{ fontFamily: 'Inter', fontSize: '40px', lineHeight: '44px', fontWeight: 600, letterSpacing: '0%' }}>
                         {artwork.title}
                         {artwork.year && <span className="text-slate-500">, {artwork.year}</span>}

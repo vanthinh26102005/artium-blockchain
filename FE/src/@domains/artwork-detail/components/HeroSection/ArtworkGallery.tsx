@@ -19,6 +19,10 @@ type ZoomControlsProps = {
     onReset: () => void
 }
 
+/**
+ * ZoomControlsBar - React component
+ * @returns React element
+ */
 const ZoomControlsBar = ({ onZoomIn, onZoomOut, onReset }: ZoomControlsProps) => {
     return (
         <div className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-1">
@@ -50,6 +54,10 @@ const ZoomControlsBar = ({ onZoomIn, onZoomOut, onReset }: ZoomControlsProps) =>
 export const ArtworkGallery = ({ images, title }: ArtworkGalleryProps) => {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+/**
+ * ArtworkGallery - React component
+ * @returns React element
+ */
 
     const handlePrevious = () => {
         setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
@@ -57,6 +65,10 @@ export const ArtworkGallery = ({ images, title }: ArtworkGalleryProps) => {
 
     const handleNext = () => {
         setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+/**
+ * handlePrevious - Utility function
+ * @returns void
+ */
     }
 
     const handleThumbnailClick = (index: number) => {
@@ -64,6 +76,10 @@ export const ArtworkGallery = ({ images, title }: ArtworkGalleryProps) => {
     }
 
     const openLightbox = () => {
+/**
+ * handleNext - Utility function
+ * @returns void
+ */
         setIsLightboxOpen(true)
     }
 
@@ -71,6 +87,10 @@ export const ArtworkGallery = ({ images, title }: ArtworkGalleryProps) => {
         setIsLightboxOpen(false)
     }
 
+/**
+ * handleThumbnailClick - Utility function
+ * @returns void
+ */
     // Prevent body scroll when lightbox is open
     useEffect(() => {
         if (isLightboxOpen) {
@@ -78,6 +98,10 @@ export const ArtworkGallery = ({ images, title }: ArtworkGalleryProps) => {
         } else {
             document.body.style.overflow = ''
         }
+/**
+ * openLightbox - Utility function
+ * @returns void
+ */
         return () => {
             document.body.style.overflow = ''
         }
@@ -85,6 +109,10 @@ export const ArtworkGallery = ({ images, title }: ArtworkGalleryProps) => {
 
     // Handle ESC key to close lightbox
     useEffect(() => {
+/**
+ * closeLightbox - Utility function
+ * @returns void
+ */
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
                 closeLightbox()
@@ -106,6 +134,10 @@ export const ArtworkGallery = ({ images, title }: ArtworkGalleryProps) => {
     return (
         <>
             {/* Main Gallery */}
+/**
+ * handleKeyDown - Utility function
+ * @returns void
+ */
             <div className="relative">
                 {/* Main Image Container - Fixed aspect ratio with gray background */}
                 <div

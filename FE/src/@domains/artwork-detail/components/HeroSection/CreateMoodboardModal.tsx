@@ -25,6 +25,10 @@ type CreateMoodboardModalProps = {
     onCreate: (name: string) => void | Promise<void>
 }
 
+/**
+ * CreateMoodboardModal - React component
+ * @returns React element
+ */
 export const CreateMoodboardModal = ({ open, onOpenChange, onCreate }: CreateMoodboardModalProps) => {
     const {
         register,
@@ -43,15 +47,27 @@ export const CreateMoodboardModal = ({ open, onOpenChange, onCreate }: CreateMoo
     const name = useWatch({ control, name: 'name' }) ?? ''
     const nameField = register('name')
 
+/**
+ * name - Utility function
+ * @returns void
+ */
     const handleOpenChange = (nextOpen: boolean) => {
         if (!nextOpen) {
             reset()
         }
+/**
+ * nameField - Utility function
+ * @returns void
+ */
         onOpenChange(nextOpen)
     }
 
     const handleCreateMoodboard = async ({ name }: CreateMoodboardNameFormValues) => {
         await onCreate(name.trim())
+/**
+ * handleOpenChange - Utility function
+ * @returns void
+ */
         reset()
     }
 
@@ -62,6 +78,10 @@ export const CreateMoodboardModal = ({ open, onOpenChange, onCreate }: CreateMoo
                 overlayClassName="bg-slate-900/70 backdrop-blur-3xl backdrop-saturate-150"
             >
                 <DialogHeader className="text-center">
+/**
+ * handleCreateMoodboard - Utility function
+ * @returns void
+ */
                     <DialogTitle className="text-xl font-semibold text-slate-900">
                         Create a New Moodboard
                     </DialogTitle>
