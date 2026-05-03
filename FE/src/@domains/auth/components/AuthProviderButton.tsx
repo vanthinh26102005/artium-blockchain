@@ -33,10 +33,10 @@ export const AuthProviderButton = ({
   const isDisabled = disabled || isLoading
 
   return (
-/**
- * isDisabled - Utility function
- * @returns void
- */
+    /**
+     * isDisabled - Utility function
+     * @returns void
+     */
     <button
       type="button"
       onClick={onClick}

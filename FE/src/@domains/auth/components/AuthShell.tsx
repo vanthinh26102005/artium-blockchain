@@ -20,17 +20,17 @@ export const AuthShell = ({ children }: AuthShellProps) => {
       <div className="fixed inset-0 z-10 bg-black/70" />
 
       {/* decorative text - left */}
-      <p className="font-monument-grotes 3xl:text-[250px] pointer-events-none fixed top-[60%] -left-[5%] z-20 hidden w-[60%] -rotate-[15deg] text-[48px] leading-[0.9] tracking-[0.1em] text-white/90 uppercase md:block lg:text-[140px] 2xl:text-[200px]">
+      <p className="pointer-events-none fixed -left-[5%] top-[60%] z-20 hidden w-[60%] -rotate-[15deg] font-monument-grotes text-[48px] uppercase leading-[0.9] tracking-[0.1em] text-white/90 2xl:text-[200px] 3xl:text-[250px] md:block lg:text-[140px]">
         Join the new art world
       </p>
 
       {/* decorative text - right */}
-      <p className="font-monument-grotes 3xl:text-[250px] pointer-events-none fixed top-[13%] -right-[6%] z-20 hidden w-[60%] rotate-[15deg] text-right text-[48px] leading-[0.9] tracking-[0.1em] text-white/90 uppercase md:block lg:text-[140px] 2xl:text-[200px]">
+      <p className="pointer-events-none fixed -right-[6%] top-[13%] z-20 hidden w-[60%] rotate-[15deg] text-right font-monument-grotes text-[48px] uppercase leading-[0.9] tracking-[0.1em] text-white/90 2xl:text-[200px] 3xl:text-[250px] md:block lg:text-[140px]">
         Join the new art world
       </p>
 
       {/* content */}
-      <div className="relative z-30 flex min-h-full items-start justify-center pt-20 pb-12">
+      <div className="relative z-30 flex min-h-full items-start justify-center pb-12 pt-20">
         {children}
       </div>
     </div>
