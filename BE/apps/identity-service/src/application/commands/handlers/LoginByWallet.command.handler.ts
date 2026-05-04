@@ -228,36 +228,9 @@ export class LoginByWalletHandler implements ICommandHandler<
     let user = await this.userRepository.findByWalletAddress(normalizedAddress);
 
     if (!user) {
-      try {
-        const slug = await this.registrationService.generateUniqueSlug(
-          normalizedAddress.slice(0, 10),
-        );
-
-        user = await this.userRepository.create({
-          email: `${normalizedAddress.slice(0, 10)}@wallet.local`,
-          password: crypto.randomBytes(16).toString('hex'),
-          fullName: null,
-          slug,
-          avatarUrl: null,
-          googleId: null,
-          walletAddress: normalizedAddress,
-          isEmailVerified: false,
-          roles: [UserRole.COLLECTOR],
-          isActive: true,
-          stripeCustomerId: null,
-          lastLogin: null,
-        });
-
-        this.logger.log(`Created new user ${user.id} via wallet login.`);
-      } catch (error) {
-        this.logger.error(
-          `Failed to create user with wallet ${normalizedAddress}`,
-          error.stack,
-        );
-        throw RpcExceptionHelper.badRequest(
-          `Cannot create user with wallet ${normalizedAddress}`,
-        );
-      }
+      throw RpcExceptionHelper.notFound(
+        'Wallet_Not_Registered',
+      );
     }
 
     const tokenPair = await this.tokenService.generateTokenPair(user);

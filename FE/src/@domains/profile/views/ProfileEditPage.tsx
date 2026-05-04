@@ -59,6 +59,7 @@ const buildInitialValues = (
   return {
     avatarUrl: user.avatarUrl || '',
     username: resolvedUsername || user.username || '',
+    walletAddress: user.walletAddress || '',
     firstName,
     lastName,
     phoneNumber: sellerProfile?.businessPhone || '',

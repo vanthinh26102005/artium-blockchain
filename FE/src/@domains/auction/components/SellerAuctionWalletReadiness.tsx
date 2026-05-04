@@ -3,6 +3,8 @@ import { AlertTriangle, CheckCircle2, Loader2, Wallet, Wifi } from 'lucide-react
 import { WALLET_TARGET_CHAIN } from '@domains/auth/constants/wallet'
 import type { EthereumProvider, MetaMaskError } from '@domains/auth/types/wallet'
 import { Button } from '@shared/components/ui/button'
+import usersApi from '@shared/apis/usersApi'
+import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
 type WalletStatus = 'idle' | 'connecting' | 'switching_network' | 'error'
 
@@ -287,6 +289,26 @@ export const SellerAuctionWalletReadiness = ({
           )}
           {isConnected ? 'Change wallet' : 'Connect MetaMask'}
         </Button>
+        {isConnected && (!userWalletAddress || userWalletAddress.toLowerCase() !== connectedAddress?.toLowerCase()) ? (
+          <Button
+            type="button"
+            onClick={async () => {
+              try {
+                setStatus('connecting')
+                await usersApi.updateMe({ walletAddress: connectedAddress })
+                await useAuthStore.getState().refreshMe()
+                setStatus('idle')
+              } catch (e) {
+                setStatus('error')
+                setError('Failed to save wallet to your profile.')
+              }
+            }}
+            disabled={isLoading}
+            className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-300"
+          >
+            Save wallet
+          </Button>
+        ) : null}
         {isWrongNetwork ? (
           <Button
             type="button"

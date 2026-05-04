@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 // next
@@ -19,6 +19,15 @@ import usersApi from '@shared/apis/usersApi'
 // @shared - components
 import { Button } from '@shared/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@shared/components/ui/alert-dialog'
 
 // @domains - auth
 import { useGoogleLoginBridge } from '@domains/auth/hooks/useGoogleLoginBridge'
@@ -48,6 +57,7 @@ export const LoginPage = () => {
   const walletLogin = useWalletLogin()
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
   const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false)
+  const [isUnregisteredWalletDialogOpen, setIsUnregisteredWalletDialogOpen] = useState(false)
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     mode: 'onBlur',
@@ -63,6 +73,13 @@ export const LoginPage = () => {
     formState: { errors, isSubmitting },
   } = form
 
+  useEffect(() => {
+    if (walletLogin.status === 'unregistered') {
+      setIsWalletDialogOpen(false)
+      setIsUnregisteredWalletDialogOpen(true)
+    }
+  }, [walletLogin.status])
+
   const handleLogin = async (values: LoginFormValues) => {
     form.clearErrors('root')
 
@@ -73,7 +90,14 @@ export const LoginPage = () => {
       })
       const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
       setAuth(response)
-      await router.push(nextPath)
+
+      // Prompt to connect wallet if they just signed up
+      if (router.query.signup === 'success') {
+        const profileHandle = response.user.slug || response.user.username || response.user.id
+        await router.push(`/profile/${encodeURIComponent(profileHandle)}/edit?connectWallet=true`)
+      } else {
+        await router.push(nextPath)
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed.'
       setError('root', { message })
@@ -82,11 +106,14 @@ export const LoginPage = () => {
 
   const handleGoogleSignIn = async () => {
     setIsGoogleSubmitting(true)
-    const callbackUrl = buildAuthCallbackUrl(
+    let callbackUrl = buildAuthCallbackUrl(
       '/login',
       router.query.next,
       '/discover?tab=top-picks',
     )
+    if (router.query.signup === 'success') {
+      callbackUrl = buildAuthCallbackUrl('/login', '/discover?tab=top-picks')
+    }
 
     try {
       await signIn('google', { callbackUrl })
@@ -116,6 +143,12 @@ export const LoginPage = () => {
         <h1 className="font-monument-grotes text-center text-3xl font-bold text-[#191414] lg:text-[48px]">
           Welcome back
         </h1>
+
+        {router.query.signup === 'success' ? (
+          <div className="mb-4 rounded-xl bg-[#f1faf4] p-3 text-center text-sm font-semibold text-[#1f7a43]">
+            Account created! Please log in to continue.
+          </div>
+        ) : null}
 
         {/* social auth */}
         <SocialAuthButtons
@@ -226,6 +259,20 @@ export const LoginPage = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isUnregisteredWalletDialogOpen} onOpenChange={setIsUnregisteredWalletDialogOpen}>
+        <AlertDialogContent onClose={() => setIsUnregisteredWalletDialogOpen(false)}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Wallet Not Linked</AlertDialogTitle>
+            <AlertDialogDescription>
+              This wallet is not linked to any Artium account. Please login or register using your email or social accounts first. Once logged in, you can connect your wallet in your Profile Settings.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setIsUnregisteredWalletDialogOpen(false)}>Got it</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AuthShell>
   )
 }

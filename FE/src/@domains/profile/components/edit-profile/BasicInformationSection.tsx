@@ -119,6 +119,29 @@ export const BasicInformationSection = ({
 
           <div>
             <label
+              htmlFor="walletAddress"
+              className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
+            >
+              Wallet Address
+            </label>
+            <input
+              id="walletAddress"
+              {...register('walletAddress')}
+              placeholder="0x..."
+              className={getInputClasses(showErrors && !!errors.walletAddress)}
+            />
+            <div className="mt-1 flex min-h-[16px] items-center justify-between text-xs text-slate-400">
+              <span className={errors.walletAddress && showErrors ? 'text-rose-500' : ''}>
+                {showErrors && typeof errors.walletAddress?.message === 'string'
+                  ? errors.walletAddress.message
+                  : ''}
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-1">Connect your Ethereum wallet address to enable login by wallet. It will be bound to your account.</p>
+          </div>
+
+          <div>
+            <label
               htmlFor="firstName"
               className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
             >

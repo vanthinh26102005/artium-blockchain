@@ -3,6 +3,7 @@ export interface User {
   displayName: string
   bio: string
   avatarUrl: string
+  walletAddress?: string | null
 }
 
 export interface Artwork {

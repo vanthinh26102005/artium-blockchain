@@ -252,11 +252,11 @@ export class AuctionsController {
       this.getArtworkStartDetails(input.artworkId),
     ]);
 
-    if (!artwork.ipfsMetadataHash) {
-      throw new ConflictException(
-        'Artwork metadata must be available on IPFS before starting an auction.',
-      );
-    }
+    // if (!artwork.ipfsMetadataHash) {
+    //   throw new ConflictException(
+    //     'Artwork metadata must be available on IPFS before starting an auction.',
+    //   );
+    // }
 
     return sendRpc<SellerAuctionStartStatusObject>(
       this.ordersClient,

@@ -142,4 +142,12 @@ export class UpdateUserProfileInput {
   @IsOptional()
   @IsString()
   avatarUrl?: string | null;
+
+  @ApiProperty({
+    required: false,
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+  })
+  @IsOptional()
+  @IsString()
+  walletAddress?: string | null;
 }

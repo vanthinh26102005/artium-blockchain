@@ -15,6 +15,7 @@ import { WALLET_TARGET_CHAIN } from '@domains/auth/constants/wallet'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import type { EthereumProvider, MetaMaskError } from '@domains/auth/types/wallet'
 import { buildSiweMessage } from '@domains/auth/utils/siwe'
+import type { ApiError } from '@shared/services/apiClient'
 
 export type WalletLoginStatus =
   | 'idle'
@@ -26,6 +27,7 @@ export type WalletLoginStatus =
   | 'signing'
   | 'logging_in'
   | 'authenticated'
+  | 'unregistered'
   | 'error'
 
 type WalletConnectionResult = {
@@ -476,7 +478,16 @@ export const useWalletLogin = () => {
 
       await delay(900)
       await router.push(getNextPath(router.query.next))
-    } catch (error) {
+    } catch (error: unknown) {
+      const apiError = error as ApiError
+      const data = apiError.data as Record<string, unknown> | undefined
+      if (data && data.message === 'Wallet_Not_Registered') {
+        setStatus('unregistered')
+        setError('Wallet not registered to any account.')
+        finishWalletToast('warning', 'Wallet not linked. Please login with email first.')
+        return
+      }
+
       const message = finishWalletErrorToast(error, 'Wallet login failed.')
       setStatus('error')
       setError(message)

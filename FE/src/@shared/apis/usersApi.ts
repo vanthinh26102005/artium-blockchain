@@ -85,7 +85,7 @@ const usersApi = {
     )
     return normalizeUserPayload(raw)
   },
-  updateMe: async (input: { fullName?: string | null; slug?: string | null; avatarUrl?: string | null }) => {
+  updateMe: async (input: { fullName?: string | null; slug?: string | null; avatarUrl?: string | null; walletAddress?: string | null }) => {
     const raw = await apiFetch<Record<string, unknown>>('/identity/users/me', {
       method: 'PUT',
       body: JSON.stringify(input),
