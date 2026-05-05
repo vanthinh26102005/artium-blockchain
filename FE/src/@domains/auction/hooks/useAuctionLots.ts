@@ -15,6 +15,11 @@ type UseAuctionLotsResult = {
 const toError = (error: unknown) =>
   error instanceof Error ? error : new Error('Unable to sync auction state.')
 
+const isSameLot = (currentLot: AuctionLot, nextLot: AuctionLot) =>
+  currentLot.auctionId === nextLot.auctionId ||
+  currentLot.onChainOrderId === nextLot.onChainOrderId ||
+  currentLot.artworkId === nextLot.artworkId
+
 export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult => {
   const { category, maxBidEth, minBidEth, skip, status, take } = input
   const [lots, setLots] = useState<AuctionLot[]>([])
@@ -48,9 +53,7 @@ export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult =>
     const response = await auctionApis.getAuctionById(auctionId)
     const nextLot = mapAuctionReadToLot(response)
 
-    setLots((currentLots) =>
-      currentLots.map((lot) => (lot.auctionId === nextLot.auctionId ? nextLot : lot)),
-    )
+    setLots((currentLots) => currentLots.map((lot) => (isSameLot(lot, nextLot) ? nextLot : lot)))
 
     return nextLot
   }, [])

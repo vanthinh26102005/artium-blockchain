@@ -143,7 +143,7 @@ export const ConfirmedBidState = ({
                     className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-[#5f5e5e]"
                     style={headlineFont}
                   >
-                    View Order Status
+                    Track Bid
                   </button>
                 ) : (
                   <button

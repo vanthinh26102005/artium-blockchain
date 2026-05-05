@@ -9,6 +9,7 @@ import {
   AuctionBidWalletError,
   submitAuctionBid,
 } from '@domains/auction/services/auctionBidWallet'
+import { saveStoredAuctionBid } from '@domains/auction/utils/bidTrackingStorage'
 import { ConfirmedBidState } from './ConfirmedBidState'
 import { PendingBidState } from './PendingBidState'
 import { SubmittingBidState } from './SubmittingBidState'
@@ -41,6 +42,7 @@ export type BidOrderStatusPayload = {
   lot: AuctionBidLot
   committedBidValue: number
   transactionHash: string
+  walletAddress?: string | null
 }
 
 type BidEditingModalProps = {
@@ -223,6 +225,15 @@ export const BidEditingModal = ({
 
         if (bidIsAuthoritative) {
           setCurrentBidValue(refreshedLot.bidValue)
+          if (submittedWalletAddress) {
+            saveStoredAuctionBid({
+              lot: refreshedLot,
+              committedBidValue,
+              transactionHash,
+              walletAddress: submittedWalletAddress,
+              status: 'confirmed',
+            })
+          }
           setViewState('confirmed')
           return
         }
@@ -335,6 +346,13 @@ export const BidEditingModal = ({
       })
       setTransactionHash(result.txHash)
       setSubmittedWalletAddress(result.walletAddress)
+      saveStoredAuctionBid({
+        lot,
+        committedBidValue: bidAmountValue,
+        transactionHash: result.txHash,
+        walletAddress: result.walletAddress,
+        status: 'pending',
+      })
       setViewState('pending')
       if (onRefreshLot && auctionId) {
         void onRefreshLot(auctionId)
@@ -395,6 +413,17 @@ export const BidEditingModal = ({
         committedBidValue={committedBidValue}
         transactionHash={transactionHash}
         onClose={handleCloseModal}
+        onTrackBid={
+          onViewOrderStatus
+            ? () =>
+                onViewOrderStatus({
+                  lot,
+                  committedBidValue,
+                  transactionHash,
+                  walletAddress: submittedWalletAddress,
+                })
+            : undefined
+        }
       />
     )
   }
@@ -416,6 +445,7 @@ export const BidEditingModal = ({
                   lot,
                   committedBidValue,
                   transactionHash,
+                  walletAddress: submittedWalletAddress,
                 })
             : undefined
         }
