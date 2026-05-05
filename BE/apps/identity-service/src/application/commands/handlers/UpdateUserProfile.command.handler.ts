@@ -46,25 +46,11 @@ export class UpdateUserProfileHandler implements ICommandHandler<
         input.slug = slugNormalized;
       }
 
-      // If wallet address is being changed, check uniqueness
-      if (input.walletAddress && input.walletAddress !== existingUser.walletAddress) {
-        const walletAddressNormalized = input.walletAddress.toLowerCase();
-        const existingByWallet =
-          await this.userRepository.findByWalletAddress(walletAddressNormalized);
-        if (existingByWallet && existingByWallet.id !== userId) {
-          throw RpcExceptionHelper.conflict(
-            'Wallet address is already registered to another account.',
-          );
-        }
-        input.walletAddress = walletAddressNormalized;
-      }
-
       // Only allow updating safe fields
       const safeInput: Record<string, unknown> = {};
       if (input.fullName !== undefined) safeInput.fullName = input.fullName;
       if (input.slug !== undefined) safeInput.slug = input.slug;
       if (input.avatarUrl !== undefined) safeInput.avatarUrl = input.avatarUrl;
-      if (input.walletAddress !== undefined) safeInput.walletAddress = input.walletAddress;
 
       const updatedUser = await this.userRepository.update(userId, safeInput);
       if (!updatedUser) {

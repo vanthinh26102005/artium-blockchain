@@ -33,6 +33,10 @@ import {
 import { useGoogleLoginBridge } from '@domains/auth/hooks/useGoogleLoginBridge'
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { useWalletLogin } from '@domains/auth/hooks/useWalletLogin'
+import {
+  clearPendingWalletLink,
+  writePendingWalletLink,
+} from '@domains/auth/services/browserAuthState'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import { buildAuthCallbackUrl, getSafeNextPath } from '@domains/auth/utils/authRedirect'
 import {
@@ -51,13 +55,14 @@ import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
 
 export const LoginPage = () => {
   const router = useRouter()
-  const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
   const setAuth = useAuthStore((state) => state.setAuth)
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
   const walletLogin = useWalletLogin()
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
   const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false)
   const [isUnregisteredWalletDialogOpen, setIsUnregisteredWalletDialogOpen] = useState(false)
+  const [isDeferringAuthRedirect, setIsDeferringAuthRedirect] = useState(false)
+  const { canRenderGuestPage } = useRedirectAuthenticatedUser('/', isDeferringAuthRedirect)
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     mode: 'onBlur',
@@ -75,10 +80,22 @@ export const LoginPage = () => {
 
   useEffect(() => {
     if (walletLogin.status === 'unregistered') {
+      if (walletLogin.walletAddress) {
+        writePendingWalletLink(walletLogin.walletAddress)
+      }
       setIsWalletDialogOpen(false)
       setIsUnregisteredWalletDialogOpen(true)
     }
-  }, [walletLogin.status])
+  }, [walletLogin.status, walletLogin.walletAddress])
+
+  const getProfileWalletConnectPath = (
+    user: { id: string; slug?: string | null; username?: string | null },
+    nextPath: string,
+  ) => {
+    const profileHandle = user.slug || user.username || user.id
+
+    return `/profile/${encodeURIComponent(profileHandle)}/edit?connectWallet=1&next=${encodeURIComponent(nextPath)}`
+  }
 
   const handleLogin = async (values: LoginFormValues) => {
     form.clearErrors('root')
@@ -89,12 +106,23 @@ export const LoginPage = () => {
         password: values.password,
       })
       const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
+      const pendingWalletAddress =
+        walletLogin.status === 'unregistered' && walletLogin.walletAddress && !response.user.walletAddress
+          ? walletLogin.walletAddress
+          : null
+      const shouldPromptWalletFromSignup = router.query.signup === 'success'
+      if (pendingWalletAddress || shouldPromptWalletFromSignup) {
+        setIsDeferringAuthRedirect(true)
+      }
+
       setAuth(response)
 
-      // Prompt to connect wallet if they just signed up
-      if (router.query.signup === 'success') {
-        const profileHandle = response.user.slug || response.user.username || response.user.id
-        await router.push(`/profile/${encodeURIComponent(profileHandle)}/edit?connectWallet=true`)
+      if (pendingWalletAddress) {
+        writePendingWalletLink(pendingWalletAddress)
+        await router.push(getProfileWalletConnectPath(response.user, nextPath))
+      } else if (shouldPromptWalletFromSignup) {
+        clearPendingWalletLink()
+        await router.push(getProfileWalletConnectPath(response.user, nextPath))
       } else {
         await router.push(nextPath)
       }
@@ -105,6 +133,10 @@ export const LoginPage = () => {
   }
 
   const handleGoogleSignIn = async () => {
+    if (walletLogin.status === 'unregistered' && walletLogin.walletAddress) {
+      writePendingWalletLink(walletLogin.walletAddress)
+    }
+
     setIsGoogleSubmitting(true)
     let callbackUrl = buildAuthCallbackUrl(
       '/login',
@@ -124,6 +156,19 @@ export const LoginPage = () => {
 
   const handleWalletSignIn = async () => {
     await walletLogin.loginWithWallet()
+  }
+
+  const handleUseEmailForWallet = () => {
+    setIsUnregisteredWalletDialogOpen(false)
+  }
+
+  const handleCreateAccountForWallet = async () => {
+    if (walletLogin.walletAddress) {
+      writePendingWalletLink(walletLogin.walletAddress)
+    }
+
+    const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
+    await router.push(`/sign-up?next=${encodeURIComponent(nextPath)}`)
   }
 
   const handleSwitchWalletNetwork = async () => {
@@ -265,11 +310,25 @@ export const LoginPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Wallet Not Linked</AlertDialogTitle>
             <AlertDialogDescription>
-              This wallet is not linked to any Artium account. Please login or register using your email or social accounts first. Once logged in, you can connect your wallet in your Profile Settings.
+              This wallet is not linked to an Artium account yet. Sign in or create an account first, then Artium will ask whether you want to connect this wallet.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setIsUnregisteredWalletDialogOpen(false)}>Got it</AlertDialogAction>
+          <AlertDialogFooter className="gap-2 sm:flex-col sm:space-x-0">
+            <AlertDialogAction onClick={handleGoogleSignIn}>Continue with Google</AlertDialogAction>
+            <button
+              type="button"
+              onClick={handleUseEmailForWallet}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-black/10 bg-white px-4 text-sm font-semibold text-[#191414] transition hover:bg-black/5"
+            >
+              Use email form
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleCreateAccountForWallet()}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-black/10 bg-white px-4 text-sm font-semibold text-[#191414] transition hover:bg-black/5"
+            >
+              Create account
+            </button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

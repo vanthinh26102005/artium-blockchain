@@ -109,7 +109,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   )
   const isSearchVisible = shouldShowSearch && isSearchOpen
   const isLandingVariant = variant === 'landing'
-
+console.log(isAuthRoute)
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 16)

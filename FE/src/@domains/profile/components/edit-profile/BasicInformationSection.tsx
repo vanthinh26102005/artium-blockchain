@@ -2,6 +2,7 @@
 import { useMemo, CSSProperties, ChangeEvent, RefObject } from 'react'
 
 // third-party
+import { Wallet, Unlink } from 'lucide-react'
 import { Controller, useWatch, Control, FieldErrors, UseFormRegister } from 'react-hook-form'
 import Select from 'react-select'
 import countryList from 'react-select-country-list'
@@ -31,6 +32,10 @@ type BasicInformationSectionProps = {
   onAvatarPick: () => void
   onAvatarRemove: () => void
   onAvatarChange: (event: ChangeEvent<HTMLInputElement>) => void
+  currentWalletAddress?: string | null
+  isWalletLoading?: boolean
+  onConnectWallet?: () => void
+  onDisconnectWallet?: () => void
   showSellerContactFields?: boolean
 }
 
@@ -44,6 +49,10 @@ export const BasicInformationSection = ({
   onAvatarPick,
   onAvatarRemove,
   onAvatarChange,
+  currentWalletAddress,
+  isWalletLoading = false,
+  onConnectWallet,
+  onDisconnectWallet,
   showSellerContactFields = false,
 }: BasicInformationSectionProps) => {
   const username = useWatch({ control, name: 'username' }) ?? ''
@@ -75,6 +84,9 @@ export const BasicInformationSection = ({
 
   const avatarError =
     typeof errors.avatarUrl?.message === 'string' ? errors.avatarUrl.message : undefined
+  const shortenedWallet = currentWalletAddress
+    ? `${currentWalletAddress.slice(0, 6)}...${currentWalletAddress.slice(-4)}`
+    : null
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -117,27 +129,42 @@ export const BasicInformationSection = ({
             </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="walletAddress"
-              className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase"
-            >
-              Wallet Address
-            </label>
-            <input
-              id="walletAddress"
-              {...register('walletAddress')}
-              placeholder="0x..."
-              className={getInputClasses(showErrors && !!errors.walletAddress)}
-            />
-            <div className="mt-1 flex min-h-[16px] items-center justify-between text-xs text-slate-400">
-              <span className={errors.walletAddress && showErrors ? 'text-rose-500' : ''}>
-                {showErrors && typeof errors.walletAddress?.message === 'string'
-                  ? errors.walletAddress.message
-                  : ''}
-              </span>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
+                  Wallet
+                </p>
+                <p className="mt-1 truncate text-sm font-semibold text-slate-900">
+                  {shortenedWallet ?? 'No wallet connected'}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Sign with MetaMask to add or change the wallet used for wallet login.
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={onConnectWallet}
+                  disabled={isWalletLoading || !onConnectWallet}
+                  className="inline-flex h-10 items-center gap-2 rounded-lg bg-slate-900 px-3 text-xs font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Wallet className="h-4 w-4" />
+                  {currentWalletAddress ? 'Change' : 'Connect'}
+                </button>
+                {currentWalletAddress ? (
+                  <button
+                    type="button"
+                    onClick={onDisconnectWallet}
+                    disabled={isWalletLoading || !onDisconnectWallet}
+                    className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <Unlink className="h-4 w-4" />
+                    Remove
+                  </button>
+                ) : null}
+              </div>
             </div>
-            <p className="text-xs text-slate-400 mt-1">Connect your Ethereum wallet address to enable login by wallet. It will be bound to your account.</p>
           </div>
 
           <div>

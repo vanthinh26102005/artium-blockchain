@@ -32,6 +32,14 @@ import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis
 import artworkUploadApi from '@shared/apis/artworkUploadApi'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import usersApi from '@shared/apis/usersApi'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/components/ui/dialog'
+import { WalletLoginPanel } from '@domains/auth/components'
+import { useWalletLink } from '@domains/auth/hooks/useWalletLink'
+import {
+  clearPendingWalletLink,
+  readPendingWalletLink,
+} from '@domains/auth/services/browserAuthState'
+import { getSafeNextPath } from '@domains/auth/utils/authRedirect'
 
 type ProfileEditPageViewProps = {
   username?: string | string[]
@@ -155,8 +163,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
   const router = useRouter()
   const authUser = useAuthStore((state) => state.user)
   const refreshMe = useAuthStore((state) => state.refreshMe)
+  const walletLink = useWalletLink()
 
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [showWalletDialog, setShowWalletDialog] = useState(false)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
@@ -181,6 +191,12 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     name: 'avatarUrl',
   })
   const avatarValue = useWatch({ control, name: 'avatarUrl' })
+
+  useEffect(() => {
+    if (router.isReady && router.query.connectWallet === '1') {
+      setShowWalletDialog(true)
+    }
+  }, [router.isReady, router.query.connectWallet])
 
   useEffect(() => {
     const saveTimer = saveTimerRef.current
@@ -468,6 +484,26 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     setShowExitConfirm(false)
   }
 
+  const handleConnectWallet = async () => {
+    const pendingWallet = readPendingWalletLink()
+    const user = await walletLink.linkWallet(pendingWallet)
+    if (!user) {
+      return
+    }
+
+    clearPendingWalletLink()
+    setShowWalletDialog(false)
+
+    if (router.query.connectWallet === '1') {
+      const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
+      await router.push(nextPath)
+    }
+  }
+
+  const handleDisconnectWallet = async () => {
+    await walletLink.unlinkWallet()
+  }
+
   return (
     <>
       <div className="min-h-screen bg-slate-50/60 font-['Inter']">
@@ -500,6 +536,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                 onAvatarPick={handleAvatarPick}
                 onAvatarRemove={handleAvatarRemove}
                 onAvatarChange={handleAvatarChange}
+                currentWalletAddress={authUser?.walletAddress ?? initialValues.walletAddress ?? null}
+                isWalletLoading={walletLink.isLoading}
+                onConnectWallet={() => setShowWalletDialog(true)}
+                onDisconnectWallet={handleDisconnectWallet}
                 showSellerContactFields={Boolean(sellerProfile)}
               />
             </div>
@@ -544,6 +584,34 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
           />
         </Portal>
       ) : null}
+
+      <Dialog open={showWalletDialog} onOpenChange={setShowWalletDialog}>
+        <DialogContent
+          size="lg"
+          closeButtonClassName="top-6 right-6 h-10 w-10 border border-black/10 bg-white text-[#6f6a67] hover:bg-[#f7f5f2] hover:text-[#191414] focus:ring-black/20 sm:top-7 sm:right-7"
+          className="max-h-[90vh] max-w-[520px] overflow-y-auto rounded-2xl bg-white p-6 text-black shadow-[0_30px_90px_rgba(0,0,0,0.28)] sm:p-7"
+        >
+          <DialogHeader className="mb-6 !px-0 pr-14 text-left sm:mb-7">
+            <DialogTitle className="text-left text-[22px] leading-[1.15] font-bold text-[#191414] sm:text-2xl">
+              Connect wallet
+            </DialogTitle>
+            <p className="max-w-[390px] text-left text-sm leading-6 font-medium text-[#6f6a67]">
+              Sign with MetaMask to bind this wallet to your Artium account.
+            </p>
+          </DialogHeader>
+
+          <WalletLoginPanel
+            buttonLabel={walletLink.buttonLabel}
+            isLoading={walletLink.isLoading}
+            isWrongNetwork={walletLink.isWrongNetwork}
+            onLogin={handleConnectWallet}
+            onSwitchNetwork={walletLink.switchToTargetChain}
+            shortenedAddress={walletLink.shortenedAddress}
+            status={walletLink.status}
+            targetChainName={walletLink.targetChain.name}
+          />
+        </DialogContent>
+      </Dialog>
 
       {showExitConfirm ? (
         <Portal>
