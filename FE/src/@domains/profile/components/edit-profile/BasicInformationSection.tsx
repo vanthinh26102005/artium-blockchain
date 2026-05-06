@@ -2,7 +2,7 @@
 import { useMemo, CSSProperties, ChangeEvent, RefObject } from 'react'
 
 // third-party
-import { Wallet, Unlink } from 'lucide-react'
+import { Wallet } from 'lucide-react'
 import { Controller, useWatch, Control, FieldErrors, UseFormRegister } from 'react-hook-form'
 import Select from 'react-select'
 import countryList from 'react-select-country-list'
@@ -34,8 +34,7 @@ type BasicInformationSectionProps = {
   onAvatarChange: (event: ChangeEvent<HTMLInputElement>) => void
   currentWalletAddress?: string | null
   isWalletLoading?: boolean
-  onConnectWallet?: () => void
-  onDisconnectWallet?: () => void
+  onManageWallet?: () => void
   showSellerContactFields?: boolean
 }
 
@@ -51,8 +50,7 @@ export const BasicInformationSection = ({
   onAvatarChange,
   currentWalletAddress,
   isWalletLoading = false,
-  onConnectWallet,
-  onDisconnectWallet,
+  onManageWallet,
   showSellerContactFields = false,
 }: BasicInformationSectionProps) => {
   const username = useWatch({ control, name: 'username' }) ?? ''
@@ -129,40 +127,29 @@ export const BasicInformationSection = ({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
               <div className="min-w-0">
                 <p className="text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase">
                   Wallet
                 </p>
-                <p className="mt-1 truncate text-sm font-semibold text-slate-900">
+                <p className="mt-1 break-all font-mono text-sm font-semibold text-slate-900 sm:truncate">
                   {shortenedWallet ?? 'No wallet connected'}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
-                  Sign with MetaMask to add or change the wallet used for wallet login.
+                  Add, change, or remove the wallet used for account login and auction bidding.
                 </p>
               </div>
-              <div className="flex shrink-0 flex-wrap gap-2">
+              <div className="flex min-w-0 shrink-0">
                 <button
                   type="button"
-                  onClick={onConnectWallet}
-                  disabled={isWalletLoading || !onConnectWallet}
-                  className="inline-flex h-10 items-center gap-2 rounded-lg bg-slate-900 px-3 text-xs font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={onManageWallet}
+                  disabled={isWalletLoading || !onManageWallet}
+                  className="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-slate-900 px-3 text-xs font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
                   <Wallet className="h-4 w-4" />
-                  {currentWalletAddress ? 'Change' : 'Connect'}
+                  Manage Wallet
                 </button>
-                {currentWalletAddress ? (
-                  <button
-                    type="button"
-                    onClick={onDisconnectWallet}
-                    disabled={isWalletLoading || !onDisconnectWallet}
-                    className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <Unlink className="h-4 w-4" />
-                    Remove
-                  </button>
-                ) : null}
               </div>
             </div>
           </div>

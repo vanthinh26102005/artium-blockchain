@@ -4,7 +4,7 @@ import Link from 'next/link'
 import React from 'react'
 
 // third-party
-import { BadgeCheck, MapPin, Pencil, Share, UserPlus, UserCheck } from 'lucide-react'
+import { BadgeCheck, MapPin, Pencil, Share, UserPlus, UserCheck, Wallet } from 'lucide-react'
 
 // @shared - utils
 import { cn } from '@shared/lib/utils'
@@ -125,15 +125,26 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
           </div>
           <div className="mt-8 inline-flex h-[50px] w-full items-stretch justify-center gap-2">
             {isOwner ? (
-              <Link
-                href={`/profile/${encodeURIComponent(user.username)}/edit`}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-6 py-3 text-sm font-semibold text-slate-900 hover:shadow-md"
-              >
-                <Pencil className="h-4 w-4" />
-                <span className="ml-1 text-[12px] font-medium lg:ml-2 lg:text-[16px]">
-                  Edit Profile
-                </span>
-              </Link>
+              <>
+                <Link
+                  href={`/profile/${encodeURIComponent(user.username)}/edit`}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-6 py-3 text-sm font-semibold text-slate-900 hover:shadow-md"
+                >
+                  <Pencil className="h-4 w-4" />
+                  <span className="ml-1 text-[12px] font-medium lg:ml-2 lg:text-[16px]">
+                    Edit Profile
+                  </span>
+                </Link>
+                <Link
+                  href={`/profile/${encodeURIComponent(user.username)}/edit?connectWallet=1`}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-6 py-3 text-sm font-semibold text-slate-900 hover:shadow-md"
+                >
+                  <Wallet className="h-4 w-4" />
+                  <span className="ml-1 text-[12px] font-medium lg:ml-2 lg:text-[16px]">
+                    Wallet
+                  </span>
+                </Link>
+              </>
             ) : (
               <button
                 onClick={toggleFollow}
@@ -185,13 +196,22 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
           </div>
           <div className="inline-flex h-[44px] w-full items-stretch justify-start gap-2">
             {isOwner ? (
-              <Link
-                href={`/profile/${encodeURIComponent(user.username)}/edit`}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-6 py-3 text-sm font-semibold text-slate-900 hover:shadow-md"
-              >
-                <Pencil className="h-4 w-4" />
-                <span className="text-[12px] font-medium">Edit Profile</span>
-              </Link>
+              <>
+                <Link
+                  href={`/profile/${encodeURIComponent(user.username)}/edit`}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-slate-900 hover:shadow-md"
+                >
+                  <Pencil className="h-4 w-4" />
+                  <span className="text-[12px] font-medium">Edit</span>
+                </Link>
+                <Link
+                  href={`/profile/${encodeURIComponent(user.username)}/edit?connectWallet=1`}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-slate-900 hover:shadow-md"
+                >
+                  <Wallet className="h-4 w-4" />
+                  <span className="text-[12px] font-medium">Wallet</span>
+                </Link>
+              </>
             ) : (
               <button
                 onClick={toggleFollow}
