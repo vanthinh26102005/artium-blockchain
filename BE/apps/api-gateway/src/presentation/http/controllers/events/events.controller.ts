@@ -20,7 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@app/auth';
-import { EventStatus, EventType } from '@app/common';
+import { EventStatus, EventType, UserPayload } from '@app/common';
 import { MICROSERVICES } from '../../../../config';
 import { sendRpc } from '../../utils';
 
@@ -59,6 +59,10 @@ type EventLocationDto = {
   };
   virtualUrl?: string;
   accessInstructions?: string;
+};
+
+type AuthenticatedRequest = {
+  user?: UserPayload;
 };
 
 const EVENT_TYPE_MAP: Record<string, EventType> = {
@@ -112,20 +116,12 @@ export class EventsController {
     return sendRpc(this.eventsClient, { cmd: 'get_public_events' }, {});
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get event by ID' })
-  @ApiParam({ name: 'id', type: 'string', description: 'Event ID' })
-  @ApiResponse({ status: 200, description: 'Event retrieved successfully' })
-  async getEventById(@Param('id') eventId: string) {
-    return sendRpc(this.eventsClient, { cmd: 'get_event' }, { eventId });
-  }
-
   @Get('hosting')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get events hosted by current user' })
   @ApiResponse({ status: 200, description: 'Events retrieved successfully' })
-  async getHostingEvents(@Req() req: any) {
+  async getHostingEvents(@Req() req: AuthenticatedRequest) {
     return sendRpc(
       this.eventsClient,
       { cmd: 'get_events_by_creator' },
@@ -135,13 +131,24 @@ export class EventsController {
     );
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: 'Get event by ID' })
+  @ApiParam({ name: 'id', type: 'string', description: 'Event ID' })
+  @ApiResponse({ status: 200, description: 'Event retrieved successfully' })
+  async getEventById(@Param('id') eventId: string) {
+    return sendRpc(this.eventsClient, { cmd: 'get_event' }, { eventId });
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new event' })
   @ApiBody({ type: Object })
   @ApiResponse({ status: 201, description: 'Event created successfully' })
-  async createEvent(@Req() req: any, @Body() payload: EventFormRequest) {
+  async createEvent(
+    @Req() req: AuthenticatedRequest,
+    @Body() payload: EventFormRequest,
+  ) {
     const primaryType = normalizeType(payload.types?.[0]);
     return sendRpc(
       this.eventsClient,
@@ -172,7 +179,7 @@ export class EventsController {
   @ApiBody({ type: Object })
   @ApiResponse({ status: 200, description: 'Event updated successfully' })
   async updateEvent(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') eventId: string,
     @Body() payload: EventFormRequest,
   ) {
@@ -207,7 +214,10 @@ export class EventsController {
   @ApiOperation({ summary: 'Delete an event' })
   @ApiParam({ name: 'id', type: 'string', description: 'Event ID' })
   @ApiResponse({ status: 200, description: 'Event deleted successfully' })
-  async deleteEvent(@Req() req: any, @Param('id') eventId: string) {
+  async deleteEvent(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') eventId: string,
+  ) {
     return sendRpc(
       this.eventsClient,
       { cmd: 'delete_event' },
@@ -229,7 +239,7 @@ export class EventsController {
     description: 'Invitations queued successfully',
   })
   async sendInvitations(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') eventId: string,
     @Body() payload: EventInvitationRequest,
   ) {

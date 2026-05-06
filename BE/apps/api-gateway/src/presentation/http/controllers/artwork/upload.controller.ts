@@ -59,6 +59,16 @@ class UploadAvatarDto {
   userId: string;
 }
 
+class UploadEventCoverImageDto {
+  @IsString()
+  @IsNotEmpty()
+  eventId: string;
+
+  @IsString()
+  @IsOptional()
+  altText?: string;
+}
+
 @ApiTags('Upload')
 @Controller('artwork/uploads')
 export class UploadController {
@@ -219,6 +229,62 @@ export class UploadController {
       this.artworkClient,
       { cmd: 'upload_artwork_images' },
       { ...dto, sellerId: req.user.id, user: req.user, files },
+    );
+  }
+
+  @Post('event-cover-image')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload event cover image',
+    description:
+      'Uploads an event cover image without requiring an artwork draft.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Event cover image file',
+        },
+        eventId: {
+          type: 'string',
+          description: 'Event ID or upload correlation ID',
+        },
+        altText: {
+          type: 'string',
+          description: 'Alternative text for the event cover image',
+        },
+      },
+      required: ['file', 'eventId'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Event cover image uploaded successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        publicId: { type: 'string' },
+        url: { type: 'string' },
+        secureUrl: { type: 'string' },
+        bucket: { type: 'string' },
+      },
+    },
+  })
+  async uploadEventCoverImage(
+    @Request() req: { user: UserPayload },
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: UploadEventCoverImageDto,
+  ): Promise<ArtworkImageInput> {
+    return sendRpc<ArtworkImageInput>(
+      this.artworkClient,
+      { cmd: 'upload_event_cover_image' },
+      { ...dto, ownerId: req.user.id, user: req.user, file },
     );
   }
 

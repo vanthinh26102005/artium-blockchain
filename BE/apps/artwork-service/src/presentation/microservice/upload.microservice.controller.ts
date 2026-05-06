@@ -19,6 +19,11 @@ const getImageExtension = (file?: Express.Multer.File, fallback = '.webp') =>
 const createStoredImageFileName = (file?: Express.Multer.File) =>
   `${uuidv4()}${getImageExtension(file)}`;
 
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const isUuid = (value: string) => uuidPattern.test(value);
+
 interface UploadArtworkImageDto {
   sellerId: string;
   artworkId: string;
@@ -36,6 +41,13 @@ interface UploadArtworkImagesDto {
 
 interface UploadAvatarDto {
   userId: string;
+  file: Express.Multer.File;
+}
+
+interface UploadEventCoverImageDto {
+  ownerId: string;
+  eventId: string;
+  altText?: string;
   file: Express.Multer.File;
 }
 
@@ -60,6 +72,16 @@ export class UploadMicroserviceController {
 
     if (sellerId === 'undefined' || artworkId === 'undefined') {
       throw new RpcException('sellerId or artworkId is "undefined" string');
+    }
+
+    if (!isUuid(sellerId)) {
+      throw RpcExceptionHelper.badRequest('Seller id must be a valid UUID');
+    }
+
+    if (!isUuid(artworkId)) {
+      throw RpcExceptionHelper.badRequest(
+        'Artwork image uploads require a valid artwork draft UUID',
+      );
     }
 
     const artwork = await this.artworkRepo.findById(artworkId);
@@ -130,28 +152,7 @@ export class UploadMicroserviceController {
       );
     }
 
-    if (dto.sellerId === 'undefined' || dto.artworkId === 'undefined') {
-      throw new RpcException('sellerId or artworkId is "undefined" string');
-    }
-
-    const artwork = await this.artworkRepo.findById(dto.artworkId);
-    if (!artwork) {
-      throw RpcExceptionHelper.notFound(
-        `Artwork draft ${dto.artworkId} not found`,
-      );
-    }
-
-    if (artwork.sellerId !== dto.sellerId) {
-      throw RpcExceptionHelper.forbidden(
-        `Artwork draft ${dto.artworkId} does not belong to this seller`,
-      );
-    }
-
-    if (artwork.status !== ArtworkStatus.DRAFT) {
-      throw RpcExceptionHelper.badRequest(
-        `Artwork ${dto.artworkId} is not a draft`,
-      );
-    }
+    await this.validateDraftUpload(dto.sellerId, dto.artworkId, dto.files[0]);
 
     const results = await Promise.all(
       dto.files.map(async (file, index) => {
@@ -178,6 +179,51 @@ export class UploadMicroserviceController {
     );
 
     return results;
+  }
+
+  @MessagePattern({ cmd: 'upload_event_cover_image' })
+  async uploadEventCoverImage(
+    @Payload() dto: UploadEventCoverImageDto,
+  ): Promise<ArtworkImageInput> {
+    this.logger.log(`[Microservice] Uploading event cover image`, {
+      ownerId: dto.ownerId,
+      eventId: dto.eventId,
+      fileName: dto.file?.originalname,
+    });
+
+    if (!dto.file) {
+      throw RpcExceptionHelper.badRequest('Event cover image file is required');
+    }
+
+    if (!dto.ownerId || !isUuid(dto.ownerId)) {
+      throw RpcExceptionHelper.badRequest('Owner id must be a valid UUID');
+    }
+
+    if (!dto.eventId || dto.eventId === 'undefined' || dto.eventId === 'null') {
+      throw RpcExceptionHelper.badRequest('Event id is required');
+    }
+
+    const safeEventId = dto.eventId.replace(/[^a-zA-Z0-9_-]/g, '-');
+    const uploadResult = await this.gcsStorage.uploadFile(dto.file, {
+      folder: `events/${dto.ownerId}/${safeEventId}`,
+      fileName: createStoredImageFileName(dto.file),
+      makePublic: true,
+      metadata: {
+        ownerId: dto.ownerId,
+        eventId: dto.eventId,
+        uploadedBy: 'artwork-service',
+        uploadContext: 'event-cover',
+      },
+    });
+
+    return {
+      publicId: uploadResult.publicId,
+      url: uploadResult.url,
+      secureUrl: uploadResult.secureUrl,
+      bucket: uploadResult.bucket,
+      altText: dto.altText,
+      isPrimary: true,
+    };
   }
 
   @MessagePattern({ cmd: 'upload_avatar' })
