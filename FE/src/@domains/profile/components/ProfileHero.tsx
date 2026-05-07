@@ -136,7 +136,7 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
                   </span>
                 </Link>
                 <Link
-                  href={`/profile/${encodeURIComponent(user.username)}/edit?connectWallet=1`}
+                  href={`/profile/${encodeURIComponent(user.username)}/edit?wallet=manage`}
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-6 py-3 text-sm font-semibold text-slate-900 hover:shadow-md"
                 >
                   <Wallet className="h-4 w-4" />
@@ -205,7 +205,7 @@ export const ProfileHero = ({ user, stats, userId, isOwner = false }: ProfileHer
                   <span className="text-[12px] font-medium">Edit</span>
                 </Link>
                 <Link
-                  href={`/profile/${encodeURIComponent(user.username)}/edit?connectWallet=1`}
+                  href={`/profile/${encodeURIComponent(user.username)}/edit?wallet=manage`}
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-slate-900 hover:shadow-md"
                 >
                   <Wallet className="h-4 w-4" />

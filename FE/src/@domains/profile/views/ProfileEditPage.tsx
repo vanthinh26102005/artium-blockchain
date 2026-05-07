@@ -222,6 +222,7 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
   const [avatarUploading, setAvatarUploading] = useState(false)
   const avatarInputRef = useRef<HTMLInputElement>(null)
   const pendingRouteRef = useRef<string | null>(null)
+  const allowConfirmedNavigationRef = useRef(false)
   const saveTimerRef = useRef<number | null>(null)
   const toastTimerRef = useRef<number | null>(null)
   const {
@@ -245,8 +246,14 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     if (router.isReady && router.query.connectWallet === '1') {
       setWalletDialogView('connect')
       setShowWalletDialog(true)
+      return
     }
-  }, [router.isReady, router.query.connectWallet])
+
+    if (router.isReady && router.query.wallet === 'manage') {
+      setWalletDialogView('manage')
+      setShowWalletDialog(true)
+    }
+  }, [router.isReady, router.query.connectWallet, router.query.wallet])
 
   useEffect(() => {
     const saveTimer = saveTimerRef.current
@@ -278,6 +285,7 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
 
   useEffect(() => {
     router.beforePopState(({ as }) => {
+      if (allowConfirmedNavigationRef.current) return true
       if (!isDirty) return true
       pendingRouteRef.current = as
       setShowExitConfirm(true)
@@ -292,6 +300,8 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
   // Intercept all navigation attempts via links
   useEffect(() => {
     const handleRouteChangeStart = (url: string) => {
+      if (allowConfirmedNavigationRef.current) return
+
       // Allow navigation if no unsaved changes
       if (!isDirty) return
 
@@ -544,8 +554,11 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     setShowExitConfirm(false)
     const nextRoute = pendingRouteRef.current
     pendingRouteRef.current = null
+    allowConfirmedNavigationRef.current = true
     if (nextRoute) {
-      router.push(nextRoute)
+      void router.push(nextRoute).catch(() => {
+        allowConfirmedNavigationRef.current = false
+      })
       return
     }
     router.back()
