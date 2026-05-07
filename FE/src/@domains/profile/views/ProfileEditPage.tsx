@@ -6,7 +6,13 @@ import { useRouter } from 'next/router'
 
 // third-party
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useController, useForm, useWatch, SubmitHandler } from 'react-hook-form'
+import {
+  useController,
+  useForm,
+  useWatch,
+  SubmitHandler,
+  SubmitErrorHandler,
+} from 'react-hook-form'
 
 // internal - components
 import { Metadata } from '@/components/SEO/Metadata'
@@ -18,6 +24,10 @@ import { Portal } from '@shared/components/ui/Portal'
 import { AboutMeSection } from '@domains/profile/components/edit-profile/AboutMeSection'
 import { BasicInformationSection } from '@domains/profile/components/edit-profile/BasicInformationSection'
 import { EditProfileHeader } from '@domains/profile/components/edit-profile/EditProfileHeader'
+import {
+  ProfileWalletManagerDialog,
+  type WalletDialogView,
+} from '@domains/profile/components/edit-profile/ProfileWalletManagerDialog'
 import { SaveStatusToast } from '@domains/profile/components/edit-profile/SaveStatusToast'
 import { useProfileDraftData } from '@domains/profile/hooks/useProfileDraftData'
 import { useProfileOverview } from '@domains/profile/hooks/useProfileOverview'
@@ -32,12 +42,58 @@ import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis
 import artworkUploadApi from '@shared/apis/artworkUploadApi'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 import usersApi from '@shared/apis/usersApi'
+import { useWalletLink } from '@domains/auth/hooks/useWalletLink'
+import {
+  clearPendingWalletLink,
+  readPendingWalletLink,
+} from '@domains/auth/services/browserAuthState'
+import { getSafeNextPath } from '@domains/auth/utils/authRedirect'
 
 type ProfileEditPageViewProps = {
   username?: string | string[]
 }
 
 type SaveStatus = 'idle' | 'saving' | 'success'
+
+const isWalletOnlyEmail = (email?: string | null) => Boolean(email?.endsWith('@wallet.local'))
+
+const SkeletonBlock = ({ className }: { className: string }) => (
+  <div className={`animate-pulse rounded-2xl bg-slate-200/70 ${className}`} />
+)
+
+const ProfileEditSkeleton = () => (
+  <div className="min-h-screen bg-slate-50/60 font-['Inter']">
+    <div className="container py-8 lg:py-10">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <SkeletonBlock className="h-8 w-44" />
+        <SkeletonBlock className="h-12 w-36 rounded-full" />
+      </div>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <SkeletonBlock className="h-4 w-44" />
+          <div className="mt-6 grid gap-6 lg:grid-cols-[180px_minmax(0,1fr)]">
+            <SkeletonBlock className="h-40 w-40" />
+            <div className="space-y-4">
+              <SkeletonBlock className="h-16 w-full" />
+              <SkeletonBlock className="h-28 w-full" />
+              <SkeletonBlock className="h-16 w-full" />
+              <SkeletonBlock className="h-16 w-full" />
+            </div>
+          </div>
+        </section>
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <SkeletonBlock className="h-4 w-36" />
+          <div className="mt-6 space-y-4">
+            <SkeletonBlock className="h-16 w-full" />
+            <SkeletonBlock className="h-32 w-full" />
+            <SkeletonBlock className="h-16 w-full" />
+            <SkeletonBlock className="h-24 w-full" />
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+)
 
 const splitName = (displayName: string) => {
   const parts = displayName.trim().split(' ')
@@ -59,6 +115,7 @@ const buildInitialValues = (
   return {
     avatarUrl: user.avatarUrl || '',
     username: resolvedUsername || user.username || '',
+    walletAddress: user.walletAddress || '',
     firstName,
     lastName,
     phoneNumber: sellerProfile?.businessPhone || '',
@@ -131,7 +188,7 @@ export const ProfileEditPageView = ({ username: _username }: ProfileEditPageView
     <>
       <Metadata title={pageTitle} />
       {isLoading ? (
-        <div className="container py-10 text-sm text-slate-500">Loading profile...</div>
+        <ProfileEditSkeleton />
       ) : error || !initialValues ? (
         <div className="container py-10 text-sm text-rose-600">{error ?? 'Profile not found.'}</div>
       ) : (
@@ -154,8 +211,11 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
   const router = useRouter()
   const authUser = useAuthStore((state) => state.user)
   const refreshMe = useAuthStore((state) => state.refreshMe)
+  const walletLink = useWalletLink()
 
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [showWalletDialog, setShowWalletDialog] = useState(false)
+  const [walletDialogView, setWalletDialogView] = useState<WalletDialogView>('manage')
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
@@ -180,6 +240,13 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     name: 'avatarUrl',
   })
   const avatarValue = useWatch({ control, name: 'avatarUrl' })
+
+  useEffect(() => {
+    if (router.isReady && router.query.connectWallet === '1') {
+      setWalletDialogView('connect')
+      setShowWalletDialog(true)
+    }
+  }, [router.isReady, router.query.connectWallet])
 
   useEffect(() => {
     const saveTimer = saveTimerRef.current
@@ -393,8 +460,24 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     }
   }
 
+  const handleInvalidSubmit: SubmitErrorHandler<FormValues> = (formErrors) => {
+    setSaveStatus('idle')
+    setSubmitError('Please fix the highlighted fields before saving.')
+
+    const firstFieldName = Object.keys(formErrors)[0]
+    if (!firstFieldName || typeof document === 'undefined') {
+      return
+    }
+
+    window.requestAnimationFrame(() => {
+      const firstField = document.querySelector<HTMLElement>(`[name="${firstFieldName}"]`)
+      firstField?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      firstField?.focus()
+    })
+  }
+
   const handleFormSubmitEvent = (event: FormEvent<HTMLFormElement>) => {
-    void handleSubmit(handleFormSubmit)(event)
+    void handleSubmit(handleFormSubmit, handleInvalidSubmit)(event)
   }
 
   const handleFormChange = () => {
@@ -450,6 +533,12 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
   const avatarSrc = avatarPreview || avatarValue || ''
   const showErrors = submitCount > 0
   const isSaving = saveStatus === 'saving' || isSubmitting
+  const currentWalletAddress = authUser?.walletAddress ?? initialValues.walletAddress ?? null
+  const hasRecoverableLogin = Boolean(
+    authUser?.googleId ||
+      (authUser?.email && !isWalletOnlyEmail(authUser.email) && authUser.isEmailVerified),
+  )
+  const canRemoveWallet = !currentWalletAddress || hasRecoverableLogin
 
   const handleConfirmExit = () => {
     setShowExitConfirm(false)
@@ -467,6 +556,39 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     setShowExitConfirm(false)
   }
 
+  const handleConnectWallet = async () => {
+    const pendingWallet = readPendingWalletLink()
+    const user = await walletLink.linkWallet(pendingWallet)
+    if (!user) {
+      return
+    }
+
+    clearPendingWalletLink()
+    setShowWalletDialog(false)
+    setWalletDialogView('manage')
+
+    if (router.query.connectWallet === '1') {
+      const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
+      await router.push(nextPath)
+    }
+  }
+
+  const handleDisconnectWallet = async () => {
+    if (!canRemoveWallet) {
+      return
+    }
+
+    const user = await walletLink.unlinkWallet()
+    if (user) {
+      setWalletDialogView('manage')
+    }
+  }
+
+  const handleOpenWalletManager = () => {
+    setWalletDialogView('manage')
+    setShowWalletDialog(true)
+  }
+
   return (
     <>
       <div className="min-h-screen bg-slate-50/60 font-['Inter']">
@@ -475,7 +597,7 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
           onChange={handleFormChange}
           className="container py-8 lg:py-10"
         >
-          <EditProfileHeader isDirty={isDirty} isSaving={isSaving} />
+          <EditProfileHeader isDirty={isDirty} isSaving={isSaving} isUploading={avatarUploading} />
           {submitError ? (
             <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
               {submitError}
@@ -499,6 +621,9 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
                 onAvatarPick={handleAvatarPick}
                 onAvatarRemove={handleAvatarRemove}
                 onAvatarChange={handleAvatarChange}
+                currentWalletAddress={currentWalletAddress}
+                isWalletLoading={walletLink.isLoading}
+                onManageWallet={handleOpenWalletManager}
                 showSellerContactFields={Boolean(sellerProfile)}
               />
             </div>
@@ -543,6 +668,31 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
           />
         </Portal>
       ) : null}
+
+      <ProfileWalletManagerDialog
+        open={showWalletDialog}
+        onOpenChange={setShowWalletDialog}
+        view={walletDialogView}
+        onViewChange={setWalletDialogView}
+        currentWalletAddress={currentWalletAddress}
+        canRemoveWallet={canRemoveWallet}
+        walletError={walletLink.error}
+        isLoading={walletLink.isLoading}
+        isWrongNetwork={walletLink.isWrongNetwork}
+        buttonLabel={
+          walletLink.status === 'idle' || walletLink.status === 'error'
+            ? currentWalletAddress
+              ? 'Change MetaMask Wallet'
+              : walletLink.buttonLabel
+            : walletLink.buttonLabel
+        }
+        shortenedAddress={walletLink.shortenedAddress}
+        status={walletLink.status}
+        targetChainName={walletLink.targetChain.name}
+        onConnectWallet={handleConnectWallet}
+        onSwitchNetwork={walletLink.switchToTargetChain}
+        onRemoveWallet={handleDisconnectWallet}
+      />
 
       {showExitConfirm ? (
         <Portal>

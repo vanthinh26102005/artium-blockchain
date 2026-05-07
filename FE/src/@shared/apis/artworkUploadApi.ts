@@ -17,6 +17,7 @@ import type {
   AvatarUploadResponse,
   UploadArtworkImageRequest,
   UploadArtworkImagesRequest,
+  UploadEventCoverImageRequest,
   UploadAvatarRequest,
   UploadOptions,
   UploadError,
@@ -191,6 +192,37 @@ export const uploadArtworkImages = async (
 }
 
 /**
+ * Upload an event cover image.
+ */
+export const uploadEventCoverImage = async (
+  request: UploadEventCoverImageRequest,
+  options?: UploadOptions,
+): Promise<ArtworkImageUploadResponse> => {
+  const { file, eventId, altText } = request
+
+  if (!eventId || eventId === 'undefined' || eventId === 'null') {
+    throw createUploadError(
+      UploadErrorType.INVALID_PARAMS,
+      "eventId is required and must not be 'undefined' or 'null'",
+    )
+  }
+
+  validateFile(file)
+
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('eventId', eventId)
+
+  if (altText) {
+    formData.append('altText', altText)
+  }
+
+  return apiUpload<ArtworkImageUploadResponse>(buildUploadPath('/event-cover-image'), formData, {
+    ...options,
+  })
+}
+
+/**
  * Upload user avatar image
  * 
  * @param request - Upload request parameters
@@ -240,6 +272,7 @@ export const uploadAvatar = async (
 const artworkUploadApi = {
   uploadArtworkImage,
   uploadArtworkImages,
+  uploadEventCoverImage,
   uploadAvatar,
 }
 

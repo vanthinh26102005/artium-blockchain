@@ -347,6 +347,7 @@ services:
     environment:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in environment}
       NODE_ENV: ${NODE_ENV:-development}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
     volumes:
       - .:/app
       - gateway_node_modules:/app/node_modules

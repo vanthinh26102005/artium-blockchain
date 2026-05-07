@@ -56,6 +56,14 @@ export const Services = [
   { provide: ITransactionService, useClass: TransactionService },
 ];
 
+const toBoolean = (value?: string | boolean | null) => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  return value?.toLowerCase() === 'true';
+};
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -69,8 +77,16 @@ export const Services = [
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const smtpUser = configService.get<string>('SMTP_USER');
-        const smtpPass = configService.get<string>('SMTP_PASS');
+        const smtpHost = configService.get<string>('SMTP_HOST') ?? '';
+        const smtpUser = configService.get<string>('SMTP_USER')?.trim();
+        const rawSmtpPass = configService.get<string>('SMTP_PASS') ?? '';
+        const smtpPass = smtpHost.includes('gmail')
+          ? rawSmtpPass.replace(/\s+/g, '')
+          : rawSmtpPass.trim();
+        const smtpPort = configService.get<number>('SMTP_PORT') ?? 587;
+        const smtpSecure =
+          toBoolean(configService.get<string>('SMTP_SECURE')) ||
+          smtpPort === 465;
         const requiresAuth =
           smtpUser &&
           smtpPass &&
@@ -79,9 +95,9 @@ export const Services = [
 
         return {
           transport: {
-            host: configService.get<string>('SMTP_HOST'),
-            port: configService.get<number>('SMTP_PORT'),
-            secure: false,
+            host: smtpHost,
+            port: smtpPort,
+            secure: smtpSecure,
             ...(requiresAuth && {
               auth: {
                 user: smtpUser,

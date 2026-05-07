@@ -47,6 +47,14 @@ const usersApi = {
     const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet', input, { auth: false })
     return normalizeLoginResponse(raw)
   },
+  linkWallet: async (input: LoginByWalletPayload) => {
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet/link', input, { auth: true })
+    return normalizeUserPayload((raw as { user: Record<string, unknown> }).user ?? raw)
+  },
+  unlinkWallet: async () => {
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet/unlink', {}, { auth: true })
+    return normalizeUserPayload((raw as { user: Record<string, unknown> }).user ?? raw)
+  },
   registerInitiate: (input: RegisterInitiatePayload) =>
     apiPost<RequestOtpResponse>('/identity/auth/register/initiate', input, {
       auth: false,

@@ -280,6 +280,46 @@ export class UserController {
     );
   }
 
+  @Post('auth/wallet/link')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Link a signed Ethereum wallet to current user' })
+  @ApiBody({ type: LoginWalletDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Wallet linked successfully',
+  })
+  async linkWallet(
+    @Request() req: Express.Request & { user: GetUserProfileDto['user'] },
+    @Body() input: LoginWalletDto,
+  ) {
+    return sendRpc(
+      this.identityClient,
+      { cmd: 'link_wallet' },
+      { userId: req.user.id, input },
+    );
+  }
+
+  @Post('auth/wallet/unlink')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Disconnect the current user wallet' })
+  @ApiResponse({
+    status: 200,
+    description: 'Wallet disconnected successfully',
+  })
+  async unlinkWallet(
+    @Request() req: Express.Request & { user: GetUserProfileDto['user'] },
+  ) {
+    return sendRpc(
+      this.identityClient,
+      { cmd: 'unlink_wallet' },
+      { userId: req.user.id },
+    );
+  }
+
   @Post('auth/register/initiate')
   @ApiOperation({
     summary: 'Initiate user registration',

@@ -9,7 +9,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ARG NEXT_PUBLIC_API_URL=https://api.dgpthinh.io.vn
-ARG NEXT_PUBLIC_WS_URL=https://dgpthinh.io.vn
+ARG NEXT_PUBLIC_WS_URL=https://api.dgpthinh.io.vn
 ARG NEXT_PUBLIC_WEB_BASE_URL=https://dgpthinh.io.vn
 ARG NEXTAUTH_URL=https://dgpthinh.io.vn
 ARG NEXT_PUBLIC_COOKIE_DOMAIN=dgpthinh.io.vn

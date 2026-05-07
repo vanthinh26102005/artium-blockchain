@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle2, Loader2, Wallet, Wifi } from 'lucide-react'
 import { WALLET_TARGET_CHAIN } from '@domains/auth/constants/wallet'
+import { useWalletLink } from '@domains/auth/hooks/useWalletLink'
 import type { EthereumProvider, MetaMaskError } from '@domains/auth/types/wallet'
 import { Button } from '@shared/components/ui/button'
 
@@ -52,8 +53,9 @@ export const SellerAuctionWalletReadiness = ({
   const [chainId, setChainId] = useState<string | null>(null)
   const [status, setStatus] = useState<WalletStatus>('idle')
   const [error, setError] = useState<string | null>(null)
+  const walletLink = useWalletLink()
 
-  const isLoading = status === 'connecting' || status === 'switching_network'
+  const isLoading = status === 'connecting' || status === 'switching_network' || walletLink.isLoading
   const isConnected = Boolean(connectedAddress)
   const isWrongNetwork = isConnected && !isTargetChain(chainId)
   const isReady = isConnected && !isWrongNetwork
@@ -287,6 +289,24 @@ export const SellerAuctionWalletReadiness = ({
           )}
           {isConnected ? 'Change wallet' : 'Connect MetaMask'}
         </Button>
+        {isConnected && (!userWalletAddress || userWalletAddress.toLowerCase() !== connectedAddress?.toLowerCase()) ? (
+          <Button
+            type="button"
+            onClick={async () => {
+              const user = await walletLink.linkWallet(connectedAddress)
+              if (!user) {
+                setError('Failed to save wallet to your profile.')
+                return
+              }
+
+              setStatus('idle')
+            }}
+            disabled={isLoading}
+            className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-300"
+          >
+            Save wallet
+          </Button>
+        ) : null}
         {isWrongNetwork ? (
           <Button
             type="button"

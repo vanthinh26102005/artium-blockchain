@@ -17,6 +17,25 @@ import {
 } from '@app/rabbitmq';
 import { SendEmailEventPayload } from '../../domain/dtos/payload';
 
+type SmtpError = Error & {
+  code?: string;
+  responseCode?: number;
+  command?: string;
+};
+
+type RabbitErrorChannel = {
+  nack: (message: unknown, allUpTo: boolean, requeue: boolean) => void;
+};
+
+const isPermanentSmtpAuthFailure = (error: unknown): error is SmtpError => {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const smtpError = error as SmtpError;
+  return smtpError.code === 'EAUTH' || smtpError.responseCode === 535;
+};
+
 @Injectable()
 export class SendEmailEventHandler {
   private readonly logger = new Logger(SendEmailEventHandler.name);
@@ -42,7 +61,7 @@ export class SendEmailEventHandler {
           DeadLetterRoutingKey.SEND_TRANSACTIONAL_EMAIL_FAILED,
       },
     },
-    errorHandler: (channel, msg, props) => {
+    errorHandler: (channel: RabbitErrorChannel, msg: unknown) => {
       channel.nack(msg, false, false);
     },
   })
@@ -138,10 +157,17 @@ export class SendEmailEventHandler {
           );
         });
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown email delivery error';
+      const errorStack = err instanceof Error ? err.stack : undefined;
+      const isAuthFailure = isPermanentSmtpAuthFailure(err);
+
       this.logger.error(
-        `Failed to send email (historyId=${historyId})`,
-        err?.stack ?? err,
+        isAuthFailure
+          ? `Email SMTP authentication failed (historyId=${historyId}). Check SMTP_USER/SMTP_PASS and provider app-password settings.`
+          : `Failed to send email (historyId=${historyId})`,
+        errorStack ?? errorMessage,
       );
 
       if (historyId) {
@@ -153,16 +179,16 @@ export class SendEmailEventHandler {
             recordId,
             {
               status: NotificationStatus.FAILED,
-              failureReason: err?.message ?? 'Unknown error',
+              failureReason: errorMessage,
               metadata: {
                 ...(metadata ?? {}),
                 retryCount,
                 sendError: {
-                  message: err?.message,
-                  stack:
-                    typeof err?.stack === 'string'
-                      ? err.stack.substring(0, 2000)
-                      : undefined,
+                  message: errorMessage,
+                  code: isAuthFailure ? err.code : undefined,
+                  responseCode: isAuthFailure ? err.responseCode : undefined,
+                  command: isAuthFailure ? err.command : undefined,
+                  stack: errorStack ? errorStack.substring(0, 2000) : undefined,
                 },
               },
               sentAt: new Date(),
@@ -170,6 +196,10 @@ export class SendEmailEventHandler {
             manager,
           );
         });
+      }
+
+      if (isAuthFailure) {
+        return;
       }
 
       throw err;

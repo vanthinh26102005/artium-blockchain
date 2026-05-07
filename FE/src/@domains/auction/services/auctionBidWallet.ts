@@ -10,6 +10,8 @@ export type AuctionBidWalletErrorCode =
   | 'rejected'
   | 'invalid_amount'
   | 'invalid_contract'
+  | 'insufficient_funds'
+  | 'contract_revert'
   | 'transaction_failed'
 
 export class AuctionBidWalletError extends Error {
@@ -86,6 +88,15 @@ const toHexQuantity = (value: bigint) => `0x${value.toString(16)}`
 
 const padHexWord = (hexValue: string) => hexValue.padStart(64, '0')
 
+const formatEthAmount = (wei: bigint) => {
+  const base = BigInt(10) ** BigInt(WEI_DECIMALS)
+  const whole = wei / base
+  const fraction = wei % base
+  const fractionText = fraction.toString().padStart(WEI_DECIMALS, '0').replace(/0+$/, '')
+
+  return fractionText ? `${whole}.${fractionText}` : whole.toString()
+}
+
 const utf8ToHex = (value: string) =>
   Array.from(new TextEncoder().encode(value))
     .map((byte) => byte.toString(16).padStart(2, '0'))
@@ -102,6 +113,58 @@ const encodeBidCalldata = (auctionId: string) => {
     padHexWord(byteLength.toString(16)),
     paddedStringHex,
   ].join('')
+}
+
+const getObjectField = (value: unknown, field: string): unknown => {
+  if (!value || typeof value !== 'object' || !(field in value)) {
+    return undefined
+  }
+
+  return (value as Record<string, unknown>)[field]
+}
+
+const extractRevertData = (error: unknown): string | null => {
+  if (typeof error === 'string') {
+    const match = error.match(/0x[a-fA-F0-9]{8,}/)
+    return match?.[0] ?? null
+  }
+
+  const data = getObjectField(error, 'data')
+  if (typeof data === 'string' && /^0x[a-fA-F0-9]{8,}$/.test(data)) {
+    return data
+  }
+
+  const nestedData = getObjectField(data, 'data')
+  if (typeof nestedData === 'string' && /^0x[a-fA-F0-9]{8,}$/.test(nestedData)) {
+    return nestedData
+  }
+
+  const messageData = extractRevertData(getObjectField(error, 'message'))
+  if (messageData) {
+    return messageData
+  }
+
+  return extractRevertData(getObjectField(error, 'cause'))
+}
+
+const getContractRevertMessage = (error: unknown) => {
+  const revertSelector = extractRevertData(error)?.slice(0, 10).toLowerCase()
+
+  switch (revertSelector) {
+    case '0xef025889':
+      return 'The seller wallet cannot bid on its own auction. Switch to a buyer wallet and try again.'
+    case '0x229f9334':
+      return 'This auction does not exist on the configured Sepolia contract.'
+    case '0x77e5c5f2':
+      return 'This auction is not currently accepting bids.'
+    case '0x9eafe1b7':
+      return 'This auction has already ended on-chain.'
+    case '0xf7ea5440':
+    case '0x2ebc0046':
+      return 'This bid is below the minimum required by the on-chain auction state. Refresh the lot and try again.'
+    default:
+      return 'The auction contract rejected this bid during simulation. Refresh the lot and try again.'
+  }
 }
 
 export const submitAuctionBid = async ({
@@ -137,18 +200,45 @@ export const submitAuctionBid = async ({
 
   const value = toHexQuantity(decimalEthToWei(bidAmountEth))
   const data = encodeBidCalldata(auctionId)
+  const valueWei = decimalEthToWei(bidAmountEth)
+
+  const balanceHex = await provider.request<string>({
+    method: 'eth_getBalance',
+    params: [walletAddress, 'latest'],
+  })
+  const balanceWei = BigInt(balanceHex)
+
+  if (balanceWei <= valueWei) {
+    throw new AuctionBidWalletError(
+      'insufficient_funds',
+      `Your selected wallet has ${formatEthAmount(
+        balanceWei,
+      )} SepoliaETH, but this bid sends ${formatEthAmount(
+        valueWei,
+      )} SepoliaETH before gas. Use a funded buyer wallet or lower the bid if the auction allows it.`,
+    )
+  }
+
+  const transaction = {
+    from: walletAddress,
+    to: contractAddress,
+    value,
+    data,
+  }
+
+  try {
+    await provider.request({
+      method: 'eth_call',
+      params: [transaction, 'latest'],
+    })
+  } catch (error) {
+    throw new AuctionBidWalletError('contract_revert', getContractRevertMessage(error), error)
+  }
 
   try {
     const txHash = await provider.request<string>({
       method: 'eth_sendTransaction',
-      params: [
-        {
-          from: walletAddress,
-          to: contractAddress,
-          value,
-          data,
-        },
-      ],
+      params: [transaction],
     })
 
     return {

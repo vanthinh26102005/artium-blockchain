@@ -20,6 +20,7 @@ type PendingBidStateProps = {
   committedBidValue: number
   transactionHash: string
   onClose: () => void
+  onTrackBid?: () => void
 }
 
 const spaceGrotesk = Space_Grotesk({
@@ -46,6 +47,7 @@ export const PendingBidState = ({
   committedBidValue,
   transactionHash,
   onClose,
+  onTrackBid,
 }: PendingBidStateProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -154,13 +156,27 @@ export const PendingBidState = ({
               </div>
 
               <div className="w-full space-y-4">
+                {onTrackBid ? (
+                  <button
+                    type="button"
+                    onClick={onTrackBid}
+                    className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-[#5f5e5e]"
+                    style={headlineFont}
+                  >
+                    Track Bid
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   onClick={onClose}
-                  className="inline-flex min-h-[60px] w-full items-center justify-center bg-black px-8 text-center text-[12px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-[#5f5e5e]"
+                  className={`inline-flex w-full items-center justify-center text-[11px] font-bold tracking-[0.15em] uppercase transition ${
+                    onTrackBid
+                      ? 'py-2 text-black/58 hover:text-black'
+                      : 'min-h-[60px] bg-black px-8 text-white hover:bg-[#5f5e5e]'
+                  }`}
                   style={headlineFont}
                 >
-                  Close
+                  {onTrackBid ? 'Stay Here' : 'Close'}
                 </button>
                 <a
                   href={getTransactionUrl(transactionHash)}

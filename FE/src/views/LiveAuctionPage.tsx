@@ -13,6 +13,7 @@ import type {
   AuctionLot,
   AuctionLotStatusKey,
 } from '@domains/auction/types'
+import { Skeleton } from '@shared/components/ui/skeleton'
 import { Metadata } from '@/components/SEO/Metadata'
 
 type AuctionCategoryKey = AuctionFilterCategoryKey
@@ -49,7 +50,7 @@ const statusOptions: Array<{ key: AuctionStatusKey; label: string; helper: strin
   { key: 'paused', label: 'PAUSED / RESERVE', helper: 'Paused or reserve not met' },
 ]
 
-const MIN_ETH = 0.5
+const MIN_ETH = 0
 const MAX_ETH = 50
 const ITEMS_PER_PAGE = 24
 
@@ -102,7 +103,47 @@ const formatEthDisplay = (value: number) => {
 }
 
 const isBidActionStatus = (statusKey: AuctionLotStatusKey) =>
-  statusKey === 'active' || statusKey === 'ending-soon'
+  statusKey === 'active' || statusKey === 'ending-soon' || statusKey === 'newly-listed'
+
+const isSameAuction = (lot: AuctionLot, auctionId: string) =>
+  lot.auctionId === auctionId || lot.onChainOrderId === auctionId || lot.artworkId === auctionId
+
+const AuctionLotCardSkeleton = ({ viewMode }: { viewMode: 'grid' | 'list' }) => (
+  <article
+    className={`border border-[#e5e7eb] bg-white p-3 md:p-4 ${
+      viewMode === 'list'
+        ? 'md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-stretch md:gap-5'
+        : ''
+    }`}
+  >
+    <Skeleton
+      className={`rounded-none bg-[#f3f3f3] ${
+        viewMode === 'grid'
+          ? 'mb-5 aspect-[4/5] md:mb-6 md:aspect-[3/4]'
+          : 'mb-4 aspect-[5/4] md:mb-0 md:h-full md:w-full md:aspect-auto'
+      }`}
+    />
+    <div className={`space-y-4 ${viewMode === 'list' ? 'md:py-2' : ''}`}>
+      <div className={`${viewMode === 'list' ? 'border-b border-[#c4c7c7]/30 pb-4' : ''}`}>
+        <Skeleton className="h-5 w-3/4 rounded-none bg-[#eeeeee]" />
+        <Skeleton className="mt-3 h-3 w-32 rounded-none bg-[#eeeeee]" />
+        {viewMode === 'list' ? (
+          <div className="mt-4 space-y-2">
+            <Skeleton className="h-3 w-full rounded-none bg-[#eeeeee]" />
+            <Skeleton className="h-3 w-5/6 rounded-none bg-[#eeeeee]" />
+          </div>
+        ) : null}
+      </div>
+      <div className="flex items-end justify-between gap-4 border-[#c4c7c7]/30 pt-4">
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-20 rounded-none bg-[#eeeeee]" />
+          <Skeleton className="h-6 w-24 rounded-none bg-[#eeeeee]" />
+        </div>
+        <Skeleton className="h-9 w-24 rounded-none bg-[#eeeeee]" />
+      </div>
+    </div>
+  </article>
+)
 
 const LiveAuctionPage = () => {
   const router = useRouter()
@@ -156,8 +197,8 @@ const LiveAuctionPage = () => {
   } = useAuctionLots({
     category: selectedCategory === 'all' ? undefined : selectedCategory,
     status: selectedStatus === 'all' ? undefined : selectedStatus,
-    minBidEth: appliedMinPrice,
-    maxBidEth: appliedMaxPrice,
+    minBidEth: appliedMinPrice > MIN_ETH ? appliedMinPrice : undefined,
+    maxBidEth: appliedMaxPrice < MAX_ETH ? appliedMaxPrice : undefined,
     skip: 0,
     take: 50,
   })
@@ -318,10 +359,11 @@ const LiveAuctionPage = () => {
   ) =>
     sourceLots.filter((lot) => {
       const matchesCategory = category === 'all' ? true : lot.categoryKey === category
-      const matchesPrice = lot.bidValue >= minPrice && lot.bidValue <= maxPrice
+      const matchesMinPrice = minPrice > MIN_ETH ? lot.bidValue >= minPrice : true
+      const matchesMaxPrice = maxPrice < MAX_ETH ? lot.bidValue <= maxPrice : true
       const matchesStatus = status === 'all' ? true : lot.statusKey === status
 
-      return matchesCategory && matchesPrice && matchesStatus
+      return matchesCategory && matchesMinPrice && matchesMaxPrice && matchesStatus
     })
 
   const visibleLots = useMemo(
@@ -364,17 +406,37 @@ const LiveAuctionPage = () => {
     () => displayedLots.map((lot) => lot.auctionId),
     [displayedLots],
   )
+  const isInitialLoading = isLoading && lots.length === 0
+  const skeletonLots = useMemo(() => Array.from({ length: effectiveViewMode === 'grid' ? 8 : 5 }), [
+    effectiveViewMode,
+  ])
+  const refreshAuctionAndSelection = useCallback(
+    async (auctionId: string) => {
+      const refreshedLot = await refreshAuctionById(auctionId)
+
+      setSelectedBidLot((currentLot) =>
+        currentLot && isSameAuction(currentLot, auctionId) ? refreshedLot : currentLot,
+      )
+
+      return refreshedLot
+    },
+    [refreshAuctionById],
+  )
   const handleRealtimeAuctionChange = useCallback(
     (auctionId: string) => {
-      void refreshAuctionById(auctionId).catch(() => refresh())
+      void refreshAuctionAndSelection(auctionId).catch(() => refresh())
     },
-    [refresh, refreshAuctionById],
+    [refresh, refreshAuctionAndSelection],
   )
 
   useAuctionRealtime({
     auctionIds: displayedAuctionIds,
     onAuctionChange: handleRealtimeAuctionChange,
   })
+
+  const activeSelectedBidLot = selectedBidLot
+    ? lots.find((lot) => isSameAuction(lot, selectedBidLot.auctionId)) ?? selectedBidLot
+    : null
 
   const resultsLabel = `${visibleLots.length} result${visibleLots.length === 1 ? '' : 's'}`
   const mobilePreviewLabel = `${mobilePreviewLots.length} result${mobilePreviewLots.length === 1 ? '' : 's'}`
@@ -432,7 +494,7 @@ const LiveAuctionPage = () => {
       return
     }
 
-    void router.push(`/orders/on-chain/${encodeURIComponent(lot.onChainOrderId)}`)
+    void router.push(`/auction/bids/${encodeURIComponent(lot.onChainOrderId)}`)
   }
 
   return (
@@ -804,14 +866,6 @@ const LiveAuctionPage = () => {
             </section>
           ) : null}
 
-          {isLoading && lots.length === 0 ? (
-            <section className="mb-8 border border-[#c4c7c7]/30 bg-[#fafafa] px-6 py-5">
-              <p className="text-[11px] tracking-[0.2em] text-[#747777] uppercase" style={headlineFont}>
-                Syncing auction state...
-              </p>
-            </section>
-          ) : null}
-
           <section
             ref={resultsRef}
             className={
@@ -820,7 +874,11 @@ const LiveAuctionPage = () => {
                 : 'grid grid-cols-1 gap-5'
             }
           >
-            {displayedLots.map((lot) => (
+            {isInitialLoading
+              ? skeletonLots.map((_, index) => (
+                  <AuctionLotCardSkeleton key={`auction-skeleton-${index}`} viewMode={effectiveViewMode} />
+                ))
+              : displayedLots.map((lot) => (
               <article
                 key={lot.artworkId}
                 className={`group border border-[#e5e7eb] bg-white p-3 transition-all duration-300 hover:border-black hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.1)] md:p-4 ${
@@ -946,10 +1004,10 @@ const LiveAuctionPage = () => {
                   </div>
                 </div>
               </article>
-            ))}
+                ))}
           </section>
 
-          {visibleLots.length === 0 ? (
+          {!isInitialLoading && visibleLots.length === 0 ? (
             <section className="mt-12 border border-[#c4c7c7]/30 bg-[#fafafa] px-6 py-10 text-center">
               <p className="text-sm tracking-[0.14em] text-black uppercase" style={headlineFont}>
                 No live auctions match your filters.
@@ -1247,11 +1305,11 @@ const LiveAuctionPage = () => {
         ) : null}
 
         <BidEditingModal
-          key={selectedBidLot?.artworkId ?? 'bid-modal-closed'}
-          lot={selectedBidLot}
-          isOpen={Boolean(selectedBidLot)}
+          key={activeSelectedBidLot?.artworkId ?? 'bid-modal-closed'}
+          lot={activeSelectedBidLot}
+          isOpen={Boolean(activeSelectedBidLot)}
           onClose={() => setSelectedBidLot(null)}
-          onRefreshLot={refreshAuctionById}
+          onRefreshLot={refreshAuctionAndSelection}
           onViewOrderStatus={handleViewOrderStatus}
         />
 

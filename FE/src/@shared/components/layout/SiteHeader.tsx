@@ -7,6 +7,8 @@ import {
   DollarSign,
   FileText,
   ImagePlus,
+  Loader2,
+  LogOut,
   Menu,
   Plus,
   Search,
@@ -62,6 +64,8 @@ type SiteHeaderProps = {
 export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
+  const logout = useAuthStore((state) => state.logout)
+  const isLoggingOut = useAuthStore((state) => state.isLoggingOut)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -109,7 +113,6 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   )
   const isSearchVisible = shouldShowSearch && isSearchOpen
   const isLandingVariant = variant === 'landing'
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 16)
@@ -499,69 +502,103 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                   <Menu className="h-5 w-5" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] p-2">
+              <DropdownMenuContent
+                align="end"
+                sideOffset={12}
+                className="w-[min(calc(100vw-2rem),420px)] rounded-[28px]! border border-slate-200 bg-white p-3 shadow-[0_24px_60px_rgba(15,23,42,0.16)]"
+              >
                 {user ? (
                   <>
+                    <div className="mb-3 rounded-[24px] border border-slate-200 bg-[#F7F8FA] p-4">
+                      <div className="flex items-center gap-3">
+                        <Image
+                          src={avatarUrl}
+                          alt={profileLabel}
+                          width={44}
+                          height={44}
+                          className="h-11 w-11 rounded-full border border-white object-cover shadow-sm"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-slate-900">
+                            @{profileLabel}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs font-medium text-slate-500">
+                            {walletLabel ??
+                              (isWalletLocalEmail(user.email) ? 'Artium account' : user.email)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                     <DropdownMenuItem
-                      onClick={() => {
-                        router.push('/artist/invoices/create')
+                      onSelect={() => {
+                        void router.push('/artist/invoices/create')
                         setIsMobileMenuOpen(false)
                       }}
-                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      className="mb-2 flex cursor-pointer items-center gap-3 rounded-[18px]! bg-blue-600 p-3 text-white transition hover:bg-blue-700 focus:bg-blue-700"
                     >
-                      <DollarSign className="h-5 w-5 text-slate-700" />
-                      <span className="font-semibold text-slate-900">Quick Sell</span>
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15">
+                        <DollarSign className="h-5 w-5" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold">Quick Sell</span>
+                        <span className="block text-xs font-medium text-white/75">
+                          Create an invoice for a buyer
+                        </span>
+                      </span>
                     </DropdownMenuItem>
+                    <div className="grid gap-2">
+                      {createMenuItems.map((item) => {
+                        const Icon = item.icon
+                        return (
+                          <DropdownMenuItem
+                            key={item.title}
+                            onSelect={() => {
+                              if (item.action) {
+                                item.action()
+                              } else if (item.href) {
+                                void router.push(item.href)
+                              }
+                              setIsMobileMenuOpen(false)
+                            }}
+                            className="flex cursor-pointer items-start gap-3 rounded-[18px]! border border-slate-200 bg-white p-3 text-left shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:bg-slate-50"
+                          >
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                              <Icon className="h-5 w-5" />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold text-slate-900">
+                                {item.title}
+                              </span>
+                              <span className="mt-0.5 line-clamp-2 block text-xs leading-5 font-medium text-slate-500">
+                                {item.description}
+                              </span>
+                            </span>
+                          </DropdownMenuItem>
+                        )
+                      })}
+                    </div>
+                    <DropdownMenuSeparator className="my-3 bg-slate-200" />
+                    <div className="grid grid-cols-2 gap-2">
+                      {navLinks.map((link) => (
+                        <DropdownMenuItem
+                          key={link.href}
+                          onSelect={() => {
+                            void router.push(link.href)
+                            setIsMobileMenuOpen(false)
+                          }}
+                          className="flex cursor-pointer justify-center rounded-full bg-slate-100 px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 focus:bg-slate-200"
+                        >
+                          {link.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                    <DropdownMenuSeparator className="my-3 bg-slate-200" />
                     <DropdownMenuItem
-                      onClick={() => {
-                        router.push('/artworks/upload')
-                        setIsMobileMenuOpen(false)
-                      }}
-                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
-                    >
-                      <ImagePlus className="h-5 w-5 text-slate-700" />
-                      <span className="font-semibold text-slate-900">Upload Inventory</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setIsPostMomentModalOpen(true)
-                        setIsMobileMenuOpen(false)
-                      }}
-                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
-                    >
-                      <Video className="h-5 w-5 text-slate-700" />
-                      <span className="font-semibold text-slate-900">Post a Moment</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        router.push('/artist/invoices/create')
-                        setIsMobileMenuOpen(false)
-                      }}
-                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
-                    >
-                      <FileText className="h-5 w-5 text-slate-700" />
-                      <span className="font-semibold text-slate-900">Create Invoice</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="my-1" />
-                    {navLinks.map((link) => (
-                      <DropdownMenuItem
-                        key={link.href}
-                        onClick={() => {
-                          router.push(link.href)
-                          setIsMobileMenuOpen(false)
-                        }}
-                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
-                      >
-                        {link.label}
-                      </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator className="my-1" />
-                    <DropdownMenuItem
-                      onClick={() => {
+                      onSelect={() => {
                         // TODO: Implement notifications navigation/action
                         setIsMobileMenuOpen(false)
                       }}
-                      className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                      className="flex cursor-pointer items-center gap-3 rounded-[18px]! p-3"
                     >
                       <Bell className="h-5 w-5 text-slate-700" />
                       <span className="font-semibold text-slate-900">Notifications</span>
@@ -570,44 +607,72 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                       <Link
                         href={`/profile/${encodeURIComponent(profileHandle)}`}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                        className="flex cursor-pointer items-center gap-3 rounded-[18px]! p-3"
                       >
                         <User className="h-5 w-5 text-slate-700" />
                         <span className="font-semibold text-slate-900">@{profileLabel}</span>
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator className="my-2 bg-slate-200" />
+                    <DropdownMenuItem
+                      disabled={isLoggingOut}
+                      onSelect={() => {
+                        setIsMobileMenuOpen(false)
+                        void logout()
+                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-[18px]! p-3 text-rose-700 focus:bg-rose-50 focus:text-rose-700 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60"
+                    >
+                      {isLoggingOut ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <LogOut className="h-5 w-5" />
+                      )}
+                      <span className="font-semibold">
+                        {isLoggingOut ? 'Signing out...' : 'Logout'}
+                      </span>
+                    </DropdownMenuItem>
                   </>
                 ) : (
                   <>
-                    {navLinks.map((link) => (
-                      <DropdownMenuItem
-                        key={link.href}
-                        onClick={() => {
-                          router.push(link.href)
-                          setIsMobileMenuOpen(false)
-                        }}
-                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
-                      >
-                        {link.label}
-                      </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator className="my-1" />
+                    <div className="mb-3 rounded-[24px] border border-slate-200 bg-[#F7F8FA] p-4">
+                      <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                        Explore Artium
+                      </p>
+                      <p className="mt-2 text-sm leading-6 font-medium text-slate-600">
+                        Discover artists, live auctions, and editorial stories.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {navLinks.map((link) => (
+                        <DropdownMenuItem
+                          key={link.href}
+                          onSelect={() => {
+                            void router.push(link.href)
+                            setIsMobileMenuOpen(false)
+                          }}
+                          className="flex cursor-pointer justify-center rounded-full bg-slate-100 px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 focus:bg-slate-200"
+                        >
+                          {link.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                    <DropdownMenuSeparator className="my-3 bg-slate-200" />
                     <DropdownMenuItem asChild>
                       <Link
                         href="/login"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                        className="flex cursor-pointer items-center justify-center rounded-full border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-900"
                       >
-                        <span className="font-semibold text-slate-900">Login</span>
+                        Login
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
                         href="/"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex cursor-pointer items-center gap-3 rounded-xl p-3"
+                        className="mt-2 flex cursor-pointer items-center justify-center rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white"
                       >
-                        <span className="font-semibold text-slate-900">Get Started</span>
+                        Get Started
                       </Link>
                     </DropdownMenuItem>
                   </>

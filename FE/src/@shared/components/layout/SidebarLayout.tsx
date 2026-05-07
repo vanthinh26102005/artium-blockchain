@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
+import { useState } from 'react'
 import { SideBar } from '@shared/components/display/SideBar'
 import { AppLayout } from '@shared/components/layout/AppLayout'
 
@@ -8,9 +9,21 @@ interface SidebarLayoutProps {
 }
 
 export const SidebarLayout = ({ children, hideFooter = false }: SidebarLayoutProps) => {
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true)
+
   return (
-    <div className="relative">
-      <SideBar />
+    <div
+      className="relative"
+      style={
+        {
+          '--sidebar-width': isSidebarExpanded ? '300px' : '84px',
+        } as CSSProperties
+      }
+    >
+      <SideBar
+        isExpanded={isSidebarExpanded}
+        onToggle={() => setIsSidebarExpanded((expanded) => !expanded)}
+      />
       <div className="sidebar-layout">
         <AppLayout hideFooter={hideFooter}>{children}</AppLayout>
       </div>
@@ -19,9 +32,12 @@ export const SidebarLayout = ({ children, hideFooter = false }: SidebarLayoutPro
           .sidebar-layout
             .app-layout
             > main${hideFooter ? '' : ',\n          .sidebar-layout .app-layout > footer'} {
-            margin-left: 300px;
-            width: calc(100% - 300px);
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
             transform: translateZ(0);
+            transition:
+              margin-left 240ms ease,
+              width 240ms ease;
           }
         }
       `}</style>
