@@ -1,4 +1,4 @@
-import { apiFetch, encodePathSegment, withQuery } from '@shared/services/apiClient'
+import { apiFetch, encodePathSegment, withQuery, type ApiFetchOptions } from '@shared/services/apiClient'
 
 type SellerProfilePayload = {
   profileId?: string // DTO field name
@@ -258,10 +258,12 @@ export const profileApis = {
   listUserMoments: (
     userId: string,
     options?: { skip?: number; take?: number; includeArchived?: boolean },
+    requestOptions?: ApiFetchOptions,
   ) =>
     apiFetch<MomentApiItem[]>(
       withQuery(`/community/moments/user/${encodePathSegment(userId)}`, options),
       {
+        ...requestOptions,
         auth: false,
         cache: 'no-store',
       },
@@ -358,10 +360,15 @@ export const profileApis = {
         auth: true,
       },
     ),
-  searchSellerProfiles: (searchQuery: string, options?: { skip?: number; take?: number }) =>
+  searchSellerProfiles: (
+    searchQuery: string,
+    options?: { skip?: number; take?: number },
+    requestOptions?: ApiFetchOptions,
+  ) =>
     apiFetch<SearchSellerProfilesResponse>(
       withQuery('/identity/seller-profiles', { searchQuery, ...options }),
       {
+        ...requestOptions,
         auth: false,
         cache: 'no-store',
       },

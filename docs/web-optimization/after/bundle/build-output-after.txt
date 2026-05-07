@@ -1,0 +1,84 @@
+
+> artium-web@0.1.0 build
+> next build
+
+▲ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+
+  Running TypeScript ...
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.6s
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/174) ...
+  Generating static pages using 7 workers (43/174) 
+  Generating static pages using 7 workers (86/174) 
+  Generating static pages using 7 workers (130/174) 
+✓ Generating static pages using 7 workers (174/174) in 290.3ms
+  Finalizing page optimization ...
+
+Route (pages)
+┌ ○ /
+├   /_app
+├ ○ /404
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/hello
+├ ○ /artist-management
+├ ○ /artist/auctions/create
+├ ○ /artist/invoices
+├ ○ /artist/invoices/checkout/[invoiceCode]
+├ ○ /artist/invoices/create
+├ ○ /artist/invoices/edit/[id]
+├ ○ /artworks/[id]
+├ ○ /artworks/upload
+├ ○ /auction
+├ ○ /checkout/[artworkId]
+├ ○ /contact-management
+├ ○ /custom-website
+├ ○ /discover
+├ ○ /editorial
+├ ● /editorial/[id] (5624 ms)
+│ ├ /editorial/editorial-san-francisco-galleries
+│ ├ /editorial/editorial-young-collectors
+│ ├ /editorial/editorial-studio-visit-oakland
+│ └ [+118 more paths]
+├ ○ /events
+├ ○ /events/[id]
+├ ○ /events/[id]/guests
+├ ○ /forgot-password
+├ ○ /homepage
+├ ○ /homepage/[section]
+├ ○ /homepage/events/[id]
+├ ○ /homepage/events/[id]/guests
+├ ○ /inventory
+├ ○ /inventory/folder/[folderId]
+├ ○ /login
+├ ○ /manage-plan
+├ ○ /marketing-email
+├ ○ /messages
+├ ○ /orders
+├ ○ /orders/[orderId]
+├ ○ /orders/on-chain/[onChainOrderId]
+├ ○ /portfolio
+├ ○ /portfolio/[username]
+├ ○ /pricing
+├ ○ /private-views
+├ ○ /profile/[username]
+├ ○ /profile/[username]/artworks
+├ ○ /profile/[username]/edit
+├ ○ /profile/[username]/moments
+├ ○ /profile/[username]/moments/[id]
+├ ○ /profile/[username]/moodboards
+├ ○ /profile/[username]/moodboards/[id]
+├ ○ /promotions
+├ ○ /refer-and-earn
+├ ○ /reset-password
+├ ○ /sales/records
+├ ○ /sales/transactions
+├ ○ /seller/register
+├ ○ /sign-up
+└ ○ /templates/preview/[id]
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses getStaticProps)
+ƒ  (Dynamic)  server-rendered on demand
+

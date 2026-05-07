@@ -1,0 +1,24 @@
+RPC baseline status: manual console evidence captured
+Generated at: 2026-05-07T10:43:55.469Z
+Updated from user-provided console screenshot after wallet checkout attempt.
+
+Automated RPC count was not captured because this CLI/headless Chrome environment does not have MetaMask or a funded Sepolia wallet.
+
+Manual wallet checkout evidence:
+- User opened the checkout wallet flow in a browser profile with MetaMask.
+- The flow reached MetaMask transaction signature.
+- User cancelled/rejected the transaction because the wallet did not have enough funds.
+- Console showed: "MetaMask - RPC Error: MetaMask Tx Signature: User denied transaction signature."
+- This confirms the before-state UX reaches MetaMask signing but reports the rejection only through console/error flow.
+
+Expected methods to count:
+- eth_accounts
+- eth_chainId
+- eth_requestAccounts
+- wallet_switchEthereumChain
+- wallet_addEthereumChain
+- eth_sendTransaction
+
+Screenshot evidence:
+- User-provided console screenshot in chat, showing the MetaMask RPC rejection.
+- Existing screenshot file from prior evidence set: docs/web-optimization/before/RPC_Call_Checkout_Flow.png

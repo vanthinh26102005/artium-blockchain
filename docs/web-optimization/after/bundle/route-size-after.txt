@@ -1,0 +1,7 @@
+# Route Asset Size - After
+
+| Route | Files | Raw size |
+|---|---:|---:|
+| /_app | 16 | 811.5 KiB |
+| /discover | 14 | 608.0 KiB |
+| /checkout/[artworkId] | 5 | 344.6 KiB |

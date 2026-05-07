@@ -4,6 +4,8 @@ import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 type ApiFetchOptions = RequestInit & {
   auth?: boolean
   baseUrl?: string
+  dedupe?: boolean
+  clientCacheTtlMs?: number
 }
 
 export type ApiQueryPrimitive = string | number | boolean
@@ -42,6 +44,8 @@ export type ApiUploadError = Error & {
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '')
 const DEFAULT_UPLOAD_TIMEOUT_MS = 60000
+const clientResponseCache = new Map<string, { expiresAt: number; data: unknown }>()
+const inflightClientRequests = new Map<string, Promise<unknown>>()
 
 export const buildApiUrl = (path: string, baseUrl?: string) => {
   const resolvedBaseUrl = (baseUrl ?? API_BASE_URL).replace(/\/$/, '')
@@ -157,46 +161,144 @@ const createUploadError = (
   return error
 }
 
+const isCacheableClientRequest = (
+  method: string,
+  body: BodyInit | null | undefined,
+  clientCacheTtlMs?: number,
+  dedupe?: boolean,
+) =>
+  typeof window !== 'undefined' &&
+  method === 'GET' &&
+  !body &&
+  (Boolean(dedupe) || Boolean(clientCacheTtlMs && clientCacheTtlMs > 0))
+
+const buildClientCacheKey = (method: string, url: string, authToken?: string) =>
+  `${method}:${url}:${authToken ?? ''}`
+
+const createAbortError = () => {
+  const error = new Error('The operation was aborted.')
+  error.name = 'AbortError'
+  return error
+}
+
+const withAbortSignal = <T>(
+  promise: Promise<T>,
+  signal?: AbortSignal | null,
+): Promise<T> => {
+  if (!signal) {
+    return promise
+  }
+
+  if (signal.aborted) {
+    return Promise.reject(createAbortError())
+  }
+
+  return new Promise((resolve, reject) => {
+    const abortHandler = () => {
+      signal.removeEventListener('abort', abortHandler)
+      reject(createAbortError())
+    }
+
+    signal.addEventListener('abort', abortHandler, { once: true })
+    promise.then(
+      (value) => {
+        signal.removeEventListener('abort', abortHandler)
+        resolve(value)
+      },
+      (error) => {
+        signal.removeEventListener('abort', abortHandler)
+        reject(error)
+      },
+    )
+  })
+}
+
 export const apiFetch = async <T>(path: string, options?: ApiFetchOptions): Promise<T> => {
-  const { auth = true, baseUrl, ...init } = options ?? {}
+  const { auth = true, baseUrl, dedupe, clientCacheTtlMs, ...init } = options ?? {}
   const headers = resolveHeaders(init.headers)
+  const method = (init.method ?? 'GET').toUpperCase()
 
   if (isJsonBody(init.body) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
 
+  let authToken: string | undefined
   if (auth) {
     ensureAuthHydrated()
     const { accessToken } = useAuthStore.getState()
     if (accessToken) {
+      authToken = accessToken
       headers.set('Authorization', `Bearer ${accessToken}`)
     }
   }
 
-  const response = await fetch(buildApiUrl(path, baseUrl), {
-    ...init,
-    headers,
-  })
+  const url = buildApiUrl(path, baseUrl)
+  const canUseClientCache = isCacheableClientRequest(method, init.body, clientCacheTtlMs, dedupe)
+  const clientCacheKey = canUseClientCache ? buildClientCacheKey(method, url, authToken) : null
+  const now = Date.now()
 
-  const contentType = response.headers.get('content-type') ?? ''
-  const bodyText = response.status === 204 ? '' : await response.text()
-  const data = parseResponseBody(bodyText, contentType)
-
-  if (!response.ok) {
-    const message = getErrorMessage(data, response.statusText || 'Request failed')
-    const error = new Error(message) as ApiError
-    error.status = response.status
-    error.data = data
-    error.headers = response.headers
-
-    if (auth && (response.status === 401 || response.status === 403)) {
-      useAuthStore.getState().clearAuth()
+  if (clientCacheKey && clientCacheTtlMs && clientCacheTtlMs > 0) {
+    const cached = clientResponseCache.get(clientCacheKey)
+    if (cached && cached.expiresAt > now) {
+      return cached.data as T
     }
-
-    throw error
+    if (cached) {
+      clientResponseCache.delete(clientCacheKey)
+    }
   }
 
-  return data as T
+  if (clientCacheKey && dedupe) {
+    const inflight = inflightClientRequests.get(clientCacheKey)
+    if (inflight) {
+      return withAbortSignal(inflight as Promise<T>, init.signal)
+    }
+  }
+
+  const requestPromise = (async () => {
+    const fetchInit = clientCacheKey && dedupe ? { ...init, signal: undefined } : init
+    const response = await fetch(url, {
+      ...fetchInit,
+      method,
+      headers,
+    })
+
+    const contentType = response.headers.get('content-type') ?? ''
+    const bodyText = response.status === 204 ? '' : await response.text()
+    const data = parseResponseBody(bodyText, contentType)
+
+    if (!response.ok) {
+      const message = getErrorMessage(data, response.statusText || 'Request failed')
+      const error = new Error(message) as ApiError
+      error.status = response.status
+      error.data = data
+      error.headers = response.headers
+
+      if (auth && (response.status === 401 || response.status === 403)) {
+        useAuthStore.getState().clearAuth()
+      }
+
+      throw error
+    }
+
+    if (clientCacheKey && clientCacheTtlMs && clientCacheTtlMs > 0) {
+      clientResponseCache.set(clientCacheKey, {
+        expiresAt: Date.now() + clientCacheTtlMs,
+        data,
+      })
+    }
+
+    return data as T
+  })()
+
+  if (clientCacheKey && dedupe) {
+    inflightClientRequests.set(clientCacheKey, requestPromise)
+    requestPromise.then(
+      () => inflightClientRequests.delete(clientCacheKey),
+      () => inflightClientRequests.delete(clientCacheKey),
+    )
+  }
+
+  return withAbortSignal(requestPromise, init.signal)
 }
 
 export const apiUpload = async <T>(

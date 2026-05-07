@@ -1,5 +1,5 @@
 // react
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 
 // third-party
 import { Masonry } from 'masonic'
@@ -21,6 +21,12 @@ type ArtworksGridProps = {
   onExitImageSearch: () => void
 }
 
+const DISCOVER_CLIENT_CACHE_OPTIONS = {
+  auth: false,
+  dedupe: true,
+  clientCacheTtlMs: 30000,
+}
+
 const MasonryCard = ({ data }: { data: DiscoverArtwork }) => {
   return <DiscoveryArtworkCard artwork={data} />
 }
@@ -28,13 +34,19 @@ const MasonryCard = ({ data }: { data: DiscoverArtwork }) => {
 export const ArtworksGrid = ({ searchQuery = '', isImageSearch, onExitImageSearch }: ArtworksGridProps) => {
   // -- fetch --
   const fetchPage = useCallback(
-    async (skip: number, take: number) => {
-      const result = await artworkApis.listArtworksPaginated({
-        skip,
-        take,
-        q: searchQuery || undefined,
-        status: 'ACTIVE',
-      })
+    async (skip: number, take: number, signal?: AbortSignal) => {
+      const result = await artworkApis.listArtworksPaginated(
+        {
+          skip,
+          take,
+          q: searchQuery || undefined,
+          status: 'ACTIVE',
+        },
+        {
+          ...DISCOVER_CLIENT_CACHE_OPTIONS,
+          signal,
+        },
+      )
       return {
         data: result.data.map(mapArtworkToDiscover),
         hasMore: result.pagination.hasNext,
@@ -122,4 +134,3 @@ export const ArtworksGrid = ({ searchQuery = '', isImageSearch, onExitImageSearc
     </div>
   )
 }
-

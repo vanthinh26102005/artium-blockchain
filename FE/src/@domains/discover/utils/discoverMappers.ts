@@ -14,29 +14,42 @@ import type { TopPicksArtwork } from '@domains/discover/mock/mockTopPicksArtwork
 // Artwork → DiscoverArtwork
 // ---------------------------------------------------------------------------
 
+const FALLBACK_ARTWORK_IMAGE = 'https://placehold.co/640x480/f1f5f9/64748b.png?text=Artwork'
+
 const resolveArtworkImage = (artwork: ArtworkApiItem): string => {
   if (artwork.thumbnailUrl) return artwork.thumbnailUrl
   const firstImage = artwork.images?.[0]
-  return firstImage?.secureUrl || firstImage?.url || '/images/placeholder-artwork.jpg'
+  return firstImage?.secureUrl || firstImage?.url || FALLBACK_ARTWORK_IMAGE
 }
 
-export const mapArtworkToDiscover = (artwork: ArtworkApiItem): DiscoverArtwork => ({
-  id: artwork.id,
-  title: artwork.title,
-  price: typeof artwork.price === 'string' ? parseFloat(artwork.price) || 0 : artwork.price ?? 0,
-  isSold: artwork.status === 'SOLD',
-  statusLabel: undefined,
-  imageMedium: resolveArtworkImage(artwork),
-  imageSmall: resolveArtworkImage(artwork),
-  imageMediumWidth: artwork.dimensions?.width ?? 640,
-  imageMediumHeight: artwork.dimensions?.height ?? 480,
-  creator: {
-    id: artwork.sellerId,
-    username: artwork.creatorName ?? 'Artist',
-    fullName: artwork.creatorName ?? 'Artist',
-    coverImage: undefined,
-  },
-})
+const resolveArtworkImageSize = (artwork: ArtworkApiItem) => {
+  const firstImage = artwork.images?.[0]
+  return {
+    width: firstImage?.width ?? 640,
+    height: firstImage?.height ?? 480,
+  }
+}
+
+export const mapArtworkToDiscover = (artwork: ArtworkApiItem): DiscoverArtwork => {
+  const imageSize = resolveArtworkImageSize(artwork)
+  return {
+    id: artwork.id,
+    title: artwork.title,
+    price: typeof artwork.price === 'string' ? parseFloat(artwork.price) || 0 : artwork.price ?? 0,
+    isSold: artwork.status === 'SOLD',
+    statusLabel: undefined,
+    imageMedium: resolveArtworkImage(artwork),
+    imageSmall: resolveArtworkImage(artwork),
+    imageMediumWidth: imageSize.width,
+    imageMediumHeight: imageSize.height,
+    creator: {
+      id: artwork.sellerId,
+      username: artwork.creatorName ?? 'Artist',
+      fullName: artwork.creatorName ?? 'Artist',
+      coverImage: undefined,
+    },
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Artwork → TopPicksArtwork
@@ -45,13 +58,15 @@ export const mapArtworkToDiscover = (artwork: ArtworkApiItem): DiscoverArtwork =
 export const mapArtworkToTopPick = (artwork: ArtworkApiItem): TopPicksArtwork => {
   const price =
     typeof artwork.price === 'string' ? parseFloat(artwork.price) || 0 : artwork.price ?? 0
+  const imageSize = resolveArtworkImageSize(artwork)
+  const imageHeight = Math.round((imageSize.height / Math.max(imageSize.width, 1)) * 160)
   return {
     id: artwork.id,
     title: artwork.title,
     username: artwork.creatorName ?? 'Artist',
     avatarUrl: undefined,
     imageUrl: resolveArtworkImage(artwork),
-    height: 200 + Math.floor(Math.random() * 80),
+    height: Math.min(280, Math.max(160, imageHeight)),
     badges: {
       price: price > 0 ? `$${price.toLocaleString()}` : undefined,
     },

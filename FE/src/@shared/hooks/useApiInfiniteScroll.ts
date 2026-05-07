@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 interface UseApiInfiniteScrollProps<T> {
-  fetchPage: (skip: number, take: number) => Promise<{ data: T[]; hasMore: boolean }>
+  fetchPage: (
+    skip: number,
+    take: number,
+    signal?: AbortSignal,
+  ) => Promise<{ data: T[]; hasMore: boolean }>
   pageSize?: number
   searchQuery?: string
 }
@@ -18,20 +22,25 @@ export const useApiInfiniteScroll = <T>({
 
   const skipRef = useRef(0)
   const isFetchingRef = useRef(false)
-  const searchQueryRef = useRef(searchQuery)
+  const requestSeqRef = useRef(0)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const fetchData = useCallback(
     async (skip: number, append: boolean) => {
       if (isFetchingRef.current) return
+      const requestSeq = requestSeqRef.current + 1
+      requestSeqRef.current = requestSeq
+      abortControllerRef.current?.abort()
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
       isFetchingRef.current = true
       setIsLoading(true)
       setError(null)
 
       try {
-        const result = await fetchPage(skip, pageSize)
+        const result = await fetchPage(skip, pageSize, abortController.signal)
 
-        // Discard stale responses after a reset
-        if (!append && skip !== 0) {
+        if (abortController.signal.aborted || requestSeq !== requestSeqRef.current) {
           return
         }
 
@@ -39,10 +48,18 @@ export const useApiInfiniteScroll = <T>({
         setHasMore(result.hasMore)
         skipRef.current = skip + result.data.length
       } catch (err) {
+        if (abortController.signal.aborted || requestSeq !== requestSeqRef.current) {
+          return
+        }
         setError(err instanceof Error ? err : new Error('Failed to fetch'))
       } finally {
-        setIsLoading(false)
-        isFetchingRef.current = false
+        if (requestSeq === requestSeqRef.current) {
+          setIsLoading(false)
+          isFetchingRef.current = false
+          if (abortControllerRef.current === abortController) {
+            abortControllerRef.current = null
+          }
+        }
       }
     },
     [fetchPage, pageSize],
@@ -57,19 +74,20 @@ export const useApiInfiniteScroll = <T>({
     fetchData(0, false)
   }, [fetchData])
 
-  // Initial load
   useEffect(() => {
+    skipRef.current = 0
+    isFetchingRef.current = false
+    setDisplayedItems([])
+    setHasMore(true)
+    setError(null)
     fetchData(0, false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Reset when searchQuery changes
-  useEffect(() => {
-    if (searchQueryRef.current !== searchQuery) {
-      searchQueryRef.current = searchQuery
-      reset()
+    return () => {
+      requestSeqRef.current += 1
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = null
+      isFetchingRef.current = false
     }
-  }, [searchQuery, reset])
+  }, [fetchData, searchQuery])
 
   const loadMore = useCallback(() => {
     if (isLoading || !hasMore) return

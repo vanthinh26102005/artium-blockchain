@@ -9,22 +9,50 @@ import { useRouter } from 'next/router'
 import { Metadata } from '@/components/SEO/Metadata'
 
 // @domains - discover
-import { ArtworksGrid } from '@domains/discover/components/artworks/ArtworksGrid'
 import { DiscoverTabs } from '@domains/discover/components/DiscoverTabs'
 import { DiscoverToolbar } from '@domains/discover/components/DiscoverToolbar'
-import { EventsGrid } from '@domains/discover/components/events/EventsGrid'
-import { InspireGrid } from '@domains/discover/components/inspire/InspireGrid'
-import { MomentsGrid } from '@domains/discover/components/moments/MomentsGrid'
-import { ProfilesGrid } from '@domains/discover/components/profiles/ProfilesGrid'
 import { DISCOVER_TABS, type DiscoverTabKey } from '@domains/discover/constants/discoverTabs'
 import { useDiscoverState } from '@domains/discover/state/useDiscoverState'
+
+// @shared
+import { useDebounce } from '@shared/hooks/useDebounce'
+
+const DiscoverTabLoading = () => (
+  <section
+    className="mt-6 min-h-[560px] rounded-2xl bg-slate-50"
+    aria-label="Loading discover tab"
+  />
+)
 
 const TopPicksMasonry = dynamic(
   () =>
     import('@domains/discover/components/topPicks/TopPicksMasonry').then(
       (mod) => mod.TopPicksMasonry,
     ),
-  { ssr: false },
+  { ssr: false, loading: DiscoverTabLoading },
+)
+const ArtworksGrid = dynamic(
+  () =>
+    import('@domains/discover/components/artworks/ArtworksGrid').then((mod) => mod.ArtworksGrid),
+  { ssr: false, loading: DiscoverTabLoading },
+)
+const ProfilesGrid = dynamic(
+  () =>
+    import('@domains/discover/components/profiles/ProfilesGrid').then((mod) => mod.ProfilesGrid),
+  { ssr: false, loading: DiscoverTabLoading },
+)
+const MomentsGrid = dynamic(
+  () =>
+    import('@domains/discover/components/moments/MomentsGrid').then((mod) => mod.MomentsGrid),
+  { ssr: false, loading: DiscoverTabLoading },
+)
+const EventsGrid = dynamic(
+  () => import('@domains/discover/components/events/EventsGrid').then((mod) => mod.EventsGrid),
+  { ssr: false, loading: DiscoverTabLoading },
+)
+const InspireGrid = dynamic(
+  () => import('@domains/discover/components/inspire/InspireGrid').then((mod) => mod.InspireGrid),
+  { ssr: false, loading: DiscoverTabLoading },
 )
 
 const DEFAULT_TAB_KEY = DISCOVER_TABS[0].key
@@ -48,6 +76,7 @@ export const DiscoverPage = () => {
   const tabParam = typeof router.query.tab === 'string' ? router.query.tab : ''
   const activeTabKey = isValidTabKey(tabParam) ? tabParam : DEFAULT_TAB_KEY
   const activeTab = DISCOVER_TABS.find((tab) => tab.key === activeTabKey) ?? DISCOVER_TABS[0]
+  const debouncedSearchQuery = useDebounce(searchQuery, 350)
 
   // -- handlers --
   const handleTabChange = (nextTab: DiscoverTabKey) => {
@@ -111,14 +140,14 @@ export const DiscoverPage = () => {
         {activeTabKey === 'top-picks' ? (
           <>
             {/* top picks */}
-            <TopPicksMasonry searchQuery={searchQuery} />
+            <TopPicksMasonry searchQuery={debouncedSearchQuery} />
           </>
         ) : null}
         {activeTabKey === 'artworks' ? (
           <>
             {/* artworks */}
             <ArtworksGrid
-              searchQuery={searchQuery}
+              searchQuery={debouncedSearchQuery}
               isImageSearch={isImageSearch}
               onExitImageSearch={() => setIsImageSearch(false)}
             />
@@ -127,19 +156,19 @@ export const DiscoverPage = () => {
         {activeTabKey === 'profiles' ? (
           <>
             {/* profiles */}
-            <ProfilesGrid searchQuery={searchQuery} />
+            <ProfilesGrid searchQuery={debouncedSearchQuery} />
           </>
         ) : null}
         {activeTabKey === 'moments' ? (
           <>
             {/* moments */}
-            <MomentsGrid searchQuery={searchQuery} />
+            <MomentsGrid searchQuery={debouncedSearchQuery} />
           </>
         ) : null}
         {activeTabKey === 'events' ? (
           <>
             {/* events */}
-            <EventsGrid searchQuery={searchQuery} />
+            <EventsGrid searchQuery={debouncedSearchQuery} />
           </>
         ) : null}
         {activeTabKey === 'get-inspired' ? (

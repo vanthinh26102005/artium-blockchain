@@ -1,0 +1,23 @@
+# RPC Count After
+
+Captured at: 2026-05-07T15:32:34.968Z
+URL: http://localhost:3000/checkout/477a93ea-b6b0-4e32-8122-2bfca3666c50
+Method: Chrome/CDP injected mock `window.ethereum` provider before app scripts.
+
+## Automated checkpoint: checkout first load before selecting wallet
+Total window.ethereum.request calls: 0
+
+| Method | Count |
+|---|---:|
+| none | 0 |
+
+Result: no wallet RPC calls were made during checkout first load before the wallet payment section is enabled.
+
+## Manual MetaMask checkpoint
+Not captured automatically in this run. To complete wallet rejection evidence, open Chrome with MetaMask, select wallet, connect, click Pay Now, cancel/reject the transaction, then save the console/UI screenshot in this folder.
+Expected after behavior: rejected/signature denied is shown as a clear retryable UI message instead of only a console error; form/order state is not unnecessarily reset.
+
+## Raw Calls
+```json
+[]
+```

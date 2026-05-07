@@ -248,6 +248,11 @@ export const WalletPaymentSection = ({
           {transactionError && (
             <div className="flex flex-col gap-2">
               <p className="text-[12px] text-red-500">{transactionError.message}</p>
+              {transactionError.canRetry && (
+                <p className="text-[12px] text-[#595959]">
+                  Use the main Pay Now button to retry when you are ready.
+                </p>
+              )}
             </div>
           )}
 

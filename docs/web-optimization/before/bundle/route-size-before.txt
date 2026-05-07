@@ -1,0 +1,33 @@
+Route asset size before optimization
+Generated at: 2026-05-07T10:38:58.352Z
+
+/_app: 810.5 KiB raw, 15 files
+  206.3 KiB static/chunks/6efc5eedaac049b5.css
+  205.6 KiB static/chunks/c10bc5e82a16990b.js
+  89.1 KiB static/chunks/ac17c2547e653071.js
+  35.5 KiB static/chunks/0bad28927eca0bef.js
+  34.0 KiB static/chunks/c7080fee71820be3.js
+  33.2 KiB static/chunks/b26bcb17201cf74c.js
+  33.0 KiB static/chunks/1f695d32818fe58c.js
+  31.7 KiB static/chunks/e60f94620298b222.js
+  30.7 KiB static/chunks/b03eed0f1e5ec0b7.js
+  29.4 KiB static/chunks/84de89c9b8269e6e.js
+
+/discover: 1039.0 KiB raw, 16 files
+  299.9 KiB static/chunks/116b138bd58c984e.js
+  205.6 KiB static/chunks/c10bc5e82a16990b.js
+  89.1 KiB static/chunks/ac17c2547e653071.js
+  68.3 KiB static/chunks/a9f2a1f61a346cca.js
+  56.9 KiB static/chunks/a5ef5315c837afcc.js
+  44.9 KiB static/chunks/68128357d6bdc204.js
+  36.9 KiB static/chunks/39f8839dc1697615.js
+  35.5 KiB static/chunks/0bad28927eca0bef.js
+  34.0 KiB static/chunks/c7080fee71820be3.js
+  29.4 KiB static/chunks/84de89c9b8269e6e.js
+
+/checkout/[artworkId]: 344.4 KiB raw, 4 files
+  205.6 KiB static/chunks/c10bc5e82a16990b.js
+  89.1 KiB static/chunks/ac17c2547e653071.js
+  39.8 KiB static/chunks/f93f0e0e96730616.js
+  10.0 KiB static/chunks/turbopack-9105f56232e25de2.js
+

@@ -12,6 +12,11 @@ import eventsApis from '@shared/apis/eventsApis'
 import { InfiniteScrollSentinel } from '@shared/components/ui/InfiniteScrollSentinel'
 
 const PAGE_SIZE = 8
+const DISCOVER_CLIENT_CACHE_OPTIONS = {
+  auth: false,
+  dedupe: true,
+  clientCacheTtlMs: 30000,
+}
 
 type EventsGridProps = {
   searchQuery?: string
@@ -31,8 +36,13 @@ export const EventsGrid = ({ searchQuery = '' }: EventsGridProps) => {
     setIsLoading(true)
     setError(null)
 
+    const abortController = new AbortController()
+
     eventsApis
-      .getDiscoverEvents()
+      .getDiscoverEvents({
+        ...DISCOVER_CLIENT_CACHE_OPTIONS,
+        signal: abortController.signal,
+      })
       .then((raw) => {
         if (cancelled) return
         const mapped = raw.map(mapEventToDiscover)
@@ -54,6 +64,7 @@ export const EventsGrid = ({ searchQuery = '' }: EventsGridProps) => {
 
     return () => {
       cancelled = true
+      abortController.abort()
     }
   }, [])
 
@@ -124,4 +135,3 @@ export const EventsGrid = ({ searchQuery = '' }: EventsGridProps) => {
     </section>
   )
 }
-

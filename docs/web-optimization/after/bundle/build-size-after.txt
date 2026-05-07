@@ -1,0 +1,3 @@
+# Build Size - After
+
+.next total raw size: 619233.3 KiB
