@@ -1,0 +1,949 @@
+{
+  "scenario": {
+    "name": "discover-first-load",
+    "url": "http://localhost:3000/discover",
+    "waitMs": 5000
+  },
+  "capturedAt": "2026-05-07T16:02:06.563Z",
+  "entries": [
+    {
+      "requestId": "80288C9E8976CB94FBBB7928CBD73FF9",
+      "url": "http://localhost:3000/discover",
+      "method": "GET",
+      "resourceType": "Document",
+      "timestamp": 214682.984989,
+      "status": 200,
+      "mimeType": "text/html",
+      "encodedDataLength": 3914,
+      "finishedTimestamp": 214682.997429
+    },
+    {
+      "requestId": "96566.2",
+      "url": "http://localhost:3000/_next/static/chunks/6efc5eedaac049b5.css",
+      "method": "GET",
+      "resourceType": "Stylesheet",
+      "timestamp": 214683.001877,
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedDataLength": 33524,
+      "finishedTimestamp": 214683.02606
+    },
+    {
+      "requestId": "96566.3",
+      "url": "http://localhost:3000/_next/static/chunks/a402fe71dd096062.css",
+      "method": "GET",
+      "resourceType": "Stylesheet",
+      "timestamp": 214683.002053,
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedDataLength": 2772,
+      "finishedTimestamp": 214683.018725
+    },
+    {
+      "requestId": "96566.4",
+      "url": "http://localhost:3000/_next/image?url=%2Fimages%2Flogo%2Flogo-and-text-light-mode.png&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214683.002099,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 4337,
+      "finishedTimestamp": 214683.023426
+    },
+    {
+      "requestId": "96566.7",
+      "url": "http://localhost:3000/_next/static/chunks/530aa546c076cea1.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002167,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 2885,
+      "finishedTimestamp": 214683.021945
+    },
+    {
+      "requestId": "96566.8",
+      "url": "http://localhost:3000/_next/static/chunks/e60f94620298b222.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002205,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 10513,
+      "finishedTimestamp": 214683.024175
+    },
+    {
+      "requestId": "96566.9",
+      "url": "http://localhost:3000/_next/static/chunks/662c551cf5a28423.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002487,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 8617,
+      "finishedTimestamp": 214683.02484
+    },
+    {
+      "requestId": "96566.10",
+      "url": "http://localhost:3000/_next/static/chunks/c767ca1719a393c0.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002514,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 10153,
+      "finishedTimestamp": 214683.025556
+    },
+    {
+      "requestId": "96566.11",
+      "url": "http://localhost:3000/_next/static/chunks/b82c59725a45e138.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002538,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 11347,
+      "finishedTimestamp": 214683.027933
+    },
+    {
+      "requestId": "96566.12",
+      "url": "http://localhost:3000/_next/static/chunks/c7080fee71820be3.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002561,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 10227,
+      "finishedTimestamp": 214683.029032
+    },
+    {
+      "requestId": "96566.13",
+      "url": "http://localhost:3000/_next/static/chunks/32b9ab6d10640bf6.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002579,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 9386,
+      "finishedTimestamp": 214683.030369
+    },
+    {
+      "requestId": "96566.14",
+      "url": "http://localhost:3000/_next/static/chunks/80583d056979f707.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.0026,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 14107,
+      "finishedTimestamp": 214683.030908
+    },
+    {
+      "requestId": "96566.15",
+      "url": "http://localhost:3000/_next/static/chunks/8fa68db2ce7f05f9.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002619,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 13404,
+      "finishedTimestamp": 214683.031174
+    },
+    {
+      "requestId": "96566.16",
+      "url": "http://localhost:3000/_next/static/chunks/c10bc5e82a16990b.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002635,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 66240,
+      "finishedTimestamp": 214683.038772
+    },
+    {
+      "requestId": "96566.17",
+      "url": "http://localhost:3000/_next/static/chunks/b592332370748137.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002661,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 11452,
+      "finishedTimestamp": 214683.033185
+    },
+    {
+      "requestId": "96566.18",
+      "url": "http://localhost:3000/_next/static/chunks/3c8442bcc66f8086.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002678,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 11812,
+      "finishedTimestamp": 214683.033683
+    },
+    {
+      "requestId": "96566.19",
+      "url": "http://localhost:3000/_next/static/chunks/85627286ad529dcb.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002702,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 11356,
+      "finishedTimestamp": 214683.033989
+    },
+    {
+      "requestId": "96566.20",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-628f5e8b5673972c.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002726,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 4600,
+      "finishedTimestamp": 214683.034191
+    },
+    {
+      "requestId": "96566.21",
+      "url": "http://localhost:3000/_next/static/chunks/082b2832a2956201.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002744,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 7388,
+      "finishedTimestamp": 214683.034523
+    },
+    {
+      "requestId": "96566.22",
+      "url": "http://localhost:3000/_next/static/chunks/2ca304f4840d69a8.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.00276,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 8616,
+      "finishedTimestamp": 214683.036867
+    },
+    {
+      "requestId": "96566.23",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-94d6f1b1fe273455.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002782,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 4569,
+      "finishedTimestamp": 214683.036275
+    },
+    {
+      "requestId": "96566.24",
+      "url": "http://localhost:3000/_next/static/4rja_Mx-CncliUv_CW39Q/_ssgManifest.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002805,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 453,
+      "finishedTimestamp": 214683.035832
+    },
+    {
+      "requestId": "96566.25",
+      "url": "http://localhost:3000/_next/static/4rja_Mx-CncliUv_CW39Q/_buildManifest.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.002824,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 1851,
+      "finishedTimestamp": 214683.037178
+    },
+    {
+      "requestId": "96566.61",
+      "url": "http://localhost:3000/fonts/ABCMonumentGrotesk-Regular-Trial.otf",
+      "method": "GET",
+      "resourceType": "Font",
+      "timestamp": 214683.040562,
+      "status": 200,
+      "mimeType": "font/otf",
+      "encodedDataLength": 64012,
+      "finishedTimestamp": 214683.068934
+    },
+    {
+      "requestId": "96566.55",
+      "url": "http://localhost:3000/images/social/dark-instagram.svg",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214683.054144,
+      "status": 200,
+      "mimeType": "image/svg+xml",
+      "encodedDataLength": 1979,
+      "finishedTimestamp": 214683.064096
+    },
+    {
+      "requestId": "96566.56",
+      "url": "http://localhost:3000/images/social/dark-x.svg",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214683.054233,
+      "status": 200,
+      "mimeType": "image/svg+xml",
+      "encodedDataLength": 876,
+      "finishedTimestamp": 214683.061482
+    },
+    {
+      "requestId": "96566.57",
+      "url": "http://localhost:3000/images/social/dark-tiktok.svg",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214683.054257,
+      "status": 200,
+      "mimeType": "image/svg+xml",
+      "encodedDataLength": 980,
+      "finishedTimestamp": 214683.063684
+    },
+    {
+      "requestId": "96566.58",
+      "url": "http://localhost:3000/images/social/dark-linkedin.svg",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214683.05428,
+      "status": 404,
+      "mimeType": "text/html",
+      "encodedDataLength": 12479,
+      "finishedTimestamp": 214683.087194
+    },
+    {
+      "requestId": "96566.59",
+      "url": "http://localhost:3000/_next/image?url=%2Fimages%2Fapp-store.png&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214683.054299,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 3896,
+      "finishedTimestamp": 214683.064772
+    },
+    {
+      "requestId": "96566.60",
+      "url": "http://localhost:3000/_next/image?url=%2Fimages%2Fgoogle-play-store.png&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214683.05432,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 3300,
+      "finishedTimestamp": 214683.065296
+    },
+    {
+      "requestId": "96566.69",
+      "url": "http://localhost:3000/_next/static/4rja_Mx-CncliUv_CW39Q/_clientMiddlewareManifest.json",
+      "method": "GET",
+      "resourceType": "Fetch",
+      "timestamp": 214683.090078,
+      "status": 200,
+      "mimeType": "application/json",
+      "encodedDataLength": 339,
+      "finishedTimestamp": 214683.091415
+    },
+    {
+      "requestId": "96566.70",
+      "url": "http://localhost:3000/_next/static/chunks/71c149081d504f04.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.1163,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 11901,
+      "finishedTimestamp": 214683.119738
+    },
+    {
+      "requestId": "96566.71",
+      "url": "http://localhost:3000/api/auth/session",
+      "method": "GET",
+      "resourceType": "Fetch",
+      "timestamp": 214683.123316,
+      "status": 200,
+      "mimeType": "application/json",
+      "encodedDataLength": 616,
+      "finishedTimestamp": 214683.138369
+    },
+    {
+      "requestId": "96566.72",
+      "url": "https://api.dgpthinh.io.vn/artwork?skip=0&take=18&status=ACTIVE&sortBy=likeCount&sortOrder=desc",
+      "method": "GET",
+      "resourceType": "Fetch",
+      "timestamp": 214683.134082,
+      "status": 200,
+      "mimeType": "application/json",
+      "encodedDataLength": 5239,
+      "finishedTimestamp": 214685.721786
+    },
+    {
+      "requestId": "96566.73",
+      "url": "http://localhost:3000/_next/static/chunks/528c4d194d8aa880.js",
+      "method": "GET",
+      "resourceType": "Other",
+      "timestamp": 214683.135258,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 1021,
+      "finishedTimestamp": 214683.738788
+    },
+    {
+      "requestId": "96566.74",
+      "url": "http://localhost:3000/_next/static/chunks/4c06481acdfc651b.js",
+      "method": "GET",
+      "resourceType": "Other",
+      "timestamp": 214683.135375,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 951,
+      "finishedTimestamp": 214683.742658
+    },
+    {
+      "requestId": "96566.75",
+      "url": "http://localhost:3000/_next/static/chunks/ee3d295ddbbd3083.js",
+      "method": "GET",
+      "resourceType": "Other",
+      "timestamp": 214683.135419,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 952,
+      "finishedTimestamp": 214683.745817
+    },
+    {
+      "requestId": "96566.76",
+      "url": "http://localhost:3000/_next/static/chunks/9684af583ab839bb.js",
+      "method": "GET",
+      "resourceType": "Other",
+      "timestamp": 214683.135461,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 950,
+      "finishedTimestamp": 214683.745889
+    },
+    {
+      "requestId": "96566.77",
+      "url": "http://localhost:3000/_next/static/chunks/45882c750ff2ceab.js",
+      "method": "GET",
+      "resourceType": "Other",
+      "timestamp": 214683.135597,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 1068,
+      "finishedTimestamp": 214683.746024
+    },
+    {
+      "requestId": "96566.78",
+      "url": "http://localhost:3000/images/logo/logo-dark-mode.png",
+      "method": "GET",
+      "resourceType": "Other",
+      "timestamp": 214683.135818,
+      "status": 200,
+      "mimeType": "image/png",
+      "encodedDataLength": 8113,
+      "finishedTimestamp": 214683.139447
+    },
+    {
+      "requestId": "96566.79",
+      "url": "http://localhost:3000/images/logo/logo-dark-mode.png",
+      "method": "GET",
+      "resourceType": "Other",
+      "timestamp": 214683.741074,
+      "status": 200,
+      "mimeType": "image/png",
+      "encodedDataLength": 243,
+      "finishedTimestamp": 214683.744962
+    },
+    {
+      "requestId": "96566.80",
+      "url": "http://localhost:3000/_next/static/chunks/528c4d194d8aa880.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.742761,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 214683.74507
+    },
+    {
+      "requestId": "96566.81",
+      "url": "http://localhost:3000/_next/static/chunks/30e7557c8ef8f0c3.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.746222,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 5018,
+      "finishedTimestamp": 214683.750887
+    },
+    {
+      "requestId": "96566.82",
+      "url": "http://localhost:3000/_next/static/chunks/004ab387573c48e2.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.746415,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 21841,
+      "finishedTimestamp": 214683.75675
+    },
+    {
+      "requestId": "96566.83",
+      "url": "http://localhost:3000/_next/static/chunks/7fa5fab8649ad717.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.746517,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 11451,
+      "finishedTimestamp": 214683.752015
+    },
+    {
+      "requestId": "96566.84",
+      "url": "http://localhost:3000/_next/static/chunks/4c159344361a0587.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.746592,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 26287,
+      "finishedTimestamp": 214683.75777
+    },
+    {
+      "requestId": "96566.85",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-dcc917187f61e658.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.74669,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 4600,
+      "finishedTimestamp": 214683.751493
+    },
+    {
+      "requestId": "96566.86",
+      "url": "http://localhost:3000/_next/static/chunks/ee3d295ddbbd3083.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.752632,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 214683.753553
+    },
+    {
+      "requestId": "96566.87",
+      "url": "http://localhost:3000/_next/static/chunks/9684af583ab839bb.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.75281,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 214683.753642
+    },
+    {
+      "requestId": "96566.88",
+      "url": "http://localhost:3000/_next/static/chunks/45882c750ff2ceab.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.752933,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 214683.754318
+    },
+    {
+      "requestId": "96566.89",
+      "url": "http://localhost:3000/_next/static/chunks/1a502e6d3ef8a7e7.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.754073,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 7289,
+      "finishedTimestamp": 214683.75924
+    },
+    {
+      "requestId": "96566.90",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-91d1e422fbc6dbab.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.754242,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 4569,
+      "finishedTimestamp": 214683.759639
+    },
+    {
+      "requestId": "96566.91",
+      "url": "http://localhost:3000/_next/static/chunks/2a39883d1d3f68a4.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.754706,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 6931,
+      "finishedTimestamp": 214683.760071
+    },
+    {
+      "requestId": "96566.92",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-e76b8ffca17d2a05.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.75489,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 4570,
+      "finishedTimestamp": 214683.760987
+    },
+    {
+      "requestId": "96566.93",
+      "url": "http://localhost:3000/_next/static/chunks/c4f4ff1d425b284d.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.755183,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 13198,
+      "finishedTimestamp": 214683.762897
+    },
+    {
+      "requestId": "96566.94",
+      "url": "http://localhost:3000/_next/static/chunks/9f97305e6127ba2e.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.755293,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 17874,
+      "finishedTimestamp": 214683.764808
+    },
+    {
+      "requestId": "96566.95",
+      "url": "http://localhost:3000/_next/static/chunks/cd7a8ee1b3b0b044.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.755371,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 17393,
+      "finishedTimestamp": 214683.764234
+    },
+    {
+      "requestId": "96566.96",
+      "url": "http://localhost:3000/_next/static/chunks/16ae1509bc5ae434.css",
+      "method": "GET",
+      "resourceType": "Stylesheet",
+      "timestamp": 214683.755477,
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedDataLength": 1093,
+      "finishedTimestamp": 214683.76149
+    },
+    {
+      "requestId": "96566.97",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-cee56ffc17d9a8f0.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 214683.755561,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 4618,
+      "finishedTimestamp": 214683.763301
+    },
+    {
+      "requestId": "96566.129",
+      "url": "http://localhost:3000/images/discover/verified-icon.svg",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.731481,
+      "status": 200,
+      "mimeType": "image/svg+xml",
+      "encodedDataLength": 1142,
+      "finishedTimestamp": 214685.733531
+    },
+    {
+      "requestId": "96566.128",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1655834648155-f7a98ff3c49d%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739233,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 12709,
+      "finishedTimestamp": 214685.749134
+    },
+    {
+      "requestId": "96566.130",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1607556671927-78a6605e290b%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739294,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 5042,
+      "finishedTimestamp": 214685.747298
+    },
+    {
+      "requestId": "96566.132",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1580136607993-fd598cf5c4f5%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739319,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 3044,
+      "finishedTimestamp": 214685.747037
+    },
+    {
+      "requestId": "96566.134",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1601049320268-42a9b275068c%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739351,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 7282,
+      "finishedTimestamp": 214685.749203
+    },
+    {
+      "requestId": "96566.136",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1578926375605-eaf7559b1458%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739376,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 9646,
+      "finishedTimestamp": 214685.748148
+    },
+    {
+      "requestId": "96566.140",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1493972741200-51d407e0ee33%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739403,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 18343,
+      "finishedTimestamp": 214685.750032
+    },
+    {
+      "requestId": "96566.142",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1533158388470-9a56699990c6%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739423,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 4166,
+      "finishedTimestamp": 214685.756877
+    },
+    {
+      "requestId": "96566.144",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1629654857513-1136aef1b10f%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739445,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 1518,
+      "finishedTimestamp": 214685.75454
+    },
+    {
+      "requestId": "96566.146",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1574521355290-c7bfcafd5c9d%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739463,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 15973,
+      "finishedTimestamp": 214685.75532
+    },
+    {
+      "requestId": "96566.148",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1583407723467-9b2d22504831%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739481,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 9198,
+      "finishedTimestamp": 214685.757468
+    },
+    {
+      "requestId": "96566.150",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1558522195-e1201b090344%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.7395,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 9687,
+      "finishedTimestamp": 214685.75546
+    },
+    {
+      "requestId": "96566.152",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1578301996581-bf7caec556c0%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739519,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 10202,
+      "finishedTimestamp": 214685.756327
+    },
+    {
+      "requestId": "96566.154",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1661893375334-e2603ce341d7%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739537,
+      "status": 404,
+      "mimeType": "text/plain",
+      "encodedDataLength": 57,
+      "finishedTimestamp": 214686.200782
+    },
+    {
+      "requestId": "96566.156",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1587658181846-33fefb67be33%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739554,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 14931,
+      "finishedTimestamp": 214685.765215
+    },
+    {
+      "requestId": "96566.158",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1605999081451-4436bf1d0d88%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739572,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 3244,
+      "finishedTimestamp": 214685.764923
+    },
+    {
+      "requestId": "96566.160",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1613168461287-6e529b708c76%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.739599,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 11201,
+      "finishedTimestamp": 214685.76502
+    },
+    {
+      "requestId": "96566.162",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1503293050619-6048ffad0dc5%3Fw%3D800%26h%3D600%26fit%3Dcrop%26q%3D80&w=256&q=75",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 214685.73962,
+      "status": 200,
+      "mimeType": "image/webp",
+      "encodedDataLength": 9408,
+      "finishedTimestamp": 214685.765136
+    }
+  ],
+  "summary": {
+    "totalRequests": 77,
+    "totalEncodedBytes": 675963,
+    "byType": {
+      "document": {
+        "count": 1,
+        "encodedBytes": 3914,
+        "failed": 0
+      },
+      "css": {
+        "count": 3,
+        "encodedBytes": 37389,
+        "failed": 0
+      },
+      "image": {
+        "count": 25,
+        "encodedBytes": 174640,
+        "failed": 2
+      },
+      "js": {
+        "count": 37,
+        "encodedBytes": 376516,
+        "failed": 0
+      },
+      "font": {
+        "count": 1,
+        "encodedBytes": 64012,
+        "failed": 0
+      },
+      "fetch": {
+        "count": 1,
+        "encodedBytes": 339,
+        "failed": 0
+      },
+      "api": {
+        "count": 2,
+        "encodedBytes": 5855,
+        "failed": 0
+      },
+      "other": {
+        "count": 7,
+        "encodedBytes": 13298,
+        "failed": 0
+      }
+    },
+    "apiRequests": [
+      {
+        "requestId": "96566.71",
+        "url": "http://localhost:3000/api/auth/session",
+        "method": "GET",
+        "resourceType": "Fetch",
+        "timestamp": 214683.123316,
+        "status": 200,
+        "mimeType": "application/json",
+        "encodedDataLength": 616,
+        "finishedTimestamp": 214683.138369
+      },
+      {
+        "requestId": "96566.72",
+        "url": "https://api.dgpthinh.io.vn/artwork?skip=0&take=18&status=ACTIVE&sortBy=likeCount&sortOrder=desc",
+        "method": "GET",
+        "resourceType": "Fetch",
+        "timestamp": 214683.134082,
+        "status": 200,
+        "mimeType": "application/json",
+        "encodedDataLength": 5239,
+        "finishedTimestamp": 214685.721786
+      }
+    ],
+    "duplicateUrls": [
+      {
+        "url": "http://localhost:3000/_next/static/chunks/528c4d194d8aa880.js",
+        "count": 2
+      },
+      {
+        "url": "http://localhost:3000/_next/static/chunks/ee3d295ddbbd3083.js",
+        "count": 2
+      },
+      {
+        "url": "http://localhost:3000/_next/static/chunks/9684af583ab839bb.js",
+        "count": 2
+      },
+      {
+        "url": "http://localhost:3000/_next/static/chunks/45882c750ff2ceab.js",
+        "count": 2
+      },
+      {
+        "url": "http://localhost:3000/images/logo/logo-dark-mode.png",
+        "count": 2
+      }
+    ]
+  }
+}

@@ -19,6 +19,12 @@ type TopPicksMasonryProps = {
   searchQuery?: string
 }
 
+const DISCOVER_CLIENT_CACHE_OPTIONS = {
+  auth: false,
+  dedupe: true,
+  clientCacheTtlMs: 30000,
+}
+
 const MasonryCard = ({ data }: { data: TopPicksArtwork }) => {
   return <ArtworkThumbnailCard artwork={data} />
 }
@@ -26,15 +32,21 @@ const MasonryCard = ({ data }: { data: TopPicksArtwork }) => {
 export const TopPicksMasonry = ({ searchQuery = '' }: TopPicksMasonryProps) => {
   // -- fetch (sorted by most liked) --
   const fetchPage = useCallback(
-    async (skip: number, take: number) => {
-      const result = await artworkApis.listArtworksPaginated({
-        skip,
-        take,
-        q: searchQuery || undefined,
-        status: 'ACTIVE',
-        sortBy: 'likeCount',
-        sortOrder: 'desc',
-      })
+    async (skip: number, take: number, signal?: AbortSignal) => {
+      const result = await artworkApis.listArtworksPaginated(
+        {
+          skip,
+          take,
+          q: searchQuery || undefined,
+          status: 'ACTIVE',
+          sortBy: 'likeCount',
+          sortOrder: 'desc',
+        },
+        {
+          ...DISCOVER_CLIENT_CACHE_OPTIONS,
+          signal,
+        },
+      )
       return {
         data: result.data.map(mapArtworkToTopPick),
         hasMore: result.pagination.hasNext,
@@ -98,4 +110,3 @@ export const TopPicksMasonry = ({ searchQuery = '' }: TopPicksMasonryProps) => {
     </div>
   )
 }
-

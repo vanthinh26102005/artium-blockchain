@@ -1,4 +1,4 @@
-import { apiFetch, apiPost, encodePathSegment } from '@shared/services/apiClient'
+import { apiFetch, apiPost, encodePathSegment, type ApiFetchOptions } from '@shared/services/apiClient'
 
 export type EventLocation = {
   type?: 'PHYSICAL' | 'VIRTUAL' | 'HYBRID'
@@ -69,8 +69,8 @@ export type SendEventInvitationsRequest = {
 }
 
 const eventsApis = {
-  getDiscoverEvents: async (): Promise<EventApiResponse[]> => {
-    return apiFetch<EventApiResponse[]>('/events/discover', { auth: false })
+  getDiscoverEvents: async (requestOptions?: ApiFetchOptions): Promise<EventApiResponse[]> => {
+    return apiFetch<EventApiResponse[]>('/events/discover', { ...requestOptions, auth: false })
   },
 
   getHostingEvents: async (): Promise<EventApiResponse[]> => {

@@ -1,6 +1,9 @@
 // react
 import { useEffect, useRef, useState } from 'react'
 
+// next
+import Image from 'next/image'
+
 // third-party
 import {
   CheckCircle2,
@@ -141,11 +144,13 @@ export const EventCard = ({ event, status, onStatusChange }: EventCardProps) => 
       {/* cover */}
       <div className="relative overflow-hidden rounded-t-2xl">
         {event.imageUrl ? (
-          <img
+          <Image
             src={event.imageUrl}
             alt={event.title}
+            width={640}
+            height={360}
+            sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="aspect-video w-full object-cover"
-            loading="lazy"
           />
         ) : (
           <div className="aspect-video w-full bg-linear-to-br from-slate-100 via-slate-200 to-slate-100" />

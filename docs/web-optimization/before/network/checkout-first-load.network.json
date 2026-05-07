@@ -1,0 +1,750 @@
+{
+  "scenario": {
+    "name": "checkout-first-load",
+    "url": "http://localhost:3000/checkout/477a93ea-b6b0-4e32-8122-2bfca3666c50",
+    "waitMs": 6000
+  },
+  "capturedAt": "2026-05-07T10:46:03.472Z",
+  "entries": [
+    {
+      "requestId": "DA8BFC61A605851DA6ABF3A14D02E830",
+      "url": "http://localhost:3000/checkout/477a93ea-b6b0-4e32-8122-2bfca3666c50",
+      "method": "GET",
+      "resourceType": "Document",
+      "timestamp": 201105.56092,
+      "status": 200,
+      "mimeType": "text/html",
+      "encodedDataLength": 1060,
+      "finishedTimestamp": 201105.563641
+    },
+    {
+      "requestId": "48147.2",
+      "url": "http://localhost:3000/_next/static/chunks/6efc5eedaac049b5.css",
+      "method": "GET",
+      "resourceType": "Stylesheet",
+      "timestamp": 201105.571523,
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.572653
+    },
+    {
+      "requestId": "48147.3",
+      "url": "http://localhost:3000/_next/static/chunks/a402fe71dd096062.css",
+      "method": "GET",
+      "resourceType": "Stylesheet",
+      "timestamp": 201105.571679,
+      "status": 200,
+      "mimeType": "text/css",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.572568
+    },
+    {
+      "requestId": "48147.6",
+      "url": "http://localhost:3000/_next/static/chunks/530aa546c076cea1.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.571736,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.573551
+    },
+    {
+      "requestId": "48147.7",
+      "url": "http://localhost:3000/_next/static/chunks/c7080fee71820be3.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.571762,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.573818
+    },
+    {
+      "requestId": "48147.8",
+      "url": "http://localhost:3000/_next/static/chunks/1f695d32818fe58c.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.571786,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.576668
+    },
+    {
+      "requestId": "48147.9",
+      "url": "http://localhost:3000/_next/static/chunks/84de89c9b8269e6e.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.571823,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.576792
+    },
+    {
+      "requestId": "48147.10",
+      "url": "http://localhost:3000/_next/static/chunks/e60f94620298b222.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.571849,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.577132
+    },
+    {
+      "requestId": "48147.11",
+      "url": "http://localhost:3000/_next/static/chunks/b03eed0f1e5ec0b7.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.571869,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.577594
+    },
+    {
+      "requestId": "48147.12",
+      "url": "http://localhost:3000/_next/static/chunks/0bad28927eca0bef.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.571893,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.577877
+    },
+    {
+      "requestId": "48147.13",
+      "url": "http://localhost:3000/_next/static/chunks/ac17c2547e653071.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.57191,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.578543
+    },
+    {
+      "requestId": "48147.14",
+      "url": "http://localhost:3000/_next/static/chunks/b26bcb17201cf74c.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.57193,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.578851
+    },
+    {
+      "requestId": "48147.15",
+      "url": "http://localhost:3000/_next/static/chunks/c10bc5e82a16990b.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.57195,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.579612
+    },
+    {
+      "requestId": "48147.16",
+      "url": "http://localhost:3000/_next/static/chunks/32b9ab6d10640bf6.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.571971,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.579574
+    },
+    {
+      "requestId": "48147.17",
+      "url": "http://localhost:3000/_next/static/chunks/3c8442bcc66f8086.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.571996,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.580169
+    },
+    {
+      "requestId": "48147.18",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-db7f88aa11394d96.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.572014,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.580345
+    },
+    {
+      "requestId": "48147.19",
+      "url": "http://localhost:3000/_next/static/chunks/f93f0e0e96730616.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.572039,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 14184,
+      "finishedTimestamp": 201105.584947
+    },
+    {
+      "requestId": "48147.20",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-9105f56232e25de2.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.572061,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 4403,
+      "finishedTimestamp": 201105.585366
+    },
+    {
+      "requestId": "48147.21",
+      "url": "http://localhost:3000/_next/static/nPVdTO_DpztE7zFX6Nrwm/_buildManifest.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.572082,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.580522
+    },
+    {
+      "requestId": "48147.22",
+      "url": "http://localhost:3000/_next/static/nPVdTO_DpztE7zFX6Nrwm/_ssgManifest.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.5721,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.580847
+    },
+    {
+      "requestId": "48147.46",
+      "url": "https://js.stripe.com/clover/stripe.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.592798,
+      "status": 200,
+      "mimeType": "text/javascript",
+      "encodedDataLength": 236427,
+      "finishedTimestamp": 201106.340592
+    },
+    {
+      "requestId": "48147.47",
+      "url": "http://localhost:3000/_next/static/nPVdTO_DpztE7zFX6Nrwm/_clientMiddlewareManifest.json",
+      "method": "GET",
+      "resourceType": "Fetch",
+      "timestamp": 201105.593644,
+      "status": 200,
+      "mimeType": "application/json",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.594154
+    },
+    {
+      "requestId": "48147.48",
+      "url": "http://localhost:3000/api/auth/session",
+      "method": "GET",
+      "resourceType": "Fetch",
+      "timestamp": 201105.603217,
+      "status": 200,
+      "mimeType": "application/json",
+      "encodedDataLength": 289,
+      "finishedTimestamp": 201105.605525
+    },
+    {
+      "requestId": "48147.49",
+      "url": "http://localhost:3000/_next/static/chunks/b6262e00f0b27889.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.604497,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 11524,
+      "finishedTimestamp": 201105.608282
+    },
+    {
+      "requestId": "48147.50",
+      "url": "http://localhost:3000/_next/static/chunks/3f8823e0b6ff5dc5.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.605237,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 2341635,
+      "finishedTimestamp": 201105.820455
+    },
+    {
+      "requestId": "48147.51",
+      "url": "http://localhost:3000/_next/static/chunks/116b138bd58c984e.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201105.605312,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201105.60684
+    },
+    {
+      "requestId": "48147.44",
+      "url": "http://localhost:3000/fonts/ABCMonumentGrotesk-Regular-Trial.otf",
+      "method": "GET",
+      "resourceType": "Font",
+      "timestamp": 201105.60843,
+      "status": 200,
+      "mimeType": "font/otf",
+      "encodedDataLength": 244,
+      "finishedTimestamp": 201105.617642
+    },
+    {
+      "requestId": "48147.52",
+      "url": "https://api.dgpthinh.io.vn/artwork/477a93ea-b6b0-4e32-8122-2bfca3666c50",
+      "method": "GET",
+      "resourceType": "Fetch",
+      "timestamp": 201105.967358,
+      "status": 200,
+      "mimeType": "application/json",
+      "encodedDataLength": 902,
+      "finishedTimestamp": 201106.045534
+    },
+    {
+      "requestId": "48147.53",
+      "url": "https://storage.googleapis.com/artwork_uit/artworks/13d2bb3e-b7cb-4bdd-8daf-bdfe4a5c0db0/477a93ea-b6b0-4e32-8122-2bfca3666c50/120eda29-4258-458f-b40d-603c75b7fcf9.jpg",
+      "method": "GET",
+      "resourceType": "Image",
+      "timestamp": 201106.119285,
+      "status": 200,
+      "mimeType": "image/jpeg",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.12204
+    },
+    {
+      "requestId": "48147.54",
+      "url": "http://localhost:3000/_next/static/chunks/6f4dead8b309a35e.js",
+      "method": "GET",
+      "resourceType": "Other",
+      "timestamp": 201106.137985,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.226537
+    },
+    {
+      "requestId": "48147.55",
+      "url": "http://localhost:3000/_next/static/chunks/795b48a63731fc08.js",
+      "method": "GET",
+      "resourceType": "Other",
+      "timestamp": 201106.138188,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 839,
+      "finishedTimestamp": 201106.233535
+    },
+    {
+      "requestId": "48147.56",
+      "url": "http://localhost:3000/_next/static/chunks/d731c34490d5d473.js",
+      "method": "GET",
+      "resourceType": "Other",
+      "timestamp": 201106.13825,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 1000,
+      "finishedTimestamp": 201106.230768
+    },
+    {
+      "requestId": "48147.57",
+      "url": "http://localhost:3000/_next/static/chunks/6f4dead8b309a35e.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.228201,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.228832
+    },
+    {
+      "requestId": "48147.58",
+      "url": "http://localhost:3000/_next/static/chunks/7d2d501b01196a62.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.229381,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.230484
+    },
+    {
+      "requestId": "48147.59",
+      "url": "http://localhost:3000/_next/static/chunks/2e90d702202ac422.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.229543,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.231444
+    },
+    {
+      "requestId": "48147.60",
+      "url": "http://localhost:3000/_next/static/chunks/1a795d8084bda13e.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.229605,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.231109
+    },
+    {
+      "requestId": "48147.61",
+      "url": "http://localhost:3000/_next/static/chunks/c6f06bd8ef829b9b.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.229685,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.231575
+    },
+    {
+      "requestId": "48147.62",
+      "url": "http://localhost:3000/_next/static/chunks/47432223c6c6b259.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.229742,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.231686
+    },
+    {
+      "requestId": "48147.63",
+      "url": "http://localhost:3000/_next/static/chunks/4c159344361a0587.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.229795,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.232146
+    },
+    {
+      "requestId": "48147.64",
+      "url": "http://localhost:3000/_next/static/chunks/2c1d4dd03f971989.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.229861,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.232944
+    },
+    {
+      "requestId": "48147.65",
+      "url": "http://localhost:3000/_next/static/chunks/004ab387573c48e2.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.229909,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.23328
+    },
+    {
+      "requestId": "48147.66",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-0d0e835acd15c45e.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.229957,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.233362
+    },
+    {
+      "requestId": "48147.67",
+      "url": "http://localhost:3000/_next/static/chunks/d731c34490d5d473.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.240181,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.240813
+    },
+    {
+      "requestId": "48147.68",
+      "url": "http://localhost:3000/_next/static/chunks/795b48a63731fc08.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.240431,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.240911
+    },
+    {
+      "requestId": "48147.69",
+      "url": "http://localhost:3000/_next/static/chunks/8756ea5ee7c46bce.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.241228,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 9606,
+      "finishedTimestamp": 201106.245317
+    },
+    {
+      "requestId": "48147.70",
+      "url": "http://localhost:3000/_next/static/chunks/c924fc2ed2f8877f.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.24134,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 0,
+      "finishedTimestamp": 201106.242278
+    },
+    {
+      "requestId": "48147.71",
+      "url": "http://localhost:3000/_next/static/chunks/0851dfcb2a06cef6.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.241402,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 15858,
+      "finishedTimestamp": 201106.246528
+    },
+    {
+      "requestId": "48147.72",
+      "url": "http://localhost:3000/_next/static/chunks/9ec6b248741f80f7.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.241456,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 10557,
+      "finishedTimestamp": 201106.246224
+    },
+    {
+      "requestId": "48147.73",
+      "url": "http://localhost:3000/_next/static/chunks/93455d931bca9f30.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.241513,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 12193,
+      "finishedTimestamp": 201106.247529
+    },
+    {
+      "requestId": "48147.74",
+      "url": "http://localhost:3000/_next/static/chunks/743478be36ae7ae4.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.241571,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 11830,
+      "finishedTimestamp": 201106.248184
+    },
+    {
+      "requestId": "48147.75",
+      "url": "http://localhost:3000/_next/static/chunks/5065f855ddf8fb2b.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.241637,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 9384,
+      "finishedTimestamp": 201106.248902
+    },
+    {
+      "requestId": "48147.76",
+      "url": "http://localhost:3000/_next/static/chunks/db31475eac6efa92.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.241701,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 16006,
+      "finishedTimestamp": 201106.252875
+    },
+    {
+      "requestId": "48147.77",
+      "url": "http://localhost:3000/_next/static/chunks/1d5b32a777516ea9.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.241758,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 96758,
+      "finishedTimestamp": 201106.263358
+    },
+    {
+      "requestId": "48147.78",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-83ee7597bb554fe7.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.241815,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 4581,
+      "finishedTimestamp": 201106.252426
+    },
+    {
+      "requestId": "48147.79",
+      "url": "http://localhost:3000/_next/static/chunks/bec99b34a3611f51.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.242094,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 13780,
+      "finishedTimestamp": 201106.253034
+    },
+    {
+      "requestId": "48147.80",
+      "url": "http://localhost:3000/_next/static/chunks/5ce8425c8768d7e7.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.242173,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 14770,
+      "finishedTimestamp": 201106.253455
+    },
+    {
+      "requestId": "48147.81",
+      "url": "http://localhost:3000/_next/static/chunks/708623bbee98efeb.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.242231,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 22139,
+      "finishedTimestamp": 201106.256564
+    },
+    {
+      "requestId": "48147.82",
+      "url": "http://localhost:3000/_next/static/chunks/turbopack-5ba1c4ed6b6010a0.js",
+      "method": "GET",
+      "resourceType": "Script",
+      "timestamp": 201106.242306,
+      "status": 200,
+      "mimeType": "application/javascript",
+      "encodedDataLength": 4520,
+      "finishedTimestamp": 201106.258405
+    },
+    {
+      "requestId": "E9874B6100212E0D5D0159C26BE05095",
+      "url": "https://js.stripe.com/v3/controller-with-preconnect-538b03be2aac8a0de50dfd911b076d18.html",
+      "method": "GET",
+      "resourceType": "Document",
+      "timestamp": 201106.432773,
+      "status": 200,
+      "mimeType": "text/html"
+    },
+    {
+      "requestId": "43288FEA83CE5A777955069CD08C3343",
+      "url": "https://js.stripe.com/v3/m-outer-3437aaddcdf6922d623e172c2d6f9278.html",
+      "method": "GET",
+      "resourceType": "Document",
+      "timestamp": 201107.455561,
+      "status": 200,
+      "mimeType": "text/html"
+    }
+  ],
+  "summary": {
+    "totalRequests": 60,
+    "totalEncodedBytes": 2854489,
+    "byType": {
+      "document": {
+        "count": 3,
+        "encodedBytes": 1060,
+        "failed": 0
+      },
+      "css": {
+        "count": 2,
+        "encodedBytes": 0,
+        "failed": 0
+      },
+      "js": {
+        "count": 47,
+        "encodedBytes": 2850155,
+        "failed": 0
+      },
+      "fetch": {
+        "count": 1,
+        "encodedBytes": 0,
+        "failed": 0
+      },
+      "api": {
+        "count": 2,
+        "encodedBytes": 1191,
+        "failed": 0
+      },
+      "font": {
+        "count": 1,
+        "encodedBytes": 244,
+        "failed": 0
+      },
+      "image": {
+        "count": 1,
+        "encodedBytes": 0,
+        "failed": 0
+      },
+      "other": {
+        "count": 3,
+        "encodedBytes": 1839,
+        "failed": 0
+      }
+    },
+    "apiRequests": [
+      {
+        "requestId": "48147.48",
+        "url": "http://localhost:3000/api/auth/session",
+        "method": "GET",
+        "resourceType": "Fetch",
+        "timestamp": 201105.603217,
+        "status": 200,
+        "mimeType": "application/json",
+        "encodedDataLength": 289,
+        "finishedTimestamp": 201105.605525
+      },
+      {
+        "requestId": "48147.52",
+        "url": "https://api.dgpthinh.io.vn/artwork/477a93ea-b6b0-4e32-8122-2bfca3666c50",
+        "method": "GET",
+        "resourceType": "Fetch",
+        "timestamp": 201105.967358,
+        "status": 200,
+        "mimeType": "application/json",
+        "encodedDataLength": 902,
+        "finishedTimestamp": 201106.045534
+      }
+    ],
+    "duplicateUrls": [
+      {
+        "url": "http://localhost:3000/_next/static/chunks/6f4dead8b309a35e.js",
+        "count": 2
+      },
+      {
+        "url": "http://localhost:3000/_next/static/chunks/795b48a63731fc08.js",
+        "count": 2
+      },
+      {
+        "url": "http://localhost:3000/_next/static/chunks/d731c34490d5d473.js",
+        "count": 2
+      }
+    ]
+  }
+}

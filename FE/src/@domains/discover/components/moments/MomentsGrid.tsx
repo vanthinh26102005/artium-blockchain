@@ -13,6 +13,11 @@ import profileApis from '@shared/apis/profileApis'
 import { InfiniteScrollSentinel } from '@shared/components/ui/InfiniteScrollSentinel'
 
 const PAGE_SIZE = 12
+const DISCOVER_CLIENT_CACHE_OPTIONS = {
+  auth: false,
+  dedupe: true,
+  clientCacheTtlMs: 30000,
+}
 
 type MomentsGridProps = {
   searchQuery?: string
@@ -30,12 +35,20 @@ export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
   // Fetch moments from featured seller profiles (no global discover endpoint)
   useEffect(() => {
     let cancelled = false
+    const abortController = new AbortController()
     setIsLoading(true)
     setError(null)
 
     const fetchMoments = async () => {
       // Get seller profiles to discover their moments
-      const profiles = await profileApis.searchSellerProfiles('', { skip: 0, take: 20 })
+      const profiles = await profileApis.searchSellerProfiles(
+        '',
+        { skip: 0, take: 20 },
+        {
+          ...DISCOVER_CLIENT_CACHE_OPTIONS,
+          signal: abortController.signal,
+        },
+      )
 
       // Build user-info lookup
       const userInfoMap = new Map(
@@ -54,7 +67,16 @@ export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
       const userIds = profiles.items.slice(0, 10).map((p) => p.userId)
       const momentArrays = await Promise.all(
         userIds.map((uid) =>
-          profileApis.listUserMoments(uid, { skip: 0, take: 5 }).catch(() => []),
+          profileApis
+            .listUserMoments(
+              uid,
+              { skip: 0, take: 5 },
+              {
+                ...DISCOVER_CLIENT_CACHE_OPTIONS,
+                signal: abortController.signal,
+              },
+            )
+            .catch(() => []),
         ),
       )
 
@@ -79,6 +101,7 @@ export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
 
     return () => {
       cancelled = true
+      abortController.abort()
     }
   }, [])
 
@@ -152,4 +175,3 @@ export const MomentsGrid = ({ searchQuery = '' }: MomentsGridProps) => {
     </section>
   )
 }
-

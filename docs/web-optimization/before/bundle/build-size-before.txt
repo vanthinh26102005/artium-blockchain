@@ -1,0 +1,3 @@
+504M	FE/.next
+ 16M	FE/.next/static
+ 15M	FE/.next/static/chunks
