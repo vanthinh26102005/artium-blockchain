@@ -3,7 +3,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import {
-  Bell,
   DollarSign,
   FileText,
   ImagePlus,
@@ -13,8 +12,14 @@ import {
   Plus,
   User,
   Video,
+  Wallet,
 } from 'lucide-react'
+import {
+  ProfileWalletManagerDialog,
+  type WalletDialogView,
+} from '@domains/profile/components/edit-profile/ProfileWalletManagerDialog'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { useWalletLink } from '@domains/auth/hooks/useWalletLink'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,9 +68,12 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
   const isLoggingOut = useAuthStore((state) => state.isLoggingOut)
+  const walletLink = useWalletLink()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isPostMomentModalOpen, setIsPostMomentModalOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showWalletDialog, setShowWalletDialog] = useState(false)
+  const [walletDialogView, setWalletDialogView] = useState<WalletDialogView>('manage')
 
   // Check if current route is a moment detail page
   const isMomentDetailPage = router.pathname === '/profile/[username]/moments/[id]'
@@ -126,6 +134,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
     .join(' ')
 
   const walletLabel = shortenWalletAddress(user?.walletAddress)
+  const currentWalletAddress = user?.walletAddress ?? null
+  const hasRecoverableLogin = Boolean(
+    user?.googleId || (user?.email && !isWalletLocalEmail(user.email) && user.isEmailVerified),
+  )
+  const canRemoveWallet = !currentWalletAddress || hasRecoverableLogin
   const profileHandle = user?.username ?? user?.id ?? user?.email ?? 'profile'
   const profileLabel =
     user?.username ??
@@ -172,6 +185,36 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
       icon: FileText,
     },
   ]
+
+  const handleOpenWalletManager = () => {
+    setWalletDialogView('manage')
+    setShowWalletDialog(true)
+  }
+
+  const handleWalletDialogOpenChange = (open: boolean) => {
+    setShowWalletDialog(open)
+    if (!open) {
+      setWalletDialogView('manage')
+    }
+  }
+
+  const handleConnectWallet = async () => {
+    const linkedUser = await walletLink.linkWallet()
+    if (linkedUser) {
+      setWalletDialogView('manage')
+    }
+  }
+
+  const handleRemoveWallet = async () => {
+    if (!canRemoveWallet) {
+      return
+    }
+
+    const updatedUser = await walletLink.unlinkWallet()
+    if (updatedUser) {
+      setWalletDialogView('manage')
+    }
+  }
 
   return (
     <header
@@ -321,13 +364,13 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                     <DropdownMenuSeparator className="my-3 bg-slate-200" />
                     <DropdownMenuItem
                       onSelect={() => {
-                        // TODO: Implement notifications navigation/action
                         setIsMobileMenuOpen(false)
+                        handleOpenWalletManager()
                       }}
                       className="flex cursor-pointer items-center gap-3 rounded-[18px]! p-3"
                     >
-                      <Bell className="h-5 w-5 text-slate-700" />
-                      <span className="font-semibold text-slate-900">Notifications</span>
+                      <Wallet className="h-5 w-5 text-slate-700" />
+                      <span className="font-semibold text-slate-900">Wallet</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
@@ -469,10 +512,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
               </div>
               <button
                 type="button"
-                aria-label="Notifications"
+                aria-label="Wallet"
+                onClick={handleOpenWalletManager}
                 className={`hidden h-11 w-11 cursor-pointer items-center justify-center rounded-full border shadow-sm transition min-[1111px]:inline-flex ${headerIconButtonClasses}`}
               >
-                <Bell className="h-4 w-4" />
+                <Wallet className="h-4 w-4" />
               </button>
               <Link
                 href={`/profile/${encodeURIComponent(profileHandle)}`}
@@ -524,6 +568,32 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
           )}
         </div>
       </div>
+      {user ? (
+        <ProfileWalletManagerDialog
+          open={showWalletDialog}
+          onOpenChange={handleWalletDialogOpenChange}
+          view={walletDialogView}
+          onViewChange={setWalletDialogView}
+          currentWalletAddress={currentWalletAddress}
+          canRemoveWallet={canRemoveWallet}
+          walletError={walletLink.error}
+          isLoading={walletLink.isLoading}
+          isWrongNetwork={walletLink.isWrongNetwork}
+          buttonLabel={
+            walletLink.status === 'idle' || walletLink.status === 'error'
+              ? currentWalletAddress
+                ? 'Change MetaMask Wallet'
+                : walletLink.buttonLabel
+              : walletLink.buttonLabel
+          }
+          shortenedAddress={walletLink.shortenedAddress}
+          status={walletLink.status}
+          targetChainName={walletLink.targetChain.name}
+          onConnectWallet={handleConnectWallet}
+          onSwitchNetwork={walletLink.switchToTargetChain}
+          onRemoveWallet={handleRemoveWallet}
+        />
+      ) : null}
       <PostMomentModal open={isPostMomentModalOpen} onOpenChange={setIsPostMomentModalOpen} />
     </header>
   )
