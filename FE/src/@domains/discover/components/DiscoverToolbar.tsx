@@ -150,7 +150,7 @@ export const DiscoverToolbar = ({
           </div>
         ) : null}
         {shouldShowFilters ? (
-          <div className="relative flex justify-end sm:justify-start">
+          <div className="relative flex w-full justify-start sm:w-auto">
             {/* filters */}
             <button
               type="button"
@@ -165,7 +165,9 @@ export const DiscoverToolbar = ({
             {openFilters ? (
               <div
                 id={filterPanelId}
-                className="absolute top-full right-0 mt-3 w-[280px] overflow-hidden rounded-2xl border border-slate-200 bg-white text-sm text-slate-600 shadow-xl shadow-slate-900/10"
+                role="dialog"
+                aria-label="Filters availability"
+                className="absolute top-full left-0 z-30 mt-3 w-[calc(100vw-2rem)] max-w-[280px] overflow-hidden rounded-2xl border border-slate-200 bg-white text-sm text-slate-600 shadow-xl shadow-slate-900/10 sm:right-0 sm:left-auto sm:w-[280px]"
               >
                 <div className="h-1 w-full bg-slate-950" />
                 <div className="p-4">
