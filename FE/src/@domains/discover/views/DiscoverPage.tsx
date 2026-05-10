@@ -55,6 +55,8 @@ export const DiscoverPage = () => {
       return
     }
 
+    setOpenFilters(false)
+
     void router.push(
       {
         pathname: router.pathname,
@@ -86,7 +88,7 @@ export const DiscoverPage = () => {
       undefined,
       { shallow: true, scroll: false },
     )
-  }, [router.isReady, router.pathname, router.query, tabParam])
+  }, [router, router.isReady, router.pathname, router.query, tabParam])
 
   // -- render --
   return (
@@ -94,7 +96,7 @@ export const DiscoverPage = () => {
       <Metadata title="Discover | Artium" />
       <div className="w-full pt-1 pb-25">
         {/* header */}
-        <div className="grid grid-cols-1 gap-4 py-3 xl:grid-cols-[1fr_auto] xl:items-center">
+        <div className="flex flex-col gap-4 py-3 xl:flex-row xl:items-center xl:gap-6">
           <DiscoverTabs activeTabKey={activeTabKey} onTabChange={handleTabChange} />
           <DiscoverToolbar
             activeTabKey={activeTabKey}
