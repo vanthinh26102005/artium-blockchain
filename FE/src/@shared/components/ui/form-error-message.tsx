@@ -9,17 +9,18 @@ type FormErrorMessageProps = {
 }
 
 export const FormErrorMessage = ({ id, message, visible = true }: FormErrorMessageProps) => {
+  if (!visible) {
+    return null
+  }
+
   return (
     <div
       id={id}
-      className={cn(
-        'flex min-h-5.5 items-center gap-2 text-sm font-semibold text-auth-error',
-        !visible && 'opacity-0',
-      )}
+      className={cn('flex min-h-5.5 items-center gap-2 text-sm font-semibold text-auth-error')}
       aria-live="polite"
     >
       <AlertCircle className="h-5 w-5" />
-      <span>{visible ? message : ''}</span>
+      <span>{message}</span>
     </div>
   )
 }

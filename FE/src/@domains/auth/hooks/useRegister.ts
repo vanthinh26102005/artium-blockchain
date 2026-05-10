@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react'
 
 // @shared - apis
 import usersApi from '@shared/apis/usersApi'
+import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
 
 // @shared - types
 import type {
@@ -32,7 +33,11 @@ export const useRegister = (): UseRegisterResult => {
     try {
       await usersApi.registerInitiate(payload)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Registration failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        'Something went wrong. Please try again.',
+        'signup',
+      )
       setError(message)
       throw error
     } finally {
@@ -47,7 +52,11 @@ export const useRegister = (): UseRegisterResult => {
     try {
       return await usersApi.registerComplete(payload)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'OTP verification failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        'The code is incorrect or expired. Request a new code.',
+        'signupOtp',
+      )
       setError(message)
       throw error
     } finally {

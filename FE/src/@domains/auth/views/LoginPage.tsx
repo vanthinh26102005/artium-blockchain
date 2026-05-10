@@ -38,6 +38,7 @@ import {
   writePendingWalletLink,
 } from '@domains/auth/services/browserAuthState'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
 import { buildAuthCallbackUrl, getSafeNextPath } from '@domains/auth/utils/authRedirect'
 import {
   AuthDivider,
@@ -127,7 +128,7 @@ export const LoginPage = () => {
         await router.push(nextPath)
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Login failed.'
+      const message = getPracticalAuthErrorMessage(error, 'Email or password is incorrect.', 'login')
       setError('root', { message })
     }
   }
@@ -225,7 +226,6 @@ export const LoginPage = () => {
               label="Email address"
               required
               aria-invalid={Boolean(errors.email)}
-              aria-describedby="login-error"
             />
 
             <AuthFormPasswordInput<LoginFormValues>
@@ -236,11 +236,10 @@ export const LoginPage = () => {
               label="Password"
               required
               aria-invalid={Boolean(errors.password)}
-              aria-describedby="login-error"
             />
 
             <FormErrorMessage
-              id="login-error"
+              id="login-submit-error"
               message={errors.root?.message ?? ''}
               visible={Boolean(errors.root?.message)}
             />

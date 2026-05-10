@@ -16,6 +16,7 @@ import {
   readPendingWalletLink,
 } from '@domains/auth/services/browserAuthState'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
 import { getSafeNextPath } from '@domains/auth/utils/authRedirect'
 
 type GoogleBridgeState = {
@@ -78,7 +79,11 @@ export const useGoogleLoginBridge = (): GoogleBridgeState => {
 
         await router.replace(nextPath)
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Google login failed.'
+        const message = getPracticalAuthErrorMessage(
+          error,
+          'Google sign-in failed. Please try again.',
+          'google',
+        )
         setError(message)
         await signOut({ redirect: false })
       } finally {

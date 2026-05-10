@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react'
 
 // @shared - apis
 import usersApi from '@shared/apis/usersApi'
+import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
 
 // @shared - types
 import type {
@@ -32,7 +33,11 @@ export const useForgotPassword = (): UseForgotPasswordResult => {
     try {
       await usersApi.requestPasswordReset(payload)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Request failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        'Something went wrong. Please try again.',
+        'forgotRequest',
+      )
       setError(message)
       throw error
     } finally {
@@ -47,7 +52,11 @@ export const useForgotPassword = (): UseForgotPasswordResult => {
     try {
       return await usersApi.verifyPasswordReset(payload)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Verification failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        'The code is incorrect or expired. Request a new code.',
+        'forgotVerify',
+      )
       setError(message)
       throw error
     } finally {

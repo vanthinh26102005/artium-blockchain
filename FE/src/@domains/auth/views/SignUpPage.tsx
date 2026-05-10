@@ -25,6 +25,7 @@ import {
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { useRegister } from '@domains/auth/hooks/useRegister'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
 import { buildAuthCallbackUrl, getSafeNextPath } from '@domains/auth/utils/authRedirect'
 import {
   AuthDivider,
@@ -89,7 +90,11 @@ export const SignUpPage = () => {
       setStep('otp')
       otpForm.reset({ otp: '' })
     } catch (error) {
-      const message = error instanceof Error ? error.message : registerError ?? 'Registration failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        registerError ?? 'Something went wrong. Please try again.',
+        'signup',
+      )
       detailsForm.setError('root', { message })
     }
   }
@@ -107,7 +112,11 @@ export const SignUpPage = () => {
       setAuth(response)
       setIsWalletPromptOpen(true)
     } catch (error) {
-      const message = error instanceof Error ? error.message : registerError ?? 'OTP verification failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        registerError ?? 'The code is incorrect or expired. Request a new code.',
+        'signupOtp',
+      )
       otpForm.setError('root', { message })
     }
   }
@@ -185,7 +194,6 @@ export const SignUpPage = () => {
                 label="First name"
                 required
                 aria-invalid={Boolean(detailsForm.formState.errors.firstName)}
-                aria-describedby="signup-error"
               />
 
               <AuthFormInput<SignUpDetailsFormValues>
@@ -197,7 +205,6 @@ export const SignUpPage = () => {
                 label="Email address"
                 required
                 aria-invalid={Boolean(detailsForm.formState.errors.email)}
-                aria-describedby="signup-error"
               />
 
               <AuthFormPasswordInput<SignUpDetailsFormValues>
@@ -208,17 +215,16 @@ export const SignUpPage = () => {
                 label="Password"
                 required
                 aria-invalid={Boolean(detailsForm.formState.errors.password)}
-                aria-describedby="signup-error"
               />
 
               {!detailsForm.formState.errors.password ? (
-                <p className="text-xs text-[#6b6b6b]">
-                  Use at least 8 characters with uppercase, lowercase, and a number.
+                <p className="text-xs font-medium text-auth-error">
+                  Use at least 8 characters, including uppercase, lowercase, and a number.
                 </p>
               ) : null}
 
               <FormErrorMessage
-                id="signup-error"
+                id="signup-submit-error"
                 message={detailsForm.formState.errors.root?.message ?? ''}
                 visible={Boolean(detailsForm.formState.errors.root?.message)}
               />
@@ -256,7 +262,7 @@ export const SignUpPage = () => {
               />
 
               <FormErrorMessage
-                id="signup-error"
+                id="signup-submit-error"
                 message={otpForm.formState.errors.root?.message ?? ''}
                 visible={Boolean(otpForm.formState.errors.root?.message)}
               />
