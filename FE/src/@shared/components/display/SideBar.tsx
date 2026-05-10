@@ -56,6 +56,7 @@ interface SidebarItemConfig {
   href?: string
   icon: ComponentType<{ className?: string }>
   badge?: SidebarBadge
+  unreadCount?: number
   eyebrow: string
   description: string
   accent: SidebarAccent
@@ -128,6 +129,8 @@ const accents = {
   },
 } satisfies Record<string, SidebarAccent>
 
+const messagesCount = 2
+
 const topItems: SidebarItemConfig[] = [
   {
     label: 'Home',
@@ -150,6 +153,7 @@ const topItems: SidebarItemConfig[] = [
     label: 'Messages',
     href: '/messages',
     icon: MessageCircle,
+    unreadCount: messagesCount,
     eyebrow: 'Collector inbox',
     description: 'Read conversations and reply to collectors.',
     accent: accents.red,
@@ -292,8 +296,6 @@ const workspaceItem: SidebarItemConfig = {
   accent: accents.blue,
 }
 
-const messagesCount = 2
-
 const planBadgeColors: Record<SidebarBadge, string> = {
   Pro: 'bg-blue-600 text-white',
   Growth: 'bg-purple-600 text-white',
@@ -376,6 +378,7 @@ const SidebarItem = ({
   href,
   icon: Icon,
   badge,
+  unreadCount,
   activePrefix,
   onUpgradeRequired,
   ...item
@@ -408,8 +411,14 @@ const SidebarItem = ({
     href,
     icon: Icon,
     badge,
+    unreadCount,
     activePrefix,
   }
+
+  const ariaLabel =
+    unreadCount && unreadCount > 0
+      ? `${label}, ${unreadCount} unread ${unreadCount === 1 ? 'message' : 'messages'}`
+      : label
 
   const content = (
     <>
@@ -427,9 +436,9 @@ const SidebarItem = ({
           isActive ? item.accent.text : '',
         )}
       />
-      {label === 'Messages' && messagesCount > 0 ? (
-        <span className="absolute -top-1 right-1 z-20 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white shadow-sm ring-4 ring-red-100">
-          {messagesCount}
+      {unreadCount && unreadCount > 0 ? (
+        <span className="absolute top-1.5 right-1.5 z-20 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-none text-white shadow-sm ring-2 ring-white">
+          {unreadCount}
         </span>
       ) : null}
       {badge ? (
@@ -451,11 +460,11 @@ const SidebarItem = ({
   )
 
   const trigger = href ? (
-    <Link href={href} className={className} onClick={handleClick} aria-label={label}>
+    <Link href={href} className={className} onClick={handleClick} aria-label={ariaLabel}>
       {content}
     </Link>
   ) : (
-    <button type="button" className={className} onClick={handleClick} aria-label={label}>
+    <button type="button" className={className} onClick={handleClick} aria-label={ariaLabel}>
       {content}
     </button>
   )
@@ -497,7 +506,7 @@ export const SideBar = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto px-3 py-4">
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {topItems.map((item) => {
                 if (item.label === 'Profile') {
                   return (
@@ -521,7 +530,7 @@ export const SideBar = () => {
 
             <div className="my-4 border-t border-slate-200" />
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {mainItems.slice(0, 5).map((item) => (
                 <SidebarItem
                   key={item.label}
@@ -547,7 +556,7 @@ export const SideBar = () => {
 
             <div className="my-4 border-t border-slate-200" />
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {bottomItems.map((item) => (
                 <SidebarItem
                   key={item.label}
