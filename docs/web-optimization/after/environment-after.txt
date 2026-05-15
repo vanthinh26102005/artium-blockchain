@@ -1,0 +1,13 @@
+# Environment After
+
+Captured at ISO: 2026-05-07T15:39:25.602Z
+Captured at local time: 22:39:25 7/5/2026 Asia/Ho_Chi_Minh
+Branch: chore/web-optimization-evidence
+Commit: 67b28e6fe316c9730c484c50ea5badf7f6630422
+Node: v24.14.0
+npm: 11.9.0
+Frontend URL: http://localhost:3000
+Backend URL: https://api.dgpthinh.io.vn
+Checkout artwork ID: 477a93ea-b6b0-4e32-8122-2bfca3666c50
+Browser/tools: Lighthouse CLI with headless Chrome; Chrome/CDP network capture; Chrome/CDP RPC mock provider check.
+Viewport/network: Lighthouse defaults for desktop/mobile; network captures use local production frontend and production backend.

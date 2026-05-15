@@ -1,0 +1,16 @@
+HTTP/2 200 
+date: Thu, 07 May 2026 10:43:32 GMT
+content-type: application/json; charset=utf-8
+content-length: 1295
+access-control-allow-credentials: true
+etag: W/"50f-uzmfaYDomkr/ZpgUjbJ9eHjNZAs"
+vary: Origin
+x-powered-by: Express
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+cf-cache-status: DYNAMIC
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=d0lZyNc0xSiaKWHx%2F1bfo%2FOyhbO0HbTDH7CJTOwLEZ%2F40YglaqmlD3cVh4EiCo4KnU5uofNDioI93KdRYYoG%2FJm9de6zSTg2avAsk6g0xmqzh7YrPISBhRFNgaNikC05iH5aQr8%3D"}]}
+server: cloudflare
+cf-ray: 9f7f9fce2dab834e-SIN
+alt-svc: h3=":443"; ma=86400
+
+{"createdAt":"2026-05-03T14:55:26.345Z","updatedAt":"2026-05-03T14:56:44.575Z","id":"477a93ea-b6b0-4e32-8122-2bfca3666c50","sellerId":"13d2bb3e-b7cb-4bdd-8daf-bdfe4a5c0db0","creatorName":"0x20660b8d","title":"1","description":"1","creationYear":2,"editionRun":"2","dimensions":{"height":1,"width":2,"unit":"in"},"weight":{"value":2,"unit":"lbs"},"materials":null,"location":null,"price":"12.00","currency":"USD","quantity":1,"status":"ACTIVE","isPublished":true,"images":[{"id":"120eda29-4258-458f-b40d-603c75b7fcf9","url":"https://storage.googleapis.com/artwork_uit/artworks/13d2bb3e-b7cb-4bdd-8daf-bdfe4a5c0db0/477a93ea-b6b0-4e32-8122-2bfca3666c50/120eda29-4258-458f-b40d-603c75b7fcf9.jpg","order":0,"bucket":"artwork_uit","publicId":"artworks/13d2bb3e-b7cb-4bdd-8daf-bdfe4a5c0db0/477a93ea-b6b0-4e32-8122-2bfca3666c50/120eda29-4258-458f-b40d-603c75b7fcf9.jpg","createdAt":"2026-05-03T14:56:42.311Z","isPrimary":true,"secureUrl":"https://storage.googleapis.com/artwork_uit/artworks/13d2bb3e-b7cb-4bdd-8daf-bdfe4a5c0db0/477a93ea-b6b0-4e32-8122-2bfca3666c50/120eda29-4258-458f-b40d-603c75b7fcf9.jpg"}],"folderId":null,"viewCount":0,"likeCount":0,"commentCount":0,"moodboardCount":0,"ipfsMetadataHash":null,"reservePrice":null,"minBidIncrement":null,"auctionDuration":null,"onChainAuctionId":null}

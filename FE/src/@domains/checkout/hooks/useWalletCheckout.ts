@@ -19,6 +19,7 @@ export type WalletErrorState = {
 type UseWalletCheckoutArgs = {
   quote: EthereumQuoteResponse | null
   isQuoteExpired: boolean
+  enabled?: boolean
 }
 
 type SubmitQuotedTransactionResult = {
@@ -66,7 +67,12 @@ function classifyMetaMaskError(
       : (err as MetaMaskError)?.message || (err as MetaMaskError)?.data?.message || ''
   const normalizedMessage = message.toLowerCase()
 
-  if (code === 4001 || normalizedMessage.includes('user rejected')) {
+  if (
+    code === 4001 ||
+    normalizedMessage.includes('user rejected') ||
+    normalizedMessage.includes('user denied') ||
+    normalizedMessage.includes('denied transaction signature')
+  ) {
     if (context === 'connect') {
       return {
         message: 'You rejected the MetaMask connection request. Retry connection when you are ready.',
@@ -164,6 +170,7 @@ function resolvePlatformWalletAddress(): string {
 export const useWalletCheckout = ({
   quote,
   isQuoteExpired,
+  enabled = true,
 }: UseWalletCheckoutArgs): UseWalletCheckoutResult => {
   const [walletAddress, setWalletAddress] = useState('')
   const [currentChainId, setCurrentChainId] = useState<string | null>(null)
@@ -195,6 +202,10 @@ export const useWalletCheckout = ({
   }, [clearTransactionState])
 
   const syncWalletState = useCallback(async (): Promise<WalletStateSnapshot> => {
+    if (!enabled) {
+      return { walletAddress, currentChainId }
+    }
+
     if (typeof window === 'undefined' || !window.ethereum) {
       return { walletAddress: '', currentChainId: null }
     }
@@ -213,14 +224,18 @@ export const useWalletCheckout = ({
       setCurrentChainId(null)
       return { walletAddress: '', currentChainId: null }
     }
-  }, [])
+  }, [currentChainId, enabled, walletAddress])
 
   useEffect(() => {
+    if (!enabled) {
+      return
+    }
+
     void syncWalletState()
-  }, [syncWalletState])
+  }, [enabled, syncWalletState])
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.ethereum) {
+    if (!enabled || typeof window === 'undefined' || !window.ethereum) {
       return
     }
 
@@ -252,7 +267,7 @@ export const useWalletCheckout = ({
       window.ethereum?.removeListener?.('accountsChanged', handleAccountsChanged)
       window.ethereum?.removeListener?.('chainChanged', handleChainChanged)
     }
-  }, [clearTransactionState])
+  }, [clearTransactionState, enabled])
 
   useEffect(() => {
     clearTransactionState()
@@ -366,7 +381,15 @@ export const useWalletCheckout = ({
       throw new Error('The Sepolia quote expired. Refresh the quote and try again.')
     }
 
-    const walletState = await syncWalletState()
+    let walletState: WalletStateSnapshot = {
+      walletAddress,
+      currentChainId,
+    }
+
+    if (!walletState.walletAddress || !walletState.currentChainId) {
+      walletState = await syncWalletState()
+    }
+
     const fromAddress = walletState.walletAddress
 
     if (!fromAddress) {
@@ -405,9 +428,11 @@ export const useWalletCheckout = ({
     clearTransactionState,
     isQuoteExpired,
     quote,
+    currentChainId,
     requiredChainId,
     switchToRequiredChain,
     syncWalletState,
+    walletAddress,
   ])
 
   return {

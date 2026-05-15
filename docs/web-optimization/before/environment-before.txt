@@ -1,0 +1,11 @@
+chore/web-optimization-evidence
+commit=67b28e6f
+date_local=2026-05-07 17:47:53 +07
+timezone=Asia/Ho_Chi_Minh
+node=v24.14.0
+npm=11.9.0
+api_url=https://api.dgpthinh.io.vn
+checkout_artwork_id=477a93ea-b6b0-4e32-8122-2bfca3666c50
+frontend_url=http://localhost:3000
+browser=Google Chrome headless via Lighthouse and Chrome DevTools Protocol
+network_profile=default local network, browser cache disabled by Lighthouse; fresh Chrome contexts for CDP network capture

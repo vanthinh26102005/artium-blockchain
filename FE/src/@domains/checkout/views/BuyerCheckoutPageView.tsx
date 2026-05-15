@@ -141,7 +141,7 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
       setIsFetchingArtwork(true)
       setFetchError(null)
       try {
-        const apiArtwork = await artworkApis.getArtworkById(artworkId)
+        const apiArtwork = await artworkApis.getArtworkById(artworkId, { auth: false })
         if (cancelled) return
         if (!apiArtwork) {
           setArtwork(null)
@@ -194,9 +194,11 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
   const walletQuoteExpiresInSeconds = walletQuote
     ? Math.max(0, Math.ceil((new Date(walletQuote.expiresAt).getTime() - walletQuoteClock) / 1000))
     : null
+  const isWalletCheckoutActive = step === 2 && watchedPaymentMethod === 'wallet'
   const walletCheckout = useWalletCheckout({
     quote: walletQuote,
     isQuoteExpired: isWalletQuoteExpired,
+    enabled: isWalletCheckoutActive,
   })
   const connectedWalletAddress = walletCheckout.walletAddress
   const clearWalletTransactionState = walletCheckout.clearTransactionState

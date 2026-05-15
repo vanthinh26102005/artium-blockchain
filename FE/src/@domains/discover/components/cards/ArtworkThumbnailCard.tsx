@@ -1,4 +1,5 @@
 // next
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 
 // @domains - discover
@@ -33,11 +34,12 @@ export const ArtworkThumbnailCard = ({ artwork }: ArtworkThumbnailCardProps) => 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_6px_16px_rgba(15,23,42,0.08)] transition duration-200 ease-out group-hover:-translate-y-0.5 group-hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
         {/* media */}
         <div className="relative w-full bg-slate-100" style={{ height: artwork.height }}>
-          <img
+          <Image
             src={artwork.imageUrl}
             alt={artwork.title}
-            loading="lazy"
-            className="h-full w-full object-cover"
+            fill
+            sizes="(min-width: 1280px) 160px, (min-width: 768px) 20vw, 50vw"
+            className="object-cover"
           />
 
           {/* trending badge */}

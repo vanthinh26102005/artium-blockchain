@@ -1,0 +1,33 @@
+
+DevTools listening on ws://127.0.0.1:9223/devtools/browser/53f15642-2c87-4cf4-b6ef-6939914a0884
+[48093:5066542:0507/174540.857532:ERROR:net/socket/ssl_client_socket_impl.cc:924] handshake failed; returned -1, SSL error code 1, net_error -183
+Trying to load the allocator multiple times. This is *not* supported.
+[48084:5066497:0507/174542.365425:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+Created TensorFlow Lite XNNPACK delegate for CPU.
+[48180:5067437:0507/174558.099657:VERBOSE1:chrome/updater/updater.cc:352] Version: 149.0.7814.0, opt, ARM_64, command line: /Users/huxtris/Library/Application Support/Google/GoogleUpdater/149.0.7814.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake-all --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[48180:5067437:0507/174558.100507:VERBOSE1:chrome/updater/updater.cc:355] OS version: 26.4.0, arch: arm64, System uptime (seconds): 201106, parent pid: 48084
+[48180:5067437:0507/174558.107763:VERBOSE2:chrome/updater/event_history.cc:265] Emitted a UPDATER_PROCESS START event to the history log
+[48182:5067441:0507/174558.123715:VERBOSE1:chrome/updater/updater.cc:352] Version: 149.0.7814.0, opt, ARM_64, command line: /Users/huxtris/Library/Application Support/Google/GoogleUpdater/149.0.7814.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/huxtris/Library/Application Support/Google/GoogleUpdater/149.0.7814.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=149.0.7814.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[48182:5067441:0507/174558.124004:VERBOSE1:chrome/updater/updater.cc:355] OS version: 26.4.0, arch: arm64, System uptime (seconds): 201106, parent pid: 1
+[48182:5067441:0507/174558.126886:VERBOSE2:chrome/updater/event_history.cc:265] Emitted a UPDATER_PROCESS START event to the history log
+[48180:5067437:0507/174558.127418:VERBOSE1:chrome/updater/crash_reporter.cc:124] Crash handler launched and ready.
+[48180:5067437:0507/174558.128192:VERBOSE1:chrome/updater/crash_client.cc:108] Found 0 completed crash reports
+[48180:5067437:0507/174558.128291:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[48180:5067437:0507/174558.128396:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/huxtris/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)
+[48180:5067437:0507/174558.128449:VERBOSE1:chrome/updater/updater.cc:103] Crash reporting initialized.
+[48180:5067449:0507/174558.128751:VERBOSE1:chrome/updater/app/app_wakeall.cc:58] Launching `/Users/huxtris/Library/Application Support/Google/GoogleUpdater/149.0.7814.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake`
+[48183:5067453:0507/174558.138626:VERBOSE1:chrome/updater/updater.cc:352] Version: 149.0.7814.0, opt, ARM_64, command line: /Users/huxtris/Library/Application Support/Google/GoogleUpdater/149.0.7814.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[48183:5067453:0507/174558.138833:VERBOSE1:chrome/updater/updater.cc:355] OS version: 26.4.0, arch: arm64, System uptime (seconds): 201106, parent pid: 48180
+[48183:5067453:0507/174558.142130:VERBOSE2:chrome/updater/event_history.cc:265] Emitted a UPDATER_PROCESS START event to the history log
+[48185:5067457:0507/174558.159566:VERBOSE1:chrome/updater/updater.cc:352] Version: 149.0.7814.0, opt, ARM_64, command line: /Users/huxtris/Library/Application Support/Google/GoogleUpdater/149.0.7814.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/huxtris/Library/Application Support/Google/GoogleUpdater/149.0.7814.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=149.0.7814.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[48185:5067457:0507/174558.159798:VERBOSE1:chrome/updater/updater.cc:355] OS version: 26.4.0, arch: arm64, System uptime (seconds): 201106, parent pid: 1
+[48185:5067457:0507/174558.162647:VERBOSE2:chrome/updater/event_history.cc:265] Emitted a UPDATER_PROCESS START event to the history log
+[48183:5067453:0507/174558.163266:VERBOSE1:chrome/updater/crash_reporter.cc:124] Crash handler launched and ready.
+[48183:5067453:0507/174558.164074:VERBOSE1:chrome/updater/crash_client.cc:108] Found 0 completed crash reports
+[48183:5067453:0507/174558.164157:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[48183:5067453:0507/174558.164230:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/huxtris/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)
+[48183:5067453:0507/174558.164278:VERBOSE1:chrome/updater/updater.cc:103] Crash reporting initialized.
+[48183:5067453:0507/174558.164592:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_mojo.cc:61] Run
+[48084:5066497:0507/174603.402744:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[48084:5066517:0507/174603.485282:ERROR:base/process/process_mac.cc:53] task_policy_set TASK_CATEGORY_POLICY: (os/kern) invalid argument (4)
+[48084:5066517:0507/174603.485298:ERROR:base/process/process_mac.cc:98] task_policy_set TASK_SUPPRESSION_POLICY: (os/kern) invalid argument (4)
