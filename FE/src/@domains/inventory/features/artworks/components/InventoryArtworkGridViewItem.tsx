@@ -6,10 +6,12 @@ import { OrderStatusBadge } from '@domains/orders/components/OrderStatusBadge'
 import { SellerAuctionDraftBadge } from '@domains/auction/components'
 import { useSellerAuctionTermsDraftStatus } from '@domains/auction/hooks/useSellerAuctionTermsDraftStatus'
 import { InventoryArtworkActionMenu } from '@domains/inventory/features/artworks/components/InventoryArtworkActionMenu'
+import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
 import {
-  type InventoryArtwork,
-  type InventoryArtworkStatus,
-} from '@domains/inventory/features/artworks/types/inventoryArtwork'
+  getInventoryArtworkStatus,
+  getInventoryArtworkStatusClassName,
+  getInventoryArtworkVisibilityLabel,
+} from '@domains/inventory/features/artworks/utils/inventoryArtworkStatus'
 import { useInventorySelectionStore } from '@domains/inventory/core/stores/useInventorySelectionStore'
 
 type InventoryArtworkGridViewItemProps = {
@@ -20,22 +22,6 @@ type InventoryArtworkGridViewItemProps = {
   onOpenDetails: (artwork: InventoryArtwork) => void
   onToggleProfileVisibility: (artwork: InventoryArtwork) => void
   onStartAuction: (artwork: InventoryArtwork) => void
-}
-
-const STATUS_CONFIG: Record<
-  InventoryArtworkStatus,
-  { icon: string; label: string; className: string }
-> = {
-  Draft: {
-    icon: '○',
-    label: 'Draft',
-    className: 'text-slate-500',
-  },
-  Hidden: {
-    icon: '◉',
-    label: 'Hidden',
-    className: 'text-amber-600',
-  },
 }
 
 export const InventoryArtworkGridViewItem = ({
@@ -52,12 +38,12 @@ export const InventoryArtworkGridViewItem = ({
   const toggle = useInventorySelectionStore((state) => state.toggle)
 
   // -- derived --
-  const statusConfig = STATUS_CONFIG[artwork.status] ?? STATUS_CONFIG.Hidden
+  const status = getInventoryArtworkStatus(artwork)
   const hasAuctionDraft = useSellerAuctionTermsDraftStatus(artwork.id)
   const priceLabel =
     typeof artwork.price === 'number' ? `US$${artwork.price.toLocaleString('en-US')}` : null
   const isSelected = selectedIds.includes(artwork.id)
-  const visibilityLabel = artwork.status === 'Hidden' ? 'Hidden in profile' : 'Draft'
+  const visibilityLabel = getInventoryArtworkVisibilityLabel(artwork)
 
   // -- handlers --
   const handleToggleSelection = () => {
@@ -150,15 +136,15 @@ export const InventoryArtworkGridViewItem = ({
           ) : null}
           <span
             className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
-              artwork.status === 'Hidden'
-                ? 'bg-slate-100 text-slate-600'
-                : 'bg-amber-50 text-amber-700'
+              getInventoryArtworkStatusClassName(status.tone)
             }`}
           >
-            <span className={`text-base leading-none ${statusConfig.className}`}>{statusConfig.icon}</span>
-            {visibilityLabel}
+            {status.label}
           </span>
-          {artwork.auctionLifecycle ? <OrderStatusBadge status={artwork.auctionLifecycle.status} /> : null}
+          <span className="text-xs font-medium text-slate-500">{visibilityLabel}</span>
+          {artwork.auctionLifecycle ? (
+            <OrderStatusBadge status={artwork.auctionLifecycle.status} />
+          ) : null}
         </div>
       </div>
     </article>

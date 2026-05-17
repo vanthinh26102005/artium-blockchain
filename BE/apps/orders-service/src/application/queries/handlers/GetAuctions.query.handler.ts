@@ -80,6 +80,9 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
           if (!auction) {
             return false;
           }
+          if (!filters.status && auction.statusKey === AuctionStatusKey.CLOSED) {
+            return false;
+          }
           if (filters.status && auction.statusKey !== filters.status) {
             return false;
           }
@@ -246,8 +249,14 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     }
 
     const endsAtMs = new Date(endsAt).getTime();
-    if (Number.isFinite(endsAtMs) && endsAtMs - Date.now() <= ONE_HOUR_MS) {
-      return AuctionStatusKey.ENDING_SOON;
+    if (Number.isFinite(endsAtMs)) {
+      const msUntilEnd = endsAtMs - Date.now();
+      if (msUntilEnd <= 0) {
+        return AuctionStatusKey.CLOSED;
+      }
+      if (msUntilEnd <= ONE_HOUR_MS) {
+        return AuctionStatusKey.ENDING_SOON;
+      }
     }
     const currentBidWei = this.resolveCurrentBidWei(order, chainAuction);
     if (!currentBidWei || currentBidWei === '0') {

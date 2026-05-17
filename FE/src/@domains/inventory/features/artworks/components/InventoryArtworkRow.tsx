@@ -7,6 +7,11 @@ import { cn } from '@shared/lib/utils'
 import { OrderStatusBadge } from '@domains/orders/components/OrderStatusBadge'
 import { InventoryArtworkActionMenu } from '@domains/inventory/features/artworks/components/InventoryArtworkActionMenu'
 import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
+import {
+  getInventoryArtworkStatus,
+  getInventoryArtworkStatusClassName,
+  getInventoryArtworkVisibilityLabel,
+} from '@domains/inventory/features/artworks/utils/inventoryArtworkStatus'
 
 const formatInventoryPrice = (price?: number) => {
   if (typeof price !== 'number') {
@@ -48,9 +53,10 @@ export const InventoryArtworkRow = ({
   onStartAuction,
   onDelete,
 }: InventoryArtworkRowProps) => {
-  const visibilityLabel = artwork.status === 'Hidden' ? 'Hidden in profile' : 'Draft'
+  const status = getInventoryArtworkStatus(artwork)
+  const visibilityLabel = getInventoryArtworkVisibilityLabel(artwork)
   const lifecycleLabel = artwork.auctionLifecycle ? 'Auction status' : 'Listing status'
-  const lifecycleValue = artwork.auctionLifecycle ? null : 'Not listed'
+  const lifecycleValue = artwork.auctionLifecycle ? null : status.label
 
   const handleOpenArtwork = () => {
     onOpenDetails(artwork)
@@ -131,13 +137,12 @@ export const InventoryArtworkRow = ({
             <span
               className={cn(
                 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em]',
-                artwork.status === 'Hidden'
-                  ? 'bg-slate-100 text-slate-600'
-                  : 'bg-amber-50 text-amber-700',
+                getInventoryArtworkStatusClassName(status.tone),
               )}
             >
-              {visibilityLabel}
+              {status.label}
             </span>
+            <span className="text-xs font-medium text-slate-500">{visibilityLabel}</span>
             {artwork.auctionLifecycle ? (
               <OrderStatusBadge status={artwork.auctionLifecycle.status} />
             ) : null}

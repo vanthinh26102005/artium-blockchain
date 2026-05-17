@@ -17,6 +17,11 @@ import {
   getProfileVisibilityLabel,
   isArtworkEditLocked,
 } from '@domains/inventory/features/artworks/utils/inventoryArtworkActions'
+import {
+  getInventoryArtworkStatus,
+  getInventoryArtworkStatusClassName,
+  getInventoryArtworkVisibilityLabel,
+} from '@domains/inventory/features/artworks/utils/inventoryArtworkStatus'
 
 type InventoryArtworkDetailsPanelProps = {
   isOpen: boolean
@@ -48,6 +53,14 @@ export const InventoryArtworkDetailsPanel = ({
   const isArtworkSection = activeSection === 'artwork'
   const isEditLocked = isArtworkEditLocked(artwork)
   const profileVisibilityLabel = getProfileVisibilityLabel(artwork)
+  const status = getInventoryArtworkStatus(artwork)
+  const visibilityLabel = getInventoryArtworkVisibilityLabel(artwork)
+  const availabilityLabel =
+    typeof artwork.quantity === 'number'
+      ? `${artwork.quantity} available`
+      : artwork.isPublished
+        ? 'Available'
+        : 'Not publicly available'
 
   const handleEdit = () => {
     if (isEditLocked) {
@@ -138,7 +151,18 @@ export const InventoryArtworkDetailsPanel = ({
 
               <div className="space-y-6">
                 <div>
-                  <p className="text-sm font-semibold text-slate-400 uppercase">{artwork.status}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${getInventoryArtworkStatusClassName(
+                        status.tone,
+                      )}`}
+                    >
+                      {status.label}
+                    </span>
+                    <span className="text-sm font-semibold text-slate-400 uppercase">
+                      {visibilityLabel}
+                    </span>
+                  </div>
                   <h3 className="mt-2 text-[36px] leading-[44px] font-semibold text-slate-900">
                     {artwork.title}
                   </h3>
@@ -160,9 +184,7 @@ export const InventoryArtworkDetailsPanel = ({
 
                 <div>
                   <p className="text-3xl font-semibold text-slate-900">{priceLabel}</p>
-                  <p className="mt-2 text-lg text-slate-500">
-                    Only {artwork.status === 'Hidden' ? '0' : '7'} available.
-                  </p>
+                  <p className="mt-2 text-lg text-slate-500">{availabilityLabel}</p>
                 </div>
 
                 <div className="space-y-2 text-lg text-slate-600">
