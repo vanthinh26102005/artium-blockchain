@@ -14,6 +14,7 @@ export const mapAuctionReadToLot = (auction: AuctionRead): AuctionLot => {
     auctionId: auction.auctionId,
     onChainOrderId: auction.onChainOrderId,
     artworkId: auction.artwork.artworkId,
+    sellerId: auction.artwork.sellerId ?? null,
     title,
     bidValue: auction.currentBidEth,
     categoryKey: auction.artwork.categoryKey,
@@ -31,6 +32,11 @@ export const mapAuctionReadToLot = (auction: AuctionRead): AuctionLot => {
     sellerWallet: auction.sellerWallet ?? null,
     contractAddress: auction.contractAddress ?? null,
     txHash: auction.txHash ?? null,
+    orderProjectionId: auction.orderProjectionId ?? null,
+    orderNumber: auction.orderNumber ?? null,
+    orderStatus: auction.orderStatus ?? null,
+    paymentStatus: auction.paymentStatus ?? null,
+    escrowState: auction.escrowState ?? null,
     serverTime: auction.serverTime,
   }
 }

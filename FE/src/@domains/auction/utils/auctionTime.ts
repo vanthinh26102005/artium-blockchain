@@ -164,9 +164,12 @@ export const getAuctionTimeRemainingDisplay = ({
   endsAt,
   elapsedSeconds = 0,
 }: AuctionTimeInput): TimeRemainingDisplay => {
+  const hasEndTimestamp = Boolean(endsAt && !Number.isNaN(new Date(endsAt).getTime()))
   const initialRemainingSeconds = getInitialRemainingSeconds(status, statusKey, endsAt)
   const remainingSeconds =
-    initialRemainingSeconds === null ? null : Math.max(0, initialRemainingSeconds - elapsedSeconds)
+    initialRemainingSeconds === null
+      ? null
+      : Math.max(0, initialRemainingSeconds - (hasEndTimestamp ? 0 : elapsedSeconds))
 
   return {
     label: getTimeRemainingLabel(remainingSeconds, status, statusKey),

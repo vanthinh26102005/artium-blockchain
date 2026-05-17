@@ -6,14 +6,24 @@ import {
   Boxes,
   Check,
   CheckCircle2,
+  Clock,
+  ExternalLink,
+  Gavel,
   ImageOff,
+  ListChecks,
   Lock,
   RefreshCcw,
+  RotateCcw,
   ShieldCheck,
 } from 'lucide-react'
 import { Button } from '@shared/components/ui/button'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
-import type { SellerAuctionArtworkCandidate } from '@shared/apis/auctionApis'
+import auctionApis, {
+  type SellerAuctionArtworkCandidate,
+  type SellerAuctionStartStatusResponse,
+} from '@shared/apis/auctionApis'
+import { mapAuctionReadToLot } from '../mappers/auctionLotMapper'
+import type { AuctionLot } from '../types'
 import {
   SellerAuctionDraftBadge,
   SellerAuctionStartStatusShell,
@@ -193,6 +203,386 @@ const LoadingGrid = () => (
   </div>
 )
 
+const formatDateTime = (value?: string | null) => {
+  if (!value) {
+    return 'N/A'
+  }
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return 'N/A'
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date)
+}
+
+const formatEth = (value?: number | null) =>
+  typeof value === 'number' && Number.isFinite(value) ? `${value.toFixed(4).replace(/\.?0+$/, '')} ETH` : '0 ETH'
+
+const getLifecycleLabel = (status?: SellerAuctionStartStatusResponse['status']) => {
+  switch (status) {
+    case 'auction_active':
+      return 'Auction active'
+    case 'pending_start':
+      return 'Start pending'
+    case 'retry_available':
+      return 'Retry available'
+    case 'start_failed':
+      return 'Start failed'
+    default:
+      return 'Order projection'
+  }
+}
+
+type SellerAuctionOverviewRow = {
+  id: string
+  title: string
+  creatorName?: string | null
+  thumbnailUrl?: string | null
+  artworkId: string
+  auction?: AuctionLot
+  startStatus?: SellerAuctionStartStatusResponse
+}
+
+const getRowStatusTone = (row: SellerAuctionOverviewRow) => {
+  if (row.auction?.orderStatus && row.auction.statusKey === 'closed') {
+    return 'border-slate-200 bg-slate-100 text-slate-700'
+  }
+  if (row.auction) {
+    return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+  }
+  if (row.startStatus?.status === 'start_failed') {
+    return 'border-rose-200 bg-rose-50 text-rose-700'
+  }
+  if (row.startStatus?.status === 'retry_available') {
+    return 'border-amber-200 bg-amber-50 text-amber-700'
+  }
+  return 'border-blue-200 bg-blue-50 text-blue-700'
+}
+
+const canResetStartAttempt = (row: SellerAuctionOverviewRow) =>
+  Boolean(
+    row.startStatus &&
+      !row.auction &&
+      row.startStatus.status === 'pending_start' &&
+      row.startStatus.walletActionRequired &&
+      !row.startStatus.txHash,
+  )
+
+const SellerAuctionManagerPanel = () => {
+  const router = useRouter()
+  const [rows, setRows] = useState<SellerAuctionOverviewRow[]>([])
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [resettingAttemptId, setResettingAttemptId] = useState<string | null>(null)
+
+  const loadOverview = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const [auctionResponse, startStatuses] = await Promise.all([
+        auctionApis.getSellerAuctions({ take: 50 }),
+        auctionApis.getSellerAuctionStartStatuses(),
+      ])
+      const sellerAuctions = auctionResponse.data.map(mapAuctionReadToLot)
+      const auctionsByOrderId = new Map(
+        sellerAuctions.map((auction) => [auction.onChainOrderId, auction]),
+      )
+      const auctionsByArtworkId = new Map(
+        sellerAuctions.map((auction) => [auction.artworkId, auction]),
+      )
+      const nextRows: SellerAuctionOverviewRow[] = []
+      const usedAuctionIds = new Set<string>()
+
+      startStatuses.forEach((status) => {
+        const auction =
+          auctionsByOrderId.get(status.orderId) ?? auctionsByArtworkId.get(status.artworkId)
+        if (auction?.auctionId) {
+          usedAuctionIds.add(auction.auctionId)
+        }
+
+        nextRows.push({
+          id: status.attemptId,
+          title: status.artworkTitle,
+          creatorName: status.creatorName,
+          thumbnailUrl: status.thumbnailUrl,
+          artworkId: status.artworkId,
+          startStatus: status,
+          auction,
+        })
+      })
+
+      sellerAuctions.forEach((auction) => {
+        if (usedAuctionIds.has(auction.auctionId)) {
+          return
+        }
+
+        nextRows.push({
+          id: auction.auctionId,
+          title: auction.title,
+          creatorName: auction.sellerWallet,
+          thumbnailUrl: auction.imageSrc,
+          artworkId: auction.artworkId,
+          auction,
+        })
+      })
+
+      setRows(nextRows)
+      setSelectedRowId((currentId) => currentId ?? nextRows[0]?.id ?? null)
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : 'Unable to load seller auctions.')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadOverview()
+  }, [loadOverview])
+
+  const selectedRow = rows.find((row) => row.id === selectedRowId) ?? rows[0] ?? null
+
+  const handleResetStartAttempt = async (row: SellerAuctionOverviewRow) => {
+    if (!row.startStatus || !canResetStartAttempt(row)) {
+      return
+    }
+
+    setResettingAttemptId(row.startStatus.attemptId)
+    setError(null)
+
+    try {
+      await auctionApis.resetSellerAuctionStartAttempt(row.startStatus.attemptId)
+      setSelectedRowId(null)
+      await loadOverview()
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Unable to reset this auction start attempt.',
+      )
+    } finally {
+      setResettingAttemptId(null)
+    }
+  }
+
+  return (
+    <section className="mt-8 space-y-6">
+      <div className="flex flex-col gap-3 rounded-[32px] border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
+            Auction detail
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+            Your auction activity
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            Review active order projections, wallet start attempts, bids, and recovery actions for
+            auctions created from this seller account.
+          </p>
+        </div>
+        <Button type="button" variant="outline" onClick={() => void loadOverview()}>
+          <RefreshCcw className="h-4 w-4" />
+          Refresh
+        </Button>
+      </div>
+
+      {error ? (
+        <div className="rounded-[24px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {error}
+        </div>
+      ) : null}
+
+      {isLoading ? (
+        <LoadingGrid />
+      ) : rows.length === 0 ? (
+        <div className="rounded-[32px] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+          <Gavel className="mx-auto h-10 w-10 text-slate-500" />
+          <h3 className="mt-4 text-2xl font-semibold text-slate-900">No seller auctions yet</h3>
+          <p className="mt-2 text-slate-500">
+            Start from the Create Auction tab when one of your artworks is ready.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
+            <div className="grid grid-cols-[minmax(0,1.5fr)_140px_140px_120px] gap-4 border-b border-slate-100 px-5 py-3 text-xs font-semibold tracking-[0.14em] text-slate-400 uppercase">
+              <span>Auction</span>
+              <span>Status</span>
+              <span>Bid</span>
+              <span>Action</span>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {rows.map((row) => {
+                const isSelected = selectedRow?.id === row.id
+                const statusLabel = row.auction
+                  ? row.auction.status
+                  : getLifecycleLabel(row.startStatus?.status)
+
+                return (
+                  <button
+                    key={row.id}
+                    type="button"
+                    onClick={() => setSelectedRowId(row.id)}
+                    className={`grid w-full grid-cols-1 gap-4 px-5 py-4 text-left transition hover:bg-slate-50 md:grid-cols-[minmax(0,1.5fr)_140px_140px_120px] md:items-center ${
+                      isSelected ? 'bg-slate-50' : 'bg-white'
+                    }`}
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      {row.thumbnailUrl ? (
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                          <Image src={row.thumbnailUrl} alt={row.title} fill unoptimized className="object-cover" />
+                        </div>
+                      ) : (
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                          <ImageOff className="h-5 w-5" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate text-base font-semibold text-slate-900">{row.title}</p>
+                        <p className="mt-1 truncate text-sm text-slate-500">
+                          {row.auction?.onChainOrderId ?? row.startStatus?.orderId ?? 'No order id'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${getRowStatusTone(row)}`}>
+                      {statusLabel}
+                    </span>
+                    <span className="text-sm font-semibold text-slate-900">
+                      {row.auction ? formatEth(row.auction.bidValue) : 'No bids'}
+                    </span>
+                    <span className="text-sm font-medium text-slate-500">
+                      View detail
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {selectedRow ? (
+            <aside className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                    Full detail
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold text-slate-900">{selectedRow.title}</h3>
+                </div>
+                <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getRowStatusTone(selectedRow)}`}>
+                  {selectedRow.auction
+                    ? selectedRow.auction.status
+                    : getLifecycleLabel(selectedRow.startStatus?.status)}
+                </span>
+              </div>
+
+              <div className="mt-6 space-y-4 text-sm">
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <div className="flex items-center gap-2 text-slate-500">
+                    <ListChecks className="h-4 w-4" />
+                    <span className="font-semibold uppercase tracking-[0.12em] text-xs">Order projection</span>
+                  </div>
+                  <dl className="mt-3 space-y-2">
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-slate-500">Order number</dt>
+                      <dd className="font-medium text-slate-900">{selectedRow.auction?.orderNumber ?? 'Not created'}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-slate-500">Order status</dt>
+                      <dd className="font-medium text-slate-900">{selectedRow.auction?.orderStatus ?? 'No order projection'}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-slate-500">Payment status</dt>
+                      <dd className="font-medium text-slate-900">{selectedRow.auction?.paymentStatus ?? 'N/A'}</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <div className="flex items-center gap-2 text-slate-500">
+                    <Gavel className="h-4 w-4" />
+                    <span className="font-semibold uppercase tracking-[0.12em] text-xs">Bid info</span>
+                  </div>
+                  <dl className="mt-3 space-y-2">
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-slate-500">Current bid</dt>
+                      <dd className="font-medium text-slate-900">{selectedRow.auction ? formatEth(selectedRow.auction.bidValue) : 'No bids yet'}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-slate-500">Minimum next bid</dt>
+                      <dd className="font-medium text-slate-900">{selectedRow.auction ? formatEth(selectedRow.auction.minimumNextBidEth) : 'N/A'}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-slate-500">Highest bidder</dt>
+                      <dd className="max-w-[220px] truncate font-mono text-xs text-slate-900">{selectedRow.auction?.highestBidder ?? 'No bidder'}</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <div className="flex items-center gap-2 text-slate-500">
+                    <Clock className="h-4 w-4" />
+                    <span className="font-semibold uppercase tracking-[0.12em] text-xs">Timeline</span>
+                  </div>
+                  <dl className="mt-3 space-y-2">
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-slate-500">Ends at</dt>
+                      <dd className="text-right font-medium text-slate-900">{formatDateTime(selectedRow.auction?.endsAt)}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-slate-500">Activated at</dt>
+                      <dd className="text-right font-medium text-slate-900">{formatDateTime(selectedRow.startStatus?.activatedAt)}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-slate-500">Updated at</dt>
+                      <dd className="text-right font-medium text-slate-900">{formatDateTime(selectedRow.startStatus?.updatedAt)}</dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3">
+                {selectedRow.auction ? (
+                  <Button
+                    type="button"
+                    className="bg-slate-900 text-white hover:bg-slate-700"
+                    onClick={() => void router.push(`/auction/bids/${encodeURIComponent(selectedRow.auction!.onChainOrderId)}`)}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Open public bid detail
+                  </Button>
+                ) : null}
+                {canResetStartAttempt(selectedRow) ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={resettingAttemptId === selectedRow.startStatus?.attemptId}
+                    onClick={() => void handleResetStartAttempt(selectedRow)}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    {resettingAttemptId === selectedRow.startStatus?.attemptId
+                      ? 'Resetting...'
+                      : 'Reset start attempt'}
+                  </Button>
+                ) : !selectedRow.auction ? (
+                  <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+                    No order projection exists yet. If a wallet transaction was submitted, wait for
+                    blockchain sync. If no transaction was submitted, reset is available.
+                  </p>
+                ) : null}
+              </div>
+            </aside>
+          ) : null}
+        </div>
+      )}
+    </section>
+  )
+}
+
 const StepRail = ({ currentStep }: { currentStep: 'artwork' | 'terms' }) => {
   const isTermsStep = currentStep === 'terms'
 
@@ -278,6 +668,7 @@ const SellerCandidateWorkspace = () => {
   const [draftSaved, setDraftSaved] = useState(false)
   const [walletError, setWalletError] = useState<string | null>(null)
   const [isEditingFailedTerms, setIsEditingFailedTerms] = useState(false)
+  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<'detail' | 'create'>('detail')
 
   const sellerAuctionStart = useSellerAuctionStart({ artworkId: termsArtworkId })
   const queryArtworkId = useMemo(() => {
@@ -364,6 +755,7 @@ const SellerCandidateWorkspace = () => {
       setDraftSaved(false)
       setWalletError(null)
       setIsEditingFailedTerms(false)
+      setActiveWorkspaceTab('create')
       sellerAuctionStart.setTrackedArtworkId(queryArtworkId)
       void sellerAuctionStart.refresh(queryArtworkId).catch(() => null)
     })
@@ -600,42 +992,68 @@ const SellerCandidateWorkspace = () => {
             <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
               Seller workspace
             </p>
-            <h1 className="mt-2 text-3xl font-semibold text-slate-900">Create auction</h1>
+            <h1 className="mt-2 text-3xl font-semibold text-slate-900">Seller auctions</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Select an eligible artwork, set buyer-facing auction terms, and hand off activation to
-              your wallet.
+              Review your auction detail, inspect order and bid state, or create a new seller auction.
             </p>
           </div>
-          <div className="w-full rounded-[28px] border border-slate-900 bg-slate-900 p-5 text-white shadow-sm lg:w-[360px]">
-            <p className="text-xs font-semibold tracking-[0.18em] text-white/50 uppercase">
-              Auction setup
-            </p>
-            <div className="mt-4">
-              <StepRail currentStep={effectiveCurrentStep} />
-            </div>
-
-            {effectiveCurrentStep === 'artwork' ? (
-              <>
-                <p className="mt-5 text-sm leading-6 text-white/75">
-                  Select an eligible artwork to unlock terms setup and preview.
-                </p>
-                <Button
-                  type="button"
-                  disabled={!selectedEligibleCandidate}
-                  onClick={handleContinueToTerms}
-                  className="mt-6 w-full bg-white text-slate-900 hover:bg-white/90 disabled:bg-white/25 disabled:text-white"
-                >
-                  Continue to auction terms
-                </Button>
-              </>
-            ) : (
-              <p className="mt-5 text-sm leading-6 text-white/75">
-                Review terms, MetaMask handoff, and persisted lifecycle status.
+          {activeWorkspaceTab === 'create' ? (
+            <div className="w-full rounded-[28px] border border-slate-900 bg-slate-900 p-5 text-white shadow-sm lg:w-[360px]">
+              <p className="text-xs font-semibold tracking-[0.18em] text-white/50 uppercase">
+                Auction setup
               </p>
-            )}
-          </div>
+              <div className="mt-4">
+                <StepRail currentStep={effectiveCurrentStep} />
+              </div>
+
+              {effectiveCurrentStep === 'artwork' ? (
+                <>
+                  <p className="mt-5 text-sm leading-6 text-white/75">
+                    Select an eligible artwork to unlock terms setup and preview.
+                  </p>
+                  <Button
+                    type="button"
+                    disabled={!selectedEligibleCandidate}
+                    onClick={handleContinueToTerms}
+                    className="mt-6 w-full bg-white text-slate-900 hover:bg-white/90 disabled:bg-white/25 disabled:text-white"
+                  >
+                    Continue to auction terms
+                  </Button>
+                </>
+              ) : (
+                <p className="mt-5 text-sm leading-6 text-white/75">
+                  Review terms, MetaMask handoff, and persisted lifecycle status.
+                </p>
+              )}
+            </div>
+          ) : null}
         </div>
       </div>
+
+      <div className="mt-6 inline-flex rounded-[24px] border border-slate-200 bg-white p-1 shadow-sm">
+        {[
+          { key: 'detail', label: 'Auction detail' },
+          { key: 'create', label: 'Create auction' },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => setActiveWorkspaceTab(tab.key as 'detail' | 'create')}
+            className={`rounded-[18px] px-5 py-3 text-sm font-semibold transition ${
+              activeWorkspaceTab === tab.key
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeWorkspaceTab === 'detail' ? <SellerAuctionManagerPanel /> : null}
+
+      {activeWorkspaceTab === 'create' ? (
+        <>
 
       <section className="mt-6 grid gap-4 md:grid-cols-3">
         {policyCards.map((card) => {
@@ -863,6 +1281,8 @@ const SellerCandidateWorkspace = () => {
           ) : null}
         </>
       )}
+        </>
+      ) : null}
     </div>
   )
 }

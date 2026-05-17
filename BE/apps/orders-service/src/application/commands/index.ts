@@ -7,4 +7,5 @@ export * from './OpenDispute.command';
 export * from './ResolveDispute.command';
 export * from './StartSellerAuction.command';
 export * from './AttachSellerAuctionStartTx.command';
+export * from './ResetSellerAuctionStartAttempt.command';
 export * from './handlers';

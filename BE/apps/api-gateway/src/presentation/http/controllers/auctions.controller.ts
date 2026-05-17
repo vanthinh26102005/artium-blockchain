@@ -15,6 +15,7 @@ import {
   UnauthorizedException,
   UseGuards,
   ConflictException,
+  Delete,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -192,6 +193,38 @@ export class AuctionsController {
     );
   }
 
+  @Get('seller/owned')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SELLER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List seller-owned auction order projections' })
+  async getSellerAuctions(@Query() query: GetAuctionsDto, @Req() req: any) {
+    const sellerId = this.getRequiredSellerId(req);
+    return sendRpc<PaginatedAuctionsObject>(
+      this.ordersClient,
+      { cmd: 'get_auctions' },
+      {
+        ...query,
+        sellerId,
+        includeSettled: true,
+      },
+    );
+  }
+
+  @Get('seller/start-statuses')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SELLER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List seller auction start lifecycle statuses' })
+  async getSellerAuctionStartStatuses(@Req() req: any) {
+    const sellerId = this.getRequiredSellerId(req);
+    return sendRpc<SellerAuctionStartStatusObject[]>(
+      this.ordersClient,
+      { cmd: 'get_seller_auction_start_statuses' },
+      { sellerId },
+    );
+  }
+
   @Get('seller/artwork-candidates')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SELLER)
@@ -307,6 +340,31 @@ export class AuctionsController {
         sellerId,
         ...input,
       },
+    );
+  }
+
+  @Delete('seller/start-attempts/:attemptId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SELLER)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Reset a seller auction start attempt without an order projection',
+  })
+  @ApiParam({
+    name: 'attemptId',
+    type: 'string',
+    description: 'Seller auction start attempt ID',
+  })
+  @HttpCode(HttpStatus.OK)
+  async resetSellerAuctionStartAttempt(
+    @Param('attemptId') attemptId: string,
+    @Req() req: any,
+  ) {
+    const sellerId = this.getRequiredSellerId(req);
+    return sendRpc<{ reset: boolean; attemptId: string; artworkId: string }>(
+      this.ordersClient,
+      { cmd: 'reset_seller_auction_start_attempt' },
+      { attemptId, sellerId },
     );
   }
 

@@ -61,11 +61,12 @@ const assertContractAddress = (contractAddress: string) => {
 const decimalEthToWei = (amountEth: string | number) => {
   const normalized = String(amountEth).trim()
 
-  if (!/^\d+(\.\d+)?$/.test(normalized)) {
+  if (!/^(?:\d+\.?\d*|\.\d+)$/.test(normalized)) {
     throw new AuctionBidWalletError('invalid_amount', 'Bid amount must be a valid ETH value.')
   }
 
-  const [wholePart, fractionPart = ''] = normalized.split('.')
+  const [wholePartRaw, fractionPart = ''] = normalized.split('.')
+  const wholePart = wholePartRaw || '0'
   if (fractionPart.length > WEI_DECIMALS) {
     throw new AuctionBidWalletError(
       'invalid_amount',

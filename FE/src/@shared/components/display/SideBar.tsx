@@ -279,10 +279,10 @@ const workspaceActionItems: SidebarItemConfig[] = [
   },
   {
     label: 'Auctions',
-    href: '/artist/auctions/create',
+    href: '/artist/auctions',
     icon: Gavel,
     eyebrow: 'Auction tools',
-    description: 'Create auction listings and selling workflows.',
+    description: 'Review auction details and create seller listings.',
     accent: accents.amber,
     activePrefix: '/artist/auctions',
   },

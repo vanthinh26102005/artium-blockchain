@@ -17,6 +17,11 @@ import { GetAuctionsQuery } from '../GetAuctions.query';
 import { Order } from '../../../domain/entities';
 import { IOrderRepository } from '../../../domain/interfaces';
 
+type AuctionFilters = GetAuctionsDto & {
+  sellerId?: string;
+  includeSettled?: boolean;
+};
+
 const MAX_AUCTION_TAKE = 50;
 const DEFAULT_AUCTION_TAKE = 20;
 const DEFAULT_MIN_INCREMENT_WEI = '100000000000000000';
@@ -43,7 +48,7 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     query: GetAuctionsQuery,
   ): Promise<{ data: AuctionReadObject[]; total: number }> {
     try {
-      const { filters } = query;
+      const filters = query.filters as AuctionFilters;
       this.logger.log(
         `Getting auctions with filters: ${JSON.stringify(filters)}`,
       );
@@ -55,7 +60,19 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
       const skip = filters.skip ?? 0;
       const blockchainWhere = {
         paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
-        status: OrderStatus.AUCTION_ACTIVE,
+        status: filters.includeSettled
+          ? {
+              $in: [
+                OrderStatus.AUCTION_ACTIVE,
+                OrderStatus.ESCROW_HELD,
+                OrderStatus.SHIPPED,
+                OrderStatus.DELIVERED,
+                OrderStatus.CANCELLED,
+                OrderStatus.REFUNDED,
+                OrderStatus.DISPUTE_OPEN,
+              ],
+            }
+          : OrderStatus.AUCTION_ACTIVE,
         onChainOrderId: { $ne: null },
       };
 
@@ -80,7 +97,17 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
           if (!auction) {
             return false;
           }
-          if (!filters.status && auction.statusKey === AuctionStatusKey.CLOSED) {
+          if (
+            filters.sellerId &&
+            auction.artwork.sellerId !== filters.sellerId
+          ) {
+            return false;
+          }
+          if (
+            !filters.status &&
+            !filters.includeSettled &&
+            auction.statusKey === AuctionStatusKey.CLOSED
+          ) {
             return false;
           }
           if (filters.status && auction.statusKey !== filters.status) {
@@ -123,7 +150,7 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
 
   async toAuctionReadObject(
     order: Order,
-    filters: GetAuctionsDto,
+    filters: AuctionFilters,
     index: number,
   ): Promise<AuctionReadObject | null> {
     const orderWithItems =
@@ -175,8 +202,14 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
         chainAuction?.seller ?? orderWithItems.sellerWallet,
       ),
       txHash: orderWithItems.txHash ?? null,
+      orderProjectionId: orderWithItems.id,
+      orderNumber: orderWithItems.orderNumber,
+      orderStatus: orderWithItems.status,
+      paymentStatus: orderWithItems.paymentStatus,
+      escrowState: orderWithItems.escrowState ?? null,
       artwork: {
         artworkId: item.artworkId,
+        sellerId: item.sellerId,
         title,
         creatorName: orderWithItems.sellerWallet ?? 'Artium seller',
         imageSrc,

@@ -49,6 +49,8 @@ import {
   GetOrderByOnChainIdHandler,
   GetOrderItemsHandler,
   GetSellerAuctionStartStatusHandler,
+  GetSellerAuctionStartStatusesHandler,
+  ResetSellerAuctionStartAttemptHandler,
   StartSellerAuctionHandler,
   SellerAuctionLifecycleOutboxService,
 } from './application';
@@ -64,6 +66,7 @@ export const CommandHandlers = [
   CreateOrderHandler,
   StartSellerAuctionHandler,
   AttachSellerAuctionStartTxHandler,
+  ResetSellerAuctionStartAttemptHandler,
   UpdateOrderStatusHandler,
   CancelOrderHandler,
   MarkShippedHandler,
@@ -81,6 +84,7 @@ export const QueryHandlers = [
   GetOrderByOnChainIdHandler,
   GetOrderItemsHandler,
   GetSellerAuctionStartStatusHandler,
+  GetSellerAuctionStartStatusesHandler,
 ];
 
 export const Repositories = [

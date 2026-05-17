@@ -339,6 +339,9 @@ services:
     build:
       context: .
       dockerfile: ./apps/api-gateway/Dockerfile
+      args:
+        SELLER_AUCTION_MIN_DURATION_SECONDS: ${SELLER_AUCTION_MIN_DURATION_SECONDS:-86400}
+        SELLER_AUCTION_MAX_DURATION_SECONDS: ${SELLER_AUCTION_MAX_DURATION_SECONDS:-2592000}
     command: yarn dev:gateway
     ports:
       - "8081:8081"
@@ -348,6 +351,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in environment}
       NODE_ENV: ${NODE_ENV:-development}
       CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
+      SELLER_AUCTION_MIN_DURATION_SECONDS: ${SELLER_AUCTION_MIN_DURATION_SECONDS:-86400}
+      SELLER_AUCTION_MAX_DURATION_SECONDS: ${SELLER_AUCTION_MAX_DURATION_SECONDS:-2592000}
     volumes:
       - .:/app
       - gateway_node_modules:/app/node_modules
@@ -476,6 +481,9 @@ services:
     build:
       context: .
       dockerfile: ./apps/orders-service/Dockerfile
+      args:
+        SELLER_AUCTION_MIN_DURATION_SECONDS: ${SELLER_AUCTION_MIN_DURATION_SECONDS:-86400}
+        SELLER_AUCTION_MAX_DURATION_SECONDS: ${SELLER_AUCTION_MAX_DURATION_SECONDS:-2592000}
     command: yarn dev:orders
     ports:
       - "3004:3004"
@@ -487,6 +495,8 @@ services:
       CONTRACT_ADDRESS: ${CONTRACT_ADDRESS:?CONTRACT_ADDRESS must be set in environment}
       BLOCKCHAIN_RPC_URL: ${BLOCKCHAIN_RPC_URL:?BLOCKCHAIN_RPC_URL must be set in environment}
       RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
+      SELLER_AUCTION_MIN_DURATION_SECONDS: ${SELLER_AUCTION_MIN_DURATION_SECONDS:-86400}
+      SELLER_AUCTION_MAX_DURATION_SECONDS: ${SELLER_AUCTION_MAX_DURATION_SECONDS:-2592000}
     volumes:
       - .:/app
       - orders_node_modules:/app/node_modules

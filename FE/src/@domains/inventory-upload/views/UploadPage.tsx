@@ -26,7 +26,12 @@ import { useUploadNavigationBlocker } from '@domains/inventory-upload/hooks/useU
 
 const TOTAL_STEPS = 2
 
-export const UploadPage = () => {
+type UploadPageProps = {
+  mode?: 'create' | 'edit'
+  artworkId?: string
+}
+
+export const UploadPage = ({ mode = 'create', artworkId }: UploadPageProps) => {
   // -- router --
   const router = useRouter()
 
@@ -65,7 +70,9 @@ export const UploadPage = () => {
     hydrationError,
     handleRetryDraftLoad,
     handleStartNewDraft,
-  } = useUploadDraftInit(allowNavigationRef)
+  } = useUploadDraftInit(allowNavigationRef, {
+    artworkId: mode === 'edit' ? artworkId : undefined,
+  })
 
   useUploadNavigationBlocker(allowNavigationRef)
 
@@ -160,6 +167,11 @@ export const UploadPage = () => {
   }
 
   const handleClose = () => {
+    if (isEditingArtwork) {
+      setIsExitOpen(true)
+      return
+    }
+
     if (step === 1) {
       setIsExitOpen(true)
       return
@@ -195,7 +207,28 @@ export const UploadPage = () => {
         isNextDisabled={
           isDraftLoading || !!hydrationError || submitting || isSubmitting
         }
+        finalActionLabel={isEditingArtwork ? 'Save Changes' : 'Publish Artwork'}
       >
+        {isEditingArtwork && !isDraftLoading && !hydrationError ? (
+          <section className="mx-auto mb-6 flex max-w-[1200px] flex-col gap-3 rounded-[24px] border border-blue-100 bg-blue-50 px-5 py-4 text-blue-950 shadow-sm md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.16em] uppercase text-blue-700">
+                Editing existing artwork
+              </p>
+              <p className="mt-1 text-sm leading-6 text-blue-950/75">
+                Review media, artwork details, and listing settings before saving changes.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push('/inventory')}
+              className="w-fit rounded-full border-blue-200 bg-white px-5 text-blue-900 hover:bg-blue-50"
+            >
+              Back to Inventory
+            </Button>
+          </section>
+        ) : null}
         {isDraftLoading ? (
           <div className="mx-auto mt-16 max-w-2xl rounded-[28px] border border-black/10 bg-white p-8 text-center shadow-sm">
             <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-black/10 border-t-[#0F6BFF]" />
@@ -241,7 +274,7 @@ export const UploadPage = () => {
             <p className="mt-4 text-[18px] text-[#191414]">
               {isEditingArtwork
                 ? 'You can exit and discard your unsaved changes.'
-                : 'Your progress has been saved automatically, you can exit or discard your progress'}
+                : 'Your progress is stored locally in this browser. No artwork draft will be created until you publish.'}
             </p>
           </div>
           <div className="grid grid-cols-2 border-t border-black/10 text-[18px] font-semibold">
@@ -250,7 +283,7 @@ export const UploadPage = () => {
               onClick={handleDeleteDraft}
               className="px-6 py-5 text-center text-red-500 transition hover:bg-red-50"
             >
-              {isEditingArtwork ? 'Discard Changes' : 'Delete Draft'}
+              {isEditingArtwork ? 'Discard Changes' : 'Discard Local Draft'}
             </button>
             <button
               type="button"
