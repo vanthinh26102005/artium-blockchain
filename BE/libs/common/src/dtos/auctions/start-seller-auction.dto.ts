@@ -18,6 +18,35 @@ export enum SellerAuctionReservePolicy {
 }
 
 const ETH_AMOUNT_PATTERN = /^(?:\d+\.?\d*|\.\d+)$/;
+const DEFAULT_SELLER_AUCTION_MIN_DURATION_SECONDS = 24 * 60 * 60;
+const DEFAULT_SELLER_AUCTION_MAX_DURATION_SECONDS = 30 * 24 * 60 * 60;
+
+const parseDurationConfigSeconds = (
+  value: string | undefined,
+  fallback: number,
+): number => {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+export const SELLER_AUCTION_MIN_DURATION_SECONDS = parseDurationConfigSeconds(
+  process.env.SELLER_AUCTION_MIN_DURATION_SECONDS,
+  DEFAULT_SELLER_AUCTION_MIN_DURATION_SECONDS,
+);
+
+const configuredMaxDurationSeconds = parseDurationConfigSeconds(
+  process.env.SELLER_AUCTION_MAX_DURATION_SECONDS,
+  DEFAULT_SELLER_AUCTION_MAX_DURATION_SECONDS,
+);
+
+export const SELLER_AUCTION_MAX_DURATION_SECONDS =
+  configuredMaxDurationSeconds >= SELLER_AUCTION_MIN_DURATION_SECONDS
+    ? configuredMaxDurationSeconds
+    : DEFAULT_SELLER_AUCTION_MAX_DURATION_SECONDS;
 
 export class StartSellerAuctionDto {
   @ApiProperty({ description: 'Artwork UUID to start in auction mode' })
@@ -54,13 +83,28 @@ export class StartSellerAuctionDto {
   minBidIncrementEth!: string;
 
   @ApiProperty({
-    description: 'Auction duration in hours',
-    example: 168,
+    description: 'Auction duration in seconds',
+    example: 604800,
   })
+  @ValidateIf(
+    (value: StartSellerAuctionDto) =>
+      value.durationSeconds !== undefined ||
+      value.durationHours === undefined ||
+      value.durationHours === null,
+  )
   @IsInt()
-  @Min(24)
-  @Max(30 * 24)
-  durationHours!: number;
+  @Min(SELLER_AUCTION_MIN_DURATION_SECONDS)
+  @Max(SELLER_AUCTION_MAX_DURATION_SECONDS)
+  durationSeconds?: number;
+
+  @ApiPropertyOptional({
+    description: 'Deprecated auction duration in hours. Use durationSeconds.',
+    example: 168,
+    deprecated: true,
+  })
+  @IsOptional()
+  @IsInt()
+  durationHours?: number;
 
   @ApiProperty({
     description:

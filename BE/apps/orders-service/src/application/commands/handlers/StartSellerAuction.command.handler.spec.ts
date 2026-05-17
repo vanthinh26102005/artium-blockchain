@@ -115,6 +115,46 @@ describe('StartSellerAuctionHandler', () => {
     );
   });
 
+  it('stores durationSeconds exactly for minute-level auction terms', async () => {
+    const durationSeconds = 24 * 60 * 60 + 30 * 60;
+    startAttemptRepo.findLatestBySellerAndArtwork.mockResolvedValue(
+      null as never,
+    );
+    startAttemptRepo.create.mockImplementation(async (data: any) => ({
+      id: 'attempt-1',
+      createdAt: new Date('2026-04-27T07:00:00.000Z'),
+      updatedAt: new Date('2026-04-27T07:00:00.000Z'),
+      ...data,
+    }));
+
+    const result = await handler.execute(
+      new StartSellerAuctionCommand({
+        ...input,
+        durationHours: undefined,
+        durationSeconds,
+      }),
+    );
+
+    expect(startAttemptRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        durationSeconds,
+      }),
+    );
+    expect(result.submittedTermsSnapshot.durationSeconds).toBe(
+      durationSeconds,
+    );
+    expect(result.submittedTermsSnapshot.durationHours).toBe(24.5);
+    expect(
+      escrowContractService.encodeCreateAuctionCalldata,
+    ).toHaveBeenCalledWith(
+      expect.any(String),
+      BigInt(durationSeconds),
+      expect.anything(),
+      expect.anything(),
+      input.ipfsMetadataHash,
+    );
+  });
+
   it('reuses an existing pending attempt instead of creating a duplicate', async () => {
     startAttemptRepo.findLatestBySellerAndArtwork.mockResolvedValue({
       id: 'attempt-1',

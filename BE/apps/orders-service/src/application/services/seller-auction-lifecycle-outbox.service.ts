@@ -66,7 +66,14 @@ export class SellerAuctionLifecycleOutboxService {
       retryAllowed: attempt.retryAllowed,
       editAllowed: attempt.editAllowed,
       walletActionRequired: attempt.walletActionRequired,
-      submittedTermsSnapshot: attempt.termsSnapshot,
+      submittedTermsSnapshot: {
+        ...attempt.termsSnapshot,
+        durationSeconds:
+          attempt.termsSnapshot.durationSeconds ?? attempt.durationSeconds,
+        durationHours:
+          attempt.termsSnapshot.durationHours ??
+          attempt.durationSeconds / (60 * 60),
+      },
       activatedAt: attempt.activatedAt?.toISOString() ?? null,
       updatedAt: (
         attempt.updatedAt ??

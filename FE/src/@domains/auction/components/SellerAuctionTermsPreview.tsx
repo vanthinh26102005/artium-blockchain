@@ -3,7 +3,8 @@ import { CheckCircle2, Circle, ImageOff } from 'lucide-react'
 import type { SellerAuctionArtworkCandidate } from '@shared/apis/auctionApis'
 import {
   SELLER_AUCTION_DURATION_PRESETS,
-  getAuctionDurationHours,
+  formatAuctionDuration,
+  getAuctionDurationSeconds,
   type SellerAuctionTermsFormValues,
 } from '../validations/sellerAuctionTerms.schema'
 
@@ -23,17 +24,12 @@ const formatDurationLabel = (values: SellerAuctionTermsFormValues) => {
     return presetLabel
   }
 
-  const customDurationHours = getAuctionDurationHours(values)
-  if (!customDurationHours) {
+  const customDurationSeconds = getAuctionDurationSeconds(values)
+  if (!customDurationSeconds) {
     return null
   }
 
-  if (customDurationHours % 24 === 0) {
-    const days = customDurationHours / 24
-    return `${days} ${days === 1 ? 'day' : 'days'}`
-  }
-
-  return `${customDurationHours} ${customDurationHours === 1 ? 'hour' : 'hours'}`
+  return formatAuctionDuration(customDurationSeconds)
 }
 
 const formatEthAmount = (value: string) => {

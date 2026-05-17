@@ -28,8 +28,10 @@ import { submitSellerAuctionStartTransaction } from '../services/auctionStartWal
 import {
   DEFAULT_SELLER_AUCTION_TERMS,
   SELLER_AUCTION_DURATION_PRESETS,
-  getAuctionDurationHours,
+  SELLER_AUCTION_CUSTOM_DURATION_UNITS,
+  getAuctionDurationSeconds,
   validateSellerAuctionTerms,
+  type SellerAuctionCustomDurationUnit,
   type SellerAuctionTermsFormValues,
 } from '../validations/sellerAuctionTerms.schema'
 import { loadSellerAuctionTermsDraft, saveSellerAuctionTermsDraft } from '../utils'
@@ -452,16 +454,28 @@ const SellerCandidateWorkspace = () => {
 
   const mapSnapshotToFormValues = useCallback(
     (snapshot: NonNullable<typeof lifecycleStatus>['submittedTermsSnapshot']) => {
+      const durationSeconds =
+        snapshot.durationSeconds ?? Math.round((snapshot.durationHours ?? 0) * 60 * 60)
       const preset =
-        SELLER_AUCTION_DURATION_PRESETS.find((option) => option.hours === snapshot.durationHours)
+        SELLER_AUCTION_DURATION_PRESETS.find((option) => option.seconds === durationSeconds)
           ?.value ?? 'custom'
+      const customDurationUnit =
+        SELLER_AUCTION_CUSTOM_DURATION_UNITS.find(
+          (option) => durationSeconds > 0 && durationSeconds % option.seconds === 0,
+        )?.value ?? 'minutes'
+      const customDurationUnitSeconds =
+        SELLER_AUCTION_CUSTOM_DURATION_UNITS.find(
+          (option) => option.value === customDurationUnit,
+        )?.seconds ?? 60
 
       return {
         reservePolicy: snapshot.reservePolicy,
         reservePriceEth: snapshot.reservePriceEth ?? '',
         minBidIncrementEth: snapshot.minBidIncrementEth,
         durationPreset: preset,
-        customDurationHours: preset === 'custom' ? String(snapshot.durationHours) : '',
+        customDurationValue:
+          preset === 'custom' ? String(durationSeconds / customDurationUnitSeconds) : '',
+        customDurationUnit: customDurationUnit as SellerAuctionCustomDurationUnit,
         shippingDisclosure: snapshot.shippingDisclosure,
         paymentDisclosure: snapshot.paymentDisclosure,
         economicsLockedAcknowledged: snapshot.economicsLockedAcknowledged,
@@ -477,7 +491,7 @@ const SellerCandidateWorkspace = () => {
       reservePriceEth:
         values.reservePolicy === 'set' ? values.reservePriceEth.trim() || null : null,
       minBidIncrementEth: values.minBidIncrementEth.trim(),
-      durationHours: getAuctionDurationHours(values) ?? 0,
+      durationSeconds: getAuctionDurationSeconds(values) ?? 0,
       shippingDisclosure: values.shippingDisclosure.trim(),
       paymentDisclosure: values.paymentDisclosure.trim(),
       economicsLockedAcknowledged: values.economicsLockedAcknowledged,

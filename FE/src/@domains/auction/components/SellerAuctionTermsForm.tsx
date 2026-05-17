@@ -3,9 +3,23 @@ import { Button } from '@shared/components/ui/button'
 import { Checkbox } from '@shared/components/ui/checkbox'
 import { Input } from '@shared/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@shared/components/ui/radio-group'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@shared/components/ui/select'
 import { Textarea } from '@shared/components/ui/textarea'
 import {
+  SELLER_AUCTION_CUSTOM_DURATION_UNITS,
   SELLER_AUCTION_DURATION_PRESETS,
+  SELLER_AUCTION_MAX_DURATION_SECONDS,
+  SELLER_AUCTION_MIN_DURATION_SECONDS,
+  formatAuctionDuration,
+  getMaximumDurationValueForUnit,
+  getMinimumDurationValueForUnit,
+  type SellerAuctionCustomDurationUnit,
   type SellerAuctionTermsFormValues,
 } from '../validations/sellerAuctionTerms.schema'
 
@@ -260,36 +274,76 @@ export const SellerAuctionTermsForm = ({
 
           {values.durationPreset === 'custom' ? (
             <div className="mt-4">
-              <label htmlFor="seller-auction-custom-duration-hours" className={fieldLabelClass}>
-                Custom duration hours
+              <label htmlFor="seller-auction-custom-duration-value" className={fieldLabelClass}>
+                Custom duration
               </label>
-              <Input
-                id="seller-auction-custom-duration-hours"
-                type="number"
-                min="24"
-                max="720"
-                step="1"
-                value={values.customDurationHours}
-                disabled={isLocked}
-                onChange={(event) =>
-                  handleValuesChange('customDurationHours', {
-                    ...values,
-                    customDurationHours: event.target.value,
-                  })
-                }
-                onBlur={() => handleBlur('customDurationHours')}
-                aria-invalid={shouldShowError('customDurationHours')}
-                aria-describedby={
-                  shouldShowError('customDurationHours')
-                    ? getFieldMessageId('customDurationHours')
-                    : undefined
-                }
-                className="mt-3 h-12 rounded-[20px] border-[#E5E5E5] bg-white text-sm text-[#191414] focus-visible:border-[#2351FC] focus-visible:ring-[#2351FC]/20"
-                placeholder="24"
-              />
-              {shouldShowError('customDurationHours') ? (
-                <p id={getFieldMessageId('customDurationHours')} className={errorClass}>
-                  {errors.customDurationHours}
+              <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
+                <Input
+                  id="seller-auction-custom-duration-value"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  min={getMinimumDurationValueForUnit(values.customDurationUnit)}
+                  max={getMaximumDurationValueForUnit(values.customDurationUnit)}
+                  value={values.customDurationValue}
+                  disabled={isLocked}
+                  onChange={(event) =>
+                    handleValuesChange('customDurationValue', {
+                      ...values,
+                      customDurationValue: event.target.value,
+                    })
+                  }
+                  onBlur={() => handleBlur('customDurationValue')}
+                  aria-invalid={shouldShowError('customDurationValue')}
+                  aria-describedby={`seller-auction-custom-duration-helper${
+                    shouldShowError('customDurationValue')
+                      ? ` ${getFieldMessageId('customDurationValue')}`
+                      : ''
+                  }`}
+                  className="h-12 rounded-[20px] border-[#E5E5E5] bg-white text-sm text-[#191414] focus-visible:border-[#2351FC] focus-visible:ring-[#2351FC]/20"
+                  placeholder={String(getMinimumDurationValueForUnit(values.customDurationUnit))}
+                />
+                <Select
+                  value={values.customDurationUnit}
+                  disabled={isLocked}
+                  onValueChange={(nextValue) => {
+                    if (!['days', 'hours', 'minutes'].includes(nextValue)) {
+                      return
+                    }
+
+                    handleValuesChange('customDurationUnit', {
+                      ...values,
+                      customDurationUnit: nextValue as SellerAuctionCustomDurationUnit,
+                    })
+                  }}
+                >
+                  <SelectTrigger
+                    aria-label="Custom duration unit"
+                    className="h-12 rounded-[20px] border-[#E5E5E5] bg-white text-sm text-[#191414] focus-visible:border-[#2351FC] focus-visible:ring-[#2351FC]/20"
+                  >
+                    <SelectValue placeholder="Unit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SELLER_AUCTION_CUSTOM_DURATION_UNITS.map((unit) => (
+                      <SelectItem key={unit.value} value={unit.value}>
+                        {unit.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <p id="seller-auction-custom-duration-helper" className={helperClass}>
+                Minimum is {formatAuctionDuration(SELLER_AUCTION_MIN_DURATION_SECONDS)}. Maximum is{' '}
+                {formatAuctionDuration(SELLER_AUCTION_MAX_DURATION_SECONDS)}.
+              </p>
+              {shouldShowError('customDurationValue') ? (
+                <p id={getFieldMessageId('customDurationValue')} className={errorClass}>
+                  {errors.customDurationValue}
+                </p>
+              ) : null}
+              {shouldShowError('customDurationUnit') ? (
+                <p id={getFieldMessageId('customDurationUnit')} className={errorClass}>
+                  {errors.customDurationUnit}
                 </p>
               ) : null}
             </div>
