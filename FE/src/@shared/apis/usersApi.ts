@@ -48,7 +48,10 @@ const usersApi = {
     return normalizeLoginResponse(raw)
   },
   linkWallet: async (input: LoginByWalletPayload) => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet/link', input, { auth: true })
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet/link', input, {
+      auth: true,
+      clearAuthOnUnauthorized: false,
+    })
     return normalizeUserPayload((raw as { user: Record<string, unknown> }).user ?? raw)
   },
   unlinkWallet: async () => {

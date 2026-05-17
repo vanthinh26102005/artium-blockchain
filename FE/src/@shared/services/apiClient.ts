@@ -4,6 +4,7 @@ import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 type ApiFetchOptions = RequestInit & {
   auth?: boolean
   baseUrl?: string
+  clearAuthOnUnauthorized?: boolean
 }
 
 export type ApiQueryPrimitive = string | number | boolean
@@ -158,7 +159,7 @@ const createUploadError = (
 }
 
 export const apiFetch = async <T>(path: string, options?: ApiFetchOptions): Promise<T> => {
-  const { auth = true, baseUrl, ...init } = options ?? {}
+  const { auth = true, baseUrl, clearAuthOnUnauthorized = true, ...init } = options ?? {}
   const headers = resolveHeaders(init.headers)
 
   if (isJsonBody(init.body) && !headers.has('Content-Type')) {
@@ -189,7 +190,7 @@ export const apiFetch = async <T>(path: string, options?: ApiFetchOptions): Prom
     error.data = data
     error.headers = response.headers
 
-    if (auth && (response.status === 401 || response.status === 403)) {
+    if (auth && clearAuthOnUnauthorized && (response.status === 401 || response.status === 403)) {
       useAuthStore.getState().clearAuth()
     }
 
