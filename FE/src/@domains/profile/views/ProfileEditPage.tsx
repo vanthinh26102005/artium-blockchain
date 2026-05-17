@@ -57,6 +57,11 @@ type SaveStatus = 'idle' | 'saving' | 'success'
 
 const isWalletOnlyEmail = (email?: string | null) => Boolean(email?.endsWith('@wallet.local'))
 
+const normalizeNullableText = (value?: string | null) => {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : null
+}
+
 const SkeletonBlock = ({ className }: { className: string }) => (
   <div className={`animate-pulse rounded-2xl bg-slate-200/70 ${className}`} />
 )
@@ -230,6 +235,7 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isDirty, isSubmitting, submitCount },
   } = useForm<FormValues>({
     resolver: zodResolver(editProfileSchema),
@@ -241,6 +247,17 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     name: 'avatarUrl',
   })
   const avatarValue = useWatch({ control, name: 'avatarUrl' })
+  const walletAddressValue = useWatch({ control, name: 'walletAddress' })
+  const persistedWalletAddress = authUser
+    ? (authUser.walletAddress ?? '')
+    : (initialValues.walletAddress ?? '')
+
+  useEffect(() => {
+    setValue('walletAddress', persistedWalletAddress, {
+      shouldDirty: false,
+      shouldTouch: false,
+    })
+  }, [persistedWalletAddress, setValue])
 
   useEffect(() => {
     if (router.isReady && router.query.connectWallet === '1') {
@@ -543,7 +560,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
   const avatarSrc = avatarPreview || avatarValue || ''
   const showErrors = submitCount > 0
   const isSaving = saveStatus === 'saving' || isSubmitting
-  const currentWalletAddress = authUser?.walletAddress ?? initialValues.walletAddress ?? null
+  const currentWalletAddress = useMemo(
+    () => normalizeNullableText(walletAddressValue),
+    [walletAddressValue],
+  )
   const hasRecoverableLogin = Boolean(
     authUser?.googleId ||
       (authUser?.email && !isWalletOnlyEmail(authUser.email) && authUser.isEmailVerified),
@@ -577,6 +597,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     }
 
     clearPendingWalletLink()
+    setValue('walletAddress', user.walletAddress ?? '', {
+      shouldDirty: false,
+      shouldTouch: false,
+    })
     setShowWalletDialog(false)
     setWalletDialogView('manage')
 
@@ -593,6 +617,10 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
 
     const user = await walletLink.unlinkWallet()
     if (user) {
+      setValue('walletAddress', user.walletAddress ?? '', {
+        shouldDirty: false,
+        shouldTouch: false,
+      })
       setWalletDialogView('manage')
     }
   }
