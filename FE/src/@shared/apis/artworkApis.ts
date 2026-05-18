@@ -2,6 +2,7 @@ import {
   apiFetch,
   encodePathSegment,
   withQuery,
+  type ApiFetchOptions,
 } from '@shared/services/apiClient'
 import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
@@ -214,26 +215,28 @@ const normalizeArtworkPage = (
 }
 
 const artworkApis = {
-  listArtworks: async (params?: ListArtworksParams) => {
+  listArtworks: async (params?: ListArtworksParams, requestOptions?: ApiFetchOptions) => {
     const response = await apiFetch<ArtworkApiItem[] | ArtworkListResponse>(
       withQuery('/artwork', params),
       {
+        ...requestOptions,
         cache: 'no-store',
       },
     )
     return normalizeArtworkList(response)
   },
-  listArtworksPaginated: async (params?: ListArtworksParams) => {
+  listArtworksPaginated: async (params?: ListArtworksParams, requestOptions?: ApiFetchOptions) => {
     const response = await apiFetch<ArtworkApiItem[] | ArtworkListResponse>(
       withQuery('/artwork', params),
       {
+        ...requestOptions,
         cache: 'no-store',
       },
     )
     return normalizeArtworkPage(response)
   },
-  getArtworkById: (id: string) =>
-    apiFetch<ArtworkApiItem | null>(`/artwork/${encodePathSegment(id)}`),
+  getArtworkById: (id: string, requestOptions?: ApiFetchOptions) =>
+    apiFetch<ArtworkApiItem | null>(`/artwork/${encodePathSegment(id)}`, requestOptions),
   getArtworkByOnChainAuctionId: async (onChainAuctionId: string) => {
     const artworks = await artworkApis.listArtworks({
       onChainAuctionId,

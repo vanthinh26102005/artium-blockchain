@@ -1,0 +1,29 @@
+# Top Chunks - After
+
+| File | Raw size |
+|---|---:|
+| static/chunks/c4cbd7919c54b423.js | 8569.5 KiB |
+| static/chunks/1d5b32a777516ea9.js | 317.3 KiB |
+| static/chunks/116b138bd58c984e.js | 299.9 KiB |
+| static/chunks/80f456313e4181bd.js | 262.1 KiB |
+| static/chunks/6efc5eedaac049b5.css | 206.3 KiB |
+| static/chunks/c10bc5e82a16990b.js | 205.6 KiB |
+| static/chunks/8a8bef1061cfe47f.js | 146.4 KiB |
+| static/chunks/fee8402a4f870e4d.js | 144.3 KiB |
+| static/chunks/bb16b7e77aa92cb4.js | 96.6 KiB |
+| static/chunks/4c159344361a0587.js | 90.4 KiB |
+| static/chunks/470e707f9db5b81b.js | 83.6 KiB |
+| static/chunks/1803fa8119468375.js | 83.6 KiB |
+| static/chunks/708623bbee98efeb.js | 78.8 KiB |
+| static/chunks/a2cc4e98288cee55.js | 77.9 KiB |
+| static/chunks/004ab387573c48e2.js | 72.3 KiB |
+| static/chunks/9f97305e6127ba2e.js | 69.9 KiB |
+| static/chunks/f28b1937bdcc2529.js | 69.9 KiB |
+| static/chunks/eaa555a9c1e253de.js | 69.7 KiB |
+| static/chunks/6da952e237c7bcf4.js | 68.4 KiB |
+| static/chunks/e657960e9a7e9457.js | 65.8 KiB |
+| static/chunks/4a8ee22cfe8bd04e.js | 61.8 KiB |
+| static/chunks/c381159329831648.js | 61.5 KiB |
+| static/chunks/26583a4740284b6c.js | 60.7 KiB |
+| static/chunks/d8d625bf1d9f1b5d.js | 59.7 KiB |
+| static/chunks/1b045604ec3f0f83.js | 57.7 KiB |

@@ -15,13 +15,26 @@ type ProfilesGridProps = {
   searchQuery?: string
 }
 
+const DISCOVER_CLIENT_CACHE_OPTIONS = {
+  auth: false,
+  dedupe: true,
+  clientCacheTtlMs: 30000,
+}
+
 export const ProfilesGrid = ({ searchQuery = '' }: ProfilesGridProps) => {
   // -- state --
   const [followingById, setFollowingById] = useState<Record<string, boolean>>({})
 
   const fetchPage = useCallback(
-    async (skip: number, take: number) => {
-      const result = await profileApis.searchSellerProfiles(searchQuery, { skip, take })
+    async (skip: number, take: number, signal?: AbortSignal) => {
+      const result = await profileApis.searchSellerProfiles(
+        searchQuery,
+        { skip, take },
+        {
+          ...DISCOVER_CLIENT_CACHE_OPTIONS,
+          signal,
+        },
+      )
       return {
         data: result.items.map(mapSellerProfileToDiscover),
         hasMore: result.hasMore,
@@ -82,4 +95,3 @@ export const ProfilesGrid = ({ searchQuery = '' }: ProfilesGridProps) => {
     </section>
   )
 }
-
