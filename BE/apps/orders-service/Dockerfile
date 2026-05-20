@@ -26,6 +26,10 @@ RUN yarn workspace @backend/orders-service build
 FROM node:20-slim AS production
 WORKDIR /app
 ENV NODE_ENV=production
+ARG SELLER_AUCTION_MIN_DURATION_SECONDS=86400
+ARG SELLER_AUCTION_MAX_DURATION_SECONDS=2592000
+ENV SELLER_AUCTION_MIN_DURATION_SECONDS=$SELLER_AUCTION_MIN_DURATION_SECONDS
+ENV SELLER_AUCTION_MAX_DURATION_SECONDS=$SELLER_AUCTION_MAX_DURATION_SECONDS
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist/apps/orders-service ./dist/apps/orders-service

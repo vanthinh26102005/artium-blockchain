@@ -35,6 +35,9 @@ export class AuctionArtworkDisplayObject {
 
   @ApiProperty({ enum: AuctionCategoryKey })
   categoryKey!: AuctionCategoryKey;
+
+  @ApiPropertyOptional({ description: 'Seller UUID for owner-scoped views' })
+  sellerId?: string | null;
 }
 
 export class AuctionReadObject {
@@ -90,6 +93,21 @@ export class AuctionReadObject {
     description: 'Last relevant blockchain transaction hash',
   })
   txHash?: string | null;
+
+  @ApiPropertyOptional({ description: 'Internal order projection UUID' })
+  orderProjectionId?: string | null;
+
+  @ApiPropertyOptional({ description: 'Order projection number' })
+  orderNumber?: string | null;
+
+  @ApiPropertyOptional({ description: 'Current order projection status' })
+  orderStatus?: string | null;
+
+  @ApiPropertyOptional({ description: 'Current payment projection status' })
+  paymentStatus?: string | null;
+
+  @ApiPropertyOptional({ description: 'Current escrow state value' })
+  escrowState?: number | null;
 
   @ApiProperty({ type: () => AuctionArtworkDisplayObject })
   artwork!: AuctionArtworkDisplayObject;

@@ -18,10 +18,12 @@ import {
   GetUserBySlugQuery,
   GetWalletNonceQuery,
   InitiateUserRegistrationCommand,
+  LinkWalletCommand,
   LoginByEmailCommand,
   LoginByGoogleCommand,
   LoginByWalletCommand,
   RequestPasswordResetCommand,
+  UnlinkWalletCommand,
   UpdateUserProfileCommand,
   VerifyPasswordResetCommand,
 } from '../../application';
@@ -148,6 +150,34 @@ export class UsersMicroserviceController {
     @Payload() data: { address: string },
   ): Promise<{ nonce: string }> {
     return this.queryBus.execute(new GetWalletNonceQuery(data.address));
+  }
+
+  @MessagePattern({ cmd: 'link_wallet' })
+  async linkWallet(
+    @Payload() data: { userId: string; input: WalletLoginInput },
+  ): Promise<{ success: boolean; message: string; user: UserPayload }> {
+    const result = await this.commandBus.execute(
+      new LinkWalletCommand(data.userId, data.input),
+    );
+    return {
+      success: true,
+      message: 'Wallet linked successfully',
+      user: result.user as UserPayload,
+    };
+  }
+
+  @MessagePattern({ cmd: 'unlink_wallet' })
+  async unlinkWallet(
+    @Payload() data: { userId: string },
+  ): Promise<{ success: boolean; message: string; user: UserPayload }> {
+    const result = await this.commandBus.execute(
+      new UnlinkWalletCommand(data.userId),
+    );
+    return {
+      success: true,
+      message: 'Wallet disconnected successfully',
+      user: result.user as UserPayload,
+    };
   }
 
   @MessagePattern({ cmd: 'update_user_profile' })

@@ -3,12 +3,13 @@
 import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { AlertTriangle, ShieldCheck, X } from 'lucide-react'
-import { useCallback, useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from 'react'
 import { getAuctionTimeRemainingDisplay } from '@domains/auction/utils'
 import {
   AuctionBidWalletError,
   submitAuctionBid,
 } from '@domains/auction/services/auctionBidWallet'
+import { saveStoredAuctionBid } from '@domains/auction/utils/bidTrackingStorage'
 import { ConfirmedBidState } from './ConfirmedBidState'
 import { PendingBidState } from './PendingBidState'
 import { SubmittingBidState } from './SubmittingBidState'
@@ -23,6 +24,7 @@ type AuctionBidLotStatusKey = 'active' | 'ending-soon' | 'closed' | 'newly-liste
 
 export type AuctionBidLot = {
   artworkId: string
+  sellerId?: string | null
   auctionId?: string
   onChainOrderId?: string
   title: string
@@ -35,12 +37,18 @@ export type AuctionBidLot = {
   minimumNextBidEth?: number
   highestBidder?: string | null
   contractAddress?: string | null
+  orderProjectionId?: string | null
+  orderNumber?: string | null
+  orderStatus?: string | null
+  paymentStatus?: string | null
+  escrowState?: number | null
 }
 
 export type BidOrderStatusPayload = {
   lot: AuctionBidLot
   committedBidValue: number
   transactionHash: string
+  walletAddress?: string | null
 }
 
 type BidEditingModalProps = {
@@ -54,6 +62,7 @@ type BidEditingModalProps = {
 const MIN_BID_INCREMENT_ETH = 0.1
 const BID_INCREMENT_RATE = 0.05
 const MOCK_ETH_TO_USD = 2575
+const MAX_ETH_DECIMALS = 18
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -78,7 +87,26 @@ const usdFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
-const formatPreciseEthDisplay = (value: number) => `${value.toFixed(2)} ETH`
+const formatEthAmount = (value: number, maximumFractionDigits = 6) => {
+  if (!Number.isFinite(value)) {
+    return '0'
+  }
+
+  return value.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits,
+  })
+}
+
+const formatEthInputValue = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return ''
+  }
+
+  return value.toFixed(MAX_ETH_DECIMALS).replace(/\.?0+$/, '')
+}
+
+const formatPreciseEthDisplay = (value: number) => `${formatEthAmount(value)} ETH`
 
 const formatUsdEstimate = (value: number) => usdFormatter.format(value * MOCK_ETH_TO_USD)
 
@@ -118,7 +146,7 @@ export const BidEditingModal = ({
   const [minimumNextBid, setMinimumNextBid] = useState(() =>
     lot?.minimumNextBidEth ?? getMinimumNextBid(lot?.bidValue ?? 0),
   )
-  const [bidAmount, setBidAmount] = useState(() => minimumNextBid.toFixed(2))
+  const [bidAmount, setBidAmount] = useState(() => formatEthInputValue(minimumNextBid))
   const [statusKey, setStatusKey] = useState<AuctionBidLotStatusKey>(() => lot?.statusKey ?? 'active')
   const [endsAt, setEndsAt] = useState<string | undefined>(() => lot?.endsAt)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
@@ -127,8 +155,11 @@ export const BidEditingModal = ({
   const [submittedWalletAddress, setSubmittedWalletAddress] = useState<string | null>(null)
   const [failedBidValue, setFailedBidValue] = useState<number | null>(null)
   const [failureMessage, setFailureMessage] = useState<string | null>(null)
+  const hasEditedBidAmountRef = useRef(false)
+  const openedLotKeyRef = useRef<string | null>(null)
   const lotBidValue = lot?.bidValue ?? 0
   const auctionId = lot?.auctionId ?? lot?.artworkId
+  const activeLotKey = lot?.auctionId ?? lot?.onChainOrderId ?? lot?.artworkId ?? null
 
   useEffect(() => {
     if (!isOpen) {
@@ -150,17 +181,29 @@ export const BidEditingModal = ({
       setStatusKey(nextLot.statusKey)
       setEndsAt(nextLot.endsAt)
 
-      if (options?.resetBidAmount) {
-        setBidAmount(nextMinimumBid.toFixed(2))
+      if (options?.resetBidAmount && !hasEditedBidAmountRef.current) {
+        setBidAmount(formatEthInputValue(nextMinimumBid))
       }
     },
     [],
   )
 
   useEffect(() => {
+    if (!isOpen) {
+      openedLotKeyRef.current = null
+      return
+    }
+
     if (!isOpen || !lot || viewState !== 'editing') {
       return
     }
+
+    if (openedLotKeyRef.current === activeLotKey) {
+      return
+    }
+
+    openedLotKeyRef.current = activeLotKey
+    hasEditedBidAmountRef.current = false
 
     let cancelled = false
 
@@ -187,7 +230,7 @@ export const BidEditingModal = ({
     return () => {
       cancelled = true
     }
-  }, [applyLotState, auctionId, isOpen, lot, onRefreshLot, viewState])
+  }, [activeLotKey, applyLotState, auctionId, isOpen, lot, onRefreshLot, viewState])
 
   useEffect(() => {
     if (
@@ -223,6 +266,15 @@ export const BidEditingModal = ({
 
         if (bidIsAuthoritative) {
           setCurrentBidValue(refreshedLot.bidValue)
+          if (submittedWalletAddress) {
+            saveStoredAuctionBid({
+              lot: refreshedLot,
+              committedBidValue,
+              transactionHash,
+              walletAddress: submittedWalletAddress,
+              status: 'confirmed',
+            })
+          }
           setViewState('confirmed')
           return
         }
@@ -242,7 +294,8 @@ export const BidEditingModal = ({
           setFailureMessage(
             'Backend auction state now requires a higher minimum bid. Review the latest current bid and try again.',
           )
-          setBidAmount(nextMinimumBid.toFixed(2))
+          hasEditedBidAmountRef.current = false
+          setBidAmount(formatEthInputValue(nextMinimumBid))
           setViewState('failed')
         }
       } catch {
@@ -303,7 +356,8 @@ export const BidEditingModal = ({
   const handleBidAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value
 
-    if (/^\d*(\.\d{0,2})?$/.test(nextValue)) {
+    if (new RegExp(`^\\d*(\\.\\d{0,${MAX_ETH_DECIMALS}})?$`).test(nextValue)) {
+      hasEditedBidAmountRef.current = true
       setBidAmount(nextValue)
     }
   }
@@ -335,6 +389,13 @@ export const BidEditingModal = ({
       })
       setTransactionHash(result.txHash)
       setSubmittedWalletAddress(result.walletAddress)
+      saveStoredAuctionBid({
+        lot,
+        committedBidValue: bidAmountValue,
+        transactionHash: result.txHash,
+        walletAddress: result.walletAddress,
+        status: 'pending',
+      })
       setViewState('pending')
       if (onRefreshLot && auctionId) {
         void onRefreshLot(auctionId)
@@ -356,19 +417,21 @@ export const BidEditingModal = ({
     setSubmittedWalletAddress(null)
     setFailedBidValue(null)
     setFailureMessage(null)
+    hasEditedBidAmountRef.current = false
     setViewState('editing')
   }
 
   const handleCloseModal = () => {
     setViewState('editing')
     setCurrentBidValue(lotBidValue)
-    setBidAmount(getMinimumNextBid(lotBidValue).toFixed(2))
+    setBidAmount(formatEthInputValue(lot?.minimumNextBidEth ?? getMinimumNextBid(lotBidValue)))
     setElapsedSeconds(0)
     setCommittedBidValue(null)
     setTransactionHash(null)
     setSubmittedWalletAddress(null)
     setFailedBidValue(null)
     setFailureMessage(null)
+    hasEditedBidAmountRef.current = false
     onClose()
   }
 
@@ -395,6 +458,17 @@ export const BidEditingModal = ({
         committedBidValue={committedBidValue}
         transactionHash={transactionHash}
         onClose={handleCloseModal}
+        onTrackBid={
+          onViewOrderStatus
+            ? () =>
+                onViewOrderStatus({
+                  lot,
+                  committedBidValue,
+                  transactionHash,
+                  walletAddress: submittedWalletAddress,
+                })
+            : undefined
+        }
       />
     )
   }
@@ -416,6 +490,7 @@ export const BidEditingModal = ({
                   lot,
                   committedBidValue,
                   transactionHash,
+                  walletAddress: submittedWalletAddress,
                 })
             : undefined
         }
@@ -670,7 +745,7 @@ export const BidEditingModal = ({
                           : 'border-black/15 focus:border-black'
                       }`}
                       style={headlineFont}
-                      placeholder={minimumNextBid.toFixed(2)}
+                      placeholder={formatEthInputValue(minimumNextBid)}
                     />
                     <span
                       className="pointer-events-none absolute right-0 bottom-5 text-lg text-black/45 transition-colors"
@@ -690,7 +765,10 @@ export const BidEditingModal = ({
                     </p>
                     <button
                       type="button"
-                      onClick={() => setBidAmount(minimumNextBid.toFixed(2))}
+                      onClick={() => {
+                        hasEditedBidAmountRef.current = false
+                        setBidAmount(formatEthInputValue(minimumNextBid))
+                      }}
                       className="text-left text-[11px] tracking-[0.18em] text-black uppercase transition hover:text-black/60 md:text-right"
                       style={headlineFont}
                     >

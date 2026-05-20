@@ -12,14 +12,13 @@ import { Metadata } from '@/components/SEO/Metadata'
 
 // @shared - components
 import { Button } from '@shared/components/ui/button'
-import { Input } from '@shared/components/ui/input'
-import { cn } from '@shared/lib/utils'
 
 // @domains - auth
-import { AuthFormOtpInput, AuthShell } from '@domains/auth/components'
+import { AuthFormInput, AuthFormOtpInput, AuthInput, AuthShell } from '@domains/auth/components'
 import { useForgotPassword } from '@domains/auth/hooks/useForgotPassword'
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { writePasswordResetSession } from '@domains/auth/services/browserAuthState'
+import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
 import {
   forgotPasswordRequestFormSchema,
   forgotPasswordVerifyFormSchema,
@@ -53,9 +52,6 @@ export const ForgotPasswordPage = () => {
     },
   })
 
-  const requestEmailField = requestForm.register('email')
-  const requestEmailError = requestForm.formState.errors.email?.message
-
   const handleRequestSubmit = async (values: ForgotPasswordRequestFormValues) => {
     requestForm.clearErrors('root')
     setNotice('')
@@ -71,7 +67,11 @@ export const ForgotPasswordPage = () => {
         otp: '',
       })
     } catch (error) {
-      const message = error instanceof Error ? error.message : apiError || 'Request failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        apiError || 'Something went wrong. Please try again.',
+        'forgotRequest',
+      )
       requestForm.setError('root', { message })
     }
   }
@@ -87,7 +87,9 @@ export const ForgotPasswordPage = () => {
       })
 
       if (!response?.resetToken) {
-        verifyForm.setError('root', { message: 'Reset verification failed.' })
+        verifyForm.setError('root', {
+          message: 'The code is incorrect or expired. Request a new code.',
+        })
         return
       }
 
@@ -98,7 +100,11 @@ export const ForgotPasswordPage = () => {
       const nextUrl = `/reset-password?email=${encodeURIComponent(values.email.trim())}`
       await router.push(nextUrl)
     } catch (error) {
-      const message = error instanceof Error ? error.message : apiError || 'Verification failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        apiError || 'The code is incorrect or expired. Request a new code.',
+        'forgotVerify',
+      )
       verifyForm.setError('root', { message })
     }
   }
@@ -133,32 +139,19 @@ export const ForgotPasswordPage = () => {
                 noValidate
               >
                 {notice ? <p className="text-sm font-semibold text-emerald-600">{notice}</p> : null}
-                <div>
-                  <Input
-                    id="forgot-email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="Enter email"
-                    aria-invalid={Boolean(requestForm.formState.errors.email)}
-                    aria-describedby="forgot-error"
-                    className={cn(
-                      'h-auto rounded-none border-b-2 border-black px-0 py-2 text-base text-[#191414] placeholder:text-[#898788] focus-visible:ring-0',
-                      requestEmailError &&
-                      'border-[#FF4337] text-[#FF4337] focus-visible:border-[#FF4337]',
-                    )}
-                    {...requestEmailField}
-                    onChange={(event) => {
-                      requestForm.clearErrors('root')
-                      requestEmailField.onChange(event)
-                    }}
-                  />
-                  {requestEmailError ? (
-                    <p className="mt-2 text-xs font-medium text-[#FF4337]">{requestEmailError}</p>
-                  ) : null}
-                </div>
+                <AuthFormInput<ForgotPasswordRequestFormValues>
+                  id="forgot-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="Enter email address"
+                  label="Email address"
+                  required
+                  aria-invalid={Boolean(requestForm.formState.errors.email)}
+                />
 
                 <FormErrorMessage
-                  id="forgot-error"
+                  id="forgot-submit-error"
                   message={requestForm.formState.errors.root?.message ?? ''}
                   visible={Boolean(requestForm.formState.errors.root?.message)}
                 />
@@ -181,16 +174,14 @@ export const ForgotPasswordPage = () => {
                 noValidate
               >
                 {notice ? <p className="text-sm font-semibold text-emerald-600">{notice}</p> : null}
-                <div>
-                  <Input
-                    id="forgot-email"
-                    type="email"
-                    autoComplete="email"
-                    value={pendingEmail}
-                    disabled
-                    className="h-auto rounded-none border-b-2 border-black border-black px-0 py-2 text-base text-[#191414] placeholder:text-[#898788] focus-visible:ring-0"
-                  />
-                </div>
+                <AuthInput
+                  id="forgot-email-readonly"
+                  label="Email address"
+                  type="email"
+                  autoComplete="email"
+                  value={pendingEmail}
+                  disabled
+                />
 
                 <AuthFormOtpInput<ForgotPasswordVerifyFormValues>
                   id="forgot-otp"
@@ -201,7 +192,7 @@ export const ForgotPasswordPage = () => {
                 />
 
                 <FormErrorMessage
-                  id="forgot-error"
+                  id="forgot-submit-error"
                   message={verifyForm.formState.errors.root?.message ?? ''}
                   visible={Boolean(verifyForm.formState.errors.root?.message)}
                 />

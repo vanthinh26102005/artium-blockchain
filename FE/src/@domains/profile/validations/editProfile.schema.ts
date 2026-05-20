@@ -11,6 +11,7 @@ export const normalizeProfileSlug = (value: string) =>
     .slice(0, 75)
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const ethAddressPattern = /^0x[a-fA-F0-9]{40}$/
 
 export const editProfileSchema = z.object({
   avatarUrl: z.string().trim(),
@@ -20,6 +21,13 @@ export const editProfileSchema = z.object({
     .min(1, 'Username is required.')
     .max(75, 'Username must be 75 characters or less.')
     .regex(slugPattern, 'Use lowercase letters, numbers, and single hyphens only.'),
+  walletAddress: z
+    .string()
+    .trim()
+    .optional()
+    .refine((val) => !val || ethAddressPattern.test(val), {
+      message: 'Invalid Ethereum wallet address.',
+    }),
   firstName: z
     .string()
     .trim()

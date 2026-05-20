@@ -22,6 +22,7 @@ type AuthState = {
   user: UserPayload | null
   isAuthenticated: boolean
   isHydrated: boolean
+  isLoggingOut: boolean
   setAuth: (payload: AuthPayload) => void
   clearAuth: () => void
   hydrateAuth: () => void
@@ -72,12 +73,22 @@ const clearStoredAuth = () => {
   window.localStorage.removeItem(AUTH_STORAGE_KEY)
 }
 
+const runNextAuthSignOut = async () => {
+  const signOutTask = signOut({ redirect: false }).catch(() => undefined)
+  const timeoutTask = new Promise<void>((resolve) => {
+    window.setTimeout(resolve, 2500)
+  })
+
+  await Promise.race([signOutTask, timeoutTask])
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   refreshToken: null,
   user: null,
   isAuthenticated: false,
   isHydrated: false,
+  isLoggingOut: false,
   setAuth: ({ accessToken, refreshToken, user }) => {
     writeStoredAuth({ accessToken, user })
 
@@ -87,6 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       user,
       isAuthenticated: getIsAuthenticated(user, accessToken),
       isHydrated: true,
+      isLoggingOut: false,
     })
   },
   clearAuth: () => {
@@ -97,6 +109,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       refreshToken: null,
       user: null,
       isAuthenticated: false,
+      isLoggingOut: false,
     })
   },
   hydrateAuth: () => {
@@ -152,15 +165,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   logout: async () => {
+    if (get().isLoggingOut) {
+      return
+    }
+
     if (isBrowser()) {
       markSkipGoogleBridge()
+      clearStoredAuth()
 
-      try {
-        await signOut({ redirect: false })
-      } finally {
-        get().clearAuth()
-        window.location.assign('/login?loggedOut=1')
-      }
+      set({
+        accessToken: null,
+        refreshToken: null,
+        user: null,
+        isAuthenticated: false,
+        isHydrated: true,
+        isLoggingOut: true,
+      })
+
+      await runNextAuthSignOut()
+      window.location.replace('/login?loggedOut=1')
       return
     }
 

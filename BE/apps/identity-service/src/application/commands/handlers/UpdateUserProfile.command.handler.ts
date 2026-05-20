@@ -71,6 +71,13 @@ export class UpdateUserProfileHandler implements ICommandHandler<
         throw error;
       }
 
+      // Catch TypeORM unique constraint violations just in case we missed anything
+      if (error.code === '23505') {
+        throw RpcExceptionHelper.conflict(
+          'The provided information is already in use by another account.',
+        );
+      }
+
       throw RpcExceptionHelper.badRequest('Failed to update user profile');
     }
   }

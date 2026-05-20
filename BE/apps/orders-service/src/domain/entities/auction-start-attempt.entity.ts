@@ -10,7 +10,8 @@ export type SellerAuctionStartTermsSnapshot = {
   reservePolicy: SellerAuctionReservePolicy;
   reservePriceEth?: string | null;
   minBidIncrementEth: string;
-  durationHours: number;
+  durationSeconds: number;
+  durationHours?: number | null;
   shippingDisclosure: string;
   paymentDisclosure: string;
   economicsLockedAcknowledged: boolean;

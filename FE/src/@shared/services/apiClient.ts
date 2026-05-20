@@ -4,6 +4,7 @@ import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 type ApiFetchOptions = RequestInit & {
   auth?: boolean
   baseUrl?: string
+  clearAuthOnUnauthorized?: boolean
   dedupe?: boolean
   clientCacheTtlMs?: number
 }
@@ -214,7 +215,14 @@ const withAbortSignal = <T>(
 }
 
 export const apiFetch = async <T>(path: string, options?: ApiFetchOptions): Promise<T> => {
-  const { auth = true, baseUrl, dedupe, clientCacheTtlMs, ...init } = options ?? {}
+  const {
+    auth = true,
+    baseUrl,
+    clearAuthOnUnauthorized = true,
+    dedupe,
+    clientCacheTtlMs,
+    ...init
+  } = options ?? {}
   const headers = resolveHeaders(init.headers)
   const method = (init.method ?? 'GET').toUpperCase()
 
@@ -273,7 +281,7 @@ export const apiFetch = async <T>(path: string, options?: ApiFetchOptions): Prom
       error.data = data
       error.headers = response.headers
 
-      if (auth && (response.status === 401 || response.status === 403)) {
+      if (auth && clearAuthOnUnauthorized && (response.status === 401 || response.status === 403)) {
         useAuthStore.getState().clearAuth()
       }
 

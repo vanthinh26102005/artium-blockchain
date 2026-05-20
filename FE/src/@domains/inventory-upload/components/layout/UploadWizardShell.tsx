@@ -13,6 +13,7 @@ type UploadWizardShellProps = {
   onPrev: () => void
   onNext: () => void
   isNextDisabled?: boolean
+  finalActionLabel?: string
   children: React.ReactNode
 }
 
@@ -24,6 +25,7 @@ export const UploadWizardShell = ({
   onPrev,
   onNext,
   isNextDisabled = false,
+  finalActionLabel,
   children,
 }: UploadWizardShellProps) => {
   return (
@@ -39,6 +41,7 @@ export const UploadWizardShell = ({
         onPrev={onPrev}
         onNext={onNext}
         isNextDisabled={isNextDisabled}
+        finalActionLabel={finalActionLabel}
       />
     </div>
   )

@@ -154,6 +154,7 @@ export const uploadArtworkWithImages = async (
     weight: draftPayload.weight,
   }
 
+  await artworkApis.createUploadDraft(draftArtworkId)
   await artworkApis.saveUploadDraft(draftArtworkId, savePayload)
 
   for (let index = 0; index < filesToUpload.length; index += 1) {

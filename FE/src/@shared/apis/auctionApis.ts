@@ -6,6 +6,7 @@ export type AuctionCategoryKey = 'architectural' | 'sculpture' | 'digital' | 'in
 
 export type AuctionArtworkDisplayResponse = {
   artworkId: string
+  sellerId?: string | null
   title: string
   creatorName: string
   imageSrc: string
@@ -29,6 +30,11 @@ export type AuctionReadResponse = {
   highestBidder?: string | null
   sellerWallet?: string | null
   txHash?: string | null
+  orderProjectionId?: string | null
+  orderNumber?: string | null
+  orderStatus?: string | null
+  paymentStatus?: string | null
+  escrowState?: number | null
   artwork: AuctionArtworkDisplayResponse
 }
 
@@ -100,7 +106,8 @@ export type SellerAuctionStartTermsSnapshot = {
   reservePolicy: SellerAuctionReservePolicy
   reservePriceEth?: string | null
   minBidIncrementEth: string
-  durationHours: number
+  durationSeconds: number
+  durationHours?: number | null
   shippingDisclosure: string
   paymentDisclosure: string
   economicsLockedAcknowledged: boolean
@@ -139,7 +146,8 @@ export type StartSellerAuctionRequest = {
   reservePolicy: SellerAuctionReservePolicy
   reservePriceEth?: string | null
   minBidIncrementEth: string
-  durationHours: number
+  durationSeconds?: number
+  durationHours?: number
   shippingDisclosure: string
   paymentDisclosure: string
   economicsLockedAcknowledged: boolean
@@ -162,6 +170,12 @@ export type GetAuctionsInput = {
 const auctionApis = {
   getAuctions: async (input: GetAuctionsInput = {}): Promise<PaginatedAuctionsResponse> => {
     return apiFetch<PaginatedAuctionsResponse>(withQuery('/auctions', input), { auth: false })
+  },
+
+  getSellerAuctions: async (input: GetAuctionsInput = {}): Promise<PaginatedAuctionsResponse> => {
+    return apiFetch<PaginatedAuctionsResponse>(withQuery('/auctions/seller/owned', input), {
+      cache: 'no-store',
+    })
   },
 
   getAuctionById: async (auctionId: string): Promise<AuctionReadResponse> => {
@@ -210,6 +224,21 @@ const auctionApis = {
     return apiFetch<SellerAuctionStartStatusResponse | null>(
       `/auctions/seller/start-status/${encodePathSegment(artworkId)}`,
       { cache: 'no-store' },
+    )
+  },
+
+  getSellerAuctionStartStatuses: async (): Promise<SellerAuctionStartStatusResponse[]> => {
+    return apiFetch<SellerAuctionStartStatusResponse[]>('/auctions/seller/start-statuses', {
+      cache: 'no-store',
+    })
+  },
+
+  resetSellerAuctionStartAttempt: async (
+    attemptId: string,
+  ): Promise<{ reset: boolean; attemptId: string; artworkId: string }> => {
+    return apiFetch<{ reset: boolean; attemptId: string; artworkId: string }>(
+      `/auctions/seller/start-attempts/${encodePathSegment(attemptId)}`,
+      { method: 'DELETE' },
     )
   },
 }

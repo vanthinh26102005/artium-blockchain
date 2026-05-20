@@ -26,11 +26,13 @@ import {
   GetWalletNonceHandler,
   InitiateUserRegistrationHandler,
   ListSellerProfilesHandler,
+  LinkWalletHandler,
   LoginByEmailHandler,
   LoginByGoogleHandler,
   LoginByWalletHandler,
   RequestPasswordResetHandler,
   StripeCustomerCreatedEventHandler,
+  UnlinkWalletHandler,
   UpdatePaymentOnboardingHandler,
   UpdateProfileVisibilityHandler,
   UpdateSellerProfileHandler,
@@ -52,6 +54,7 @@ import {
   SellerWebsite,
   TokenService,
   User,
+  WalletSignatureService,
 } from './domain';
 import {
   RefreshTokenRepository,
@@ -73,6 +76,8 @@ export const CommandHandlers = [
   LoginByEmailHandler,
   LoginByGoogleHandler,
   LoginByWalletHandler,
+  LinkWalletHandler,
+  UnlinkWalletHandler,
 
   ConfirmNewPasswordHandler,
   RequestPasswordResetHandler,
@@ -110,6 +115,7 @@ export const InfrastructureServices = [
   TokenService,
   RegistrationService,
   NonceService,
+  WalletSignatureService,
 ];
 export const Controllers = [
   UsersController,

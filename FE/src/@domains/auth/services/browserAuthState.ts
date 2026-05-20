@@ -1,5 +1,6 @@
 const PASSWORD_RESET_SESSION_KEY = 'artium.auth.password-reset'
 const SKIP_GOOGLE_BRIDGE_KEY = 'artium.auth.skip-google-bridge'
+const PENDING_WALLET_LINK_KEY = 'artium.auth.pending-wallet-link'
 
 type PasswordResetSession = {
   email: string
@@ -61,4 +62,28 @@ export const consumeSkipGoogleBridge = () => {
   }
 
   return shouldSkipBridge
+}
+
+export const writePendingWalletLink = (address: string) => {
+  if (!isBrowser()) {
+    return
+  }
+
+  window.sessionStorage.setItem(PENDING_WALLET_LINK_KEY, address)
+}
+
+export const readPendingWalletLink = () => {
+  if (!isBrowser()) {
+    return null
+  }
+
+  return window.sessionStorage.getItem(PENDING_WALLET_LINK_KEY)
+}
+
+export const clearPendingWalletLink = () => {
+  if (!isBrowser()) {
+    return
+  }
+
+  window.sessionStorage.removeItem(PENDING_WALLET_LINK_KEY)
 }

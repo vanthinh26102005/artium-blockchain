@@ -5,23 +5,26 @@ const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
 export const authEmailSchema = z
   .string()
   .trim()
-  .min(1, 'Email is required.')
+  .min(1, 'Enter your email address.')
   .email('Enter a valid email address.')
 
-export const loginPasswordSchema = z.string().min(1, 'Password is required.')
+export const loginPasswordSchema = z.string().min(1, 'Enter your password.')
 
 export const signUpFirstNameSchema = z.string().trim().min(1, 'First name is required.')
 
 export const signUpPasswordSchema = z
   .string()
-  .min(1, 'Password is required.')
-  .regex(STRONG_PASSWORD_REGEX, 'Use 8+ characters with uppercase, lowercase, and a number.')
+  .min(1, 'Enter your password.')
+  .regex(
+    STRONG_PASSWORD_REGEX,
+    'Use at least 8 characters, including uppercase, lowercase, and a number.',
+  )
 
 export const otpCodeSchema = z
   .string()
   .trim()
-  .min(1, 'Verification code is required.')
-  .regex(/^\d{6}$/, 'OTP must be 6 digits.')
+  .min(1, 'Enter the 6-digit code.')
+  .regex(/^\d{6}$/, 'Enter the 6-digit code from your email.')
 
 export const loginFormSchema = z.object({
   email: authEmailSchema,

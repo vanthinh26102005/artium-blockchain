@@ -14,7 +14,14 @@ const createDraftArtworkId = () => {
 const getQueryParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value
 
-export const useUploadDraftInit = (allowNavigationRef: React.RefObject<boolean>) => {
+type UseUploadDraftInitOptions = {
+  artworkId?: string
+}
+
+export const useUploadDraftInit = (
+  allowNavigationRef: React.RefObject<boolean>,
+  options: UseUploadDraftInitOptions = {},
+) => {
   const router = useRouter()
   
   const hydrateFromQuery = useUploadArtworkStore((state) => state.hydrateFromQuery)
@@ -26,11 +33,10 @@ export const useUploadDraftInit = (allowNavigationRef: React.RefObject<boolean>)
   const [isDraftLoading, setIsDraftLoading] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   
-  const generatedDraftIdRef = useRef<string | null>(null)
   const lastHydratedDraftIdRef = useRef<string | null>(null)
   const lastHydratedArtworkIdRef = useRef<string | null>(null)
   
-  const artworkIdParam = getQueryParam(router.query.artworkId)
+  const artworkIdParam = options.artworkId ?? getQueryParam(router.query.artworkId)
   const isEditingArtwork = Boolean(artworkIdParam)
 
   useEffect(() => {
@@ -38,7 +44,7 @@ export const useUploadDraftInit = (allowNavigationRef: React.RefObject<boolean>)
       return
     }
 
-    const artworkIdParamStr = getQueryParam(router.query.artworkId)
+    const artworkIdParamStr = options.artworkId ?? getQueryParam(router.query.artworkId)
     const legacyDraftParam = router.query.draft
     const draftArtworkIdQuery = router.query.draftArtworkId ?? legacyDraftParam
     const draftArtworkIdParam = getQueryParam(draftArtworkIdQuery)
@@ -53,7 +59,6 @@ export const useUploadDraftInit = (allowNavigationRef: React.RefObject<boolean>)
         hydrateFromQuery(artworkIdParamStr)
         setHydrationError(null)
         setIsDraftLoading(true)
-        generatedDraftIdRef.current = null
         lastHydratedDraftIdRef.current = null
 
         try {
@@ -123,23 +128,16 @@ export const useUploadDraftInit = (allowNavigationRef: React.RefObject<boolean>)
     }
 
     if (!draftArtworkIdParam) {
+      if (lastHydratedDraftIdRef.current) {
+        return
+      }
+
       const nextDraftId = createDraftArtworkId()
-      generatedDraftIdRef.current = nextDraftId
-      lastHydratedDraftIdRef.current = null
+      lastHydratedDraftIdRef.current = nextDraftId
       lastHydratedArtworkIdRef.current = null
-      allowNavigationRef.current = true
-      router
-        .replace(
-          {
-            pathname: router.pathname,
-            query: { ...router.query, draftArtworkId: nextDraftId },
-          },
-          undefined,
-          { shallow: true },
-        )
-        .finally(() => {
-          allowNavigationRef.current = false
-        })
+      hydrateFromQuery(nextDraftId)
+      setHydrationError(null)
+      setIsDraftLoading(false)
       return
     }
 
@@ -149,15 +147,12 @@ export const useUploadDraftInit = (allowNavigationRef: React.RefObject<boolean>)
 
     let isCancelled = false
     const loadDraft = async () => {
-      const isGeneratedDraft = generatedDraftIdRef.current === draftArtworkIdParam
       hydrateFromQuery(draftArtworkIdParam)
       setHydrationError(null)
       setIsDraftLoading(true)
 
       try {
-        const draft = isGeneratedDraft
-          ? await artworkApis.createUploadDraft(draftArtworkIdParam)
-          : await artworkApis.getUploadDraft(draftArtworkIdParam)
+        const draft = await artworkApis.getUploadDraft(draftArtworkIdParam)
 
         if (isCancelled) {
           return
@@ -165,7 +160,6 @@ export const useUploadDraftInit = (allowNavigationRef: React.RefObject<boolean>)
 
         hydrateFromBackendDraft(draft)
         lastHydratedDraftIdRef.current = draftArtworkIdParam
-        generatedDraftIdRef.current = null
       } catch (err) {
         if (isCancelled) {
           return
@@ -194,6 +188,7 @@ export const useUploadDraftInit = (allowNavigationRef: React.RefObject<boolean>)
   }, [
     hydrateFromBackendDraft,
     hydrateFromQuery,
+    options.artworkId,
     retryCount,
     router,
     router.isReady,
@@ -212,15 +207,27 @@ export const useUploadDraftInit = (allowNavigationRef: React.RefObject<boolean>)
 
   const handleStartNewDraft = () => {
     const nextDraftId = createDraftArtworkId()
-    generatedDraftIdRef.current = nextDraftId
-    lastHydratedDraftIdRef.current = null
+    lastHydratedDraftIdRef.current = nextDraftId
     lastHydratedArtworkIdRef.current = null
     resetDraft()
+    hydrateFromQuery(nextDraftId)
     setHydrationError(null)
+    allowNavigationRef.current = true
+    if (options.artworkId) {
+      router
+        .push({
+          pathname: '/artworks/upload',
+        })
+        .finally(() => {
+          allowNavigationRef.current = false
+        })
+      return
+    }
+
     const nextQuery = { ...router.query }
     delete nextQuery.artworkId
-    nextQuery.draftArtworkId = nextDraftId
-    allowNavigationRef.current = true
+    delete nextQuery.draftArtworkId
+    delete nextQuery.draft
     router
       .replace(
         {

@@ -16,3 +16,4 @@ export * from './services/nonce.service';
 export * from './services/otp.service';
 export * from './services/registration.service';
 export * from './services/token.service';
+export * from './services/wallet-signature.service';

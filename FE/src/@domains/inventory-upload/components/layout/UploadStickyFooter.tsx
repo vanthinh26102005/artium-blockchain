@@ -11,6 +11,7 @@ type UploadStickyFooterProps = {
   onPrev: () => void
   onNext: () => void
   isNextDisabled?: boolean
+  finalActionLabel?: string
 }
 
 export const UploadStickyFooter = ({
@@ -20,6 +21,7 @@ export const UploadStickyFooter = ({
   onPrev,
   onNext,
   isNextDisabled = false,
+  finalActionLabel = 'Publish Artwork',
 }: UploadStickyFooterProps) => {
   const isFirstStep = step <= 1
   const isLastStep = step >= totalSteps
@@ -59,7 +61,7 @@ export const UploadStickyFooter = ({
             disabled={isNextDisabled}
             className="bg-primary flex h-[40px] flex-1 items-center justify-center rounded-full border border-black px-6 text-[14px] font-semibold whitespace-nowrap text-white hover:shadow disabled:opacity-40 lg:h-[44px] lg:flex-none"
           >
-            {isLastStep ? 'Publish Artwork' : 'Continue'}
+            {isLastStep ? finalActionLabel : 'Continue'}
           </Button>
         </div>
       </div>

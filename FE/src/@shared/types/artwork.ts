@@ -252,6 +252,18 @@ export interface UploadArtworkImagesRequest {
 }
 
 /**
+ * Upload event cover image request.
+ * Backend: UploadController.uploadEventCoverImage
+ *
+ * Note: This is sent as multipart/form-data
+ */
+export interface UploadEventCoverImageRequest {
+  file: File;
+  eventId: string;
+  altText?: string;
+}
+
+/**
  * Upload avatar request
  * Backend: UploadController.uploadAvatar
  * 
@@ -276,7 +288,7 @@ export interface ApiErrorResponse {
   path: string;
   method: string;
   message: string | string[];
-  errors?: Record<string, any> | null;
+  errors?: Record<string, unknown> | null;
 }
 
 /**
@@ -296,7 +308,7 @@ export enum UploadErrorType {
 export interface UploadError extends Error {
   type: UploadErrorType;
   statusCode?: number;
-  details?: any;
+  details?: unknown;
 }
 
 // ============================================================================

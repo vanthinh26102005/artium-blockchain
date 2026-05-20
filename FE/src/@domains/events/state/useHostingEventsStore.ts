@@ -68,13 +68,10 @@ const resolveUploadedImageUrl = (result: { secureUrl?: string; url?: string }) =
 };
 
 const uploadEventCoverImage = async (file: File, eventId: string, title: string) => {
-  const { user } = useAuthStore.getState();
-  const uploadResult = await artworkUploadApi.uploadArtworkImage({
+  const uploadResult = await artworkUploadApi.uploadEventCoverImage({
     file,
-    sellerId: user?.id ?? "event-host",
-    artworkId: `event-${eventId}`,
+    eventId,
     altText: title,
-    isPrimary: true,
   });
   const coverImageUrl = resolveUploadedImageUrl(uploadResult);
 

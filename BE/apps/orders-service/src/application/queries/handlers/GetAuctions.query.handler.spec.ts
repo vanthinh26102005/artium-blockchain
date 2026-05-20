@@ -45,27 +45,27 @@ describe('GetAuctionsHandler', () => {
     );
   });
 
-  it('requests only authoritative active auction rows and maps converged item data', async () => {
-    orderRepo.find.mockResolvedValue([
+  const activeAuctionOrder = () => ({
+    id: 'order-1',
+    onChainOrderId: 'AUC-001',
+    status: OrderStatus.AUCTION_ACTIVE,
+    paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
+    sellerWallet: '0x2222222222222222222222222222222222222222',
+    escrowState: EscrowState.STARTED,
+    txHash:
+      '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+    createdAt: new Date('2026-04-27T08:00:00.000Z'),
+    items: [
       {
-        id: 'order-1',
-        onChainOrderId: 'AUC-001',
-        status: OrderStatus.AUCTION_ACTIVE,
-        paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
-        sellerWallet: '0x2222222222222222222222222222222222222222',
-        escrowState: EscrowState.STARTED,
-        txHash:
-          '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-        createdAt: new Date('2026-04-27T08:00:00.000Z'),
-        items: [
-          {
-            artworkId: 'artwork-1',
-            artworkTitle: 'Ocean Study',
-            artworkImageUrl: 'https://cdn.example.com/ocean.jpg',
-          },
-        ],
+        artworkId: 'artwork-1',
+        artworkTitle: 'Ocean Study',
+        artworkImageUrl: 'https://cdn.example.com/ocean.jpg',
       },
-    ] as never);
+    ],
+  });
+
+  it('requests only authoritative active auction rows and maps converged item data', async () => {
+    orderRepo.find.mockResolvedValue([activeAuctionOrder()] as never);
     orderRepo.count.mockResolvedValue(1 as never);
     orderRepo.findWithItems.mockResolvedValue(null as never);
 
@@ -95,6 +95,52 @@ describe('GetAuctionsHandler', () => {
         imageSrc: 'https://cdn.example.com/ocean.jpg',
       },
     });
+  });
+
+  it('omits elapsed auctions from the default live feed', async () => {
+    orderRepo.find.mockResolvedValue([activeAuctionOrder()] as never);
+    orderRepo.count.mockResolvedValue(1 as never);
+    orderRepo.findWithItems.mockResolvedValue(null as never);
+    escrowContractService.getAuction.mockResolvedValue({
+      state: EscrowState.STARTED,
+      highestBid: BigInt('2000000000000000000'),
+      minBidIncrement: BigInt('100000000000000000'),
+      endTime: BigInt(Math.floor(Date.now() / 1000) - 60),
+      highestBidder: '0x3333333333333333333333333333333333333333',
+      seller: '0x2222222222222222222222222222222222222222',
+    } as never);
+
+    const result = await handler.execute(
+      new GetAuctionsQuery({ take: 20, skip: 0 }),
+    );
+
+    expect(result.data).toHaveLength(0);
+    expect(result.total).toBe(1);
+  });
+
+  it('returns elapsed auctions when closed status is requested', async () => {
+    orderRepo.find.mockResolvedValue([activeAuctionOrder()] as never);
+    orderRepo.count.mockResolvedValue(1 as never);
+    orderRepo.findWithItems.mockResolvedValue(null as never);
+    escrowContractService.getAuction.mockResolvedValue({
+      state: EscrowState.STARTED,
+      highestBid: BigInt('2000000000000000000'),
+      minBidIncrement: BigInt('100000000000000000'),
+      endTime: BigInt(Math.floor(Date.now() / 1000) - 60),
+      highestBidder: '0x3333333333333333333333333333333333333333',
+      seller: '0x2222222222222222222222222222222222222222',
+    } as never);
+
+    const result = await handler.execute(
+      new GetAuctionsQuery({
+        take: 20,
+        skip: 0,
+        status: AuctionStatusKey.CLOSED,
+      }),
+    );
+
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0].statusKey).toBe(AuctionStatusKey.CLOSED);
   });
 
   it('drops rows that do not have converged artwork linkage', async () => {

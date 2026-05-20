@@ -142,4 +142,5 @@ export class UpdateUserProfileInput {
   @IsOptional()
   @IsString()
   avatarUrl?: string | null;
+
 }

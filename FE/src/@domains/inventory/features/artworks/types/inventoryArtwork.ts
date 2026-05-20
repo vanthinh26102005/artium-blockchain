@@ -1,19 +1,29 @@
 import type { InventoryFolder } from '@domains/inventory/features/folders/types/inventoryFolder'
 import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
-export type InventoryArtworkStatus = 'Draft' | 'Hidden'
+export type InventoryArtworkStatus =
+  | 'DRAFT'
+  | 'ACTIVE'
+  | 'SOLD'
+  | 'RESERVED'
+  | 'INACTIVE'
+  | 'DELETED'
+  | 'PENDING_REVIEW'
+  | 'IN_AUCTION'
 
 export type InventoryArtwork = {
   id: string
   title: string
   creatorName: string
   status: InventoryArtworkStatus
+  displayStatus?: 'Draft' | 'Hidden'
   isPublished?: boolean
   auctionLifecycle?: SellerAuctionStartStatusResponse | null
   backendStatus?: string
   createdAt?: string
   updatedAt?: string
   price?: number
+  quantity?: number
   thumbnailUrl: string
   folderId?: string
 }

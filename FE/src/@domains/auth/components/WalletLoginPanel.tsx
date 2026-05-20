@@ -6,6 +6,9 @@ import { cn } from '@shared/lib/utils'
 
 // @domains - auth
 import type { WalletLoginStatus } from '@domains/auth/hooks/useWalletLogin'
+import type { WalletLinkStatus } from '@domains/auth/hooks/useWalletLink'
+
+type WalletPanelStatus = WalletLoginStatus | WalletLinkStatus
 
 type WalletLoginPanelProps = {
   buttonLabel: string
@@ -14,7 +17,7 @@ type WalletLoginPanelProps = {
   onLogin: () => void
   onSwitchNetwork: () => void
   shortenedAddress: string | null
-  status: WalletLoginStatus
+  status: WalletPanelStatus
   targetChainName: string
 }
 
@@ -32,7 +35,7 @@ const getWalletSteps = ({
 }: {
   isWrongNetwork: boolean
   shortenedAddress: string | null
-  status: WalletLoginStatus
+  status: WalletPanelStatus
 }): WalletStep[] => {
   const hasWallet = Boolean(shortenedAddress)
   const hasSigned = status === 'logging_in' || status === 'authenticated'

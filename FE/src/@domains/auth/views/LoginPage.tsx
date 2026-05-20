@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 // next
@@ -19,12 +19,26 @@ import usersApi from '@shared/apis/usersApi'
 // @shared - components
 import { Button } from '@shared/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@shared/components/ui/alert-dialog'
 
 // @domains - auth
 import { useGoogleLoginBridge } from '@domains/auth/hooks/useGoogleLoginBridge'
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { useWalletLogin } from '@domains/auth/hooks/useWalletLogin'
+import {
+  clearPendingWalletLink,
+  writePendingWalletLink,
+} from '@domains/auth/services/browserAuthState'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
 import { buildAuthCallbackUrl, getSafeNextPath } from '@domains/auth/utils/authRedirect'
 import {
   AuthDivider,
@@ -42,12 +56,14 @@ import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
 
 export const LoginPage = () => {
   const router = useRouter()
-  const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
   const setAuth = useAuthStore((state) => state.setAuth)
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
   const walletLogin = useWalletLogin()
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
   const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false)
+  const [isUnregisteredWalletDialogOpen, setIsUnregisteredWalletDialogOpen] = useState(false)
+  const [isDeferringAuthRedirect, setIsDeferringAuthRedirect] = useState(false)
+  const { canRenderGuestPage } = useRedirectAuthenticatedUser('/', isDeferringAuthRedirect)
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     mode: 'onBlur',
@@ -63,6 +79,25 @@ export const LoginPage = () => {
     formState: { errors, isSubmitting },
   } = form
 
+  useEffect(() => {
+    if (walletLogin.status === 'unregistered') {
+      if (walletLogin.walletAddress) {
+        writePendingWalletLink(walletLogin.walletAddress)
+      }
+      setIsWalletDialogOpen(false)
+      setIsUnregisteredWalletDialogOpen(true)
+    }
+  }, [walletLogin.status, walletLogin.walletAddress])
+
+  const getProfileWalletConnectPath = (
+    user: { id: string; slug?: string | null; username?: string | null },
+    nextPath: string,
+  ) => {
+    const profileHandle = user.slug || user.username || user.id
+
+    return `/profile/${encodeURIComponent(profileHandle)}/edit?connectWallet=1&next=${encodeURIComponent(nextPath)}`
+  }
+
   const handleLogin = async (values: LoginFormValues) => {
     form.clearErrors('root')
 
@@ -72,21 +107,46 @@ export const LoginPage = () => {
         password: values.password,
       })
       const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
+      const pendingWalletAddress =
+        walletLogin.status === 'unregistered' && walletLogin.walletAddress && !response.user.walletAddress
+          ? walletLogin.walletAddress
+          : null
+      const shouldPromptWalletFromSignup = router.query.signup === 'success'
+      if (pendingWalletAddress || shouldPromptWalletFromSignup) {
+        setIsDeferringAuthRedirect(true)
+      }
+
       setAuth(response)
-      await router.push(nextPath)
+
+      if (pendingWalletAddress) {
+        writePendingWalletLink(pendingWalletAddress)
+        await router.push(getProfileWalletConnectPath(response.user, nextPath))
+      } else if (shouldPromptWalletFromSignup) {
+        clearPendingWalletLink()
+        await router.push(getProfileWalletConnectPath(response.user, nextPath))
+      } else {
+        await router.push(nextPath)
+      }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Login failed.'
+      const message = getPracticalAuthErrorMessage(error, 'Email or password is incorrect.', 'login')
       setError('root', { message })
     }
   }
 
   const handleGoogleSignIn = async () => {
+    if (walletLogin.status === 'unregistered' && walletLogin.walletAddress) {
+      writePendingWalletLink(walletLogin.walletAddress)
+    }
+
     setIsGoogleSubmitting(true)
-    const callbackUrl = buildAuthCallbackUrl(
+    let callbackUrl = buildAuthCallbackUrl(
       '/login',
       router.query.next,
       '/discover?tab=top-picks',
     )
+    if (router.query.signup === 'success') {
+      callbackUrl = buildAuthCallbackUrl('/login', '/discover?tab=top-picks')
+    }
 
     try {
       await signIn('google', { callbackUrl })
@@ -97,6 +157,19 @@ export const LoginPage = () => {
 
   const handleWalletSignIn = async () => {
     await walletLogin.loginWithWallet()
+  }
+
+  const handleUseEmailForWallet = () => {
+    setIsUnregisteredWalletDialogOpen(false)
+  }
+
+  const handleCreateAccountForWallet = async () => {
+    if (walletLogin.walletAddress) {
+      writePendingWalletLink(walletLogin.walletAddress)
+    }
+
+    const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
+    await router.push(`/sign-up?next=${encodeURIComponent(nextPath)}`)
   }
 
   const handleSwitchWalletNetwork = async () => {
@@ -116,6 +189,12 @@ export const LoginPage = () => {
         <h1 className="font-monument-grotes text-center text-3xl font-bold text-[#191414] lg:text-[48px]">
           Welcome back
         </h1>
+
+        {router.query.signup === 'success' ? (
+          <div className="mb-4 rounded-xl bg-[#f1faf4] p-3 text-center text-sm font-semibold text-[#1f7a43]">
+            Account created! Please log in to continue.
+          </div>
+        ) : null}
 
         {/* social auth */}
         <SocialAuthButtons
@@ -147,7 +226,6 @@ export const LoginPage = () => {
               label="Email address"
               required
               aria-invalid={Boolean(errors.email)}
-              aria-describedby="login-error"
             />
 
             <AuthFormPasswordInput<LoginFormValues>
@@ -158,11 +236,10 @@ export const LoginPage = () => {
               label="Password"
               required
               aria-invalid={Boolean(errors.password)}
-              aria-describedby="login-error"
             />
 
             <FormErrorMessage
-              id="login-error"
+              id="login-submit-error"
               message={errors.root?.message ?? ''}
               visible={Boolean(errors.root?.message)}
             />
@@ -226,6 +303,34 @@ export const LoginPage = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isUnregisteredWalletDialogOpen} onOpenChange={setIsUnregisteredWalletDialogOpen}>
+        <AlertDialogContent onClose={() => setIsUnregisteredWalletDialogOpen(false)}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Wallet Not Linked</AlertDialogTitle>
+            <AlertDialogDescription>
+              This wallet is not linked to an Artium account yet. Sign in or create an account first, then Artium will ask whether you want to connect this wallet.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:flex-col sm:space-x-0">
+            <AlertDialogAction onClick={handleGoogleSignIn}>Continue with Google</AlertDialogAction>
+            <button
+              type="button"
+              onClick={handleUseEmailForWallet}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-black/10 bg-white px-4 text-sm font-semibold text-[#191414] transition hover:bg-black/5"
+            >
+              Use email form
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleCreateAccountForWallet()}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-black/10 bg-white px-4 text-sm font-semibold text-[#191414] transition hover:bg-black/5"
+            >
+              Create account
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AuthShell>
   )
 }

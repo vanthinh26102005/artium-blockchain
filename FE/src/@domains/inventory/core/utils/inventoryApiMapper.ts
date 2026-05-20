@@ -1,6 +1,9 @@
 import type { ArtworkApiItem } from '@shared/apis/artworkApis'
 import type { ArtworkFolderApiItem } from '@shared/apis/artworkFolderApis'
-import type { InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
+import type {
+  InventoryArtwork,
+  InventoryArtworkStatus,
+} from '@domains/inventory/features/artworks/types/inventoryArtwork'
 import type { InventoryFolder } from '@domains/inventory/features/folders/types/inventoryFolder'
 
 const FALLBACK_THUMBNAIL = '/images/logo/logo-light-mode.png'
@@ -27,26 +30,57 @@ const resolveThumbnail = (item: ArtworkApiItem) => {
   return firstImage?.secureUrl || firstImage?.url || FALLBACK_THUMBNAIL
 }
 
-const resolveDisplayStatus = (item: ArtworkApiItem) => {
+const resolveDisplayStatus = (item: ArtworkApiItem): 'Draft' | 'Hidden' => {
   if (item.displayStatus) {
     return item.displayStatus
   }
 
-  return item.status === 'DRAFT' ? 'Draft' : 'Hidden'
+  switch (item.status) {
+    case 'SOLD':
+    case 'RESERVED':
+    case 'INACTIVE':
+    case 'DELETED':
+      return 'Hidden'
+    case 'DRAFT':
+    case 'ACTIVE':
+    case 'PENDING_REVIEW':
+    default:
+      return 'Draft'
+  }
+}
+
+const resolveArtworkStatus = (item: ArtworkApiItem): InventoryArtworkStatus => {
+  switch (item.status) {
+    case 'ACTIVE':
+    case 'SOLD':
+    case 'RESERVED':
+    case 'INACTIVE':
+    case 'DELETED':
+    case 'PENDING_REVIEW':
+    case 'IN_AUCTION':
+    case 'DRAFT':
+      return item.status
+    default:
+      return item.isPublished ? 'ACTIVE' : 'INACTIVE'
+  }
 }
 
 export const mapArtworkToInventory = (item: ArtworkApiItem): InventoryArtwork => {
+  const status = resolveArtworkStatus(item)
+
   return {
     id: item.id,
     title: item.title,
     creatorName: item.creatorName ?? 'Unknown artist',
-    status: resolveDisplayStatus(item),
+    status,
+    displayStatus: resolveDisplayStatus(item),
     isPublished: item.isPublished ?? false,
     auctionLifecycle: item.auctionLifecycle ?? null,
     backendStatus: item.status,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
     price: normalizePrice(item.price),
+    quantity: item.quantity,
     thumbnailUrl: resolveThumbnail(item),
     folderId: item.folder?.id ?? item.folderId ?? undefined,
   }

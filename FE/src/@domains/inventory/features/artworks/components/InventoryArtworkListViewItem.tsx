@@ -1,5 +1,5 @@
 // third-party
-import { EyeOff, Info } from 'lucide-react'
+import { Info } from 'lucide-react'
 
 // @shared - components
 import { Checkbox } from '@shared/components/ui/checkbox'
@@ -9,6 +9,11 @@ import { SellerAuctionDraftBadge } from '@domains/auction/components'
 import { useSellerAuctionTermsDraftStatus } from '@domains/auction/hooks/useSellerAuctionTermsDraftStatus'
 import { InventoryArtworkActionMenu } from '@domains/inventory/features/artworks/components/InventoryArtworkActionMenu'
 import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
+import {
+  getInventoryArtworkStatus,
+  getInventoryArtworkStatusClassName,
+  getInventoryArtworkVisibilityLabel,
+} from '@domains/inventory/features/artworks/utils/inventoryArtworkStatus'
 import { useInventorySelectionStore } from '@domains/inventory/core/stores/useInventorySelectionStore'
 
 type InventoryArtworkListViewItemProps = {
@@ -42,7 +47,8 @@ export const InventoryArtworkListViewItem = ({
     typeof artwork.price === 'number' ? `US$${artwork.price.toLocaleString('en-US')}` : ''
   const subtitleParts = [priceLabel, artwork.creatorName].filter(Boolean)
   const subtitleLabel = subtitleParts.join(' • ')
-  const visibilityLabel = artwork.status === 'Hidden' ? 'Hidden in profile' : 'Draft'
+  const status = getInventoryArtworkStatus(artwork)
+  const visibilityLabel = getInventoryArtworkVisibilityLabel(artwork)
   const hasAuctionDraft = useSellerAuctionTermsDraftStatus(artwork.id)
 
   // -- handlers --
@@ -87,11 +93,15 @@ export const InventoryArtworkListViewItem = ({
         </div>
         <div className="flex items-center gap-3">
           {hasAuctionDraft ? <SellerAuctionDraftBadge /> : null}
-          <div className="flex items-center gap-2">
-            {artwork.status === 'Hidden' && <EyeOff className="h-4 w-4 text-slate-400" />}
-            <span className="text-sm font-semibold text-slate-500 uppercase">
-              {visibilityLabel}
+          <div className="flex flex-col items-end gap-1">
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${getInventoryArtworkStatusClassName(
+                status.tone,
+              )}`}
+            >
+              {status.label}
             </span>
+            <span className="text-xs font-medium text-slate-500">{visibilityLabel}</span>
           </div>
           <InventoryArtworkActionMenu
             artwork={artwork}
@@ -129,7 +139,7 @@ export const InventoryArtworkListViewItem = ({
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-sm text-slate-400">Listing status</span>
-              <span className="text-base font-medium text-slate-900">—</span>
+              <span className="text-base font-medium text-slate-900">{status.label}</span>
             </div>
           </div>
         </div>

@@ -11,8 +11,12 @@ import { signOut, useSession } from 'next-auth/react'
 import usersApi from '@shared/apis/usersApi'
 
 // @domains - auth
-import { consumeSkipGoogleBridge } from '@domains/auth/services/browserAuthState'
+import {
+  consumeSkipGoogleBridge,
+  readPendingWalletLink,
+} from '@domains/auth/services/browserAuthState'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
 import { getSafeNextPath } from '@domains/auth/utils/authRedirect'
 
 type GoogleBridgeState = {
@@ -64,9 +68,22 @@ export const useGoogleLoginBridge = (): GoogleBridgeState => {
         const response = await usersApi.loginWithGoogle({ idToken })
         setAuth(response)
         const nextPath = getSafeNextPath(router.query.next, '/')
+        const pendingWallet = readPendingWalletLink()
+        if (pendingWallet && !response.user.walletAddress) {
+          const profileHandle = response.user.slug || response.user.username || response.user.id
+          await router.replace(
+            `/profile/${encodeURIComponent(profileHandle)}/edit?connectWallet=1&next=${encodeURIComponent(nextPath)}`,
+          )
+          return
+        }
+
         await router.replace(nextPath)
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Google login failed.'
+        const message = getPracticalAuthErrorMessage(
+          error,
+          'Google sign-in failed. Please try again.',
+          'google',
+        )
         setError(message)
         await signOut({ redirect: false })
       } finally {

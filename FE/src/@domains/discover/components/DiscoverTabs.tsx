@@ -24,9 +24,9 @@ export const DiscoverTabs = ({ activeTabKey, onTabChange }: DiscoverTabsProps) =
 
   // -- render --
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="min-w-0 flex-1 overflow-x-auto pb-1">
       {/* tab list */}
-      <div className="flex w-max flex-nowrap items-center gap-2" role="tablist">
+      <div className="flex min-w-max flex-nowrap items-center gap-2" role="tablist">
         {DISCOVER_TABS.map((tab) => {
           const isActive = tab.key === activeTabKey
 

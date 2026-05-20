@@ -2,19 +2,19 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
 
-export const useRedirectAuthenticatedUser = (redirectTo = '/') => {
+export const useRedirectAuthenticatedUser = (redirectTo = '/', disabled = false) => {
   const router = useRouter()
   const isHydrated = useAuthStore((state) => state.isHydrated)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-  const canRenderGuestPage = isHydrated && !isAuthenticated
+  const canRenderGuestPage = isHydrated && (disabled || !isAuthenticated)
 
   useEffect(() => {
-    if (!router.isReady || !isHydrated || !isAuthenticated) {
+    if (disabled || !router.isReady || !isHydrated || !isAuthenticated) {
       return
     }
 
     void router.replace(redirectTo)
-  }, [router, isHydrated, isAuthenticated, redirectTo])
+  }, [disabled, router, isHydrated, isAuthenticated, redirectTo])
 
   return { canRenderGuestPage }
 }

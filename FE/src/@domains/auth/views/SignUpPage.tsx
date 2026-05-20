@@ -13,12 +13,20 @@ import { Metadata } from '@/components/SEO/Metadata'
 
 // @shared - components
 import { Button } from '@shared/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/components/ui/dialog'
 
 // @domains - auth
 import { useGoogleLoginBridge } from '@domains/auth/hooks/useGoogleLoginBridge'
+import { useWalletLink } from '@domains/auth/hooks/useWalletLink'
+import {
+  clearPendingWalletLink,
+  readPendingWalletLink,
+} from '@domains/auth/services/browserAuthState'
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { useRegister } from '@domains/auth/hooks/useRegister'
-import { buildAuthCallbackUrl } from '@domains/auth/utils/authRedirect'
+import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
+import { buildAuthCallbackUrl, getSafeNextPath } from '@domains/auth/utils/authRedirect'
 import {
   AuthDivider,
   AuthFormInput,
@@ -29,6 +37,7 @@ import {
   AuthInput,
   AuthShell,
   SocialAuthButtons,
+  WalletLoginPanel,
 } from '@domains/auth/components'
 import {
   otpOnlyFormSchema,
@@ -40,11 +49,14 @@ import { FormErrorMessage } from '@/@shared/components/ui/form-error-message'
 
 export const SignUpPage = () => {
   const router = useRouter()
-  const { canRenderGuestPage } = useRedirectAuthenticatedUser('/')
+  const setAuth = useAuthStore((state) => state.setAuth)
   const { initiate, complete, isLoading, error: registerError } = useRegister()
   const { error: googleError, isLoading: isGoogleBridgeLoading } = useGoogleLoginBridge()
+  const walletLink = useWalletLink()
   const [step, setStep] = useState<'details' | 'otp'>('details')
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
+  const [isWalletPromptOpen, setIsWalletPromptOpen] = useState(false)
+  const { canRenderGuestPage } = useRedirectAuthenticatedUser('/', isWalletPromptOpen)
   const [pendingDetails, setPendingDetails] = useState<SignUpDetailsFormValues | null>(null)
   const detailsForm = useForm<SignUpDetailsFormValues>({
     resolver: zodResolver(signUpDetailsFormSchema),
@@ -78,7 +90,11 @@ export const SignUpPage = () => {
       setStep('otp')
       otpForm.reset({ otp: '' })
     } catch (error) {
-      const message = error instanceof Error ? error.message : registerError ?? 'Registration failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        registerError ?? 'Something went wrong. Please try again.',
+        'signup',
+      )
       detailsForm.setError('root', { message })
     }
   }
@@ -92,12 +108,34 @@ export const SignUpPage = () => {
     }
 
     try {
-      await complete({ email: pendingDetails.email.trim(), otp: values.otp.trim() })
-      await router.push('/login?signup=success')
+      const response = await complete({ email: pendingDetails.email.trim(), otp: values.otp.trim() })
+      setAuth(response)
+      setIsWalletPromptOpen(true)
     } catch (error) {
-      const message = error instanceof Error ? error.message : registerError ?? 'OTP verification failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        registerError ?? 'The code is incorrect or expired. Request a new code.',
+        'signupOtp',
+      )
       otpForm.setError('root', { message })
     }
+  }
+
+  const finishRegistration = async () => {
+    clearPendingWalletLink()
+    const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
+    await router.push(nextPath)
+  }
+
+  const handleConnectWalletAfterRegistration = async () => {
+    const user = await walletLink.linkWallet(readPendingWalletLink())
+    if (!user) {
+      return
+    }
+
+    clearPendingWalletLink()
+    setIsWalletPromptOpen(false)
+    await finishRegistration()
   }
 
   const handleGoogleSignIn = async () => {
@@ -156,7 +194,6 @@ export const SignUpPage = () => {
                 label="First name"
                 required
                 aria-invalid={Boolean(detailsForm.formState.errors.firstName)}
-                aria-describedby="signup-error"
               />
 
               <AuthFormInput<SignUpDetailsFormValues>
@@ -168,7 +205,6 @@ export const SignUpPage = () => {
                 label="Email address"
                 required
                 aria-invalid={Boolean(detailsForm.formState.errors.email)}
-                aria-describedby="signup-error"
               />
 
               <AuthFormPasswordInput<SignUpDetailsFormValues>
@@ -179,17 +215,16 @@ export const SignUpPage = () => {
                 label="Password"
                 required
                 aria-invalid={Boolean(detailsForm.formState.errors.password)}
-                aria-describedby="signup-error"
               />
 
               {!detailsForm.formState.errors.password ? (
-                <p className="text-xs text-[#6b6b6b]">
-                  Use at least 8 characters with uppercase, lowercase, and a number.
+                <p className="text-xs font-medium text-auth-error">
+                  Use at least 8 characters, including uppercase, lowercase, and a number.
                 </p>
               ) : null}
 
               <FormErrorMessage
-                id="signup-error"
+                id="signup-submit-error"
                 message={detailsForm.formState.errors.root?.message ?? ''}
                 visible={Boolean(detailsForm.formState.errors.root?.message)}
               />
@@ -227,7 +262,7 @@ export const SignUpPage = () => {
               />
 
               <FormErrorMessage
-                id="signup-error"
+                id="signup-submit-error"
                 message={otpForm.formState.errors.root?.message ?? ''}
                 visible={Boolean(otpForm.formState.errors.root?.message)}
               />
@@ -260,6 +295,42 @@ export const SignUpPage = () => {
 
         <AuthFooter />
       </AuthFormCard>
+
+      <Dialog open={isWalletPromptOpen} onOpenChange={setIsWalletPromptOpen}>
+        <DialogContent
+          size="lg"
+          closeButtonClassName="top-6 right-6 h-10 w-10 border border-black/10 bg-white text-[#6f6a67] hover:bg-[#f7f5f2] hover:text-[#191414] focus:ring-black/20 sm:top-7 sm:right-7"
+          className="max-h-[90vh] max-w-[520px] overflow-y-auto rounded-2xl bg-white p-6 text-black shadow-[0_30px_90px_rgba(0,0,0,0.28)] sm:p-7"
+        >
+          <DialogHeader className="mb-6 !px-0 pr-14 text-left sm:mb-7">
+            <DialogTitle className="text-left text-[22px] leading-[1.15] font-bold text-[#191414] sm:text-2xl">
+              Connect your wallet?
+            </DialogTitle>
+            <p className="max-w-[390px] text-left text-sm leading-6 font-medium text-[#6f6a67]">
+              Link MetaMask to this account so you can sign in with either email or wallet.
+            </p>
+          </DialogHeader>
+
+          <WalletLoginPanel
+            buttonLabel={walletLink.buttonLabel}
+            isLoading={walletLink.isLoading}
+            isWrongNetwork={walletLink.isWrongNetwork}
+            onLogin={handleConnectWalletAfterRegistration}
+            onSwitchNetwork={walletLink.switchToTargetChain}
+            shortenedAddress={walletLink.shortenedAddress}
+            status={walletLink.status}
+            targetChainName={walletLink.targetChain.name}
+          />
+
+          <button
+            type="button"
+            onClick={() => void finishRegistration()}
+            className="mt-4 h-11 w-full rounded-lg border border-black/10 text-sm font-bold text-[#191414] transition hover:bg-black/5"
+          >
+            Do this later
+          </button>
+        </DialogContent>
+      </Dialog>
     </AuthShell>
   )
 }

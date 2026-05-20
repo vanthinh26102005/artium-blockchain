@@ -29,8 +29,13 @@ export class SellerAuctionStartTermsSnapshotObject {
   @ApiProperty({ description: 'Minimum bid increment in ETH string form' })
   minBidIncrementEth!: string;
 
-  @ApiProperty({ description: 'Auction duration in hours' })
-  durationHours!: number;
+  @ApiProperty({ description: 'Auction duration in seconds' })
+  durationSeconds!: number;
+
+  @ApiPropertyOptional({
+    description: 'Deprecated auction duration in hours. Use durationSeconds.',
+  })
+  durationHours?: number | null;
 
   @ApiProperty({ description: 'Shipping disclosure shown to buyers' })
   shippingDisclosure!: string;

@@ -34,6 +34,7 @@ export const AuthOtpCodeInput = ({
 }: AuthOtpCodeInputProps) => {
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])
   const digits = buildOtpDigits(value.replace(/\D/g, '').slice(0, length), length)
+  const messageId = `${id}-message`
 
   const commitValue = (nextDigits: string[]) => {
     onChange(nextDigits.join('').replace(/\D/g, '').slice(0, length))
@@ -100,6 +101,7 @@ export const AuthOtpCodeInput = ({
       required={required}
       errorMessage={errorMessage}
       description={description}
+      messageId={messageId}
       className="space-y-3"
       labelClassName="text-xs font-bold tracking-[0.2em] text-auth-label uppercase"
       requiredMarkClassName="text-auth-error"
@@ -121,6 +123,8 @@ export const AuthOtpCodeInput = ({
             value={digit}
             disabled={disabled}
             aria-label={`${label} digit ${index + 1}`}
+            aria-describedby={messageId}
+            aria-invalid={hasError}
             onChange={(event) => handleDigitChange(index, event.target.value)}
             onBlur={onBlur}
             onKeyDown={(event) => handleKeyDown(index, event)}

@@ -5,6 +5,8 @@ import { RpcException } from '@nestjs/microservices';
 import {
   RpcExceptionHelper,
   SellerAuctionReservePolicy,
+  SELLER_AUCTION_MAX_DURATION_SECONDS,
+  SELLER_AUCTION_MIN_DURATION_SECONDS,
   SellerAuctionStartFailureReason,
   SellerAuctionStartStatus,
   SellerAuctionStartStatusObject,
@@ -44,7 +46,7 @@ export class StartSellerAuctionHandler implements ICommandHandler<StartSellerAuc
         data.minBidIncrementEth,
         'Minimum bid increment must be a valid ETH amount',
       );
-      const durationSeconds = data.durationHours * 60 * 60;
+      const durationSeconds = this.normalizeDurationSeconds(data);
       const existing = await this.startAttemptRepo.findLatestBySellerAndArtwork(
         data.sellerId,
         data.artworkId,
@@ -159,6 +161,8 @@ export class StartSellerAuctionHandler implements ICommandHandler<StartSellerAuc
   private buildTermsSnapshot(
     data: StartSellerAuctionCommand['data'],
   ): SellerAuctionStartTermsSnapshot {
+    const durationSeconds = this.normalizeDurationSeconds(data);
+
     return {
       reservePolicy: data.reservePolicy,
       reservePriceEth:
@@ -166,11 +170,40 @@ export class StartSellerAuctionHandler implements ICommandHandler<StartSellerAuc
           ? (data.reservePriceEth?.trim() ?? null)
           : null,
       minBidIncrementEth: data.minBidIncrementEth.trim(),
-      durationHours: data.durationHours,
+      durationSeconds,
+      durationHours: durationSeconds / (60 * 60),
       shippingDisclosure: data.shippingDisclosure.trim(),
       paymentDisclosure: data.paymentDisclosure.trim(),
       economicsLockedAcknowledged: data.economicsLockedAcknowledged,
     };
+  }
+
+  private normalizeDurationSeconds(data: StartSellerAuctionCommand['data']): number {
+    const candidateDurationSeconds =
+      data.durationSeconds ??
+      (Number.isInteger(data.durationHours)
+        ? (data.durationHours as number) * 60 * 60
+        : null);
+
+    if (candidateDurationSeconds === null) {
+      throw RpcExceptionHelper.badRequest(this.getDurationBoundsMessage());
+    }
+
+    const durationSeconds = candidateDurationSeconds;
+
+    if (
+      !Number.isInteger(durationSeconds) ||
+      durationSeconds < SELLER_AUCTION_MIN_DURATION_SECONDS ||
+      durationSeconds > SELLER_AUCTION_MAX_DURATION_SECONDS
+    ) {
+      throw RpcExceptionHelper.badRequest(this.getDurationBoundsMessage());
+    }
+
+    return durationSeconds;
+  }
+
+  private getDurationBoundsMessage(): string {
+    return `Auction duration must be between ${SELLER_AUCTION_MIN_DURATION_SECONDS} and ${SELLER_AUCTION_MAX_DURATION_SECONDS} seconds.`;
   }
 
   private getRequiredContractAddress(): string {
@@ -249,7 +282,14 @@ export class StartSellerAuctionHandler implements ICommandHandler<StartSellerAuc
       retryAllowed: attempt.retryAllowed,
       editAllowed: attempt.editAllowed,
       walletActionRequired: attempt.walletActionRequired,
-      submittedTermsSnapshot: attempt.termsSnapshot,
+      submittedTermsSnapshot: {
+        ...attempt.termsSnapshot,
+        durationSeconds:
+          attempt.termsSnapshot.durationSeconds ?? attempt.durationSeconds,
+        durationHours:
+          attempt.termsSnapshot.durationHours ??
+          attempt.durationSeconds / (60 * 60),
+      },
       activatedAt: attempt.activatedAt?.toISOString() ?? null,
       updatedAt: (
         attempt.updatedAt ??

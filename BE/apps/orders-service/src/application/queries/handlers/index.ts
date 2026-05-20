@@ -6,3 +6,4 @@ export * from './GetOrderById.query.handler';
 export * from './GetOrderByOnChainId.query.handler';
 export * from './GetOrderItems.query.handler';
 export * from './GetSellerAuctionStartStatus.query.handler';
+export * from './GetSellerAuctionStartStatuses.query.handler';

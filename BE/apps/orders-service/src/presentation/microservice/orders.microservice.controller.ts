@@ -14,6 +14,7 @@ import {
 import {
   AttachSellerAuctionStartTxCommand,
   CreateOrderCommand,
+  ResetSellerAuctionStartAttemptCommand,
   UpdateOrderStatusCommand,
   CancelOrderCommand,
   MarkShippedCommand,
@@ -28,6 +29,7 @@ import {
   GetOrderByOnChainIdQuery,
   GetOrderItemsQuery,
   GetSellerAuctionStartStatusQuery,
+  GetSellerAuctionStartStatusesQuery,
   StartSellerAuctionCommand,
 } from '../../application';
 
@@ -56,6 +58,16 @@ export class OrdersMicroserviceController {
   async getAuctions(@Payload() data: GetAuctionsDto) {
     this.logger.debug('Getting auctions');
     return this.queryBus.execute(new GetAuctionsQuery(data));
+  }
+
+  @MessagePattern({ cmd: 'get_seller_auction_start_statuses' })
+  async getSellerAuctionStartStatuses(@Payload() data: { sellerId: string }) {
+    this.logger.debug(
+      `Getting seller auction start statuses for seller: ${data.sellerId}`,
+    );
+    return this.queryBus.execute(
+      new GetSellerAuctionStartStatusesQuery(data.sellerId),
+    );
   }
 
   @MessagePattern({ cmd: 'get_auction_by_id' })
@@ -98,6 +110,18 @@ export class OrdersMicroserviceController {
         data.walletAddress,
         data.txHash,
       ),
+    );
+  }
+
+  @MessagePattern({ cmd: 'reset_seller_auction_start_attempt' })
+  async resetSellerAuctionStartAttempt(
+    @Payload() data: { attemptId: string; sellerId: string },
+  ) {
+    this.logger.debug(
+      `Resetting seller auction start attempt: ${data.attemptId}`,
+    );
+    return this.commandBus.execute(
+      new ResetSellerAuctionStartAttemptCommand(data.attemptId, data.sellerId),
     );
   }
 

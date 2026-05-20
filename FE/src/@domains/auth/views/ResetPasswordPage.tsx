@@ -30,6 +30,7 @@ import {
   writePasswordResetSession,
 } from '@domains/auth/services/browserAuthState'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
 import {
   resetPasswordConfirmFormSchema,
   resetPasswordVerifyFormSchema,
@@ -79,7 +80,9 @@ export const ResetPasswordPage = () => {
       })
 
       if (!response?.resetToken) {
-        verifyForm.setError('root', { message: 'Verification failed.' })
+        verifyForm.setError('root', {
+          message: 'The code is incorrect or expired. Request a new code.',
+        })
         return
       }
 
@@ -99,7 +102,11 @@ export const ResetPasswordPage = () => {
         confirmPassword: '',
       })
     } catch (error) {
-      const message = error instanceof Error ? error.message : apiError || 'Verification failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        apiError || 'The code is incorrect or expired. Request a new code.',
+        'resetVerify',
+      )
       verifyForm.setError('root', { message })
     }
   }
@@ -123,7 +130,11 @@ export const ResetPasswordPage = () => {
         await router.push('/login?reset=success')
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : apiError || 'Reset failed.'
+      const message = getPracticalAuthErrorMessage(
+        error,
+        apiError || 'Something went wrong. Please try again.',
+        'resetConfirm',
+      )
       confirmForm.setError('root', { message })
     }
   }
@@ -222,7 +233,6 @@ export const ResetPasswordPage = () => {
                 label="Email address"
                 required
                 aria-invalid={Boolean(verifyForm.formState.errors.email)}
-                aria-describedby="reset-error"
               />
 
               <AuthFormOtpInput<ResetPasswordVerifyFormValues>
@@ -234,7 +244,7 @@ export const ResetPasswordPage = () => {
               />
 
               <FormErrorMessage
-                id="reset-error"
+                id="reset-submit-error"
                 message={verifyForm.formState.errors.root?.message ?? ''}
                 visible={Boolean(verifyForm.formState.errors.root?.message)}
               />
@@ -267,7 +277,6 @@ export const ResetPasswordPage = () => {
                 label="Email address"
                 required
                 aria-invalid={Boolean(confirmForm.formState.errors.email)}
-                aria-describedby="reset-error"
                 disabled
               />
 
@@ -281,12 +290,11 @@ export const ResetPasswordPage = () => {
                 label="New password"
                 required
                 aria-invalid={Boolean(confirmForm.formState.errors.newPassword)}
-                aria-describedby="reset-error"
               />
 
               {!confirmForm.formState.errors.newPassword ? (
-                <p className="text-xs text-[#6b6b6b]">
-                  Use at least 8 characters with uppercase, lowercase, and a number.
+                <p className="text-xs font-medium text-auth-error">
+                  Use at least 8 characters, including uppercase, lowercase, and a number.
                 </p>
               ) : null}
 
@@ -298,11 +306,10 @@ export const ResetPasswordPage = () => {
                 label="Confirm new password"
                 required
                 aria-invalid={Boolean(confirmForm.formState.errors.confirmPassword)}
-                aria-describedby="reset-error"
               />
 
               <FormErrorMessage
-                id="reset-error"
+                id="reset-submit-error"
                 message={confirmForm.formState.errors.root?.message ?? ''}
                 visible={Boolean(confirmForm.formState.errors.root?.message)}
               />
