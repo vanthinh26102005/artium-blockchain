@@ -2,6 +2,8 @@ import { useState } from 'react'
 import orderApis, { type OrderResponse } from '@shared/apis/orderApis'
 import { BaseInputField, BaseTextareaField } from '@shared/components/forms'
 import { Button } from '@shared/components/ui/button'
+import { DeliverySignaturePad } from './DeliverySignaturePad'
+import { submitOrderDeliveryConfirmation } from '../services/orderDeliveryWallet'
 import type { OrderActorRole } from '../types/orderTypes'
 import {
   canCancelOrder,
@@ -9,6 +11,7 @@ import {
   canMarkShipped,
   canOpenDispute,
   getNextStepDescription,
+  isBlockchainOrder,
 } from '../utils/orderPresentation'
 
 type ActiveAction = 'cancel' | 'ship' | 'confirm' | 'dispute' | null
@@ -29,6 +32,7 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
   const [trackingNumber, setTrackingNumber] = useState('')
   const [shippingMethod, setShippingMethod] = useState('')
   const [deliveryNotes, setDeliveryNotes] = useState('')
+  const [deliverySignatureDataUrl, setDeliverySignatureDataUrl] = useState<string | null>(null)
   const [disputeReason, setDisputeReason] = useState('')
   const labelClassName = 'text-sm font-medium text-slate-700'
   const messageClassName = 'text-sm text-red-500'
@@ -85,12 +89,47 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
     try {
       const updatedOrder = await orderApis.confirmDelivery(order.id, {
         notes: deliveryNotes.trim() || undefined,
+        confirmationMethod: deliverySignatureDataUrl ? 'app_signature' : 'app',
+        signatureDataUrl: deliverySignatureDataUrl ?? undefined,
       })
       setDeliveryNotes('')
+      setDeliverySignatureDataUrl(null)
       resetLocalState()
       onOrderUpdated(updatedOrder, 'Delivery was confirmed successfully.')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to confirm delivery.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleConfirmDeliveryOnChain = async () => {
+    if (!order.onChainOrderId || !order.contractAddress) {
+      setErrorMessage('This order is missing on-chain confirmation data.')
+      return
+    }
+
+    setIsSubmitting(true)
+    setErrorMessage(null)
+
+    try {
+      const walletResult = await submitOrderDeliveryConfirmation({
+        onChainOrderId: order.onChainOrderId,
+        contractAddress: order.contractAddress,
+        expectedBuyerWallet: order.buyerWallet,
+      })
+      const updatedOrder = await orderApis.confirmDelivery(order.id, {
+        notes: deliveryNotes.trim() || undefined,
+        confirmationMethod: 'wallet',
+        signatureDataUrl: deliverySignatureDataUrl ?? undefined,
+        transactionHash: walletResult.txHash,
+      })
+      setDeliveryNotes('')
+      setDeliverySignatureDataUrl(null)
+      resetLocalState()
+      onOrderUpdated(updatedOrder, 'Delivery confirmation was submitted on-chain.')
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to confirm delivery on-chain.')
     } finally {
       setIsSubmitting(false)
     }
@@ -114,12 +153,18 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
     }
   }
 
+  const requiresWalletDeliveryConfirmation = role === 'buyer' && canConfirmDelivery(order.status) && isBlockchainOrder(order)
+
   const actions = [
     role === 'seller' && canMarkShipped(order.status)
       ? { key: 'ship' as const, label: 'Mark as shipped', variant: 'default' as const }
       : null,
     role === 'buyer' && canConfirmDelivery(order.status)
-      ? { key: 'confirm' as const, label: 'Confirm delivery', variant: 'default' as const }
+      ? {
+          key: 'confirm' as const,
+          label: requiresWalletDeliveryConfirmation ? 'Confirm on-chain' : 'Confirm delivery',
+          variant: 'default' as const,
+        }
       : null,
     role === 'buyer' && canOpenDispute(order)
       ? { key: 'dispute' as const, label: 'Open dispute', variant: 'outline' as const }
@@ -221,6 +266,12 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
 
       {activeAction === 'confirm' ? (
         <div className="mt-6 space-y-4 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
+          {requiresWalletDeliveryConfirmation ? (
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-700">
+              Escrow release follows the blockchain confirmation. This order will update after the
+              contract event syncs.
+            </div>
+          ) : null}
           <BaseTextareaField
             id="order-action-delivery-notes"
             label="Delivery notes"
@@ -233,9 +284,27 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
             descriptionClassName="text-sm text-slate-400"
             textareaClassName={textareaClassName}
           />
+          <DeliverySignaturePad
+            value={deliverySignatureDataUrl}
+            onChange={setDeliverySignatureDataUrl}
+            required={!requiresWalletDeliveryConfirmation}
+          />
           <div className="flex gap-3">
-            <Button type="button" loading={isSubmitting} onClick={() => void handleConfirmDelivery()}>
-              Confirm delivery
+            <Button
+              type="button"
+              loading={isSubmitting}
+              disabled={
+                requiresWalletDeliveryConfirmation
+                  ? !order.onChainOrderId || !order.contractAddress
+                  : !deliverySignatureDataUrl
+              }
+              onClick={() =>
+                void (requiresWalletDeliveryConfirmation
+                  ? handleConfirmDeliveryOnChain()
+                  : handleConfirmDelivery())
+              }
+            >
+              {requiresWalletDeliveryConfirmation ? 'Confirm on-chain' : 'Confirm delivery'}
             </Button>
             <Button type="button" variant="outline" className="border-slate-200" onClick={resetLocalState}>
               Cancel

@@ -106,14 +106,15 @@ export class OrdersController {
   private buildOrderInvoiceSource(
     order: AuthorizedOrderObject,
   ): OrderInvoiceSourceOrderDto {
-    if (!order.collectorId) {
+    if (!order.collectorId && !order.buyerWallet) {
       throw new NotFoundException('Order invoice not found');
     }
 
     return {
       id: order.id,
       orderNumber: order.orderNumber,
-      collectorId: order.collectorId,
+      collectorId: order.collectorId ?? null,
+      buyerWallet: order.buyerWallet ?? null,
       status: order.status,
       paymentStatus: order.paymentStatus,
       paymentMethod: order.paymentMethod ?? null,
@@ -121,6 +122,7 @@ export class OrdersController {
       paymentIntentId: order.paymentIntentId ?? null,
       txHash: order.txHash ?? null,
       onChainOrderId: order.onChainOrderId ?? null,
+      bidAmountWei: order.bidAmountWei ?? null,
       subtotal: order.subtotal,
       shippingCost: order.shippingCost,
       taxAmount: order.taxAmount,
@@ -278,7 +280,11 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async getOrderInvoice(@Param('id') id: string, @Req() req: any) {
-    const order = await this.getAuthorizedOrder(id, req.user?.id);
+    const order = await this.getAuthorizedOrder(
+      id,
+      req.user?.id,
+      req.user?.walletAddress,
+    );
     const viewerRole = this.getOrderInvoiceViewerRole(order, req.user?.id);
 
     const invoice = await sendRpc<OrderInvoiceObject>(
@@ -379,7 +385,12 @@ export class OrdersController {
     return sendRpc(
       this.ordersClient,
       { cmd: 'confirm_delivery' },
-      { id, userId: req.user?.id, ...data },
+      {
+        id,
+        userId: req.user?.id,
+        userWalletAddress: req.user?.walletAddress ?? null,
+        ...data,
+      },
     );
   }
 

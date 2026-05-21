@@ -177,10 +177,10 @@ export class OrderRepository implements IOrderRepository {
     const repo = this.getRepo(transactionManager);
     const qb = repo
       .createQueryBuilder('order')
-      .innerJoin('order_items', 'item', 'item.order_id = order.order_id')
-      .where('item.seller_id = :sellerId', { sellerId })
+      .innerJoin('order.items', 'sellerItem')
+      .where('sellerItem.sellerId = :sellerId', { sellerId })
       .distinct(true)
-      .orderBy('order.created_at', 'DESC');
+      .orderBy('order.createdAt', 'DESC');
 
     if (options?.status) {
       qb.andWhere('order.status = :status', { status: options.status });

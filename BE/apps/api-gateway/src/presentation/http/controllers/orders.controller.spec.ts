@@ -32,6 +32,8 @@ describe('OrdersController', () => {
     billingAddress: { city: 'Ho Chi Minh City' },
     customerNotes: null,
     onChainOrderId: null,
+    buyerWallet: null,
+    bidAmountWei: null,
     txHash: null,
     confirmedAt: new Date('2026-04-30T00:02:00.000Z'),
     createdAt: new Date('2026-04-30T00:00:00.000Z'),
@@ -75,6 +77,7 @@ describe('OrdersController', () => {
       paymentIntentId: 'pi-1',
       txHash: null,
       onChainOrderId: null,
+      bidAmountWei: null,
     },
     items: [],
     createdAt: new Date('2026-04-30T00:02:00.000Z'),
@@ -208,7 +211,7 @@ describe('OrdersController', () => {
       pattern.cmd === 'get_order_by_id' ? order : invoice,
     );
 
-    await controller.getOrderInvoice('order-1', { user: { id: 'buyer-1' } });
+    await controller.getOrderInvoice('order-1', { user: { id: 'seller-1' } });
 
     expect(sendRpcMock).toHaveBeenLastCalledWith(
       paymentsClientMock,
@@ -218,13 +221,63 @@ describe('OrdersController', () => {
           id: 'order-1',
           orderNumber: 'ORD-1700000000-ABC123',
           collectorId: 'buyer-1',
+          buyerWallet: null,
           paymentTransactionId: 'tx-1',
+          bidAmountWei: null,
           items: [
             expect.objectContaining({
               sellerId: 'seller-1',
               artworkTitle: 'Blue Study',
               priceAtPurchase: 100,
               quantity: 1,
+            }),
+          ],
+        }),
+      },
+    );
+  });
+
+  it('passes blockchain bid amount to payments-service for auction invoices', async () => {
+    sendRpcMock.mockImplementation(async (_client: any, pattern: any) =>
+      pattern.cmd === 'get_order_by_id'
+        ? {
+            ...order,
+            paymentStatus: 'escrow',
+            paymentMethod: 'blockchain',
+            collectorId: null,
+            currency: 'ETH',
+            subtotal: 0,
+            totalAmount: 0,
+            onChainOrderId: '42',
+            buyerWallet: '0xwinner',
+            bidAmountWei: '100000000000000',
+            items: order.items.map((item) => ({
+              ...item,
+              priceAtPurchase: 0,
+              currency: 'ETH',
+            })),
+          }
+        : invoice,
+    );
+
+    await controller.getOrderInvoice('order-1', { user: { id: 'seller-1' } });
+
+    expect(sendRpcMock).toHaveBeenLastCalledWith(
+      paymentsClientMock,
+      { cmd: 'get_or_materialize_order_invoice' },
+      {
+        order: expect.objectContaining({
+          paymentMethod: 'blockchain',
+          collectorId: null,
+          buyerWallet: '0xwinner',
+          onChainOrderId: '42',
+          bidAmountWei: '100000000000000',
+          subtotal: 0,
+          totalAmount: 0,
+          items: [
+            expect.objectContaining({
+              priceAtPurchase: 0,
+              currency: 'ETH',
             }),
           ],
         }),

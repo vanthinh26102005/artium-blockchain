@@ -5,8 +5,12 @@ import {
   formatInvoiceAddressLines,
   formatInvoiceDate,
   formatInvoiceField,
+  formatInvoiceItemLineTotal,
+  formatInvoiceItemUnitPrice,
   formatInvoiceMoney,
   formatInvoicePartyField,
+  formatInvoiceSubtotal,
+  formatInvoiceTotal,
   INVOICE_MISSING_FIELD_COPY,
 } from '../utils/orderInvoicePresentation'
 
@@ -43,11 +47,13 @@ const TotalRow = ({
   label,
   value,
   currency,
+  displayValue,
   strong,
 }: {
   label: string
   value: number
   currency: string
+  displayValue?: string
   strong?: boolean
 }) => (
   <div
@@ -58,7 +64,7 @@ const TotalRow = ({
   >
     <span className={strong ? 'text-slate-900' : 'text-slate-500'}>{label}</span>
     <span className={strong ? 'text-slate-900' : 'font-medium text-slate-900'}>
-      {formatInvoiceMoney(value, currency)}
+      {displayValue ?? formatInvoiceMoney(value, currency)}
     </span>
   </div>
 )
@@ -100,7 +106,7 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
         <div className="order-invoice-document-summary grid gap-4 rounded-[16px] border border-slate-200 bg-slate-50 p-4 sm:grid-cols-3 lg:min-w-[420px]">
           <FieldBlock label="Issue date" value={formatInvoiceDate(invoice.issueDate ?? invoice.createdAt)} />
           <FieldBlock label="Paid date" value={formatInvoiceDate(invoice.paidAt)} />
-          <FieldBlock label="Total" value={formatInvoiceMoney(invoice.totalAmount, invoice.currency)} />
+          <FieldBlock label="Total" value={formatInvoiceTotal(invoice)} />
         </div>
       </header>
 
@@ -145,64 +151,74 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
             <span>Discount</span>
             <span className="text-right">Line total</span>
           </div>
-          {invoice.items.map((item) => (
-            <div
-              key={item.id}
-              className="grid grid-cols-[minmax(0,1.7fr)_0.5fr_0.8fr_0.8fr_0.8fr_0.9fr] gap-3 border-b border-slate-100 px-4 py-4 text-sm last:border-b-0"
-            >
-              <div className="flex min-w-0 gap-3">
-                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
-                  {item.artworkImageUrl ? (
-                    <Image
-                      src={item.artworkImageUrl}
-                      alt={item.artworkTitle ?? item.description}
-                      width={56}
-                      height={56}
-                      unoptimized
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                      Art
-                    </div>
-                  )}
+          {invoice.items.map((item, itemIndex) => {
+            const unitPriceLabel = formatInvoiceItemUnitPrice(invoice, item.unitPrice, itemIndex)
+            const lineTotalLabel = formatInvoiceItemLineTotal(invoice, item.lineTotal, itemIndex)
+
+            return (
+              <div
+                key={item.id}
+                className="grid grid-cols-[minmax(0,1.7fr)_0.5fr_0.8fr_0.8fr_0.8fr_0.9fr] gap-3 border-b border-slate-100 px-4 py-4 text-sm last:border-b-0"
+              >
+                <div className="flex min-w-0 gap-3">
+                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                    {item.artworkImageUrl ? (
+                      <Image
+                        src={item.artworkImageUrl}
+                        alt={item.artworkTitle ?? item.description}
+                        width={56}
+                        height={56}
+                        unoptimized
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                        Art
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-slate-900">
+                      {formatInvoiceField(item.artworkTitle ?? item.description)}
+                    </p>
+                    <p className="mt-1 text-slate-500">{formatInvoiceField(item.description)}</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="font-medium text-slate-900">
-                    {formatInvoiceField(item.artworkTitle ?? item.description)}
-                  </p>
-                  <p className="mt-1 text-slate-500">{formatInvoiceField(item.description)}</p>
-                </div>
+                <span>{item.quantity}</span>
+                <span>{unitPriceLabel}</span>
+                <span>{formatInvoiceMoney(item.taxAmount, invoice.currency)}</span>
+                <span>{formatInvoiceMoney(item.discountAmount, invoice.currency)}</span>
+                <span className="text-right font-medium text-slate-900">
+                  {lineTotalLabel}
+                </span>
               </div>
-              <span>{item.quantity}</span>
-              <span>{formatInvoiceMoney(item.unitPrice, invoice.currency)}</span>
-              <span>{formatInvoiceMoney(item.taxAmount, invoice.currency)}</span>
-              <span>{formatInvoiceMoney(item.discountAmount, invoice.currency)}</span>
-              <span className="text-right font-medium text-slate-900">
-                {formatInvoiceMoney(item.lineTotal, invoice.currency)}
-              </span>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         <div className="order-invoice-line-cards space-y-4 lg:hidden">
-          {invoice.items.map((item) => (
-            <div key={item.id} className="rounded-[16px] border border-slate-200 p-4">
-              <p className="font-medium text-slate-900">
-                {formatInvoiceField(item.artworkTitle ?? item.description)}
-              </p>
-              <p className="mt-1 text-sm text-slate-500">{formatInvoiceField(item.description)}</p>
-              <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <FieldBlock label="Quantity" value={String(item.quantity)} />
-                <FieldBlock label="Unit" value={formatInvoiceMoney(item.unitPrice, invoice.currency)} />
-                <FieldBlock label="Tax" value={formatInvoiceMoney(item.taxAmount, invoice.currency)} />
-                <FieldBlock label="Discount" value={formatInvoiceMoney(item.discountAmount, invoice.currency)} />
-                <div className="col-span-2">
-                  <FieldBlock label="Line total" value={formatInvoiceMoney(item.lineTotal, invoice.currency)} />
+          {invoice.items.map((item, itemIndex) => {
+            const unitPriceLabel = formatInvoiceItemUnitPrice(invoice, item.unitPrice, itemIndex)
+            const lineTotalLabel = formatInvoiceItemLineTotal(invoice, item.lineTotal, itemIndex)
+
+            return (
+              <div key={item.id} className="rounded-[16px] border border-slate-200 p-4">
+                <p className="font-medium text-slate-900">
+                  {formatInvoiceField(item.artworkTitle ?? item.description)}
+                </p>
+                <p className="mt-1 text-sm text-slate-500">{formatInvoiceField(item.description)}</p>
+                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <FieldBlock label="Quantity" value={String(item.quantity)} />
+                  <FieldBlock label="Unit" value={unitPriceLabel} />
+                  <FieldBlock label="Tax" value={formatInvoiceMoney(item.taxAmount, invoice.currency)} />
+                  <FieldBlock label="Discount" value={formatInvoiceMoney(item.discountAmount, invoice.currency)} />
+                  <div className="col-span-2">
+                    <FieldBlock label="Line total" value={lineTotalLabel} />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 
@@ -217,11 +233,22 @@ export const OrderInvoiceDocument = ({ invoice, className }: OrderInvoiceDocumen
         </div>
 
         <div className="space-y-3 rounded-[16px] border border-slate-200 bg-slate-50 p-4">
-          <TotalRow label="Subtotal" value={invoice.subtotal} currency={invoice.currency} />
+          <TotalRow
+            label="Subtotal"
+            value={invoice.subtotal}
+            currency={invoice.currency}
+            displayValue={formatInvoiceSubtotal(invoice)}
+          />
           <TotalRow label="Tax" value={invoice.taxAmount} currency={invoice.currency} />
           <TotalRow label="Discount" value={invoice.discountAmount} currency={invoice.currency} />
           <TotalRow label="Shipping" value={invoice.shippingAmount} currency={invoice.currency} />
-          <TotalRow label="Total" value={invoice.totalAmount} currency={invoice.currency} strong />
+          <TotalRow
+            label="Total"
+            value={invoice.totalAmount}
+            currency={invoice.currency}
+            displayValue={formatInvoiceTotal(invoice)}
+            strong
+          />
         </div>
       </section>
 

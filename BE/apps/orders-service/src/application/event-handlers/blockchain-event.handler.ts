@@ -519,6 +519,13 @@ export class BlockchainEventHandler {
         deliveredAt: new Date(),
         escrowState: EscrowState.COMPLETED,
         paymentStatus: OrderPaymentStatus.RELEASED,
+        deliveryConfirmationMethod: 'wallet',
+        deliveryConfirmationTxHash:
+          typeof (message as Record<string, unknown>).txHash === 'string'
+            ? ((message as Record<string, unknown>).txHash as string)
+            : order.deliveryConfirmationTxHash,
+        deliveryConfirmationSubmittedAt:
+          order.deliveryConfirmationSubmittedAt ?? new Date(),
         ...this.getBlockchainEventMetadata(message),
       });
     } catch (error) {

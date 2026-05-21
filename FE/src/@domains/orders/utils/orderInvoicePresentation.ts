@@ -7,6 +7,7 @@ import {
   formatOrderDate,
   formatOrderDateTime,
   formatOrderMoney,
+  formatWeiToEth,
 } from './orderPresentation'
 
 export type OrderInvoiceAvailabilityState = 'checking' | 'ready' | 'unavailable' | 'retry'
@@ -25,6 +26,14 @@ export const INVOICE_MISSING_FIELD_COPY = 'Not provided'
 export const INVOICE_REDACTED_FIELD_COPY = 'Redacted by access rules'
 
 const RETRY_COPY = 'Unable to load invoice. Try again without leaving this order.'
+
+const AUCTION_INVOICE_STATUSES = new Set([
+  'escrow_held',
+  'shipped',
+  'delivered',
+  'dispute_open',
+  'refunded',
+])
 
 const isNonDisclosingUnavailableError = (message?: string | null) => {
   const normalized = message?.toLowerCase() ?? ''
@@ -100,8 +109,26 @@ export const getOrderInvoiceAvailability = ({
   }
 }
 
+export const canRequestOrderInvoice = (order?: OrderResponse | null) => {
+  if (!order) {
+    return false
+  }
+
+  const isBlockchainOrder = order.paymentMethod === 'blockchain' || Boolean(order.onChainOrderId)
+
+  if (isBlockchainOrder) {
+    return Boolean(
+      order.buyerWallet &&
+        order.bidAmountWei &&
+        AUCTION_INVOICE_STATUSES.has(order.status),
+    )
+  }
+
+  return Boolean(order.collectorId)
+}
+
 export const getOrderListInvoiceAvailability = (order: OrderResponse): OrderInvoiceAvailability => {
-  if (order.id && order.orderNumber) {
+  if (order.id && order.orderNumber && canRequestOrderInvoice(order)) {
     return {
       state: 'ready',
       label: 'Invoice ready',
@@ -128,6 +155,52 @@ export const formatInvoiceField = (value?: string | number | null): string => {
 
   const normalized = String(value).trim()
   return normalized.length > 0 ? normalized : INVOICE_MISSING_FIELD_COPY
+}
+
+const hasBlockchainBidAmount = (invoice: OrderInvoiceResponse) =>
+  invoice.payment.paymentMethod === 'blockchain' && Boolean(invoice.payment.bidAmountWei)
+
+const isPrimaryBlockchainBidItem = (invoice: OrderInvoiceResponse, itemIndex: number) =>
+  itemIndex === 0 && hasBlockchainBidAmount(invoice)
+
+export const formatInvoiceTotal = (invoice: OrderInvoiceResponse): string => {
+  if (hasBlockchainBidAmount(invoice)) {
+    return formatWeiToEth(invoice.payment.bidAmountWei)
+  }
+
+  return formatOrderMoney(invoice.totalAmount, invoice.currency)
+}
+
+export const formatInvoiceSubtotal = (invoice: OrderInvoiceResponse): string => {
+  if (hasBlockchainBidAmount(invoice)) {
+    return formatWeiToEth(invoice.payment.bidAmountWei)
+  }
+
+  return formatOrderMoney(invoice.subtotal, invoice.currency)
+}
+
+export const formatInvoiceItemUnitPrice = (
+  invoice: OrderInvoiceResponse,
+  unitPrice: number,
+  itemIndex: number,
+): string => {
+  if (isPrimaryBlockchainBidItem(invoice, itemIndex)) {
+    return formatWeiToEth(invoice.payment.bidAmountWei)
+  }
+
+  return formatOrderMoney(unitPrice, invoice.currency)
+}
+
+export const formatInvoiceItemLineTotal = (
+  invoice: OrderInvoiceResponse,
+  lineTotal: number,
+  itemIndex: number,
+): string => {
+  if (isPrimaryBlockchainBidItem(invoice, itemIndex)) {
+    return formatWeiToEth(invoice.payment.bidAmountWei)
+  }
+
+  return formatOrderMoney(lineTotal, invoice.currency)
 }
 
 export const formatInvoicePartyField = (value?: string | null, redacted?: boolean): string => {

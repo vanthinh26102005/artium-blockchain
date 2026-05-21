@@ -98,6 +98,8 @@ export class GetOrderInvoiceHandler implements IQueryHandler<GetOrderInvoiceQuer
     return this.transactionService.execute(async (manager) => {
       const invoiceNumber = `INV-${sourceOrder.orderNumber}`;
       const sellerId = sourceOrder.items[0]?.sellerId;
+      const subtotal = this.getSourceSubtotal(sourceOrder);
+      const totalAmount = this.getSourceTotalAmount(sourceOrder);
 
       if (!sellerId) {
         throw RpcExceptionHelper.badRequest(
@@ -108,7 +110,7 @@ export class GetOrderInvoiceHandler implements IQueryHandler<GetOrderInvoiceQuer
       const invoice = await this.invoiceRepo.create(
         {
           sellerId,
-          collectorId: sourceOrder.collectorId,
+          collectorId: sourceOrder.collectorId ?? null,
           customerEmail: null,
           invoiceNumber,
           status:
@@ -116,10 +118,10 @@ export class GetOrderInvoiceHandler implements IQueryHandler<GetOrderInvoiceQuer
               ? InvoiceStatus.PAID
               : InvoiceStatus.SENT,
           orderId: sourceOrder.id,
-          subtotal: sourceOrder.subtotal,
+          subtotal,
           taxAmount: sourceOrder.taxAmount,
           discountAmount: sourceOrder.discountAmount || 0,
-          totalAmount: sourceOrder.totalAmount,
+          totalAmount,
           currency: sourceOrder.currency,
           paymentTransactionId: sourceOrder.paymentTransactionId,
           paidAt:
@@ -133,21 +135,29 @@ export class GetOrderInvoiceHandler implements IQueryHandler<GetOrderInvoiceQuer
       );
 
       await this.invoiceItemRepo.createMany(
-        sourceOrder.items.map((item) => ({
-          invoiceId: invoice.id,
-          artworkId: item.artworkId,
-          artworkTitle: item.artworkTitle,
-          artworkImageUrl: item.artworkImageUrl,
-          description: item.artworkTitle || 'Artwork purchase',
-          quantity: item.quantity,
-          unitPrice: item.priceAtPurchase,
-          lineTotal: item.priceAtPurchase * item.quantity,
-          taxRate: 0,
-          taxAmount: 0,
-          discountAmount: 0,
-          notes: null,
-          createdAt: new Date(),
-        })),
+        sourceOrder.items.map((item, itemIndex) => {
+          const unitPrice = this.getSourceItemUnitPrice(
+            sourceOrder,
+            item,
+            itemIndex,
+          );
+
+          return {
+            invoiceId: invoice.id,
+            artworkId: item.artworkId,
+            artworkTitle: item.artworkTitle,
+            artworkImageUrl: item.artworkImageUrl,
+            description: item.artworkTitle || 'Artwork purchase',
+            quantity: item.quantity,
+            unitPrice,
+            lineTotal: unitPrice * item.quantity,
+            taxRate: 0,
+            taxAmount: 0,
+            discountAmount: 0,
+            notes: null,
+            createdAt: new Date(),
+          };
+        }),
         manager,
       );
 
@@ -212,6 +222,53 @@ export class GetOrderInvoiceHandler implements IQueryHandler<GetOrderInvoiceQuer
     return value instanceof Date ? value : new Date(value);
   }
 
+  private getWinningBidEth(
+    sourceOrder: OrderInvoiceSourceOrderDto,
+  ): number | null {
+    if (
+      sourceOrder.paymentMethod !== 'blockchain' ||
+      !sourceOrder.bidAmountWei
+    ) {
+      return null;
+    }
+
+    const normalizedWei = sourceOrder.bidAmountWei.trim();
+    if (!/^\d+$/.test(normalizedWei)) {
+      return null;
+    }
+
+    const amountEth = Number(normalizedWei) / 1e18;
+    return Number.isFinite(amountEth) ? amountEth : null;
+  }
+
+  private getSourceSubtotal(sourceOrder: OrderInvoiceSourceOrderDto): number {
+    return (
+      this.getWinningBidEth(sourceOrder) ?? Number(sourceOrder.subtotal ?? 0)
+    );
+  }
+
+  private getSourceTotalAmount(sourceOrder: OrderInvoiceSourceOrderDto): number {
+    return (
+      this.getWinningBidEth(sourceOrder) ??
+      Number(sourceOrder.totalAmount ?? sourceOrder.subtotal ?? 0)
+    );
+  }
+
+  private getSourceItemUnitPrice(
+    sourceOrder: OrderInvoiceSourceOrderDto,
+    item: OrderInvoiceSourceOrderDto['items'][number] | undefined,
+    itemIndex: number,
+  ): number {
+    if (itemIndex === 0) {
+      return (
+        this.getWinningBidEth(sourceOrder) ??
+        Number(item?.priceAtPurchase ?? 0)
+      );
+    }
+
+    return Number(item?.priceAtPurchase ?? 0);
+  }
+
   private mapInvoiceToOrderInvoiceObject(
     invoice: Invoice,
     sourceOrder: OrderInvoiceSourceOrderDto,
@@ -222,6 +279,11 @@ export class GetOrderInvoiceHandler implements IQueryHandler<GetOrderInvoiceQuer
         (transaction) => transaction.id === invoice.paymentTransactionId,
       ) || paymentTransactions[0];
     const firstItem = sourceOrder.items[0];
+    const winningBidEth = this.getWinningBidEth(sourceOrder);
+    const subtotal =
+      winningBidEth ?? Number(invoice.subtotal ?? sourceOrder.subtotal);
+    const totalAmount =
+      winningBidEth ?? Number(invoice.totalAmount ?? sourceOrder.totalAmount);
 
     return {
       id: invoice.id,
@@ -233,15 +295,18 @@ export class GetOrderInvoiceHandler implements IQueryHandler<GetOrderInvoiceQuer
       dueDate: invoice.dueDate || null,
       paidAt: invoice.paidAt || null,
       currency: invoice.currency || sourceOrder.currency,
-      subtotal: Number(invoice.subtotal ?? sourceOrder.subtotal),
+      subtotal,
       taxAmount: Number(invoice.taxAmount ?? sourceOrder.taxAmount),
       discountAmount: Number(
         invoice.discountAmount ?? sourceOrder.discountAmount ?? 0,
       ),
       shippingAmount: Number(sourceOrder.shippingCost || 0),
-      totalAmount: Number(invoice.totalAmount ?? sourceOrder.totalAmount),
+      totalAmount,
       buyer: {
-        id: sourceOrder.collectorId,
+        id:
+          sourceOrder.collectorId ??
+          sourceOrder.buyerWallet ??
+          'unknown-buyer',
       },
       seller: {
         id: invoice.sellerId || firstItem?.sellerId,
@@ -262,11 +327,17 @@ export class GetOrderInvoiceHandler implements IQueryHandler<GetOrderInvoiceQuer
           null,
         txHash: sourceOrder.txHash || paymentTransaction?.txHash || null,
         onChainOrderId: sourceOrder.onChainOrderId || null,
+        bidAmountWei: sourceOrder.bidAmountWei || null,
       },
-      items: (invoice.items || []).map((item) => {
+      items: (invoice.items || []).map((item, itemIndex) => {
         const sourceItem = sourceOrder.items.find(
           (candidate) => candidate.artworkId === item.artworkId,
         );
+        const winningBidEth =
+          itemIndex === 0 ? this.getWinningBidEth(sourceOrder) : null;
+        const unitPrice =
+          winningBidEth ??
+          Number(item.unitPrice ?? sourceItem?.priceAtPurchase ?? 0);
 
         return {
           id: item.id,
@@ -277,10 +348,8 @@ export class GetOrderInvoiceHandler implements IQueryHandler<GetOrderInvoiceQuer
             item.artworkImageUrl || sourceItem?.artworkImageUrl || null,
           description: item.description,
           quantity: Number(item.quantity),
-          unitPrice: Number(item.unitPrice),
-          lineTotal: Number(
-            item.lineTotal ?? Number(item.unitPrice) * Number(item.quantity),
-          ),
+          unitPrice,
+          lineTotal: unitPrice * Number(item.quantity),
           taxAmount: Number(item.taxAmount || 0),
           discountAmount: Number(item.discountAmount || 0),
         };

@@ -18,6 +18,7 @@ import type { OrdersWorkspaceScope } from '../types/orderTypes'
 import { hydrateOrderItems } from '../utils/hydrateOrderItems'
 import {
   canPrintOrderInvoice,
+  canRequestOrderInvoice,
   getOrderInvoiceAvailability,
   INVOICE_UNAVAILABLE_COPY,
 } from '../utils/orderInvoicePresentation'
@@ -26,6 +27,10 @@ import {
   formatOrderDate,
   formatOrderDateTime,
   formatOrderMoney,
+  getOrderItemLineTotalLabel,
+  getOrderItemUnitPriceLabel,
+  getOrderSubtotalLabel,
+  getOrderTotalLabel,
   getOrderActorRole,
   getPaymentMethodLabel,
   getPaymentStatusLabel,
@@ -40,6 +45,14 @@ const formatAddress = (address?: Record<string, string | undefined> | null) => {
   return [address.line1, address.line2, `${address.city ?? ''}${address.city && address.state ? ', ' : ''}${address.state ?? ''}`, `${address.postalCode ?? ''} ${address.country ?? ''}`]
     .map((line) => line?.trim())
     .filter(Boolean) as string[]
+}
+
+const getShippingRecipient = (address?: Record<string, string | undefined> | null) => {
+  if (!address) {
+    return null
+  }
+
+  return address.fullName?.trim() || address.name?.trim() || null
 }
 
 const trimHash = (value?: string | null) => {
@@ -183,8 +196,17 @@ export const OrderDetailPageView = () => {
       return
     }
 
+    if (!canRequestOrderInvoice(order)) {
+      setInvoice(null)
+      setIsInvoiceLoading(false)
+      setInvoiceErrorMessage(INVOICE_UNAVAILABLE_COPY)
+      setIsInvoiceUnavailable(true)
+      latestInvoiceOrderIdRef.current = null
+      return
+    }
+
     void loadInvoice({ id: order.id })
-  }, [loadInvoice, order?.id])
+  }, [loadInvoice, order])
 
   useEffect(() => {
     if (!order?.id || router.query.invoice !== '1') {
@@ -201,7 +223,7 @@ export const OrderDetailPageView = () => {
     }, 0)
   }, [order?.id, router.query.invoice])
 
-  const role = order && user?.id ? getOrderActorRole(order, user.id, preferredScope) : 'buyer'
+  const role = order && user?.id ? getOrderActorRole(order, user.id, preferredScope, user.walletAddress) : 'buyer'
   const timelineSteps = order ? buildOrderTimeline(order) : []
   const shippingLines = formatAddress(order?.shippingAddress ?? null)
   const shippingPresentation = order ? getShippingPresentation(order) : null
@@ -219,13 +241,13 @@ export const OrderDetailPageView = () => {
   const handlePreviewInvoice = () => {
     setIsInvoiceModalOpen(true)
 
-    if (order?.id && !invoice && !isInvoiceLoading) {
+    if (order?.id && canRequestOrderInvoice(order) && !invoice && !isInvoiceLoading) {
       void loadInvoice({ id: order.id })
     }
   }
 
   const handleRetryInvoice = () => {
-    if (!order?.id) {
+    if (!order?.id || !canRequestOrderInvoice(order)) {
       return
     }
 
@@ -307,7 +329,7 @@ export const OrderDetailPageView = () => {
                       Total
                     </p>
                     <p className="mt-1 text-lg font-semibold text-slate-900">
-                      {formatOrderMoney(order.totalAmount, order.currency)}
+                      {getOrderTotalLabel(order)}
                     </p>
                   </div>
                   <div>
@@ -344,46 +366,49 @@ export const OrderDetailPageView = () => {
                     <h2 className="text-xl font-semibold text-slate-900">Artwork summary</h2>
                   </div>
                   <div className="mt-6 space-y-4">
-                    {order.items?.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex flex-col gap-4 rounded-[24px] border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between"
-                      >
-                        <div className="flex gap-4">
-                          <div className="h-20 w-20 overflow-hidden rounded-2xl bg-white">
-                            {item.artworkImageUrl ? (
-                              <Image
-                                src={item.artworkImageUrl}
-                                alt={item.artworkTitle}
-                                width={80}
-                                height={80}
-                                unoptimized
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                Art
-                              </div>
-                            )}
+                    {order.items?.map((item, itemIndex) => {
+                      const unitPriceLabel = getOrderItemUnitPriceLabel(order, item, itemIndex)
+                      const lineTotalLabel = getOrderItemLineTotalLabel(order, item, itemIndex)
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="flex flex-col gap-4 rounded-[24px] border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div className="flex gap-4">
+                            <div className="h-20 w-20 overflow-hidden rounded-2xl bg-white">
+                              {item.artworkImageUrl ? (
+                                <Image
+                                  src={item.artworkImageUrl}
+                                  alt={item.artworkTitle}
+                                  width={80}
+                                  height={80}
+                                  unoptimized
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                  Art
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <h3 className="text-base font-semibold text-slate-900">{item.artworkTitle}</h3>
+                              <p className="mt-1 text-sm text-slate-500">
+                                Quantity {item.quantity} • {unitPriceLabel}
+                              </p>
+                              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                                Seller {item.sellerId}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="text-base font-semibold text-slate-900">{item.artworkTitle}</h3>
-                            <p className="mt-1 text-sm text-slate-500">
-                              Quantity {item.quantity} • {formatOrderMoney(item.priceAtPurchase, item.currency)}
-                            </p>
-                            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                              Seller {item.sellerId}
-                            </p>
+                          <div className="text-sm text-slate-500 sm:text-right">
+                            <p className="font-medium text-slate-900">{lineTotalLabel}</p>
+                            <p className="mt-1">Payout {item.payoutStatus}</p>
                           </div>
                         </div>
-                        <div className="text-sm text-slate-500 sm:text-right">
-                          <p className="font-medium text-slate-900">
-                            {formatOrderMoney(item.priceAtPurchase * item.quantity, item.currency)}
-                          </p>
-                          <p className="mt-1">Payout {item.payoutStatus}</p>
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
 
@@ -510,6 +535,54 @@ export const OrderDetailPageView = () => {
                   }}
                 />
 
+                {role === 'seller' ? (
+                  <div tabIndex={11} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <h2 className="text-xl font-semibold text-slate-900">Buyer & fulfillment</h2>
+                    <div className="mt-6 space-y-4 text-sm text-slate-600">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <CopyValueField
+                          label="Buyer ID"
+                          value={order.collectorId}
+                          displayValue={order.collectorId ? trimHash(order.collectorId) : 'Not available'}
+                        />
+                        <CopyValueField
+                          label="Buyer wallet"
+                          value={order.buyerWallet}
+                          displayValue={trimHash(order.buyerWallet)}
+                        />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                          Recipient
+                        </p>
+                        <p className="mt-2 text-slate-900">
+                          {getShippingRecipient(order.shippingAddress) ?? 'Not available'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                          Fulfillment address
+                        </p>
+                        {shippingLines.length > 0 ? (
+                          <div className="mt-2 space-y-1 text-slate-900">
+                            {shippingLines.map((line) => (
+                              <p key={`seller-${line}`}>{line}</p>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-2">No shipping address captured yet.</p>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                          Buyer notes
+                        </p>
+                        <p className="mt-2 text-slate-900">{order.customerNotes || 'None'}</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
                 <OrderInvoicePanel
                   availability={invoiceAvailability}
                   invoice={invoice}
@@ -525,7 +598,7 @@ export const OrderDetailPageView = () => {
                     <div className="flex items-center justify-between">
                       <span>Subtotal</span>
                       <span className="font-medium text-slate-900">
-                        {formatOrderMoney(order.subtotal, order.currency)}
+                        {getOrderSubtotalLabel(order)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -550,7 +623,7 @@ export const OrderDetailPageView = () => {
                       <div className="flex items-center justify-between">
                         <span className="text-base font-semibold text-slate-900">Total</span>
                         <span className="text-base font-semibold text-slate-900">
-                          {formatOrderMoney(order.totalAmount, order.currency)}
+                          {getOrderTotalLabel(order)}
                         </span>
                       </div>
                     </div>

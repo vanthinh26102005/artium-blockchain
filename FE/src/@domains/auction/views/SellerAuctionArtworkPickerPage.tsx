@@ -546,10 +546,30 @@ const SellerAuctionManagerPanel = () => {
               </div>
 
               <div className="mt-6 flex flex-col gap-3">
-                {selectedRow.auction ? (
+                {selectedRow.auction?.orderProjectionId ? (
                   <Button
                     type="button"
                     className="bg-slate-900 text-white hover:bg-slate-700"
+                    onClick={() =>
+                      void router.push({
+                        pathname: `/orders/${selectedRow.auction!.orderProjectionId}`,
+                        query: { scope: 'seller', invoice: '1' },
+                      })
+                    }
+                  >
+                    <ListChecks className="h-4 w-4" />
+                    Manage fulfillment
+                  </Button>
+                ) : null}
+                {selectedRow.auction ? (
+                  <Button
+                    type="button"
+                    variant={selectedRow.auction.orderProjectionId ? 'outline' : 'default'}
+                    className={
+                      selectedRow.auction.orderProjectionId
+                        ? 'border-slate-200 text-slate-900'
+                        : 'bg-slate-900 text-white hover:bg-slate-700'
+                    }
                     onClick={() => void router.push(`/auction/bids/${encodeURIComponent(selectedRow.auction!.onChainOrderId)}`)}
                   >
                     <ExternalLink className="h-4 w-4" />

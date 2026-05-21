@@ -6,12 +6,12 @@ import type { OrdersWorkspaceScope } from '../types/orderTypes'
 import { getOrderListInvoiceAvailability } from '../utils/orderInvoicePresentation'
 import {
   formatOrderDate,
-  formatOrderMoney,
   getDisplayOrderStatus,
   getNextActionLabel,
   getNextStepDescription,
   getOrderActorRole,
   getPaymentMethodLabel,
+  getOrderTotalLabel,
   getPrimaryArtwork,
 } from '../utils/orderPresentation'
 import { OrderInvoiceStatusChip } from './OrderInvoiceStatusChip'
@@ -84,7 +84,7 @@ export const OrderListCard = ({ order, scope, currentUserId }: OrderListCardProp
               Total
             </p>
             <p className="mt-1 text-lg font-semibold text-slate-900">
-              {formatOrderMoney(order.totalAmount, order.currency)}
+              {getOrderTotalLabel(order)}
             </p>
           </div>
           <div className="md:mt-5">

@@ -92,6 +92,12 @@ export type OrderResponse = {
   confirmedAt?: string | null
   shippedAt?: string | null
   deliveredAt?: string | null
+  deliveryConfirmedBy?: string | null
+  deliveryConfirmationMethod?: string | null
+  deliveryConfirmationNotes?: string | null
+  deliverySignatureDataUrl?: string | null
+  deliveryConfirmationTxHash?: string | null
+  deliveryConfirmationSubmittedAt?: string | null
   onChainOrderId?: string | null
   contractAddress?: string | null
   chainId?: string | null
@@ -139,6 +145,7 @@ export type OrderInvoicePaymentResponse = {
   paymentIntentId?: string | null
   txHash?: string | null
   onChainOrderId?: string | null
+  bidAmountWei?: string | null
 }
 
 export type OrderInvoiceItemResponse = {
@@ -188,6 +195,9 @@ export type MarkShippedRequest = {
 
 export type ConfirmDeliveryRequest = {
   notes?: string
+  confirmationMethod?: 'app' | 'app_signature' | 'wallet'
+  signatureDataUrl?: string
+  transactionHash?: string
 }
 
 export type OpenDisputeRequest = {

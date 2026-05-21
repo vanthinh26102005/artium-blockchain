@@ -4,6 +4,7 @@ import type { OrdersWorkspaceScope } from '../types/orderTypes'
 type OrdersSegmentedControlProps = {
   value: OrdersWorkspaceScope
   onChange: (value: OrdersWorkspaceScope) => void
+  availableScopes?: OrdersWorkspaceScope[]
 }
 
 const OPTIONS: Array<{ label: string; value: OrdersWorkspaceScope }> = [
@@ -11,10 +12,20 @@ const OPTIONS: Array<{ label: string; value: OrdersWorkspaceScope }> = [
   { label: 'Sales', value: 'seller' },
 ]
 
-export const OrdersSegmentedControl = ({ value, onChange }: OrdersSegmentedControlProps) => {
+export const OrdersSegmentedControl = ({
+  value,
+  onChange,
+  availableScopes = ['buyer', 'seller'],
+}: OrdersSegmentedControlProps) => {
+  const options = OPTIONS.filter((option) => availableScopes.includes(option.value))
+
+  if (options.length <= 1) {
+    return null
+  }
+
   return (
     <div className="inline-flex rounded-full bg-slate-100 p-1">
-      {OPTIONS.map((option) => (
+      {options.map((option) => (
         <button
           key={option.value}
           type="button"
