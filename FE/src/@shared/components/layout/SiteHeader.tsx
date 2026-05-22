@@ -124,7 +124,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
         ? 'bg-black border-b border-white/10 text-white shadow-[0_8px_30px_rgba(0,0,0,0.45)]'
         : 'bg-transparent border-b border-black text-white'
       : isAuthRoute
-        ? 'bg-transparent border-b border-black shadow-none backdrop-blur-none'
+        ? 'bg-transparent shadow-none backdrop-blur-none'
         : 'backdrop-blur-2xl backdrop-saturate-150',
     !isLandingVariant &&
       !isAuthRoute &&

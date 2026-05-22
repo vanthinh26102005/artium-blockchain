@@ -318,25 +318,25 @@ const SidebarFlyout = ({
 }: SidebarItemConfig & {
   isActive?: boolean
 }) => (
-  <div className="relative w-[228px] overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-900/10">
-    <span className="absolute top-1/2 -left-1 h-2.5 w-2.5 -translate-y-1/2 rotate-45 border-b border-l border-slate-200 bg-white" />
-    <div className={cn('h-1 w-full', accent.marker)} />
-    <div className="p-3.5">
-      <div className="flex items-start justify-between gap-3">
+  <div className="relative w-[300px] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-900/10">
+    <span className="absolute top-1/2 -left-1.5 h-3 w-3 -translate-y-1/2 rotate-45 border-b border-l border-slate-200 bg-white" />
+    <div className={cn('h-1.5 w-full', accent.marker)} />
+    <div className="p-5">
+      <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className={cn('text-[10px] font-bold tracking-[0.18em] uppercase', accent.text)}>
+          <p className={cn('text-xs font-bold tracking-[0.22em] uppercase', accent.text)}>
             {eyebrow}
           </p>
-          <p className="mt-1 truncate text-sm font-semibold text-slate-950">{label}</p>
+          <p className="mt-2 truncate text-xl font-semibold text-slate-950">{label}</p>
         </div>
         {isActive ? (
-          <span className="shrink-0 rounded-full bg-slate-950 px-2 py-0.5 text-[9px] font-bold tracking-[0.1em] text-white uppercase">
+          <span className="shrink-0 rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold tracking-[0.1em] text-white uppercase">
             Active
           </span>
         ) : badge ? (
           <span
             className={cn(
-              'shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold tracking-[0.1em] uppercase',
+              'shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.1em] uppercase',
               planBadgeColors[badge],
             )}
           >
@@ -344,7 +344,7 @@ const SidebarFlyout = ({
           </span>
         ) : null}
       </div>
-      <p className="mt-2 text-xs leading-5 text-slate-600">{description}</p>
+      <p className="mt-3 text-base leading-7 text-slate-600">{description}</p>
     </div>
   </div>
 )
@@ -583,10 +583,10 @@ export const SideBar = () => {
                 side="right"
                 align="end"
                 sideOffset={12}
-                className="w-[188px] rounded-xl border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-900/10"
+                className="w-[260px] rounded-2xl border-slate-200 bg-white p-2.5 shadow-xl shadow-slate-900/10"
               >
-                <DropdownMenuItem className="gap-2 rounded-lg px-2.5 py-2 text-sm font-semibold text-slate-900">
-                  <User className="h-4 w-4 text-slate-600" />
+                <DropdownMenuItem className="gap-3 rounded-xl px-4 py-4 text-lg! font-semibold text-slate-900">
+                  <User className="h-6 w-6 text-slate-600" />
                   Account
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -594,12 +594,12 @@ export const SideBar = () => {
                     void logout()
                   }}
                   disabled={isLoggingOut}
-                  className="gap-2 rounded-lg px-2.5 py-2 text-sm font-semibold text-slate-900"
+                  className="gap-3 rounded-xl px-4 py-4 text-lg! font-semibold text-slate-900"
                 >
                   {isLoggingOut ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-slate-600" />
+                    <Loader2 className="h-6 w-6 animate-spin text-slate-600" />
                   ) : (
-                    <LogOut className="h-4 w-4 text-slate-600" />
+                    <LogOut className="h-6 w-6 text-slate-600" />
                   )}
                   {isLoggingOut ? 'Signing out...' : 'Logout'}
                 </DropdownMenuItem>
