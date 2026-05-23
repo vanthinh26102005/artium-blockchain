@@ -37,7 +37,7 @@ export const Heading = <T extends ElementType = 'h2'>({
   return (
     <Component
       className={cn(
-        'font-monument-grotes font-semibold tracking-tight',
+        'font-monument-grotes font-semibold tracking-normal',
         headingSizeClass[size],
         headingToneClass[tone],
         className,

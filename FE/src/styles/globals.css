@@ -143,6 +143,66 @@
   }
 }
 
+.landing-color-field {
+  animation: landing-color-field-drift 22s cubic-bezier(0.45, 0, 0.2, 1) infinite alternate;
+}
+
+@keyframes landing-color-field-drift {
+  0% {
+    transform: translate3d(-1.2%, -0.8%, 0) scale(1.015);
+  }
+
+  50% {
+    transform: translate3d(0.8%, 1%, 0) scale(1.035);
+  }
+
+  100% {
+    transform: translate3d(1.4%, -0.4%, 0) scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-color-field {
+    animation: none;
+    transform: none;
+  }
+}
+
+.landing-scroll-reveal {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  transition:
+    opacity 620ms ease,
+    transform 760ms cubic-bezier(0.19, 1, 0.22, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.landing-scroll-reveal[data-reveal-state='hidden'] {
+  opacity: 0;
+  transform: translate3d(var(--reveal-x, 0px), var(--reveal-y, 28px), 0) scale(0.985);
+}
+
+.landing-scroll-reveal[data-reveal-state='visible'] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+@media (max-width: 767px) {
+  .landing-scroll-reveal[data-reveal-state='hidden'] {
+    transform: translate3d(0, var(--reveal-y, 24px), 0) scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-scroll-reveal,
+  .landing-scroll-reveal[data-reveal-state='hidden'],
+  .landing-scroll-reveal[data-reveal-state='visible'] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* Hide scrollbar but allow scrolling */
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */

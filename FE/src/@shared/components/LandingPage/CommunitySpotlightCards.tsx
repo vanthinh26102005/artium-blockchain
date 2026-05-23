@@ -27,7 +27,7 @@ export const SpotlightBlockCard = ({
     return (
       <Card className={cn('border-none bg-transparent shadow-none', className)} style={{ height }}>
         <div
-          className="flex h-full w-full flex-col justify-between rounded-xl p-3"
+          className="flex h-full w-full flex-col justify-between rounded-[8px] p-3"
           style={{ backgroundColor: block.highlightBackgroundColor }}
         >
           <Heading size="h3" className="text-[28px] leading-tight font-semibold lg:text-[40px]">
@@ -46,7 +46,7 @@ export const SpotlightBlockCard = ({
 
   return (
     <Card className={cn('border-none bg-transparent shadow-none', className)} style={{ height }}>
-      <CardContent className="relative h-full w-full overflow-hidden rounded-xl p-0">
+      <CardContent className="relative h-full w-full overflow-hidden rounded-[8px] p-0">
         <Image
           src={imageSrc}
           alt={block.name || 'Spotlight Artist'}
@@ -79,7 +79,7 @@ export const SpotlightCard = ({
     return (
       <Card
         className={cn(
-          'relative overflow-hidden rounded-[14px] border-none bg-transparent shadow-none',
+          'relative overflow-hidden rounded-[8px] border-none bg-transparent shadow-none',
           className,
         )}
         style={{ height: CARD_HEIGHT, minWidth: FULL_WIDTH, maxWidth: FULL_WIDTH }}
@@ -110,7 +110,11 @@ export const SpotlightCard = ({
 
   return (
     <div
-      className={cn('flex flex-col gap-3 rounded-xl bg-transparent', className, artist.className)}
+      className={cn(
+        'flex flex-col gap-3 rounded-[8px] bg-transparent',
+        className,
+        artist.className,
+      )}
       style={{ height: CARD_HEIGHT, minWidth: SPLIT_WIDTH, maxWidth: SPLIT_WIDTH }}
     >
       <SpotlightBlockCard

@@ -44,7 +44,7 @@ export const SPOTLIGHT_ARTISTS: SpotlightItem[] = [
     },
     bottom: {
       highlightNumber: '6,000+',
-      highlightText: 'In Artwork Sold',
+      highlightText: 'Artwork Sales',
       highlightBackgroundColor: '#35c9ee',
     },
   },
@@ -82,7 +82,7 @@ export const SPOTLIGHT_ARTISTS: SpotlightItem[] = [
     },
     bottom: {
       highlightNumber: '$4.5M+',
-      highlightText: 'In Artwork Sales',
+      highlightText: 'Artwork Volume',
       highlightBackgroundColor: '#22D877',
     },
   },

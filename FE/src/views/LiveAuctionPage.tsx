@@ -2,11 +2,28 @@ import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { ChevronDown, Grid2X2, LayoutList, ShieldCheck } from 'lucide-react'
+import {
+  Activity,
+  ArrowUpRight,
+  ChevronDown,
+  Gavel,
+  Grid2X2,
+  LayoutList,
+  ShieldCheck,
+  SlidersHorizontal,
+  Timer,
+  TrendingUp,
+} from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { BidEditingModal, type BidOrderStatusPayload } from '@domains/auction/components'
 import { useAuctionLots } from '@domains/auction/hooks/useAuctionLots'
 import { useAuctionRealtime } from '@domains/auction/hooks/useAuctionRealtime'
+import {
+  formatAuctionEth,
+  formatAuctionEthInputValue,
+  formatAuctionEthValue,
+  normalizeAuctionEthValue,
+} from '@domains/auction/utils'
 import type {
   AuctionFilterCategoryKey,
   AuctionFilterStatusKey,
@@ -51,13 +68,9 @@ const statusOptions: Array<{ key: AuctionStatusKey; label: string; helper: strin
 ]
 
 const MIN_ETH = 0
-const MAX_ETH = 50
+const MAX_ETH = 3
+const PRICE_RANGE_STEP = 0.0001
 const ITEMS_PER_PAGE = 24
-
-const formatBidDisplay = (value: number) => {
-  const normalizedValue = Math.min(MAX_ETH, Math.max(MIN_ETH, Number(value.toFixed(1))))
-  return `${Number.isInteger(normalizedValue) ? normalizedValue.toFixed(0) : normalizedValue.toFixed(1)} ETH`
-}
 
 const statusBadgeClass: Record<AuctionLotStatusKey, string> = {
   active: 'bg-[#16a34a]',
@@ -76,30 +89,33 @@ const lotActionLabel: Record<AuctionLotStatusKey, string> = {
 }
 
 const clampEthValue = (value: number) => {
-  if (Number.isNaN(value)) {
+  if (!Number.isFinite(value)) {
     return MIN_ETH
   }
 
-  return Math.min(MAX_ETH, Math.max(MIN_ETH, Number(value.toFixed(1))))
+  return normalizeAuctionEthValue(Math.min(MAX_ETH, Math.max(MIN_ETH, value)))
 }
 
 const parseEthInput = (value: string, fallback: number) => {
-  const normalized = value.replace('+', '').trim()
-  const parsed = Number.parseFloat(normalized)
+  const trimmed = value.trim()
+  const withoutLeadingPlus = trimmed.startsWith('+') ? trimmed.slice(1) : trimmed
+  const normalized = withoutLeadingPlus.replace(',', '.')
 
-  if (Number.isNaN(parsed)) {
+  if (!/^(?:\d+|\d*\.\d+)$/.test(normalized)) {
     return fallback
   }
+
+  const parsed = Number.parseFloat(normalized)
 
   return clampEthValue(parsed)
 }
 
-const formatEthDisplay = (value: number) => {
+const formatPriceRangeValue = (value: number) => {
   if (value >= MAX_ETH) {
-    return '50+'
+    return `${formatAuctionEthValue(MAX_ETH)}+`
   }
 
-  return Number.isInteger(value) ? `${value}` : value.toFixed(1)
+  return formatAuctionEthValue(value)
 }
 
 const isBidActionStatus = (statusKey: AuctionLotStatusKey) =>
@@ -110,36 +126,36 @@ const isSameAuction = (lot: AuctionLot, auctionId: string) =>
 
 const AuctionLotCardSkeleton = ({ viewMode }: { viewMode: 'grid' | 'list' }) => (
   <article
-    className={`border border-[#e5e7eb] bg-white p-3 md:p-4 ${
+    className={`overflow-hidden rounded-[8px] border border-black/10 bg-white/82 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.78)] md:p-4 ${
       viewMode === 'list'
         ? 'md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-stretch md:gap-5'
         : ''
     }`}
   >
     <Skeleton
-      className={`rounded-none bg-[#f3f3f3] ${
+      className={`rounded-[6px] bg-[#ecefeb] ${
         viewMode === 'grid'
           ? 'mb-5 aspect-[4/5] md:mb-6 md:aspect-[3/4]'
-          : 'mb-4 aspect-[5/4] md:mb-0 md:h-full md:w-full md:aspect-auto'
+          : 'mb-4 aspect-[5/4] md:mb-0 md:aspect-auto md:h-full md:w-full'
       }`}
     />
     <div className={`space-y-4 ${viewMode === 'list' ? 'md:py-2' : ''}`}>
       <div className={`${viewMode === 'list' ? 'border-b border-[#c4c7c7]/30 pb-4' : ''}`}>
-        <Skeleton className="h-5 w-3/4 rounded-none bg-[#eeeeee]" />
-        <Skeleton className="mt-3 h-3 w-32 rounded-none bg-[#eeeeee]" />
+        <Skeleton className="h-5 w-3/4 rounded-[4px] bg-[#ecefeb]" />
+        <Skeleton className="mt-3 h-3 w-32 rounded-[4px] bg-[#ecefeb]" />
         {viewMode === 'list' ? (
           <div className="mt-4 space-y-2">
-            <Skeleton className="h-3 w-full rounded-none bg-[#eeeeee]" />
-            <Skeleton className="h-3 w-5/6 rounded-none bg-[#eeeeee]" />
+            <Skeleton className="h-3 w-full rounded-[4px] bg-[#ecefeb]" />
+            <Skeleton className="h-3 w-5/6 rounded-[4px] bg-[#ecefeb]" />
           </div>
         ) : null}
       </div>
       <div className="flex items-end justify-between gap-4 border-[#c4c7c7]/30 pt-4">
         <div className="space-y-2">
-          <Skeleton className="h-3 w-20 rounded-none bg-[#eeeeee]" />
-          <Skeleton className="h-6 w-24 rounded-none bg-[#eeeeee]" />
+          <Skeleton className="h-3 w-20 rounded-[4px] bg-[#ecefeb]" />
+          <Skeleton className="h-6 w-24 rounded-[4px] bg-[#ecefeb]" />
         </div>
-        <Skeleton className="h-9 w-24 rounded-none bg-[#eeeeee]" />
+        <Skeleton className="h-9 w-24 rounded-[6px] bg-[#ecefeb]" />
       </div>
     </div>
   </article>
@@ -157,12 +173,16 @@ const LiveAuctionPage = () => {
   const [mobileSelectedStatus, setMobileSelectedStatus] = useState<AuctionStatusKey>('all')
   const [mobileAppliedMinPrice, setMobileAppliedMinPrice] = useState(MIN_ETH)
   const [mobileAppliedMaxPrice, setMobileAppliedMaxPrice] = useState(MAX_ETH)
-  const [mobileMinInputValue, setMobileMinInputValue] = useState(`${MIN_ETH}`)
-  const [mobileMaxInputValue, setMobileMaxInputValue] = useState(`${MAX_ETH}`)
+  const [mobileMinInputValue, setMobileMinInputValue] = useState(
+    formatAuctionEthInputValue(MIN_ETH),
+  )
+  const [mobileMaxInputValue, setMobileMaxInputValue] = useState(
+    formatAuctionEthInputValue(MAX_ETH),
+  )
   const [draftMinPrice, setDraftMinPrice] = useState(MIN_ETH)
   const [draftMaxPrice, setDraftMaxPrice] = useState(MAX_ETH)
-  const [minInputValue, setMinInputValue] = useState(`${MIN_ETH}`)
-  const [maxInputValue, setMaxInputValue] = useState(`${MAX_ETH}`)
+  const [minInputValue, setMinInputValue] = useState(formatAuctionEthInputValue(MIN_ETH))
+  const [maxInputValue, setMaxInputValue] = useState(formatAuctionEthInputValue(MAX_ETH))
   const [isStatusOpen, setIsStatusOpen] = useState(false)
   const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false)
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
@@ -187,14 +207,7 @@ const LiveAuctionPage = () => {
   const maxPercent = ((draftMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMinPercent = ((mobileAppliedMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMaxPercent = ((mobileAppliedMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
-  const {
-    lots,
-    total,
-    isLoading,
-    error,
-    refresh,
-    refreshAuctionById,
-  } = useAuctionLots({
+  const { lots, isLoading, error, refresh, refreshAuctionById } = useAuctionLots({
     category: selectedCategory === 'all' ? undefined : selectedCategory,
     status: selectedStatus === 'all' ? undefined : selectedStatus,
     minBidEth: appliedMinPrice > MIN_ETH ? appliedMinPrice : undefined,
@@ -281,8 +294,8 @@ const LiveAuctionPage = () => {
     setMobileSelectedStatus(selectedStatus)
     setMobileAppliedMinPrice(appliedMinPrice)
     setMobileAppliedMaxPrice(appliedMaxPrice)
-    setMobileMinInputValue(`${appliedMinPrice}`)
-    setMobileMaxInputValue(`${appliedMaxPrice}`)
+    setMobileMinInputValue(formatAuctionEthInputValue(appliedMinPrice))
+    setMobileMaxInputValue(formatAuctionEthInputValue(appliedMaxPrice))
   }
 
   const applyDesktopPriceRange = () => {
@@ -292,8 +305,8 @@ const LiveAuctionPage = () => {
     setCurrentPage(1)
     setDraftMinPrice(nextMin)
     setDraftMaxPrice(nextMax)
-    setMinInputValue(`${nextMin}`)
-    setMaxInputValue(`${nextMax}`)
+    setMinInputValue(formatAuctionEthInputValue(nextMin))
+    setMaxInputValue(formatAuctionEthInputValue(nextMax))
     setAppliedMinPrice(nextMin)
     setAppliedMaxPrice(nextMax)
     setIsPriceRangeOpen(false)
@@ -312,8 +325,8 @@ const LiveAuctionPage = () => {
     setAppliedMaxPrice(MAX_ETH)
     setDraftMinPrice(MIN_ETH)
     setDraftMaxPrice(MAX_ETH)
-    setMinInputValue(`${MIN_ETH}`)
-    setMaxInputValue(`${MAX_ETH}`)
+    setMinInputValue(formatAuctionEthInputValue(MIN_ETH))
+    setMaxInputValue(formatAuctionEthInputValue(MAX_ETH))
     setIsCategoryOpen(false)
     setIsStatusOpen(false)
     setIsPriceRangeOpen(false)
@@ -324,8 +337,8 @@ const LiveAuctionPage = () => {
     setMobileSelectedStatus('all')
     setMobileAppliedMinPrice(MIN_ETH)
     setMobileAppliedMaxPrice(MAX_ETH)
-    setMobileMinInputValue(`${MIN_ETH}`)
-    setMobileMaxInputValue(`${MAX_ETH}`)
+    setMobileMinInputValue(formatAuctionEthInputValue(MIN_ETH))
+    setMobileMaxInputValue(formatAuctionEthInputValue(MAX_ETH))
   }
 
   const applyMobileFilters = () => {
@@ -333,15 +346,12 @@ const LiveAuctionPage = () => {
       parseEthInput(mobileMinInputValue, mobileAppliedMinPrice),
       mobileAppliedMaxPrice,
     )
-    const nextMax = Math.max(
-      parseEthInput(mobileMaxInputValue, mobileAppliedMaxPrice),
-      nextMin,
-    )
+    const nextMax = Math.max(parseEthInput(mobileMaxInputValue, mobileAppliedMaxPrice), nextMin)
 
     setMobileAppliedMinPrice(nextMin)
     setMobileAppliedMaxPrice(nextMax)
-    setMobileMinInputValue(`${nextMin}`)
-    setMobileMaxInputValue(`${nextMax}`)
+    setMobileMinInputValue(formatAuctionEthInputValue(nextMin))
+    setMobileMaxInputValue(formatAuctionEthInputValue(nextMax))
     setCurrentPage(1)
     setSelectedCategory(mobileSelectedCategory)
     setSelectedStatus(mobileSelectedStatus)
@@ -367,14 +377,7 @@ const LiveAuctionPage = () => {
     })
 
   const visibleLots = useMemo(
-    () =>
-      filterLots(
-        lots,
-        selectedCategory,
-        selectedStatus,
-        appliedMinPrice,
-        appliedMaxPrice,
-      ),
+    () => filterLots(lots, selectedCategory, selectedStatus, appliedMinPrice, appliedMaxPrice),
     [appliedMaxPrice, appliedMinPrice, lots, selectedCategory, selectedStatus],
   )
   const mobilePreviewLots = useMemo(
@@ -407,9 +410,10 @@ const LiveAuctionPage = () => {
     [displayedLots],
   )
   const isInitialLoading = isLoading && lots.length === 0
-  const skeletonLots = useMemo(() => Array.from({ length: effectiveViewMode === 'grid' ? 8 : 5 }), [
-    effectiveViewMode,
-  ])
+  const skeletonLots = useMemo(
+    () => Array.from({ length: effectiveViewMode === 'grid' ? 8 : 5 }),
+    [effectiveViewMode],
+  )
   const refreshAuctionAndSelection = useCallback(
     async (auctionId: string) => {
       const refreshedLot = await refreshAuctionById(auctionId)
@@ -435,7 +439,7 @@ const LiveAuctionPage = () => {
   })
 
   const activeSelectedBidLot = selectedBidLot
-    ? lots.find((lot) => isSameAuction(lot, selectedBidLot.auctionId)) ?? selectedBidLot
+    ? (lots.find((lot) => isSameAuction(lot, selectedBidLot.auctionId)) ?? selectedBidLot)
     : null
 
   const resultsLabel = `${visibleLots.length} result${visibleLots.length === 1 ? '' : 's'}`
@@ -445,12 +449,46 @@ const LiveAuctionPage = () => {
     selectedStatus !== 'all' ||
     appliedMinPrice !== MIN_ETH ||
     appliedMaxPrice !== MAX_ETH
+  const visibleLotsLabel = `${visibleLots.length} ${visibleLots.length === 1 ? 'lot' : 'lots'}`
   const footerLabel = hasActiveFilters
-    ? `Page ${safeCurrentPage} of ${totalPages} • ${visibleLots.length} matching lots`
-    : `Page ${safeCurrentPage} of ${totalPages} • ${total} total lots`
+    ? `Page ${safeCurrentPage} of ${totalPages} • ${visibleLotsLabel} matching filters`
+    : `Page ${safeCurrentPage} of ${totalPages} • ${visibleLotsLabel} loaded`
+  const emptyStateTitle = hasActiveFilters
+    ? 'No live auctions match your filters.'
+    : 'No live auctions available.'
   const emptyStateBody = hasActiveFilters
     ? 'Adjust or clear your filters to view other auction lots.'
     : 'No live auctions are available right now. Please check back soon.'
+  const featuredLot =
+    displayedLots.find((lot) => isBidActionStatus(lot.statusKey)) ?? visibleLots[0] ?? lots[0]
+  const liveLotCount = visibleLots.filter((lot) => isBidActionStatus(lot.statusKey)).length
+  const endingSoonLotCount = visibleLots.filter((lot) => lot.statusKey === 'ending-soon').length
+  const totalBidValue = visibleLots.reduce((sum, lot) => sum + lot.bidValue, 0)
+  const highestBidLot = visibleLots.reduce<AuctionLot | null>(
+    (currentHighest, lot) =>
+      !currentHighest || lot.bidValue > currentHighest.bidValue ? lot : currentHighest,
+    null,
+  )
+  const heroStats = [
+    {
+      icon: Activity,
+      value: liveLotCount,
+      label: 'Live lots',
+      helper: 'accepting bids',
+    },
+    {
+      icon: Timer,
+      value: endingSoonLotCount,
+      label: 'Closing soon',
+      helper: 'watch closely',
+    },
+    {
+      icon: TrendingUp,
+      value: formatAuctionEth(totalBidValue),
+      label: 'Visible volume',
+      helper: highestBidLot ? `Top lot ${formatAuctionEth(highestBidLot.bidValue)}` : 'No bids yet',
+    },
+  ]
 
   const scrollResultsToTop = () => {
     if (typeof window === 'undefined') {
@@ -503,29 +541,204 @@ const LiveAuctionPage = () => {
         title="Live Auctions | Artium"
         description="A curated auction showcase for architectural masterworks and digital artifacts on Artium."
       />
-      <div className="min-h-screen bg-white text-[#1a1c1c]" style={bodyFont}>
-        <main className="mx-auto max-w-[1600px] px-6 pt-12 pb-20 md:px-12 md:pt-16">
-          <header className="mb-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-            <div className="max-w-2xl">
-              <h1
-                className={`${spaceGrotesk.className} mb-6 text-5xl leading-none font-bold tracking-[0.04em] text-black uppercase md:text-7xl`}
-              >
-                Live Auctions
-              </h1>
-              <p className="text-lg leading-8 font-light text-[#444747]">
-                A curated selection of architectural masterworks and digital artifacts. Each piece
-                is verified via blockchain provenance, ensuring institutional-grade collectible
-                security.
-              </p>
-            </div>
-            <div className="flex items-center gap-4 text-[11px] tracking-[0.22em] text-black/40 uppercase">
-              <span className="h-2 w-2 animate-pulse bg-black" />
-              <span>Live updating from on-chain data</span>
+      <div className="min-h-screen overflow-hidden bg-[#f6f6f2] text-[#1a1c1c]" style={bodyFont}>
+        <main className="mx-auto max-w-[1600px] px-4 pt-8 pb-20 sm:px-6 md:px-10 md:pt-12 xl:px-12">
+          <header className="relative mb-8 overflow-hidden rounded-[8px] border border-black/10 bg-[linear-gradient(135deg,#ffffff_0%,#f5f7f1_50%,#eaf7f6_100%)] shadow-[0_24px_90px_rgba(15,23,42,0.09),inset_0_1px_0_rgba(255,255,255,0.86)]">
+            <div
+              aria-hidden="true"
+              className="absolute -top-32 -right-24 h-72 w-72 rounded-full bg-[#f97316]/14 blur-3xl"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-[#35c9ee]/14 blur-3xl"
+            />
+            <div className="relative grid gap-8 p-5 sm:p-7 lg:grid-cols-[minmax(0,0.98fr)_minmax(360px,0.72fr)] lg:p-9 xl:p-10">
+              <div className="flex min-w-0 flex-col justify-center py-2">
+                <p className="mb-5 inline-flex min-h-10 w-fit items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 text-[10px] font-semibold tracking-[0.18em] text-slate-500 uppercase shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-md">
+                  <Gavel className="h-4 w-4 text-[#f97316]" />
+                  Live bidding room
+                </p>
+                <h1
+                  className={`${spaceGrotesk.className} max-w-4xl text-[46px] leading-[0.92] font-bold tracking-normal text-slate-950 uppercase sm:text-[68px] xl:text-[88px]`}
+                >
+                  Live Auctions
+                </h1>
+                <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
+                  Browse verified auction lots, compare live bid signals, and enter the bidding flow
+                  without losing sight of price, category, or closing urgency.
+                </p>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={scrollResultsToTop}
+                    className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-slate-950 px-6 text-sm font-bold tracking-[0.08em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-950/30 focus-visible:outline-none"
+                    style={headlineFont}
+                  >
+                    Explore lots
+                    <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                  <Link
+                    href="/artist/auctions"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-black/10 bg-white/64 px-6 text-sm font-bold tracking-[0.08em] text-slate-950 uppercase transition hover:bg-white focus-visible:ring-2 focus-visible:ring-slate-950/30 focus-visible:outline-none"
+                    style={headlineFont}
+                  >
+                    Seller tools
+                  </Link>
+                </div>
+                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                  {heroStats.map((stat) => {
+                    const Icon = stat.icon
+                    return (
+                      <div
+                        key={stat.label}
+                        className="rounded-[8px] border border-black/10 bg-white/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] backdrop-blur-md"
+                      >
+                        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-[6px] bg-slate-950 text-white">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <p className="text-2xl font-bold text-slate-950" style={headlineFont}>
+                          {stat.value}
+                        </p>
+                        <p className="mt-1 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
+                          {stat.label}
+                        </p>
+                        <p className="mt-2 text-xs leading-5 text-slate-500">{stat.helper}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="min-w-0">
+                {featuredLot ? (
+                  <article className="group h-full overflow-hidden rounded-[8px] border border-black/10 bg-white/78 p-3 shadow-[0_24px_80px_rgba(15,23,42,0.11),inset_0_1px_0_rgba(255,255,255,0.8)] backdrop-blur-md">
+                    <div className="relative min-h-[300px] overflow-hidden rounded-[6px] bg-slate-100 sm:min-h-[420px] lg:min-h-full">
+                      {featuredLot.imageSrc ? (
+                        <Image
+                          src={featuredLot.imageSrc}
+                          alt={featuredLot.imageAlt}
+                          fill
+                          sizes="(max-width: 1024px) 92vw, 38vw"
+                          className="object-cover transition duration-500 group-hover:scale-[1.035]"
+                        />
+                      ) : (
+                        <div className="flex h-full min-h-[320px] items-center justify-center text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                          Image syncing
+                        </div>
+                      )}
+                      <div className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/86 px-3 py-1.5 text-[10px] font-semibold tracking-[0.12em] text-slate-950 uppercase backdrop-blur-md">
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[featuredLot.statusKey]} ${
+                            featuredLot.statusKey === 'active' ||
+                            featuredLot.statusKey === 'ending-soon'
+                              ? 'animate-pulse'
+                              : ''
+                          }`}
+                        />
+                        {featuredLot.status}
+                      </div>
+                    </div>
+                    <div className="grid gap-4 p-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-5">
+                      <div className="min-w-0">
+                        <p className="mb-2 text-[10px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                          Featured lot
+                        </p>
+                        <h2
+                          className="text-3xl leading-none font-bold tracking-normal text-slate-950 uppercase sm:text-4xl"
+                          style={headlineFont}
+                        >
+                          {featuredLot.title}
+                        </h2>
+                        <Link
+                          href={`/artworks/${featuredLot.artworkId}`}
+                          className="mt-3 inline-flex items-center gap-2 text-xs font-bold tracking-[0.14em] text-slate-500 uppercase transition hover:text-slate-950"
+                          style={headlineFont}
+                        >
+                          View artwork details
+                          <ArrowUpRight className="h-3.5 w-3.5" />
+                        </Link>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+                        <div className="rounded-full border border-slate-200 bg-white px-4 py-2">
+                          <p className="text-[9px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
+                            Current bid
+                          </p>
+                          <p className="mt-1 text-lg font-bold text-slate-950" style={headlineFont}>
+                            {formatAuctionEth(featuredLot.bidValue)}
+                          </p>
+                        </div>
+                        {isBidActionStatus(featuredLot.statusKey) ? (
+                          <button
+                            type="button"
+                            onClick={() => openBidModal(featuredLot)}
+                            className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-slate-950 px-5 text-xs font-bold tracking-[0.12em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-950/30 focus-visible:outline-none"
+                            style={headlineFont}
+                          >
+                            {lotActionLabel[featuredLot.statusKey]}
+                            <ArrowUpRight className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <Link
+                            href={`/artworks/${featuredLot.artworkId}`}
+                            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-slate-950 px-5 text-xs font-bold tracking-[0.12em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-950/30 focus-visible:outline-none"
+                            style={headlineFont}
+                          >
+                            {lotActionLabel[featuredLot.statusKey]}
+                            <ArrowUpRight className="h-4 w-4" />
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                ) : (
+                  <div className="h-full min-h-[420px] rounded-[8px] border border-black/10 bg-white/70 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-md">
+                    <div className="flex h-full min-h-[390px] flex-col justify-between rounded-[6px] border border-black/10 bg-[radial-gradient(circle_at_20%_20%,rgba(249,115,22,0.16),transparent_34%),radial-gradient(circle_at_80%_8%,rgba(53,201,238,0.18),transparent_32%),#f8faf6] p-5">
+                      <div className="inline-flex w-fit items-center gap-2 rounded-full border border-black/10 bg-white/78 px-3 py-1.5 text-[10px] font-semibold tracking-[0.16em] text-slate-500 uppercase">
+                        <Activity className="h-3.5 w-3.5 text-[#f97316]" />
+                        Auction sync
+                      </div>
+                      <div>
+                        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[8px] bg-slate-950 text-white shadow-[0_18px_45px_rgba(15,23,42,0.18)]">
+                          <Gavel className="h-6 w-6" />
+                        </div>
+                        <h2
+                          className="max-w-sm text-3xl leading-none font-bold text-slate-950 uppercase sm:text-4xl"
+                          style={headlineFont}
+                        >
+                          Auction room syncing.
+                        </h2>
+                        <p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">
+                          Live lots will appear here as soon as the auction service returns fresh
+                          data.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-[8px] border border-black/10 bg-white/76 p-3">
+                          <p className="text-[9px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
+                            Range
+                          </p>
+                          <p className="mt-1 font-bold text-slate-950" style={headlineFont}>
+                            0 - 3 ETH
+                          </p>
+                        </div>
+                        <div className="rounded-[8px] border border-black/10 bg-white/76 p-3">
+                          <p className="text-[9px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
+                            Signal
+                          </p>
+                          <p className="mt-1 font-bold text-slate-950" style={headlineFont}>
+                            On-chain
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </header>
 
-          <section className="mb-12 flex flex-wrap items-center justify-between gap-8 border-y border-[#c4c7c7]/30 py-8">
-            <div className="hidden flex-wrap items-center gap-10 md:flex">
+          <section className="sticky top-20 z-20 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[8px] border border-black/10 bg-white/82 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.82)] backdrop-blur-xl md:static md:p-4">
+            <div className="hidden flex-wrap items-center gap-3 md:flex">
               <div ref={categoryRef} className="relative">
                 <button
                   type="button"
@@ -534,7 +747,7 @@ const LiveAuctionPage = () => {
                     setIsPriceRangeOpen(false)
                     setIsCategoryOpen((prev) => !prev)
                   }}
-                  className="group text-left"
+                  className="group min-h-14 rounded-[8px] border border-slate-200 bg-white/74 px-4 py-2 text-left transition hover:border-slate-300 hover:bg-white focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                   aria-expanded={isCategoryOpen}
                   aria-haspopup="listbox"
                 >
@@ -553,7 +766,7 @@ const LiveAuctionPage = () => {
                 </button>
 
                 {isCategoryOpen ? (
-                  <div className="absolute top-full left-0 z-20 mt-4 min-w-[280px] border border-[#c4c7c7]/40 bg-white p-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.18)]">
+                  <div className="absolute top-full left-0 z-20 mt-3 min-w-[300px] rounded-[8px] border border-black/10 bg-white/95 p-2 shadow-[0_24px_70px_rgba(15,23,42,0.15)] backdrop-blur-xl">
                     <div className="space-y-1" role="listbox" aria-label="Category options">
                       {categoryOptions.map((option) => (
                         <button
@@ -564,10 +777,10 @@ const LiveAuctionPage = () => {
                             setSelectedCategory(option.key)
                             setIsCategoryOpen(false)
                           }}
-                          className={`block w-full px-3 py-3 text-left transition-colors ${
+                          className={`block w-full rounded-[6px] px-3 py-3 text-left transition-colors ${
                             option.key === selectedCategory
-                              ? 'bg-black text-white'
-                              : 'text-black hover:bg-[#f5f5f5]'
+                              ? 'bg-slate-950 text-white'
+                              : 'text-black hover:bg-slate-50'
                           }`}
                         >
                           <span className="block text-sm font-bold uppercase" style={headlineFont}>
@@ -594,7 +807,7 @@ const LiveAuctionPage = () => {
                     setIsPriceRangeOpen(false)
                     setIsStatusOpen((prev) => !prev)
                   }}
-                  className="group text-left"
+                  className="group min-h-14 rounded-[8px] border border-slate-200 bg-white/74 px-4 py-2 text-left transition hover:border-slate-300 hover:bg-white focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                   aria-expanded={isStatusOpen}
                   aria-haspopup="listbox"
                 >
@@ -613,7 +826,7 @@ const LiveAuctionPage = () => {
                 </button>
 
                 {isStatusOpen ? (
-                  <div className="absolute top-full left-0 z-20 mt-4 min-w-[280px] border border-[#c4c7c7]/40 bg-white p-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.18)]">
+                  <div className="absolute top-full left-0 z-20 mt-3 min-w-[300px] rounded-[8px] border border-black/10 bg-white/95 p-2 shadow-[0_24px_70px_rgba(15,23,42,0.15)] backdrop-blur-xl">
                     <div className="space-y-1" role="listbox" aria-label="Status options">
                       {statusOptions.map((option) => (
                         <button
@@ -624,10 +837,10 @@ const LiveAuctionPage = () => {
                             setSelectedStatus(option.key)
                             setIsStatusOpen(false)
                           }}
-                          className={`block w-full px-3 py-3 text-left transition-colors ${
+                          className={`block w-full rounded-[6px] px-3 py-3 text-left transition-colors ${
                             option.key === selectedStatus
-                              ? 'bg-black text-white'
-                              : 'text-black hover:bg-[#f5f5f5]'
+                              ? 'bg-slate-950 text-white'
+                              : 'text-black hover:bg-slate-50'
                           }`}
                         >
                           <span className="block text-sm font-bold uppercase" style={headlineFont}>
@@ -655,13 +868,13 @@ const LiveAuctionPage = () => {
                     if (!isPriceRangeOpen) {
                       setDraftMinPrice(appliedMinPrice)
                       setDraftMaxPrice(appliedMaxPrice)
-                      setMinInputValue(`${appliedMinPrice}`)
-                      setMaxInputValue(`${appliedMaxPrice}`)
+                      setMinInputValue(formatAuctionEthInputValue(appliedMinPrice))
+                      setMaxInputValue(formatAuctionEthInputValue(appliedMaxPrice))
                     }
 
                     setIsPriceRangeOpen((prev) => !prev)
                   }}
-                  className="group text-left"
+                  className="group min-h-14 rounded-[8px] border border-slate-200 bg-white/74 px-4 py-2 text-left transition hover:border-slate-300 hover:bg-white focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                   aria-expanded={isPriceRangeOpen}
                   aria-haspopup="dialog"
                 >
@@ -672,7 +885,8 @@ const LiveAuctionPage = () => {
                     className="flex items-center gap-2 text-sm font-bold text-black transition-colors group-hover:text-black/70"
                     style={headlineFont}
                   >
-                    {formatEthDisplay(appliedMinPrice)} ETH - {formatEthDisplay(appliedMaxPrice)} ETH
+                    {formatPriceRangeValue(appliedMinPrice)} ETH -{' '}
+                    {formatPriceRangeValue(appliedMaxPrice)} ETH
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${isPriceRangeOpen ? 'rotate-180' : ''}`}
                     />
@@ -680,52 +894,61 @@ const LiveAuctionPage = () => {
                 </button>
 
                 {isPriceRangeOpen ? (
-                  <div className="absolute top-full left-0 z-20 mt-4 w-[min(92vw,360px)] border-2 border-black/70 bg-white px-4 py-5 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.25)] sm:px-5 sm:py-5">
+                  <div
+                    role="dialog"
+                    aria-label="Price range filter"
+                    className="absolute top-full left-0 z-20 mt-3 w-[min(92vw,390px)] rounded-[8px] border border-black/10 bg-white/95 px-4 py-5 shadow-[0_24px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:px-5 sm:py-5"
+                  >
                     <div className="mb-5 flex items-center justify-between gap-3">
                       <span className="text-[12px] font-extrabold tracking-[0.2em] text-[#8a8a8a] uppercase">
                         Range (ETH)
                       </span>
                       <span className="text-lg font-black text-black" style={bodyFont}>
-                        {formatEthDisplay(draftMinPrice)} - {formatEthDisplay(draftMaxPrice)}
+                        {formatPriceRangeValue(draftMinPrice)} -{' '}
+                        {formatPriceRangeValue(draftMaxPrice)}
                       </span>
                     </div>
 
                     <div className="relative mb-6 px-2">
-                      <div className="h-1 bg-black" />
+                      <div className="h-1 rounded-full bg-slate-950" />
                       <div
-                        className="absolute top-1/2 h-6 w-6 -translate-y-1/2 border-2 border-[#d9d9d9] bg-black shadow-[0_0_0_2px_white]"
+                        className="absolute top-1/2 h-6 w-6 -translate-y-1/2 rounded-full border-2 border-white bg-slate-950 shadow-[0_0_0_2px_rgba(15,23,42,0.14)]"
                         style={{ left: `calc(${minPercent}% - 12px)` }}
                       />
                       <div
-                        className="absolute top-1/2 h-6 w-6 -translate-y-1/2 border-2 border-[#d9d9d9] bg-black shadow-[0_0_0_2px_white]"
+                        className="absolute top-1/2 h-6 w-6 -translate-y-1/2 rounded-full border-2 border-white bg-slate-950 shadow-[0_0_0_2px_rgba(15,23,42,0.14)]"
                         style={{ left: `calc(${maxPercent}% - 12px)` }}
                       />
                       <input
                         type="range"
                         min={MIN_ETH}
                         max={MAX_ETH}
-                        step={0.1}
+                        step={PRICE_RANGE_STEP}
                         value={draftMinPrice}
                         onChange={(event) => {
-                          const nextValue = Math.min(Number(event.target.value), draftMaxPrice)
+                          const nextValue = clampEthValue(
+                            Math.min(Number(event.target.value), draftMaxPrice),
+                          )
                           setDraftMinPrice(nextValue)
-                          setMinInputValue(`${nextValue}`)
+                          setMinInputValue(formatAuctionEthInputValue(nextValue))
                         }}
-                        className="absolute inset-x-0 top-1/2 z-10 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                        className="auction-range-input absolute inset-x-0 top-1/2 z-10 h-11 -translate-y-1/2 opacity-0"
                         aria-label="Minimum ETH range"
                       />
                       <input
                         type="range"
                         min={MIN_ETH}
                         max={MAX_ETH}
-                        step={0.1}
+                        step={PRICE_RANGE_STEP}
                         value={draftMaxPrice}
                         onChange={(event) => {
-                          const nextValue = Math.max(Number(event.target.value), draftMinPrice)
+                          const nextValue = clampEthValue(
+                            Math.max(Number(event.target.value), draftMinPrice),
+                          )
                           setDraftMaxPrice(nextValue)
-                          setMaxInputValue(`${nextValue}`)
+                          setMaxInputValue(formatAuctionEthInputValue(nextValue))
                         }}
-                        className="absolute inset-x-0 top-1/2 z-20 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                        className="auction-range-input absolute inset-x-0 top-1/2 z-20 h-11 -translate-y-1/2 opacity-0"
                         aria-label="Maximum ETH range"
                       />
                     </div>
@@ -741,11 +964,14 @@ const LiveAuctionPage = () => {
                           value={minInputValue}
                           onChange={(event) => setMinInputValue(event.target.value)}
                           onBlur={() => {
-                            const nextValue = Math.min(parseEthInput(minInputValue, draftMinPrice), draftMaxPrice)
+                            const nextValue = Math.min(
+                              parseEthInput(minInputValue, draftMinPrice),
+                              draftMaxPrice,
+                            )
                             setDraftMinPrice(nextValue)
-                            setMinInputValue(`${nextValue}`)
+                            setMinInputValue(formatAuctionEthInputValue(nextValue))
                           }}
-                          className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.55rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                          className="h-14 w-full rounded-[6px] border border-[#e5e7eb] px-4 text-[1.35rem] text-black transition outline-none focus:border-black focus:ring-1 focus:ring-black"
                         />
                       </label>
                       <label className="block">
@@ -758,11 +984,14 @@ const LiveAuctionPage = () => {
                           value={maxInputValue}
                           onChange={(event) => setMaxInputValue(event.target.value)}
                           onBlur={() => {
-                            const nextValue = Math.max(parseEthInput(maxInputValue, draftMaxPrice), draftMinPrice)
+                            const nextValue = Math.max(
+                              parseEthInput(maxInputValue, draftMaxPrice),
+                              draftMinPrice,
+                            )
                             setDraftMaxPrice(nextValue)
-                            setMaxInputValue(`${nextValue}`)
+                            setMaxInputValue(formatAuctionEthInputValue(nextValue))
                           }}
-                          className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.55rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                          className="h-14 w-full rounded-[6px] border border-[#e5e7eb] px-4 text-[1.35rem] text-black transition outline-none focus:border-black focus:ring-1 focus:ring-black"
                         />
                       </label>
                     </div>
@@ -770,7 +999,7 @@ const LiveAuctionPage = () => {
                     <button
                       type="button"
                       onClick={applyDesktopPriceRange}
-                      className="w-full bg-black px-5 py-3.5 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90"
+                      className="min-h-11 w-full rounded-full bg-slate-950 px-5 py-3.5 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                       style={headlineFont}
                     >
                       Apply Range
@@ -780,15 +1009,15 @@ const LiveAuctionPage = () => {
               </div>
             </div>
             <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-normal">
-              <div className="hidden border border-[#c4c7c7]/30 bg-[#f7f7f7] p-1 md:flex">
+              <div className="hidden rounded-full border border-slate-200 bg-slate-50 p-1 md:flex">
                 <button
                   type="button"
                   aria-label="Grid view"
                   aria-pressed={effectiveViewMode === 'grid'}
                   onClick={() => setViewMode('grid')}
-                  className={`px-3 py-2 transition-colors ${
+                  className={`inline-flex min-h-11 min-w-11 items-center justify-center px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none ${
                     effectiveViewMode === 'grid'
-                      ? 'bg-black text-white'
+                      ? 'rounded-full bg-slate-950 text-white'
                       : 'text-black/40 hover:text-black'
                   }`}
                 >
@@ -799,9 +1028,9 @@ const LiveAuctionPage = () => {
                   aria-label="List view"
                   aria-pressed={effectiveViewMode === 'list'}
                   onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 transition-colors ${
+                  className={`inline-flex min-h-11 min-w-11 items-center justify-center px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none ${
                     effectiveViewMode === 'list'
-                      ? 'bg-black text-white'
+                      ? 'rounded-full bg-slate-950 text-white'
                       : 'text-black/40 hover:text-black'
                   }`}
                 >
@@ -818,7 +1047,7 @@ const LiveAuctionPage = () => {
                 type="button"
                 onClick={resetDesktopFilters}
                 disabled={!hasActiveFilters}
-                className={`hidden text-xs tracking-[0.22em] uppercase transition md:block ${
+                className={`hidden min-h-11 items-center text-xs tracking-[0.22em] uppercase transition focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none md:inline-flex ${
                   hasActiveFilters
                     ? 'cursor-pointer text-black hover:text-black/60'
                     : 'cursor-not-allowed text-black/30'
@@ -837,27 +1066,28 @@ const LiveAuctionPage = () => {
                 ref={mobileFilterButtonRef}
                 type="button"
                 onClick={openMobileFilters}
-                className="border border-black px-4 py-2 text-xs tracking-[0.22em] text-black uppercase transition hover:bg-black hover:text-white md:hidden"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-xs tracking-[0.18em] text-black uppercase transition hover:bg-slate-950 hover:text-white focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none md:hidden"
                 style={headlineFont}
               >
+                <SlidersHorizontal className="h-4 w-4" />
                 Open Filters
               </button>
             </div>
           </section>
 
           {error ? (
-            <section className="mb-8 border border-[#dc2626]/30 bg-[#fff7f7] px-6 py-5">
+            <section className="mb-8 rounded-[8px] border border-[#dc2626]/20 bg-[#fff7f7] px-6 py-5 shadow-[0_18px_50px_rgba(127,29,29,0.06)]">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <p className="text-sm leading-7 text-[#7f1d1d]">
-                  We could not sync the latest auction state. Refresh the lot, review the newest
-                  current bid, and try again.
+                  We could not sync the latest auction state. Refresh auctions, review the newest
+                  bid data, and try again.
                 </p>
                 <button
                   type="button"
                   onClick={() => {
                     void refresh()
                   }}
-                  className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800"
+                  className="inline-flex min-h-11 w-fit items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                   style={headlineFont}
                 >
                   Refresh
@@ -876,141 +1106,145 @@ const LiveAuctionPage = () => {
           >
             {isInitialLoading
               ? skeletonLots.map((_, index) => (
-                  <AuctionLotCardSkeleton key={`auction-skeleton-${index}`} viewMode={effectiveViewMode} />
+                  <AuctionLotCardSkeleton
+                    key={`auction-skeleton-${index}`}
+                    viewMode={effectiveViewMode}
+                  />
                 ))
               : displayedLots.map((lot) => (
-              <article
-                key={lot.artworkId}
-                className={`group border border-[#e5e7eb] bg-white p-3 transition-all duration-300 hover:border-black hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.1)] md:p-4 ${
-                  effectiveViewMode === 'list'
-                    ? 'md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-stretch md:gap-5'
-                    : ''
-                }`}
-              >
-                <div
-                  className={`relative overflow-hidden bg-[#f7f7f7] ${
-                    effectiveViewMode === 'grid'
-                      ? 'mb-5 aspect-[4/5] md:mb-6 md:aspect-[3/4]'
-                      : 'mb-4 aspect-[5/4] md:mb-0 md:h-full md:w-full md:aspect-auto'
-                  }`}
-                >
-                  {lot.imageSrc ? (
-                    <Image
-                      src={lot.imageSrc}
-                      alt={lot.imageAlt}
-                      fill
-                      sizes={
+                  <article
+                    key={lot.artworkId}
+                    className={`group overflow-hidden rounded-[8px] border border-black/10 bg-white/82 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.78)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-black/18 hover:shadow-[0_26px_70px_rgba(15,23,42,0.13)] md:p-4 ${
+                      effectiveViewMode === 'list'
+                        ? 'md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-stretch md:gap-5'
+                        : ''
+                    }`}
+                  >
+                    <div
+                      className={`relative overflow-hidden rounded-[6px] bg-[#f7f7f7] ${
                         effectiveViewMode === 'grid'
-                          ? '(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 44vw, 92vw'
-                          : '(min-width: 768px) 280px, 92vw'
-                      }
-                      className="object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
-                    />
-                  ) : (
-                    <div className="flex h-full min-h-64 items-center justify-center px-6 text-center text-[11px] tracking-[0.2em] text-[#747777] uppercase">
-                      Image syncing
+                          ? 'mb-5 aspect-[4/5] md:mb-6 md:aspect-[3/4]'
+                          : 'mb-4 aspect-[5/4] md:mb-0 md:aspect-auto md:h-full md:w-full'
+                      }`}
+                    >
+                      {lot.imageSrc ? (
+                        <Image
+                          src={lot.imageSrc}
+                          alt={lot.imageAlt}
+                          fill
+                          sizes={
+                            effectiveViewMode === 'grid'
+                              ? '(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 44vw, 92vw'
+                              : '(min-width: 768px) 280px, 92vw'
+                          }
+                          className="object-cover transition-all duration-700 group-hover:scale-[1.035]"
+                        />
+                      ) : (
+                        <div className="flex h-full min-h-64 items-center justify-center px-6 text-center text-[11px] tracking-[0.2em] text-[#747777] uppercase">
+                          Image syncing
+                        </div>
+                      )}
+                      <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full border border-white/50 bg-white/90 px-3 py-1.5 backdrop-blur-md">
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[lot.statusKey]} ${
+                            lot.statusKey === 'active' || lot.statusKey === 'ending-soon'
+                              ? 'animate-pulse'
+                              : ''
+                          }`}
+                        />
+                        <span className="text-[10px] tracking-[0.08em] text-black uppercase">
+                          {lot.status}
+                        </span>
+                      </div>
                     </div>
-                  )}
-                  <div className="absolute top-4 left-4 flex items-center gap-2 border border-[#c4c7c7]/30 bg-white/90 px-3 py-1 backdrop-blur-md">
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[lot.statusKey]} ${
-                        lot.statusKey === 'active' || lot.statusKey === 'ending-soon'
-                          ? 'animate-pulse'
+                    <div
+                      className={`space-y-4 ${
+                        effectiveViewMode === 'list'
+                          ? 'flex min-w-0 flex-col justify-between md:py-2'
                           : ''
                       }`}
-                    />
-                    <span className="text-[10px] tracking-[0.08em] text-black uppercase">
-                      {lot.status}
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className={`space-y-4 ${
-                    effectiveViewMode === 'list'
-                      ? 'min-w-0 flex flex-col justify-between md:py-2'
-                      : ''
-                  }`}
-                >
-                  <div
-                    className={`flex items-start justify-between gap-3 ${
-                      effectiveViewMode === 'list' ? 'border-b border-[#c4c7c7]/30 pb-4' : ''
-                    }`}
-                  >
-                    <div>
-                      <h2
-                        className={`font-bold uppercase text-black ${
-                          effectiveViewMode === 'grid'
-                            ? 'text-lg tracking-[-0.04em]'
-                            : 'text-2xl tracking-[0.02em] md:text-3xl'
-                        }`}
-                        style={headlineFont}
                     >
-                      {lot.title}
-                    </h2>
-                      <Link
-                        href={`/artworks/${lot.artworkId}`}
-                        className="mt-3 inline-block text-[11px] tracking-[0.2em] text-black/55 uppercase transition hover:text-black"
-                        style={headlineFont}
-                      >
-                        View artwork details
-                      </Link>
-                      {effectiveViewMode === 'list' ? (
-                        <p className="mt-3 max-w-2xl text-sm leading-7 text-[#747777]">
-                          Verified collectible with on-chain provenance, active bidding, and a
-                          curator-selected presentation format designed for quick comparison.
-                        </p>
-                      ) : null}
-                    </div>
-                    <ShieldCheck className="h-5 w-5 shrink-0 text-[#747777] transition-colors group-hover:text-black" />
-                  </div>
-                  <div
-                    className={`flex gap-4 border-[#c4c7c7]/30 ${
-                      effectiveViewMode === 'grid'
-                        ? 'items-end justify-between border-t pt-4'
-                        : 'items-end justify-between pt-2'
-                    }`}
-                  >
-                    <div>
-                      <p className="mb-1 text-[10px] tracking-[0.25em] text-[#747777] uppercase">
-                        Current Bid
-                      </p>
-                      <p
-                        className={`font-bold text-black uppercase ${
-                          effectiveViewMode === 'grid' ? 'text-lg' : 'text-2xl md:text-3xl'
+                      <div
+                        className={`flex items-start justify-between gap-3 ${
+                          effectiveViewMode === 'list' ? 'border-b border-[#c4c7c7]/30 pb-4' : ''
                         }`}
-                        style={headlineFont}
                       >
-                        {formatBidDisplay(lot.bidValue)}
-                      </p>
+                        <div>
+                          <h2
+                            className={`font-bold text-black uppercase ${
+                              effectiveViewMode === 'grid'
+                                ? 'text-lg tracking-[-0.04em]'
+                                : 'text-2xl tracking-[0.02em] md:text-3xl'
+                            }`}
+                            style={headlineFont}
+                          >
+                            {lot.title}
+                          </h2>
+                          <Link
+                            href={`/artworks/${lot.artworkId}`}
+                            className="mt-3 inline-flex items-center gap-1.5 text-[11px] tracking-[0.16em] text-black/55 uppercase transition hover:text-black"
+                            style={headlineFont}
+                          >
+                            View artwork details
+                            <ArrowUpRight className="h-3.5 w-3.5" />
+                          </Link>
+                          {effectiveViewMode === 'list' ? (
+                            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#747777]">
+                              Verified collectible with on-chain provenance, active bidding, and a
+                              curator-selected presentation format designed for quick comparison.
+                            </p>
+                          ) : null}
+                        </div>
+                        <ShieldCheck className="h-5 w-5 shrink-0 text-[#747777] transition-colors group-hover:text-black" />
+                      </div>
+                      <div
+                        className={`flex gap-4 border-[#c4c7c7]/30 ${
+                          effectiveViewMode === 'grid'
+                            ? 'items-end justify-between border-t pt-4'
+                            : 'items-end justify-between rounded-[8px] bg-slate-50 px-4 py-3'
+                        }`}
+                      >
+                        <div>
+                          <p className="mb-1 text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                            Current Bid
+                          </p>
+                          <p
+                            className={`font-bold text-black uppercase ${
+                              effectiveViewMode === 'grid' ? 'text-lg' : 'text-2xl md:text-3xl'
+                            }`}
+                            style={headlineFont}
+                          >
+                            {formatAuctionEth(lot.bidValue)}
+                          </p>
+                        </div>
+                        {isBidActionStatus(lot.statusKey) ? (
+                          <button
+                            type="button"
+                            onClick={() => openBidModal(lot)}
+                            className="inline-flex min-h-11 w-fit items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-center text-[10px] font-bold tracking-[0.16em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
+                            style={headlineFont}
+                          >
+                            {lotActionLabel[lot.statusKey]}
+                          </button>
+                        ) : (
+                          <Link
+                            href={`/artworks/${lot.artworkId}`}
+                            className="inline-flex min-h-11 w-fit items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-center text-[10px] font-bold tracking-[0.16em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
+                            style={headlineFont}
+                          >
+                            {lotActionLabel[lot.statusKey]}
+                          </Link>
+                        )}
+                      </div>
                     </div>
-                    {isBidActionStatus(lot.statusKey) ? (
-                      <button
-                        type="button"
-                        onClick={() => openBidModal(lot)}
-                        className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
-                        style={headlineFont}
-                      >
-                        {lotActionLabel[lot.statusKey]}
-                      </button>
-                    ) : (
-                      <Link
-                        href={`/artworks/${lot.artworkId}`}
-                        className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
-                        style={headlineFont}
-                      >
-                        {lotActionLabel[lot.statusKey]}
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </article>
+                  </article>
                 ))}
           </section>
 
-          {!isInitialLoading && visibleLots.length === 0 ? (
-            <section className="mt-12 border border-[#c4c7c7]/30 bg-[#fafafa] px-6 py-10 text-center">
+          {!error && !isInitialLoading && visibleLots.length === 0 ? (
+            <section className="mt-12 rounded-[8px] border border-black/10 bg-white/72 px-6 py-10 text-center shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
               <p className="text-sm tracking-[0.14em] text-black uppercase" style={headlineFont}>
-                No live auctions match your filters.
+                {emptyStateTitle}
               </p>
               <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#747777]">
                 {emptyStateBody}
@@ -1025,10 +1259,10 @@ const LiveAuctionPage = () => {
                   type="button"
                   onClick={() => handlePageChange(Math.max(1, safeCurrentPage - 1))}
                   disabled={safeCurrentPage === 1}
-                  className={`border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
+                  className={`min-h-11 rounded-full border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none ${
                     safeCurrentPage === 1
                       ? 'cursor-not-allowed border-black/15 text-black/25'
-                      : 'border-black text-black hover:bg-black hover:text-white'
+                      : 'border-black/25 bg-white/70 text-black hover:bg-slate-950 hover:text-white'
                   }`}
                   style={headlineFont}
                 >
@@ -1044,10 +1278,10 @@ const LiveAuctionPage = () => {
                       type="button"
                       onClick={() => handlePageChange(pageNumber)}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`min-w-10 border px-3 py-2 text-[11px] tracking-[0.18em] uppercase transition ${
+                      className={`min-h-11 min-w-11 rounded-full border px-3 py-2 text-[11px] tracking-[0.18em] uppercase transition focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none ${
                         isActive
-                          ? 'border-black bg-black text-white'
-                          : 'border-black/25 text-black hover:border-black hover:bg-black hover:text-white'
+                          ? 'border-slate-950 bg-slate-950 text-white'
+                          : 'border-black/25 bg-white/70 text-black hover:border-slate-950 hover:bg-slate-950 hover:text-white'
                       }`}
                       style={headlineFont}
                     >
@@ -1059,10 +1293,10 @@ const LiveAuctionPage = () => {
                   type="button"
                   onClick={() => handlePageChange(Math.min(totalPages, safeCurrentPage + 1))}
                   disabled={safeCurrentPage === totalPages}
-                  className={`border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
+                  className={`min-h-11 rounded-full border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none ${
                     safeCurrentPage === totalPages
                       ? 'cursor-not-allowed border-black/15 text-black/25'
-                      : 'border-black text-black hover:bg-black hover:text-white'
+                      : 'border-black/25 bg-white/70 text-black hover:bg-slate-950 hover:text-white'
                   }`}
                   style={headlineFont}
                 >
@@ -1070,22 +1304,20 @@ const LiveAuctionPage = () => {
                 </button>
               </div>
             ) : null}
-            <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
-              {footerLabel}
-            </p>
+            <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">{footerLabel}</p>
           </section>
         </main>
 
         {isMobileFiltersOpen ? (
           <div
-            className="fixed inset-0 z-50 bg-black/45 md:hidden"
+            className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-sm md:hidden"
             onClick={() => setIsMobileFiltersOpen(false)}
           >
             <div
               role="dialog"
               aria-modal="true"
               aria-labelledby="mobile-auction-filters-title"
-              className="ml-auto flex h-full w-full max-w-md flex-col bg-white"
+              className="ml-auto flex h-full w-full max-w-md flex-col bg-[#f8faf6]"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="flex items-center justify-between border-b border-[#c4c7c7]/30 px-6 py-5">
@@ -1105,7 +1337,7 @@ const LiveAuctionPage = () => {
                   <button
                     type="button"
                     onClick={resetMobileFilters}
-                    className="border border-black/15 px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-black uppercase transition hover:border-black hover:bg-black hover:text-white"
+                    className="min-h-11 rounded-full border border-black/15 bg-white px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-black uppercase transition hover:border-black hover:bg-black hover:text-white focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                     style={headlineFont}
                   >
                     Clear
@@ -1114,7 +1346,7 @@ const LiveAuctionPage = () => {
                     ref={mobileFilterCloseButtonRef}
                     type="button"
                     onClick={() => setIsMobileFiltersOpen(false)}
-                    className="border border-black bg-black px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800"
+                    className="min-h-11 rounded-full border border-black bg-black px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                     style={headlineFont}
                   >
                     Close
@@ -1128,7 +1360,10 @@ const LiveAuctionPage = () => {
                     <span className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
                       Category
                     </span>
-                    <span className="text-[11px] tracking-[0.14em] text-black uppercase" style={headlineFont}>
+                    <span
+                      className="text-[11px] tracking-[0.14em] text-black uppercase"
+                      style={headlineFont}
+                    >
                       {mobileSelectedCategoryOption.label}
                     </span>
                   </div>
@@ -1138,10 +1373,10 @@ const LiveAuctionPage = () => {
                         key={option.key}
                         type="button"
                         onClick={() => setMobileSelectedCategory(option.key)}
-                        className={`block w-full border px-4 py-3 text-left transition-colors ${
+                        className={`block w-full rounded-[8px] border px-4 py-3 text-left transition-colors ${
                           option.key === mobileSelectedCategory
                             ? 'border-black bg-black text-white'
-                            : 'border-[#d7dada] text-black hover:border-black'
+                            : 'border-[#d7dada] bg-white text-black hover:border-black'
                         }`}
                       >
                         <span className="block text-sm font-bold uppercase" style={headlineFont}>
@@ -1149,7 +1384,9 @@ const LiveAuctionPage = () => {
                         </span>
                         <span
                           className={`mt-1 block text-[11px] tracking-[0.08em] uppercase ${
-                            option.key === mobileSelectedCategory ? 'text-white/70' : 'text-[#747777]'
+                            option.key === mobileSelectedCategory
+                              ? 'text-white/70'
+                              : 'text-[#747777]'
                           }`}
                         >
                           {option.helper}
@@ -1164,7 +1401,10 @@ const LiveAuctionPage = () => {
                     <span className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
                       Status
                     </span>
-                    <span className="text-[11px] tracking-[0.14em] text-black uppercase" style={headlineFont}>
+                    <span
+                      className="text-[11px] tracking-[0.14em] text-black uppercase"
+                      style={headlineFont}
+                    >
                       {mobileSelectedStatusOption.label}
                     </span>
                   </div>
@@ -1174,10 +1414,10 @@ const LiveAuctionPage = () => {
                         key={option.key}
                         type="button"
                         onClick={() => setMobileSelectedStatus(option.key)}
-                        className={`block w-full border px-4 py-3 text-left transition-colors ${
+                        className={`block w-full rounded-[8px] border px-4 py-3 text-left transition-colors ${
                           option.key === mobileSelectedStatus
                             ? 'border-black bg-black text-white'
-                            : 'border-[#d7dada] text-black hover:border-black'
+                            : 'border-[#d7dada] bg-white text-black hover:border-black'
                         }`}
                       >
                         <span className="block text-sm font-bold uppercase" style={headlineFont}>
@@ -1201,46 +1441,51 @@ const LiveAuctionPage = () => {
                       Price Range
                     </span>
                     <span className="text-lg font-black text-black" style={bodyFont}>
-                      {formatEthDisplay(mobileAppliedMinPrice)} - {formatEthDisplay(mobileAppliedMaxPrice)} ETH
+                      {formatPriceRangeValue(mobileAppliedMinPrice)} -{' '}
+                      {formatPriceRangeValue(mobileAppliedMaxPrice)} ETH
                     </span>
                   </div>
 
                   <div className="relative mb-6 px-2">
-                    <div className="h-1 bg-black" />
+                    <div className="h-1 rounded-full bg-black" />
                     <div
-                      className="absolute top-1/2 h-6 w-6 -translate-y-1/2 border-2 border-[#d9d9d9] bg-black shadow-[0_0_0_2px_white]"
+                      className="absolute top-1/2 h-6 w-6 -translate-y-1/2 rounded-full border-2 border-white bg-black shadow-[0_0_0_2px_rgba(15,23,42,0.14)]"
                       style={{ left: `calc(${mobileMinPercent}% - 12px)` }}
                     />
                     <div
-                      className="absolute top-1/2 h-6 w-6 -translate-y-1/2 border-2 border-[#d9d9d9] bg-black shadow-[0_0_0_2px_white]"
+                      className="absolute top-1/2 h-6 w-6 -translate-y-1/2 rounded-full border-2 border-white bg-black shadow-[0_0_0_2px_rgba(15,23,42,0.14)]"
                       style={{ left: `calc(${mobileMaxPercent}% - 12px)` }}
                     />
                     <input
                       type="range"
                       min={MIN_ETH}
                       max={MAX_ETH}
-                      step={0.1}
+                      step={PRICE_RANGE_STEP}
                       value={mobileAppliedMinPrice}
                       onChange={(event) => {
-                        const nextValue = Math.min(Number(event.target.value), mobileAppliedMaxPrice)
+                        const nextValue = clampEthValue(
+                          Math.min(Number(event.target.value), mobileAppliedMaxPrice),
+                        )
                         setMobileAppliedMinPrice(nextValue)
-                        setMobileMinInputValue(`${nextValue}`)
+                        setMobileMinInputValue(formatAuctionEthInputValue(nextValue))
                       }}
-                      className="absolute inset-x-0 top-1/2 z-10 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                      className="auction-range-input absolute inset-x-0 top-1/2 z-10 h-11 -translate-y-1/2 opacity-0"
                       aria-label="Mobile minimum ETH range"
                     />
                     <input
                       type="range"
                       min={MIN_ETH}
                       max={MAX_ETH}
-                      step={0.1}
+                      step={PRICE_RANGE_STEP}
                       value={mobileAppliedMaxPrice}
                       onChange={(event) => {
-                        const nextValue = Math.max(Number(event.target.value), mobileAppliedMinPrice)
+                        const nextValue = clampEthValue(
+                          Math.max(Number(event.target.value), mobileAppliedMinPrice),
+                        )
                         setMobileAppliedMaxPrice(nextValue)
-                        setMobileMaxInputValue(`${nextValue}`)
+                        setMobileMaxInputValue(formatAuctionEthInputValue(nextValue))
                       }}
-                      className="absolute inset-x-0 top-1/2 z-20 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                      className="auction-range-input absolute inset-x-0 top-1/2 z-20 h-11 -translate-y-1/2 opacity-0"
                       aria-label="Mobile maximum ETH range"
                     />
                   </div>
@@ -1261,9 +1506,9 @@ const LiveAuctionPage = () => {
                             mobileAppliedMaxPrice,
                           )
                           setMobileAppliedMinPrice(nextValue)
-                          setMobileMinInputValue(`${nextValue}`)
+                          setMobileMinInputValue(formatAuctionEthInputValue(nextValue))
                         }}
-                        className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.35rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                        className="h-14 w-full rounded-[6px] border border-[#e5e7eb] bg-white px-4 text-[1.35rem] text-black transition outline-none focus:border-black focus:ring-1 focus:ring-black"
                       />
                     </label>
                     <label className="block">
@@ -1281,9 +1526,9 @@ const LiveAuctionPage = () => {
                             mobileAppliedMinPrice,
                           )
                           setMobileAppliedMaxPrice(nextValue)
-                          setMobileMaxInputValue(`${nextValue}`)
+                          setMobileMaxInputValue(formatAuctionEthInputValue(nextValue))
                         }}
-                        className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.35rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                        className="h-14 w-full rounded-[6px] border border-[#e5e7eb] bg-white px-4 text-[1.35rem] text-black transition outline-none focus:border-black focus:ring-1 focus:ring-black"
                       />
                     </label>
                   </div>
@@ -1294,7 +1539,7 @@ const LiveAuctionPage = () => {
                 <button
                   type="button"
                   onClick={applyMobileFilters}
-                  className="w-full bg-black px-5 py-4 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90"
+                  className="min-h-11 w-full rounded-full bg-black px-5 py-4 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                   style={headlineFont}
                 >
                   Apply Filters ({mobilePreviewLots.length})
@@ -1313,6 +1558,39 @@ const LiveAuctionPage = () => {
           onViewOrderStatus={handleViewOrderStatus}
         />
 
+        <style jsx global>{`
+          .auction-range-input {
+            pointer-events: none;
+            appearance: none;
+            background: transparent;
+          }
+
+          .auction-range-input::-webkit-slider-thumb {
+            pointer-events: auto;
+            width: 44px;
+            height: 44px;
+            cursor: grab;
+            appearance: none;
+            background: transparent;
+          }
+
+          .auction-range-input::-webkit-slider-thumb:active {
+            cursor: grabbing;
+          }
+
+          .auction-range-input::-moz-range-thumb {
+            pointer-events: auto;
+            width: 44px;
+            height: 44px;
+            cursor: grab;
+            border: 0;
+            background: transparent;
+          }
+
+          .auction-range-input::-moz-range-thumb:active {
+            cursor: grabbing;
+          }
+        `}</style>
       </div>
     </>
   )
