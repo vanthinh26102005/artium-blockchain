@@ -106,7 +106,7 @@ export const SiteFooter = () => {
                   <Link
                     href="#"
                     aria-label="Instagram"
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
                   >
                     <Image
                       src="/images/social/dark-instagram.svg"
@@ -119,7 +119,7 @@ export const SiteFooter = () => {
                   <Link
                     href="#"
                     aria-label="X"
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
                   >
                     <Image
                       src="/images/social/dark-x.svg"
@@ -132,7 +132,7 @@ export const SiteFooter = () => {
                   <Link
                     href="#"
                     aria-label="TikTok"
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
                   >
                     <Image
                       src="/images/social/dark-tiktok.svg"
@@ -145,7 +145,7 @@ export const SiteFooter = () => {
                   <Link
                     href="#"
                     aria-label="LinkedIn"
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
                   >
                     <Image
                       src="/images/social/dark-linkedin.svg"
@@ -188,16 +188,16 @@ export const SiteFooter = () => {
                   <input
                     type="text"
                     placeholder="First name"
-                    className="w-full border-0 border-b border-white/20 bg-transparent py-2.5 text-sm text-white/80 outline-none placeholder:text-white/30 focus:border-white/40"
+                    className="min-h-11 w-full border-0 border-b border-white/20 bg-transparent py-2.5 text-sm text-white/80 outline-none placeholder:text-white/30 focus:border-white/40"
                   />
                   <input
                     type="email"
                     placeholder="Email address *"
-                    className="w-full border-0 border-b border-white/20 bg-transparent py-2.5 text-sm text-white/80 outline-none placeholder:text-white/30 focus:border-white/40"
+                    className="min-h-11 w-full border-0 border-b border-white/20 bg-transparent py-2.5 text-sm text-white/80 outline-none placeholder:text-white/30 focus:border-white/40"
                   />
                   <button
                     type="button"
-                    className="mt-1 w-fit rounded-full bg-white px-6 py-2.5 text-xs font-semibold text-black transition hover:bg-white/90"
+                    className="mt-1 min-h-11 w-fit rounded-full bg-white px-6 py-2.5 text-xs font-semibold text-black transition hover:bg-white/90"
                   >
                     Subscribe
                   </button>

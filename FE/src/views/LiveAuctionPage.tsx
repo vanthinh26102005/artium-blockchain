@@ -7,6 +7,12 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { BidEditingModal, type BidOrderStatusPayload } from '@domains/auction/components'
 import { useAuctionLots } from '@domains/auction/hooks/useAuctionLots'
 import { useAuctionRealtime } from '@domains/auction/hooks/useAuctionRealtime'
+import {
+  formatAuctionEth,
+  formatAuctionEthInputValue,
+  formatAuctionEthValue,
+  normalizeAuctionEthValue,
+} from '@domains/auction/utils'
 import type {
   AuctionFilterCategoryKey,
   AuctionFilterStatusKey,
@@ -51,13 +57,9 @@ const statusOptions: Array<{ key: AuctionStatusKey; label: string; helper: strin
 ]
 
 const MIN_ETH = 0
-const MAX_ETH = 50
+const MAX_ETH = 3
+const PRICE_RANGE_STEP = 0.0001
 const ITEMS_PER_PAGE = 24
-
-const formatBidDisplay = (value: number) => {
-  const normalizedValue = Math.min(MAX_ETH, Math.max(MIN_ETH, Number(value.toFixed(1))))
-  return `${Number.isInteger(normalizedValue) ? normalizedValue.toFixed(0) : normalizedValue.toFixed(1)} ETH`
-}
 
 const statusBadgeClass: Record<AuctionLotStatusKey, string> = {
   active: 'bg-[#16a34a]',
@@ -76,30 +78,33 @@ const lotActionLabel: Record<AuctionLotStatusKey, string> = {
 }
 
 const clampEthValue = (value: number) => {
-  if (Number.isNaN(value)) {
+  if (!Number.isFinite(value)) {
     return MIN_ETH
   }
 
-  return Math.min(MAX_ETH, Math.max(MIN_ETH, Number(value.toFixed(1))))
+  return normalizeAuctionEthValue(Math.min(MAX_ETH, Math.max(MIN_ETH, value)))
 }
 
 const parseEthInput = (value: string, fallback: number) => {
-  const normalized = value.replace('+', '').trim()
-  const parsed = Number.parseFloat(normalized)
+  const trimmed = value.trim()
+  const withoutLeadingPlus = trimmed.startsWith('+') ? trimmed.slice(1) : trimmed
+  const normalized = withoutLeadingPlus.replace(',', '.')
 
-  if (Number.isNaN(parsed)) {
+  if (!/^(?:\d+|\d*\.\d+)$/.test(normalized)) {
     return fallback
   }
+
+  const parsed = Number.parseFloat(normalized)
 
   return clampEthValue(parsed)
 }
 
-const formatEthDisplay = (value: number) => {
+const formatPriceRangeValue = (value: number) => {
   if (value >= MAX_ETH) {
-    return '50+'
+    return `${formatAuctionEthValue(MAX_ETH)}+`
   }
 
-  return Number.isInteger(value) ? `${value}` : value.toFixed(1)
+  return formatAuctionEthValue(value)
 }
 
 const isBidActionStatus = (statusKey: AuctionLotStatusKey) =>
@@ -120,7 +125,7 @@ const AuctionLotCardSkeleton = ({ viewMode }: { viewMode: 'grid' | 'list' }) => 
       className={`rounded-none bg-[#f3f3f3] ${
         viewMode === 'grid'
           ? 'mb-5 aspect-[4/5] md:mb-6 md:aspect-[3/4]'
-          : 'mb-4 aspect-[5/4] md:mb-0 md:h-full md:w-full md:aspect-auto'
+          : 'mb-4 aspect-[5/4] md:mb-0 md:aspect-auto md:h-full md:w-full'
       }`}
     />
     <div className={`space-y-4 ${viewMode === 'list' ? 'md:py-2' : ''}`}>
@@ -157,12 +162,16 @@ const LiveAuctionPage = () => {
   const [mobileSelectedStatus, setMobileSelectedStatus] = useState<AuctionStatusKey>('all')
   const [mobileAppliedMinPrice, setMobileAppliedMinPrice] = useState(MIN_ETH)
   const [mobileAppliedMaxPrice, setMobileAppliedMaxPrice] = useState(MAX_ETH)
-  const [mobileMinInputValue, setMobileMinInputValue] = useState(`${MIN_ETH}`)
-  const [mobileMaxInputValue, setMobileMaxInputValue] = useState(`${MAX_ETH}`)
+  const [mobileMinInputValue, setMobileMinInputValue] = useState(
+    formatAuctionEthInputValue(MIN_ETH),
+  )
+  const [mobileMaxInputValue, setMobileMaxInputValue] = useState(
+    formatAuctionEthInputValue(MAX_ETH),
+  )
   const [draftMinPrice, setDraftMinPrice] = useState(MIN_ETH)
   const [draftMaxPrice, setDraftMaxPrice] = useState(MAX_ETH)
-  const [minInputValue, setMinInputValue] = useState(`${MIN_ETH}`)
-  const [maxInputValue, setMaxInputValue] = useState(`${MAX_ETH}`)
+  const [minInputValue, setMinInputValue] = useState(formatAuctionEthInputValue(MIN_ETH))
+  const [maxInputValue, setMaxInputValue] = useState(formatAuctionEthInputValue(MAX_ETH))
   const [isStatusOpen, setIsStatusOpen] = useState(false)
   const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false)
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
@@ -187,14 +196,7 @@ const LiveAuctionPage = () => {
   const maxPercent = ((draftMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMinPercent = ((mobileAppliedMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMaxPercent = ((mobileAppliedMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
-  const {
-    lots,
-    total,
-    isLoading,
-    error,
-    refresh,
-    refreshAuctionById,
-  } = useAuctionLots({
+  const { lots, isLoading, error, refresh, refreshAuctionById } = useAuctionLots({
     category: selectedCategory === 'all' ? undefined : selectedCategory,
     status: selectedStatus === 'all' ? undefined : selectedStatus,
     minBidEth: appliedMinPrice > MIN_ETH ? appliedMinPrice : undefined,
@@ -281,8 +283,8 @@ const LiveAuctionPage = () => {
     setMobileSelectedStatus(selectedStatus)
     setMobileAppliedMinPrice(appliedMinPrice)
     setMobileAppliedMaxPrice(appliedMaxPrice)
-    setMobileMinInputValue(`${appliedMinPrice}`)
-    setMobileMaxInputValue(`${appliedMaxPrice}`)
+    setMobileMinInputValue(formatAuctionEthInputValue(appliedMinPrice))
+    setMobileMaxInputValue(formatAuctionEthInputValue(appliedMaxPrice))
   }
 
   const applyDesktopPriceRange = () => {
@@ -292,8 +294,8 @@ const LiveAuctionPage = () => {
     setCurrentPage(1)
     setDraftMinPrice(nextMin)
     setDraftMaxPrice(nextMax)
-    setMinInputValue(`${nextMin}`)
-    setMaxInputValue(`${nextMax}`)
+    setMinInputValue(formatAuctionEthInputValue(nextMin))
+    setMaxInputValue(formatAuctionEthInputValue(nextMax))
     setAppliedMinPrice(nextMin)
     setAppliedMaxPrice(nextMax)
     setIsPriceRangeOpen(false)
@@ -312,8 +314,8 @@ const LiveAuctionPage = () => {
     setAppliedMaxPrice(MAX_ETH)
     setDraftMinPrice(MIN_ETH)
     setDraftMaxPrice(MAX_ETH)
-    setMinInputValue(`${MIN_ETH}`)
-    setMaxInputValue(`${MAX_ETH}`)
+    setMinInputValue(formatAuctionEthInputValue(MIN_ETH))
+    setMaxInputValue(formatAuctionEthInputValue(MAX_ETH))
     setIsCategoryOpen(false)
     setIsStatusOpen(false)
     setIsPriceRangeOpen(false)
@@ -324,8 +326,8 @@ const LiveAuctionPage = () => {
     setMobileSelectedStatus('all')
     setMobileAppliedMinPrice(MIN_ETH)
     setMobileAppliedMaxPrice(MAX_ETH)
-    setMobileMinInputValue(`${MIN_ETH}`)
-    setMobileMaxInputValue(`${MAX_ETH}`)
+    setMobileMinInputValue(formatAuctionEthInputValue(MIN_ETH))
+    setMobileMaxInputValue(formatAuctionEthInputValue(MAX_ETH))
   }
 
   const applyMobileFilters = () => {
@@ -333,15 +335,12 @@ const LiveAuctionPage = () => {
       parseEthInput(mobileMinInputValue, mobileAppliedMinPrice),
       mobileAppliedMaxPrice,
     )
-    const nextMax = Math.max(
-      parseEthInput(mobileMaxInputValue, mobileAppliedMaxPrice),
-      nextMin,
-    )
+    const nextMax = Math.max(parseEthInput(mobileMaxInputValue, mobileAppliedMaxPrice), nextMin)
 
     setMobileAppliedMinPrice(nextMin)
     setMobileAppliedMaxPrice(nextMax)
-    setMobileMinInputValue(`${nextMin}`)
-    setMobileMaxInputValue(`${nextMax}`)
+    setMobileMinInputValue(formatAuctionEthInputValue(nextMin))
+    setMobileMaxInputValue(formatAuctionEthInputValue(nextMax))
     setCurrentPage(1)
     setSelectedCategory(mobileSelectedCategory)
     setSelectedStatus(mobileSelectedStatus)
@@ -367,14 +366,7 @@ const LiveAuctionPage = () => {
     })
 
   const visibleLots = useMemo(
-    () =>
-      filterLots(
-        lots,
-        selectedCategory,
-        selectedStatus,
-        appliedMinPrice,
-        appliedMaxPrice,
-      ),
+    () => filterLots(lots, selectedCategory, selectedStatus, appliedMinPrice, appliedMaxPrice),
     [appliedMaxPrice, appliedMinPrice, lots, selectedCategory, selectedStatus],
   )
   const mobilePreviewLots = useMemo(
@@ -407,9 +399,10 @@ const LiveAuctionPage = () => {
     [displayedLots],
   )
   const isInitialLoading = isLoading && lots.length === 0
-  const skeletonLots = useMemo(() => Array.from({ length: effectiveViewMode === 'grid' ? 8 : 5 }), [
-    effectiveViewMode,
-  ])
+  const skeletonLots = useMemo(
+    () => Array.from({ length: effectiveViewMode === 'grid' ? 8 : 5 }),
+    [effectiveViewMode],
+  )
   const refreshAuctionAndSelection = useCallback(
     async (auctionId: string) => {
       const refreshedLot = await refreshAuctionById(auctionId)
@@ -435,7 +428,7 @@ const LiveAuctionPage = () => {
   })
 
   const activeSelectedBidLot = selectedBidLot
-    ? lots.find((lot) => isSameAuction(lot, selectedBidLot.auctionId)) ?? selectedBidLot
+    ? (lots.find((lot) => isSameAuction(lot, selectedBidLot.auctionId)) ?? selectedBidLot)
     : null
 
   const resultsLabel = `${visibleLots.length} result${visibleLots.length === 1 ? '' : 's'}`
@@ -445,9 +438,13 @@ const LiveAuctionPage = () => {
     selectedStatus !== 'all' ||
     appliedMinPrice !== MIN_ETH ||
     appliedMaxPrice !== MAX_ETH
+  const visibleLotsLabel = `${visibleLots.length} ${visibleLots.length === 1 ? 'lot' : 'lots'}`
   const footerLabel = hasActiveFilters
-    ? `Page ${safeCurrentPage} of ${totalPages} • ${visibleLots.length} matching lots`
-    : `Page ${safeCurrentPage} of ${totalPages} • ${total} total lots`
+    ? `Page ${safeCurrentPage} of ${totalPages} • ${visibleLotsLabel} matching filters`
+    : `Page ${safeCurrentPage} of ${totalPages} • ${visibleLotsLabel} loaded`
+  const emptyStateTitle = hasActiveFilters
+    ? 'No live auctions match your filters.'
+    : 'No live auctions available.'
   const emptyStateBody = hasActiveFilters
     ? 'Adjust or clear your filters to view other auction lots.'
     : 'No live auctions are available right now. Please check back soon.'
@@ -534,7 +531,7 @@ const LiveAuctionPage = () => {
                     setIsPriceRangeOpen(false)
                     setIsCategoryOpen((prev) => !prev)
                   }}
-                  className="group text-left"
+                  className="group min-h-11 text-left focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                   aria-expanded={isCategoryOpen}
                   aria-haspopup="listbox"
                 >
@@ -594,7 +591,7 @@ const LiveAuctionPage = () => {
                     setIsPriceRangeOpen(false)
                     setIsStatusOpen((prev) => !prev)
                   }}
-                  className="group text-left"
+                  className="group min-h-11 text-left focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                   aria-expanded={isStatusOpen}
                   aria-haspopup="listbox"
                 >
@@ -655,13 +652,13 @@ const LiveAuctionPage = () => {
                     if (!isPriceRangeOpen) {
                       setDraftMinPrice(appliedMinPrice)
                       setDraftMaxPrice(appliedMaxPrice)
-                      setMinInputValue(`${appliedMinPrice}`)
-                      setMaxInputValue(`${appliedMaxPrice}`)
+                      setMinInputValue(formatAuctionEthInputValue(appliedMinPrice))
+                      setMaxInputValue(formatAuctionEthInputValue(appliedMaxPrice))
                     }
 
                     setIsPriceRangeOpen((prev) => !prev)
                   }}
-                  className="group text-left"
+                  className="group min-h-11 text-left focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                   aria-expanded={isPriceRangeOpen}
                   aria-haspopup="dialog"
                 >
@@ -672,7 +669,8 @@ const LiveAuctionPage = () => {
                     className="flex items-center gap-2 text-sm font-bold text-black transition-colors group-hover:text-black/70"
                     style={headlineFont}
                   >
-                    {formatEthDisplay(appliedMinPrice)} ETH - {formatEthDisplay(appliedMaxPrice)} ETH
+                    {formatPriceRangeValue(appliedMinPrice)} ETH -{' '}
+                    {formatPriceRangeValue(appliedMaxPrice)} ETH
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${isPriceRangeOpen ? 'rotate-180' : ''}`}
                     />
@@ -680,13 +678,18 @@ const LiveAuctionPage = () => {
                 </button>
 
                 {isPriceRangeOpen ? (
-                  <div className="absolute top-full left-0 z-20 mt-4 w-[min(92vw,360px)] border-2 border-black/70 bg-white px-4 py-5 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.25)] sm:px-5 sm:py-5">
+                  <div
+                    role="dialog"
+                    aria-label="Price range filter"
+                    className="absolute top-full left-0 z-20 mt-4 w-[min(92vw,360px)] border-2 border-black/70 bg-white px-4 py-5 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.25)] sm:px-5 sm:py-5"
+                  >
                     <div className="mb-5 flex items-center justify-between gap-3">
                       <span className="text-[12px] font-extrabold tracking-[0.2em] text-[#8a8a8a] uppercase">
                         Range (ETH)
                       </span>
                       <span className="text-lg font-black text-black" style={bodyFont}>
-                        {formatEthDisplay(draftMinPrice)} - {formatEthDisplay(draftMaxPrice)}
+                        {formatPriceRangeValue(draftMinPrice)} -{' '}
+                        {formatPriceRangeValue(draftMaxPrice)}
                       </span>
                     </div>
 
@@ -704,28 +707,32 @@ const LiveAuctionPage = () => {
                         type="range"
                         min={MIN_ETH}
                         max={MAX_ETH}
-                        step={0.1}
+                        step={PRICE_RANGE_STEP}
                         value={draftMinPrice}
                         onChange={(event) => {
-                          const nextValue = Math.min(Number(event.target.value), draftMaxPrice)
+                          const nextValue = clampEthValue(
+                            Math.min(Number(event.target.value), draftMaxPrice),
+                          )
                           setDraftMinPrice(nextValue)
-                          setMinInputValue(`${nextValue}`)
+                          setMinInputValue(formatAuctionEthInputValue(nextValue))
                         }}
-                        className="absolute inset-x-0 top-1/2 z-10 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                        className="auction-range-input absolute inset-x-0 top-1/2 z-10 h-11 -translate-y-1/2 opacity-0"
                         aria-label="Minimum ETH range"
                       />
                       <input
                         type="range"
                         min={MIN_ETH}
                         max={MAX_ETH}
-                        step={0.1}
+                        step={PRICE_RANGE_STEP}
                         value={draftMaxPrice}
                         onChange={(event) => {
-                          const nextValue = Math.max(Number(event.target.value), draftMinPrice)
+                          const nextValue = clampEthValue(
+                            Math.max(Number(event.target.value), draftMinPrice),
+                          )
                           setDraftMaxPrice(nextValue)
-                          setMaxInputValue(`${nextValue}`)
+                          setMaxInputValue(formatAuctionEthInputValue(nextValue))
                         }}
-                        className="absolute inset-x-0 top-1/2 z-20 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                        className="auction-range-input absolute inset-x-0 top-1/2 z-20 h-11 -translate-y-1/2 opacity-0"
                         aria-label="Maximum ETH range"
                       />
                     </div>
@@ -741,11 +748,14 @@ const LiveAuctionPage = () => {
                           value={minInputValue}
                           onChange={(event) => setMinInputValue(event.target.value)}
                           onBlur={() => {
-                            const nextValue = Math.min(parseEthInput(minInputValue, draftMinPrice), draftMaxPrice)
+                            const nextValue = Math.min(
+                              parseEthInput(minInputValue, draftMinPrice),
+                              draftMaxPrice,
+                            )
                             setDraftMinPrice(nextValue)
-                            setMinInputValue(`${nextValue}`)
+                            setMinInputValue(formatAuctionEthInputValue(nextValue))
                           }}
-                          className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.55rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                          className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.55rem] text-black transition outline-none focus:border-black focus:ring-1 focus:ring-black"
                         />
                       </label>
                       <label className="block">
@@ -758,11 +768,14 @@ const LiveAuctionPage = () => {
                           value={maxInputValue}
                           onChange={(event) => setMaxInputValue(event.target.value)}
                           onBlur={() => {
-                            const nextValue = Math.max(parseEthInput(maxInputValue, draftMaxPrice), draftMinPrice)
+                            const nextValue = Math.max(
+                              parseEthInput(maxInputValue, draftMaxPrice),
+                              draftMinPrice,
+                            )
                             setDraftMaxPrice(nextValue)
-                            setMaxInputValue(`${nextValue}`)
+                            setMaxInputValue(formatAuctionEthInputValue(nextValue))
                           }}
-                          className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.55rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                          className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.55rem] text-black transition outline-none focus:border-black focus:ring-1 focus:ring-black"
                         />
                       </label>
                     </div>
@@ -770,7 +783,7 @@ const LiveAuctionPage = () => {
                     <button
                       type="button"
                       onClick={applyDesktopPriceRange}
-                      className="w-full bg-black px-5 py-3.5 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90"
+                      className="min-h-11 w-full bg-black px-5 py-3.5 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                       style={headlineFont}
                     >
                       Apply Range
@@ -786,7 +799,7 @@ const LiveAuctionPage = () => {
                   aria-label="Grid view"
                   aria-pressed={effectiveViewMode === 'grid'}
                   onClick={() => setViewMode('grid')}
-                  className={`px-3 py-2 transition-colors ${
+                  className={`inline-flex min-h-11 min-w-11 items-center justify-center px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none ${
                     effectiveViewMode === 'grid'
                       ? 'bg-black text-white'
                       : 'text-black/40 hover:text-black'
@@ -799,7 +812,7 @@ const LiveAuctionPage = () => {
                   aria-label="List view"
                   aria-pressed={effectiveViewMode === 'list'}
                   onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 transition-colors ${
+                  className={`inline-flex min-h-11 min-w-11 items-center justify-center px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none ${
                     effectiveViewMode === 'list'
                       ? 'bg-black text-white'
                       : 'text-black/40 hover:text-black'
@@ -818,7 +831,7 @@ const LiveAuctionPage = () => {
                 type="button"
                 onClick={resetDesktopFilters}
                 disabled={!hasActiveFilters}
-                className={`hidden text-xs tracking-[0.22em] uppercase transition md:block ${
+                className={`hidden min-h-11 items-center text-xs tracking-[0.22em] uppercase transition focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none md:inline-flex ${
                   hasActiveFilters
                     ? 'cursor-pointer text-black hover:text-black/60'
                     : 'cursor-not-allowed text-black/30'
@@ -837,7 +850,7 @@ const LiveAuctionPage = () => {
                 ref={mobileFilterButtonRef}
                 type="button"
                 onClick={openMobileFilters}
-                className="border border-black px-4 py-2 text-xs tracking-[0.22em] text-black uppercase transition hover:bg-black hover:text-white md:hidden"
+                className="min-h-11 border border-black px-4 py-2 text-xs tracking-[0.22em] text-black uppercase transition hover:bg-black hover:text-white focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none md:hidden"
                 style={headlineFont}
               >
                 Open Filters
@@ -849,15 +862,15 @@ const LiveAuctionPage = () => {
             <section className="mb-8 border border-[#dc2626]/30 bg-[#fff7f7] px-6 py-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <p className="text-sm leading-7 text-[#7f1d1d]">
-                  We could not sync the latest auction state. Refresh the lot, review the newest
-                  current bid, and try again.
+                  We could not sync the latest auction state. Refresh auctions, review the newest
+                  bid data, and try again.
                 </p>
                 <button
                   type="button"
                   onClick={() => {
                     void refresh()
                   }}
-                  className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800"
+                  className="inline-flex min-h-11 w-fit items-center justify-center bg-black px-4 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                   style={headlineFont}
                 >
                   Refresh
@@ -876,141 +889,144 @@ const LiveAuctionPage = () => {
           >
             {isInitialLoading
               ? skeletonLots.map((_, index) => (
-                  <AuctionLotCardSkeleton key={`auction-skeleton-${index}`} viewMode={effectiveViewMode} />
+                  <AuctionLotCardSkeleton
+                    key={`auction-skeleton-${index}`}
+                    viewMode={effectiveViewMode}
+                  />
                 ))
               : displayedLots.map((lot) => (
-              <article
-                key={lot.artworkId}
-                className={`group border border-[#e5e7eb] bg-white p-3 transition-all duration-300 hover:border-black hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.1)] md:p-4 ${
-                  effectiveViewMode === 'list'
-                    ? 'md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-stretch md:gap-5'
-                    : ''
-                }`}
-              >
-                <div
-                  className={`relative overflow-hidden bg-[#f7f7f7] ${
-                    effectiveViewMode === 'grid'
-                      ? 'mb-5 aspect-[4/5] md:mb-6 md:aspect-[3/4]'
-                      : 'mb-4 aspect-[5/4] md:mb-0 md:h-full md:w-full md:aspect-auto'
-                  }`}
-                >
-                  {lot.imageSrc ? (
-                    <Image
-                      src={lot.imageSrc}
-                      alt={lot.imageAlt}
-                      fill
-                      sizes={
+                  <article
+                    key={lot.artworkId}
+                    className={`group border border-[#e5e7eb] bg-white p-3 transition-all duration-300 hover:border-black hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.1)] md:p-4 ${
+                      effectiveViewMode === 'list'
+                        ? 'md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-stretch md:gap-5'
+                        : ''
+                    }`}
+                  >
+                    <div
+                      className={`relative overflow-hidden bg-[#f7f7f7] ${
                         effectiveViewMode === 'grid'
-                          ? '(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 44vw, 92vw'
-                          : '(min-width: 768px) 280px, 92vw'
-                      }
-                      className="object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
-                    />
-                  ) : (
-                    <div className="flex h-full min-h-64 items-center justify-center px-6 text-center text-[11px] tracking-[0.2em] text-[#747777] uppercase">
-                      Image syncing
+                          ? 'mb-5 aspect-[4/5] md:mb-6 md:aspect-[3/4]'
+                          : 'mb-4 aspect-[5/4] md:mb-0 md:aspect-auto md:h-full md:w-full'
+                      }`}
+                    >
+                      {lot.imageSrc ? (
+                        <Image
+                          src={lot.imageSrc}
+                          alt={lot.imageAlt}
+                          fill
+                          sizes={
+                            effectiveViewMode === 'grid'
+                              ? '(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 768px) 44vw, 92vw'
+                              : '(min-width: 768px) 280px, 92vw'
+                          }
+                          className="object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
+                        />
+                      ) : (
+                        <div className="flex h-full min-h-64 items-center justify-center px-6 text-center text-[11px] tracking-[0.2em] text-[#747777] uppercase">
+                          Image syncing
+                        </div>
+                      )}
+                      <div className="absolute top-4 left-4 flex items-center gap-2 border border-[#c4c7c7]/30 bg-white/90 px-3 py-1 backdrop-blur-md">
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[lot.statusKey]} ${
+                            lot.statusKey === 'active' || lot.statusKey === 'ending-soon'
+                              ? 'animate-pulse'
+                              : ''
+                          }`}
+                        />
+                        <span className="text-[10px] tracking-[0.08em] text-black uppercase">
+                          {lot.status}
+                        </span>
+                      </div>
                     </div>
-                  )}
-                  <div className="absolute top-4 left-4 flex items-center gap-2 border border-[#c4c7c7]/30 bg-white/90 px-3 py-1 backdrop-blur-md">
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[lot.statusKey]} ${
-                        lot.statusKey === 'active' || lot.statusKey === 'ending-soon'
-                          ? 'animate-pulse'
+                    <div
+                      className={`space-y-4 ${
+                        effectiveViewMode === 'list'
+                          ? 'flex min-w-0 flex-col justify-between md:py-2'
                           : ''
                       }`}
-                    />
-                    <span className="text-[10px] tracking-[0.08em] text-black uppercase">
-                      {lot.status}
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className={`space-y-4 ${
-                    effectiveViewMode === 'list'
-                      ? 'min-w-0 flex flex-col justify-between md:py-2'
-                      : ''
-                  }`}
-                >
-                  <div
-                    className={`flex items-start justify-between gap-3 ${
-                      effectiveViewMode === 'list' ? 'border-b border-[#c4c7c7]/30 pb-4' : ''
-                    }`}
-                  >
-                    <div>
-                      <h2
-                        className={`font-bold uppercase text-black ${
-                          effectiveViewMode === 'grid'
-                            ? 'text-lg tracking-[-0.04em]'
-                            : 'text-2xl tracking-[0.02em] md:text-3xl'
-                        }`}
-                        style={headlineFont}
                     >
-                      {lot.title}
-                    </h2>
-                      <Link
-                        href={`/artworks/${lot.artworkId}`}
-                        className="mt-3 inline-block text-[11px] tracking-[0.2em] text-black/55 uppercase transition hover:text-black"
-                        style={headlineFont}
-                      >
-                        View artwork details
-                      </Link>
-                      {effectiveViewMode === 'list' ? (
-                        <p className="mt-3 max-w-2xl text-sm leading-7 text-[#747777]">
-                          Verified collectible with on-chain provenance, active bidding, and a
-                          curator-selected presentation format designed for quick comparison.
-                        </p>
-                      ) : null}
-                    </div>
-                    <ShieldCheck className="h-5 w-5 shrink-0 text-[#747777] transition-colors group-hover:text-black" />
-                  </div>
-                  <div
-                    className={`flex gap-4 border-[#c4c7c7]/30 ${
-                      effectiveViewMode === 'grid'
-                        ? 'items-end justify-between border-t pt-4'
-                        : 'items-end justify-between pt-2'
-                    }`}
-                  >
-                    <div>
-                      <p className="mb-1 text-[10px] tracking-[0.25em] text-[#747777] uppercase">
-                        Current Bid
-                      </p>
-                      <p
-                        className={`font-bold text-black uppercase ${
-                          effectiveViewMode === 'grid' ? 'text-lg' : 'text-2xl md:text-3xl'
+                      <div
+                        className={`flex items-start justify-between gap-3 ${
+                          effectiveViewMode === 'list' ? 'border-b border-[#c4c7c7]/30 pb-4' : ''
                         }`}
-                        style={headlineFont}
                       >
-                        {formatBidDisplay(lot.bidValue)}
-                      </p>
+                        <div>
+                          <h2
+                            className={`font-bold text-black uppercase ${
+                              effectiveViewMode === 'grid'
+                                ? 'text-lg tracking-[-0.04em]'
+                                : 'text-2xl tracking-[0.02em] md:text-3xl'
+                            }`}
+                            style={headlineFont}
+                          >
+                            {lot.title}
+                          </h2>
+                          <Link
+                            href={`/artworks/${lot.artworkId}`}
+                            className="mt-3 inline-block text-[11px] tracking-[0.2em] text-black/55 uppercase transition hover:text-black"
+                            style={headlineFont}
+                          >
+                            View artwork details
+                          </Link>
+                          {effectiveViewMode === 'list' ? (
+                            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#747777]">
+                              Verified collectible with on-chain provenance, active bidding, and a
+                              curator-selected presentation format designed for quick comparison.
+                            </p>
+                          ) : null}
+                        </div>
+                        <ShieldCheck className="h-5 w-5 shrink-0 text-[#747777] transition-colors group-hover:text-black" />
+                      </div>
+                      <div
+                        className={`flex gap-4 border-[#c4c7c7]/30 ${
+                          effectiveViewMode === 'grid'
+                            ? 'items-end justify-between border-t pt-4'
+                            : 'items-end justify-between pt-2'
+                        }`}
+                      >
+                        <div>
+                          <p className="mb-1 text-[10px] tracking-[0.25em] text-[#747777] uppercase">
+                            Current Bid
+                          </p>
+                          <p
+                            className={`font-bold text-black uppercase ${
+                              effectiveViewMode === 'grid' ? 'text-lg' : 'text-2xl md:text-3xl'
+                            }`}
+                            style={headlineFont}
+                          >
+                            {formatAuctionEth(lot.bidValue)}
+                          </p>
+                        </div>
+                        {isBidActionStatus(lot.statusKey) ? (
+                          <button
+                            type="button"
+                            onClick={() => openBidModal(lot)}
+                            className="inline-flex min-h-11 w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
+                            style={headlineFont}
+                          >
+                            {lotActionLabel[lot.statusKey]}
+                          </button>
+                        ) : (
+                          <Link
+                            href={`/artworks/${lot.artworkId}`}
+                            className="inline-flex min-h-11 w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
+                            style={headlineFont}
+                          >
+                            {lotActionLabel[lot.statusKey]}
+                          </Link>
+                        )}
+                      </div>
                     </div>
-                    {isBidActionStatus(lot.statusKey) ? (
-                      <button
-                        type="button"
-                        onClick={() => openBidModal(lot)}
-                        className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
-                        style={headlineFont}
-                      >
-                        {lotActionLabel[lot.statusKey]}
-                      </button>
-                    ) : (
-                      <Link
-                        href={`/artworks/${lot.artworkId}`}
-                        className="inline-flex w-fit items-center justify-center bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.2em] text-white uppercase transition hover:bg-neutral-800"
-                        style={headlineFont}
-                      >
-                        {lotActionLabel[lot.statusKey]}
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </article>
+                  </article>
                 ))}
           </section>
 
-          {!isInitialLoading && visibleLots.length === 0 ? (
+          {!error && !isInitialLoading && visibleLots.length === 0 ? (
             <section className="mt-12 border border-[#c4c7c7]/30 bg-[#fafafa] px-6 py-10 text-center">
               <p className="text-sm tracking-[0.14em] text-black uppercase" style={headlineFont}>
-                No live auctions match your filters.
+                {emptyStateTitle}
               </p>
               <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#747777]">
                 {emptyStateBody}
@@ -1025,7 +1041,7 @@ const LiveAuctionPage = () => {
                   type="button"
                   onClick={() => handlePageChange(Math.max(1, safeCurrentPage - 1))}
                   disabled={safeCurrentPage === 1}
-                  className={`border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
+                  className={`min-h-11 border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none ${
                     safeCurrentPage === 1
                       ? 'cursor-not-allowed border-black/15 text-black/25'
                       : 'border-black text-black hover:bg-black hover:text-white'
@@ -1044,7 +1060,7 @@ const LiveAuctionPage = () => {
                       type="button"
                       onClick={() => handlePageChange(pageNumber)}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`min-w-10 border px-3 py-2 text-[11px] tracking-[0.18em] uppercase transition ${
+                      className={`min-h-11 min-w-11 border px-3 py-2 text-[11px] tracking-[0.18em] uppercase transition focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none ${
                         isActive
                           ? 'border-black bg-black text-white'
                           : 'border-black/25 text-black hover:border-black hover:bg-black hover:text-white'
@@ -1059,7 +1075,7 @@ const LiveAuctionPage = () => {
                   type="button"
                   onClick={() => handlePageChange(Math.min(totalPages, safeCurrentPage + 1))}
                   disabled={safeCurrentPage === totalPages}
-                  className={`border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
+                  className={`min-h-11 border px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none ${
                     safeCurrentPage === totalPages
                       ? 'cursor-not-allowed border-black/15 text-black/25'
                       : 'border-black text-black hover:bg-black hover:text-white'
@@ -1070,9 +1086,7 @@ const LiveAuctionPage = () => {
                 </button>
               </div>
             ) : null}
-            <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
-              {footerLabel}
-            </p>
+            <p className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">{footerLabel}</p>
           </section>
         </main>
 
@@ -1105,7 +1119,7 @@ const LiveAuctionPage = () => {
                   <button
                     type="button"
                     onClick={resetMobileFilters}
-                    className="border border-black/15 px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-black uppercase transition hover:border-black hover:bg-black hover:text-white"
+                    className="min-h-11 border border-black/15 px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-black uppercase transition hover:border-black hover:bg-black hover:text-white focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                     style={headlineFont}
                   >
                     Clear
@@ -1114,7 +1128,7 @@ const LiveAuctionPage = () => {
                     ref={mobileFilterCloseButtonRef}
                     type="button"
                     onClick={() => setIsMobileFiltersOpen(false)}
-                    className="border border-black bg-black px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800"
+                    className="min-h-11 border border-black bg-black px-3 py-2 text-[11px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                     style={headlineFont}
                   >
                     Close
@@ -1128,7 +1142,10 @@ const LiveAuctionPage = () => {
                     <span className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
                       Category
                     </span>
-                    <span className="text-[11px] tracking-[0.14em] text-black uppercase" style={headlineFont}>
+                    <span
+                      className="text-[11px] tracking-[0.14em] text-black uppercase"
+                      style={headlineFont}
+                    >
                       {mobileSelectedCategoryOption.label}
                     </span>
                   </div>
@@ -1149,7 +1166,9 @@ const LiveAuctionPage = () => {
                         </span>
                         <span
                           className={`mt-1 block text-[11px] tracking-[0.08em] uppercase ${
-                            option.key === mobileSelectedCategory ? 'text-white/70' : 'text-[#747777]'
+                            option.key === mobileSelectedCategory
+                              ? 'text-white/70'
+                              : 'text-[#747777]'
                           }`}
                         >
                           {option.helper}
@@ -1164,7 +1183,10 @@ const LiveAuctionPage = () => {
                     <span className="text-[10px] tracking-[0.25em] text-[#747777] uppercase">
                       Status
                     </span>
-                    <span className="text-[11px] tracking-[0.14em] text-black uppercase" style={headlineFont}>
+                    <span
+                      className="text-[11px] tracking-[0.14em] text-black uppercase"
+                      style={headlineFont}
+                    >
                       {mobileSelectedStatusOption.label}
                     </span>
                   </div>
@@ -1201,7 +1223,8 @@ const LiveAuctionPage = () => {
                       Price Range
                     </span>
                     <span className="text-lg font-black text-black" style={bodyFont}>
-                      {formatEthDisplay(mobileAppliedMinPrice)} - {formatEthDisplay(mobileAppliedMaxPrice)} ETH
+                      {formatPriceRangeValue(mobileAppliedMinPrice)} -{' '}
+                      {formatPriceRangeValue(mobileAppliedMaxPrice)} ETH
                     </span>
                   </div>
 
@@ -1219,28 +1242,32 @@ const LiveAuctionPage = () => {
                       type="range"
                       min={MIN_ETH}
                       max={MAX_ETH}
-                      step={0.1}
+                      step={PRICE_RANGE_STEP}
                       value={mobileAppliedMinPrice}
                       onChange={(event) => {
-                        const nextValue = Math.min(Number(event.target.value), mobileAppliedMaxPrice)
+                        const nextValue = clampEthValue(
+                          Math.min(Number(event.target.value), mobileAppliedMaxPrice),
+                        )
                         setMobileAppliedMinPrice(nextValue)
-                        setMobileMinInputValue(`${nextValue}`)
+                        setMobileMinInputValue(formatAuctionEthInputValue(nextValue))
                       }}
-                      className="absolute inset-x-0 top-1/2 z-10 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                      className="auction-range-input absolute inset-x-0 top-1/2 z-10 h-11 -translate-y-1/2 opacity-0"
                       aria-label="Mobile minimum ETH range"
                     />
                     <input
                       type="range"
                       min={MIN_ETH}
                       max={MAX_ETH}
-                      step={0.1}
+                      step={PRICE_RANGE_STEP}
                       value={mobileAppliedMaxPrice}
                       onChange={(event) => {
-                        const nextValue = Math.max(Number(event.target.value), mobileAppliedMinPrice)
+                        const nextValue = clampEthValue(
+                          Math.max(Number(event.target.value), mobileAppliedMinPrice),
+                        )
                         setMobileAppliedMaxPrice(nextValue)
-                        setMobileMaxInputValue(`${nextValue}`)
+                        setMobileMaxInputValue(formatAuctionEthInputValue(nextValue))
                       }}
-                      className="absolute inset-x-0 top-1/2 z-20 h-6 -translate-y-1/2 cursor-pointer opacity-0"
+                      className="auction-range-input absolute inset-x-0 top-1/2 z-20 h-11 -translate-y-1/2 opacity-0"
                       aria-label="Mobile maximum ETH range"
                     />
                   </div>
@@ -1261,9 +1288,9 @@ const LiveAuctionPage = () => {
                             mobileAppliedMaxPrice,
                           )
                           setMobileAppliedMinPrice(nextValue)
-                          setMobileMinInputValue(`${nextValue}`)
+                          setMobileMinInputValue(formatAuctionEthInputValue(nextValue))
                         }}
-                        className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.35rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                        className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.35rem] text-black transition outline-none focus:border-black focus:ring-1 focus:ring-black"
                       />
                     </label>
                     <label className="block">
@@ -1281,9 +1308,9 @@ const LiveAuctionPage = () => {
                             mobileAppliedMinPrice,
                           )
                           setMobileAppliedMaxPrice(nextValue)
-                          setMobileMaxInputValue(`${nextValue}`)
+                          setMobileMaxInputValue(formatAuctionEthInputValue(nextValue))
                         }}
-                        className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.35rem] text-black outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                        className="h-14 w-full border border-[#e5e7eb] px-4 text-[1.35rem] text-black transition outline-none focus:border-black focus:ring-1 focus:ring-black"
                       />
                     </label>
                   </div>
@@ -1294,7 +1321,7 @@ const LiveAuctionPage = () => {
                 <button
                   type="button"
                   onClick={applyMobileFilters}
-                  className="w-full bg-black px-5 py-4 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90"
+                  className="min-h-11 w-full bg-black px-5 py-4 text-center text-[13px] font-bold tracking-[0.18em] text-white uppercase transition hover:bg-black/90 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
                   style={headlineFont}
                 >
                   Apply Filters ({mobilePreviewLots.length})
@@ -1313,6 +1340,39 @@ const LiveAuctionPage = () => {
           onViewOrderStatus={handleViewOrderStatus}
         />
 
+        <style jsx global>{`
+          .auction-range-input {
+            pointer-events: none;
+            appearance: none;
+            background: transparent;
+          }
+
+          .auction-range-input::-webkit-slider-thumb {
+            pointer-events: auto;
+            width: 44px;
+            height: 44px;
+            cursor: grab;
+            appearance: none;
+            background: transparent;
+          }
+
+          .auction-range-input::-webkit-slider-thumb:active {
+            cursor: grabbing;
+          }
+
+          .auction-range-input::-moz-range-thumb {
+            pointer-events: auto;
+            width: 44px;
+            height: 44px;
+            cursor: grab;
+            border: 0;
+            background: transparent;
+          }
+
+          .auction-range-input::-moz-range-thumb:active {
+            cursor: grabbing;
+          }
+        `}</style>
       </div>
     </>
   )

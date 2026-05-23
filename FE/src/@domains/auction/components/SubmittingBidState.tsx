@@ -4,12 +4,8 @@ import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { LoaderCircle, X } from 'lucide-react'
 import { type CSSProperties } from 'react'
-import {
-  Dialog,
-  DialogOverlay,
-  DialogPortal,
-  DialogPrimitive,
-} from '@shared/components/ui/dialog'
+import { formatAuctionEth } from '@domains/auction/utils'
+import { Dialog, DialogOverlay, DialogPortal, DialogPrimitive } from '@shared/components/ui/dialog'
 
 type SubmittingBidStateProps = {
   isOpen: boolean
@@ -28,8 +24,6 @@ const spaceGrotesk = Space_Grotesk({
 const headlineFont = {
   fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
-
-const formatEthDisplay = (value: number) => `${value.toFixed(2)} ETH`
 
 const getEstimatedGasFee = (bidValue: number) =>
   Math.max(0.0018, Math.min(0.0048, bidValue * 0.00017)).toFixed(4)
@@ -58,7 +52,7 @@ export const SubmittingBidState = ({
             <button
               type="button"
               disabled
-              className="absolute top-6 right-6 z-10 inline-flex h-10 w-10 items-center justify-center text-black/20"
+              className="absolute top-6 right-6 z-10 inline-flex h-11 w-11 items-center justify-center text-black/20"
               aria-label="Close submitting bid panel"
             >
               <X className="h-6 w-6" strokeWidth={1.8} />
@@ -70,7 +64,7 @@ export const SubmittingBidState = ({
                 alt={imageAlt}
                 fill
                 sizes="(min-width: 768px) 34vw, 100vw"
-                className="object-cover grayscale opacity-80"
+                className="object-cover opacity-80 grayscale"
               />
               <div className="absolute inset-0 bg-black/10" />
               <div className="absolute right-5 bottom-5 left-5">
@@ -133,8 +127,11 @@ export const SubmittingBidState = ({
                   >
                     Current Bid
                   </span>
-                  <span className="text-sm tracking-[0.08em] text-black/60 uppercase" style={headlineFont}>
-                    {formatEthDisplay(currentBidValue)}
+                  <span
+                    className="text-sm tracking-[0.08em] text-black/60 uppercase"
+                    style={headlineFont}
+                  >
+                    {formatAuctionEth(currentBidValue)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-4 border-b border-black/10 py-4">
@@ -145,7 +142,7 @@ export const SubmittingBidState = ({
                     Bid Amount
                   </span>
                   <span className="text-xl text-black" style={headlineFont}>
-                    {formatEthDisplay(committedBidValue)}
+                    {formatAuctionEth(committedBidValue)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-4 pt-4">
@@ -175,8 +172,7 @@ export const SubmittingBidState = ({
               </button>
 
               <p className="mx-auto max-w-[280px] text-center text-[12px] leading-6 text-black/58">
-                Please keep this window open while the transaction is being indexed on the
-                network.
+                Please keep this window open while the transaction is being indexed on the network.
               </p>
             </div>
           </div>

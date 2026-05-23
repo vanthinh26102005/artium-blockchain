@@ -12,6 +12,7 @@ import { BidEditingModal, type BidOrderStatusPayload } from '../components'
 import { useAuctionRealtime } from '../hooks/useAuctionRealtime'
 import { mapAuctionReadToLot } from '../mappers/auctionLotMapper'
 import type { AuctionLot } from '../types'
+import { formatAuctionEth } from '../utils'
 import {
   getStoredAuctionBid,
   saveStoredAuctionBid,
@@ -30,8 +31,6 @@ const spaceGrotesk = Space_Grotesk({
 const headlineFont = {
   fontFamily: spaceGrotesk.style.fontFamily,
 } satisfies CSSProperties
-
-const formatEth = (value: number) => `${value.toFixed(2)} ETH`
 
 const shortenHash = (value?: string | null, leading = 8, trailing = 5) => {
   if (!value) {
@@ -58,7 +57,9 @@ const getTransactionUrl = (transactionHash?: string | null) => {
 const normalizeAddress = (value?: string | null) => value?.trim().toLowerCase() ?? null
 
 const canPlaceBid = (lot: AuctionLot | null) =>
-  lot?.statusKey === 'active' || lot?.statusKey === 'ending-soon' || lot?.statusKey === 'newly-listed'
+  lot?.statusKey === 'active' ||
+  lot?.statusKey === 'ending-soon' ||
+  lot?.statusKey === 'newly-listed'
 
 const TrackerSkeleton = () => (
   <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_420px]">
@@ -108,7 +109,9 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
       })
       .catch((caughtError) => {
         if (!cancelled) {
-          setError(caughtError instanceof Error ? caughtError.message : 'Unable to load bid tracker.')
+          setError(
+            caughtError instanceof Error ? caughtError.message : 'Unable to load bid tracker.',
+          )
         }
       })
       .finally(() => {
@@ -123,10 +126,7 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
   }, [auctionId])
 
   const realtimeAuctionId = lot?.auctionId ?? auctionId
-  const realtimeAuctionIds = useMemo(
-    () => [realtimeAuctionId],
-    [realtimeAuctionId],
-  )
+  const realtimeAuctionIds = useMemo(() => [realtimeAuctionId], [realtimeAuctionId])
   const handleRealtimeAuctionChange = useCallback(() => {
     void refreshAuction()
   }, [refreshAuction])
@@ -163,7 +163,12 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
   const txHref = getTransactionUrl(effectiveStoredBid?.transactionHash)
 
   useEffect(() => {
-    if (!lot || !storedBid || !effectiveStoredBid || storedBid.status === effectiveStoredBid.status) {
+    if (
+      !lot ||
+      !storedBid ||
+      !effectiveStoredBid ||
+      storedBid.status === effectiveStoredBid.status
+    ) {
       return
     }
 
@@ -176,16 +181,13 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
     })
   }, [effectiveStoredBid, lot, storedBid])
 
-  const handleRefreshLot = useCallback(
-    async (nextAuctionId: string) => {
-      const nextLot = await auctionApis.getAuctionById(nextAuctionId).then(mapAuctionReadToLot)
-      setLot(nextLot)
-      setSelectedBidLot((currentLot) => (currentLot ? nextLot : currentLot))
-      setStoredBid(getStoredAuctionBid(nextLot.onChainOrderId))
-      return nextLot
-    },
-    [],
-  )
+  const handleRefreshLot = useCallback(async (nextAuctionId: string) => {
+    const nextLot = await auctionApis.getAuctionById(nextAuctionId).then(mapAuctionReadToLot)
+    setLot(nextLot)
+    setSelectedBidLot((currentLot) => (currentLot ? nextLot : currentLot))
+    setStoredBid(getStoredAuctionBid(nextLot.onChainOrderId))
+    return nextLot
+  }, [])
 
   const handleTrackBid = ({ lot: nextLot }: BidOrderStatusPayload) => {
     if (nextLot.onChainOrderId) {
@@ -208,10 +210,16 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
               <ArrowLeft className="h-4 w-4" />
               Live Auctions
             </Link>
-            <p className="text-[11px] tracking-[0.25em] text-[#747777] uppercase" style={headlineFont}>
+            <p
+              className="text-[11px] tracking-[0.25em] text-[#747777] uppercase"
+              style={headlineFont}
+            >
               Bid Tracker
             </p>
-            <h1 className="mt-3 text-5xl leading-none font-bold tracking-[0.02em] text-black uppercase md:text-7xl" style={headlineFont}>
+            <h1
+              className="mt-3 text-5xl leading-none font-bold tracking-[0.02em] text-black uppercase md:text-7xl"
+              style={headlineFont}
+            >
               {lot?.title ?? 'Auction Bid'}
             </h1>
           </div>
@@ -256,7 +264,10 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
               <div className="absolute inset-x-0 bottom-0 bg-white/92 px-6 py-6 backdrop-blur-md md:px-8">
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
                   <div>
-                    <p className="text-[10px] tracking-[0.2em] text-black/45 uppercase" style={headlineFont}>
+                    <p
+                      className="text-[10px] tracking-[0.2em] text-black/45 uppercase"
+                      style={headlineFont}
+                    >
                       On-Chain Auction
                     </p>
                     <p className="mt-2 font-mono text-sm text-black/72">{lot.onChainOrderId}</p>
@@ -275,7 +286,10 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
             <aside className="space-y-4">
               <section className="border border-black/10 bg-[#f7f7f7] p-6">
                 <div className="mb-6 flex items-center justify-between gap-4">
-                  <p className="text-[11px] tracking-[0.2em] text-black/45 uppercase" style={headlineFont}>
+                  <p
+                    className="text-[11px] tracking-[0.2em] text-black/45 uppercase"
+                    style={headlineFont}
+                  >
                     Live State
                   </p>
                   <span className="bg-black px-3 py-1 text-[10px] tracking-[0.16em] text-white uppercase">
@@ -284,24 +298,33 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
                 </div>
                 <div className="space-y-5">
                   <div>
-                    <p className="text-[10px] tracking-[0.16em] text-black/40 uppercase" style={headlineFont}>
+                    <p
+                      className="text-[10px] tracking-[0.16em] text-black/40 uppercase"
+                      style={headlineFont}
+                    >
                       Current Bid
                     </p>
                     <p className="mt-1 text-4xl font-bold text-black" style={headlineFont}>
-                      {formatEth(lot.bidValue)}
+                      {formatAuctionEth(lot.bidValue)}
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4 border-t border-black/10 pt-5">
                     <div>
-                      <p className="text-[10px] tracking-[0.16em] text-black/40 uppercase" style={headlineFont}>
+                      <p
+                        className="text-[10px] tracking-[0.16em] text-black/40 uppercase"
+                        style={headlineFont}
+                      >
                         Next Minimum
                       </p>
                       <p className="mt-1 text-lg font-bold text-black" style={headlineFont}>
-                        {formatEth(lot.minimumNextBidEth)}
+                        {formatAuctionEth(lot.minimumNextBidEth)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] tracking-[0.16em] text-black/40 uppercase" style={headlineFont}>
+                      <p
+                        className="text-[10px] tracking-[0.16em] text-black/40 uppercase"
+                        style={headlineFont}
+                      >
                         Highest Wallet
                       </p>
                       <p className="mt-2 font-mono text-xs text-black/72">
@@ -318,10 +341,16 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
                     <Wallet className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] tracking-[0.18em] text-black/42 uppercase" style={headlineFont}>
+                    <p
+                      className="text-[10px] tracking-[0.18em] text-black/42 uppercase"
+                      style={headlineFont}
+                    >
                       Your Bid
                     </p>
-                    <p className="text-sm font-bold tracking-[0.14em] text-black uppercase" style={headlineFont}>
+                    <p
+                      className="text-sm font-bold tracking-[0.14em] text-black uppercase"
+                      style={headlineFont}
+                    >
                       {bidStatusLabel}
                     </p>
                   </div>
@@ -330,15 +359,21 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
                 {effectiveStoredBid ? (
                   <div className="space-y-4">
                     <div className="flex items-end justify-between gap-4 border-b border-black/10 pb-4">
-                      <span className="text-[11px] tracking-[0.14em] text-black/45 uppercase" style={headlineFont}>
+                      <span
+                        className="text-[11px] tracking-[0.14em] text-black/45 uppercase"
+                        style={headlineFont}
+                      >
                         Submitted Amount
                       </span>
                       <span className="text-xl font-bold text-black" style={headlineFont}>
-                        {formatEth(effectiveStoredBid.bidAmountEth)}
+                        {formatAuctionEth(effectiveStoredBid.bidAmountEth)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-4 border-b border-black/10 pb-4">
-                      <span className="text-[11px] tracking-[0.14em] text-black/45 uppercase" style={headlineFont}>
+                      <span
+                        className="text-[11px] tracking-[0.14em] text-black/45 uppercase"
+                        style={headlineFont}
+                      >
                         Wallet
                       </span>
                       <span className="font-mono text-xs text-black/72">
@@ -346,7 +381,10 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-[11px] tracking-[0.14em] text-black/45 uppercase" style={headlineFont}>
+                      <span
+                        className="text-[11px] tracking-[0.14em] text-black/45 uppercase"
+                        style={headlineFont}
+                      >
                         Transaction
                       </span>
                       {txHref ? (
@@ -366,8 +404,8 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
                   </div>
                 ) : (
                   <p className="text-sm leading-7 text-black/58">
-                    This browser has no stored bid for the auction yet. You can still review the live
-                    state and place a bid from here.
+                    This browser has no stored bid for the auction yet. You can still review the
+                    live state and place a bid from here.
                   </p>
                 )}
               </section>

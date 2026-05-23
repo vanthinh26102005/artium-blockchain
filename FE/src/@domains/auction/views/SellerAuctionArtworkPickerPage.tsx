@@ -44,7 +44,11 @@ import {
   type SellerAuctionCustomDurationUnit,
   type SellerAuctionTermsFormValues,
 } from '../validations/sellerAuctionTerms.schema'
-import { loadSellerAuctionTermsDraft, saveSellerAuctionTermsDraft } from '../utils'
+import {
+  formatAuctionEth,
+  loadSellerAuctionTermsDraft,
+  saveSellerAuctionTermsDraft,
+} from '../utils'
 
 const policyCards = [
   {
@@ -220,7 +224,7 @@ const formatDateTime = (value?: string | null) => {
 }
 
 const formatEth = (value?: number | null) =>
-  typeof value === 'number' && Number.isFinite(value) ? `${value.toFixed(4).replace(/\.?0+$/, '')} ETH` : '0 ETH'
+  typeof value === 'number' && Number.isFinite(value) ? formatAuctionEth(value) : '0 ETH'
 
 const getLifecycleLabel = (status?: SellerAuctionStartStatusResponse['status']) => {
   switch (status) {
@@ -266,10 +270,10 @@ const getRowStatusTone = (row: SellerAuctionOverviewRow) => {
 const canResetStartAttempt = (row: SellerAuctionOverviewRow) =>
   Boolean(
     row.startStatus &&
-      !row.auction &&
-      row.startStatus.status === 'pending_start' &&
-      row.startStatus.walletActionRequired &&
-      !row.startStatus.txHash,
+    !row.auction &&
+    row.startStatus.status === 'pending_start' &&
+    row.startStatus.walletActionRequired &&
+    !row.startStatus.txHash,
   )
 
 const SellerAuctionManagerPanel = () => {
@@ -335,7 +339,9 @@ const SellerAuctionManagerPanel = () => {
       setRows(nextRows)
       setSelectedRowId((currentId) => currentId ?? nextRows[0]?.id ?? null)
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : 'Unable to load seller auctions.')
+      setError(
+        caughtError instanceof Error ? caughtError.message : 'Unable to load seller auctions.',
+      )
     } finally {
       setIsLoading(false)
     }
@@ -377,9 +383,7 @@ const SellerAuctionManagerPanel = () => {
           <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
             Auction detail
           </p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-900">
-            Your auction activity
-          </h2>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">Your auction activity</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
             Review active order projections, wallet start attempts, bids, and recovery actions for
             auctions created from this seller account.
@@ -435,7 +439,13 @@ const SellerAuctionManagerPanel = () => {
                     <div className="flex min-w-0 items-center gap-3">
                       {row.thumbnailUrl ? (
                         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
-                          <Image src={row.thumbnailUrl} alt={row.title} fill unoptimized className="object-cover" />
+                          <Image
+                            src={row.thumbnailUrl}
+                            alt={row.title}
+                            fill
+                            unoptimized
+                            className="object-cover"
+                          />
                         </div>
                       ) : (
                         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
@@ -443,21 +453,23 @@ const SellerAuctionManagerPanel = () => {
                         </div>
                       )}
                       <div className="min-w-0">
-                        <p className="truncate text-base font-semibold text-slate-900">{row.title}</p>
+                        <p className="truncate text-base font-semibold text-slate-900">
+                          {row.title}
+                        </p>
                         <p className="mt-1 truncate text-sm text-slate-500">
                           {row.auction?.onChainOrderId ?? row.startStatus?.orderId ?? 'No order id'}
                         </p>
                       </div>
                     </div>
-                    <span className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${getRowStatusTone(row)}`}>
+                    <span
+                      className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${getRowStatusTone(row)}`}
+                    >
                       {statusLabel}
                     </span>
                     <span className="text-sm font-semibold text-slate-900">
                       {row.auction ? formatEth(row.auction.bidValue) : 'No bids'}
                     </span>
-                    <span className="text-sm font-medium text-slate-500">
-                      View detail
-                    </span>
+                    <span className="text-sm font-medium text-slate-500">View detail</span>
                   </button>
                 )
               })}
@@ -471,9 +483,13 @@ const SellerAuctionManagerPanel = () => {
                   <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
                     Full detail
                   </p>
-                  <h3 className="mt-2 text-2xl font-semibold text-slate-900">{selectedRow.title}</h3>
+                  <h3 className="mt-2 text-2xl font-semibold text-slate-900">
+                    {selectedRow.title}
+                  </h3>
                 </div>
-                <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getRowStatusTone(selectedRow)}`}>
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${getRowStatusTone(selectedRow)}`}
+                >
                   {selectedRow.auction
                     ? selectedRow.auction.status
                     : getLifecycleLabel(selectedRow.startStatus?.status)}
@@ -484,20 +500,28 @@ const SellerAuctionManagerPanel = () => {
                 <div className="rounded-2xl bg-slate-50 p-4">
                   <div className="flex items-center gap-2 text-slate-500">
                     <ListChecks className="h-4 w-4" />
-                    <span className="font-semibold uppercase tracking-[0.12em] text-xs">Order projection</span>
+                    <span className="text-xs font-semibold tracking-[0.12em] uppercase">
+                      Order projection
+                    </span>
                   </div>
                   <dl className="mt-3 space-y-2">
                     <div className="flex justify-between gap-4">
                       <dt className="text-slate-500">Order number</dt>
-                      <dd className="font-medium text-slate-900">{selectedRow.auction?.orderNumber ?? 'Not created'}</dd>
+                      <dd className="font-medium text-slate-900">
+                        {selectedRow.auction?.orderNumber ?? 'Not created'}
+                      </dd>
                     </div>
                     <div className="flex justify-between gap-4">
                       <dt className="text-slate-500">Order status</dt>
-                      <dd className="font-medium text-slate-900">{selectedRow.auction?.orderStatus ?? 'No order projection'}</dd>
+                      <dd className="font-medium text-slate-900">
+                        {selectedRow.auction?.orderStatus ?? 'No order projection'}
+                      </dd>
                     </div>
                     <div className="flex justify-between gap-4">
                       <dt className="text-slate-500">Payment status</dt>
-                      <dd className="font-medium text-slate-900">{selectedRow.auction?.paymentStatus ?? 'N/A'}</dd>
+                      <dd className="font-medium text-slate-900">
+                        {selectedRow.auction?.paymentStatus ?? 'N/A'}
+                      </dd>
                     </div>
                   </dl>
                 </div>
@@ -505,20 +529,32 @@ const SellerAuctionManagerPanel = () => {
                 <div className="rounded-2xl bg-slate-50 p-4">
                   <div className="flex items-center gap-2 text-slate-500">
                     <Gavel className="h-4 w-4" />
-                    <span className="font-semibold uppercase tracking-[0.12em] text-xs">Bid info</span>
+                    <span className="text-xs font-semibold tracking-[0.12em] uppercase">
+                      Bid info
+                    </span>
                   </div>
                   <dl className="mt-3 space-y-2">
                     <div className="flex justify-between gap-4">
                       <dt className="text-slate-500">Current bid</dt>
-                      <dd className="font-medium text-slate-900">{selectedRow.auction ? formatEth(selectedRow.auction.bidValue) : 'No bids yet'}</dd>
+                      <dd className="font-medium text-slate-900">
+                        {selectedRow.auction
+                          ? formatEth(selectedRow.auction.bidValue)
+                          : 'No bids yet'}
+                      </dd>
                     </div>
                     <div className="flex justify-between gap-4">
                       <dt className="text-slate-500">Minimum next bid</dt>
-                      <dd className="font-medium text-slate-900">{selectedRow.auction ? formatEth(selectedRow.auction.minimumNextBidEth) : 'N/A'}</dd>
+                      <dd className="font-medium text-slate-900">
+                        {selectedRow.auction
+                          ? formatEth(selectedRow.auction.minimumNextBidEth)
+                          : 'N/A'}
+                      </dd>
                     </div>
                     <div className="flex justify-between gap-4">
                       <dt className="text-slate-500">Highest bidder</dt>
-                      <dd className="max-w-[220px] truncate font-mono text-xs text-slate-900">{selectedRow.auction?.highestBidder ?? 'No bidder'}</dd>
+                      <dd className="max-w-[220px] truncate font-mono text-xs text-slate-900">
+                        {selectedRow.auction?.highestBidder ?? 'No bidder'}
+                      </dd>
                     </div>
                   </dl>
                 </div>
@@ -526,20 +562,28 @@ const SellerAuctionManagerPanel = () => {
                 <div className="rounded-2xl bg-slate-50 p-4">
                   <div className="flex items-center gap-2 text-slate-500">
                     <Clock className="h-4 w-4" />
-                    <span className="font-semibold uppercase tracking-[0.12em] text-xs">Timeline</span>
+                    <span className="text-xs font-semibold tracking-[0.12em] uppercase">
+                      Timeline
+                    </span>
                   </div>
                   <dl className="mt-3 space-y-2">
                     <div className="flex justify-between gap-4">
                       <dt className="text-slate-500">Ends at</dt>
-                      <dd className="text-right font-medium text-slate-900">{formatDateTime(selectedRow.auction?.endsAt)}</dd>
+                      <dd className="text-right font-medium text-slate-900">
+                        {formatDateTime(selectedRow.auction?.endsAt)}
+                      </dd>
                     </div>
                     <div className="flex justify-between gap-4">
                       <dt className="text-slate-500">Activated at</dt>
-                      <dd className="text-right font-medium text-slate-900">{formatDateTime(selectedRow.startStatus?.activatedAt)}</dd>
+                      <dd className="text-right font-medium text-slate-900">
+                        {formatDateTime(selectedRow.startStatus?.activatedAt)}
+                      </dd>
                     </div>
                     <div className="flex justify-between gap-4">
                       <dt className="text-slate-500">Updated at</dt>
-                      <dd className="text-right font-medium text-slate-900">{formatDateTime(selectedRow.startStatus?.updatedAt)}</dd>
+                      <dd className="text-right font-medium text-slate-900">
+                        {formatDateTime(selectedRow.startStatus?.updatedAt)}
+                      </dd>
                     </div>
                   </dl>
                 </div>
@@ -550,7 +594,11 @@ const SellerAuctionManagerPanel = () => {
                   <Button
                     type="button"
                     className="bg-slate-900 text-white hover:bg-slate-700"
-                    onClick={() => void router.push(`/auction/bids/${encodeURIComponent(selectedRow.auction!.onChainOrderId)}`)}
+                    onClick={() =>
+                      void router.push(
+                        `/auction/bids/${encodeURIComponent(selectedRow.auction!.onChainOrderId)}`,
+                      )
+                    }
                   >
                     <ExternalLink className="h-4 w-4" />
                     Open public bid detail
@@ -856,9 +904,8 @@ const SellerCandidateWorkspace = () => {
           (option) => durationSeconds > 0 && durationSeconds % option.seconds === 0,
         )?.value ?? 'minutes'
       const customDurationUnitSeconds =
-        SELLER_AUCTION_CUSTOM_DURATION_UNITS.find(
-          (option) => option.value === customDurationUnit,
-        )?.seconds ?? 60
+        SELLER_AUCTION_CUSTOM_DURATION_UNITS.find((option) => option.value === customDurationUnit)
+          ?.seconds ?? 60
 
       return {
         reservePolicy: snapshot.reservePolicy,
@@ -994,7 +1041,8 @@ const SellerCandidateWorkspace = () => {
             </p>
             <h1 className="mt-2 text-3xl font-semibold text-slate-900">Seller auctions</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Review your auction detail, inspect order and bid state, or create a new seller auction.
+              Review your auction detail, inspect order and bid state, or create a new seller
+              auction.
             </p>
           </div>
           {activeWorkspaceTab === 'create' ? (
@@ -1054,233 +1102,234 @@ const SellerCandidateWorkspace = () => {
 
       {activeWorkspaceTab === 'create' ? (
         <>
+          <section className="mt-6 grid gap-4 md:grid-cols-3">
+            {policyCards.map((card) => {
+              const Icon = card.icon
 
-      <section className="mt-6 grid gap-4 md:grid-cols-3">
-        {policyCards.map((card) => {
-          const Icon = card.icon
-
-          return (
-            <article
-              key={card.title}
-              className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <Icon className="h-6 w-6 text-slate-600" />
-              <h2 className="mt-4 text-lg font-semibold text-slate-900">{card.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500">{card.body}</p>
-            </article>
-          )
-        })}
-      </section>
-
-      <SellerAuctionWalletReadiness userWalletAddress={user?.walletAddress} />
-
-      {error ? (
-        <section className="mt-8 rounded-[32px] border border-rose-200 bg-rose-50 p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-rose-950">
-                We could not load auction eligibility. Try again or return to inventory.
-              </h2>
-              <p className="mt-2 text-sm text-rose-700">{error.message}</p>
-            </div>
-            <Button type="button" variant="outline" onClick={() => void refresh()}>
-              <RefreshCcw className="h-4 w-4" />
-              Retry
-            </Button>
-          </div>
-        </section>
-      ) : null}
-
-      {effectiveCurrentStep === 'terms' && selectedCandidate ? (
-        <section className="mt-10">
-          {shouldShowLifecycleShell && lifecycleStatus ? (
-            <div className="mb-6">
-              <SellerAuctionStartStatusShell
-                status={lifecycleStatus}
-                walletError={walletError || sellerAuctionStart.error}
-                isWalletActionLoading={
-                  sellerAuctionStart.isRetrying || sellerAuctionStart.isAttachingTx
-                }
-                onOpenMetaMask={() => void runWalletHandoff(lifecycleStatus)}
-                onRetry={() => void handleRetryStart()}
-                onBackToTerms={
-                  lifecycleStatus.editAllowed
-                    ? () => {
-                        setIsEditingFailedTerms(true)
-                        setWalletError(null)
-                        setTermsErrors({})
-                        setHasSubmittedTerms(false)
-                        setTermsValues(
-                          mapSnapshotToFormValues(lifecycleStatus.submittedTermsSnapshot),
-                        )
-                      }
-                    : undefined
-                }
-              />
-            </div>
-          ) : null}
-
-          {!shouldShowLifecycleShell && sellerAuctionStart.error ? (
-            <div className="mb-6 rounded-[24px] border border-[#FF4337]/20 bg-[#FFF5F4] px-4 py-3 text-sm text-[#FF4337]">
-              {sellerAuctionStart.error}
-            </div>
-          ) : null}
-
-          <div className="rounded-[32px] border border-slate-200 bg-white p-4 shadow-sm md:p-6">
-            <div className="grid gap-5 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-center">
-              <CandidateImage candidate={selectedCandidate} className="max-w-[160px]" />
-              <div>
-                <p className="text-[11px] font-bold tracking-[0.18em] text-slate-400 uppercase">
-                  Selected artwork
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
-                  {selectedCandidate.title}
-                </h2>
-                <p className="mt-2 text-sm text-slate-500">
-                  {selectedCandidate.creatorName || 'Unknown creator'}
-                </p>
-                <span className="mt-4 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-slate-600 uppercase">
-                  {selectedCandidate.status}
-                </span>
-              </div>
-              <div className="md:justify-self-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleBackToArtwork}
-                  disabled={isLifecycleLocked}
+              return (
+                <article
+                  key={card.title}
+                  className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  Change artwork
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
-            <div>
-              <SellerAuctionTermsForm
-                values={displayedTermsValues}
-                errors={termsErrors}
-                hasSubmitted={hasSubmittedTerms}
-                onChange={updateTermsValues}
-                onValidate={validateCurrentTerms}
-                onBack={handleBackToArtwork}
-                onSaveDraft={handleSaveDraft}
-                onStartAttempt={() => void handleStartAttempt()}
-                isStartDisabled={sellerAuctionStart.isBusy || isLifecycleLocked}
-                isLocked={isLifecycleLocked}
-                isBackDisabled={isLifecycleLocked}
-                isSaveDraftDisabled={isLifecycleLocked}
-                startButtonLabel={startButtonLabel}
-                supportingMessage={supportingMessage}
-              />
-              {draftSaved ? (
-                <p className="mt-3 text-sm font-medium text-[#027A48]">
-                  Draft saved on this device.
-                </p>
-              ) : null}
-            </div>
-
-            <SellerAuctionTermsPreview
-              candidate={selectedCandidate}
-              values={displayedTermsValues}
-              isTermsValid={previewMode === 'submitted' ? true : isTermsValid}
-              mode={previewMode}
-            />
-          </div>
-        </section>
-      ) : (
-        <>
-          <section className="mt-10">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-sm font-semibold tracking-[0.18em] text-slate-400 uppercase">
-                  Ready for auction
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
-                  {hasNoEligible ? 'No auction-ready artworks' : 'Ready for auction'}
-                </h2>
-              </div>
-              <p className="text-sm text-slate-500">
-                {eligible.length} ready / {blocked.length} needs attention
-              </p>
-            </div>
-
-            <div className="mt-5">
-              {isLoading ? <LoadingGrid /> : null}
-              {hasNoArtworks ? (
-                <div className="rounded-[32px] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
-                  <Boxes className="mx-auto h-10 w-10 text-slate-500" />
-                  <h3 className="mt-4 text-2xl font-semibold text-slate-900">
-                    No artworks in your inventory yet
-                  </h3>
-                  <p className="mt-2 text-slate-500">
-                    Upload or publish an artwork before starting an auction.
-                  </p>
-                </div>
-              ) : null}
-              {hasNoEligible ? (
-                <div className="rounded-[32px] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
-                  <Boxes className="mx-auto h-10 w-10 text-slate-500" />
-                  <h3 className="mt-4 text-2xl font-semibold text-slate-900">
-                    No auction-ready artworks
-                  </h3>
-                  <p className="mt-2 max-w-2xl text-slate-500">
-                    Your artworks need to be active, published, single-edition, and complete before
-                    they can enter an auction.
-                  </p>
-                </div>
-              ) : null}
-              {!isLoading && eligible.length > 0 ? (
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {eligible.map((candidate) => (
-                    <CandidateCard
-                      key={candidate.artworkId}
-                      candidate={candidate}
-                      isSelected={selectedArtworkId === candidate.artworkId}
-                      onSelect={() => handleSelectArtwork(candidate.artworkId)}
-                    />
-                  ))}
-                </div>
-              ) : null}
-            </div>
+                  <Icon className="h-6 w-6 text-slate-600" />
+                  <h2 className="mt-4 text-lg font-semibold text-slate-900">{card.title}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">{card.body}</p>
+                </article>
+              )
+            })}
           </section>
 
-          {!hasNoArtworks && !isLoading ? (
-            <section className="mt-12">
-              <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <SellerAuctionWalletReadiness userWalletAddress={user?.walletAddress} />
+
+          {error ? (
+            <section className="mt-8 rounded-[32px] border border-rose-200 bg-rose-50 p-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <p className="text-sm font-semibold tracking-[0.18em] text-slate-400 uppercase">
-                    Needs attention
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold text-slate-900">Needs attention</h2>
+                  <h2 className="text-xl font-semibold text-rose-950">
+                    We could not load auction eligibility. Try again or return to inventory.
+                  </h2>
+                  <p className="mt-2 text-sm text-rose-700">{error.message}</p>
                 </div>
-                <p className="text-sm text-slate-500">
-                  Blocked artworks stay visible for recovery.
-                </p>
+                <Button type="button" variant="outline" onClick={() => void refresh()}>
+                  <RefreshCcw className="h-4 w-4" />
+                  Retry
+                </Button>
               </div>
-              {blocked.length > 0 ? (
-                <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {blocked.map((candidate) => (
-                    <CandidateCard
-                      key={candidate.artworkId}
-                      candidate={candidate}
-                      isSelected={selectedArtworkId === candidate.artworkId}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="mt-5 rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
-                  <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-                  <p className="mt-3 text-lg font-semibold text-slate-900">
-                    No blocked artworks found.
-                  </p>
-                </div>
-              )}
             </section>
           ) : null}
-        </>
-      )}
+
+          {effectiveCurrentStep === 'terms' && selectedCandidate ? (
+            <section className="mt-10">
+              {shouldShowLifecycleShell && lifecycleStatus ? (
+                <div className="mb-6">
+                  <SellerAuctionStartStatusShell
+                    status={lifecycleStatus}
+                    walletError={walletError || sellerAuctionStart.error}
+                    isWalletActionLoading={
+                      sellerAuctionStart.isRetrying || sellerAuctionStart.isAttachingTx
+                    }
+                    onOpenMetaMask={() => void runWalletHandoff(lifecycleStatus)}
+                    onRetry={() => void handleRetryStart()}
+                    onBackToTerms={
+                      lifecycleStatus.editAllowed
+                        ? () => {
+                            setIsEditingFailedTerms(true)
+                            setWalletError(null)
+                            setTermsErrors({})
+                            setHasSubmittedTerms(false)
+                            setTermsValues(
+                              mapSnapshotToFormValues(lifecycleStatus.submittedTermsSnapshot),
+                            )
+                          }
+                        : undefined
+                    }
+                  />
+                </div>
+              ) : null}
+
+              {!shouldShowLifecycleShell && sellerAuctionStart.error ? (
+                <div className="mb-6 rounded-[24px] border border-[#FF4337]/20 bg-[#FFF5F4] px-4 py-3 text-sm text-[#FF4337]">
+                  {sellerAuctionStart.error}
+                </div>
+              ) : null}
+
+              <div className="rounded-[32px] border border-slate-200 bg-white p-4 shadow-sm md:p-6">
+                <div className="grid gap-5 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-center">
+                  <CandidateImage candidate={selectedCandidate} className="max-w-[160px]" />
+                  <div>
+                    <p className="text-[11px] font-bold tracking-[0.18em] text-slate-400 uppercase">
+                      Selected artwork
+                    </p>
+                    <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+                      {selectedCandidate.title}
+                    </h2>
+                    <p className="mt-2 text-sm text-slate-500">
+                      {selectedCandidate.creatorName || 'Unknown creator'}
+                    </p>
+                    <span className="mt-4 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-slate-600 uppercase">
+                      {selectedCandidate.status}
+                    </span>
+                  </div>
+                  <div className="md:justify-self-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleBackToArtwork}
+                      disabled={isLifecycleLocked}
+                    >
+                      Change artwork
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
+                <div>
+                  <SellerAuctionTermsForm
+                    values={displayedTermsValues}
+                    errors={termsErrors}
+                    hasSubmitted={hasSubmittedTerms}
+                    onChange={updateTermsValues}
+                    onValidate={validateCurrentTerms}
+                    onBack={handleBackToArtwork}
+                    onSaveDraft={handleSaveDraft}
+                    onStartAttempt={() => void handleStartAttempt()}
+                    isStartDisabled={sellerAuctionStart.isBusy || isLifecycleLocked}
+                    isLocked={isLifecycleLocked}
+                    isBackDisabled={isLifecycleLocked}
+                    isSaveDraftDisabled={isLifecycleLocked}
+                    startButtonLabel={startButtonLabel}
+                    supportingMessage={supportingMessage}
+                  />
+                  {draftSaved ? (
+                    <p className="mt-3 text-sm font-medium text-[#027A48]">
+                      Draft saved on this device.
+                    </p>
+                  ) : null}
+                </div>
+
+                <SellerAuctionTermsPreview
+                  candidate={selectedCandidate}
+                  values={displayedTermsValues}
+                  isTermsValid={previewMode === 'submitted' ? true : isTermsValid}
+                  mode={previewMode}
+                />
+              </div>
+            </section>
+          ) : (
+            <>
+              <section className="mt-10">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                      Ready for auction
+                    </p>
+                    <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+                      {hasNoEligible ? 'No auction-ready artworks' : 'Ready for auction'}
+                    </h2>
+                  </div>
+                  <p className="text-sm text-slate-500">
+                    {eligible.length} ready / {blocked.length} needs attention
+                  </p>
+                </div>
+
+                <div className="mt-5">
+                  {isLoading ? <LoadingGrid /> : null}
+                  {hasNoArtworks ? (
+                    <div className="rounded-[32px] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+                      <Boxes className="mx-auto h-10 w-10 text-slate-500" />
+                      <h3 className="mt-4 text-2xl font-semibold text-slate-900">
+                        No artworks in your inventory yet
+                      </h3>
+                      <p className="mt-2 text-slate-500">
+                        Upload or publish an artwork before starting an auction.
+                      </p>
+                    </div>
+                  ) : null}
+                  {hasNoEligible ? (
+                    <div className="rounded-[32px] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+                      <Boxes className="mx-auto h-10 w-10 text-slate-500" />
+                      <h3 className="mt-4 text-2xl font-semibold text-slate-900">
+                        No auction-ready artworks
+                      </h3>
+                      <p className="mt-2 max-w-2xl text-slate-500">
+                        Your artworks need to be active, published, single-edition, and complete
+                        before they can enter an auction.
+                      </p>
+                    </div>
+                  ) : null}
+                  {!isLoading && eligible.length > 0 ? (
+                    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                      {eligible.map((candidate) => (
+                        <CandidateCard
+                          key={candidate.artworkId}
+                          candidate={candidate}
+                          isSelected={selectedArtworkId === candidate.artworkId}
+                          onSelect={() => handleSelectArtwork(candidate.artworkId)}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </section>
+
+              {!hasNoArtworks && !isLoading ? (
+                <section className="mt-12">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                        Needs attention
+                      </p>
+                      <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+                        Needs attention
+                      </h2>
+                    </div>
+                    <p className="text-sm text-slate-500">
+                      Blocked artworks stay visible for recovery.
+                    </p>
+                  </div>
+                  {blocked.length > 0 ? (
+                    <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                      {blocked.map((candidate) => (
+                        <CandidateCard
+                          key={candidate.artworkId}
+                          candidate={candidate}
+                          isSelected={selectedArtworkId === candidate.artworkId}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-5 rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
+                      <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                      <p className="mt-3 text-lg font-semibold text-slate-900">
+                        No blocked artworks found.
+                      </p>
+                    </div>
+                  )}
+                </section>
+              ) : null}
+            </>
+          )}
         </>
       ) : null}
     </div>
