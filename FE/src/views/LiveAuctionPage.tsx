@@ -691,8 +691,46 @@ const LiveAuctionPage = () => {
                     </div>
                   </article>
                 ) : (
-                  <div className="h-full min-h-[420px] rounded-[8px] border border-black/10 bg-white/70 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
-                    <Skeleton className="h-full min-h-[390px] rounded-[6px] bg-[#ecefeb]" />
+                  <div className="h-full min-h-[420px] rounded-[8px] border border-black/10 bg-white/70 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-md">
+                    <div className="flex h-full min-h-[390px] flex-col justify-between rounded-[6px] border border-black/10 bg-[radial-gradient(circle_at_20%_20%,rgba(249,115,22,0.16),transparent_34%),radial-gradient(circle_at_80%_8%,rgba(53,201,238,0.18),transparent_32%),#f8faf6] p-5">
+                      <div className="inline-flex w-fit items-center gap-2 rounded-full border border-black/10 bg-white/78 px-3 py-1.5 text-[10px] font-semibold tracking-[0.16em] text-slate-500 uppercase">
+                        <Activity className="h-3.5 w-3.5 text-[#f97316]" />
+                        Auction sync
+                      </div>
+                      <div>
+                        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[8px] bg-slate-950 text-white shadow-[0_18px_45px_rgba(15,23,42,0.18)]">
+                          <Gavel className="h-6 w-6" />
+                        </div>
+                        <h2
+                          className="max-w-sm text-3xl leading-none font-bold text-slate-950 uppercase sm:text-4xl"
+                          style={headlineFont}
+                        >
+                          Auction room syncing.
+                        </h2>
+                        <p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">
+                          Live lots will appear here as soon as the auction service returns fresh
+                          data.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-[8px] border border-black/10 bg-white/76 p-3">
+                          <p className="text-[9px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
+                            Range
+                          </p>
+                          <p className="mt-1 font-bold text-slate-950" style={headlineFont}>
+                            0 - 3 ETH
+                          </p>
+                        </div>
+                        <div className="rounded-[8px] border border-black/10 bg-white/76 p-3">
+                          <p className="text-[9px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
+                            Signal
+                          </p>
+                          <p className="mt-1 font-bold text-slate-950" style={headlineFont}>
+                            On-chain
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
