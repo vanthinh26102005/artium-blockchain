@@ -47,10 +47,11 @@ To get started with this project, you will need to have [Node.js](https://nodejs
 
     Copy the `.env.example` file to `.env` and fill in the shared secret values.
     Docker Compose reads service defaults from `apps/<service>/.env.compose`, while each service still receives its owned secrets explicitly from `docker-compose.yml`.
+    Shared database mode expects `SHARED_DB_HOST` and related variables to point at the external AWS RDS PostgreSQL instance; Compose no longer starts a local `db-shared` container.
 
 3.  **Start the infrastructure**:
 
-    This will start the required databases and other infrastructure components using Docker.
+    This will start Nginx and the backend services. In shared database mode, PostgreSQL, RabbitMQ is external CloudAMQP via `RABBITMQ_URI`, and Redis is external Upstash via `REDIS_URL`.
 
     ```sh
     yarn docker:up:shared

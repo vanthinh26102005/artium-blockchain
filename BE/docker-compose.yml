@@ -265,74 +265,24 @@ services:
     networks:
       - infra_network
 
-  # ---------------------------
-  # Messaging & Cache
-  # ---------------------------
-  rabbitmq:
-    build:
-      context: .
-      dockerfile: ./infrastructure/docker/rabbitmq/Dockerfile
-    container_name: rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-myuser}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-mypassword}
-      TZ: Asia/Ho_Chi_Minh
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: nginx
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${NGINX_HTTP_PORT:-8080}:80"
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - ./infrastructure/docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api-gateway
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost/nginx-health || exit 1"]
       interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: "768M"
-        reservations:
-          cpus: "0.40"
-          memory: "512M"
     networks:
-      - infra_network
-
-  redis:
-    image: redis:8.2-alpine
-    container_name: med-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: "256M"
-        reservations:
-          cpus: "0.25"
-          memory: "128M"
-    networks:
-      - infra_network
-
-  mailhog:
-    image: mailhog/mailhog:latest
-    container_name: med-mailhog
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: "128M"
-    networks:
-      - infra_network
+      - services_network
 
   api-gateway:
     container_name: api-gateway
@@ -382,17 +332,25 @@ services:
     env_file:
       - ./apps/identity-service/.env.compose
     environment:
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      SHARED_DB_HOST: ${SHARED_DB_HOST:-db-shared}
+      SHARED_DB_PORT: ${SHARED_DB_PORT:-5432}
+      SHARED_DB_USERNAME: ${SHARED_DB_USERNAME:-postgres}
       SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
+      SHARED_DB_NAME: ${SHARED_DB_NAME:-artium_global}
+      DB_SSL: ${DB_SSL:-false}
+      DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED:-false}
+      DB_CONNECT_RETRY_ATTEMPTS: ${DB_CONNECT_RETRY_ATTEMPTS:-6}
+      DB_CONNECT_RETRY_DELAY_MS: ${DB_CONNECT_RETRY_DELAY_MS:-5000}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in environment}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
+      RABBITMQ_URI: ${RABBITMQ_URI:?RABBITMQ_URI must be set in environment}
+      REDIS_URL: ${REDIS_URL:?REDIS_URL must be set in environment}
+      REDIS_TLS: ${REDIS_TLS:-false}
     volumes:
       - .:/app
       - identity_node_modules:/app/node_modules
-    depends_on:
-      - rabbitmq
-      - redis
     networks:
       - infra_network
       - services_network
@@ -408,18 +366,20 @@ services:
     env_file:
       - ./apps/notifications-service/.env.compose
     environment:
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      SHARED_DB_HOST: ${SHARED_DB_HOST:-db-shared}
+      SHARED_DB_PORT: ${SHARED_DB_PORT:-5432}
+      SHARED_DB_USERNAME: ${SHARED_DB_USERNAME:-postgres}
       SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
-      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
+      SHARED_DB_NAME: ${SHARED_DB_NAME:-artium_global}
+      DB_SSL: ${DB_SSL:-false}
+      DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED:-false}
+      DB_CONNECT_RETRY_ATTEMPTS: ${DB_CONNECT_RETRY_ATTEMPTS:-6}
+      DB_CONNECT_RETRY_DELAY_MS: ${DB_CONNECT_RETRY_DELAY_MS:-5000}
+      RABBITMQ_URI: ${RABBITMQ_URI:?RABBITMQ_URI must be set in environment}
     volumes:
       - .:/app
       - notifications_node_modules:/app/node_modules
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      mailhog:
-        condition: service_started
     networks:
       - infra_network
       - services_network
@@ -436,24 +396,26 @@ services:
     env_file:
       - ./apps/artwork-service/.env.compose
     environment:
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      SHARED_DB_HOST: ${SHARED_DB_HOST:-db-shared}
+      SHARED_DB_PORT: ${SHARED_DB_PORT:-5432}
+      SHARED_DB_USERNAME: ${SHARED_DB_USERNAME:-postgres}
       SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
-      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
+      SHARED_DB_NAME: ${SHARED_DB_NAME:-artium_global}
+      DB_SSL: ${DB_SSL:-false}
+      DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED:-false}
+      DB_CONNECT_RETRY_ATTEMPTS: ${DB_CONNECT_RETRY_ATTEMPTS:-6}
+      DB_CONNECT_RETRY_DELAY_MS: ${DB_CONNECT_RETRY_DELAY_MS:-5000}
+      RABBITMQ_URI: ${RABBITMQ_URI:?RABBITMQ_URI must be set in environment}
       PORT: 3002
       MICROSERVICE_PORT: 3102
       MICROSERVICE_HOST: 0.0.0.0
-      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
       DB_SYNCHRONIZE: "true"
-      SHARED_DB_HOST: db-shared
-      SHARED_DB_PORT: 5432
-      SHARED_DB_USERNAME: postgres
-      SHARED_DB_NAME: artium_global
       DB_HOST: db-artwork
       DB_PORT: 5432
       DB_USER: artwork_user
       DB_PASS: "1"
       DB_NAME: artwork_db
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
       TZ: Asia/Ho_Chi_Minh
       GCS_PROJECT_ID: artworkmanagement
       GCS_BUCKET_NAME: artwork_uit
@@ -467,11 +429,6 @@ services:
       - .:/app
       - artwork_node_modules:/app/node_modules
       - ./config/gcs-service-account.json:/app/config/gcs-service-account.json:ro
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_started
     networks:
       - infra_network
       - services_network
@@ -490,18 +447,25 @@ services:
     env_file:
       - ./apps/orders-service/.env.compose
     environment:
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      SHARED_DB_HOST: ${SHARED_DB_HOST:-db-shared}
+      SHARED_DB_PORT: ${SHARED_DB_PORT:-5432}
+      SHARED_DB_USERNAME: ${SHARED_DB_USERNAME:-postgres}
       SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
+      SHARED_DB_NAME: ${SHARED_DB_NAME:-artium_global}
+      DB_SSL: ${DB_SSL:-false}
+      DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED:-false}
+      DB_CONNECT_RETRY_ATTEMPTS: ${DB_CONNECT_RETRY_ATTEMPTS:-6}
+      DB_CONNECT_RETRY_DELAY_MS: ${DB_CONNECT_RETRY_DELAY_MS:-5000}
       PLATFORM_PRIVATE_KEY: ${PLATFORM_PRIVATE_KEY:?PLATFORM_PRIVATE_KEY must be set in environment}
       CONTRACT_ADDRESS: ${CONTRACT_ADDRESS:?CONTRACT_ADDRESS must be set in environment}
       BLOCKCHAIN_RPC_URL: ${BLOCKCHAIN_RPC_URL:?BLOCKCHAIN_RPC_URL must be set in environment}
-      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
+      RABBITMQ_URI: ${RABBITMQ_URI:?RABBITMQ_URI must be set in environment}
       SELLER_AUCTION_MIN_DURATION_SECONDS: ${SELLER_AUCTION_MIN_DURATION_SECONDS:-86400}
       SELLER_AUCTION_MAX_DURATION_SECONDS: ${SELLER_AUCTION_MAX_DURATION_SECONDS:-2592000}
     volumes:
       - .:/app
       - orders_node_modules:/app/node_modules
-    depends_on:
-      - rabbitmq
     networks:
       - infra_network
       - services_network
@@ -518,17 +482,21 @@ services:
     env_file:
       - ./apps/messaging-service/.env.compose
     environment:
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      SHARED_DB_HOST: ${SHARED_DB_HOST:-db-shared}
+      SHARED_DB_PORT: ${SHARED_DB_PORT:-5432}
+      SHARED_DB_USERNAME: ${SHARED_DB_USERNAME:-postgres}
       SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
-      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
+      SHARED_DB_NAME: ${SHARED_DB_NAME:-artium_global}
+      DB_SSL: ${DB_SSL:-false}
+      DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED:-false}
+      DB_CONNECT_RETRY_ATTEMPTS: ${DB_CONNECT_RETRY_ATTEMPTS:-6}
+      DB_CONNECT_RETRY_DELAY_MS: ${DB_CONNECT_RETRY_DELAY_MS:-5000}
+      RABBITMQ_URI: ${RABBITMQ_URI:?RABBITMQ_URI must be set in environment}
     volumes:
       - .:/app
       - messaging_node_modules:/app/node_modules
       - ./config/gcs-service-account.json:/app/config/gcs-service-account.json:ro
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_started
     networks:
       - infra_network
       - services_network
@@ -544,8 +512,17 @@ services:
     env_file:
       - ./apps/payments-service/.env.compose
     environment:
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      SHARED_DB_HOST: ${SHARED_DB_HOST:-db-shared}
+      SHARED_DB_PORT: ${SHARED_DB_PORT:-5432}
+      SHARED_DB_USERNAME: ${SHARED_DB_USERNAME:-postgres}
       SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
-      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
+      SHARED_DB_NAME: ${SHARED_DB_NAME:-artium_global}
+      DB_SSL: ${DB_SSL:-false}
+      DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED:-false}
+      DB_CONNECT_RETRY_ATTEMPTS: ${DB_CONNECT_RETRY_ATTEMPTS:-6}
+      DB_CONNECT_RETRY_DELAY_MS: ${DB_CONNECT_RETRY_DELAY_MS:-5000}
+      RABBITMQ_URI: ${RABBITMQ_URI:?RABBITMQ_URI must be set in environment}
       STRIPE_API_KEY: ${STRIPE_API_KEY:?STRIPE_API_KEY must be set in environment}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?STRIPE_WEBHOOK_SECRET must be set in environment}
       PLATFORM_PRIVATE_KEY: ${PLATFORM_PRIVATE_KEY:?PLATFORM_PRIVATE_KEY must be set in environment}
@@ -554,11 +531,6 @@ services:
     volumes:
       - .:/app
       - payments_node_modules:/app/node_modules
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_started
     networks:
       - infra_network
       - services_network
@@ -574,16 +546,20 @@ services:
     env_file:
       - ./apps/events-service/.env.compose
     environment:
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      SHARED_DB_HOST: ${SHARED_DB_HOST:-db-shared}
+      SHARED_DB_PORT: ${SHARED_DB_PORT:-5432}
+      SHARED_DB_USERNAME: ${SHARED_DB_USERNAME:-postgres}
       SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
-      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
+      SHARED_DB_NAME: ${SHARED_DB_NAME:-artium_global}
+      DB_SSL: ${DB_SSL:-false}
+      DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED:-false}
+      DB_CONNECT_RETRY_ATTEMPTS: ${DB_CONNECT_RETRY_ATTEMPTS:-6}
+      DB_CONNECT_RETRY_DELAY_MS: ${DB_CONNECT_RETRY_DELAY_MS:-5000}
+      RABBITMQ_URI: ${RABBITMQ_URI:?RABBITMQ_URI must be set in environment}
     volumes:
       - .:/app
       - events_node_modules:/app/node_modules
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_started
     networks:
       - infra_network
       - services_network
@@ -599,17 +575,21 @@ services:
     env_file:
       - ./apps/community-service/.env.compose
     environment:
+      DB_STRATEGY: ${DB_STRATEGY:-SHARED}
+      SHARED_DB_HOST: ${SHARED_DB_HOST:-db-shared}
+      SHARED_DB_PORT: ${SHARED_DB_PORT:-5432}
+      SHARED_DB_USERNAME: ${SHARED_DB_USERNAME:-postgres}
       SHARED_DB_PASSWORD: ${SHARED_DB_PASSWORD:-1}
-      RABBITMQ_URI: ${RABBITMQ_URI:-amqp://myuser:mypassword@rabbitmq:5672}
+      SHARED_DB_NAME: ${SHARED_DB_NAME:-artium_global}
+      DB_SSL: ${DB_SSL:-false}
+      DB_SSL_REJECT_UNAUTHORIZED: ${DB_SSL_REJECT_UNAUTHORIZED:-false}
+      DB_CONNECT_RETRY_ATTEMPTS: ${DB_CONNECT_RETRY_ATTEMPTS:-6}
+      DB_CONNECT_RETRY_DELAY_MS: ${DB_CONNECT_RETRY_DELAY_MS:-5000}
+      RABBITMQ_URI: ${RABBITMQ_URI:?RABBITMQ_URI must be set in environment}
     volumes:
       - .:/app
       - community_node_modules:/app/node_modules
       - ./config/gcs-service-account.json:/app/config/gcs-service-account.json:ro
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_started
     networks:
       - infra_network
       - services_network
@@ -634,9 +614,6 @@ volumes:
   payments_node_modules:
   events_node_modules:
   community_node_modules:
-
-  rabbitmq_data:
-  redis_data:
 
 # ===========================
 # Networks
