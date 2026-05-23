@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react'
 import Image from 'next/image'
 import { Card } from '@shared/components/ui/card'
-import { Text } from './typography'
 
-// -- types --
 export type ArtistCardBase = {
   name?: string
   location?: string
@@ -25,8 +23,6 @@ export type QuoteCard = ArtistCardBase & {
 
 export type ArtistCard = VideoCard | QuoteCard
 
-// -- components --
-
 type TestimonialVideoCardProps = {
   name?: string
   location?: string
@@ -42,30 +38,29 @@ export const TestimonialVideoCard = ({
 }: TestimonialVideoCardProps) => {
   return (
     <Card
-      className="flex h-[273px] w-[183px] flex-col space-y-[20px] rounded-2xl border-none p-4 lg:!h-[415px] lg:!w-[219px] lg:space-y-[15px] lg:!rounded-[16.7px] lg:p-[10px] lg:pt-[20px]"
+      className="flex h-[360px] w-[248px] shrink-0 flex-col gap-4 rounded-[8px] border border-white/12 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md lg:h-[430px] lg:w-[300px] lg:p-4"
       style={{ backgroundColor }}
     >
-      {/* -- info -- */}
-      <div className="font-inter lg:font-monument-grotes space-y-1 self-stretch lg:space-y-0">
-        <Text className="text-center text-[16px] leading-[150%] font-semibold !text-white lg:text-[18px] lg:leading-[120%] lg:font-bold">
+      <div className="font-inter space-y-1 self-stretch">
+        <p className="text-center text-base leading-6 font-semibold text-white lg:text-lg">
           {name}
-        </Text>
-        <Text className="text-center text-[12px] leading-[130%] font-normal !text-white lg:text-[16px] lg:leading-[120%]">
-          {location}
-        </Text>
+        </p>
+        <p className="text-center text-sm leading-5 text-white/72 lg:text-base">{location}</p>
       </div>
 
-      {/* -- video -- */}
-      <div className="h-[177px] w-[151px] overflow-hidden rounded-xl lg:h-[329px] lg:w-[199px] lg:rounded-t-none lg:rounded-b-[12.52px]">
-        <video
-          src={videoSrc}
-          className="h-full w-full object-cover"
-          controls
-          muted
-          autoPlay
-          loop
-          playsInline
-        />
+      <div className="min-h-0 flex-1 overflow-hidden rounded-[6px] border border-white/16 bg-black">
+        {videoSrc && (
+          <video
+            src={videoSrc}
+            className="h-full w-full object-cover"
+            aria-label={`${name ?? 'Artist'} testimonial video`}
+            muted
+            autoPlay
+            loop
+            playsInline
+            preload="metadata"
+          />
+        )}
       </div>
     </Card>
   )
@@ -88,29 +83,25 @@ export const ArtistQuoteCard = ({
 }: ArtistQuoteCardProps) => {
   return (
     <Card
-      className="font-inter lg:font-monument-grotes flex h-[273px] w-[275px] flex-col space-y-[20px] rounded-2xl border-none px-4 py-8 lg:!h-[415px] lg:!w-[350px] lg:space-y-[16.7px] lg:!rounded-[16.7px] lg:p-[33.4px]"
+      className="font-inter flex h-[360px] w-[300px] shrink-0 flex-col justify-between gap-6 rounded-[8px] border border-black/10 px-5 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-md lg:h-[430px] lg:w-[390px] lg:p-8"
       style={{ backgroundColor }}
     >
-      {/* -- quote -- */}
-      <p className="h-[250px] text-[12px] leading-[125%] text-[#1A1A1A] lg:text-[20px] lg:text-black">
+      <p className="overflow-hidden text-[15px] leading-6 text-[#1A1A1A] lg:text-[19px] lg:leading-8 lg:text-black">
         {quote}
       </p>
 
-      {/* -- footer -- */}
-      <div className="flex items-center space-x-4 pt-[16.7px]">
-        <div className="relative h-[40px] w-[40px] shrink-0 overflow-hidden rounded-full lg:h-[66.7px] lg:w-[66.7px]">
+      <div className="flex items-center gap-4 border-t border-black/10 pt-4">
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-black/10 lg:h-14 lg:w-14">
           {avatarSrc && (
             <Image src={avatarSrc} alt={name || 'Artist avatar'} fill className="object-cover" />
           )}
         </div>
 
-        <div>
-          <Text className="self-stretch text-[14px] leading-[125%] font-normal text-[#1A1A1A] lg:text-[18px] lg:font-bold lg:text-black">
+        <div className="min-w-0">
+          <p className="truncate text-sm leading-5 font-semibold text-[#1A1A1A] lg:text-base lg:text-black">
             {name}
-          </Text>
-          <Text className="self-stretch text-[12px] leading-[125%] font-normal text-[#767676] lg:text-[16px]">
-            {location}
-          </Text>
+          </p>
+          <p className="truncate text-xs leading-5 text-[#767676] lg:text-sm">{location}</p>
         </div>
       </div>
     </Card>
