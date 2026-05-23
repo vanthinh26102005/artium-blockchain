@@ -135,13 +135,15 @@ const ArtworkCard = ({
       onClick={onClick}
       className={cn(
         'group min-w-0 cursor-pointer overflow-hidden rounded-[8px] border border-black/10 bg-white/82 text-left shadow-[0_18px_50px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.78)] backdrop-blur-md transition hover:-translate-y-1 hover:border-black/18 hover:shadow-[0_26px_70px_rgba(15,23,42,0.13)]',
-        featured ? 'grid gap-0 md:grid-cols-[0.44fr_0.56fr]' : 'w-[240px] shrink-0 sm:w-[270px]',
+        featured
+          ? 'grid min-h-[360px] w-full gap-0 md:grid-cols-[0.44fr_0.56fr]'
+          : 'w-[240px] shrink-0 sm:w-[270px]',
       )}
     >
       <div
         className={cn(
           'relative overflow-hidden bg-slate-100',
-          featured ? 'min-h-[280px] md:min-h-full' : 'aspect-[3/4]',
+          featured ? 'min-h-[300px] md:min-h-full' : 'aspect-[3/4]',
         )}
       >
         <Image
