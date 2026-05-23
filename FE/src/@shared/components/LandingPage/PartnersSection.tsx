@@ -6,6 +6,7 @@ import { cn } from '@shared/lib/utils'
 
 // @shared - landing page
 import LandingPageSection from './LandingPageSection'
+import { ScrollReveal } from './ScrollReveal'
 
 type PartnersSectionProps = {
   className?: string
@@ -15,7 +16,7 @@ const PartnersSection = ({ className }: PartnersSectionProps) => {
   return (
     <section className={cn('bg-[#f6f6f2] text-[#111111]', className)}>
       <LandingPageSection className="grid gap-8 lg:grid-cols-[minmax(0,0.52fr)_minmax(0,0.48fr)] lg:items-center">
-        <div>
+        <ScrollReveal distance={24}>
           <p className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-[8px] border border-black/12 bg-white/50 px-3 text-[11px] tracking-[0.2em] text-black/54 uppercase shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-md">
             <ShieldCheck className="h-4 w-4" />
             Ready for demo
@@ -51,9 +52,14 @@ const PartnersSection = ({ className }: PartnersSectionProps) => {
               </Link>
             </Button>
           </div>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid min-h-[460px] grid-cols-[0.78fr_1fr] gap-4">
+        <ScrollReveal
+          className="grid min-h-[460px] grid-cols-[0.78fr_1fr] gap-4"
+          delay={100}
+          direction="right"
+          distance={24}
+        >
           <div className="relative mt-16 overflow-hidden rounded-[8px] border border-black/10 bg-white shadow-[0_20px_70px_rgba(0,0,0,0.12)]">
             <Image
               src="/images/homepage-v2/community-spotlight/art-3.jpg"
@@ -80,7 +86,7 @@ const PartnersSection = ({ className }: PartnersSectionProps) => {
               </p>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </LandingPageSection>
     </section>
   )

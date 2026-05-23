@@ -4,6 +4,7 @@ import { cn } from '@shared/lib/utils'
 
 // @shared - landing page
 import LandingPageSection from './LandingPageSection'
+import { ScrollReveal } from './ScrollReveal'
 
 type IntroductionProps = {
   className?: string
@@ -43,7 +44,7 @@ const Introduction = ({ className }: IntroductionProps) => {
   return (
     <section className={cn('bg-[#f4f1ea] text-[#121212]', className)}>
       <LandingPageSection className="grid gap-8 lg:grid-cols-[minmax(0,0.45fr)_minmax(0,0.55fr)] lg:items-center">
-        <div>
+        <ScrollReveal distance={24}>
           <p className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-[8px] border border-black/12 bg-white/[0.45] px-3 text-[11px] tracking-[0.2em] text-black/54 uppercase shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-md">
             <ShieldCheck className="h-4 w-4" />
             One connected workspace
@@ -66,9 +67,14 @@ const Introduction = ({ className }: IntroductionProps) => {
               </div>
             ))}
           </div>
-        </div>
+        </ScrollReveal>
 
-        <div className="relative overflow-hidden rounded-[8px] bg-black shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
+        <ScrollReveal
+          className="relative overflow-hidden rounded-[8px] bg-black shadow-[0_24px_80px_rgba(0,0,0,0.18)]"
+          delay={100}
+          direction="right"
+          distance={24}
+        >
           <video
             ref={videoRef}
             className="aspect-[16/11] h-full min-h-[320px] w-full object-cover opacity-90"
@@ -96,7 +102,7 @@ const Introduction = ({ className }: IntroductionProps) => {
               <Play className="h-5 w-5 fill-black" />
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </LandingPageSection>
     </section>
   )

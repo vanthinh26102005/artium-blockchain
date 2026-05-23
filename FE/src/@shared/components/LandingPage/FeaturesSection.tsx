@@ -8,6 +8,7 @@ import { cn } from '@shared/lib/utils'
 
 // @shared - landing page
 import LandingPageSection from './LandingPageSection'
+import { ScrollReveal } from './ScrollReveal'
 import { FEATURES } from './constants'
 
 type FeaturesSectionProps = {
@@ -29,7 +30,7 @@ const FeaturesSection = ({ className }: FeaturesSectionProps) => {
     <section className={cn('bg-white text-[#111111]', className)}>
       <LandingPageSection>
         <div className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,0.62fr)_minmax(320px,0.38fr)] lg:items-end">
-          <div>
+          <ScrollReveal distance={24}>
             <p className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-[8px] border border-black/10 bg-white/70 px-3 text-[11px] tracking-[0.2em] text-black/50 uppercase shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur-md">
               <LayoutDashboard className="h-4 w-4" />
               Tools that close the loop
@@ -37,15 +38,17 @@ const FeaturesSection = ({ className }: FeaturesSectionProps) => {
             <h2 className="font-monument-grotes max-w-4xl text-4xl leading-[1] font-semibold tracking-normal uppercase md:text-6xl">
               One platform for the work after discovery.
             </h2>
-          </div>
-          <p className="text-base leading-7 text-black/62 lg:text-lg">
-            Keep the storefront beautiful and the operational layer practical. Each tool is designed
-            for repeat use by working artists and gallery teams.
-          </p>
+          </ScrollReveal>
+          <ScrollReveal delay={90} distance={24}>
+            <p className="text-base leading-7 text-black/62 lg:text-lg">
+              Keep the storefront beautiful and the operational layer practical. Each tool is
+              designed for repeat use by working artists and gallery teams.
+            </p>
+          </ScrollReveal>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[390px_minmax(0,1fr)]">
-          <div className="space-y-3">
+          <ScrollReveal className="space-y-3" delay={80} direction="left" distance={24}>
             {FEATURES.map((feature, idx) => {
               const isActive = idx === activeIndex
               return (
@@ -88,9 +91,14 @@ const FeaturesSection = ({ className }: FeaturesSectionProps) => {
               Start building
               <ArrowRight className="h-4 w-4" />
             </Button>
-          </div>
+          </ScrollReveal>
 
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
+          <ScrollReveal
+            className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]"
+            delay={160}
+            direction="right"
+            distance={24}
+          >
             <div className="relative min-h-[360px] overflow-hidden rounded-[8px] border border-black/10 bg-white/70 shadow-[0_24px_80px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur-md lg:min-h-[590px]">
               <Image
                 key={activeFeature.title}
@@ -120,7 +128,7 @@ const FeaturesSection = ({ className }: FeaturesSectionProps) => {
                 ))}
               </ul>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </LandingPageSection>
     </section>
