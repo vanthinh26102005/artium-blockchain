@@ -1,7 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, Logger, HttpException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { RpcExceptionHelper, OrderStatus, EscrowState } from '@app/common';
+import {
+  RpcExceptionHelper,
+  OrderStatus,
+  EscrowState,
+  OrderPaymentMethod,
+} from '@app/common';
 import { MarkShippedCommand } from '../MarkShipped.command';
 import { Order } from '../../../domain/entities';
 import { IOrderRepository } from '../../../domain/interfaces';
@@ -15,6 +20,21 @@ export class MarkShippedHandler implements ICommandHandler<MarkShippedCommand> {
     @Inject(IOrderRepository)
     private readonly orderRepo: IOrderRepository,
   ) {}
+
+  private isBlockchainEscrowOrder(order: Order) {
+    return (
+      order.paymentMethod === OrderPaymentMethod.BLOCKCHAIN ||
+      Boolean(order.onChainOrderId)
+    );
+  }
+
+  private assertTransactionHash(transactionHash?: string) {
+    if (!transactionHash || !/^0x[a-fA-F0-9]{64}$/.test(transactionHash)) {
+      throw RpcExceptionHelper.badRequest(
+        'A valid blockchain shipment transaction hash is required.',
+      );
+    }
+  }
 
   async execute(command: MarkShippedCommand): Promise<Order | null> {
     try {
@@ -41,6 +61,17 @@ export class MarkShippedHandler implements ICommandHandler<MarkShippedCommand> {
         throw RpcExceptionHelper.badRequest(
           `Cannot mark order as shipped in status '${order.status}'. Order must be in ESCROW_HELD status.`,
         );
+      }
+
+      if (this.isBlockchainEscrowOrder(order)) {
+        this.assertTransactionHash(data.transactionHash);
+
+        return this.orderRepo.update(orderId, {
+          carrier: data.carrier,
+          trackingNumber: data.trackingNumber,
+          shippingMethod: data.shippingMethod || null,
+          txHash: data.transactionHash,
+        });
       }
 
       return this.orderRepo.update(orderId, {

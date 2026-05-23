@@ -119,6 +119,34 @@ describe('OrdersController', () => {
     );
   });
 
+  it('passes authenticated buyer wallet to buyer order listing', async () => {
+    sendRpcMock.mockImplementation(async () => ({ data: [], total: 0 }));
+
+    await expect(
+      controller.getOrders(
+        { scope: 'buyer' as any, status: 'escrow_held' as any },
+        {
+          user: {
+            id: 'buyer-1',
+            walletAddress: ' 0xWinner ',
+          },
+        },
+      ),
+    ).resolves.toEqual({ data: [], total: 0 });
+
+    expect(sendRpcMock).toHaveBeenCalledWith(
+      ordersClientMock,
+      { cmd: 'get_orders' },
+      expect.objectContaining({
+        scope: 'buyer',
+        status: 'escrow_held',
+        buyerId: 'buyer-1',
+        buyerWallet: '0xwinner',
+        sellerId: undefined,
+      }),
+    );
+  });
+
   it('returns an order invoice for an authorized seller', async () => {
     sendRpcMock.mockImplementation(async (_client: any, pattern: any) =>
       pattern.cmd === 'get_order_by_id'

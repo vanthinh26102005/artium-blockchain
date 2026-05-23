@@ -215,6 +215,10 @@ export class OrdersController {
         ...filters,
         scope,
         buyerId: scope === OrdersWorkspaceScope.BUYER ? userId : undefined,
+        buyerWallet:
+          scope === OrdersWorkspaceScope.BUYER
+            ? normalizeWalletAddress(req.user?.walletAddress)
+            : undefined,
         sellerId: scope === OrdersWorkspaceScope.SELLER ? userId : undefined,
       },
     );

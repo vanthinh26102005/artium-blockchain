@@ -6,6 +6,10 @@ import { GetOrdersQuery } from '../GetOrders.query';
 import { Order } from '../../../domain/entities';
 import { IOrderRepository } from '../../../domain/interfaces';
 
+type OrderFilters = GetOrdersQuery['filters'] & {
+  buyerWallet?: string | null;
+};
+
 @QueryHandler(GetOrdersQuery)
 export class GetOrdersHandler implements IQueryHandler<GetOrdersQuery> {
   private readonly logger = new Logger(GetOrdersHandler.name);
@@ -19,7 +23,7 @@ export class GetOrdersHandler implements IQueryHandler<GetOrdersQuery> {
     query: GetOrdersQuery,
   ): Promise<{ data: Order[]; total: number }> {
     try {
-      const { filters } = query;
+      const filters = query.filters as OrderFilters;
       this.logger.log(
         `Getting orders with filters: ${JSON.stringify(filters)}`,
       );
@@ -36,8 +40,20 @@ export class GetOrdersHandler implements IQueryHandler<GetOrdersQuery> {
         });
       }
 
+      if (filters.buyerId) {
+        return this.orderRepo.findByBuyerIdentity({
+          buyerId: filters.buyerId,
+          buyerWallet: filters.buyerWallet,
+          skip: filters.skip,
+          take: filters.take ?? 20,
+          status: filters.status,
+          onChainOrderId: filters.onChainOrderId,
+          escrowState: filters.escrowState,
+          paymentMethod: filters.paymentMethod,
+        });
+      }
+
       const where: Record<string, any> = {};
-      if (filters.buyerId) where.collectorId = filters.buyerId;
       if (filters.status) where.status = filters.status;
       if (filters.onChainOrderId) where.onChainOrderId = filters.onChainOrderId;
       if (filters.escrowState !== undefined)

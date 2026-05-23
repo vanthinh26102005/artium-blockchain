@@ -56,6 +56,8 @@ export const CopyValueField = ({
 }: CopyValueFieldProps) => {
   const resetTimerRef = useRef<number | null>(null)
   const [copyState, setCopyState] = useState<CopyState>('idle')
+  const copyValue = value?.trim() ?? ''
+  const hasCopyValue = copyValue.length > 0
 
   useEffect(() => {
     return () => {
@@ -77,12 +79,12 @@ export const CopyValueField = ({
   }
 
   const handleCopy = async () => {
-    if (!value) {
+    if (!hasCopyValue) {
       return
     }
 
     try {
-      await copyText(value)
+      await copyText(copyValue)
       setCopyState('copied')
     } catch {
       setCopyState('error')
@@ -95,15 +97,22 @@ export const CopyValueField = ({
     copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy'
 
   return (
-    <div className={cn('space-y-2', className)}>
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
+    <div className={cn('min-w-0 space-y-2', className)}>
+      <p className="text-xs font-semibold tracking-[0.16em] text-slate-400 uppercase">{label}</p>
 
-      {value ? (
-        <div className="flex items-start gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="min-w-0 flex-1 break-all font-mono text-[13px] text-slate-900">
-            {displayValue ?? value}
+      <div className="flex min-h-[58px] min-w-0 items-start gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
+        <div className="min-w-0 flex-1">
+          <p
+            className={cn(
+              'text-sm leading-5 break-words',
+              hasCopyValue ? 'font-mono text-[13px] break-all text-slate-900' : 'text-slate-500',
+            )}
+          >
+            {hasCopyValue ? displayValue || copyValue : emptyLabel}
           </p>
+        </div>
 
+        {hasCopyValue ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -111,7 +120,7 @@ export const CopyValueField = ({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 rounded-full text-slate-500 hover:bg-white hover:text-slate-900"
+                  className="h-8! w-8! shrink-0 rounded-full text-slate-500 hover:bg-white hover:text-slate-900"
                   onClick={() => void handleCopy()}
                   aria-label={`Copy ${label}`}
                 >
@@ -127,12 +136,8 @@ export const CopyValueField = ({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        </div>
-      ) : (
-        <p className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-500">
-          {emptyLabel}
-        </p>
-      )}
+        ) : null}
+      </div>
     </div>
   )
 }

@@ -10,9 +10,10 @@ type UnlinkWalletResult = {
 };
 
 @CommandHandler(UnlinkWalletCommand)
-export class UnlinkWalletHandler
-  implements ICommandHandler<UnlinkWalletCommand, UnlinkWalletResult>
-{
+export class UnlinkWalletHandler implements ICommandHandler<
+  UnlinkWalletCommand,
+  UnlinkWalletResult
+> {
   private readonly logger = new Logger(UnlinkWalletHandler.name);
 
   constructor(
@@ -25,6 +26,16 @@ export class UnlinkWalletHandler
       const user = await this.userRepository.findById(command.userId);
       if (!user) {
         throw RpcExceptionHelper.notFound('User not found');
+      }
+      if (!user.walletAddress) {
+        throw RpcExceptionHelper.badRequest(
+          'No wallet is linked to this account.',
+        );
+      }
+      if (!this.hasRecoverableSignInMethod(user)) {
+        throw RpcExceptionHelper.conflict(
+          'Add and verify another sign-in method before removing this wallet.',
+        );
       }
 
       const updatedUser = await this.userRepository.update(command.userId, {
@@ -45,5 +56,20 @@ export class UnlinkWalletHandler
 
       throw error;
     }
+  }
+
+  private hasRecoverableSignInMethod(user: {
+    email?: string | null;
+    googleId?: string | null;
+    password?: string | null;
+    isEmailVerified?: boolean | null;
+  }) {
+    if (user.googleId) {
+      return true;
+    }
+
+    const hasEmail = Boolean(user.email?.trim());
+
+    return hasEmail && Boolean(user.password || user.isEmailVerified);
   }
 }

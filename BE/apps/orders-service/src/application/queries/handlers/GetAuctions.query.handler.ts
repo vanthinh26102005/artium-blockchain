@@ -8,6 +8,7 @@ import {
   EscrowState,
   GetAuctionsDto,
   OrderPaymentMethod,
+  OrderPaymentStatus,
   OrderStatus,
   RpcExceptionHelper,
 } from '@app/common';
@@ -163,8 +164,12 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     }
 
     const chainAuction = await this.getOnChainAuction(orderWithItems);
-    const currentBidWei = this.resolveCurrentBidWei(
+    const projectedOrder = await this.reconcileOrderProjection(
       orderWithItems,
+      chainAuction,
+    );
+    const currentBidWei = this.resolveCurrentBidWei(
+      projectedOrder,
       chainAuction,
     );
     const minBidIncrementWei =
@@ -172,9 +177,9 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     const minimumNextBidWei = (
       BigInt(currentBidWei) + BigInt(minBidIncrementWei)
     ).toString();
-    const endsAt = this.resolveEndsAt(orderWithItems, chainAuction);
+    const endsAt = this.resolveEndsAt(projectedOrder, chainAuction);
     const statusKey = this.resolveStatusKey(
-      orderWithItems,
+      projectedOrder,
       chainAuction,
       endsAt,
     );
@@ -185,7 +190,7 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     return {
       auctionId: onChainOrderId,
       onChainOrderId,
-      contractAddress: orderWithItems.contractAddress ?? null,
+      contractAddress: projectedOrder.contractAddress ?? null,
       statusKey,
       statusLabel: this.resolveStatusLabel(statusKey),
       currentBidWei,
@@ -196,22 +201,22 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
       endsAt,
       serverTime: new Date().toISOString(),
       highestBidder: this.normalizeAddress(
-        chainAuction?.highestBidder ?? orderWithItems.buyerWallet,
+        chainAuction?.highestBidder ?? projectedOrder.buyerWallet,
       ),
       sellerWallet: this.normalizeAddress(
-        chainAuction?.seller ?? orderWithItems.sellerWallet,
+        chainAuction?.seller ?? projectedOrder.sellerWallet,
       ),
-      txHash: orderWithItems.txHash ?? null,
-      orderProjectionId: orderWithItems.id,
-      orderNumber: orderWithItems.orderNumber,
-      orderStatus: orderWithItems.status,
-      paymentStatus: orderWithItems.paymentStatus,
-      escrowState: orderWithItems.escrowState ?? null,
+      txHash: projectedOrder.txHash ?? null,
+      orderProjectionId: projectedOrder.id,
+      orderNumber: projectedOrder.orderNumber,
+      orderStatus: projectedOrder.status,
+      paymentStatus: projectedOrder.paymentStatus,
+      escrowState: projectedOrder.escrowState ?? null,
       artwork: {
         artworkId: item.artworkId,
         sellerId: item.sellerId,
         title,
-        creatorName: orderWithItems.sellerWallet ?? 'Artium seller',
+        creatorName: projectedOrder.sellerWallet ?? 'Artium seller',
         imageSrc,
         imageAlt: imageSrc
           ? `Artwork preview of ${title}`
@@ -219,6 +224,111 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
         categoryKey,
       },
     };
+  }
+
+  private async reconcileOrderProjection(
+    order: Order,
+    chainAuction: AuctionCoreDto | null,
+  ): Promise<Order> {
+    if (!chainAuction) {
+      return order;
+    }
+
+    const patch = this.buildOnChainProjectionPatch(order, chainAuction);
+    if (!patch) {
+      return order;
+    }
+
+    this.logger.log(
+      `Repairing auction order projection ${order.onChainOrderId}: ${order.status} -> ${patch.status ?? order.status}`,
+    );
+    await this.orderRepo.update(order.id, patch);
+    return Object.assign(order, patch);
+  }
+
+  private buildOnChainProjectionPatch(
+    order: Order,
+    chainAuction: AuctionCoreDto,
+  ): Partial<Order> | null {
+    const patch: Partial<Order> = {};
+    const nextState = chainAuction.state;
+    const nextStatus = this.resolveOrderStatusFromEscrowState(
+      nextState,
+      order.status,
+    );
+    const nextPaymentStatus = this.resolvePaymentStatusFromEscrowState(
+      nextState,
+      order.paymentStatus,
+    );
+    const highestBidWei = chainAuction.highestBid?.toString();
+    const highestBidder = this.normalizeAddress(chainAuction.highestBidder);
+
+    if (order.escrowState !== nextState) {
+      patch.escrowState = nextState;
+    }
+    if (nextStatus !== order.status) {
+      patch.status = nextStatus;
+    }
+    if (nextPaymentStatus !== order.paymentStatus) {
+      patch.paymentStatus = nextPaymentStatus;
+    }
+    if (
+      highestBidWei &&
+      highestBidWei !== '0' &&
+      highestBidWei !== order.bidAmountWei
+    ) {
+      patch.bidAmountWei = highestBidWei;
+      Object.assign(patch, this.getBidAmountTotals(highestBidWei));
+    }
+    if (
+      highestBidder &&
+      highestBidder !== ZERO_ADDRESS &&
+      highestBidder !== this.normalizeAddress(order.buyerWallet)
+    ) {
+      patch.buyerWallet = highestBidder;
+    }
+
+    return Object.keys(patch).length > 0 ? patch : null;
+  }
+
+  private resolveOrderStatusFromEscrowState(
+    escrowState: EscrowState,
+    currentStatus: OrderStatus,
+  ): OrderStatus {
+    switch (escrowState) {
+      case EscrowState.ENDED:
+        return OrderStatus.ESCROW_HELD;
+      case EscrowState.SHIPPED:
+        return OrderStatus.SHIPPED;
+      case EscrowState.DISPUTED:
+        return OrderStatus.DISPUTE_OPEN;
+      case EscrowState.COMPLETED:
+        return OrderStatus.DELIVERED;
+      case EscrowState.CANCELLED:
+        return OrderStatus.CANCELLED;
+      case EscrowState.STARTED:
+      default:
+        return currentStatus;
+    }
+  }
+
+  private resolvePaymentStatusFromEscrowState(
+    escrowState: EscrowState,
+    currentStatus: OrderPaymentStatus,
+  ): OrderPaymentStatus {
+    switch (escrowState) {
+      case EscrowState.ENDED:
+      case EscrowState.SHIPPED:
+      case EscrowState.DISPUTED:
+        return OrderPaymentStatus.ESCROW;
+      case EscrowState.COMPLETED:
+        return OrderPaymentStatus.RELEASED;
+      case EscrowState.CANCELLED:
+        return OrderPaymentStatus.REFUNDED;
+      case EscrowState.STARTED:
+      default:
+        return currentStatus;
+    }
   }
 
   private async getOnChainAuction(
@@ -243,6 +353,23 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     chainAuction: AuctionCoreDto | null,
   ) {
     return chainAuction?.highestBid?.toString() ?? order.bidAmountWei ?? '0';
+  }
+
+  private getBidAmountTotals(amountWei?: string) {
+    if (!amountWei || !/^\d+$/.test(amountWei)) {
+      return {};
+    }
+
+    const amountEth = Number(amountWei) / 1_000_000_000_000_000_000;
+    if (!Number.isFinite(amountEth)) {
+      return {};
+    }
+
+    const roundedAmount = Number(amountEth.toFixed(2));
+    return {
+      subtotal: roundedAmount,
+      totalAmount: roundedAmount,
+    };
   }
 
   private resolveEndsAt(order: Order, chainAuction: AuctionCoreDto | null) {

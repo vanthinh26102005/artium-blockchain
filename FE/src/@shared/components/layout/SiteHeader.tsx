@@ -44,8 +44,6 @@ const shortenWalletAddress = (address?: string | null) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
-const isWalletLocalEmail = (email?: string | null) => Boolean(email?.endsWith('@wallet.local'))
-
 const getUsableAvatarUrl = (avatarUrl?: string | null) => {
   const trimmed = avatarUrl?.trim()
   if (
@@ -135,18 +133,11 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
 
   const walletLabel = shortenWalletAddress(user?.walletAddress)
   const currentWalletAddress = user?.walletAddress ?? null
-  const hasRecoverableLogin = Boolean(
-    user?.googleId || (user?.email && !isWalletLocalEmail(user.email) && user.isEmailVerified),
-  )
+  const hasRecoverableLogin = Boolean(user?.googleId || user?.email)
   const canRemoveWallet = !currentWalletAddress || hasRecoverableLogin
   const profileHandle = user?.username ?? user?.id ?? user?.email ?? 'profile'
   const profileLabel =
-    user?.username ??
-    user?.displayName ??
-    user?.fullName ??
-    walletLabel ??
-    (isWalletLocalEmail(user?.email) ? null : user?.email) ??
-    'user'
+    user?.username ?? user?.displayName ?? user?.fullName ?? walletLabel ?? user?.email ?? 'user'
   const useWhiteNav = isLandingVariant || isAuthRoute || (isTransparentHeaderPage && !isScrolled)
   const avatarFallbackUrl = useWhiteNav
     ? '/images/logo/logo-dark-mode.png'
@@ -292,8 +283,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                             @{profileLabel}
                           </p>
                           <p className="mt-0.5 truncate text-xs font-medium text-slate-500">
-                            {walletLabel ??
-                              (isWalletLocalEmail(user.email) ? 'Artium account' : user.email)}
+                            {walletLabel ?? user.email}
                           </p>
                         </div>
                       </div>

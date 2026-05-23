@@ -144,10 +144,7 @@ export const formatWeiToEth = (value?: string | null, fractionDigits = 6) => {
   const unsignedWei = normalizedValue.replace(/^0+/, '') || '0'
   const paddedWei = unsignedWei.padStart(19, '0')
   const whole = paddedWei.slice(0, -18).replace(/^0+/, '') || '0'
-  const fractionText = paddedWei
-    .slice(-18)
-    .slice(0, Math.max(0, fractionDigits))
-    .replace(/0+$/, '')
+  const fractionText = paddedWei.slice(-18).slice(0, Math.max(0, fractionDigits)).replace(/0+$/, '')
 
   return fractionText.length > 0 ? `${whole}.${fractionText} ETH` : `${whole} ETH`
 }
@@ -156,7 +153,7 @@ const hasBlockchainBidAmount = (order: OrderResponse) =>
   order.paymentMethod === 'blockchain' && Boolean(order.bidAmountWei)
 
 export const isBlockchainOrder = (order: OrderResponse) =>
-  order.paymentMethod === 'blockchain' || Boolean(order.onChainOrderId)
+  order.paymentMethod?.trim().toLowerCase() === 'blockchain' || Boolean(order.onChainOrderId)
 
 const isPrimaryBlockchainBidItem = (order: OrderResponse, itemIndex: number) =>
   itemIndex === 0 && hasBlockchainBidAmount(order)
@@ -414,7 +411,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         emptyAddressLabel: 'No shipping address has been captured yet for this order.',
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Assigned at dispatch' },
-          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking will appear after dispatch' },
+          {
+            label: 'Tracking',
+            value: order.trackingNumber ?? 'Tracking will appear after dispatch',
+          },
           { label: 'Shipping method', value: order.shippingMethod ?? 'Finalized before dispatch' },
         ],
       }
@@ -426,8 +426,14 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         emptyAddressLabel: 'No shipping address has been captured yet for this order.',
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Seller has not assigned a carrier yet' },
-          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking will appear after dispatch' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Selected once shipment is booked' },
+          {
+            label: 'Tracking',
+            value: order.trackingNumber ?? 'Tracking will appear after dispatch',
+          },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Selected once shipment is booked',
+          },
         ],
       }
     case 'shipped':
@@ -439,7 +445,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Carrier not provided' },
           { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not provided' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not provided' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping method not provided',
+          },
         ],
       }
     case 'dispute_open':
@@ -452,7 +461,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Carrier not recorded' },
           { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not recorded' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not recorded' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping method not recorded',
+          },
         ],
       }
     case 'delivered':
@@ -464,7 +476,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Carrier not recorded' },
           { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not recorded' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not recorded' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping method not recorded',
+          },
         ],
       }
     case 'cancelled':
@@ -476,7 +491,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'No carrier will be assigned' },
           { label: 'Tracking', value: order.trackingNumber ?? 'No tracking will be added' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping is no longer scheduled' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping is no longer scheduled',
+          },
         ],
       }
     case 'refunded':
@@ -579,7 +597,7 @@ const buildEscrowOrderTimeline = (order: OrderResponse): OrderTimelineStep[] => 
       key: 'closed',
       label: isCancelled ? 'Cancelled' : isRefunded ? 'Refunded' : 'Complete',
       description: isCancelled
-        ? order.cancelledReason ?? 'The auction order was cancelled before completion.'
+        ? (order.cancelledReason ?? 'The auction order was cancelled before completion.')
         : isRefunded
           ? 'The auction order is closed after refund.'
           : 'No further action is required.',
@@ -628,25 +646,23 @@ const buildCardOrderTimeline = (order: OrderResponse): OrderTimelineStep[] => {
         ? 'A delivery dispute is open and awaiting resolution.'
         : 'The buyer confirmed the artwork was received.',
       date: isDisputed ? order.disputeOpenedAt : order.deliveredAt,
-      state: order.deliveredAt || order.disputeOpenedAt
-        ? 'complete'
-        : order.status === 'shipped'
-          ? 'current'
-          : 'upcoming',
+      state:
+        order.deliveredAt || order.disputeOpenedAt
+          ? 'complete'
+          : order.status === 'shipped'
+            ? 'current'
+            : 'upcoming',
     },
     {
       key: 'closed',
       label: isCancelled ? 'Cancelled' : isRefunded ? 'Refunded' : 'Complete',
       description: isCancelled
-        ? order.cancelledReason ?? 'The order was cancelled before completion.'
+        ? (order.cancelledReason ?? 'The order was cancelled before completion.')
         : isRefunded
           ? 'Funds were returned and the order was closed.'
           : 'No further action is required.',
       date: order.cancelledAt ?? order.disputeResolvedAt ?? order.deliveredAt,
-      state:
-        isCancelled || isRefunded || order.status === 'delivered'
-          ? 'complete'
-          : 'upcoming',
+      state: isCancelled || isRefunded || order.status === 'delivered' ? 'complete' : 'upcoming',
     },
   ]
 }

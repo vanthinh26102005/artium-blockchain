@@ -45,7 +45,10 @@ export class CompleteUserRegistrationHandler implements ICommandHandler<
 
       const result = await this.transactionService.execute(async (manager) => {
         const newUser = await this.registrationService.createUser(
-          registrationPayload,
+          {
+            ...registrationPayload,
+            isEmailVerified: true,
+          },
           manager,
         );
 

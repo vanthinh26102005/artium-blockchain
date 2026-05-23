@@ -222,6 +222,7 @@ export class OrdersMicroserviceController {
       carrier: string;
       trackingNumber: string;
       shippingMethod?: string;
+      transactionHash?: string;
     },
   ) {
     this.logger.debug(

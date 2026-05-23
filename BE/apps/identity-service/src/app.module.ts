@@ -149,21 +149,31 @@ export const Services = [
       isGlobal: true,
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
+        const url = configService.get<string>('REDIS_URL')?.trim();
+        const tlsEnabled = configService.get<string>('REDIS_TLS') === 'true';
         const host = configService.get<string>('REDIS_HOST');
         const port = configService.get<number>('REDIS_PORT');
 
         const logger = new Logger('RedisCache');
 
         logger.log(
-          `[Redis] Configuring Redis cache with host: ${host}, port: ${port}`,
+          url
+            ? `[Redis] Configuring Redis cache with external URL`
+            : `[Redis] Configuring Redis cache with host: ${host}, port: ${port}`,
         );
 
         try {
-          const cacheConfig = {
-            store: redisStore,
-            host,
-            port,
-          };
+          const cacheConfig = url
+            ? {
+                store: redisStore,
+                url,
+                ...(tlsEnabled ? { socket: { tls: true } } : {}),
+              }
+            : {
+                store: redisStore,
+                host,
+                port,
+              };
           logger.log(`[Redis] Redis cache configuration successfully prepared`);
           return cacheConfig;
         } catch (error) {
