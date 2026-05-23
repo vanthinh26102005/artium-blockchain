@@ -17,11 +17,11 @@ ARTIUM là đồ án của Nhóm 10 cho môn IE213 - Kỹ thuật phát triển 
 
 | STT | MSSV     | Họ và tên         | Vai trò trong nhóm                                                                                                                                                      | Tỷ lệ |
 | --- | -------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| 1   | 23521500 | Ngô Văn Thịnh     | Nhóm trưởng, điều phối dự án, hỗ trợ fullstack và blockchain, rà soát tích hợp frontend/backend/smart contract, tổng hợp báo cáo và demo.                               | 21%   |
-| 2   | 23521647 | Phan Hữu Trí      | Phụ trách frontend và blockchain integration: giao diện người dùng, MetaMask login, wallet checkout, hiển thị trạng thái giao dịch và hỗ trợ demo frontend.             | 19.5% |
-| 3   | 23521827 | Hồ Vương Tường Vy | Phụ trách frontend, tài liệu và luồng nghiệp vụ: hỗ trợ giao diện, use case, sequence, ERD, báo cáo, slide, minh chứng demo và tối ưu kỹ thuật web.                     | 19.5% |
-| 4   | 23521497 | Dương Phước Thịnh | Phụ trách backend và blockchain: Orders/Payments service, Ethereum transaction confirmation, blockchain event sync, smart contract integration và deploy/demo kỹ thuật. | 21%   |
-| 5   | 23520314 | Phạm Viết Đức     | Phụ trách backend, blockchain và kiểm thử: hỗ trợ API/database, smart contract test, kiểm thử luồng chính, Docker/Swagger/minh chứng triển khai.                        | 19%   |
+| 1   | 23521500 | Ngô Văn Thịnh     | Nhóm trưởng, điều phối dự án, hỗ trợ fullstack và blockchain, rà soát tích hợp frontend/backend/smart contract, tổng hợp báo cáo và demo.                               | 20.6% |
+| 2   | 23521647 | Phan Hữu Trí      | Phụ trách frontend và blockchain integration: giao diện người dùng, MetaMask login, wallet checkout, hiển thị trạng thái giao dịch và hỗ trợ demo frontend.             | 19.6% |
+| 3   | 23521827 | Hồ Vương Tường Vy | Phụ trách frontend, tài liệu và luồng nghiệp vụ: hỗ trợ giao diện, use case, sequence, ERD, báo cáo, slide, minh chứng demo và tối ưu kỹ thuật web.                     | 19.6% |
+| 4   | 23521497 | Dương Phước Thịnh | Phụ trách backend và blockchain: Orders/Payments service, Ethereum transaction confirmation, blockchain event sync, smart contract integration và deploy/demo kỹ thuật. | 20.6% |
+| 5   | 23520314 | Phạm Viết Đức     | Phụ trách backend, blockchain và kiểm thử: hỗ trợ API/database, smart contract test, kiểm thử luồng chính, Docker/Swagger/minh chứng triển khai.                        | 19.6% |
 |     |          |                   | Tổng tỷ lệ đóng góp                                                                                                                                                     | 100%  |
 
 ## Liên Kết Quan Trọng
