@@ -4,15 +4,25 @@ import Link from 'next/link'
 import { ArrowUp } from 'lucide-react'
 
 const footerLinks = {
-  Company: ['Pricing', 'About us', 'Contact us', 'Editorial'],
-  'Join the Community': [
-    'Onboarding Guide',
-    'For Artists',
-    'For Galleries',
-    'Why Artium For Artists',
-    'Why Artium For Galleries',
+  Company: [
+    { label: 'Pricing', href: '/pricing' },
+    { label: 'About us', href: '/about' },
+    { label: 'Contact us', href: '/contact' },
+    { label: 'Editorial', href: '/editorial' },
   ],
-  'Policy & Guidelines': ['FAQs', 'Community Guidelines', 'Terms of Service', 'Privacy Policy'],
+  'Join the Community': [
+    { label: 'Onboarding Guide', href: '/onboarding-guide' },
+    { label: 'For Artists', href: '/for-artists' },
+    { label: 'For Galleries', href: '/for-galleries' },
+    { label: 'Why Artium For Artists', href: '/why-artium-for-artists' },
+    { label: 'Why Artium For Galleries', href: '/why-artium-for-galleries' },
+  ],
+  'Policy & Guidelines': [
+    { label: 'FAQs', href: '/faqs' },
+    { label: 'Community Guidelines', href: '/community-guidelines' },
+    { label: 'Terms of Service', href: '/terms-of-service' },
+    { label: 'Privacy Policy', href: '/privacy-policy' },
+  ],
 }
 
 export const SiteFooter = () => {
@@ -60,9 +70,9 @@ export const SiteFooter = () => {
                   <h4 className="mb-5 text-sm font-semibold text-white">Company</h4>
                   <ul className="space-y-3.5 text-[0.8rem] text-white/70">
                     {footerLinks.Company.map((item) => (
-                      <li key={item}>
-                        <Link href="#" className="transition hover:text-white">
-                          {item}
+                      <li key={item.href}>
+                        <Link href={item.href} className="transition hover:text-white">
+                          {item.label}
                         </Link>
                       </li>
                     ))}
@@ -73,9 +83,9 @@ export const SiteFooter = () => {
                   <h4 className="mb-5 text-sm font-semibold text-white">Join the Community</h4>
                   <ul className="space-y-3.5 text-[0.8rem] text-white/70">
                     {footerLinks['Join the Community'].map((item) => (
-                      <li key={item}>
-                        <Link href="#" className="transition hover:text-white">
-                          {item}
+                      <li key={item.href}>
+                        <Link href={item.href} className="transition hover:text-white">
+                          {item.label}
                         </Link>
                       </li>
                     ))}
@@ -86,9 +96,9 @@ export const SiteFooter = () => {
                   <h4 className="mb-5 text-sm font-semibold text-white">Policy & Guidelines</h4>
                   <ul className="space-y-3.5 text-[0.8rem] text-white/70">
                     {footerLinks['Policy & Guidelines'].map((item) => (
-                      <li key={item}>
-                        <Link href="#" className="transition hover:text-white">
-                          {item}
+                      <li key={item.href}>
+                        <Link href={item.href} className="transition hover:text-white">
+                          {item.label}
                         </Link>
                       </li>
                     ))}
