@@ -12,7 +12,7 @@ FROM base AS builder
 COPY package.json yarn.lock ./
 COPY apps/notifications-service/package.json ./apps/notifications-service/package.json
 COPY libs ./libs
-RUN yarn install --frozen-lockfile
+RUN yarn install
 
 COPY webpack-hmr.config.js tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
 COPY apps/notifications-service/tsconfig.json ./apps/notifications-service/tsconfig.json
