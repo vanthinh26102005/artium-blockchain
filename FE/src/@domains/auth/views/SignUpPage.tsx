@@ -25,7 +25,10 @@ import {
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { useRegister } from '@domains/auth/hooks/useRegister'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
-import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
+import {
+  getPracticalAuthErrorMessage,
+  isCaptchaRequiredError,
+} from '@domains/auth/utils/authErrors'
 import { buildAuthCallbackUrl, getSafeNextPath } from '@domains/auth/utils/authRedirect'
 import {
   AuthDivider,
@@ -37,6 +40,7 @@ import {
   AuthInput,
   AuthShell,
   SocialAuthButtons,
+  TurnstileChallenge,
   WalletLoginPanel,
 } from '@domains/auth/components'
 import {
@@ -56,6 +60,9 @@ export const SignUpPage = () => {
   const [step, setStep] = useState<'details' | 'otp'>('details')
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
   const [isWalletPromptOpen, setIsWalletPromptOpen] = useState(false)
+  const [isCaptchaRequired, setIsCaptchaRequired] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaChallengeKey, setCaptchaChallengeKey] = useState(0)
   const { canRenderGuestPage } = useRedirectAuthenticatedUser('/', isWalletPromptOpen)
   const [pendingDetails, setPendingDetails] = useState<SignUpDetailsFormValues | null>(null)
   const detailsForm = useForm<SignUpDetailsFormValues>({
@@ -85,11 +92,19 @@ export const SignUpPage = () => {
         firstName: values.firstName.trim(),
         email: values.email.trim(),
         password: values.password,
+        captchaToken: isCaptchaRequired ? (captchaToken ?? undefined) : undefined,
       })
       setPendingDetails(values)
       setStep('otp')
       otpForm.reset({ otp: '' })
     } catch (error) {
+      if (isCaptchaRequiredError(error)) {
+        setIsCaptchaRequired(true)
+      }
+      if (isCaptchaRequired || isCaptchaRequiredError(error)) {
+        setCaptchaToken(null)
+        setCaptchaChallengeKey((current) => current + 1)
+      }
       const message = getPracticalAuthErrorMessage(
         error,
         registerError ?? 'Something went wrong. Please try again.',
@@ -108,7 +123,10 @@ export const SignUpPage = () => {
     }
 
     try {
-      const response = await complete({ email: pendingDetails.email.trim(), otp: values.otp.trim() })
+      const response = await complete({
+        email: pendingDetails.email.trim(),
+        otp: values.otp.trim(),
+      })
       setAuth(response)
       setIsWalletPromptOpen(true)
     } catch (error) {
@@ -143,11 +161,7 @@ export const SignUpPage = () => {
 
     try {
       await signIn('google', {
-        callbackUrl: buildAuthCallbackUrl(
-          '/sign-up',
-          router.query.next,
-          '/discover?tab=top-picks',
-        ),
+        callbackUrl: buildAuthCallbackUrl('/sign-up', router.query.next, '/discover?tab=top-picks'),
       })
     } finally {
       setIsGoogleSubmitting(false)
@@ -218,9 +232,22 @@ export const SignUpPage = () => {
               />
 
               {!detailsForm.formState.errors.password ? (
-                <p className="text-xs font-medium text-auth-error">
+                <p className="text-auth-error text-xs font-medium">
                   Use at least 8 characters, including uppercase, lowercase, and a number.
                 </p>
+              ) : null}
+
+              {isCaptchaRequired ? (
+                <TurnstileChallenge
+                  action="register_initiate"
+                  challengeKey={captchaChallengeKey}
+                  onTokenChange={setCaptchaToken}
+                  onError={() =>
+                    detailsForm.setError('root', {
+                      message: 'Verification failed. Please try again.',
+                    })
+                  }
+                />
               ) : null}
 
               <FormErrorMessage
@@ -232,7 +259,11 @@ export const SignUpPage = () => {
               <Button
                 className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
                 loading={detailsForm.formState.isSubmitting || isLoading}
-                disabled={detailsForm.formState.isSubmitting || isLoading}
+                disabled={
+                  detailsForm.formState.isSubmitting ||
+                  isLoading ||
+                  (isCaptchaRequired && !captchaToken)
+                }
                 type="submit"
               >
                 {detailsForm.formState.isSubmitting || isLoading ? 'Signing up...' : 'Sign up'}
@@ -241,7 +272,11 @@ export const SignUpPage = () => {
           </FormProvider>
         ) : (
           <FormProvider {...otpForm}>
-            <form className="mt-3 space-y-4" onSubmit={otpForm.handleSubmit(handleOtpSubmit)} noValidate>
+            <form
+              className="mt-3 space-y-4"
+              onSubmit={otpForm.handleSubmit(handleOtpSubmit)}
+              noValidate
+            >
               <AuthInput
                 id="signup-email-readonly"
                 name="email"

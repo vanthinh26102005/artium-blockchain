@@ -39,6 +39,7 @@ export * from './dtos/artworks/tags/update-tag.input';
 export * from './dtos/auctions';
 export * from './dtos/community';
 export * from './dtos/identity/get-user-profile.dto';
+export * from './dtos/identity/auth-request-metadata.dto';
 export * from './dtos/identity/login-email.dto';
 export * from './dtos/identity/login-google.dto';
 export * from './dtos/identity/login-wallet.dto';

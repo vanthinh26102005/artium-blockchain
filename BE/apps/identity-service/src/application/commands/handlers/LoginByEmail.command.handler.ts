@@ -5,6 +5,7 @@ import { RpcExceptionHelper } from '@app/common';
 import * as bcrypt from 'bcryptjs';
 import {
   IUserRepository,
+  AuthAbuseProtectionService,
   LoginResponse,
   TokenService,
 } from 'apps/identity-service/src/domain';
@@ -20,6 +21,7 @@ export class LoginByEmailHandler implements ICommandHandler<
   constructor(
     @Inject(IUserRepository) private readonly userRepository: IUserRepository,
     private readonly tokenService: TokenService,
+    private readonly authAbuseProtectionService: AuthAbuseProtectionService,
   ) {}
 
   async execute(command: LoginByEmailCommand): Promise<LoginResponse> {
@@ -30,6 +32,11 @@ export class LoginByEmailHandler implements ICommandHandler<
         throw RpcExceptionHelper.badRequest('Email and password are required');
       }
 
+      await this.authAbuseProtectionService.assertCanAttemptEmailLogin(
+        command.loginInput,
+        command.metadata,
+      );
+
       this.logger.debug(`Attempting login for email: ${email}`);
 
       const user = await this.userRepository.findByEmail(email);
@@ -37,16 +44,33 @@ export class LoginByEmailHandler implements ICommandHandler<
         this.logger.warn(
           `Login failed for email: ${email} - User not found or missing password`,
         );
+        await this.authAbuseProtectionService.recordEmailLoginFailure(
+          email,
+          command.metadata,
+        );
         throw RpcExceptionHelper.unauthorized('Invalid credentials');
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         this.logger.warn(`Login failed for email: ${email} - Invalid password`);
+        await this.authAbuseProtectionService.recordEmailLoginFailure(
+          email,
+          command.metadata,
+        );
         throw RpcExceptionHelper.unauthorized('Invalid credentials');
       }
 
-      const tokenPair = await this.tokenService.generateTokenPair(user);
+      await this.authAbuseProtectionService.recordEmailLoginSuccess(
+        email,
+        command.metadata,
+      );
+
+      const tokenPair = await this.tokenService.generateTokenPair(
+        user,
+        command.metadata?.userAgent,
+        command.metadata?.ipAddress,
+      );
 
       await this.userRepository.updateLastLogin(user.id, new Date());
 

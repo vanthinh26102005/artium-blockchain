@@ -3,6 +3,7 @@ import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import {
   IUserRepository,
+  AuthAbuseProtectionService,
   OtpContext,
   OtpService,
   RequestPasswordResetResponse,
@@ -24,6 +25,7 @@ export class RequestPasswordResetHandler implements ICommandHandler<
     private readonly otpService: OtpService,
     @Inject(ITransactionService)
     private readonly transactionService: ITransactionService,
+    private readonly authAbuseProtectionService: AuthAbuseProtectionService,
   ) {}
 
   async execute(
@@ -31,6 +33,13 @@ export class RequestPasswordResetHandler implements ICommandHandler<
   ): Promise<RequestPasswordResetResponse> {
     const { email } = command.input;
     this.logger.log(`Password reset requested for email: ${email}`);
+
+    await this.authAbuseProtectionService.assertCaptchaForSensitiveRequest(
+      'password-reset-request',
+      command.input.captchaToken,
+      command.metadata,
+      'password_reset_request',
+    );
 
     const user = await this.userRepository.findByEmail(email);
     if (!user) {

@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { IdentityServiceModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
@@ -8,7 +9,10 @@ import { AllRpcExceptionsFilter } from '@app/common';
 async function bootstrap() {
   const logger = new Logger('IdentityService');
 
-  const app = await NestFactory.create(IdentityServiceModule);
+  const app = await NestFactory.create<NestExpressApplication>(
+    IdentityServiceModule,
+  );
+  app.set('trust proxy', 1);
 
   // app.enableCors({
   //   origin: true,

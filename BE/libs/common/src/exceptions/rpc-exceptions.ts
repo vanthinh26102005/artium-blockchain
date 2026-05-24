@@ -20,8 +20,12 @@ export class RpcExceptionHelper {
     return this.from(HttpStatus.UNAUTHORIZED, message);
   }
 
-  static forbidden(message: string): RpcException {
-    return this.from(HttpStatus.FORBIDDEN, message);
+  static forbidden(message: string, errors?: any): RpcException {
+    return this.from(HttpStatus.FORBIDDEN, message, errors);
+  }
+
+  static tooManyRequests(message: string): RpcException {
+    return this.from(HttpStatus.TOO_MANY_REQUESTS, message);
   }
 
   static notFound(message: string): RpcException {

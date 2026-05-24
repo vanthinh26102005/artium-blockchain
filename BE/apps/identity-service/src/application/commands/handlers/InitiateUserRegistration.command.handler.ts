@@ -1,7 +1,11 @@
 import { OutboxService } from '@app/outbox/outbox.service';
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { OtpContext, OtpService } from 'apps/identity-service/src/domain';
+import {
+  AuthAbuseProtectionService,
+  OtpContext,
+  OtpService,
+} from 'apps/identity-service/src/domain';
 import { RegistrationService } from 'apps/identity-service/src/domain/services/registration.service';
 import * as bcrypt from 'bcryptjs';
 import { ITransactionService, RpcExceptionHelper } from '@app/common/index';
@@ -18,6 +22,7 @@ export class InitiateUserRegistrationHandler implements ICommandHandler<Initiate
     @Inject(ITransactionService)
     private readonly transactionService: ITransactionService,
     private readonly outboxService: OutboxService,
+    private readonly authAbuseProtectionService: AuthAbuseProtectionService,
   ) {}
 
   async execute(command: InitiateUserRegistrationCommand): Promise<void> {
@@ -25,6 +30,13 @@ export class InitiateUserRegistrationHandler implements ICommandHandler<Initiate
     this.logger.log(`Initiating registration process for email: ${email}`);
 
     try {
+      await this.authAbuseProtectionService.assertCaptchaForSensitiveRequest(
+        'register-initiate',
+        command.input.captchaToken,
+        command.metadata,
+        'register_initiate',
+      );
+
       await this.registrationService.ensureEmailIsUnique(email);
 
       const salt = await bcrypt.genSalt();

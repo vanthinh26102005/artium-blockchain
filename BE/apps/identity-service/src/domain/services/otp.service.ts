@@ -1,10 +1,13 @@
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { OtpContext } from '../enums/otp-context.enum';
 
@@ -19,8 +22,12 @@ export class OtpService {
   private readonly logger = new Logger(OtpService.name);
   private readonly OTP_MAX_ATTEMPTS = 5;
   private readonly OTP_RETRY_LIMIT = 5;
+  private readonly OTP_DAILY_LIMIT = 20;
 
-  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly configService: ConfigService,
+  ) {}
 
   async generateAndStoreOtp(
     context: OtpContext,
@@ -82,6 +89,7 @@ export class OtpService {
   async invalidateOtp(context: OtpContext, identifier: string): Promise<void> {
     await this.cacheManager.del(this._getOtpKey(context, identifier));
     await this.cacheManager.del(this._getRetryKey(context, identifier));
+    await this.cacheManager.del(this._getCooldownKey(context, identifier));
     this.logger.log(`[OTP] Invalidated OTP data for ${context}:${identifier}`);
   }
 
@@ -135,7 +143,22 @@ export class OtpService {
     identifier: string,
   ): Promise<void> {
     const retryKey = this._getRetryKey(context, identifier);
+    const cooldownKey = this._getCooldownKey(context, identifier);
+    const dailyKey = this._getDailyKey(context, identifier);
+    const cooldownMs = this.numberConfig('OTP_RESEND_COOLDOWN_MS', 60 * 1000);
     const retryCount = (await this.cacheManager.get<number>(retryKey)) || 0;
+    const dailyCount = (await this.cacheManager.get<number>(dailyKey)) || 0;
+    const dailyLimit = this.numberConfig(
+      'OTP_DAILY_LIMIT',
+      this.OTP_DAILY_LIMIT,
+    );
+
+    if (await this.cacheManager.get(cooldownKey)) {
+      throw new HttpException(
+        `Vui lòng chờ ${Math.ceil(cooldownMs / 1000)} giây trước khi yêu cầu OTP mới.`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
 
     if (retryCount >= this.OTP_RETRY_LIMIT) {
       this.logger.warn(
@@ -146,7 +169,19 @@ export class OtpService {
       );
     }
 
+    if (dailyCount >= dailyLimit) {
+      this.logger.warn(
+        `[OTP] Daily request limit reached for ${context}:${identifier}`,
+      );
+      throw new HttpException(
+        'Bạn đã yêu cầu OTP quá nhiều lần trong ngày. Vui lòng thử lại sau.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     await this.cacheManager.set(retryKey, retryCount + 1, 3600 * 1000);
+    await this.cacheManager.set(dailyKey, dailyCount + 1, 24 * 3600 * 1000);
+    await this.cacheManager.set(cooldownKey, true, cooldownMs);
   }
 
   private _getOtpKey(context: OtpContext, identifier: string): string {
@@ -155,6 +190,14 @@ export class OtpService {
 
   private _getRetryKey(context: OtpContext, identifier: string): string {
     return `otp:retry:${context}:${identifier}`;
+  }
+
+  private _getCooldownKey(context: OtpContext, identifier: string): string {
+    return `otp:cooldown:${context}:${identifier}`;
+  }
+
+  private _getDailyKey(context: OtpContext, identifier: string): string {
+    return `otp:daily:${context}:${identifier}`;
   }
 
   private async _getRemainingTtl(key: string): Promise<number> {
@@ -167,5 +210,10 @@ export class OtpService {
 
   private _getOneTimeTokenKey(context: OtpContext, identifier: string): string {
     return `one-time-token:${context}:${identifier}`;
+  }
+
+  private numberConfig(key: string, fallback: number): number {
+    const value = Number(this.configService.get<string | number>(key));
+    return Number.isFinite(value) && value > 0 ? value : fallback;
   }
 }

@@ -27,15 +27,18 @@ export class LoginByWalletHandler implements ICommandHandler<
     const normalizedAddress =
       await this.walletSignatureService.verifySignedMessage(message, signature);
 
-    const user = await this.userRepository.findByWalletAddress(
-      normalizedAddress,
-    );
+    const user =
+      await this.userRepository.findByWalletAddress(normalizedAddress);
 
     if (!user) {
       throw RpcExceptionHelper.notFound('Wallet_Not_Registered');
     }
 
-    const tokenPair = await this.tokenService.generateTokenPair(user);
+    const tokenPair = await this.tokenService.generateTokenPair(
+      user,
+      command.metadata?.userAgent,
+      command.metadata?.ipAddress,
+    );
 
     return {
       user,

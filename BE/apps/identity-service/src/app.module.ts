@@ -9,6 +9,7 @@ import { Logger, Module, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
 import { OAuth2Client } from 'google-auth-library';
@@ -46,6 +47,8 @@ import {
   IRefreshTokenRepository,
   ISellerProfileRepository,
   IUserRepository,
+  AuthAbuseProtectionService,
+  CaptchaService,
   NonceService,
   OtpService,
   RefreshToken,
@@ -66,6 +69,7 @@ import {
   SellerProfilesController,
   UsersController,
 } from './presentation';
+import { IdentityThrottlerGuard } from './presentation/http/guards/identity-throttler.guard';
 import { UsersMicroserviceController } from './presentation/microservice';
 import { SellerProfilesMicroserviceController } from './presentation/microservice/seller-profiles.microservice.controller';
 
@@ -112,6 +116,8 @@ export const Repositories = [
 ];
 export const InfrastructureServices = [
   OtpService,
+  AuthAbuseProtectionService,
+  CaptchaService,
   TokenService,
   RegistrationService,
   NonceService,
@@ -186,6 +192,15 @@ export const Services = [
       },
     }),
 
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60 * 1000,
+        limit: 100,
+        blockDuration: 60 * 1000,
+      },
+    ]),
+
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -210,6 +225,7 @@ export const Services = [
     ...EventHandlers,
     ...Repositories,
     ...InfrastructureServices,
+    IdentityThrottlerGuard,
     ...Strategies,
     ...Services,
     {

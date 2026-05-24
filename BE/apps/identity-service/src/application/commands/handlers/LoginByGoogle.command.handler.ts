@@ -119,7 +119,11 @@ export class LoginByGoogleHandler implements ICommandHandler<
       }
     }
 
-    const tokenPair = await this.tokenService.generateTokenPair(user);
+    const tokenPair = await this.tokenService.generateTokenPair(
+      user,
+      command.metadata?.userAgent,
+      command.metadata?.ipAddress,
+    );
 
     return {
       user,

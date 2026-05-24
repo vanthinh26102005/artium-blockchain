@@ -1,10 +1,6 @@
 export { AuthProviderButton } from './AuthProviderButton'
 export { AuthDivider } from './AuthDivider'
-export {
-  AuthFormInput,
-  AuthFormOtpInput,
-  AuthFormPasswordInput,
-} from './AuthFormFields'
+export { AuthFormInput, AuthFormOtpInput, AuthFormPasswordInput } from './AuthFormFields'
 export { AuthFooter } from './AuthFooter'
 export { AuthFormCard } from './AuthFormCard'
 export { AuthInput } from './AuthInput'
@@ -12,4 +8,5 @@ export { AuthOtpCodeInput } from './AuthOtpCodeInput'
 export { AuthPasswordInput } from './AuthPasswordInput'
 export { AuthShell } from './AuthShell'
 export { SocialAuthButtons } from './SocialAuthButtons'
+export { TurnstileChallenge } from './TurnstileChallenge'
 export { WalletLoginPanel } from './WalletLoginPanel'
