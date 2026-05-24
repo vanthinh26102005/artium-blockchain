@@ -38,6 +38,8 @@ import {
   UserRole,
 } from '@app/common';
 import { sendRpc } from '../utils';
+import { Idempotent } from '../decorators/idempotent.decorator';
+import { IdempotencyPolicies } from '../decorators/idempotency-scopes';
 
 type OrderItemAccessObject = {
   id?: string | null;
@@ -177,6 +179,7 @@ export class OrdersController {
   }
 
   @Post()
+  @Idempotent(IdempotencyPolicies.CreateOrder)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create new order' })

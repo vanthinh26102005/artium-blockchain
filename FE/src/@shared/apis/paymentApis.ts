@@ -1,4 +1,10 @@
-import { apiFetch, apiPost, encodePathSegment, withQuery } from '@shared/services/apiClient'
+import {
+  apiFetch,
+  apiPost,
+  createIdempotencyKey,
+  encodePathSegment,
+  withQuery,
+} from '@shared/services/apiClient'
 
 // --- Request Types ---
 
@@ -20,6 +26,10 @@ export type ConfirmPaymentIntentRequest = {
 
 export type CreateStripeCustomerRequest = {
   email: string
+}
+
+export type IdempotentMutationOptions = {
+  idempotencyKey?: string
 }
 
 // --- Response Types ---
@@ -122,8 +132,11 @@ export type PaymentTransactionResponse = {
 const paymentApis = {
   createPaymentIntent: async (
     data: CreatePaymentIntentRequest,
+    options?: IdempotentMutationOptions,
   ): Promise<PaymentIntentResponse> => {
-    return apiPost<PaymentIntentResponse>('/payments/stripe/payment-intent', data)
+    return apiPost<PaymentIntentResponse>('/payments/stripe/payment-intent', data, {
+      idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey(),
+    })
   },
 
   confirmPaymentIntent: async (

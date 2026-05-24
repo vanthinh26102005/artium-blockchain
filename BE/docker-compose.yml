@@ -301,6 +301,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in environment}
       NODE_ENV: ${NODE_ENV:-development}
       CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
+      REDIS_URL: ${REDIS_URL:?REDIS_URL must be set in environment}
+      REDIS_TLS: ${REDIS_TLS:-false}
       SELLER_AUCTION_MIN_DURATION_SECONDS: ${SELLER_AUCTION_MIN_DURATION_SECONDS:-86400}
       SELLER_AUCTION_MAX_DURATION_SECONDS: ${SELLER_AUCTION_MAX_DURATION_SECONDS:-2592000}
     volumes:

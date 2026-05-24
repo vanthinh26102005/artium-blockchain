@@ -7,14 +7,11 @@ type ApiFetchOptions = RequestInit & {
   clearAuthOnUnauthorized?: boolean
   dedupe?: boolean
   clientCacheTtlMs?: number
+  idempotencyKey?: string
 }
 
 export type ApiQueryPrimitive = string | number | boolean
-export type ApiQueryValue =
-  | ApiQueryPrimitive
-  | readonly ApiQueryPrimitive[]
-  | null
-  | undefined
+export type ApiQueryValue = ApiQueryPrimitive | readonly ApiQueryPrimitive[] | null | undefined
 
 export type ApiError = Error & {
   status?: number
@@ -45,8 +42,17 @@ export type ApiUploadError = Error & {
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '')
 const DEFAULT_UPLOAD_TIMEOUT_MS = 60000
+const DEVICE_ID_STORAGE_KEY = 'artium_device_id'
 const clientResponseCache = new Map<string, { expiresAt: number; data: unknown }>()
 const inflightClientRequests = new Map<string, Promise<unknown>>()
+
+export const createIdempotencyKey = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
 
 export const buildApiUrl = (path: string, baseUrl?: string) => {
   const resolvedBaseUrl = (baseUrl ?? API_BASE_URL).replace(/\/$/, '')
@@ -91,12 +97,33 @@ export const buildQueryString = (params?: object) => {
   return queryString.length > 0 ? `?${queryString}` : ''
 }
 
-export const withQuery = (path: string, params?: object) =>
-  `${path}${buildQueryString(params)}`
+export const withQuery = (path: string, params?: object) => `${path}${buildQueryString(params)}`
 
 export const jsonBody = (body: unknown) => JSON.stringify(body)
 
 const resolveHeaders = (headers?: HeadersInit) => new Headers(headers)
+
+const getBrowserDeviceId = () => {
+  if (typeof window === 'undefined') {
+    return undefined
+  }
+
+  try {
+    const existing = window.localStorage.getItem(DEVICE_ID_STORAGE_KEY)
+    if (existing) {
+      return existing
+    }
+
+    const next =
+      typeof window.crypto?.randomUUID === 'function'
+        ? window.crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    window.localStorage.setItem(DEVICE_ID_STORAGE_KEY, next)
+    return next
+  } catch {
+    return undefined
+  }
+}
 
 const isJsonBody = (body: BodyInit | null | undefined) => {
   if (!body) {
@@ -182,10 +209,7 @@ const createAbortError = () => {
   return error
 }
 
-const withAbortSignal = <T>(
-  promise: Promise<T>,
-  signal?: AbortSignal | null,
-): Promise<T> => {
+const withAbortSignal = <T>(promise: Promise<T>, signal?: AbortSignal | null): Promise<T> => {
   if (!signal) {
     return promise
   }
@@ -221,6 +245,7 @@ export const apiFetch = async <T>(path: string, options?: ApiFetchOptions): Prom
     clearAuthOnUnauthorized = true,
     dedupe,
     clientCacheTtlMs,
+    idempotencyKey,
     ...init
   } = options ?? {}
   const headers = resolveHeaders(init.headers)
@@ -228,6 +253,15 @@ export const apiFetch = async <T>(path: string, options?: ApiFetchOptions): Prom
 
   if (isJsonBody(init.body) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
+  }
+
+  const deviceId = getBrowserDeviceId()
+  if (deviceId && !headers.has('X-Device-Id')) {
+    headers.set('X-Device-Id', deviceId)
+  }
+
+  if (idempotencyKey && !headers.has('Idempotency-Key')) {
+    headers.set('Idempotency-Key', idempotencyKey)
   }
 
   let authToken: string | undefined

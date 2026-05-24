@@ -80,6 +80,7 @@ export class CreateStripePaymentIntentHandler implements ICommandHandler<CreateS
         stripeCustomer.stripeId, // Always use the verified Stripe customer ID
         data.stripePaymentMethodId,
         data.description,
+        data.idempotencyKey,
       );
 
       if (!paymentIntent.client_secret) {

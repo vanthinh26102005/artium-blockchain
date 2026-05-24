@@ -32,6 +32,8 @@ import {
   AttachPaymentMethodDto,
 } from '@app/common';
 import { sendRpc } from '../../utils';
+import { Idempotent } from '../../decorators/idempotent.decorator';
+import { IdempotencyPolicies } from '../../decorators/idempotency-scopes';
 import { RecordEthereumPaymentDto } from './dtos/record-ethereum-payment.dto';
 import { GetEthereumQuoteDto } from './dtos/get-ethereum-quote.dto';
 
@@ -46,6 +48,7 @@ export class PaymentsController {
   // ==================== STRIPE OPERATIONS ====================
 
   @Post('stripe/payment-intent')
+  @Idempotent(IdempotencyPolicies.CreateStripePaymentIntent)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create Stripe payment intent' })
@@ -63,7 +66,7 @@ export class PaymentsController {
     return sendRpc(
       this.paymentsClient,
       { cmd: 'create_payment_intent' },
-      { ...data, userId: req.user?.id },
+      { ...data, userId: req.user?.id, idempotencyKey: req.idempotencyKey },
     );
   }
 
@@ -111,6 +114,7 @@ export class PaymentsController {
   }
 
   @Post('stripe/refunds')
+  @Idempotent(IdempotencyPolicies.CreateStripeRefund)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a refund' })
@@ -122,8 +126,11 @@ export class PaymentsController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Payment intent not found' })
-  async createRefund(@Body() data: CreateRefundDto) {
-    return sendRpc(this.paymentsClient, { cmd: 'create_refund' }, data);
+  async createRefund(@Body() data: CreateRefundDto, @Req() req: any) {
+    return sendRpc(this.paymentsClient, { cmd: 'create_refund' }, {
+      ...data,
+      idempotencyKey: req.idempotencyKey,
+    });
   }
 
   @Post('stripe/payment-methods/attach')

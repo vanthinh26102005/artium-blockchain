@@ -1,4 +1,10 @@
-import { apiFetch, apiPost, encodePathSegment, withQuery } from '@shared/services/apiClient'
+import {
+  apiFetch,
+  apiPost,
+  createIdempotencyKey,
+  encodePathSegment,
+  withQuery,
+} from '@shared/services/apiClient'
 import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
 // --- Request Types ---
@@ -205,11 +211,20 @@ export type OpenDisputeRequest = {
   reason: string
 }
 
+export type IdempotentMutationOptions = {
+  idempotencyKey?: string
+}
+
 // --- API Functions ---
 
 const orderApis = {
-  createOrder: async (data: CreateOrderRequest): Promise<OrderResponse> => {
-    return apiPost<OrderResponse>('/orders', data)
+  createOrder: async (
+    data: CreateOrderRequest,
+    options?: IdempotentMutationOptions,
+  ): Promise<OrderResponse> => {
+    return apiPost<OrderResponse>('/orders', data, {
+      idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey(),
+    })
   },
 
   getOrderById: async (id: string): Promise<OrderResponse> => {

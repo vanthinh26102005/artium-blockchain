@@ -27,6 +27,8 @@ import {
 } from '@app/common';
 import { MICROSERVICES } from '../../../../config';
 import { sendRpc } from '../../utils';
+import { Idempotent } from '../../decorators/idempotent.decorator';
+import { IdempotencyPolicies } from '../../decorators/idempotency-scopes';
 
 type QuickSellCollectorInput = {
   name?: string;
@@ -301,6 +303,7 @@ export class QuickSellInvoicesController {
   ) {}
 
   @Post()
+  @Idempotent(IdempotencyPolicies.CreateQuickSellInvoice)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a quick-sell invoice' })
@@ -474,6 +477,7 @@ export class QuickSellInvoicesController {
   }
 
   @Post('code/:invoiceCode/payment-intent')
+  @Idempotent(IdempotencyPolicies.CreateQuickSellPaymentIntent)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create Stripe payment intent for invoice' })
@@ -500,6 +504,7 @@ export class QuickSellInvoicesController {
         userId: req.user?.id,
         buyerEmail: payload?.email,
         buyerName: payload?.name,
+        idempotencyKey: req.idempotencyKey,
       },
     );
   }

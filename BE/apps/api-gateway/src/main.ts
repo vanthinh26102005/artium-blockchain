@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ApiGatewayModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './presentation/http/filters';
@@ -33,10 +34,14 @@ const resolveApiGlobalPrefix = (): string => {
 async function bootstrap() {
   const logger = new Logger('ApiGateway');
 
-  const app = await NestFactory.create(ApiGatewayModule, {
-    logger: ['log', 'error', 'warn', 'debug', 'verbose'],
-    rawBody: true,
-  });
+  const app = await NestFactory.create<NestExpressApplication>(
+    ApiGatewayModule,
+    {
+      logger: ['log', 'error', 'warn', 'debug', 'verbose'],
+      rawBody: true,
+    },
+  );
+  app.set('trust proxy', 1);
 
   const apiGlobalPrefix = resolveApiGlobalPrefix();
   const routeBasePath = apiGlobalPrefix ? `/${apiGlobalPrefix}` : '';
@@ -62,7 +67,14 @@ async function bootstrap() {
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Device-Id',
+      'Idempotency-Key',
+      'X-Request-Id',
+    ],
+    exposedHeaders: ['X-Request-Id', 'Idempotency-Replayed'],
   });
 
   app.useGlobalFilters(new AllExceptionsFilter());

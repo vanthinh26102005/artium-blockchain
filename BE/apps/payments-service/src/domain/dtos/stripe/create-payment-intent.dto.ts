@@ -94,4 +94,8 @@ export class CreatePaymentIntentDTO {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, string>;
+
+  @IsOptional()
+  @IsString()
+  idempotencyKey?: string;
 }

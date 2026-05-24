@@ -4,4 +4,5 @@ export interface CreateInvoicePaymentIntentDTO {
   userId: string;
   buyerEmail?: string;
   buyerName?: string;
+  idempotencyKey?: string;
 }

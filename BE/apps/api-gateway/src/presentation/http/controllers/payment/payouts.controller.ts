@@ -21,6 +21,8 @@ import { MICROSERVICES } from '../../../../config';
 import { JwtAuthGuard } from '@app/auth';
 import { CreatePayoutDto } from '@app/common';
 import { sendRpc } from '../../utils';
+import { Idempotent } from '../../decorators/idempotent.decorator';
+import { IdempotencyPolicies } from '../../decorators/idempotency-scopes';
 
 @ApiTags('Payouts')
 @Controller('payments/payouts')
@@ -31,6 +33,7 @@ export class PayoutsController {
   ) {}
 
   @Post()
+  @Idempotent(IdempotencyPolicies.CreatePayout)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new payout request' })
