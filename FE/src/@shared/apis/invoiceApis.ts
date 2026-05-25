@@ -1,7 +1,12 @@
 // Quick Sell Invoice APIs
 // Based on blueprint: 06_QUICK_SELL_API_CONTRACT.md
 
-import { apiFetch, apiPost, encodePathSegment } from '@shared/services/apiClient'
+import {
+  apiFetch,
+  apiPost,
+  createIdempotencyKey,
+  encodePathSegment,
+} from '@shared/services/apiClient'
 import {
   mockCreateQuickSellInvoice,
   mockCreateQuickSellPaymentIntent,
@@ -119,6 +124,10 @@ export type CreateInvoicePaymentIntentRequest = {
   name?: string
 }
 
+export type IdempotentMutationOptions = {
+  idempotencyKey?: string
+}
+
 export type CreateInvoicePaymentIntentResponse = {
   transactionId: string
   paymentIntentId: string
@@ -134,11 +143,16 @@ const invoiceApis = {
    * Create a new Quick Sell invoice
    * POST /store/sale/invoice
    */
-  createQuickSellInvoice: async (payload: CreateInvoiceRequest): Promise<CreateInvoiceResponse> => {
+  createQuickSellInvoice: async (
+    payload: CreateInvoiceRequest,
+    options?: IdempotentMutationOptions,
+  ): Promise<CreateInvoiceResponse> => {
     if (USE_MOCK_API) {
       return mockCreateQuickSellInvoice(payload)
     }
-    return apiPost<CreateInvoiceResponse>('/store/sale/invoice', payload)
+    return apiPost<CreateInvoiceResponse>('/store/sale/invoice', payload, {
+      idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey(),
+    })
   },
 
   /**
@@ -208,6 +222,7 @@ const invoiceApis = {
   createQuickSellPaymentIntent: async (
     invoiceCode: string,
     payload: CreateInvoicePaymentIntentRequest,
+    options?: IdempotentMutationOptions,
   ): Promise<CreateInvoicePaymentIntentResponse> => {
     if (USE_MOCK_API) {
       return mockCreateQuickSellPaymentIntent(invoiceCode, payload)
@@ -215,6 +230,9 @@ const invoiceApis = {
     return apiPost<CreateInvoicePaymentIntentResponse>(
       `/store/sale/invoice/code/${encodePathSegment(invoiceCode)}/payment-intent`,
       payload,
+      {
+        idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey(),
+      },
     )
   },
 }

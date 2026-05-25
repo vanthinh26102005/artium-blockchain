@@ -65,6 +65,9 @@ export class OrderInvoicePaymentObject {
 
   @ApiPropertyOptional({ description: 'On-chain order ID' })
   onChainOrderId?: string | null;
+
+  @ApiPropertyOptional({ description: 'Winning blockchain bid amount in wei' })
+  bidAmountWei?: string | null;
 }
 
 export class OrderInvoiceItemObject {
@@ -243,10 +246,15 @@ export class OrderInvoiceSourceOrderDto {
   @IsString()
   orderNumber: string;
 
-  @ApiProperty({ description: 'Collector/buyer ID' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ description: 'Collector/buyer ID' })
+  @IsOptional()
   @IsString()
-  collectorId: string;
+  collectorId?: string | null;
+
+  @ApiPropertyOptional({ description: 'Buyer wallet for blockchain orders' })
+  @IsOptional()
+  @IsString()
+  buyerWallet?: string | null;
 
   @ApiProperty({ description: 'Order status' })
   @IsNotEmpty()
@@ -282,6 +290,11 @@ export class OrderInvoiceSourceOrderDto {
   @IsOptional()
   @IsString()
   onChainOrderId?: string | null;
+
+  @ApiPropertyOptional({ description: 'Winning blockchain bid amount in wei' })
+  @IsOptional()
+  @IsString()
+  bidAmountWei?: string | null;
 
   @ApiProperty({ description: 'Subtotal before tax/shipping' })
   @IsNumber()

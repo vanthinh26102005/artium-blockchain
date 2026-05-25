@@ -22,6 +22,7 @@ describe('GetAuctionsHandler', () => {
     find: jest.fn(),
     count: jest.fn(),
     findWithItems: jest.fn(),
+    update: jest.fn(),
   };
   const escrowContractService = {
     getAuction: jest.fn(),
@@ -141,6 +142,43 @@ describe('GetAuctionsHandler', () => {
 
     expect(result.data).toHaveLength(1);
     expect(result.data[0].statusKey).toBe(AuctionStatusKey.CLOSED);
+  });
+
+  it('repairs stale auction_active projections when the contract is already finalized', async () => {
+    orderRepo.find.mockResolvedValue([activeAuctionOrder()] as never);
+    orderRepo.count.mockResolvedValue(1 as never);
+    orderRepo.findWithItems.mockResolvedValue(null as never);
+    escrowContractService.getAuction.mockResolvedValue({
+      state: EscrowState.ENDED,
+      highestBid: BigInt('3000000000000000000'),
+      minBidIncrement: BigInt('100000000000000000'),
+      endTime: BigInt(Math.floor(Date.now() / 1000) - 60),
+      highestBidder: '0x3333333333333333333333333333333333333333',
+      seller: '0x2222222222222222222222222222222222222222',
+    } as never);
+
+    const result = await handler.execute(
+      new GetAuctionsQuery({
+        take: 20,
+        skip: 0,
+        includeSettled: true,
+      } as never),
+    );
+
+    expect(orderRepo.update).toHaveBeenCalledWith(
+      'order-1',
+      expect.objectContaining({
+        status: OrderStatus.ESCROW_HELD,
+        escrowState: EscrowState.ENDED,
+        bidAmountWei: '3000000000000000000',
+        buyerWallet: '0x3333333333333333333333333333333333333333',
+      }),
+    );
+    expect(result.data[0]).toMatchObject({
+      statusKey: AuctionStatusKey.CLOSED,
+      orderStatus: OrderStatus.ESCROW_HELD,
+      escrowState: EscrowState.ENDED,
+    });
   });
 
   it('drops rows that do not have converged artwork linkage', async () => {

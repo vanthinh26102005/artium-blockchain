@@ -14,11 +14,20 @@ import { Metadata } from '@/components/SEO/Metadata'
 import { Button } from '@shared/components/ui/button'
 
 // @domains - auth
-import { AuthFormInput, AuthFormOtpInput, AuthInput, AuthShell } from '@domains/auth/components'
+import {
+  AuthFormInput,
+  AuthFormOtpInput,
+  AuthInput,
+  AuthShell,
+  TurnstileChallenge,
+} from '@domains/auth/components'
 import { useForgotPassword } from '@domains/auth/hooks/useForgotPassword'
 import { useRedirectAuthenticatedUser } from '@domains/auth/hooks/useRedirectAuthenticatedUser'
 import { writePasswordResetSession } from '@domains/auth/services/browserAuthState'
-import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
+import {
+  getPracticalAuthErrorMessage,
+  isCaptchaRequiredError,
+} from '@domains/auth/utils/authErrors'
 import {
   forgotPasswordRequestFormSchema,
   forgotPasswordVerifyFormSchema,
@@ -34,6 +43,9 @@ export const ForgotPasswordPage = () => {
   const [step, setStep] = useState<'request' | 'verify'>('request')
   const [pendingEmail, setPendingEmail] = useState('')
   const [notice, setNotice] = useState('')
+  const [isCaptchaRequired, setIsCaptchaRequired] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaChallengeKey, setCaptchaChallengeKey] = useState(0)
   const requestForm = useForm<ForgotPasswordRequestFormValues>({
     resolver: zodResolver(forgotPasswordRequestFormSchema),
     mode: 'onBlur',
@@ -58,7 +70,10 @@ export const ForgotPasswordPage = () => {
 
     try {
       const normalizedEmail = values.email.trim()
-      await requestReset({ email: normalizedEmail })
+      await requestReset({
+        email: normalizedEmail,
+        captchaToken: isCaptchaRequired ? (captchaToken ?? undefined) : undefined,
+      })
       setPendingEmail(normalizedEmail)
       setStep('verify')
       setNotice('We sent a verification code to your email.')
@@ -67,6 +82,13 @@ export const ForgotPasswordPage = () => {
         otp: '',
       })
     } catch (error) {
+      if (isCaptchaRequiredError(error)) {
+        setIsCaptchaRequired(true)
+      }
+      if (isCaptchaRequired || isCaptchaRequiredError(error)) {
+        setCaptchaToken(null)
+        setCaptchaChallengeKey((current) => current + 1)
+      }
       const message = getPracticalAuthErrorMessage(
         error,
         apiError || 'Something went wrong. Please try again.',
@@ -150,6 +172,19 @@ export const ForgotPasswordPage = () => {
                   aria-invalid={Boolean(requestForm.formState.errors.email)}
                 />
 
+                {isCaptchaRequired ? (
+                  <TurnstileChallenge
+                    action="password_reset_request"
+                    challengeKey={captchaChallengeKey}
+                    onTokenChange={setCaptchaToken}
+                    onError={() =>
+                      requestForm.setError('root', {
+                        message: 'Verification failed. Please try again.',
+                      })
+                    }
+                  />
+                ) : null}
+
                 <FormErrorMessage
                   id="forgot-submit-error"
                   message={requestForm.formState.errors.root?.message ?? ''}
@@ -159,7 +194,11 @@ export const ForgotPasswordPage = () => {
                 <Button
                   className="bg-mint-green hover:bg-mint-green/80 w-full rounded-full border border-black/10 py-3 text-base font-semibold tracking-[0.2em] text-black uppercase"
                   loading={requestForm.formState.isSubmitting || isLoading}
-                  disabled={requestForm.formState.isSubmitting || isLoading}
+                  disabled={
+                    requestForm.formState.isSubmitting ||
+                    isLoading ||
+                    (isCaptchaRequired && !captchaToken)
+                  }
                   type="submit"
                 >
                   {requestForm.formState.isSubmitting || isLoading ? 'Sending...' : 'Send code'}

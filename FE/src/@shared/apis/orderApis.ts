@@ -1,4 +1,10 @@
-import { apiFetch, apiPost, encodePathSegment, withQuery } from '@shared/services/apiClient'
+import {
+  apiFetch,
+  apiPost,
+  createIdempotencyKey,
+  encodePathSegment,
+  withQuery,
+} from '@shared/services/apiClient'
 import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
 // --- Request Types ---
@@ -92,6 +98,12 @@ export type OrderResponse = {
   confirmedAt?: string | null
   shippedAt?: string | null
   deliveredAt?: string | null
+  deliveryConfirmedBy?: string | null
+  deliveryConfirmationMethod?: string | null
+  deliveryConfirmationNotes?: string | null
+  deliverySignatureDataUrl?: string | null
+  deliveryConfirmationTxHash?: string | null
+  deliveryConfirmationSubmittedAt?: string | null
   onChainOrderId?: string | null
   contractAddress?: string | null
   chainId?: string | null
@@ -139,6 +151,7 @@ export type OrderInvoicePaymentResponse = {
   paymentIntentId?: string | null
   txHash?: string | null
   onChainOrderId?: string | null
+  bidAmountWei?: string | null
 }
 
 export type OrderInvoiceItemResponse = {
@@ -184,21 +197,34 @@ export type MarkShippedRequest = {
   carrier: string
   trackingNumber: string
   shippingMethod?: string
+  transactionHash?: string
 }
 
 export type ConfirmDeliveryRequest = {
   notes?: string
+  confirmationMethod?: 'app' | 'app_signature' | 'wallet'
+  signatureDataUrl?: string
+  transactionHash?: string
 }
 
 export type OpenDisputeRequest = {
   reason: string
 }
 
+export type IdempotentMutationOptions = {
+  idempotencyKey?: string
+}
+
 // --- API Functions ---
 
 const orderApis = {
-  createOrder: async (data: CreateOrderRequest): Promise<OrderResponse> => {
-    return apiPost<OrderResponse>('/orders', data)
+  createOrder: async (
+    data: CreateOrderRequest,
+    options?: IdempotentMutationOptions,
+  ): Promise<OrderResponse> => {
+    return apiPost<OrderResponse>('/orders', data, {
+      idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey(),
+    })
   },
 
   getOrderById: async (id: string): Promise<OrderResponse> => {
@@ -209,7 +235,12 @@ const orderApis = {
     return apiFetch<OrderInvoiceResponse>(`/orders/${encodePathSegment(id)}/invoice`)
   },
 
-  getMyOrders: async ({ scope, status, skip, take }: GetMyOrdersInput): Promise<PaginatedOrdersResponse> => {
+  getMyOrders: async ({
+    scope,
+    status,
+    skip,
+    take,
+  }: GetMyOrdersInput): Promise<PaginatedOrdersResponse> => {
     return apiFetch<PaginatedOrdersResponse>(withQuery('/orders', { scope, status, skip, take }))
   },
 

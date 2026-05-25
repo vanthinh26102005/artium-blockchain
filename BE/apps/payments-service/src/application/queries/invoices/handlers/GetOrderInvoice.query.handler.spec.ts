@@ -215,4 +215,62 @@ describe('GetOrderInvoiceHandler', () => {
       manager,
     );
   });
+
+  it('uses the winning bid as the invoice amount for blockchain auction orders', async () => {
+    const auctionSourceOrder = {
+      ...sourceOrder,
+      collectorId: null,
+      buyerWallet: '0xwinner',
+      paymentStatus: 'escrow',
+      paymentMethod: 'blockchain',
+      paymentTransactionId: null,
+      paymentIntentId: null,
+      txHash: '0xauction',
+      onChainOrderId: '42',
+      bidAmountWei: '100000000000000',
+      subtotal: 0,
+      taxAmount: 0,
+      totalAmount: 0,
+      currency: 'ETH',
+      items: sourceOrder.items.map((item) => ({
+        ...item,
+        priceAtPurchase: 0,
+        currency: 'ETH',
+      })),
+    };
+    const staleAuctionInvoice = {
+      ...invoice,
+      status: InvoiceStatus.SENT,
+      subtotal: 0,
+      taxAmount: 0,
+      totalAmount: 0,
+      currency: 'ETH',
+      paymentTransactionId: null,
+      items: [
+        {
+          ...invoiceItem,
+          unitPrice: 0,
+          lineTotal: 0,
+        },
+      ],
+    };
+    invoiceRepo.findByOrderId = jest.fn(async () => staleAuctionInvoice);
+    transactionRepo.findByOrderId = jest.fn(async () => []);
+
+    const result = await handler.execute(
+      new GetOrderInvoiceQuery(auctionSourceOrder),
+    );
+
+    expect(result.currency).toBe('ETH');
+    expect(result.buyer.id).toBe('0xwinner');
+    expect(result.subtotal).toBe(0.0001);
+    expect(result.totalAmount).toBe(0.0001);
+    expect(result.payment.bidAmountWei).toBe('100000000000000');
+    expect(result.items[0]).toEqual(
+      expect.objectContaining({
+        unitPrice: 0.0001,
+        lineTotal: 0.0001,
+      }),
+    );
+  });
 });

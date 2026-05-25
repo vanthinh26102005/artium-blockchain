@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { ClientsModule } from '@nestjs/microservices';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthLibModule } from '@app/auth';
 import {
   MICROSERVICES,
@@ -27,13 +29,24 @@ import { CommunityMomentsController } from './presentation/http/controllers/comm
 import { CommunityMoodboardsController } from './presentation/http/controllers/community/moodboards.controller';
 import { CommunityUploadsController } from './presentation/http/controllers/community/uploads.controller';
 import { FollowersController } from './presentation/http/controllers/community/followers.controller';
+import { AuthThrottlerGuard } from './presentation/http/guards/auth-throttler.guard';
+import { IdempotencyInterceptor } from './presentation/http/interceptors/idempotency.interceptor';
+import { RedisIdempotencyService } from './presentation/http/services/redis-idempotency.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: './apps/api-gateway/.env.local',
+      envFilePath: ['./apps/api-gateway/.env.local', '.env.local'],
     }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60 * 1000,
+        limit: 100,
+        blockDuration: 60 * 1000,
+      },
+    ]),
     AuthLibModule,
     ClientsModule.register([
       {
@@ -95,6 +108,15 @@ import { FollowersController } from './presentation/http/controllers/community/f
     CommunityMoodboardsController,
     FollowersController,
   ],
-  providers: [MessagingGateway, AuctionGateway],
+  providers: [
+    MessagingGateway,
+    AuctionGateway,
+    RedisIdempotencyService,
+    IdempotencyInterceptor,
+    {
+      provide: APP_GUARD,
+      useClass: AuthThrottlerGuard,
+    },
+  ],
 })
 export class ApiGatewayModule {}

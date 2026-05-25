@@ -15,10 +15,16 @@ import { hydrateOrderItems } from '../utils/hydrateOrderItems'
 import { ORDER_STATUS_FILTERS } from '../utils/orderPresentation'
 
 const INITIAL_SCOPE: OrdersWorkspaceScope = 'buyer'
+const SELLER_ROLE = 'seller'
+
+const hasSellerRole = (roles?: string[] | null) =>
+  roles?.some((role) => role.toLowerCase() === SELLER_ROLE) ?? false
 
 export const OrdersPageView = () => {
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
+  const isSeller = hasSellerRole(user?.roles)
+  const availableScopes: OrdersWorkspaceScope[] = isSeller ? ['buyer', 'seller'] : ['buyer']
 
   const [scope, setScope] = useState<OrdersWorkspaceScope>(INITIAL_SCOPE)
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -31,14 +37,36 @@ export const OrdersPageView = () => {
   const [total, setTotal] = useState(0)
 
   useEffect(() => {
-    if (!router.isReady) {
+    if (!router.isReady || !user?.id) {
       return
     }
 
-    if (router.query.scope === 'buyer' || router.query.scope === 'seller') {
-      setScope(router.query.scope)
+    const requestedScope = router.query.scope
+    if (requestedScope === 'seller') {
+      if (isSeller) {
+        setScope('seller')
+        return
+      }
+
+      setScope('buyer')
+      const nextQuery = { ...router.query }
+      delete nextQuery.scope
+      void router.replace({ pathname: router.pathname, query: nextQuery }, undefined, {
+        shallow: true,
+      })
+      return
     }
-  }, [router.isReady, router.query.scope])
+
+    if (requestedScope === 'buyer') {
+      setScope('buyer')
+    }
+  }, [isSeller, router, router.isReady, router.query, router.query.scope, user?.id])
+
+  useEffect(() => {
+    if (!isSeller && scope === 'seller') {
+      setScope('buyer')
+    }
+  }, [isSeller, scope])
 
   useEffect(() => {
     setPage(1)
@@ -171,7 +199,11 @@ export const OrdersPageView = () => {
                 Keep track of purchases, manage fulfillment, and review each order without leaving the authenticated workspace.
               </p>
             </div>
-            <OrdersSegmentedControl value={scope} onChange={setScope} />
+            <OrdersSegmentedControl
+              value={scope}
+              availableScopes={availableScopes}
+              onChange={setScope}
+            />
           </div>
         </div>
 

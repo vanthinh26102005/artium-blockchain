@@ -47,8 +47,10 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { MICROSERVICES } from 'apps/api-gateway/src/config';
-import { sendRpc } from '../../utils';
+import { Request as ExpressRequest } from 'express';
+import { buildAuthRequestMetadata, sendRpc } from '../../utils';
 
 @ApiTags('Users')
 @Controller('identity')
@@ -72,7 +74,7 @@ export class UserController {
   })
   @UseGuards(JwtAuthGuard)
   async getUserProfile(
-    @Request() req: Express.Request & { user: GetUserProfileDto['user'] },
+    @Request() req: ExpressRequest & { user: GetUserProfileDto['user'] },
   ) {
     return sendRpc<UserPayload>(
       this.identityClient,
@@ -105,7 +107,7 @@ export class UserController {
     description: 'Slug already taken',
   })
   async updateUserProfile(
-    @Request() req: Express.Request & { user: GetUserProfileDto['user'] },
+    @Request() req: ExpressRequest & { user: GetUserProfileDto['user'] },
     @Body() input: UpdateUserProfileInput,
   ) {
     return sendRpc(
@@ -177,6 +179,9 @@ export class UserController {
 
   @Post('auth/login')
   @HttpCode(HttpStatus.OK)
+  @Throttle({
+    default: { limit: 10, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'User login with email and password',
     description: 'Authenticates a user using email and password credentials',
@@ -202,16 +207,22 @@ export class UserController {
     status: 500,
     description: 'Internal Server Error - Unexpected system error',
   })
-  async login(@Body() loginInput: LoginEmailDto) {
+  async login(
+    @Body() loginInput: LoginEmailDto,
+    @Request() req: ExpressRequest,
+  ) {
     return sendRpc<LoginResponse>(
       this.identityClient,
       { cmd: 'login_email' },
-      loginInput,
+      { input: loginInput, meta: buildAuthRequestMetadata(req) },
     );
   }
 
   @Post('auth/google')
   @HttpCode(HttpStatus.OK)
+  @Throttle({
+    default: { limit: 20, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'User login with Google',
     description: 'Authenticates a user using Google ID token from OAuth',
@@ -237,16 +248,22 @@ export class UserController {
     status: 500,
     description: 'Internal Server Error - Unexpected system error',
   })
-  async loginWithGoogle(@Body() loginInput: LoginGoogleDto) {
+  async loginWithGoogle(
+    @Body() loginInput: LoginGoogleDto,
+    @Request() req: ExpressRequest,
+  ) {
     return sendRpc<LoginResponse>(
       this.identityClient,
       { cmd: 'login_google' },
-      loginInput,
+      { input: loginInput, meta: buildAuthRequestMetadata(req) },
     );
   }
 
   @Post('auth/wallet')
   @HttpCode(HttpStatus.OK)
+  @Throttle({
+    default: { limit: 20, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({ summary: 'Login with Ethereum wallet (SIWE)' })
   @ApiBody({ type: LoginWalletDto })
   @ApiResponse({
@@ -259,15 +276,21 @@ export class UserController {
     status: 401,
     description: 'Invalid or expired nonce / signature',
   })
-  async loginWallet(@Body() input: LoginWalletDto) {
+  async loginWallet(
+    @Body() input: LoginWalletDto,
+    @Request() req: ExpressRequest,
+  ) {
     return sendRpc<LoginResponse>(
       this.identityClient,
       { cmd: 'login_wallet' },
-      input,
+      { input, meta: buildAuthRequestMetadata(req) },
     );
   }
 
   @Get('auth/wallet/nonce')
+  @Throttle({
+    default: { limit: 20, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({ summary: 'Get nonce for wallet login' })
   @ApiQuery({ name: 'address', required: true, type: String })
   @ApiResponse({ status: 200, description: 'Nonce generated successfully' })
@@ -291,7 +314,7 @@ export class UserController {
     description: 'Wallet linked successfully',
   })
   async linkWallet(
-    @Request() req: Express.Request & { user: GetUserProfileDto['user'] },
+    @Request() req: ExpressRequest & { user: GetUserProfileDto['user'] },
     @Body() input: LoginWalletDto,
   ) {
     return sendRpc(
@@ -311,7 +334,7 @@ export class UserController {
     description: 'Wallet disconnected successfully',
   })
   async unlinkWallet(
-    @Request() req: Express.Request & { user: GetUserProfileDto['user'] },
+    @Request() req: ExpressRequest & { user: GetUserProfileDto['user'] },
   ) {
     return sendRpc(
       this.identityClient,
@@ -321,6 +344,9 @@ export class UserController {
   }
 
   @Post('auth/register/initiate')
+  @Throttle({
+    default: { limit: 5, ttl: 60 * 1000, blockDuration: 10 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'Initiate user registration',
     description:
@@ -348,15 +374,21 @@ export class UserController {
     status: 500,
     description: 'Internal Server Error - Unexpected system error',
   })
-  async initiateRegistration(@Body() input: RegisterInitiateDto) {
+  async initiateRegistration(
+    @Body() input: RegisterInitiateDto,
+    @Request() req: ExpressRequest,
+  ) {
     return sendRpc<{ success: boolean; message: string }>(
       this.identityClient,
       { cmd: 'initiate_registeration' },
-      input,
+      { input, meta: buildAuthRequestMetadata(req) },
     );
   }
 
   @Post('auth/register/complete')
+  @Throttle({
+    default: { limit: 10, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'Complete user registration',
     description:
@@ -380,15 +412,21 @@ export class UserController {
     status: 500,
     description: 'Internal Server Error - Unexpected system error',
   })
-  async completeRegistration(@Body() input: RegisterCompleteDto) {
+  async completeRegistration(
+    @Body() input: RegisterCompleteDto,
+    @Request() req: ExpressRequest,
+  ) {
     return sendRpc<LoginResponse>(
       this.identityClient,
       { cmd: 'complete_registeration' },
-      input,
+      { input, meta: buildAuthRequestMetadata(req) },
     );
   }
 
   @Post('auth/password/reset/request')
+  @Throttle({
+    default: { limit: 5, ttl: 60 * 1000, blockDuration: 10 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'Request password reset',
     description:
@@ -407,15 +445,21 @@ export class UserController {
     status: 400,
     description: 'Invalid email format',
   })
-  async requestPasswordReset(@Body() input: PasswordResetRequestDto) {
+  async requestPasswordReset(
+    @Body() input: PasswordResetRequestDto,
+    @Request() req: ExpressRequest,
+  ) {
     return sendRpc<{ success: boolean; message: string }>(
       this.identityClient,
       { cmd: 'request_password_reset' },
-      input,
+      { input, meta: buildAuthRequestMetadata(req) },
     );
   }
 
   @Post('auth/password/reset/verify')
+  @Throttle({
+    default: { limit: 10, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'Verify password reset token',
     description:
@@ -434,15 +478,21 @@ export class UserController {
     status: 400,
     description: 'Invalid or expired reset token',
   })
-  async verifyPasswordReset(@Body() input: PasswordResetVerifyDto) {
+  async verifyPasswordReset(
+    @Body() input: PasswordResetVerifyDto,
+    @Request() req: ExpressRequest,
+  ) {
     return sendRpc<{ success: boolean; resetToken: string }>(
       this.identityClient,
       { cmd: 'password_reset_verify' },
-      input,
+      { input, meta: buildAuthRequestMetadata(req) },
     );
   }
 
   @Put('auth/password/reset/confirm')
+  @Throttle({
+    default: { limit: 10, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'Confirm new password after reset',
     description:
@@ -461,11 +511,14 @@ export class UserController {
     status: 400,
     description: 'Invalid token or password confirmation',
   })
-  async confirmPasswordReset(@Body() input: PasswordResetConfirmDto) {
+  async confirmPasswordReset(
+    @Body() input: PasswordResetConfirmDto,
+    @Request() req: ExpressRequest,
+  ) {
     return sendRpc<LoginResponse>(
       this.identityClient,
       { cmd: 'password_reset_confirm' },
-      input,
+      { input, meta: buildAuthRequestMetadata(req) },
     );
   }
 }

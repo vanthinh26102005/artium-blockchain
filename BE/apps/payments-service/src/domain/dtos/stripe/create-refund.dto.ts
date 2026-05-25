@@ -58,4 +58,8 @@ export class CreateRefundDTO {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, string>;
+
+  @IsOptional()
+  @IsString()
+  idempotencyKey?: string;
 }

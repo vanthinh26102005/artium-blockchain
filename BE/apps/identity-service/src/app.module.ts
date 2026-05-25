@@ -9,6 +9,7 @@ import { Logger, Module, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
 import { OAuth2Client } from 'google-auth-library';
@@ -46,6 +47,8 @@ import {
   IRefreshTokenRepository,
   ISellerProfileRepository,
   IUserRepository,
+  AuthAbuseProtectionService,
+  CaptchaService,
   NonceService,
   OtpService,
   RefreshToken,
@@ -66,6 +69,7 @@ import {
   SellerProfilesController,
   UsersController,
 } from './presentation';
+import { IdentityThrottlerGuard } from './presentation/http/guards/identity-throttler.guard';
 import { UsersMicroserviceController } from './presentation/microservice';
 import { SellerProfilesMicroserviceController } from './presentation/microservice/seller-profiles.microservice.controller';
 
@@ -112,6 +116,8 @@ export const Repositories = [
 ];
 export const InfrastructureServices = [
   OtpService,
+  AuthAbuseProtectionService,
+  CaptchaService,
   TokenService,
   RegistrationService,
   NonceService,
@@ -133,7 +139,7 @@ export const Services = [
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: './apps/identity-service/.env.local',
+      envFilePath: ['./apps/identity-service/.env.local', '.env.local'],
     }),
 
     DynamicDatabaseModule.forRoot('identity'),
@@ -149,21 +155,31 @@ export const Services = [
       isGlobal: true,
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
+        const url = configService.get<string>('REDIS_URL')?.trim();
+        const tlsEnabled = configService.get<string>('REDIS_TLS') === 'true';
         const host = configService.get<string>('REDIS_HOST');
         const port = configService.get<number>('REDIS_PORT');
 
         const logger = new Logger('RedisCache');
 
         logger.log(
-          `[Redis] Configuring Redis cache with host: ${host}, port: ${port}`,
+          url
+            ? `[Redis] Configuring Redis cache with external URL`
+            : `[Redis] Configuring Redis cache with host: ${host}, port: ${port}`,
         );
 
         try {
-          const cacheConfig = {
-            store: redisStore,
-            host,
-            port,
-          };
+          const cacheConfig = url
+            ? {
+                store: redisStore,
+                url,
+                ...(tlsEnabled ? { socket: { tls: true } } : {}),
+              }
+            : {
+                store: redisStore,
+                host,
+                port,
+              };
           logger.log(`[Redis] Redis cache configuration successfully prepared`);
           return cacheConfig;
         } catch (error) {
@@ -175,6 +191,15 @@ export const Services = [
         }
       },
     }),
+
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60 * 1000,
+        limit: 100,
+        blockDuration: 60 * 1000,
+      },
+    ]),
 
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -200,6 +225,7 @@ export const Services = [
     ...EventHandlers,
     ...Repositories,
     ...InfrastructureServices,
+    IdentityThrottlerGuard,
     ...Strategies,
     ...Services,
     {

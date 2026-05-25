@@ -75,6 +75,7 @@ export type RegisterInitiatePayload = {
   firstName: string
   email: string
   password: string
+  captchaToken?: string
 }
 
 export type RegisterCompletePayload = {
@@ -84,6 +85,7 @@ export type RegisterCompletePayload = {
 
 export type RequestPasswordResetPayload = {
   email: string
+  captchaToken?: string
 }
 
 export type VerifyPasswordResetPayload = {

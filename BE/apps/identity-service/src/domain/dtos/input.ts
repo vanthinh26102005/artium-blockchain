@@ -7,6 +7,7 @@ import {
   Length,
   MinLength,
   IsOptional,
+  MaxLength,
 } from 'class-validator';
 
 export type CreateUserInput = Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
@@ -27,6 +28,12 @@ export class UserRegisterInput {
   @IsString()
   @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   password: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4096)
+  captchaToken?: string;
 }
 
 export class CompleteUserRegisterInput {
@@ -45,6 +52,12 @@ export class RequestPasswordResetInput {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4096)
+  captchaToken?: string;
 }
 
 export class VerifyPasswordResetInput {
@@ -97,6 +110,12 @@ export class EmailLoginInput {
   @IsString()
   @MinLength(6)
   password: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4096)
+  captchaToken?: string;
 }
 export class WalletLoginInput {
   @ApiProperty({ description: 'SIWE message signed by the wallet' })

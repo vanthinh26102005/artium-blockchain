@@ -38,12 +38,25 @@ const getRawMessage = (error: unknown) => {
 
 const getApiStatus = (error: unknown) => (error as ApiError | undefined)?.status
 
+const getApiErrorData = (error: unknown) => (error as ApiError | undefined)?.data
+
+export const isCaptchaRequiredError = (error: unknown) => {
+  const data = getApiErrorData(error)
+
+  if (!data || typeof data !== 'object') {
+    return false
+  }
+
+  const errorData = data as {
+    captchaRequired?: unknown
+    errors?: { captchaRequired?: unknown } | null
+  }
+
+  return errorData.captchaRequired === true || errorData.errors?.captchaRequired === true
+}
+
 const normalizeMessage = (message: string) =>
-  message
-    .replace(/[_-]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase()
+  message.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase()
 
 export const getPracticalAuthErrorMessage = (
   error: unknown,
@@ -55,8 +68,21 @@ export const getPracticalAuthErrorMessage = (
   const status = getApiStatus(error)
   const contextFallback = context ? contextFallbacks[context] : fallback
 
+  if (isCaptchaRequiredError(error)) {
+    return 'Complete the verification and try again.'
+  }
+
   if (!normalized) {
     return contextFallback || fallback
+  }
+
+  if (
+    status === 429 ||
+    normalized.includes('too many') ||
+    normalized.includes('rate limit') ||
+    normalized.includes('try again later')
+  ) {
+    return rawMessage
   }
 
   if (

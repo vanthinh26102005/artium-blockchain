@@ -100,6 +100,24 @@ export class OrderObject {
   @ApiPropertyOptional({ description: 'When delivery was confirmed' })
   deliveredAt?: Date | null;
 
+  @ApiPropertyOptional({ description: 'User ID that confirmed delivery' })
+  deliveryConfirmedBy?: string | null;
+
+  @ApiPropertyOptional({ description: 'Delivery confirmation method' })
+  deliveryConfirmationMethod?: string | null;
+
+  @ApiPropertyOptional({ description: 'Buyer notes captured during delivery confirmation' })
+  deliveryConfirmationNotes?: string | null;
+
+  @ApiPropertyOptional({ description: 'Buyer hand-drawn delivery signature data URL' })
+  deliverySignatureDataUrl?: string | null;
+
+  @ApiPropertyOptional({ description: 'On-chain delivery confirmation transaction hash' })
+  deliveryConfirmationTxHash?: string | null;
+
+  @ApiPropertyOptional({ description: 'When delivery confirmation was submitted' })
+  deliveryConfirmationSubmittedAt?: Date | null;
+
   // ── Blockchain / Auction fields ──
 
   @ApiPropertyOptional({

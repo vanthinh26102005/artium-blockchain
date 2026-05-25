@@ -9,17 +9,22 @@ import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 
+const REQUEST_ID_HEADER = 'X-Request-Id';
+const REQUEST_ID_PATTERN = /^[A-Za-z0-9._:-]{8,128}$/;
+
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   private readonly logger = new Logger('HTTP');
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
     const { method, url, body } = request;
-    const requestId = uuidv4();
+    const requestId = this.resolveRequestId(request.headers?.['x-request-id']);
 
     // Attach requestId to request for tracing
     request.requestId = requestId;
+    response.setHeader(REQUEST_ID_HEADER, requestId);
 
     const startTime = Date.now();
 
@@ -84,5 +89,16 @@ export class LoggingInterceptor implements NestInterceptor {
     if (sanitized.resetToken) sanitized.resetToken = '***';
 
     return sanitized;
+  }
+
+  private resolveRequestId(value: string | string[] | undefined): string {
+    const candidate = Array.isArray(value) ? value[0] : value;
+    const normalized = candidate?.trim();
+
+    if (normalized && REQUEST_ID_PATTERN.test(normalized)) {
+      return normalized;
+    }
+
+    return uuidv4();
   }
 }

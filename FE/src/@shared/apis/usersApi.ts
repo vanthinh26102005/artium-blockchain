@@ -19,6 +19,7 @@ import { normalizeLoginResponse, normalizeUserPayload } from '@shared/types/auth
 type LoginByEmailInput = {
   email: string
   password: string
+  captchaToken?: string
 }
 
 type LoginByGoogleInput = {
@@ -27,24 +28,32 @@ type LoginByGoogleInput = {
 
 const usersApi = {
   loginByEmail: async (input: LoginByEmailInput) => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/login', input, { auth: false })
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/login', input, {
+      auth: false,
+    })
     return normalizeLoginResponse(raw)
   },
   loginByGoogle: async (input: LoginByGoogleInput) => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, { auth: false })
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, {
+      auth: false,
+    })
     return normalizeLoginResponse(raw)
   },
   loginWithGoogle: async (input: LoginByGoogleInput) => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, { auth: false })
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/google', input, {
+      auth: false,
+    })
     return normalizeLoginResponse(raw)
   },
   getWalletNonce: (address: string) =>
-    apiFetch<WalletNonceResponse>(
-      withQuery('/identity/auth/wallet/nonce', { address }),
-      { auth: false, cache: 'no-store' },
-    ),
+    apiFetch<WalletNonceResponse>(withQuery('/identity/auth/wallet/nonce', { address }), {
+      auth: false,
+      cache: 'no-store',
+    }),
   loginByWallet: async (input: LoginByWalletPayload) => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet', input, { auth: false })
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet', input, {
+      auth: false,
+    })
     return normalizeLoginResponse(raw)
   },
   linkWallet: async (input: LoginByWalletPayload) => {
@@ -55,7 +64,11 @@ const usersApi = {
     return normalizeUserPayload((raw as { user: Record<string, unknown> }).user ?? raw)
   },
   unlinkWallet: async () => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/wallet/unlink', {}, { auth: true })
+    const raw = await apiPost<Record<string, unknown>>(
+      '/identity/auth/wallet/unlink',
+      {},
+      { auth: true },
+    )
     return normalizeUserPayload((raw as { user: Record<string, unknown> }).user ?? raw)
   },
   registerInitiate: (input: RegisterInitiatePayload) =>
@@ -63,7 +76,9 @@ const usersApi = {
       auth: false,
     }),
   registerComplete: async (input: RegisterCompletePayload) => {
-    const raw = await apiPost<Record<string, unknown>>('/identity/auth/register/complete', input, { auth: false })
+    const raw = await apiPost<Record<string, unknown>>('/identity/auth/register/complete', input, {
+      auth: false,
+    })
     return normalizeLoginResponse(raw)
   },
   requestPasswordReset: (input: RequestPasswordResetPayload) =>
@@ -83,7 +98,10 @@ const usersApi = {
     return normalizeLoginResponse(raw)
   },
   getMe: async () => {
-    const raw = await apiFetch<Record<string, unknown>>('/identity/users/me', { auth: true, cache: 'no-store' })
+    const raw = await apiFetch<Record<string, unknown>>('/identity/users/me', {
+      auth: true,
+      cache: 'no-store',
+    })
     return normalizeUserPayload(raw)
   },
   getUserBySlug: async (slug: string) => {
@@ -96,7 +114,11 @@ const usersApi = {
     )
     return normalizeUserPayload(raw)
   },
-  updateMe: async (input: { fullName?: string | null; slug?: string | null; avatarUrl?: string | null }) => {
+  updateMe: async (input: {
+    fullName?: string | null
+    slug?: string | null
+    avatarUrl?: string | null
+  }) => {
     const raw = await apiFetch<Record<string, unknown>>('/identity/users/me', {
       method: 'PUT',
       body: JSON.stringify(input),

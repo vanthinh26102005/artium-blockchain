@@ -55,8 +55,6 @@ type ProfileEditPageViewProps = {
 
 type SaveStatus = 'idle' | 'saving' | 'success'
 
-const isWalletOnlyEmail = (email?: string | null) => Boolean(email?.endsWith('@wallet.local'))
-
 const normalizeNullableText = (value?: string | null) => {
   const trimmed = value?.trim()
   return trimmed ? trimmed : null
@@ -564,10 +562,7 @@ const ProfileEditForm = ({ initialValues, sellerProfile }: ProfileEditFormProps)
     () => normalizeNullableText(walletAddressValue),
     [walletAddressValue],
   )
-  const hasRecoverableLogin = Boolean(
-    authUser?.googleId ||
-      (authUser?.email && !isWalletOnlyEmail(authUser.email) && authUser.isEmailVerified),
-  )
+  const hasRecoverableLogin = Boolean(authUser?.googleId || authUser?.email)
   const canRemoveWallet = !currentWalletAddress || hasRecoverableLogin
 
   const handleConfirmExit = () => {

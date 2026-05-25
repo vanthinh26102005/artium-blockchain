@@ -60,8 +60,14 @@ export class CreateInvoicePaymentIntentHandler implements ICommandHandler<Create
   async execute(
     command: CreateInvoicePaymentIntentCommand,
   ): Promise<CreateInvoicePaymentIntentResult> {
-    const { invoiceId, invoiceNumber, userId, buyerEmail, buyerName } =
-      command.data;
+    const {
+      invoiceId,
+      invoiceNumber,
+      userId,
+      buyerEmail,
+      buyerName,
+      idempotencyKey,
+    } = command.data;
 
     if (!userId || userId.trim() === '') {
       throw RpcExceptionHelper.badRequest('userId is required');
@@ -142,6 +148,7 @@ export class CreateInvoicePaymentIntentHandler implements ICommandHandler<Create
         stripeCustomer.stripeId,
         undefined,
         `Invoice ${invoice.invoiceNumber || invoice.id}`,
+        idempotencyKey,
       );
 
       if (!paymentIntent.client_secret) {

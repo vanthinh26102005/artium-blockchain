@@ -33,6 +33,7 @@ export class StripeService {
     customerId?: string,
     paymentMethodId?: string,
     description?: string,
+    idempotencyKey?: string,
   ): Promise<Stripe.PaymentIntent> {
     try {
       const params: Stripe.PaymentIntentCreateParams = {
@@ -48,7 +49,10 @@ export class StripeService {
       if (paymentMethodId) params.payment_method = paymentMethodId;
       if (description) params.description = description;
 
-      const paymentIntent = await this.stripe.paymentIntents.create(params);
+      const paymentIntent = await this.stripe.paymentIntents.create(
+        params,
+        idempotencyKey ? { idempotencyKey } : undefined,
+      );
 
       this.logger.log(
         `PaymentIntent created: ${paymentIntent.id} for amount: ${amount} ${currency}`,
@@ -302,6 +306,7 @@ export class StripeService {
     amount?: number,
     reason?: Stripe.RefundCreateParams.Reason,
     metadata?: Record<string, string>,
+    idempotencyKey?: string,
   ): Promise<Stripe.Refund> {
     try {
       const params: Stripe.RefundCreateParams = {
@@ -312,7 +317,10 @@ export class StripeService {
       if (reason) params.reason = reason;
       if (metadata) params.metadata = metadata;
 
-      const refund = await this.stripe.refunds.create(params);
+      const refund = await this.stripe.refunds.create(
+        params,
+        idempotencyKey ? { idempotencyKey } : undefined,
+      );
 
       this.logger.log(
         `Refund created: ${refund.id} for PaymentIntent: ${paymentIntentId}`,

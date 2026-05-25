@@ -1,3 +1,4 @@
+export * from './auth-request-metadata.dto';
 export * from './login-email.dto';
 export * from './login-google.dto';
 export * from './login-wallet.dto';

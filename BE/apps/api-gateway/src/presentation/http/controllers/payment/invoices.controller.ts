@@ -26,6 +26,8 @@ import {
   UpdateInvoiceDto,
 } from '@app/common';
 import { sendRpc } from '../../utils';
+import { Idempotent } from '../../decorators/idempotent.decorator';
+import { IdempotencyPolicies } from '../../decorators/idempotency-scopes';
 
 @ApiTags('Invoices')
 @Controller('payments/invoices')
@@ -36,6 +38,7 @@ export class InvoicesController {
   ) {}
 
   @Post()
+  @Idempotent(IdempotencyPolicies.CreateInvoice)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new invoice' })

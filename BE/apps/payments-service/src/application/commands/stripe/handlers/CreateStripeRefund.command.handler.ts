@@ -84,6 +84,7 @@ export class CreateStripeRefundHandler implements ICommandHandler<CreateStripeRe
         refundAmount,
         data.reason as any,
         metadata,
+        data.idempotencyKey,
       );
 
       const isPartialRefund = refundAmount < transaction.amount;

@@ -163,6 +163,50 @@ export class Order extends AbstractEntity {
   deliveredAt?: Date | null;
 
   @Column({
+    name: 'delivery_confirmed_by',
+    type: 'uuid',
+    nullable: true,
+  })
+  deliveryConfirmedBy?: string | null;
+
+  @Column({
+    name: 'delivery_confirmation_method',
+    type: 'varchar',
+    length: 40,
+    nullable: true,
+  })
+  deliveryConfirmationMethod?: string | null;
+
+  @Column({
+    name: 'delivery_confirmation_notes',
+    type: 'text',
+    nullable: true,
+  })
+  deliveryConfirmationNotes?: string | null;
+
+  @Column({
+    name: 'delivery_signature_data_url',
+    type: 'text',
+    nullable: true,
+  })
+  deliverySignatureDataUrl?: string | null;
+
+  @Column({
+    name: 'delivery_confirmation_tx_hash',
+    type: 'varchar',
+    length: 66,
+    nullable: true,
+  })
+  deliveryConfirmationTxHash?: string | null;
+
+  @Column({
+    name: 'delivery_confirmation_submitted_at',
+    type: 'timestamp',
+    nullable: true,
+  })
+  deliveryConfirmationSubmittedAt?: Date | null;
+
+  @Column({
     name: 'on_chain_order_id',
     type: 'varchar',
     nullable: true,

@@ -25,4 +25,14 @@ export class MarkShippedDto {
   @IsOptional()
   @IsString()
   shippingMethod?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Blockchain transaction hash for contract-backed shipment confirmation',
+    example:
+      '0x3b9aca00b9aca00b9aca00b9aca00b9aca00b9aca00b9aca00b9aca00b9aca00',
+  })
+  @IsOptional()
+  @IsString()
+  transactionHash?: string;
 }

@@ -130,6 +130,74 @@ export const formatOrderMoney = (amount: number, currency: string) => {
   return `${normalizedAmount.toFixed(currency === 'ETH' ? 6 : 2)} ${currency}`
 }
 
+export const formatWeiToEth = (value?: string | null, fractionDigits = 6) => {
+  if (!value) {
+    return 'N/A'
+  }
+
+  const normalizedValue = value.trim()
+
+  if (!/^\d+$/.test(normalizedValue)) {
+    return `${value} wei`
+  }
+
+  const unsignedWei = normalizedValue.replace(/^0+/, '') || '0'
+  const paddedWei = unsignedWei.padStart(19, '0')
+  const whole = paddedWei.slice(0, -18).replace(/^0+/, '') || '0'
+  const fractionText = paddedWei.slice(-18).slice(0, Math.max(0, fractionDigits)).replace(/0+$/, '')
+
+  return fractionText.length > 0 ? `${whole}.${fractionText} ETH` : `${whole} ETH`
+}
+
+const hasBlockchainBidAmount = (order: OrderResponse) =>
+  order.paymentMethod === 'blockchain' && Boolean(order.bidAmountWei)
+
+export const isBlockchainOrder = (order: OrderResponse) =>
+  order.paymentMethod?.trim().toLowerCase() === 'blockchain' || Boolean(order.onChainOrderId)
+
+const isPrimaryBlockchainBidItem = (order: OrderResponse, itemIndex: number) =>
+  itemIndex === 0 && hasBlockchainBidAmount(order)
+
+export const getOrderTotalLabel = (order: OrderResponse) => {
+  if (hasBlockchainBidAmount(order)) {
+    return formatWeiToEth(order.bidAmountWei)
+  }
+
+  return formatOrderMoney(order.totalAmount, order.currency)
+}
+
+export const getOrderSubtotalLabel = (order: OrderResponse) => {
+  if (hasBlockchainBidAmount(order)) {
+    return formatWeiToEth(order.bidAmountWei)
+  }
+
+  return formatOrderMoney(order.subtotal, order.currency)
+}
+
+export const getOrderItemUnitPriceLabel = (
+  order: OrderResponse,
+  item: OrderItemResponse,
+  itemIndex: number,
+) => {
+  if (isPrimaryBlockchainBidItem(order, itemIndex)) {
+    return formatWeiToEth(order.bidAmountWei)
+  }
+
+  return formatOrderMoney(item.priceAtPurchase, item.currency)
+}
+
+export const getOrderItemLineTotalLabel = (
+  order: OrderResponse,
+  item: OrderItemResponse,
+  itemIndex: number,
+) => {
+  if (isPrimaryBlockchainBidItem(order, itemIndex)) {
+    return formatWeiToEth(order.bidAmountWei)
+  }
+
+  return formatOrderMoney(item.priceAtPurchase * item.quantity, item.currency)
+}
+
 export const getOrderStatusLabel = (status?: string | null) => {
   if (!status) {
     return 'Unknown'
@@ -169,9 +237,13 @@ export const getOrderActorRole = (
   order: OrderResponse,
   currentUserId?: string | null,
   preferredScope?: OrdersWorkspaceScope | null,
+  currentUserWalletAddress?: string | null,
 ): OrderActorRole => {
+  const normalizedWallet = currentUserWalletAddress?.trim().toLowerCase() ?? null
   const isSeller = order.items?.some((item) => item.sellerId === currentUserId) ?? false
-  const isBuyer = order.collectorId === currentUserId
+  const isBuyer =
+    order.collectorId === currentUserId ||
+    (normalizedWallet !== null && order.buyerWallet?.trim().toLowerCase() === normalizedWallet)
 
   if (preferredScope === 'seller' && isSeller) {
     return 'seller'
@@ -244,7 +316,7 @@ export const getNextActionLabel = (order: OrderResponse, role: OrderActorRole) =
   }
 
   if (role === 'buyer' && canConfirmDelivery(order.status)) {
-    return 'Confirm arrival'
+    return isBlockchainOrder(order) ? 'Confirm escrow release' : 'Confirm arrival'
   }
 
   if (role === 'buyer' && canOpenDispute(order)) {
@@ -294,7 +366,9 @@ export const getNextStepDescription = (order: OrderResponse, role: OrderActorRol
   }
 
   if (role === 'buyer' && canConfirmDelivery(order.status)) {
-    return 'Confirm delivery once the artwork arrives in good condition.'
+    return isBlockchainOrder(order)
+      ? 'Confirm delivery with the winning wallet. Escrow release updates after the blockchain event syncs.'
+      : 'Sign and confirm delivery once the artwork arrives in good condition.'
   }
 
   if (role === 'buyer' && canOpenDispute(order)) {
@@ -337,7 +411,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         emptyAddressLabel: 'No shipping address has been captured yet for this order.',
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Assigned at dispatch' },
-          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking will appear after dispatch' },
+          {
+            label: 'Tracking',
+            value: order.trackingNumber ?? 'Tracking will appear after dispatch',
+          },
           { label: 'Shipping method', value: order.shippingMethod ?? 'Finalized before dispatch' },
         ],
       }
@@ -349,8 +426,14 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         emptyAddressLabel: 'No shipping address has been captured yet for this order.',
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Seller has not assigned a carrier yet' },
-          { label: 'Tracking', value: order.trackingNumber ?? 'Tracking will appear after dispatch' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Selected once shipment is booked' },
+          {
+            label: 'Tracking',
+            value: order.trackingNumber ?? 'Tracking will appear after dispatch',
+          },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Selected once shipment is booked',
+          },
         ],
       }
     case 'shipped':
@@ -362,7 +445,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Carrier not provided' },
           { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not provided' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not provided' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping method not provided',
+          },
         ],
       }
     case 'dispute_open':
@@ -375,7 +461,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Carrier not recorded' },
           { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not recorded' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not recorded' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping method not recorded',
+          },
         ],
       }
     case 'delivered':
@@ -387,7 +476,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'Carrier not recorded' },
           { label: 'Tracking', value: order.trackingNumber ?? 'Tracking number not recorded' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping method not recorded' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping method not recorded',
+          },
         ],
       }
     case 'cancelled':
@@ -399,7 +491,10 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
         records: [
           { label: 'Carrier', value: order.carrier ?? 'No carrier will be assigned' },
           { label: 'Tracking', value: order.trackingNumber ?? 'No tracking will be added' },
-          { label: 'Shipping method', value: order.shippingMethod ?? 'Shipping is no longer scheduled' },
+          {
+            label: 'Shipping method',
+            value: order.shippingMethod ?? 'Shipping is no longer scheduled',
+          },
         ],
       }
     case 'refunded':
@@ -429,7 +524,90 @@ export const getShippingPresentation = (order: OrderResponse): ShippingPresentat
   }
 }
 
-export const buildOrderTimeline = (order: OrderResponse): OrderTimelineStep[] => {
+const getCompletedState = (isComplete: boolean, isCurrent: boolean): OrderTimelineStep['state'] => {
+  if (isComplete) {
+    return 'complete'
+  }
+
+  return isCurrent ? 'current' : 'upcoming'
+}
+
+const buildEscrowOrderTimeline = (order: OrderResponse): OrderTimelineStep[] => {
+  const isCancelled = order.status === 'cancelled'
+  const isRefunded = order.status === 'refunded'
+  const isDisputed = order.status === 'dispute_open'
+  const isDelivered = order.status === 'delivered'
+  const hasShipment = Boolean(order.shippedAt)
+  const hasSubmittedConfirmation = Boolean(order.deliveryConfirmationSubmittedAt)
+
+  return [
+    {
+      key: 'auction_won',
+      label: 'Auction won',
+      description: 'The winning bid was recorded for this auction order.',
+      date: order.createdAt,
+      state: 'complete',
+    },
+    {
+      key: 'escrow_secured',
+      label: 'Escrow secured',
+      description: 'The winning bid is held by the auction escrow contract.',
+      date: order.confirmedAt ?? order.createdAt,
+      state: getCompletedState(
+        ['escrow_held', 'shipped', 'delivered', 'dispute_open'].includes(order.status),
+        order.status === 'auction_active',
+      ),
+    },
+    {
+      key: 'awaiting_shipment',
+      label: 'Awaiting shipment',
+      description: 'The seller prepares shipment and records carrier details.',
+      date: null,
+      state: getCompletedState(hasShipment || isDelivered, order.status === 'escrow_held'),
+    },
+    {
+      key: 'shipped',
+      label: 'Shipped',
+      description: 'Carrier and tracking details are available for the buyer.',
+      date: order.shippedAt,
+      state: getCompletedState(hasShipment || isDelivered, order.status === 'shipped'),
+    },
+    {
+      key: 'buyer_confirmation',
+      label: isDisputed ? 'Delivery under review' : 'Buyer confirmation',
+      description: isDisputed
+        ? 'A delivery dispute is open and escrow remains protected.'
+        : 'The buyer confirms delivery from the winning wallet.',
+      date: order.deliveryConfirmationSubmittedAt ?? order.disputeOpenedAt,
+      state: getCompletedState(
+        hasSubmittedConfirmation || isDelivered || isDisputed,
+        order.status === 'shipped',
+      ),
+    },
+    {
+      key: 'escrow_released',
+      label: isRefunded ? 'Escrow refunded' : 'Escrow released',
+      description: isRefunded
+        ? 'Funds were returned and the order was closed.'
+        : 'The contract release event completed the auction order.',
+      date: order.deliveredAt ?? order.disputeResolvedAt,
+      state: getCompletedState(isDelivered || isRefunded, false),
+    },
+    {
+      key: 'closed',
+      label: isCancelled ? 'Cancelled' : isRefunded ? 'Refunded' : 'Complete',
+      description: isCancelled
+        ? (order.cancelledReason ?? 'The auction order was cancelled before completion.')
+        : isRefunded
+          ? 'The auction order is closed after refund.'
+          : 'No further action is required.',
+      date: order.cancelledAt ?? order.disputeResolvedAt ?? order.deliveredAt,
+      state: getCompletedState(isCancelled || isRefunded || isDelivered, false),
+    },
+  ]
+}
+
+const buildCardOrderTimeline = (order: OrderResponse): OrderTimelineStep[] => {
   const terminalStatus = order.status
   const isCancelled = terminalStatus === 'cancelled'
   const isRefunded = terminalStatus === 'refunded'
@@ -468,25 +646,27 @@ export const buildOrderTimeline = (order: OrderResponse): OrderTimelineStep[] =>
         ? 'A delivery dispute is open and awaiting resolution.'
         : 'The buyer confirmed the artwork was received.',
       date: isDisputed ? order.disputeOpenedAt : order.deliveredAt,
-      state: order.deliveredAt || order.disputeOpenedAt
-        ? 'complete'
-        : order.status === 'shipped'
-          ? 'current'
-          : 'upcoming',
+      state:
+        order.deliveredAt || order.disputeOpenedAt
+          ? 'complete'
+          : order.status === 'shipped'
+            ? 'current'
+            : 'upcoming',
     },
     {
       key: 'closed',
       label: isCancelled ? 'Cancelled' : isRefunded ? 'Refunded' : 'Complete',
       description: isCancelled
-        ? order.cancelledReason ?? 'The order was cancelled before completion.'
+        ? (order.cancelledReason ?? 'The order was cancelled before completion.')
         : isRefunded
           ? 'Funds were returned and the order was closed.'
           : 'No further action is required.',
       date: order.cancelledAt ?? order.disputeResolvedAt ?? order.deliveredAt,
-      state:
-        isCancelled || isRefunded || order.status === 'delivered'
-          ? 'complete'
-          : 'upcoming',
+      state: isCancelled || isRefunded || order.status === 'delivered' ? 'complete' : 'upcoming',
     },
   ]
+}
+
+export const buildOrderTimeline = (order: OrderResponse): OrderTimelineStep[] => {
+  return isBlockchainOrder(order) ? buildEscrowOrderTimeline(order) : buildCardOrderTimeline(order)
 }

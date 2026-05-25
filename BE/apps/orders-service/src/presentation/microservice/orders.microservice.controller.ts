@@ -7,6 +7,7 @@ import {
   UpdateOrderDto,
   GetOrdersDto,
   GetAuctionsDto,
+  DeliveryConfirmationMethod,
   OrderStatus,
   RpcExceptionHelper,
   StartSellerAuctionDto,
@@ -221,6 +222,7 @@ export class OrdersMicroserviceController {
       carrier: string;
       trackingNumber: string;
       shippingMethod?: string;
+      transactionHash?: string;
     },
   ) {
     this.logger.debug(
@@ -232,13 +234,24 @@ export class OrdersMicroserviceController {
 
   @MessagePattern({ cmd: 'confirm_delivery' })
   async confirmDelivery(
-    @Payload() data: { id: string; userId: string; notes?: string },
+    @Payload()
+    data: {
+      id: string;
+      userId: string;
+      userWalletAddress?: string | null;
+      notes?: string;
+      confirmationMethod?: DeliveryConfirmationMethod;
+      signatureDataUrl?: string;
+      transactionHash?: string;
+    },
   ) {
     this.logger.debug(
       `Confirming delivery for order: ${data.id} by user: ${data.userId}`,
     );
-    const { id, userId, ...dto } = data;
-    return this.commandBus.execute(new ConfirmDeliveryCommand(id, userId, dto));
+    const { id, userId, userWalletAddress, ...dto } = data;
+    return this.commandBus.execute(
+      new ConfirmDeliveryCommand(id, userId, dto, userWalletAddress),
+    );
   }
 
   @MessagePattern({ cmd: 'open_dispute' })

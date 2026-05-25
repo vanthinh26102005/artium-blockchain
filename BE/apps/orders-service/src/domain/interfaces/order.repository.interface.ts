@@ -18,6 +18,11 @@ export type SellerOrderListOptions = {
   paymentMethod?: OrderPaymentMethod;
 };
 
+export type BuyerOrderListOptions = SellerOrderListOptions & {
+  buyerId?: string;
+  buyerWallet?: string | null;
+};
+
 export interface IOrderRepository extends IRepository<Order, string> {
   findByCollectorId(
     collectorId: string,
@@ -38,6 +43,11 @@ export interface IOrderRepository extends IRepository<Order, string> {
   findBySellerIdViaItems(
     sellerId: string,
     options?: SellerOrderListOptions,
+    transactionManager?: EntityManager,
+  ): Promise<{ data: Order[]; total: number }>;
+
+  findByBuyerIdentity(
+    options: BuyerOrderListOptions,
     transactionManager?: EntityManager,
   ): Promise<{ data: Order[]; total: number }>;
 

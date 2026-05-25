@@ -38,7 +38,10 @@ import {
   writePendingWalletLink,
 } from '@domains/auth/services/browserAuthState'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
-import { getPracticalAuthErrorMessage } from '@domains/auth/utils/authErrors'
+import {
+  getPracticalAuthErrorMessage,
+  isCaptchaRequiredError,
+} from '@domains/auth/utils/authErrors'
 import { buildAuthCallbackUrl, getSafeNextPath } from '@domains/auth/utils/authRedirect'
 import {
   AuthDivider,
@@ -49,6 +52,7 @@ import {
   AuthProviderButton,
   AuthShell,
   SocialAuthButtons,
+  TurnstileChallenge,
   WalletLoginPanel,
 } from '@domains/auth/components'
 import { type LoginFormValues, loginFormSchema } from '@domains/auth/validations/auth.schema'
@@ -63,6 +67,9 @@ export const LoginPage = () => {
   const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false)
   const [isUnregisteredWalletDialogOpen, setIsUnregisteredWalletDialogOpen] = useState(false)
   const [isDeferringAuthRedirect, setIsDeferringAuthRedirect] = useState(false)
+  const [isCaptchaRequired, setIsCaptchaRequired] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaChallengeKey, setCaptchaChallengeKey] = useState(0)
   const { canRenderGuestPage } = useRedirectAuthenticatedUser('/', isDeferringAuthRedirect)
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -105,10 +112,13 @@ export const LoginPage = () => {
       const response = await usersApi.loginByEmail({
         email: values.email.trim(),
         password: values.password,
+        captchaToken: isCaptchaRequired ? (captchaToken ?? undefined) : undefined,
       })
       const nextPath = getSafeNextPath(router.query.next, '/discover?tab=top-picks')
       const pendingWalletAddress =
-        walletLogin.status === 'unregistered' && walletLogin.walletAddress && !response.user.walletAddress
+        walletLogin.status === 'unregistered' &&
+        walletLogin.walletAddress &&
+        !response.user.walletAddress
           ? walletLogin.walletAddress
           : null
       const shouldPromptWalletFromSignup = router.query.signup === 'success'
@@ -128,7 +138,18 @@ export const LoginPage = () => {
         await router.push(nextPath)
       }
     } catch (error) {
-      const message = getPracticalAuthErrorMessage(error, 'Email or password is incorrect.', 'login')
+      if (isCaptchaRequiredError(error)) {
+        setIsCaptchaRequired(true)
+      }
+      if (isCaptchaRequired || isCaptchaRequiredError(error)) {
+        setCaptchaToken(null)
+        setCaptchaChallengeKey((current) => current + 1)
+      }
+      const message = getPracticalAuthErrorMessage(
+        error,
+        'Email or password is incorrect.',
+        'login',
+      )
       setError('root', { message })
     }
   }
@@ -139,11 +160,7 @@ export const LoginPage = () => {
     }
 
     setIsGoogleSubmitting(true)
-    let callbackUrl = buildAuthCallbackUrl(
-      '/login',
-      router.query.next,
-      '/discover?tab=top-picks',
-    )
+    let callbackUrl = buildAuthCallbackUrl('/login', router.query.next, '/discover?tab=top-picks')
     if (router.query.signup === 'success') {
       callbackUrl = buildAuthCallbackUrl('/login', '/discover?tab=top-picks')
     }
@@ -238,6 +255,19 @@ export const LoginPage = () => {
               aria-invalid={Boolean(errors.password)}
             />
 
+            {isCaptchaRequired ? (
+              <TurnstileChallenge
+                action="login"
+                challengeKey={captchaChallengeKey}
+                onTokenChange={setCaptchaToken}
+                onError={() =>
+                  setError('root', {
+                    message: 'Verification failed. Please try again.',
+                  })
+                }
+              />
+            ) : null}
+
             <FormErrorMessage
               id="login-submit-error"
               message={errors.root?.message ?? ''}
@@ -247,7 +277,7 @@ export const LoginPage = () => {
             <Button
               className="h-14 w-full rounded-[40px] border border-black/10 text-base font-semibold tracking-[0.3em] uppercase"
               loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (isCaptchaRequired && !captchaToken)}
               type="submit"
             >
               {isSubmitting ? 'Logging in...' : 'Sign in'}

@@ -34,6 +34,7 @@ import {
 import { useSellerAuctionStart } from '../hooks/useSellerAuctionStart'
 import { useSellerAuctionArtworkCandidates } from '../hooks/useSellerAuctionArtworkCandidates'
 import { useSellerAuctionTermsDraftStatus } from '../hooks/useSellerAuctionTermsDraftStatus'
+import { submitAuctionFinalizeTransaction } from '../services/auctionFinalizeWallet'
 import { submitSellerAuctionStartTransaction } from '../services/auctionStartWallet'
 import {
   DEFAULT_SELLER_AUCTION_TERMS,
@@ -49,6 +50,14 @@ import {
   loadSellerAuctionTermsDraft,
   saveSellerAuctionTermsDraft,
 } from '../utils'
+
+const FINALIZATION_PENDING_STORAGE_KEY = 'artium.pendingAuctionFinalizations'
+const FINALIZATION_PENDING_TTL_MS = 60 * 60 * 1000
+
+type PendingAuctionFinalization = {
+  txHash: string
+  submittedAt: string
+}
 
 const policyCards = [
   {
@@ -224,7 +233,46 @@ const formatDateTime = (value?: string | null) => {
 }
 
 const formatEth = (value?: number | null) =>
-  typeof value === 'number' && Number.isFinite(value) ? formatAuctionEth(value) : '0 ETH'
+  typeof value === 'number' && Number.isFinite(value)
+    ? `${value.toFixed(4).replace(/\.?0+$/, '')} ETH`
+    : '0 ETH'
+
+const shortenHash = (value: string) => `${value.slice(0, 10)}...${value.slice(-6)}`
+
+const readPendingFinalizations = (): Record<string, PendingAuctionFinalization> => {
+  if (typeof window === 'undefined') {
+    return {}
+  }
+
+  try {
+    const parsed = JSON.parse(
+      window.localStorage.getItem(FINALIZATION_PENDING_STORAGE_KEY) ?? '{}',
+    ) as Record<string, PendingAuctionFinalization>
+    const now = Date.now()
+
+    return Object.fromEntries(
+      Object.entries(parsed).filter(([, value]) => {
+        const submittedAtMs = new Date(value.submittedAt).getTime()
+
+        return (
+          value.txHash &&
+          Number.isFinite(submittedAtMs) &&
+          now - submittedAtMs < FINALIZATION_PENDING_TTL_MS
+        )
+      }),
+    )
+  } catch {
+    return {}
+  }
+}
+
+const writePendingFinalizations = (value: Record<string, PendingAuctionFinalization>) => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.setItem(FINALIZATION_PENDING_STORAGE_KEY, JSON.stringify(value))
+}
 
 const getLifecycleLabel = (status?: SellerAuctionStartStatusResponse['status']) => {
   switch (status) {
@@ -276,82 +324,156 @@ const canResetStartAttempt = (row: SellerAuctionOverviewRow) =>
     !row.startStatus.txHash,
   )
 
+const canFinalizeAuction = (row: SellerAuctionOverviewRow) =>
+  Boolean(
+    row.auction &&
+    row.auction.statusKey === 'closed' &&
+    row.auction.orderStatus === 'auction_active' &&
+    row.auction.onChainOrderId &&
+    row.auction.contractAddress,
+  )
+
+const isAuctionSettledOnChain = (auction: AuctionLot) =>
+  (Boolean(auction.orderStatus) && auction.orderStatus !== 'auction_active') ||
+  (typeof auction.escrowState === 'number' && auction.escrowState > 0)
+
 const SellerAuctionManagerPanel = () => {
   const router = useRouter()
   const [rows, setRows] = useState<SellerAuctionOverviewRow[]>([])
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [actionMessage, setActionMessage] = useState<string | null>(null)
   const [resettingAttemptId, setResettingAttemptId] = useState<string | null>(null)
+  const [finalizingAuctionId, setFinalizingAuctionId] = useState<string | null>(null)
+  const [pendingFinalizations, setPendingFinalizations] = useState<
+    Record<string, PendingAuctionFinalization>
+  >({})
 
-  const loadOverview = useCallback(async () => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const [auctionResponse, startStatuses] = await Promise.all([
-        auctionApis.getSellerAuctions({ take: 50 }),
-        auctionApis.getSellerAuctionStartStatuses(),
-      ])
-      const sellerAuctions = auctionResponse.data.map(mapAuctionReadToLot)
-      const auctionsByOrderId = new Map(
-        sellerAuctions.map((auction) => [auction.onChainOrderId, auction]),
-      )
-      const auctionsByArtworkId = new Map(
-        sellerAuctions.map((auction) => [auction.artworkId, auction]),
-      )
-      const nextRows: SellerAuctionOverviewRow[] = []
-      const usedAuctionIds = new Set<string>()
-
-      startStatuses.forEach((status) => {
-        const auction =
-          auctionsByOrderId.get(status.orderId) ?? auctionsByArtworkId.get(status.artworkId)
-        if (auction?.auctionId) {
-          usedAuctionIds.add(auction.auctionId)
-        }
-
-        nextRows.push({
-          id: status.attemptId,
-          title: status.artworkTitle,
-          creatorName: status.creatorName,
-          thumbnailUrl: status.thumbnailUrl,
-          artworkId: status.artworkId,
-          startStatus: status,
-          auction,
-        })
-      })
-
-      sellerAuctions.forEach((auction) => {
-        if (usedAuctionIds.has(auction.auctionId)) {
-          return
-        }
-
-        nextRows.push({
-          id: auction.auctionId,
-          title: auction.title,
-          creatorName: auction.sellerWallet,
-          thumbnailUrl: auction.imageSrc,
-          artworkId: auction.artworkId,
-          auction,
-        })
-      })
-
-      setRows(nextRows)
-      setSelectedRowId((currentId) => currentId ?? nextRows[0]?.id ?? null)
-    } catch (caughtError) {
-      setError(
-        caughtError instanceof Error ? caughtError.message : 'Unable to load seller auctions.',
-      )
-    } finally {
-      setIsLoading(false)
-    }
+  useEffect(() => {
+    const nextPending = readPendingFinalizations()
+    setPendingFinalizations(nextPending)
+    writePendingFinalizations(nextPending)
   }, [])
+
+  const updatePendingFinalizations = useCallback(
+    (
+      updater: (
+        current: Record<string, PendingAuctionFinalization>,
+      ) => Record<string, PendingAuctionFinalization>,
+    ) => {
+      setPendingFinalizations((current) => {
+        const next = updater(current)
+        writePendingFinalizations(next)
+        return next
+      })
+    },
+    [],
+  )
+
+  const loadOverview = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!options?.silent) {
+        setIsLoading(true)
+      }
+      setError(null)
+
+      try {
+        const [auctionResponse, startStatuses] = await Promise.all([
+          auctionApis.getSellerAuctions({ take: 50 }),
+          auctionApis.getSellerAuctionStartStatuses(),
+        ])
+        const sellerAuctions = auctionResponse.data.map(mapAuctionReadToLot)
+        const auctionsByOrderId = new Map(
+          sellerAuctions.map((auction) => [auction.onChainOrderId, auction]),
+        )
+        const auctionsByArtworkId = new Map(
+          sellerAuctions.map((auction) => [auction.artworkId, auction]),
+        )
+        const nextRows: SellerAuctionOverviewRow[] = []
+        const usedAuctionIds = new Set<string>()
+
+        startStatuses.forEach((status) => {
+          const auction =
+            auctionsByOrderId.get(status.orderId) ?? auctionsByArtworkId.get(status.artworkId)
+          if (auction?.auctionId) {
+            usedAuctionIds.add(auction.auctionId)
+          }
+
+          nextRows.push({
+            id: status.attemptId,
+            title: status.artworkTitle,
+            creatorName: status.creatorName,
+            thumbnailUrl: status.thumbnailUrl,
+            artworkId: status.artworkId,
+            startStatus: status,
+            auction,
+          })
+        })
+
+        sellerAuctions.forEach((auction) => {
+          if (usedAuctionIds.has(auction.auctionId)) {
+            return
+          }
+
+          nextRows.push({
+            id: auction.auctionId,
+            title: auction.title,
+            creatorName: auction.sellerWallet,
+            thumbnailUrl: auction.imageSrc,
+            artworkId: auction.artworkId,
+            auction,
+          })
+        })
+
+        updatePendingFinalizations((current) => {
+          const next = { ...current }
+          let changed = false
+
+          sellerAuctions.forEach((auction) => {
+            if (isAuctionSettledOnChain(auction) && next[auction.onChainOrderId]) {
+              delete next[auction.onChainOrderId]
+              changed = true
+            }
+          })
+
+          return changed ? next : current
+        })
+        setRows(nextRows)
+        setSelectedRowId((currentId) => currentId ?? nextRows[0]?.id ?? null)
+      } catch (caughtError) {
+        setError(
+          caughtError instanceof Error ? caughtError.message : 'Unable to load seller auctions.',
+        )
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false)
+        }
+      }
+    },
+    [updatePendingFinalizations],
+  )
 
   useEffect(() => {
     void loadOverview()
   }, [loadOverview])
 
+  useEffect(() => {
+    if (Object.keys(pendingFinalizations).length === 0) {
+      return
+    }
+
+    const intervalId = window.setInterval(() => {
+      void loadOverview({ silent: true })
+    }, 15_000)
+
+    return () => window.clearInterval(intervalId)
+  }, [loadOverview, pendingFinalizations])
+
   const selectedRow = rows.find((row) => row.id === selectedRowId) ?? rows[0] ?? null
+  const selectedFinalization = selectedRow?.auction
+    ? pendingFinalizations[selectedRow.auction.onChainOrderId]
+    : null
 
   const handleResetStartAttempt = async (row: SellerAuctionOverviewRow) => {
     if (!row.startStatus || !canResetStartAttempt(row)) {
@@ -373,6 +495,45 @@ const SellerAuctionManagerPanel = () => {
       )
     } finally {
       setResettingAttemptId(null)
+    }
+  }
+
+  const handleFinalizeAuction = async (row: SellerAuctionOverviewRow) => {
+    if (!row.auction || !canFinalizeAuction(row)) {
+      return
+    }
+    if (pendingFinalizations[row.auction.onChainOrderId]) {
+      setActionMessage('Auction finalization is already pending. Wait for chain sync or refresh.')
+      return
+    }
+
+    setFinalizingAuctionId(row.auction.auctionId)
+    setError(null)
+    setActionMessage(null)
+
+    try {
+      const result = await submitAuctionFinalizeTransaction({
+        onChainOrderId: row.auction.onChainOrderId,
+        contractAddress: row.auction.contractAddress!,
+        expectedSellerWallet: row.auction.sellerWallet,
+      })
+      updatePendingFinalizations((current) => ({
+        ...current,
+        [row.auction!.onChainOrderId]: {
+          txHash: result.txHash,
+          submittedAt: new Date().toISOString(),
+        },
+      }))
+      setActionMessage(
+        `Auction finalization submitted (${shortenHash(result.txHash)}). Waiting for chain sync.`,
+      )
+      await loadOverview()
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error ? caughtError.message : 'Unable to finalize this auction.',
+      )
+    } finally {
+      setFinalizingAuctionId(null)
     }
   }
 
@@ -398,6 +559,12 @@ const SellerAuctionManagerPanel = () => {
       {error ? (
         <div className="rounded-[24px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {error}
+        </div>
+      ) : null}
+
+      {actionMessage ? (
+        <div className="rounded-[24px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {actionMessage}
         </div>
       ) : null}
 
@@ -590,10 +757,48 @@ const SellerAuctionManagerPanel = () => {
               </div>
 
               <div className="mt-6 flex flex-col gap-3">
-                {selectedRow.auction ? (
+                {canFinalizeAuction(selectedRow) && selectedRow.auction ? (
                   <Button
                     type="button"
                     className="bg-slate-900 text-white hover:bg-slate-700"
+                    disabled={
+                      finalizingAuctionId === selectedRow.auction.auctionId ||
+                      Boolean(selectedFinalization)
+                    }
+                    onClick={() => void handleFinalizeAuction(selectedRow)}
+                  >
+                    <Gavel className="h-4 w-4" />
+                    {selectedFinalization
+                      ? `Finalization pending (${shortenHash(selectedFinalization.txHash)})`
+                      : finalizingAuctionId === selectedRow.auction.auctionId
+                        ? 'Opening MetaMask...'
+                        : 'Finalize auction'}
+                  </Button>
+                ) : null}
+                {selectedRow.auction?.orderProjectionId ? (
+                  <Button
+                    type="button"
+                    className="bg-slate-900 text-white hover:bg-slate-700"
+                    onClick={() =>
+                      void router.push({
+                        pathname: `/orders/${selectedRow.auction!.orderProjectionId}`,
+                        query: { scope: 'seller', invoice: '1' },
+                      })
+                    }
+                  >
+                    <ListChecks className="h-4 w-4" />
+                    Manage fulfillment
+                  </Button>
+                ) : null}
+                {selectedRow.auction ? (
+                  <Button
+                    type="button"
+                    variant={selectedRow.auction.orderProjectionId ? 'outline' : 'default'}
+                    className={
+                      selectedRow.auction.orderProjectionId
+                        ? 'border-slate-200 text-slate-900'
+                        : 'bg-slate-900 text-white hover:bg-slate-700'
+                    }
                     onClick={() =>
                       void router.push(
                         `/auction/bids/${encodeURIComponent(selectedRow.auction!.onChainOrderId)}`,

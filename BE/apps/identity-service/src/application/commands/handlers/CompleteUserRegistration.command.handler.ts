@@ -45,7 +45,10 @@ export class CompleteUserRegistrationHandler implements ICommandHandler<
 
       const result = await this.transactionService.execute(async (manager) => {
         const newUser = await this.registrationService.createUser(
-          registrationPayload,
+          {
+            ...registrationPayload,
+            isEmailVerified: true,
+          },
           manager,
         );
 
@@ -55,7 +58,11 @@ export class CompleteUserRegistrationHandler implements ICommandHandler<
         );
         this.logger.debug(`OTP invalidated for email: ${email}`);
 
-        const tokenPair = await this.tokenService.generateTokenPair(newUser);
+        const tokenPair = await this.tokenService.generateTokenPair(
+          newUser,
+          command.metadata?.userAgent,
+          command.metadata?.ipAddress,
+        );
         this.logger.debug(
           `Token pair generated for new user ID: ${newUser.id}`,
         );

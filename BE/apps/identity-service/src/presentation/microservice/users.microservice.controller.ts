@@ -1,4 +1,6 @@
 import {
+  AuthRequestMetadata,
+  AuthRpcPayload,
   GetUserProfileDto,
   LoginGoogleDto,
   PasswordResetConfirmDto,
@@ -34,6 +36,8 @@ import {
   VerifyPasswordResetResponse,
   WalletLoginInput,
 } from '../../domain';
+
+type MaybeAuthPayload<T> = T | AuthRpcPayload<T>;
 
 @Controller()
 export class UsersMicroserviceController {
@@ -86,38 +90,47 @@ export class UsersMicroserviceController {
 
   @MessagePattern({ cmd: 'login_email' })
   async loginEmail(
-    @Payload() loginInput: EmailLoginInput,
+    @Payload() payload: MaybeAuthPayload<EmailLoginInput>,
   ): Promise<LoginResponse> {
-    return this.commandBus.execute(new LoginByEmailCommand(loginInput));
+    const { input, meta } = this.unpackAuthPayload(payload);
+    return this.commandBus.execute(new LoginByEmailCommand(input, meta));
   }
 
   @MessagePattern({ cmd: 'login_google' })
   async loginGoogle(
-    @Payload() loginInput: LoginGoogleDto,
+    @Payload() payload: MaybeAuthPayload<LoginGoogleDto>,
   ): Promise<LoginResponse> {
-    return this.commandBus.execute(new LoginByGoogleCommand(loginInput));
+    const { input, meta } = this.unpackAuthPayload(payload);
+    return this.commandBus.execute(new LoginByGoogleCommand(input, meta));
   }
 
   @MessagePattern({ cmd: 'initiate_registeration' })
   async initiateRegistration(
-    @Payload() input: RegisterInitiateDto,
+    @Payload() payload: MaybeAuthPayload<RegisterInitiateDto>,
   ): Promise<{ success: boolean; message: string }> {
-    await this.commandBus.execute(new InitiateUserRegistrationCommand(input));
+    const { input, meta } = this.unpackAuthPayload(payload);
+    await this.commandBus.execute(
+      new InitiateUserRegistrationCommand(input, meta),
+    );
     return { success: true, message: 'OTP sent successfully' };
   }
 
   @MessagePattern({ cmd: 'complete_registeration' })
   async completeRegistration(
-    @Payload() input: RegisterCompleteDto,
+    @Payload() payload: MaybeAuthPayload<RegisterCompleteDto>,
   ): Promise<LoginResponse> {
-    return this.commandBus.execute(new CompleteUserRegistrationCommand(input));
+    const { input, meta } = this.unpackAuthPayload(payload);
+    return this.commandBus.execute(
+      new CompleteUserRegistrationCommand(input, meta),
+    );
   }
 
   @MessagePattern({ cmd: 'request_password_reset' })
   async requestPasswordReset(
-    @Payload() input: PasswordResetRequestDto,
+    @Payload() payload: MaybeAuthPayload<PasswordResetRequestDto>,
   ): Promise<{ success: boolean; message: string }> {
-    await this.commandBus.execute(new RequestPasswordResetCommand(input));
+    const { input, meta } = this.unpackAuthPayload(payload);
+    await this.commandBus.execute(new RequestPasswordResetCommand(input, meta));
     return {
       success: true,
       message: 'If email exists, reset instructions will be sent',
@@ -126,23 +139,26 @@ export class UsersMicroserviceController {
 
   @MessagePattern({ cmd: 'password_reset_verify' })
   async verifyPasswordReset(
-    @Payload() input: PasswordResetVerifyDto,
+    @Payload() payload: MaybeAuthPayload<PasswordResetVerifyDto>,
   ): Promise<VerifyPasswordResetResponse> {
+    const { input } = this.unpackAuthPayload(payload);
     return this.commandBus.execute(new VerifyPasswordResetCommand(input));
   }
 
   @MessagePattern({ cmd: 'password_reset_confirm' })
   async confirmPasswordReset(
-    @Payload() input: PasswordResetConfirmDto,
+    @Payload() payload: MaybeAuthPayload<PasswordResetConfirmDto>,
   ): Promise<LoginResponse> {
-    return this.commandBus.execute(new ConfirmNewPasswordCommand(input));
+    const { input, meta } = this.unpackAuthPayload(payload);
+    return this.commandBus.execute(new ConfirmNewPasswordCommand(input, meta));
   }
 
   @MessagePattern({ cmd: 'login_wallet' })
   async loginWallet(
-    @Payload() input: WalletLoginInput,
+    @Payload() payload: MaybeAuthPayload<WalletLoginInput>,
   ): Promise<LoginResponse> {
-    return this.commandBus.execute(new LoginByWalletCommand(input));
+    const { input, meta } = this.unpackAuthPayload(payload);
+    return this.commandBus.execute(new LoginByWalletCommand(input, meta));
   }
 
   @MessagePattern({ cmd: 'get_wallet_nonce' })
@@ -192,5 +208,22 @@ export class UsersMicroserviceController {
       message: 'User profile updated successfully',
       user: result.user as UserPayload,
     };
+  }
+
+  private unpackAuthPayload<T>(payload: MaybeAuthPayload<T>): {
+    input: T;
+    meta?: AuthRequestMetadata;
+  } {
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      'input' in payload &&
+      Object.prototype.hasOwnProperty.call(payload, 'input')
+    ) {
+      const wrappedPayload = payload as AuthRpcPayload<T>;
+      return { input: wrappedPayload.input, meta: wrappedPayload.meta };
+    }
+
+    return { input: payload as T };
   }
 }

@@ -54,7 +54,11 @@ export class ConfirmNewPasswordHandler implements ICommandHandler<
         `Password for user ${updatedUser.id} has been reset successfully.`,
       );
 
-      const tokenPair = await this.tokenService.generateTokenPair(updatedUser);
+      const tokenPair = await this.tokenService.generateTokenPair(
+        updatedUser,
+        command.metadata?.userAgent,
+        command.metadata?.ipAddress,
+      );
       return { user: updatedUser, ...tokenPair };
     });
   }

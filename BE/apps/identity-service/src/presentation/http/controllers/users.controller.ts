@@ -17,6 +17,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { RpcException } from '@nestjs/microservices';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -26,6 +27,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -53,6 +55,8 @@ import {
   VerifyPasswordResetCommand,
 } from '../../../application';
 import { JwtAuthGuard } from '@app/auth';
+import { AuthRequestMetadata } from '@app/common';
+import { IdentityThrottlerGuard } from '../guards/identity-throttler.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -104,9 +108,7 @@ export class UsersController {
       const { password: _password, ...safeUser } = user;
       return safeUser as UserPayload;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      this.throwIfKnownException(error);
 
       this.logger.error(
         `[UsersController] [ReqID: ${requestId}] - Failed to get user profile`,
@@ -171,9 +173,7 @@ export class UsersController {
       );
       return user;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      this.throwIfKnownException(error);
 
       this.logger.error(
         `[UsersController] [ReqID: ${requestId}] - Unexpected error getting user by ID`,
@@ -191,6 +191,10 @@ export class UsersController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(IdentityThrottlerGuard)
+  @Throttle({
+    default: { limit: 10, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'User login with email and password',
     description: 'Authenticates a user using email and password credentials',
@@ -216,7 +220,10 @@ export class UsersController {
     status: 500,
     description: 'Internal Server Error - Unexpected system error',
   })
-  async login(@Body() loginInput: EmailLoginInput): Promise<LoginResponse> {
+  async login(
+    @Body() loginInput: EmailLoginInput,
+    @Request() req: any,
+  ): Promise<LoginResponse> {
     const requestId = uuidv4();
     this.logger.log(
       `[UsersController] [ReqID: ${requestId}] - User login attempt`,
@@ -243,7 +250,7 @@ export class UsersController {
       }
 
       const result = await this.commandBus.execute(
-        new LoginByEmailCommand(loginInput),
+        new LoginByEmailCommand(loginInput, this.buildAuthRequestMetadata(req)),
       );
 
       this.logger.log(
@@ -255,9 +262,7 @@ export class UsersController {
 
       return result;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      this.throwIfKnownException(error);
 
       this.logger.error(
         `[UsersController] [ReqID: ${requestId}] - Unexpected login error`,
@@ -276,6 +281,10 @@ export class UsersController {
 
   @Post('login/google')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(IdentityThrottlerGuard)
+  @Throttle({
+    default: { limit: 20, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'User login with Google',
     description: 'Authenticates a user using Google ID token from OAuth',
@@ -303,6 +312,7 @@ export class UsersController {
   })
   async loginWithGoogle(
     @Body() loginInput: GoogleLoginInput,
+    @Request() req: any,
   ): Promise<LoginResponse> {
     const requestId = uuidv4();
     this.logger.log(
@@ -319,7 +329,10 @@ export class UsersController {
       }
 
       const result = await this.commandBus.execute(
-        new LoginByGoogleCommand(loginInput),
+        new LoginByGoogleCommand(
+          loginInput,
+          this.buildAuthRequestMetadata(req),
+        ),
       );
 
       this.logger.log(
@@ -328,9 +341,7 @@ export class UsersController {
 
       return result;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      this.throwIfKnownException(error);
 
       this.logger.error(
         `[UsersController] [ReqID: ${requestId}] - Unexpected Google login error`,
@@ -347,6 +358,10 @@ export class UsersController {
   }
 
   @Post('register/initiate')
+  @UseGuards(IdentityThrottlerGuard)
+  @Throttle({
+    default: { limit: 5, ttl: 60 * 1000, blockDuration: 10 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'Initiate user registration',
     description:
@@ -376,6 +391,7 @@ export class UsersController {
   })
   async initiateRegistration(
     @Body() input: UserRegisterInput,
+    @Request() req: any,
   ): Promise<RequestOtpResponse> {
     const requestId = uuidv4();
     this.logger.log(
@@ -414,7 +430,12 @@ export class UsersController {
         );
       }
 
-      await this.commandBus.execute(new InitiateUserRegistrationCommand(input));
+      await this.commandBus.execute(
+        new InitiateUserRegistrationCommand(
+          input,
+          this.buildAuthRequestMetadata(req),
+        ),
+      );
 
       this.logger.log(
         `[UsersController] [ReqID: ${requestId}] - Registration initiated successfully`,
@@ -425,9 +446,7 @@ export class UsersController {
 
       return { success: true, message: 'OTP sent successfully' };
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      this.throwIfKnownException(error);
 
       this.logger.error(
         `[UsersController] [ReqID: ${requestId}] - Unexpected registration initiation error`,
@@ -445,6 +464,10 @@ export class UsersController {
   }
 
   @Post('register/complete')
+  @UseGuards(IdentityThrottlerGuard)
+  @Throttle({
+    default: { limit: 10, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'Complete user registration',
     description:
@@ -470,6 +493,7 @@ export class UsersController {
   })
   async completeRegistration(
     @Body() input: CompleteUserRegisterInput,
+    @Request() req: any,
   ): Promise<LoginResponse> {
     const requestId = uuidv4();
     this.logger.log(
@@ -503,7 +527,10 @@ export class UsersController {
       }
 
       const result = await this.commandBus.execute(
-        new CompleteUserRegistrationCommand(input),
+        new CompleteUserRegistrationCommand(
+          input,
+          this.buildAuthRequestMetadata(req),
+        ),
       );
 
       this.logger.log(
@@ -515,9 +542,7 @@ export class UsersController {
 
       return result;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      this.throwIfKnownException(error);
 
       this.logger.error(
         `[UsersController] [ReqID: ${requestId}] - Unexpected registration completion error`,
@@ -535,6 +560,10 @@ export class UsersController {
   }
 
   @Post('password/reset/request')
+  @UseGuards(IdentityThrottlerGuard)
+  @Throttle({
+    default: { limit: 5, ttl: 60 * 1000, blockDuration: 10 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'Request password reset',
     description:
@@ -555,6 +584,7 @@ export class UsersController {
   })
   async requestPasswordReset(
     @Body() input: RequestPasswordResetInput,
+    @Request() req: any,
   ): Promise<RequestPasswordResetResponse> {
     const requestId = uuidv4();
     this.logger.log(
@@ -579,7 +609,12 @@ export class UsersController {
         throw new BadRequestException('Invalid email format');
       }
 
-      await this.commandBus.execute(new RequestPasswordResetCommand(input));
+      await this.commandBus.execute(
+        new RequestPasswordResetCommand(
+          input,
+          this.buildAuthRequestMetadata(req),
+        ),
+      );
 
       this.logger.log(
         `[UsersController] [ReqID: ${requestId}] - Password reset request processed`,
@@ -593,9 +628,7 @@ export class UsersController {
         message: 'If email exists, reset instructions will be sent',
       };
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      this.throwIfKnownException(error);
 
       this.logger.error(
         `[UsersController] [ReqID: ${requestId}] - Unexpected password reset request error`,
@@ -613,6 +646,10 @@ export class UsersController {
   }
 
   @Post('password/reset/verify')
+  @UseGuards(IdentityThrottlerGuard)
+  @Throttle({
+    default: { limit: 10, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'Verify password reset token',
     description:
@@ -670,9 +707,7 @@ export class UsersController {
 
       return result;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      this.throwIfKnownException(error);
 
       this.logger.error(
         `[UsersController] [ReqID: ${requestId}] - Unexpected password reset verification error`,
@@ -690,6 +725,10 @@ export class UsersController {
   }
 
   @Put('password/reset/confirm')
+  @UseGuards(IdentityThrottlerGuard)
+  @Throttle({
+    default: { limit: 10, ttl: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  })
   @ApiOperation({
     summary: 'Confirm new password after reset',
     description:
@@ -710,6 +749,7 @@ export class UsersController {
   })
   async confirmPasswordReset(
     @Body() input: ConfirmPasswordResetInput,
+    @Request() req: any,
   ): Promise<LoginResponse> {
     const requestId = uuidv4();
     this.logger.log(
@@ -769,7 +809,10 @@ export class UsersController {
       }
 
       const result = await this.commandBus.execute(
-        new ConfirmNewPasswordCommand(input),
+        new ConfirmNewPasswordCommand(
+          input,
+          this.buildAuthRequestMetadata(req),
+        ),
       );
 
       this.logger.log(
@@ -781,9 +824,7 @@ export class UsersController {
 
       return result;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      this.throwIfKnownException(error);
 
       this.logger.error(
         `[UsersController] [ReqID: ${requestId}] - Unexpected password reset confirmation error`,
@@ -808,5 +849,56 @@ export class UsersController {
   private sanitizeEmail(email: string): string {
     if (!email) return 'unknown';
     return email.replace(/(.{2}).*(@.*)/, '$1***$2');
+  }
+
+  private throwIfKnownException(error: unknown): void {
+    if (error instanceof HttpException) {
+      throw error;
+    }
+
+    if (error instanceof RpcException) {
+      const rpcError = error.getError();
+
+      if (typeof rpcError === 'object' && rpcError !== null) {
+        const statusCode =
+          Number((rpcError as any).statusCode) ||
+          HttpStatus.INTERNAL_SERVER_ERROR;
+        throw new HttpException(
+          {
+            statusCode,
+            message: (rpcError as any).message || 'Request failed',
+            errors: (rpcError as any).errors || null,
+          },
+          statusCode,
+        );
+      }
+
+      throw new InternalServerErrorException(String(rpcError));
+    }
+  }
+
+  private buildAuthRequestMetadata(request: any): AuthRequestMetadata {
+    return {
+      ipAddress:
+        this.sanitizeMetadataValue(request?.ips?.[0]) ||
+        this.sanitizeMetadataValue(request?.ip) ||
+        this.sanitizeMetadataValue(request?.socket?.remoteAddress),
+      userAgent: this.sanitizeMetadataValue(request?.headers?.['user-agent']),
+      deviceId: this.sanitizeMetadataValue(
+        request?.headers?.['x-device-id'],
+        128,
+      ),
+    };
+  }
+
+  private sanitizeMetadataValue(
+    value: unknown,
+    maxLength = 512,
+  ): string | undefined {
+    const rawValue = Array.isArray(value) ? value[0] : value;
+    if (typeof rawValue !== 'string') return undefined;
+    const trimmed = rawValue.trim();
+    if (!trimmed) return undefined;
+    return trimmed.slice(0, maxLength);
   }
 }

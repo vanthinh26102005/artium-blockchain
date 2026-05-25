@@ -2,6 +2,9 @@ import { useState } from 'react'
 import orderApis, { type OrderResponse } from '@shared/apis/orderApis'
 import { BaseInputField, BaseTextareaField } from '@shared/components/forms'
 import { Button } from '@shared/components/ui/button'
+import { DeliverySignaturePad } from './DeliverySignaturePad'
+import { submitOrderDeliveryConfirmation } from '../services/orderDeliveryWallet'
+import { submitOrderShipmentConfirmation } from '../services/orderShipmentWallet'
 import type { OrderActorRole } from '../types/orderTypes'
 import {
   canCancelOrder,
@@ -9,6 +12,7 @@ import {
   canMarkShipped,
   canOpenDispute,
   getNextStepDescription,
+  isBlockchainOrder,
 } from '../utils/orderPresentation'
 
 type ActiveAction = 'cancel' | 'ship' | 'confirm' | 'dispute' | null
@@ -29,6 +33,7 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
   const [trackingNumber, setTrackingNumber] = useState('')
   const [shippingMethod, setShippingMethod] = useState('')
   const [deliveryNotes, setDeliveryNotes] = useState('')
+  const [deliverySignatureDataUrl, setDeliverySignatureDataUrl] = useState<string | null>(null)
   const [disputeReason, setDisputeReason] = useState('')
   const labelClassName = 'text-sm font-medium text-slate-700'
   const messageClassName = 'text-sm text-red-500'
@@ -61,16 +66,47 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
     setErrorMessage(null)
 
     try {
+      if (requiresWalletShipmentConfirmation && (!order.onChainOrderId || !order.contractAddress)) {
+        setErrorMessage(
+          'This blockchain order is missing shipment contract data. Refresh the order.',
+        )
+        return
+      }
+
+      const shipmentTxHash = requiresWalletShipmentConfirmation
+        ? (
+            await submitOrderShipmentConfirmation({
+              onChainOrderId: order.onChainOrderId ?? '',
+              contractAddress: order.contractAddress ?? '',
+              trackingHash: trackingNumber.trim(),
+              expectedSellerWallet: order.sellerWallet,
+            })
+          ).txHash
+        : undefined
+
+      if (requiresWalletShipmentConfirmation && !shipmentTxHash) {
+        setErrorMessage(
+          'Shipment was not submitted on-chain. Confirm the MetaMask transaction first.',
+        )
+        return
+      }
+
       const updatedOrder = await orderApis.markShipped(order.id, {
         carrier: shippingCarrier.trim(),
         trackingNumber: trackingNumber.trim(),
         shippingMethod: shippingMethod.trim() || undefined,
+        transactionHash: shipmentTxHash,
       })
       setShippingCarrier('')
       setTrackingNumber('')
       setShippingMethod('')
       resetLocalState()
-      onOrderUpdated(updatedOrder, 'Shipment details were saved and the order is now in transit.')
+      onOrderUpdated(
+        updatedOrder,
+        requiresWalletShipmentConfirmation
+          ? 'Shipment transaction was submitted. The order will move to shipped after chain sync.'
+          : 'Shipment details were saved and the order is now in transit.',
+      )
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to update shipment details.')
     } finally {
@@ -85,12 +121,49 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
     try {
       const updatedOrder = await orderApis.confirmDelivery(order.id, {
         notes: deliveryNotes.trim() || undefined,
+        confirmationMethod: deliverySignatureDataUrl ? 'app_signature' : 'app',
+        signatureDataUrl: deliverySignatureDataUrl ?? undefined,
       })
       setDeliveryNotes('')
+      setDeliverySignatureDataUrl(null)
       resetLocalState()
       onOrderUpdated(updatedOrder, 'Delivery was confirmed successfully.')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to confirm delivery.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleConfirmDeliveryOnChain = async () => {
+    if (!order.onChainOrderId || !order.contractAddress) {
+      setErrorMessage('This order is missing on-chain confirmation data.')
+      return
+    }
+
+    setIsSubmitting(true)
+    setErrorMessage(null)
+
+    try {
+      const walletResult = await submitOrderDeliveryConfirmation({
+        onChainOrderId: order.onChainOrderId,
+        contractAddress: order.contractAddress,
+        expectedBuyerWallet: order.buyerWallet,
+      })
+      const updatedOrder = await orderApis.confirmDelivery(order.id, {
+        notes: deliveryNotes.trim() || undefined,
+        confirmationMethod: 'wallet',
+        signatureDataUrl: deliverySignatureDataUrl ?? undefined,
+        transactionHash: walletResult.txHash,
+      })
+      setDeliveryNotes('')
+      setDeliverySignatureDataUrl(null)
+      resetLocalState()
+      onOrderUpdated(updatedOrder, 'Delivery confirmation was submitted on-chain.')
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Unable to confirm delivery on-chain.',
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -114,12 +187,27 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
     }
   }
 
+  const requiresWalletDeliveryConfirmation =
+    role === 'buyer' && canConfirmDelivery(order.status) && isBlockchainOrder(order)
+  const requiresWalletShipmentConfirmation =
+    role === 'seller' && canMarkShipped(order.status) && isBlockchainOrder(order)
+
   const actions = [
     role === 'seller' && canMarkShipped(order.status)
-      ? { key: 'ship' as const, label: 'Mark as shipped', variant: 'default' as const }
+      ? {
+          key: 'ship' as const,
+          label: requiresWalletShipmentConfirmation
+            ? 'Confirm shipment on-chain'
+            : 'Mark as shipped',
+          variant: 'default' as const,
+        }
       : null,
     role === 'buyer' && canConfirmDelivery(order.status)
-      ? { key: 'confirm' as const, label: 'Confirm delivery', variant: 'default' as const }
+      ? {
+          key: 'confirm' as const,
+          label: requiresWalletDeliveryConfirmation ? 'Confirm on-chain' : 'Confirm delivery',
+          variant: 'default' as const,
+        }
       : null,
     role === 'buyer' && canOpenDispute(order)
       ? { key: 'dispute' as const, label: 'Open dispute', variant: 'outline' as const }
@@ -127,12 +215,21 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
     canCancelOrder(order.status)
       ? { key: 'cancel' as const, label: 'Cancel order', variant: 'outline' as const }
       : null,
-  ].filter(Boolean) as Array<{ key: Exclude<ActiveAction, null>; label: string; variant: 'default' | 'outline' }>
+  ].filter(Boolean) as Array<{
+    key: Exclude<ActiveAction, null>
+    label: string
+    variant: 'default' | 'outline'
+  }>
 
   return (
-    <div tabIndex={10} className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <div
+      tabIndex={10}
+      className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+    >
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Next step</p>
+        <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
+          Next step
+        </p>
         <h2 className="text-xl font-semibold text-slate-900">Manage this order</h2>
         <p className="text-sm leading-6 text-slate-500">{getNextStepDescription(order, role)}</p>
       </div>
@@ -168,6 +265,12 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
 
       {activeAction === 'ship' ? (
         <div className="mt-6 space-y-4 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
+          {requiresWalletShipmentConfirmation ? (
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-700">
+              Shipment must be confirmed by the seller wallet on-chain. The order will stay in
+              escrow until the contract event syncs.
+            </div>
+          ) : null}
           <div className="grid gap-4 md:grid-cols-2">
             <BaseInputField
               id="order-action-shipping-carrier"
@@ -207,12 +310,22 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
             <Button
               type="button"
               loading={isSubmitting}
-              disabled={!shippingCarrier.trim() || !trackingNumber.trim()}
+              disabled={
+                !shippingCarrier.trim() ||
+                !trackingNumber.trim() ||
+                (requiresWalletShipmentConfirmation &&
+                  (!order.onChainOrderId || !order.contractAddress))
+              }
               onClick={() => void handleMarkShipped()}
             >
-              Save shipment
+              {requiresWalletShipmentConfirmation ? 'Confirm shipment on-chain' : 'Save shipment'}
             </Button>
-            <Button type="button" variant="outline" className="border-slate-200" onClick={resetLocalState}>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-slate-200"
+              onClick={resetLocalState}
+            >
               Cancel
             </Button>
           </div>
@@ -221,6 +334,12 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
 
       {activeAction === 'confirm' ? (
         <div className="mt-6 space-y-4 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
+          {requiresWalletDeliveryConfirmation ? (
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-700">
+              Escrow release follows the blockchain confirmation. This order will update after the
+              contract event syncs.
+            </div>
+          ) : null}
           <BaseTextareaField
             id="order-action-delivery-notes"
             label="Delivery notes"
@@ -233,11 +352,34 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
             descriptionClassName="text-sm text-slate-400"
             textareaClassName={textareaClassName}
           />
+          <DeliverySignaturePad
+            value={deliverySignatureDataUrl}
+            onChange={setDeliverySignatureDataUrl}
+            required={!requiresWalletDeliveryConfirmation}
+          />
           <div className="flex gap-3">
-            <Button type="button" loading={isSubmitting} onClick={() => void handleConfirmDelivery()}>
-              Confirm delivery
+            <Button
+              type="button"
+              loading={isSubmitting}
+              disabled={
+                requiresWalletDeliveryConfirmation
+                  ? !order.onChainOrderId || !order.contractAddress
+                  : !deliverySignatureDataUrl
+              }
+              onClick={() =>
+                void (requiresWalletDeliveryConfirmation
+                  ? handleConfirmDeliveryOnChain()
+                  : handleConfirmDelivery())
+              }
+            >
+              {requiresWalletDeliveryConfirmation ? 'Confirm on-chain' : 'Confirm delivery'}
             </Button>
-            <Button type="button" variant="outline" className="border-slate-200" onClick={resetLocalState}>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-slate-200"
+              onClick={resetLocalState}
+            >
               Cancel
             </Button>
           </div>
@@ -266,7 +408,12 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
             >
               Open dispute
             </Button>
-            <Button type="button" variant="outline" className="border-slate-200" onClick={resetLocalState}>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-slate-200"
+              onClick={resetLocalState}
+            >
               Cancel
             </Button>
           </div>
@@ -296,7 +443,12 @@ export const OrderActionPanel = ({ order, role, onOrderUpdated }: OrderActionPan
             >
               Confirm cancellation
             </Button>
-            <Button type="button" variant="outline" className="border-rose-200 bg-white text-rose-900" onClick={resetLocalState}>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-rose-200 bg-white text-rose-900"
+              onClick={resetLocalState}
+            >
               Keep order
             </Button>
           </div>
