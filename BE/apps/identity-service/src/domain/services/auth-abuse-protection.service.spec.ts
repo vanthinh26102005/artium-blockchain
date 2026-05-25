@@ -87,4 +87,45 @@ describe(AuthAbuseProtectionService.name, () => {
       service.assertCanAttemptEmailLogin({ email: 'blocked@test.dev' }),
     ).rejects.toBeInstanceOf(RpcException);
   });
+
+  it('does not let a low block threshold preempt captcha when captcha is enabled', async () => {
+    const lowBlockConfig = {
+      get: (key: string) => {
+        const values: Record<string, string | number> = {
+          AUTH_CAPTCHA_FAILED_LOGIN_THRESHOLD: 3,
+          AUTH_EMAIL_BLOCK_FAILED_LOGIN_THRESHOLD: 3,
+          AUTH_FAILURE_WINDOW_MS: 3600000,
+          AUTH_BLOCK_WINDOW_MS: 900000,
+        };
+        return values[key];
+      },
+    };
+    const captchaService = {
+      isEnabled: jest.fn(() => true),
+      assertValidCaptcha: jest.fn(async (token?: string) => {
+        if (!token) {
+          throw new RpcException({
+            statusCode: 403,
+            message: 'Captcha verification required',
+            errors: { captchaRequired: true },
+          });
+        }
+      }),
+    };
+    const service = new AuthAbuseProtectionService(
+      new MemoryCache() as any,
+      lowBlockConfig as any,
+      captchaService as any,
+    );
+
+    await service.recordEmailLoginFailure('captcha@test.dev');
+    await service.recordEmailLoginFailure('captcha@test.dev');
+    await service.recordEmailLoginFailure('captcha@test.dev');
+
+    await expect(
+      service.assertCanAttemptEmailLogin({ email: 'captcha@test.dev' }),
+    ).rejects.toBeInstanceOf(RpcException);
+
+    expect(captchaService.assertValidCaptcha).toHaveBeenCalled();
+  });
 });

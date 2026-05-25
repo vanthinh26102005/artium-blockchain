@@ -86,7 +86,7 @@ export class AuthAbuseProtectionService {
       );
     }
 
-    if (emailFailures >= this.emailBlockThreshold()) {
+    if (emailFailures >= this.effectiveEmailBlockThreshold()) {
       await this.cacheManager.set(
         this.emailBlockKey(normalizedEmail),
         true,
@@ -221,6 +221,12 @@ export class AuthAbuseProtectionService {
 
   private emailBlockThreshold(): number {
     return this.numberConfig('AUTH_EMAIL_BLOCK_FAILED_LOGIN_THRESHOLD', 5);
+  }
+
+  private effectiveEmailBlockThreshold(): number {
+    if (!this.captchaService.isEnabled()) return this.emailBlockThreshold();
+
+    return Math.max(this.emailBlockThreshold(), this.captchaThreshold() + 1);
   }
 
   private sensitiveCaptchaThreshold(): number {

@@ -139,7 +139,7 @@ export const Services = [
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: './apps/identity-service/.env.local',
+      envFilePath: ['./apps/identity-service/.env.local', '.env.local'],
     }),
 
     DynamicDatabaseModule.forRoot('identity'),

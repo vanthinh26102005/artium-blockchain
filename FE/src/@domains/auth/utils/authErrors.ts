@@ -77,6 +77,15 @@ export const getPracticalAuthErrorMessage = (
   }
 
   if (
+    status === 429 ||
+    normalized.includes('too many') ||
+    normalized.includes('rate limit') ||
+    normalized.includes('try again later')
+  ) {
+    return rawMessage
+  }
+
+  if (
     context === 'login' ||
     status === 401 ||
     normalized.includes('invalid credentials') ||
