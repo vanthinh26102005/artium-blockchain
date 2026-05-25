@@ -122,7 +122,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
         ? 'bg-black border-b border-white/10 text-white shadow-[0_8px_30px_rgba(0,0,0,0.45)]'
         : 'bg-transparent border-b border-black text-white'
       : isAuthRoute
-        ? 'bg-transparent border-b border-black shadow-none backdrop-blur-none'
+        ? 'bg-transparent shadow-none backdrop-blur-none'
         : 'backdrop-blur-2xl backdrop-saturate-150',
     !isLandingVariant &&
       !isAuthRoute &&
@@ -533,7 +533,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 onClick={() => {
                   router.push('/login')
                 }}
-                className={`hidden cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition min-[1111px]:inline-flex ${
+                className={`hidden min-h-11 cursor-pointer items-center rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition min-[1111px]:inline-flex ${
                   useWhiteNav
                     ? 'border border-white/20 bg-transparent text-white hover:border-white/30 hover:bg-white/10'
                     : 'border border-slate-200 bg-white text-slate-800 hover:border-slate-300'
@@ -546,7 +546,7 @@ export const SiteHeader = ({ variant = 'default' }: SiteHeaderProps) => {
                 onClick={() => {
                   router.push('/')
                 }}
-                className={`hidden cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition min-[1111px]:inline-flex ${
+                className={`hidden min-h-11 cursor-pointer items-center rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition min-[1111px]:inline-flex ${
                   useWhiteNav
                     ? 'bg-white text-black hover:bg-white/90'
                     : 'bg-blue-600 text-white hover:bg-blue-700'

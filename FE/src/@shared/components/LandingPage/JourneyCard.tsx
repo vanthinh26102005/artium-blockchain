@@ -1,9 +1,8 @@
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@shared/components/ui/button'
-import { Card, CardContent } from '@shared/components/ui/card'
 import { cn } from '@shared/lib/utils'
-import { Heading } from './typography'
 
 type JourneyCardProps = {
   className?: string
@@ -21,37 +20,41 @@ export const JourneyCard = ({
   cta = 'Learn More',
 }: JourneyCardProps) => {
   return (
-    <Card
+    <article
       className={cn(
-        'w-full space-y-[20px] rounded-[15px] bg-white p-4 text-black lg:w-[630px] lg:space-y-6 lg:rounded-[20px] lg:p-[20px]',
+        'group overflow-hidden rounded-[8px] border border-white/18 bg-white/[0.86] text-black shadow-[0_24px_90px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.72)] backdrop-blur-md',
         className,
       )}
     >
-      {/* -- image -- */}
-      <div className="relative h-[200px] w-full shrink-0 self-stretch overflow-hidden rounded-[8px] lg:h-[400px]">
-        <Image src={imageSrc} alt={title} fill priority className="object-cover" />
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#eeeeee]">
+        <Image
+          src={imageSrc}
+          alt={title}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          sizes="(max-width: 1024px) 100vw, 46vw"
+        />
       </div>
 
-      {/* -- content -- */}
-      <CardContent className="flex items-center justify-between gap-3 !p-0">
-        <Heading
-          as="h3"
-          size="h3"
-          className="font-inter text-[18px] leading-[120%] font-semibold text-black lg:text-[40px] lg:leading-[36px] lg:font-medium lg:tracking-[-0.4px]"
-        >
-          {title}
-        </Heading>
+      <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[11px] tracking-[0.2em] text-black/42 uppercase">Pathway</p>
+          <h3 className="font-monument-grotes mt-2 text-3xl leading-none font-semibold tracking-normal uppercase md:text-5xl">
+            {title}
+          </h3>
+        </div>
 
         <Button
           asChild
           size="lg"
-          className="h-[38px] min-w-25 rounded-4xl bg-[#0F6BFF] px-4 text-[12px] leading-[14px] text-white hover:bg-[#0d5edc] lg:h-12 lg:min-w-[151px] lg:px-6 lg:text-[20px] lg:leading-[18px]"
+          className="min-h-12 rounded-full !bg-black px-5 text-sm font-semibold !text-white hover:!bg-black/80"
         >
-          <Link href={href} className="block shrink-0">
+          <Link href={href}>
             {cta}
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </article>
   )
 }

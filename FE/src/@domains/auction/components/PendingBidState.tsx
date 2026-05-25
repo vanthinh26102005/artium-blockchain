@@ -4,13 +4,9 @@ import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { Clock3, X } from 'lucide-react'
 import { type CSSProperties } from 'react'
+import { formatAuctionEth } from '@domains/auction/utils'
 import { WALLET_TARGET_CHAIN } from '@domains/auth/constants/wallet'
-import {
-  Dialog,
-  DialogOverlay,
-  DialogPortal,
-  DialogPrimitive,
-} from '@shared/components/ui/dialog'
+import { Dialog, DialogOverlay, DialogPortal, DialogPrimitive } from '@shared/components/ui/dialog'
 
 type PendingBidStateProps = {
   isOpen: boolean
@@ -33,8 +29,6 @@ const headlineFont = {
 } satisfies CSSProperties
 
 const formatTransactionHash = (value: string) => `${value.slice(0, 7)}...${value.slice(-4)}`
-
-const formatEthDisplay = (value: number) => `${value.toFixed(2)} ETH`
 
 const getTransactionUrl = (transactionHash: string) =>
   `${WALLET_TARGET_CHAIN.blockExplorerUrl.replace(/\/$/, '')}/tx/${encodeURIComponent(transactionHash)}`
@@ -64,7 +58,7 @@ export const PendingBidState = ({
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/60 transition hover:text-black md:top-6 md:right-6"
+              className="absolute top-4 right-4 z-10 inline-flex h-11 w-11 items-center justify-center text-black/60 transition hover:text-black md:top-6 md:right-6"
               aria-label="Close pending bid panel"
             >
               <X className="h-6 w-6" strokeWidth={1.8} />
@@ -112,7 +106,7 @@ export const PendingBidState = ({
                     Committed Amount
                   </span>
                   <span className="text-xl text-black" style={headlineFont}>
-                    {formatEthDisplay(committedBidValue)}
+                    {formatAuctionEth(committedBidValue)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-4 pt-4">
@@ -130,13 +124,7 @@ export const PendingBidState = ({
 
               <div className="mb-10 flex items-center justify-center gap-4 border-y border-black/8 py-6">
                 <div className="relative h-12 w-12 overflow-hidden bg-neutral-200">
-                  <Image
-                    src={imageSrc}
-                    alt={imageAlt}
-                    fill
-                    sizes="48px"
-                    className="object-cover"
-                  />
+                  <Image src={imageSrc} alt={imageAlt} fill sizes="48px" className="object-cover" />
                 </div>
                 <div className="min-w-0 text-left">
                   <span

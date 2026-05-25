@@ -3,22 +3,26 @@
 import Image from 'next/image'
 import { Space_Grotesk } from 'next/font/google'
 import { AlertTriangle, ShieldCheck, X } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from 'react'
-import { getAuctionTimeRemainingDisplay } from '@domains/auction/utils'
 import {
-  AuctionBidWalletError,
-  submitAuctionBid,
-} from '@domains/auction/services/auctionBidWallet'
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type CSSProperties,
+} from 'react'
+import {
+  formatAuctionEth,
+  formatAuctionEthInputValue,
+  normalizeAuctionEthValue,
+  getAuctionTimeRemainingDisplay,
+} from '@domains/auction/utils'
+import { AuctionBidWalletError, submitAuctionBid } from '@domains/auction/services/auctionBidWallet'
 import { saveStoredAuctionBid } from '@domains/auction/utils/bidTrackingStorage'
 import { ConfirmedBidState } from './ConfirmedBidState'
 import { PendingBidState } from './PendingBidState'
 import { SubmittingBidState } from './SubmittingBidState'
-import {
-  Dialog,
-  DialogOverlay,
-  DialogPortal,
-  DialogPrimitive,
-} from '@shared/components/ui/dialog'
+import { Dialog, DialogOverlay, DialogPortal, DialogPrimitive } from '@shared/components/ui/dialog'
 
 type AuctionBidLotStatusKey = 'active' | 'ending-soon' | 'closed' | 'newly-listed' | 'paused'
 
@@ -87,31 +91,12 @@ const usdFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
-const formatEthAmount = (value: number, maximumFractionDigits = 6) => {
-  if (!Number.isFinite(value)) {
-    return '0'
-  }
-
-  return value.toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits,
-  })
-}
-
-const formatEthInputValue = (value: number) => {
-  if (!Number.isFinite(value)) {
-    return ''
-  }
-
-  return value.toFixed(MAX_ETH_DECIMALS).replace(/\.?0+$/, '')
-}
-
-const formatPreciseEthDisplay = (value: number) => `${formatEthAmount(value)} ETH`
-
 const formatUsdEstimate = (value: number) => usdFormatter.format(value * MOCK_ETH_TO_USD)
 
 const getMinimumNextBid = (currentBid: number) =>
-  Number((currentBid + Math.max(MIN_BID_INCREMENT_ETH, currentBid * BID_INCREMENT_RATE)).toFixed(2))
+  normalizeAuctionEthValue(
+    currentBid + Math.max(MIN_BID_INCREMENT_ETH, currentBid * BID_INCREMENT_RATE),
+  )
 
 const getBidModalStatusLabel = (statusKey: AuctionBidLotStatusKey) => {
   switch (statusKey) {
@@ -143,11 +128,13 @@ export const BidEditingModal = ({
     'editing' | 'submitting' | 'pending' | 'confirmed' | 'failed'
   >('editing')
   const [currentBidValue, setCurrentBidValue] = useState(() => lot?.bidValue ?? 0)
-  const [minimumNextBid, setMinimumNextBid] = useState(() =>
-    lot?.minimumNextBidEth ?? getMinimumNextBid(lot?.bidValue ?? 0),
+  const [minimumNextBid, setMinimumNextBid] = useState(
+    () => lot?.minimumNextBidEth ?? getMinimumNextBid(lot?.bidValue ?? 0),
   )
-  const [bidAmount, setBidAmount] = useState(() => formatEthInputValue(minimumNextBid))
-  const [statusKey, setStatusKey] = useState<AuctionBidLotStatusKey>(() => lot?.statusKey ?? 'active')
+  const [bidAmount, setBidAmount] = useState(() => formatAuctionEthInputValue(minimumNextBid))
+  const [statusKey, setStatusKey] = useState<AuctionBidLotStatusKey>(
+    () => lot?.statusKey ?? 'active',
+  )
   const [endsAt, setEndsAt] = useState<string | undefined>(() => lot?.endsAt)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [committedBidValue, setCommittedBidValue] = useState<number | null>(null)
@@ -182,7 +169,7 @@ export const BidEditingModal = ({
       setEndsAt(nextLot.endsAt)
 
       if (options?.resetBidAmount && !hasEditedBidAmountRef.current) {
-        setBidAmount(formatEthInputValue(nextMinimumBid))
+        setBidAmount(formatAuctionEthInputValue(nextMinimumBid))
       }
     },
     [],
@@ -295,7 +282,7 @@ export const BidEditingModal = ({
             'Backend auction state now requires a higher minimum bid. Review the latest current bid and try again.',
           )
           hasEditedBidAmountRef.current = false
-          setBidAmount(formatEthInputValue(nextMinimumBid))
+          setBidAmount(formatAuctionEthInputValue(nextMinimumBid))
           setViewState('failed')
         }
       } catch {
@@ -336,14 +323,15 @@ export const BidEditingModal = ({
   const bidAmountValue = Number.parseFloat(bidAmount)
   const isBidAmountEmpty = bidAmount.trim().length === 0
   const isBidAmountInvalid = !isBidAmountEmpty && Number.isNaN(bidAmountValue)
-  const isBidBelowMinimum = !isBidAmountInvalid && !isBidAmountEmpty && bidAmountValue < minimumNextBid
+  const isBidBelowMinimum =
+    !isBidAmountInvalid && !isBidAmountEmpty && bidAmountValue < minimumNextBid
   const validationMessage = isBidAmountEmpty
     ? 'Enter your bid amount in ETH.'
     : isBidAmountInvalid
       ? 'Bid amount must be a valid number.'
       : isBidBelowMinimum
-        ? `Your bid must be at least ${formatPreciseEthDisplay(minimumNextBid)}.`
-        : `Ready to submit above the minimum bid threshold of ${formatPreciseEthDisplay(minimumNextBid)}.`
+        ? `Your bid must be at least ${formatAuctionEth(minimumNextBid)}.`
+        : `Ready to submit above the minimum bid threshold of ${formatAuctionEth(minimumNextBid)}.`
   const isBidValid = !isBidAmountEmpty && !isBidAmountInvalid && !isBidBelowMinimum
   const bidSpread = isBidValid ? Math.max(0, bidAmountValue - minimumNextBid) : 0
   const timeRemainingDisplay = getAuctionTimeRemainingDisplay({
@@ -424,7 +412,9 @@ export const BidEditingModal = ({
   const handleCloseModal = () => {
     setViewState('editing')
     setCurrentBidValue(lotBidValue)
-    setBidAmount(formatEthInputValue(lot?.minimumNextBidEth ?? getMinimumNextBid(lotBidValue)))
+    setBidAmount(
+      formatAuctionEthInputValue(lot?.minimumNextBidEth ?? getMinimumNextBid(lotBidValue)),
+    )
     setElapsedSeconds(0)
     setCommittedBidValue(null)
     setTransactionHash(null)
@@ -512,7 +502,7 @@ export const BidEditingModal = ({
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/70 transition hover:text-black"
+                className="absolute top-4 right-4 z-10 inline-flex h-11 w-11 items-center justify-center text-black/70 transition hover:text-black"
                 aria-label="Close failed bid panel"
               >
                 <X className="h-7 w-7" strokeWidth={1.8} />
@@ -526,7 +516,10 @@ export const BidEditingModal = ({
                     <AlertTriangle className="h-6 w-6" strokeWidth={2} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] tracking-[0.18em] text-black/45 uppercase" style={headlineFont}>
+                    <p
+                      className="text-[10px] tracking-[0.18em] text-black/45 uppercase"
+                      style={headlineFont}
+                    >
                       Bid Update
                     </p>
                     <h2
@@ -536,7 +529,10 @@ export const BidEditingModal = ({
                     >
                       Transaction Failed
                     </h2>
-                    <p className="mt-2 text-[10px] tracking-[0.18em] text-black/45 uppercase" style={headlineFont}>
+                    <p
+                      className="mt-2 text-[10px] tracking-[0.18em] text-black/45 uppercase"
+                      style={headlineFont}
+                    >
                       Backend state requires review
                     </p>
                   </div>
@@ -552,15 +548,21 @@ export const BidEditingModal = ({
                 <div className="space-y-4 border-b border-black/10 pb-8">
                   <div className="flex items-end justify-between gap-4">
                     <div>
-                      <p className="text-[10px] tracking-[0.16em] text-black/42 uppercase" style={headlineFont}>
+                      <p
+                        className="text-[10px] tracking-[0.16em] text-black/42 uppercase"
+                        style={headlineFont}
+                      >
                         Current Top Bid
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-black" style={headlineFont}>
-                        {formatPreciseEthDisplay(currentBidValue)}
+                        {formatAuctionEth(currentBidValue)}
                       </p>
-                      <p className="mt-1 text-[10px] tracking-[0.12em] text-black/45 uppercase" style={headlineFont}>
+                      <p
+                        className="mt-1 text-[10px] tracking-[0.12em] text-black/45 uppercase"
+                        style={headlineFont}
+                      >
                         ≈ {formatUsdEstimate(currentBidValue)}
                       </p>
                     </div>
@@ -570,15 +572,21 @@ export const BidEditingModal = ({
 
                   <div className="flex items-end justify-between gap-4">
                     <div>
-                      <p className="text-[10px] tracking-[0.16em] text-[#ba1a1a] uppercase" style={headlineFont}>
+                      <p
+                        className="text-[10px] tracking-[0.16em] text-[#ba1a1a] uppercase"
+                        style={headlineFont}
+                      >
                         Your Submitted Bid
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-black/48" style={headlineFont}>
-                        {formatPreciseEthDisplay(failedBidValue)}
+                        {formatAuctionEth(failedBidValue)}
                       </p>
-                      <p className="mt-1 text-[10px] tracking-[0.12em] text-black/35 uppercase" style={headlineFont}>
+                      <p
+                        className="mt-1 text-[10px] tracking-[0.12em] text-black/35 uppercase"
+                        style={headlineFont}
+                      >
                         ≈ {formatUsdEstimate(failedBidValue)}
                       </p>
                     </div>
@@ -608,11 +616,17 @@ export const BidEditingModal = ({
               <footer className="flex items-center justify-between gap-4 bg-[#f3f3f3] px-8 py-5 md:px-10">
                 <div className="flex min-w-0 items-center gap-2 text-black/45">
                   <ShieldCheck className="h-4 w-4 shrink-0" />
-                  <span className="truncate text-[10px] tracking-[0.14em] uppercase" style={headlineFont}>
+                  <span
+                    className="truncate text-[10px] tracking-[0.14em] uppercase"
+                    style={headlineFont}
+                  >
                     Secure blockchain verification
                   </span>
                 </div>
-                <span className="shrink-0 text-[10px] tracking-[0.14em] text-black/35 uppercase" style={headlineFont}>
+                <span
+                  className="shrink-0 text-[10px] tracking-[0.14em] text-black/35 uppercase"
+                  style={headlineFont}
+                >
                   v2.4.0
                 </span>
               </footer>
@@ -636,7 +650,7 @@ export const BidEditingModal = ({
             <button
               type="button"
               onClick={handleCloseModal}
-              className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center text-black/70 transition hover:text-black"
+              className="absolute top-4 right-4 z-10 inline-flex h-11 w-11 items-center justify-center text-black/70 transition hover:text-black"
               aria-label="Close bid panel"
             >
               <X className="h-7 w-7" strokeWidth={1.8} />
@@ -653,20 +667,26 @@ export const BidEditingModal = ({
               <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-black/5 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 px-5 py-5 text-white md:px-6 md:py-6">
                 <div className="min-w-0">
-                  <p className="text-[10px] tracking-[0.22em] text-white/72 uppercase" style={headlineFont}>
+                  <p
+                    className="text-[10px] tracking-[0.22em] text-white/72 uppercase"
+                    style={headlineFont}
+                  >
                     Ref. {lot.artworkId.toUpperCase()}
                   </p>
-                  <p className="mt-2 text-sm text-white/88">Curated live-auction selection on Artium.</p>
+                  <p className="mt-2 text-sm text-white/88">
+                    Curated live-auction selection on Artium.
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 border border-white/25 bg-white/10 px-3 py-1.5 backdrop-blur-sm">
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${statusBadgeClass[statusKey]} ${
-                      statusKey === 'active' || statusKey === 'ending-soon'
-                        ? 'animate-pulse'
-                        : ''
+                      statusKey === 'active' || statusKey === 'ending-soon' ? 'animate-pulse' : ''
                     }`}
                   />
-                  <span className="text-[10px] tracking-[0.16em] text-white uppercase" style={headlineFont}>
+                  <span
+                    className="text-[10px] tracking-[0.16em] text-white uppercase"
+                    style={headlineFont}
+                  >
                     {getBidModalStatusLabel(statusKey)}
                   </span>
                 </div>
@@ -676,7 +696,10 @@ export const BidEditingModal = ({
             <div className="flex w-full flex-col overflow-hidden md:w-7/12">
               <div className="flex-1 overflow-y-auto px-6 pt-6 md:px-10 md:pt-10">
                 <header className="mb-10 border-b border-black/10 pb-8">
-                  <p className="text-[11px] tracking-[0.28em] text-black/45 uppercase" style={headlineFont}>
+                  <p
+                    className="text-[11px] tracking-[0.28em] text-black/45 uppercase"
+                    style={headlineFont}
+                  >
                     Place a Bid
                   </p>
                   <h2
@@ -690,16 +713,25 @@ export const BidEditingModal = ({
 
                 <section className="grid grid-cols-1 gap-6 border-b border-black/10 pb-8 md:grid-cols-2 md:gap-10">
                   <div className="space-y-1">
-                    <p className="text-[11px] tracking-[0.14em] text-black/45 uppercase" style={headlineFont}>
+                    <p
+                      className="text-[11px] tracking-[0.14em] text-black/45 uppercase"
+                      style={headlineFont}
+                    >
                       Current Bid
                     </p>
-                    <p className="text-2xl font-semibold text-black md:text-3xl" style={headlineFont}>
-                      {formatPreciseEthDisplay(currentBidValue)}
+                    <p
+                      className="text-2xl font-semibold text-black md:text-3xl"
+                      style={headlineFont}
+                    >
+                      {formatAuctionEth(currentBidValue)}
                     </p>
                     <p className="text-xs text-black/45">{formatUsdEstimate(currentBidValue)}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[11px] tracking-[0.14em] text-black/45 uppercase" style={headlineFont}>
+                    <p
+                      className="text-[11px] tracking-[0.14em] text-black/45 uppercase"
+                      style={headlineFont}
+                    >
                       Time Remaining
                     </p>
                     <p
@@ -727,7 +759,7 @@ export const BidEditingModal = ({
                       className="text-[11px] tracking-[0.14em] text-black/65 uppercase"
                       style={headlineFont}
                     >
-                      Min. Next Bid: {formatPreciseEthDisplay(minimumNextBid)}
+                      Min. Next Bid: {formatAuctionEth(minimumNextBid)}
                     </span>
                   </div>
 
@@ -739,13 +771,13 @@ export const BidEditingModal = ({
                       value={bidAmount}
                       onChange={handleBidAmountChange}
                       aria-invalid={!isBidValid && !isBidAmountEmpty ? 'true' : 'false'}
-                      className={`w-full border-b bg-transparent py-4 pr-14 text-4xl text-black outline-none transition placeholder:text-black/12 md:text-5xl ${
+                      className={`w-full border-b bg-transparent py-4 pr-14 text-4xl text-black transition outline-none placeholder:text-black/12 md:text-5xl ${
                         !isBidValid && !isBidAmountEmpty
                           ? 'border-[#ba1a1a] focus:border-[#ba1a1a]'
                           : 'border-black/15 focus:border-black'
                       }`}
                       style={headlineFont}
-                      placeholder={formatEthInputValue(minimumNextBid)}
+                      placeholder={formatAuctionEthInputValue(minimumNextBid)}
                     />
                     <span
                       className="pointer-events-none absolute right-0 bottom-5 text-lg text-black/45 transition-colors"
@@ -767,9 +799,9 @@ export const BidEditingModal = ({
                       type="button"
                       onClick={() => {
                         hasEditedBidAmountRef.current = false
-                        setBidAmount(formatEthInputValue(minimumNextBid))
+                        setBidAmount(formatAuctionEthInputValue(minimumNextBid))
                       }}
-                      className="text-left text-[11px] tracking-[0.18em] text-black uppercase transition hover:text-black/60 md:text-right"
+                      className="inline-flex min-h-11 items-center text-left text-[11px] tracking-[0.18em] text-black uppercase transition hover:text-black/60 md:text-right"
                       style={headlineFont}
                     >
                       Use Minimum
@@ -778,15 +810,21 @@ export const BidEditingModal = ({
 
                   <div className="mt-8 grid grid-cols-1 gap-4 border-t border-black/10 pt-6 text-sm text-black/55 md:grid-cols-2">
                     <div>
-                      <p className="text-[11px] tracking-[0.14em] text-black/40 uppercase" style={headlineFont}>
+                      <p
+                        className="text-[11px] tracking-[0.14em] text-black/40 uppercase"
+                        style={headlineFont}
+                      >
                         Minimum Increment
                       </p>
                       <p className="mt-2 text-base text-black" style={headlineFont}>
-                        {formatPreciseEthDisplay(Math.max(0, minimumNextBid - currentBidValue))}
+                        {formatAuctionEth(Math.max(0, minimumNextBid - currentBidValue))}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[11px] tracking-[0.14em] text-black/40 uppercase" style={headlineFont}>
+                      <p
+                        className="text-[11px] tracking-[0.14em] text-black/40 uppercase"
+                        style={headlineFont}
+                      >
                         Approx. USD Value
                       </p>
                       <p className="mt-2 text-base text-black" style={headlineFont}>
@@ -803,17 +841,23 @@ export const BidEditingModal = ({
               <footer className="border-t border-black/10 bg-white px-6 pt-5 pb-6 shadow-[0_-18px_32px_-24px_rgba(0,0,0,0.16)] md:px-10 md:pt-6">
                 <div className="mb-4 flex items-center justify-between gap-4 border-b border-black/10 pb-4">
                   <div className="min-w-0">
-                    <p className="text-[11px] tracking-[0.16em] text-black/42 uppercase" style={headlineFont}>
+                    <p
+                      className="text-[11px] tracking-[0.16em] text-black/42 uppercase"
+                      style={headlineFont}
+                    >
                       Ready to Bid
                     </p>
                     <p className="mt-2 text-sm text-black/60">
                       {isBidValid
-                        ? `Submitting ${formatPreciseEthDisplay(bidAmountValue)} for this lot.`
-                        : `Minimum next bid is ${formatPreciseEthDisplay(minimumNextBid)}.`}
+                        ? `Submitting ${formatAuctionEth(bidAmountValue)} for this lot.`
+                        : `Minimum next bid is ${formatAuctionEth(minimumNextBid)}.`}
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-[10px] tracking-[0.16em] text-black/40 uppercase" style={headlineFont}>
+                    <p
+                      className="text-[10px] tracking-[0.16em] text-black/40 uppercase"
+                      style={headlineFont}
+                    >
                       Approx. USD Value
                     </p>
                     <p className="mt-1 text-base text-black" style={headlineFont}>
@@ -852,8 +896,7 @@ export const BidEditingModal = ({
                 </p>
                 {isBidValid && bidSpread > 0 ? (
                   <p className="mt-3 text-center text-[11px] leading-5 text-black/55">
-                    Your current entry is {formatPreciseEthDisplay(bidSpread)} above the minimum
-                    next bid.
+                    Your current entry is {formatAuctionEth(bidSpread)} above the minimum next bid.
                   </p>
                 ) : null}
               </footer>

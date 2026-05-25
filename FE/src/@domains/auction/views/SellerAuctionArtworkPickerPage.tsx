@@ -45,7 +45,11 @@ import {
   type SellerAuctionCustomDurationUnit,
   type SellerAuctionTermsFormValues,
 } from '../validations/sellerAuctionTerms.schema'
-import { loadSellerAuctionTermsDraft, saveSellerAuctionTermsDraft } from '../utils'
+import {
+  formatAuctionEth,
+  loadSellerAuctionTermsDraft,
+  saveSellerAuctionTermsDraft,
+} from '../utils'
 
 const FINALIZATION_PENDING_STORAGE_KEY = 'artium.pendingAuctionFinalizations'
 const FINALIZATION_PENDING_TTL_MS = 60 * 60 * 1000

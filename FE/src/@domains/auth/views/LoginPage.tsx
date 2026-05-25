@@ -334,16 +334,17 @@ export const LoginPage = () => {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog
-        open={isUnregisteredWalletDialogOpen}
-        onOpenChange={setIsUnregisteredWalletDialogOpen}
-      >
-        <AlertDialogContent onClose={() => setIsUnregisteredWalletDialogOpen(false)}>
+      <AlertDialog open={isUnregisteredWalletDialogOpen} onOpenChange={setIsUnregisteredWalletDialogOpen}>
+        <AlertDialogContent
+          onClose={() => setIsUnregisteredWalletDialogOpen(false)}
+          className="bg-white p-6 text-[#191414] shadow-[0_30px_90px_rgba(0,0,0,0.28)] sm:rounded-2xl sm:p-8"
+        >
           <AlertDialogHeader>
-            <AlertDialogTitle>Wallet Not Linked</AlertDialogTitle>
-            <AlertDialogDescription>
-              This wallet is not linked to an Artium account yet. Sign in or create an account
-              first, then Artium will ask whether you want to connect this wallet.
+            <AlertDialogTitle className="text-xl font-bold text-[#191414]">
+              Wallet Not Linked
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-relaxed text-[#6f6a67]">
+              This wallet is not linked to an Artium account yet. Sign in or create an account first, then Artium will ask whether you want to connect this wallet.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:flex-col sm:space-x-0">
