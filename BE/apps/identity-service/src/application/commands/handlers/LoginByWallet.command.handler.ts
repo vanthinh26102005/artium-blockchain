@@ -1,5 +1,7 @@
 import { Inject, Logger } from '@nestjs/common';
 import { RpcExceptionHelper } from '@app/common';
+import { OutboxService } from '@app/outbox';
+import { ExchangeName, RoutingKey } from '@app/rabbitmq';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { LoginByWalletCommand } from '../LoginByWallet.command';
 import {
@@ -20,6 +22,7 @@ export class LoginByWalletHandler implements ICommandHandler<
     @Inject(IUserRepository) private readonly userRepository: IUserRepository,
     private readonly tokenService: TokenService,
     private readonly walletSignatureService: WalletSignatureService,
+    private readonly outboxService: OutboxService,
   ) {}
 
   async execute(command: LoginByWalletCommand): Promise<LoginResponse> {
@@ -33,6 +36,20 @@ export class LoginByWalletHandler implements ICommandHandler<
     if (!user) {
       throw RpcExceptionHelper.notFound('Wallet_Not_Registered');
     }
+
+    const occurredAt = new Date();
+    await this.outboxService.createOutboxMessage({
+      aggregateType: 'user',
+      aggregateId: user.id,
+      eventType: 'IdentityWalletLinked',
+      exchange: ExchangeName.USER_EVENTS,
+      routingKey: RoutingKey.IDENTITY_WALLET_LINKED,
+      payload: {
+        userId: user.id,
+        walletAddress: normalizedAddress,
+        occurredAt: occurredAt.toISOString(),
+      },
+    });
 
     const tokenPair = await this.tokenService.generateTokenPair(
       user,

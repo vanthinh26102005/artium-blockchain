@@ -16,6 +16,8 @@ export type StoredAuctionBid = {
 }
 
 const STORAGE_PREFIX = 'artium.auction.bid.'
+const HISTORY_STORAGE_KEY = 'artium.auction.bid.history'
+const MAX_HISTORY_RECORDS = 100
 
 const getStorageKey = (auctionId: string) => `${STORAGE_PREFIX}${auctionId}`
 
@@ -61,6 +63,57 @@ export const getStoredAuctionBid = (auctionId: string): StoredAuctionBid | null 
   }
 }
 
+const readLegacyStoredBids = () => {
+  if (!isBrowser()) {
+    return []
+  }
+
+  return Object.keys(window.localStorage)
+    .filter((key) => key.startsWith(STORAGE_PREFIX) && key !== HISTORY_STORAGE_KEY)
+    .map((key) => {
+      try {
+        const parsedValue = JSON.parse(window.localStorage.getItem(key) ?? 'null') as unknown
+        return isStoredAuctionBid(parsedValue) ? parsedValue : null
+      } catch {
+        return null
+      }
+    })
+    .filter((bid): bid is StoredAuctionBid => Boolean(bid))
+}
+
+export const getStoredAuctionBidHistory = (): StoredAuctionBid[] => {
+  if (!isBrowser()) {
+    return []
+  }
+
+  try {
+    const parsedValue = JSON.parse(
+      window.localStorage.getItem(HISTORY_STORAGE_KEY) ?? '[]',
+    ) as unknown
+    const storedHistory = Array.isArray(parsedValue)
+      ? parsedValue.filter(isStoredAuctionBid)
+      : []
+    const legacyBids = readLegacyStoredBids()
+    const merged = new Map<string, StoredAuctionBid>()
+
+    ;[...legacyBids, ...storedHistory].forEach((bid) => {
+      const key = bid.transactionHash || `${bid.auctionId}:${bid.updatedAt}`
+      const existing = merged.get(key)
+      if (!existing || new Date(bid.updatedAt).getTime() > new Date(existing.updatedAt).getTime()) {
+        merged.set(key, bid)
+      }
+    })
+
+    return Array.from(merged.values()).sort(
+      (left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
+    )
+  } catch {
+    return readLegacyStoredBids().sort(
+      (left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
+    )
+  }
+}
+
 export const saveStoredAuctionBid = (input: {
   lot: AuctionBidLot
   committedBidValue: number
@@ -92,6 +145,17 @@ export const saveStoredAuctionBid = (input: {
 
   try {
     window.localStorage.setItem(getStorageKey(auctionId), JSON.stringify(nextValue))
+    const nextHistory = [
+      nextValue,
+      ...getStoredAuctionBidHistory().filter((bid) => bid.transactionHash !== nextValue.transactionHash),
+    ]
+      .sort(
+        (left, right) =>
+          new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
+      )
+      .slice(0, MAX_HISTORY_RECORDS)
+
+    window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(nextHistory))
     return nextValue
   } catch {
     return null

@@ -22,7 +22,7 @@ const CreateSellerAuctionRoute: NextPageWithLayout = () => {
   return (
     <>
       <Metadata title="Create Seller Auction | Artium" />
-      <SellerAuctionArtworkPickerPage />
+      <SellerAuctionArtworkPickerPage initialWorkspaceTab="create" />
     </>
   )
 }

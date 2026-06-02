@@ -11,6 +11,9 @@ export const RoutingKey = {
   PAYMENT_ETHEREUM_CONFIRMATION_REQUESTED:
     'payment.ethereum.confirmation.requested',
 
+  IDENTITY_WALLET_LINKED: 'identity.wallet.linked',
+  IDENTITY_WALLET_UNLINKED: 'identity.wallet.unlinked',
+
   BLOCKCHAIN_AUCTION_STARTED: 'blockchain.auction.started',
   BLOCKCHAIN_AUCTION_ENDED: 'blockchain.auction.ended',
   BLOCKCHAIN_BID_NEW: 'blockchain.bid.new',

@@ -32,6 +32,14 @@ const DEFAULT_AVATAR = '/images/logo-dark-mode.png'
 const DEFAULT_ARTWORK = '/images/placeholder-artwork.jpg'
 
 const ensureText = (value?: string | null) => (value ?? '').toString()
+const firstNonEmptyText = (...values: Array<string | null | undefined>) =>
+  values.find((value) => Boolean(value?.trim()))?.trim() ?? ''
+
+const resolveUserDisplayName = (user: UserPayload) =>
+  firstNonEmptyText(user.fullName, user.displayName, user.slug, user.username, user.email, 'Artist')
+
+const resolveUserHandle = (user: UserPayload) =>
+  firstNonEmptyText(user.slug, user.username, user.email?.split('@')[0], user.id)
 
 const formatCurrency = (amount: number, currency?: string | null) => {
   const code = (currency ?? 'USD').toUpperCase()
@@ -91,8 +99,8 @@ const formatDimensions = (artwork: ArtworkApiItem) => {
  * This serves as the BASE profile — seller data enriches it if available.
  */
 export const mapUserPayloadToProfileUser = (user: UserPayload): ProfileUser => ({
-  username: user.slug ?? user.username ?? '',
-  displayName: user.fullName ?? user.displayName ?? '',
+  username: resolveUserHandle(user),
+  displayName: resolveUserDisplayName(user),
   bio: '',
   avatarUrl: user.avatarUrl || DEFAULT_AVATAR,
   role: undefined,

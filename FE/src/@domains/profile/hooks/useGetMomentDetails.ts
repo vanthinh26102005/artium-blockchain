@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 
 import type { MomentDetail } from '@domains/profile/types'
-import profileApis from '@shared/apis/profileApis'
+import profileApis, { type SellerProfilePayload } from '@shared/apis/profileApis'
 import usersApi from '@shared/apis/usersApi'
 import { mapMomentToMomentDetail } from '@domains/profile/utils/profileApiMapper'
+import type { UserPayload } from '@shared/types/auth'
 
 type UseGetMomentDetailsResult = {
   data: MomentDetail | null
@@ -47,13 +48,26 @@ export const useGetMomentDetails = (
           authorSlug = authorUser.slug || authorUser.username || options.username
         }
 
-        const authorProfile = await profileApis.getSellerProfileByUserId(authorUserId)
+        let authorProfile: SellerProfilePayload | null = null
+        try {
+          authorProfile = await profileApis.getSellerProfileByUserId(authorUserId)
+        } catch {
+          authorProfile = null
+        }
+        let authorUserFallback: UserPayload | null = null
         if (!authorSlug) {
           try {
-            const authorUser = await usersApi.getUserById(authorUserId)
-            authorSlug = authorUser.slug || authorUser.username || ''
+            authorUserFallback = await usersApi.getUserById(authorUserId)
+            authorSlug = authorUserFallback.slug || authorUserFallback.username || ''
           } catch {
             authorSlug = ''
+          }
+        }
+        if (!authorUserFallback) {
+          try {
+            authorUserFallback = await usersApi.getUserById(authorUserId)
+          } catch {
+            authorUserFallback = null
           }
         }
 
@@ -62,11 +76,19 @@ export const useGetMomentDetails = (
         }
 
         const mapped = mapMomentToMomentDetail(moment, {
-          username: authorSlug,
-          displayName: authorProfile.displayName,
-          bio: authorProfile.bio ?? '',
-          avatarUrl: authorProfile.profileImageUrl || '/images/logo-dark-mode.png',
-          verified: Boolean(authorProfile.isVerified),
+          username: authorSlug || authorUserFallback?.slug || authorUserFallback?.username || 'user',
+          displayName:
+            authorProfile?.displayName ||
+            authorUserFallback?.fullName ||
+            authorUserFallback?.displayName ||
+            authorUserFallback?.email ||
+            'Artist',
+          bio: authorProfile?.bio ?? '',
+          avatarUrl:
+            authorProfile?.profileImageUrl ||
+            authorUserFallback?.avatarUrl ||
+            '/images/logo-dark-mode.png',
+          verified: Boolean(authorProfile?.isVerified),
         })
 
         setData(mapped)

@@ -41,11 +41,11 @@ export const getInventoryArtworkStatus = (
 }
 
 export const getInventoryArtworkVisibilityLabel = (artwork: InventoryArtwork) => {
-  if (artwork.status === 'DRAFT') {
-    return 'Not published'
+  if (artwork.status === 'ACTIVE' && artwork.isPublished === true) {
+    return 'Published'
   }
 
-  return artwork.isPublished ? 'Visible on profile' : 'Hidden in profile'
+  return 'Unpublished'
 }
 
 export const getInventoryArtworkStatusClassName = (

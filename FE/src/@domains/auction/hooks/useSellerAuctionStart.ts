@@ -31,10 +31,13 @@ const writeRememberedArtworkId = (artworkId: string | null) => {
 
 type UseSellerAuctionStartArgs = {
   artworkId: string | null
+  enabled?: boolean
 }
 
-export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) => {
-  const [rememberedArtworkId, setRememberedArtworkId] = useState<string | null>(null)
+export const useSellerAuctionStart = ({ artworkId, enabled = true }: UseSellerAuctionStartArgs) => {
+  const [rememberedArtworkId, setRememberedArtworkId] = useState<string | null>(() =>
+    readRememberedArtworkId(),
+  )
   const [status, setStatus] = useState<SellerAuctionStartStatusResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isHydrating, setIsHydrating] = useState(false)
@@ -43,19 +46,27 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
   const [isRetrying, setIsRetrying] = useState(false)
   const [isAttachingTx, setIsAttachingTx] = useState(false)
 
-  useEffect(() => {
-    setRememberedArtworkId(readRememberedArtworkId())
-  }, [])
-
   const setTrackedArtworkId = useCallback((nextArtworkId: string | null) => {
     setRememberedArtworkId(nextArtworkId)
     writeRememberedArtworkId(nextArtworkId)
   }, [])
 
+  const clearTrackedArtwork = useCallback(() => {
+    setStatus(null)
+    setError(null)
+    setTrackedArtworkId(null)
+  }, [setTrackedArtworkId])
+
   const effectiveArtworkId = artworkId ?? rememberedArtworkId
 
   const refresh = useCallback(
     async (nextArtworkId?: string | null) => {
+      if (!enabled) {
+        setStatus(null)
+        setError(null)
+        return null
+      }
+
       const targetArtworkId = nextArtworkId ?? effectiveArtworkId
       if (!targetArtworkId) {
         setStatus(null)
@@ -84,10 +95,17 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
         setIsRefreshing(false)
       }
     },
-    [effectiveArtworkId, rememberedArtworkId, setTrackedArtworkId],
+    [effectiveArtworkId, enabled, rememberedArtworkId, setTrackedArtworkId],
   )
 
   useEffect(() => {
+    if (!enabled) {
+      setStatus(null)
+      setError(null)
+      setIsHydrating(false)
+      return
+    }
+
     if (!effectiveArtworkId) {
       setStatus(null)
       return
@@ -131,10 +149,14 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
     return () => {
       isMounted = false
     }
-  }, [artworkId, effectiveArtworkId, rememberedArtworkId, setTrackedArtworkId])
+  }, [artworkId, effectiveArtworkId, enabled, rememberedArtworkId, setTrackedArtworkId])
 
   const start = useCallback(
     async (input: StartSellerAuctionRequest) => {
+      if (!enabled) {
+        throw new Error('Seller auction start is only available to seller accounts.')
+      }
+
       setIsStarting(true)
       setError(null)
       try {
@@ -151,11 +173,15 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
         setIsStarting(false)
       }
     },
-    [setTrackedArtworkId],
+    [enabled, setTrackedArtworkId],
   )
 
   const retry = useCallback(
     async (input: StartSellerAuctionRequest) => {
+      if (!enabled) {
+        throw new Error('Seller auction retry is only available to seller accounts.')
+      }
+
       setIsRetrying(true)
       setError(null)
       try {
@@ -174,11 +200,15 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
         setIsRetrying(false)
       }
     },
-    [setTrackedArtworkId],
+    [enabled, setTrackedArtworkId],
   )
 
   const attachTransaction = useCallback(
     async (attemptId: string, input: AttachSellerAuctionStartTxRequest) => {
+      if (!enabled) {
+        throw new Error('Seller auction transaction attach is only available to seller accounts.')
+      }
+
       setIsAttachingTx(true)
       setError(null)
       try {
@@ -197,7 +227,7 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
         setIsAttachingTx(false)
       }
     },
-    [setTrackedArtworkId],
+    [enabled, setTrackedArtworkId],
   )
 
   const isBusy = isHydrating || isRefreshing || isStarting || isRetrying || isAttachingTx
@@ -218,10 +248,12 @@ export const useSellerAuctionStart = ({ artworkId }: UseSellerAuctionStartArgs) 
       start,
       retry,
       attachTransaction,
+      clearTrackedArtwork,
       setTrackedArtworkId,
     }),
     [
       attachTransaction,
+      clearTrackedArtwork,
       effectiveArtworkId,
       error,
       isAttachingTx,

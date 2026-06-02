@@ -1,7 +1,9 @@
 import { Inject, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { RpcExceptionHelper } from '@app/common';
+import { ITransactionService, RpcExceptionHelper } from '@app/common';
+import { OutboxService } from '@app/outbox';
+import { ExchangeName, RoutingKey } from '@app/rabbitmq';
 import { LinkWalletCommand } from '../LinkWallet.command';
 import {
   IUserRepository,
@@ -14,15 +16,19 @@ type LinkWalletResult = {
 };
 
 @CommandHandler(LinkWalletCommand)
-export class LinkWalletHandler
-  implements ICommandHandler<LinkWalletCommand, LinkWalletResult>
-{
+export class LinkWalletHandler implements ICommandHandler<
+  LinkWalletCommand,
+  LinkWalletResult
+> {
   private readonly logger = new Logger(LinkWalletHandler.name);
 
   constructor(
     @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
     private readonly walletSignatureService: WalletSignatureService,
+    private readonly outboxService: OutboxService,
+    @Inject(ITransactionService)
+    private readonly transactionService: ITransactionService,
   ) {}
 
   async execute(command: LinkWalletCommand): Promise<LinkWalletResult> {
@@ -47,12 +53,61 @@ export class LinkWalletHandler
         );
       }
 
-      const updatedUser = await this.userRepository.update(userId, {
-        walletAddress: normalizedAddress,
-      });
-      if (!updatedUser) {
-        throw RpcExceptionHelper.notFound('Failed to update wallet');
-      }
+      const occurredAt = new Date();
+      const previousWalletAddress = user.walletAddress?.trim().toLowerCase();
+      const updatedUser = await this.transactionService.execute(
+        async (manager) => {
+          const nextUser = await this.userRepository.update(
+            userId,
+            {
+              walletAddress: normalizedAddress,
+            },
+            manager,
+          );
+          if (!nextUser) {
+            throw RpcExceptionHelper.notFound('Failed to update wallet');
+          }
+
+          if (
+            previousWalletAddress &&
+            previousWalletAddress !== normalizedAddress
+          ) {
+            await this.outboxService.createOutboxMessage(
+              {
+                aggregateType: 'user',
+                aggregateId: userId,
+                eventType: 'IdentityWalletUnlinked',
+                exchange: ExchangeName.USER_EVENTS,
+                routingKey: RoutingKey.IDENTITY_WALLET_UNLINKED,
+                payload: {
+                  userId,
+                  walletAddress: previousWalletAddress,
+                  occurredAt: occurredAt.toISOString(),
+                },
+              },
+              manager,
+            );
+          }
+
+          await this.outboxService.createOutboxMessage(
+            {
+              aggregateType: 'user',
+              aggregateId: userId,
+              eventType: 'IdentityWalletLinked',
+              exchange: ExchangeName.USER_EVENTS,
+              routingKey: RoutingKey.IDENTITY_WALLET_LINKED,
+              payload: {
+                userId,
+                walletAddress: normalizedAddress,
+                occurredAt: occurredAt.toISOString(),
+              },
+            },
+            manager,
+          );
+
+          return nextUser;
+        },
+      );
 
       this.logger.log(`Linked wallet ${normalizedAddress} to user ${userId}`);
 

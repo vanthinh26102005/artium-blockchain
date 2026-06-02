@@ -1,4 +1,5 @@
 import { User, Artwork } from '@shared/types'
+import type { SellerAuctionStartStatusResponse } from '@shared/apis/auctionApis'
 
 // === ARTWORK DETAIL ===
 export type ArtworkDetailImage = {
@@ -18,6 +19,10 @@ export type ArtworkDetailCreator = User & {
 export type ArtworkDetail = Artwork & {
     sellerId?: string
     priceAmount?: number
+    status?: string
+    isPublished?: boolean
+    auctionLifecycle?: SellerAuctionStartStatusResponse | null
+    onChainAuctionId?: string | null
     year?: number
     medium?: string
     dimensions?: string

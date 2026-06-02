@@ -1,7 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import auctionApis, { type GetAuctionsInput } from '@shared/apis/auctionApis'
 import { mapAuctionReadToLot } from '../mappers/auctionLotMapper'
 import type { AuctionLot } from '../types'
+import {
+  applyAuctionRealtimeEventToLot,
+  type AuctionRealtimeEvent,
+} from '../utils/auctionRealtime'
 
 type UseAuctionLotsResult = {
   lots: AuctionLot[]
@@ -10,6 +14,7 @@ type UseAuctionLotsResult = {
   error: Error | null
   refresh: () => Promise<void>
   refreshAuctionById: (auctionId: string) => Promise<AuctionLot>
+  applyRealtimeEvent: (event: AuctionRealtimeEvent) => boolean
 }
 
 const toError = (error: unknown) =>
@@ -26,6 +31,7 @@ export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult =>
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+  const lotsRef = useRef<AuctionLot[]>([])
 
   const refresh = useCallback(async () => {
     setIsLoading(true)
@@ -40,7 +46,9 @@ export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult =>
         status,
         take,
       })
-      setLots(response.data.map(mapAuctionReadToLot))
+      const nextLots = response.data.map(mapAuctionReadToLot)
+      lotsRef.current = nextLots
+      setLots(nextLots)
       setTotal(response.total)
     } catch (err) {
       setError(toError(err))
@@ -53,9 +61,34 @@ export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult =>
     const response = await auctionApis.getAuctionById(auctionId)
     const nextLot = mapAuctionReadToLot(response)
 
-    setLots((currentLots) => currentLots.map((lot) => (isSameLot(lot, nextLot) ? nextLot : lot)))
+    setLots((currentLots) => {
+      const nextLots = currentLots.map((lot) => (isSameLot(lot, nextLot) ? nextLot : lot))
+      lotsRef.current = nextLots
+      return nextLots
+    })
 
     return nextLot
+  }, [])
+
+  const applyRealtimeEvent = useCallback((event: AuctionRealtimeEvent) => {
+    let didApply = false
+
+    const nextLots = lotsRef.current.map((lot) => {
+      const nextLot = applyAuctionRealtimeEventToLot(lot, event)
+      if (!nextLot) {
+        return lot
+      }
+
+      didApply = true
+      return nextLot
+    })
+
+    if (didApply) {
+      lotsRef.current = nextLots
+      setLots(nextLots)
+    }
+
+    return didApply
   }, [])
 
   useEffect(() => {
@@ -69,5 +102,6 @@ export const useAuctionLots = (input: GetAuctionsInput): UseAuctionLotsResult =>
     error,
     refresh,
     refreshAuctionById,
+    applyRealtimeEvent,
   }
 }

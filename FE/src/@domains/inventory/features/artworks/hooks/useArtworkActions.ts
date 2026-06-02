@@ -5,6 +5,7 @@ import artworkApis from '@shared/apis/artworkApis'
 import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
 import { mapArtworkToInventory } from '@domains/inventory/core/utils/inventoryApiMapper'
 import {
+  canToggleProfileVisibility,
   getAuctionHandoffHref,
   getEditArtworkHref,
   getProfileVisibilityPatch,
@@ -48,6 +49,11 @@ export const useArtworkActions = ({
   }
 
   const handleToggleProfileVisibility = async (artwork: InventoryArtwork) => {
+    if (!canToggleProfileVisibility(artwork)) {
+      setToastMessage('This artwork cannot be published or unpublished right now.')
+      return
+    }
+
     try {
       const response = await artworkApis.updateArtwork(
         artwork.id,
@@ -56,7 +62,7 @@ export const useArtworkActions = ({
       const updatedArtwork = mapArtworkToInventory(response)
       onArtworkUpdated(updatedArtwork)
       setDetailsTarget((current) => (current?.id === updatedArtwork.id ? updatedArtwork : current))
-      setToastMessage('Profile visibility updated.')
+      setToastMessage(updatedArtwork.isPublished ? 'Artwork published.' : 'Artwork unpublished.')
     } catch (error) {
       const message =
         error instanceof Error && error.message

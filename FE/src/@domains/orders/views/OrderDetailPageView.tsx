@@ -68,6 +68,25 @@ const trimHash = (value?: string | null) => {
 }
 
 const INVOICE_RETRY_COPY = 'Unable to load invoice. Try again without leaving this order.'
+const TIMELINE_HIGHLIGHT_MS = 8000
+
+const mergeUpdatedOrderItems = (
+  updatedOrder: OrderResponse,
+  currentOrder?: OrderResponse | null,
+): OrderResponse => ({
+  ...updatedOrder,
+  items: updatedOrder.items?.length ? updatedOrder.items : currentOrder?.items ?? [],
+})
+
+const getTimelineAttentionStep = (order: OrderResponse) => {
+  const steps = buildOrderTimeline(order)
+  return (
+    steps.find((step) => step.state === 'current') ??
+    [...steps].reverse().find((step) => step.state === 'complete') ??
+    steps[0] ??
+    null
+  )
+}
 
 const isInvoiceUnavailableError = (message?: string | null) => {
   const normalized = message?.toLowerCase() ?? ''
@@ -95,12 +114,59 @@ export const OrderDetailPageView = () => {
   const [invoiceErrorMessage, setInvoiceErrorMessage] = useState<string | null>(null)
   const [isInvoiceUnavailable, setIsInvoiceUnavailable] = useState(false)
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false)
+  const [highlightedTimelineStepKey, setHighlightedTimelineStepKey] = useState<string | null>(null)
+  const [timelineAnnouncement, setTimelineAnnouncement] = useState<string | null>(null)
   const invoicePanelRef = useRef<HTMLDivElement | null>(null)
+  const timelinePanelRef = useRef<HTMLDivElement | null>(null)
+  const timelineHighlightTimeoutRef = useRef<number | null>(null)
+  const latestOrderRefreshRef = useRef(0)
   const invoiceFocusOrderRef = useRef<string | null>(null)
   const latestInvoiceOrderIdRef = useRef<string | null>(null)
 
   const preferredScope: OrdersWorkspaceScope | null =
     scope === 'seller' || scope === 'buyer' ? scope : null
+
+  const loadOrderById = useCallback(async (targetOrderId: string) => {
+    const response = await orderApis.getOrderById(targetOrderId)
+    const hydratedItems = await hydrateOrderItems(response.items ?? [])
+
+    return {
+      ...response,
+      items: hydratedItems,
+    }
+  }, [])
+
+  const focusLifecycleTimeline = useCallback((nextOrder: OrderResponse) => {
+    const attentionStep = getTimelineAttentionStep(nextOrder)
+    if (!attentionStep) {
+      return
+    }
+
+    setHighlightedTimelineStepKey(attentionStep.key)
+    setTimelineAnnouncement(
+      attentionStep.state === 'current'
+        ? `Lifecycle timeline updated. Current step: ${attentionStep.label}.`
+        : `Lifecycle timeline updated. Latest completed step: ${attentionStep.label}.`,
+    )
+
+    if (timelineHighlightTimeoutRef.current) {
+      window.clearTimeout(timelineHighlightTimeoutRef.current)
+    }
+
+    timelineHighlightTimeoutRef.current = window.setTimeout(() => {
+      setHighlightedTimelineStepKey(null)
+      timelineHighlightTimeoutRef.current = null
+    }, TIMELINE_HIGHLIGHT_MS)
+
+    window.setTimeout(() => {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      timelinePanelRef.current?.scrollIntoView({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'center',
+      })
+      timelinePanelRef.current?.focus({ preventScroll: true })
+    }, 0)
+  }, [])
 
   const loadInvoice = useCallback(async (order: Pick<OrderResponse, 'id'>) => {
     const targetOrderId = order.id
@@ -154,22 +220,21 @@ export const OrderDetailPageView = () => {
     setInvoiceErrorMessage(null)
     setIsInvoiceUnavailable(false)
     setIsInvoiceModalOpen(false)
+    setHighlightedTimelineStepKey(null)
+    setTimelineAnnouncement(null)
+    latestOrderRefreshRef.current += 1
     latestInvoiceOrderIdRef.current = null
     invoiceFocusOrderRef.current = null
 
     const loadOrder = async () => {
       try {
-        const response = await orderApis.getOrderById(orderId)
-        const hydratedItems = await hydrateOrderItems(response.items ?? [])
+        const nextOrder = await loadOrderById(orderId)
 
         if (!isActive) {
           return
         }
 
-        setOrder({
-          ...response,
-          items: hydratedItems,
-        })
+        setOrder(nextOrder)
       } catch (error) {
         if (!isActive) {
           return
@@ -189,7 +254,15 @@ export const OrderDetailPageView = () => {
     return () => {
       isActive = false
     }
-  }, [orderId, router.isReady])
+  }, [loadOrderById, orderId, router.isReady])
+
+  useEffect(() => {
+    return () => {
+      if (timelineHighlightTimeoutRef.current) {
+        window.clearTimeout(timelineHighlightTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!order?.id) {
@@ -224,7 +297,12 @@ export const OrderDetailPageView = () => {
   }, [order?.id, router.query.invoice])
 
   const role = order && user?.id ? getOrderActorRole(order, user.id, preferredScope, user.walletAddress) : 'buyer'
-  const timelineSteps = order ? buildOrderTimeline(order) : []
+  const timelineSteps = order
+    ? buildOrderTimeline(order).map((step) => ({
+        ...step,
+        isHighlighted: step.key === highlightedTimelineStepKey,
+      }))
+    : []
   const shippingLines = formatAddress(order?.shippingAddress ?? null)
   const shippingPresentation = order ? getShippingPresentation(order) : null
   const invoiceAvailability = useMemo(
@@ -261,6 +339,39 @@ export const OrderDetailPageView = () => {
 
     window.print()
   }
+
+  const handleOrderUpdated = useCallback(
+    (updatedOrder: OrderResponse, message: string) => {
+      const refreshRequestId = latestOrderRefreshRef.current + 1
+      latestOrderRefreshRef.current = refreshRequestId
+      const nextOrder = mergeUpdatedOrderItems(updatedOrder, order)
+
+      setOrder(nextOrder)
+      setSuccessMessage(message)
+      setErrorMessage(null)
+      focusLifecycleTimeline(nextOrder)
+
+      void loadOrderById(updatedOrder.id)
+        .then((refreshedOrder) => {
+          if (latestOrderRefreshRef.current !== refreshRequestId) {
+            return
+          }
+
+          setOrder(refreshedOrder)
+          focusLifecycleTimeline(refreshedOrder)
+        })
+        .catch(() => {
+          if (latestOrderRefreshRef.current !== refreshRequestId) {
+            return
+          }
+
+          setSuccessMessage(
+            `${message} The timeline is showing the latest response from the action. Refresh if backend sync is still in progress.`,
+          )
+        })
+    },
+    [focusLifecycleTimeline, loadOrderById, order],
+  )
 
   return (
     <>
@@ -513,8 +624,28 @@ export const OrderDetailPageView = () => {
                   </div>
                 </div>
 
-                <div tabIndex={4} className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <h2 className="text-xl font-semibold text-slate-900">Lifecycle timeline</h2>
+                <div
+                  ref={timelinePanelRef}
+                  tabIndex={4}
+                  aria-labelledby="order-lifecycle-heading"
+                  className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <h2
+                      id="order-lifecycle-heading"
+                      className="text-xl font-semibold text-slate-900"
+                    >
+                      Lifecycle timeline
+                    </h2>
+                    {highlightedTimelineStepKey ? (
+                      <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                        Updated
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="sr-only" aria-live="polite">
+                    {timelineAnnouncement}
+                  </p>
                   <div className="mt-6">
                     <OrderTimeline steps={timelineSteps} />
                   </div>
@@ -525,14 +656,7 @@ export const OrderDetailPageView = () => {
                 <OrderActionPanel
                   order={order}
                   role={role}
-                  onOrderUpdated={(updatedOrder, message) => {
-                    setOrder({
-                      ...updatedOrder,
-                      items: updatedOrder.items ?? order.items ?? [],
-                    })
-                    setSuccessMessage(message)
-                    setErrorMessage(null)
-                  }}
+                  onOrderUpdated={handleOrderUpdated}
                 />
 
                 {role === 'seller' ? (

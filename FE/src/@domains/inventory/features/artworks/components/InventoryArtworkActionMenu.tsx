@@ -21,9 +21,11 @@ import {
 // @domains - inventory
 import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
 import {
+  canToggleProfileVisibility,
   canShowAuctionHandoff,
   getAuctionHandoffLabel,
   getProfileVisibilityLabel,
+  isArtworkPublished,
   isArtworkEditLocked,
 } from '@domains/inventory/features/artworks/utils/inventoryArtworkActions'
 
@@ -52,15 +54,13 @@ export const InventoryArtworkActionMenu = ({
 }: InventoryArtworkActionMenuProps) => {
   // -- derived --
   const isEditLocked = isArtworkEditLocked(artwork)
-  const profileVisibilityLabel =
-    getProfileVisibilityLabel(artwork) === 'Hide Artwork from Profile'
-      ? 'Hide Artwork from Profile'
-      : 'Show Artwork on Profile'
+  const profileVisibilityLabel = getProfileVisibilityLabel(artwork)
   const auctionHandoffLabel =
     getAuctionHandoffLabel(artwork) === 'Resume Auction Setup'
       ? 'Resume Auction Setup'
       : 'Start Auction'
   const showAuctionHandoff = canShowAuctionHandoff(artwork)
+  const canToggleVisibility = canToggleProfileVisibility(artwork)
 
   // -- render --
   return (
@@ -98,10 +98,11 @@ export const InventoryArtworkActionMenu = ({
           Edit Artwork
         </DropdownMenuItem>
         <DropdownMenuItem
+          disabled={!canToggleVisibility}
           onSelect={() => onToggleProfileVisibility(artwork)}
-          className="cursor-pointer gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-900"
+          className="cursor-pointer gap-3 rounded-xl px-4 py-3 text-base font-medium text-slate-900 data-[disabled]:cursor-not-allowed data-[disabled]:text-slate-400"
         >
-          {artwork.isPublished ? (
+          {isArtworkPublished(artwork) ? (
             <EyeOff className="h-4 w-4 text-slate-600" />
           ) : (
             <Eye className="h-4 w-4 text-slate-600" />

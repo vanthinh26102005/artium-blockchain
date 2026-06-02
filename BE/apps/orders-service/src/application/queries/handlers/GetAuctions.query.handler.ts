@@ -17,6 +17,7 @@ import { ethers } from 'ethers';
 import { GetAuctionsQuery } from '../GetAuctions.query';
 import { Order } from '../../../domain/entities';
 import { IOrderRepository } from '../../../domain/interfaces';
+import { AuctionBuyerIdentityService } from '../../services';
 
 type AuctionFilters = GetAuctionsDto & {
   sellerId?: string;
@@ -43,6 +44,7 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     @Inject(IOrderRepository)
     private readonly orderRepo: IOrderRepository,
     private readonly escrowContractService: EscrowContractService,
+    private readonly buyerIdentity: AuctionBuyerIdentityService,
   ) {}
 
   async execute(
@@ -234,7 +236,7 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
       return order;
     }
 
-    const patch = this.buildOnChainProjectionPatch(order, chainAuction);
+    const patch = await this.buildOnChainProjectionPatch(order, chainAuction);
     if (!patch) {
       return order;
     }
@@ -246,10 +248,10 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
     return Object.assign(order, patch);
   }
 
-  private buildOnChainProjectionPatch(
+  private async buildOnChainProjectionPatch(
     order: Order,
     chainAuction: AuctionCoreDto,
-  ): Partial<Order> | null {
+  ): Promise<Partial<Order> | null> {
     const patch: Partial<Order> = {};
     const nextState = chainAuction.state;
     const nextStatus = this.resolveOrderStatusFromEscrowState(
@@ -280,12 +282,21 @@ export class GetAuctionsHandler implements IQueryHandler<GetAuctionsQuery> {
       patch.bidAmountWei = highestBidWei;
       Object.assign(patch, this.getBidAmountTotals(highestBidWei));
     }
-    if (
-      highestBidder &&
-      highestBidder !== ZERO_ADDRESS &&
-      highestBidder !== this.normalizeAddress(order.buyerWallet)
-    ) {
-      patch.buyerWallet = highestBidder;
+    if (highestBidder && highestBidder !== ZERO_ADDRESS) {
+      const currentBuyerWallet = this.normalizeAddress(order.buyerWallet);
+      if (highestBidder !== currentBuyerWallet) {
+        patch.buyerWallet = highestBidder;
+        patch.collectorId =
+          nextState === EscrowState.STARTED
+            ? await this.buyerIdentity.resolveCollectorIdByWallet(highestBidder)
+            : null;
+      } else if (nextState === EscrowState.STARTED && !order.collectorId) {
+        const collectorId =
+          await this.buyerIdentity.resolveCollectorIdByWallet(highestBidder);
+        if (collectorId) {
+          patch.collectorId = collectorId;
+        }
+      }
     }
 
     return Object.keys(patch).length > 0 ? patch : null;

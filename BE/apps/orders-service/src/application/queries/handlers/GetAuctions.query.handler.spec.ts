@@ -27,6 +27,9 @@ describe('GetAuctionsHandler', () => {
   const escrowContractService = {
     getAuction: jest.fn(),
   };
+  const buyerIdentity = {
+    resolveCollectorIdByWallet: jest.fn(),
+  };
 
   let handler: GetAuctionsHandler;
 
@@ -43,6 +46,7 @@ describe('GetAuctionsHandler', () => {
     handler = new GetAuctionsHandler(
       orderRepo as never,
       escrowContractService as never,
+      buyerIdentity as never,
     );
   });
 
@@ -172,6 +176,7 @@ describe('GetAuctionsHandler', () => {
         escrowState: EscrowState.ENDED,
         bidAmountWei: '3000000000000000000',
         buyerWallet: '0x3333333333333333333333333333333333333333',
+        collectorId: null,
       }),
     );
     expect(result.data[0]).toMatchObject({
@@ -179,6 +184,58 @@ describe('GetAuctionsHandler', () => {
       orderStatus: OrderStatus.ESCROW_HELD,
       escrowState: EscrowState.ENDED,
     });
+  });
+
+  it('repairs active current bidder projections with the current wallet owner snapshot', async () => {
+    orderRepo.find.mockResolvedValue([
+      {
+        ...activeAuctionOrder(),
+        buyerWallet: '0x1111111111111111111111111111111111111111',
+        collectorId: 'old-buyer',
+      },
+    ] as never);
+    orderRepo.count.mockResolvedValue(1 as never);
+    orderRepo.findWithItems.mockResolvedValue(null as never);
+    buyerIdentity.resolveCollectorIdByWallet.mockResolvedValue(
+      'current-buyer' as never,
+    );
+
+    await handler.execute(new GetAuctionsQuery({ take: 20, skip: 0 }));
+
+    expect(buyerIdentity.resolveCollectorIdByWallet).toHaveBeenCalledWith(
+      '0x3333333333333333333333333333333333333333',
+    );
+    expect(orderRepo.update).toHaveBeenCalledWith(
+      'order-1',
+      expect.objectContaining({
+        buyerWallet: '0x3333333333333333333333333333333333333333',
+        collectorId: 'current-buyer',
+      }),
+    );
+  });
+
+  it('fills a missing active collector snapshot when the current bidder wallet is already synced', async () => {
+    orderRepo.find.mockResolvedValue([
+      {
+        ...activeAuctionOrder(),
+        buyerWallet: '0x3333333333333333333333333333333333333333',
+        collectorId: null,
+      },
+    ] as never);
+    orderRepo.count.mockResolvedValue(1 as never);
+    orderRepo.findWithItems.mockResolvedValue(null as never);
+    buyerIdentity.resolveCollectorIdByWallet.mockResolvedValue(
+      'current-buyer' as never,
+    );
+
+    await handler.execute(new GetAuctionsQuery({ take: 20, skip: 0 }));
+
+    expect(orderRepo.update).toHaveBeenCalledWith(
+      'order-1',
+      expect.objectContaining({
+        collectorId: 'current-buyer',
+      }),
+    );
   });
 
   it('drops rows that do not have converged artwork linkage', async () => {

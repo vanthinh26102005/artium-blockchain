@@ -32,6 +32,12 @@ export type ArtworkForCheckout = {
   title: string
   artistName: string
   artistId?: string
+  status?: string
+  isPublished?: boolean
+  onChainAuctionId?: string | null
+  auctionLifecycle?: {
+    status?: string | null
+  } | null
   price: number
   priceLabel: string
   coverUrl: string

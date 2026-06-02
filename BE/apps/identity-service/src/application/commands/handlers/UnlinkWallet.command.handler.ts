@@ -1,7 +1,9 @@
 import { Inject, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { RpcExceptionHelper } from '@app/common';
+import { ITransactionService, RpcExceptionHelper } from '@app/common';
+import { OutboxService } from '@app/outbox';
+import { ExchangeName, RoutingKey } from '@app/rabbitmq';
 import { UnlinkWalletCommand } from '../UnlinkWallet.command';
 import { IUserRepository, UserPayload } from '../../../domain';
 
@@ -19,6 +21,9 @@ export class UnlinkWalletHandler implements ICommandHandler<
   constructor(
     @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
+    private readonly outboxService: OutboxService,
+    @Inject(ITransactionService)
+    private readonly transactionService: ITransactionService,
   ) {}
 
   async execute(command: UnlinkWalletCommand): Promise<UnlinkWalletResult> {
@@ -38,12 +43,40 @@ export class UnlinkWalletHandler implements ICommandHandler<
         );
       }
 
-      const updatedUser = await this.userRepository.update(command.userId, {
-        walletAddress: null,
-      });
-      if (!updatedUser) {
-        throw RpcExceptionHelper.notFound('Failed to update wallet');
-      }
+      const walletAddress = user.walletAddress.trim().toLowerCase();
+      const occurredAt = new Date();
+      const updatedUser = await this.transactionService.execute(
+        async (manager) => {
+          const nextUser = await this.userRepository.update(
+            command.userId,
+            {
+              walletAddress: null,
+            },
+            manager,
+          );
+          if (!nextUser) {
+            throw RpcExceptionHelper.notFound('Failed to update wallet');
+          }
+
+          await this.outboxService.createOutboxMessage(
+            {
+              aggregateType: 'user',
+              aggregateId: command.userId,
+              eventType: 'IdentityWalletUnlinked',
+              exchange: ExchangeName.USER_EVENTS,
+              routingKey: RoutingKey.IDENTITY_WALLET_UNLINKED,
+              payload: {
+                userId: command.userId,
+                walletAddress,
+                occurredAt: occurredAt.toISOString(),
+              },
+            },
+            manager,
+          );
+
+          return nextUser;
+        },
+      );
 
       this.logger.log(`Unlinked wallet from user ${command.userId}`);
 

@@ -14,10 +14,12 @@ import {
   Lock,
   RefreshCcw,
   RotateCcw,
+  Search,
   ShieldCheck,
 } from 'lucide-react'
 import { Button } from '@shared/components/ui/button'
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
+import { WALLET_TARGET_CHAIN } from '@domains/auth/constants/wallet'
 import auctionApis, {
   type SellerAuctionArtworkCandidate,
   type SellerAuctionStartStatusResponse,
@@ -46,10 +48,13 @@ import {
   type SellerAuctionTermsFormValues,
 } from '../validations/sellerAuctionTerms.schema'
 import {
-  formatAuctionEth,
   loadSellerAuctionTermsDraft,
   saveSellerAuctionTermsDraft,
 } from '../utils'
+import {
+  getStoredAuctionBidHistory,
+  type StoredAuctionBid,
+} from '../utils/bidTrackingStorage'
 
 const FINALIZATION_PENDING_STORAGE_KEY = 'artium.pendingAuctionFinalizations'
 const FINALIZATION_PENDING_TTL_MS = 60 * 60 * 1000
@@ -289,6 +294,8 @@ const getLifecycleLabel = (status?: SellerAuctionStartStatusResponse['status']) 
   }
 }
 
+type SellerAuctionWorkspaceTab = 'detail' | 'history' | 'create'
+
 type SellerAuctionOverviewRow = {
   id: string
   title: string
@@ -298,6 +305,21 @@ type SellerAuctionOverviewRow = {
   auction?: AuctionLot
   startStatus?: SellerAuctionStartStatusResponse
 }
+
+type BidHistoryStatusFilter = 'all' | StoredAuctionBid['status']
+type BidHistoryDateFilter = 'all' | '7' | '30' | '90'
+type BidHistorySortKey = 'newest' | 'oldest' | 'highest' | 'lowest'
+
+const bidHistoryStatusOptions: Array<{ key: BidHistoryStatusFilter; label: string }> = [
+  { key: 'all', label: 'All bids' },
+  { key: 'pending', label: 'Pending' },
+  { key: 'confirmed', label: 'Confirmed' },
+]
+
+const getBidTransactionUrl = (transactionHash: string) =>
+  `${WALLET_TARGET_CHAIN.blockExplorerUrl.replace(/\/$/, '')}/tx/${encodeURIComponent(
+    transactionHash,
+  )}`
 
 const getRowStatusTone = (row: SellerAuctionOverviewRow) => {
   if (row.auction?.orderStatus && row.auction.statusKey === 'closed') {
@@ -336,6 +358,292 @@ const canFinalizeAuction = (row: SellerAuctionOverviewRow) =>
 const isAuctionSettledOnChain = (auction: AuctionLot) =>
   (Boolean(auction.orderStatus) && auction.orderStatus !== 'auction_active') ||
   (typeof auction.escrowState === 'number' && auction.escrowState > 0)
+
+const hasAuctionBid = (auction?: AuctionLot | null) => Boolean(auction && auction.bidValue > 0)
+
+const BidHistoryPanel = () => {
+  const [history, setHistory] = useState<StoredAuctionBid[]>(() => getStoredAuctionBidHistory())
+  const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<BidHistoryStatusFilter>('all')
+  const [dateFilter, setDateFilter] = useState<BidHistoryDateFilter>('all')
+  const [sortKey, setSortKey] = useState<BidHistorySortKey>('newest')
+  const latestHistoryTimestampMs = useMemo(
+    () =>
+      history.reduce((latestTimestamp, bid) => {
+        const updatedAtMs = new Date(bid.updatedAt).getTime()
+
+        return Number.isFinite(updatedAtMs)
+          ? Math.max(latestTimestamp, updatedAtMs)
+          : latestTimestamp
+      }, 0),
+    [history],
+  )
+
+  const refreshHistory = () => {
+    setHistory(getStoredAuctionBidHistory())
+  }
+
+  const filteredHistory = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase()
+    const cutoffMs =
+      dateFilter === 'all' || latestHistoryTimestampMs === 0
+        ? null
+        : latestHistoryTimestampMs - Number(dateFilter) * 24 * 60 * 60 * 1000
+
+    return history
+      .filter((bid) => {
+        const updatedAtMs = new Date(bid.updatedAt).getTime()
+        const matchesQuery =
+          !normalizedQuery ||
+          [bid.title, bid.auctionId, bid.artworkId, bid.transactionHash, bid.walletAddress].some(
+            (value) => value.toLowerCase().includes(normalizedQuery),
+          )
+        const matchesStatus = statusFilter === 'all' || bid.status === statusFilter
+        const matchesDate =
+          cutoffMs === null || (Number.isFinite(updatedAtMs) && updatedAtMs >= cutoffMs)
+
+        return matchesQuery && matchesStatus && matchesDate
+      })
+      .sort((left, right) => {
+        if (sortKey === 'highest') {
+          return right.bidAmountEth - left.bidAmountEth
+        }
+        if (sortKey === 'lowest') {
+          return left.bidAmountEth - right.bidAmountEth
+        }
+
+        const leftMs = new Date(left.updatedAt).getTime()
+        const rightMs = new Date(right.updatedAt).getTime()
+
+        return sortKey === 'oldest' ? leftMs - rightMs : rightMs - leftMs
+      })
+  }, [dateFilter, history, latestHistoryTimestampMs, query, sortKey, statusFilter])
+
+  const hasActiveFilters =
+    query.trim().length > 0 ||
+    statusFilter !== 'all' ||
+    dateFilter !== 'all' ||
+    sortKey !== 'newest'
+  const confirmedCount = history.filter((bid) => bid.status === 'confirmed').length
+  const pendingCount = history.filter((bid) => bid.status === 'pending').length
+
+  const resetFilters = () => {
+    setQuery('')
+    setStatusFilter('all')
+    setDateFilter('all')
+    setSortKey('newest')
+  }
+
+  return (
+    <section className="mt-8 space-y-6">
+      <div className="flex flex-col gap-3 rounded-[32px] border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
+            Bid history
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">Your tracked bids</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            Review bids submitted from this browser, filter by status or timeframe, and reopen
+            transaction records for verification.
+          </p>
+        </div>
+        <Button type="button" variant="outline" onClick={refreshHistory}>
+          <RefreshCcw className="h-4 w-4" />
+          Refresh
+        </Button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {[
+          { label: 'Tracked bids', value: history.length },
+          { label: 'Confirmed', value: confirmedCount },
+          { label: 'Pending sync', value: pendingCount },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-[24px] border border-slate-200 bg-white p-5">
+            <p className="text-xs font-semibold tracking-[0.16em] text-slate-400 uppercase">
+              {stat.label}
+            </p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(260px,1fr)_170px_170px_auto] xl:items-end">
+          <label className="block">
+            <span className="text-xs font-semibold tracking-[0.14em] text-slate-400 uppercase">
+              Search
+            </span>
+            <div className="mt-2 flex min-h-11 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 focus-within:border-slate-900">
+              <Search className="h-4 w-4 text-slate-400" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Artwork, order, wallet, or tx"
+                className="h-10 min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+              />
+            </div>
+          </label>
+
+          <label className="block">
+            <span className="text-xs font-semibold tracking-[0.14em] text-slate-400 uppercase">
+              Timeframe
+            </span>
+            <select
+              value={dateFilter}
+              onChange={(event) => setDateFilter(event.target.value as BidHistoryDateFilter)}
+              className="mt-2 h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-900"
+            >
+              <option value="all">All time</option>
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="text-xs font-semibold tracking-[0.14em] text-slate-400 uppercase">
+              Sort
+            </span>
+            <select
+              value={sortKey}
+              onChange={(event) => setSortKey(event.target.value as BidHistorySortKey)}
+              className="mt-2 h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-900"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="highest">Highest bid</option>
+              <option value="lowest">Lowest bid</option>
+            </select>
+          </label>
+
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!hasActiveFilters}
+            onClick={resetFilters}
+            className="h-11 w-full self-end xl:w-auto"
+          >
+            Clear
+          </Button>
+        </div>
+
+        <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            {bidHistoryStatusOptions.map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => setStatusFilter(option.key)}
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                  statusFilter === option.key
+                    ? 'border-slate-900 bg-slate-900 text-white'
+                    : 'border-slate-200 bg-white text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs font-semibold tracking-[0.14em] text-slate-400 uppercase">
+            {filteredHistory.length} shown
+          </p>
+        </div>
+      </div>
+
+      {filteredHistory.length === 0 ? (
+        <div className="rounded-[32px] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+          <Gavel className="mx-auto h-10 w-10 text-slate-500" />
+          <h3 className="mt-4 text-2xl font-semibold text-slate-900">
+            {history.length === 0 ? 'No tracked bids yet' : 'No bids match these filters'}
+          </h3>
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
+            {history.length === 0
+              ? 'Bids submitted from this browser will appear here after wallet submission.'
+              : 'Clear or adjust filters to review the rest of your local bid history.'}
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <div className="min-w-[920px]">
+              <div className="grid grid-cols-[minmax(280px,1.4fr)_130px_120px_170px_140px] gap-4 border-b border-slate-100 px-5 py-3 text-xs font-semibold tracking-[0.14em] text-slate-400 uppercase">
+                <span>Auction</span>
+                <span>Amount</span>
+                <span>Status</span>
+                <span>Updated</span>
+                <span>Record</span>
+              </div>
+              <div className="max-h-[560px] divide-y divide-slate-100 overflow-y-auto">
+                {filteredHistory.map((bid) => (
+                  <article
+                    key={`${bid.auctionId}-${bid.transactionHash}`}
+                    className="grid grid-cols-[minmax(280px,1.4fr)_130px_120px_170px_140px] items-center gap-4 px-5 py-4"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      {bid.imageSrc ? (
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                          <Image
+                            src={bid.imageSrc}
+                            alt={bid.imageAlt}
+                            fill
+                            unoptimized
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                          <ImageOff className="h-5 w-5" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate text-base font-semibold text-slate-900">
+                          {bid.title}
+                        </p>
+                        <p className="mt-1 truncate font-mono text-xs text-slate-500">
+                          {bid.auctionId}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-semibold text-slate-900">
+                      {formatEth(bid.bidAmountEth)}
+                    </span>
+                    <span
+                      className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${
+                        bid.status === 'confirmed'
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                          : 'border-amber-200 bg-amber-50 text-amber-700'
+                      }`}
+                    >
+                      {bid.status === 'confirmed' ? 'Confirmed' : 'Pending'}
+                    </span>
+                    <span className="text-sm text-slate-500">{formatDateTime(bid.updatedAt)}</span>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="h-10 border-slate-200 text-slate-900"
+                        onClick={() => {
+                          window.open(
+                            getBidTransactionUrl(bid.transactionHash),
+                            '_blank',
+                            'noreferrer',
+                          )
+                        }}
+                      >
+                        Tx {shortenHash(bid.transactionHash)}
+                      </Button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
 
 const SellerAuctionManagerPanel = () => {
   const router = useRouter()
@@ -790,12 +1098,12 @@ const SellerAuctionManagerPanel = () => {
                     Manage fulfillment
                   </Button>
                 ) : null}
-                {selectedRow.auction ? (
+                {hasAuctionBid(selectedRow.auction) ? (
                   <Button
                     type="button"
-                    variant={selectedRow.auction.orderProjectionId ? 'outline' : 'default'}
+                    variant={selectedRow.auction?.orderProjectionId ? 'outline' : 'default'}
                     className={
-                      selectedRow.auction.orderProjectionId
+                      selectedRow.auction?.orderProjectionId
                         ? 'border-slate-200 text-slate-900'
                         : 'bg-slate-900 text-white hover:bg-slate-700'
                     }
@@ -806,7 +1114,7 @@ const SellerAuctionManagerPanel = () => {
                     }
                   >
                     <ExternalLink className="h-4 w-4" />
-                    Open public bid detail
+                    View newest bid
                   </Button>
                 ) : null}
                 {canResetStartAttempt(selectedRow) ? (
@@ -875,39 +1183,22 @@ const StepRail = ({ currentStep }: { currentStep: 'artwork' | 'terms' }) => {
   )
 }
 
-const SellerProfileRequired = () => {
-  const router = useRouter()
-  const user = useAuthStore((state) => state.user)
-  const profileHref = user?.slug ? `/profile/${user.slug}/edit` : '/profile'
-
-  return (
-    <section className="-mx-6 -my-1 flex min-h-screen items-center justify-center bg-[#F7F8FA] px-4 py-12 text-center sm:-mx-8 sm:px-6 lg:-mx-12 lg:px-8">
-      <div className="max-w-3xl rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
-          Seller auctions
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold text-slate-900">Seller profile required</h1>
-        <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500">
-          Create or complete your seller profile before starting an auction.
-        </p>
-        <Button
-          type="button"
-          className="mt-6 bg-slate-900 text-white hover:bg-slate-700"
-          onClick={() => void router.push(profileHref)}
-        >
-          Go to seller profile
-        </Button>
-      </div>
-    </section>
-  )
+type SellerCandidateWorkspaceProps = {
+  initialWorkspaceTab?: SellerAuctionWorkspaceTab
+  isSeller: boolean
 }
 
-const SellerCandidateWorkspace = () => {
+const SellerCandidateWorkspace = ({
+  initialWorkspaceTab = 'detail',
+  isSeller,
+}: SellerCandidateWorkspaceProps) => {
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
   const workspaceRef = useRef<HTMLDivElement | null>(null)
   const hydratedQueryArtworkRef = useRef<string | null>(null)
-  const { data, eligible, blocked, isLoading, error, refresh } = useSellerAuctionArtworkCandidates()
+  const { data, eligible, blocked, isLoading, error, refresh } = useSellerAuctionArtworkCandidates({
+    enabled: isSeller,
+  })
   const [currentStep, setCurrentStep] = useState<'artwork' | 'terms'>('artwork')
   const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null)
   const [termsArtworkId, setTermsArtworkId] = useState<string | null>(null)
@@ -921,9 +1212,10 @@ const SellerCandidateWorkspace = () => {
   const [draftSaved, setDraftSaved] = useState(false)
   const [walletError, setWalletError] = useState<string | null>(null)
   const [isEditingFailedTerms, setIsEditingFailedTerms] = useState(false)
-  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<'detail' | 'create'>('detail')
+  const [requestedWorkspaceTab, setActiveWorkspaceTab] =
+    useState<SellerAuctionWorkspaceTab>(() => (isSeller ? initialWorkspaceTab : 'history'))
 
-  const sellerAuctionStart = useSellerAuctionStart({ artworkId: termsArtworkId })
+  const sellerAuctionStart = useSellerAuctionStart({ artworkId: termsArtworkId, enabled: isSeller })
   const queryArtworkId = useMemo(() => {
     const value = router.query.artworkId
 
@@ -978,8 +1270,26 @@ const SellerCandidateWorkspace = () => {
       lifecycleStatus.status === 'start_failed'),
   )
   const shouldShowLifecycleShell = Boolean(lifecycleStatus && !isFailureEditable)
+  const workspaceTabs = useMemo(
+    () =>
+      isSeller
+        ? [
+            { key: 'detail' as const, label: 'Auction detail' },
+            { key: 'history' as const, label: 'Bid history' },
+            { key: 'create' as const, label: 'Create auction' },
+          ]
+        : [{ key: 'history' as const, label: 'Bid tracking' }],
+    [isSeller],
+  )
+  const activeWorkspaceTab = workspaceTabs.some((tab) => tab.key === requestedWorkspaceTab)
+    ? requestedWorkspaceTab
+    : workspaceTabs[0].key
 
   useEffect(() => {
+    if (!isSeller) {
+      return
+    }
+
     if (!router.isReady || !queryArtworkId || isLoading) {
       return
     }
@@ -1016,7 +1326,7 @@ const SellerCandidateWorkspace = () => {
     return () => {
       isCancelled = true
     }
-  }, [allCandidates, isLoading, queryArtworkId, router.isReady, sellerAuctionStart])
+  }, [allCandidates, isLoading, isSeller, queryArtworkId, router.isReady, sellerAuctionStart])
 
   const updateTermsValues = (nextValues: SellerAuctionTermsFormValues) => {
     setTermsValues(nextValues)
@@ -1081,11 +1391,30 @@ const SellerCandidateWorkspace = () => {
     workspaceRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  const clearArtworkQuery = () => {
+    if (!router.query.artworkId) {
+      return
+    }
+
+    const { artworkId: _artworkId, ...nextQuery } = router.query
+    void _artworkId
+    void router.replace({ pathname: router.pathname, query: nextQuery }, undefined, {
+      shallow: true,
+    })
+    hydratedQueryArtworkRef.current = null
+  }
+
   const handleBackToArtwork = () => {
     setCurrentStep('artwork')
+    setSelectedArtworkId(null)
     setTermsArtworkId(null)
+    setTermsErrors({})
+    setHasSubmittedTerms(false)
+    setDraftSaved(false)
     setIsEditingFailedTerms(false)
     setWalletError(null)
+    sellerAuctionStart.clearTrackedArtwork()
+    clearArtworkQuery()
   }
 
   const handleSaveDraft = () => {
@@ -1242,15 +1571,18 @@ const SellerCandidateWorkspace = () => {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
-              Seller workspace
+              {isSeller ? 'Seller workspace' : 'Auction workspace'}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold text-slate-900">Seller auctions</h1>
+            <h1 className="mt-2 text-3xl font-semibold text-slate-900">
+              {isSeller ? 'Seller auctions' : 'Auction bid tracking'}
+            </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Review your auction detail, inspect order and bid state, or create a new seller
-              auction.
+              {isSeller
+                ? 'Review your auction detail, inspect order and bid state, or create a new seller auction.'
+                : 'Review bids submitted from this browser and reopen transaction records for verification.'}
             </p>
           </div>
-          {activeWorkspaceTab === 'create' ? (
+          {isSeller && activeWorkspaceTab === 'create' ? (
             <div className="w-full rounded-[28px] border border-slate-900 bg-slate-900 p-5 text-white shadow-sm lg:w-[360px]">
               <p className="text-xs font-semibold tracking-[0.18em] text-white/50 uppercase">
                 Auction setup
@@ -1274,9 +1606,19 @@ const SellerCandidateWorkspace = () => {
                   </Button>
                 </>
               ) : (
-                <p className="mt-5 text-sm leading-6 text-white/75">
-                  Review terms, MetaMask handoff, and persisted lifecycle status.
-                </p>
+                <>
+                  <p className="mt-5 text-sm leading-6 text-white/75">
+                    Review terms, MetaMask handoff, and persisted lifecycle status.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleBackToArtwork}
+                    className="mt-6 w-full border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                  >
+                    Back to choose artwork
+                  </Button>
+                </>
               )}
             </div>
           ) : null}
@@ -1284,14 +1626,11 @@ const SellerCandidateWorkspace = () => {
       </div>
 
       <div className="mt-6 inline-flex rounded-[24px] border border-slate-200 bg-white p-1 shadow-sm">
-        {[
-          { key: 'detail', label: 'Auction detail' },
-          { key: 'create', label: 'Create auction' },
-        ].map((tab) => (
+        {workspaceTabs.map((tab) => (
           <button
             key={tab.key}
             type="button"
-            onClick={() => setActiveWorkspaceTab(tab.key as 'detail' | 'create')}
+            onClick={() => setActiveWorkspaceTab(tab.key)}
             className={`rounded-[18px] px-5 py-3 text-sm font-semibold transition ${
               activeWorkspaceTab === tab.key
                 ? 'bg-slate-900 text-white'
@@ -1303,9 +1642,10 @@ const SellerCandidateWorkspace = () => {
         ))}
       </div>
 
-      {activeWorkspaceTab === 'detail' ? <SellerAuctionManagerPanel /> : null}
+      {isSeller && activeWorkspaceTab === 'detail' ? <SellerAuctionManagerPanel /> : null}
+      {activeWorkspaceTab === 'history' ? <BidHistoryPanel /> : null}
 
-      {activeWorkspaceTab === 'create' ? (
+      {isSeller && activeWorkspaceTab === 'create' ? (
         <>
           <section className="mt-6 grid gap-4 md:grid-cols-3">
             {policyCards.map((card) => {
@@ -1400,7 +1740,6 @@ const SellerCandidateWorkspace = () => {
                       type="button"
                       variant="outline"
                       onClick={handleBackToArtwork}
-                      disabled={isLifecycleLocked}
                     >
                       Change artwork
                     </Button>
@@ -1421,7 +1760,6 @@ const SellerCandidateWorkspace = () => {
                     onStartAttempt={() => void handleStartAttempt()}
                     isStartDisabled={sellerAuctionStart.isBusy || isLifecycleLocked}
                     isLocked={isLifecycleLocked}
-                    isBackDisabled={isLifecycleLocked}
                     isSaveDraftDisabled={isLifecycleLocked}
                     startButtonLabel={startButtonLabel}
                     supportingMessage={supportingMessage}
@@ -1541,13 +1879,15 @@ const SellerCandidateWorkspace = () => {
   )
 }
 
-export const SellerAuctionArtworkPickerPage = () => {
+type SellerAuctionArtworkPickerPageProps = {
+  initialWorkspaceTab?: SellerAuctionWorkspaceTab
+}
+
+export const SellerAuctionArtworkPickerPage = ({
+  initialWorkspaceTab,
+}: SellerAuctionArtworkPickerPageProps) => {
   const user = useAuthStore((state) => state.user)
   const isSeller = user?.roles?.includes('seller') ?? false
 
-  if (!isSeller) {
-    return <SellerProfileRequired />
-  }
-
-  return <SellerCandidateWorkspace />
+  return <SellerCandidateWorkspace initialWorkspaceTab={initialWorkspaceTab} isSeller={isSeller} />
 }

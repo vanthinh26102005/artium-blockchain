@@ -19,7 +19,10 @@ import {
   IOrderRepository,
 } from '../../domain/interfaces';
 import { AuctionStartAttempt, Order } from '../../domain/entities';
-import { SellerAuctionLifecycleOutboxService } from '../services';
+import {
+  AuctionBuyerIdentityService,
+  SellerAuctionLifecycleOutboxService,
+} from '../services';
 
 const ARTWORK_SERVICE_CLIENT = 'ARTWORK_SERVICE';
 const ARTWORK_RPC_TIMEOUT_MS = 30_000;
@@ -38,6 +41,7 @@ export class BlockchainEventHandler {
     @Inject(ARTWORK_SERVICE_CLIENT)
     private readonly artworkClient: ClientProxy,
     private readonly lifecycleOutbox: SellerAuctionLifecycleOutboxService,
+    private readonly buyerIdentity: AuctionBuyerIdentityService,
   ) {}
 
   private generateOrderNumber(prefix = 'AUC') {
@@ -83,6 +87,35 @@ export class BlockchainEventHandler {
       return null;
     }
     return new Date(seconds * 1000);
+  }
+
+  private async buildBuyerIdentityPatch(
+    walletAddress?: string | null,
+    existingOrder?: Pick<Order, 'buyerWallet' | 'collectorId'> | null,
+  ): Promise<
+    Pick<Order, 'buyerWallet' | 'collectorId'> | Record<string, never>
+  > {
+    const buyerWallet =
+      this.buyerIdentity.normalizeWalletAddress(walletAddress);
+    if (!buyerWallet) {
+      return {};
+    }
+
+    const existingBuyerWallet = this.buyerIdentity.normalizeWalletAddress(
+      existingOrder?.buyerWallet,
+    );
+    if (existingOrder?.collectorId && existingBuyerWallet === buyerWallet) {
+      return {
+        buyerWallet,
+        collectorId: existingOrder.collectorId,
+      };
+    }
+
+    return {
+      buyerWallet,
+      collectorId:
+        await this.buyerIdentity.resolveCollectorIdByWallet(buyerWallet),
+    };
   }
 
   @RabbitSubscribe({
@@ -309,6 +342,9 @@ export class BlockchainEventHandler {
     try {
       const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
       if (!order) {
+        const buyerIdentityPatch = await this.buildBuyerIdentityPatch(
+          message.bidder,
+        );
         await this.orderRepo.create({
           collectorId: null,
           orderNumber: this.generateOrderNumber('AUC'),
@@ -321,7 +357,7 @@ export class BlockchainEventHandler {
           paymentStatus: OrderPaymentStatus.UNPAID,
           paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
           onChainOrderId: message.orderId,
-          buyerWallet: message.bidder,
+          ...buyerIdentityPatch,
           bidAmountWei: message.amount,
           escrowState: EscrowState.STARTED,
           ...this.getBidAmountTotals(message.amount),
@@ -330,9 +366,13 @@ export class BlockchainEventHandler {
         return;
       }
 
+      const buyerIdentityPatch = await this.buildBuyerIdentityPatch(
+        message.bidder,
+        order,
+      );
       await this.orderRepo.update(order.id, {
         status: OrderStatus.AUCTION_ACTIVE,
-        buyerWallet: message.bidder,
+        ...buyerIdentityPatch,
         bidAmountWei: message.amount,
         paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
         paymentStatus: OrderPaymentStatus.UNPAID,
@@ -368,11 +408,15 @@ export class BlockchainEventHandler {
         message.orderId,
       );
       if (existing) {
+        const buyerIdentityPatch = await this.buildBuyerIdentityPatch(
+          message.winner,
+          existing,
+        );
         await this.orderRepo.update(existing.id, {
           status: OrderStatus.ESCROW_HELD,
           paymentStatus: OrderPaymentStatus.ESCROW,
           paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
-          buyerWallet: message.winner,
+          ...buyerIdentityPatch,
           bidAmountWei: message.amount,
           escrowState: EscrowState.ENDED,
           ...this.getBidAmountTotals(message.amount),
@@ -381,6 +425,9 @@ export class BlockchainEventHandler {
         return;
       }
 
+      const buyerIdentityPatch = await this.buildBuyerIdentityPatch(
+        message.winner,
+      );
       await this.orderRepo.create({
         collectorId: null,
         orderNumber: this.generateOrderNumber('AUC'),
@@ -393,7 +440,7 @@ export class BlockchainEventHandler {
         paymentStatus: OrderPaymentStatus.ESCROW,
         paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
         onChainOrderId: message.orderId,
-        buyerWallet: message.winner,
+        ...buyerIdentityPatch,
         bidAmountWei: message.amount,
         escrowState: EscrowState.ENDED,
         ...this.getBidAmountTotals(message.amount),
@@ -514,9 +561,14 @@ export class BlockchainEventHandler {
         return;
       }
 
+      const buyerIdentityPatch = await this.buildBuyerIdentityPatch(
+        message.winner,
+        order,
+      );
       await this.orderRepo.update(order.id, {
         status: OrderStatus.DELIVERED,
         deliveredAt: new Date(),
+        ...buyerIdentityPatch,
         escrowState: EscrowState.COMPLETED,
         paymentStatus: OrderPaymentStatus.RELEASED,
         deliveryConfirmationMethod: 'wallet',
@@ -556,8 +608,13 @@ export class BlockchainEventHandler {
         return;
       }
 
+      const buyerIdentityPatch = await this.buildBuyerIdentityPatch(
+        message.buyer,
+        order,
+      );
       await this.orderRepo.update(order.id, {
         status: OrderStatus.DISPUTE_OPEN,
+        ...buyerIdentityPatch,
         escrowState: EscrowState.DISPUTED,
         disputeReason: message.reason,
         disputeOpenedAt: new Date(),
@@ -668,6 +725,9 @@ export class BlockchainEventHandler {
     try {
       const order = await this.orderRepo.findByOnChainOrderId(message.orderId);
       if (!order) {
+        const buyerIdentityPatch = await this.buildBuyerIdentityPatch(
+          message.buyer,
+        );
         await this.orderRepo.create({
           collectorId: null,
           orderNumber: this.generateOrderNumber('AUC'),
@@ -680,7 +740,7 @@ export class BlockchainEventHandler {
           paymentStatus: OrderPaymentStatus.REFUNDED,
           paymentMethod: OrderPaymentMethod.BLOCKCHAIN,
           onChainOrderId: message.orderId,
-          buyerWallet: message.buyer,
+          ...buyerIdentityPatch,
           escrowState: EscrowState.CANCELLED,
           cancelledAt: new Date(),
           cancelledReason: 'Shipping timeout',
@@ -689,10 +749,14 @@ export class BlockchainEventHandler {
         return;
       }
 
+      const buyerIdentityPatch = await this.buildBuyerIdentityPatch(
+        message.buyer,
+        order,
+      );
       await this.orderRepo.update(order.id, {
         status: OrderStatus.REFUNDED,
         paymentStatus: OrderPaymentStatus.REFUNDED,
-        buyerWallet: message.buyer,
+        ...buyerIdentityPatch,
         escrowState: EscrowState.CANCELLED,
         cancelledAt: new Date(),
         cancelledReason: 'Shipping timeout',
