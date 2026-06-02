@@ -18,18 +18,21 @@ import {
   ShoppingCart,
   CartItem,
   AuctionStartAttempt,
+  WalletOwnership,
 } from './domain/entities';
 
 import {
   IAuctionStartAttemptRepository,
   IOrderRepository,
   IOrderItemRepository,
+  IWalletOwnershipRepository,
 } from './domain/interfaces';
 
 import {
   AuctionStartAttemptRepository,
   OrderRepository,
   OrderItemRepository,
+  WalletOwnershipRepository,
 } from './infrastructure/repositories';
 
 import {
@@ -50,6 +53,7 @@ import {
   GetOrderItemsHandler,
   GetSellerAuctionStartStatusHandler,
   GetSellerAuctionStartStatusesHandler,
+  AuctionBuyerIdentityService,
   ResetSellerAuctionStartAttemptHandler,
   StartSellerAuctionHandler,
   SellerAuctionLifecycleOutboxService,
@@ -58,6 +62,7 @@ import {
 import {
   BlockchainEventHandler,
   PaymentEventHandler,
+  WalletOwnershipEventHandler,
 } from './application/event-handlers';
 
 import { OrdersMicroserviceController } from './presentation/microservice';
@@ -94,14 +99,20 @@ export const Repositories = [
     provide: IAuctionStartAttemptRepository,
     useClass: AuctionStartAttemptRepository,
   },
+  { provide: IWalletOwnershipRepository, useClass: WalletOwnershipRepository },
 ];
 
 export const Services = [
   { provide: ITransactionService, useClass: TransactionService },
   SellerAuctionLifecycleOutboxService,
+  AuctionBuyerIdentityService,
 ];
 
-export const EventHandlers = [BlockchainEventHandler, PaymentEventHandler];
+export const EventHandlers = [
+  BlockchainEventHandler,
+  PaymentEventHandler,
+  WalletOwnershipEventHandler,
+];
 
 export const Controllers = [OrdersMicroserviceController];
 
@@ -128,6 +139,7 @@ const ArtworkServiceClient = {
       ShoppingCart,
       CartItem,
       AuctionStartAttempt,
+      WalletOwnership,
       OutboxEntity,
     ]),
 

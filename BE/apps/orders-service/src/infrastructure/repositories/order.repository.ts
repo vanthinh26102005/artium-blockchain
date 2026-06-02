@@ -239,13 +239,25 @@ export class OrderRepository implements IOrderRepository {
 
         if (normalizedBuyerWallet) {
           if (options.buyerId) {
-            identityQb.orWhere('LOWER(order.buyerWallet) = :buyerWallet', {
-              buyerWallet: normalizedBuyerWallet,
-            });
+            identityQb.orWhere(
+              new Brackets((walletQb) => {
+                walletQb
+                  .where('order.collectorId IS NULL')
+                  .andWhere('LOWER(order.buyerWallet) = :buyerWallet', {
+                    buyerWallet: normalizedBuyerWallet,
+                  });
+              }),
+            );
           } else {
-            identityQb.where('LOWER(order.buyerWallet) = :buyerWallet', {
-              buyerWallet: normalizedBuyerWallet,
-            });
+            identityQb.where(
+              new Brackets((walletQb) => {
+                walletQb
+                  .where('order.collectorId IS NULL')
+                  .andWhere('LOWER(order.buyerWallet) = :buyerWallet', {
+                    buyerWallet: normalizedBuyerWallet,
+                  });
+              }),
+            );
           }
         }
       }),

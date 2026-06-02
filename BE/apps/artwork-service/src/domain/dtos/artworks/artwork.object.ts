@@ -188,7 +188,7 @@ export class ArtworkObject {
   @ApiPropertyOptional({
     type: () => SellerAuctionStartStatusObject,
     description:
-      'Seller-only auction lifecycle state for authenticated workspace inventory surfaces',
+      'Auction lifecycle state used to block direct purchase while seller auction start is pending or active',
   })
   auctionLifecycle?: SellerAuctionStartStatusObject | null;
 }

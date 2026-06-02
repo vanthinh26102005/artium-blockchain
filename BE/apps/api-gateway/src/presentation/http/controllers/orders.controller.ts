@@ -92,6 +92,7 @@ export class OrdersController {
       order.items?.some((item) => item.sellerId === userId) ?? false;
     const normalizedWalletAddress = normalizeWalletAddress(walletAddress);
     const isBlockchainBuyer =
+      !order.collectorId &&
       normalizedWalletAddress !== null &&
       normalizeWalletAddress(order.buyerWallet) === normalizedWalletAddress;
     const isBlockchainSeller =
@@ -154,8 +155,15 @@ export class OrdersController {
   private getOrderInvoiceViewerRole(
     order: AuthorizedOrderObject,
     userId?: string,
+    walletAddress?: string | null,
   ): OrderInvoiceViewerRole {
-    return order.collectorId === userId ? 'buyer' : 'seller';
+    const normalizedWalletAddress = normalizeWalletAddress(walletAddress);
+    const isWalletBuyer =
+      !order.collectorId &&
+      normalizedWalletAddress !== null &&
+      normalizeWalletAddress(order.buyerWallet) === normalizedWalletAddress;
+
+    return order.collectorId === userId || isWalletBuyer ? 'buyer' : 'seller';
   }
 
   private redactOrderInvoiceForSeller(
@@ -292,7 +300,11 @@ export class OrdersController {
       req.user?.id,
       req.user?.walletAddress,
     );
-    const viewerRole = this.getOrderInvoiceViewerRole(order, req.user?.id);
+    const viewerRole = this.getOrderInvoiceViewerRole(
+      order,
+      req.user?.id,
+      req.user?.walletAddress,
+    );
 
     const invoice = await sendRpc<OrderInvoiceObject>(
       this.paymentsClient,
@@ -427,7 +439,12 @@ export class OrdersController {
     return sendRpc(
       this.ordersClient,
       { cmd: 'open_dispute' },
-      { id, userId: req.user?.id, ...data },
+      {
+        id,
+        userId: req.user?.id,
+        userWalletAddress: req.user?.walletAddress ?? null,
+        ...data,
+      },
     );
   }
 

@@ -12,7 +12,7 @@ import { OrdersEmptyState } from '../components/OrdersEmptyState'
 import { OrdersSegmentedControl } from '../components/OrdersSegmentedControl'
 import type { OrdersWorkspaceScope } from '../types/orderTypes'
 import { hydrateOrderItems } from '../utils/hydrateOrderItems'
-import { ORDER_STATUS_FILTERS } from '../utils/orderPresentation'
+import { isBlockchainOrder, ORDER_STATUS_FILTERS } from '../utils/orderPresentation'
 
 const INITIAL_SCOPE: OrdersWorkspaceScope = 'buyer'
 const SELLER_ROLE = 'seller'
@@ -122,7 +122,7 @@ export const OrdersPageView = () => {
                   hydratedOrders.map(async (order) => {
                     const primaryArtworkId = order.items?.[0]?.artworkId
 
-                    if (order.paymentMethod !== 'blockchain' || !primaryArtworkId) {
+                    if (!isBlockchainOrder(order) || !primaryArtworkId) {
                       return [order.id, null] as const
                     }
 

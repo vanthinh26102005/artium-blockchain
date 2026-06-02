@@ -77,6 +77,7 @@ export class LoginByGoogleHandler implements ICommandHandler<
           );
           throw RpcExceptionHelper.badRequest(`Cannot update user ${user.id}`);
         }
+        user = updatedUser;
         this.logger.log(`Updated user ${user.id} with Google info.`);
       } catch (error) {
         this.logger.error(

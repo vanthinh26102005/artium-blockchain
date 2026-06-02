@@ -13,16 +13,29 @@ type UseSellerAuctionArtworkCandidatesResult = {
   refresh: () => Promise<void>
 }
 
+type UseSellerAuctionArtworkCandidatesArgs = {
+  enabled?: boolean
+}
+
 const toError = (error: unknown) =>
   error instanceof Error ? error : new Error('Unable to load auction eligibility.')
 
 export const useSellerAuctionArtworkCandidates =
-  (): UseSellerAuctionArtworkCandidatesResult => {
+  ({
+    enabled = true,
+  }: UseSellerAuctionArtworkCandidatesArgs = {}): UseSellerAuctionArtworkCandidatesResult => {
     const [data, setData] = useState<SellerAuctionArtworkCandidatesResponse | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(enabled)
     const [error, setError] = useState<Error | null>(null)
 
     const refresh = useCallback(async () => {
+      if (!enabled) {
+        setData(null)
+        setIsLoading(false)
+        setError(null)
+        return
+      }
+
       setIsLoading(true)
       setError(null)
 
@@ -34,7 +47,7 @@ export const useSellerAuctionArtworkCandidates =
       } finally {
         setIsLoading(false)
       }
-    }, [])
+    }, [enabled])
 
     useEffect(() => {
       void refresh()

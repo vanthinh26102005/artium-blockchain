@@ -8,11 +8,19 @@ type OrderTimelineProps = {
 
 export const OrderTimeline = ({ steps }: OrderTimelineProps) => {
   return (
-    <div className="space-y-5">
+    <ol className="space-y-5">
       {steps.map((step, index) => (
-        <div key={step.key} className="flex gap-4">
+        <li
+          key={step.key}
+          aria-current={step.state === 'current' ? 'step' : undefined}
+          className={cn(
+            'flex gap-4 rounded-2xl transition-colors',
+            step.isHighlighted && '-mx-3 bg-blue-50 px-3 py-3 ring-1 ring-blue-100',
+          )}
+        >
           <div className="flex flex-col items-center">
             <div
+              aria-hidden="true"
               className={cn(
                 'mt-1 h-3.5 w-3.5 rounded-full border-2',
                 step.state === 'complete' && 'border-emerald-600 bg-emerald-600',
@@ -33,8 +41,8 @@ export const OrderTimeline = ({ steps }: OrderTimelineProps) => {
             </div>
             <p className="mt-1 text-sm leading-6 text-slate-500">{step.description}</p>
           </div>
-        </div>
+        </li>
       ))}
-    </div>
+    </ol>
   )
 }

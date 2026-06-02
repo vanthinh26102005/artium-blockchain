@@ -14,7 +14,9 @@ import { Dialog, DialogOverlay, DialogPortal, DialogPrimitive } from '@shared/co
 // @domains - inventory
 import { type InventoryArtwork } from '@domains/inventory/features/artworks/types/inventoryArtwork'
 import {
+  canToggleProfileVisibility,
   getProfileVisibilityLabel,
+  isArtworkPublished,
   isArtworkEditLocked,
 } from '@domains/inventory/features/artworks/utils/inventoryArtworkActions'
 import {
@@ -52,13 +54,14 @@ export const InventoryArtworkDetailsPanel = ({
 
   const isArtworkSection = activeSection === 'artwork'
   const isEditLocked = isArtworkEditLocked(artwork)
+  const canToggleVisibility = canToggleProfileVisibility(artwork)
   const profileVisibilityLabel = getProfileVisibilityLabel(artwork)
   const status = getInventoryArtworkStatus(artwork)
   const visibilityLabel = getInventoryArtworkVisibilityLabel(artwork)
   const availabilityLabel =
     typeof artwork.quantity === 'number'
       ? `${artwork.quantity} available`
-      : artwork.isPublished
+      : isArtworkPublished(artwork)
         ? 'Available'
         : 'Not publicly available'
 
@@ -76,6 +79,10 @@ export const InventoryArtworkDetailsPanel = ({
   }
 
   const handleToggleProfileVisibility = () => {
+    if (!canToggleVisibility) {
+      return
+    }
+
     onToggleProfileVisibility(artwork)
   }
 
@@ -295,9 +302,10 @@ export const InventoryArtworkDetailsPanel = ({
               <button
                 type="button"
                 onClick={handleToggleProfileVisibility}
-                className="flex items-center gap-2 text-slate-700 transition hover:text-slate-950"
+                disabled={!canToggleVisibility}
+                className="flex items-center gap-2 text-slate-700 transition hover:text-slate-950 disabled:cursor-not-allowed disabled:text-slate-400"
               >
-                {artwork.isPublished ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {isArtworkPublished(artwork) ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 {profileVisibilityLabel}
               </button>
             </div>

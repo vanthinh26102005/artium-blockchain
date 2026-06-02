@@ -19,6 +19,10 @@ import { BidEditingModal, type BidOrderStatusPayload } from '@domains/auction/co
 import { useAuctionLots } from '@domains/auction/hooks/useAuctionLots'
 import { useAuctionRealtime } from '@domains/auction/hooks/useAuctionRealtime'
 import {
+  applyAuctionRealtimeEventToLot,
+  type AuctionRealtimeEvent,
+} from '@domains/auction/utils/auctionRealtime'
+import {
   formatAuctionEth,
   formatAuctionEthInputValue,
   formatAuctionEthValue,
@@ -124,6 +128,8 @@ const isBidActionStatus = (statusKey: AuctionLotStatusKey) =>
 const isSameAuction = (lot: AuctionLot, auctionId: string) =>
   lot.auctionId === auctionId || lot.onChainOrderId === auctionId || lot.artworkId === auctionId
 
+const hasAuctionBid = (lot: AuctionLot) => lot.bidValue > 0 && Boolean(lot.onChainOrderId)
+
 const AuctionLotCardSkeleton = ({ viewMode }: { viewMode: 'grid' | 'list' }) => (
   <article
     className={`overflow-hidden rounded-[8px] border border-black/10 bg-white/82 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.78)] md:p-4 ${
@@ -207,14 +213,15 @@ const LiveAuctionPage = () => {
   const maxPercent = ((draftMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMinPercent = ((mobileAppliedMinPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
   const mobileMaxPercent = ((mobileAppliedMaxPrice - MIN_ETH) / (MAX_ETH - MIN_ETH)) * 100
-  const { lots, isLoading, error, refresh, refreshAuctionById } = useAuctionLots({
-    category: selectedCategory === 'all' ? undefined : selectedCategory,
-    status: selectedStatus === 'all' ? undefined : selectedStatus,
-    minBidEth: appliedMinPrice > MIN_ETH ? appliedMinPrice : undefined,
-    maxBidEth: appliedMaxPrice < MAX_ETH ? appliedMaxPrice : undefined,
-    skip: 0,
-    take: 50,
-  })
+  const { lots, isLoading, error, refresh, refreshAuctionById, applyRealtimeEvent } =
+    useAuctionLots({
+      category: selectedCategory === 'all' ? undefined : selectedCategory,
+      status: selectedStatus === 'all' ? undefined : selectedStatus,
+      minBidEth: appliedMinPrice > MIN_ETH ? appliedMinPrice : undefined,
+      maxBidEth: appliedMaxPrice < MAX_ETH ? appliedMaxPrice : undefined,
+      skip: 0,
+      take: 50,
+    })
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -406,7 +413,10 @@ const LiveAuctionPage = () => {
   )
   const effectiveViewMode = isMobileViewport ? 'list' : viewMode
   const displayedAuctionIds = useMemo(
-    () => displayedLots.map((lot) => lot.auctionId),
+    () =>
+      Array.from(
+        new Set(displayedLots.flatMap((lot) => [lot.auctionId, lot.onChainOrderId, lot.artworkId])),
+      ),
     [displayedLots],
   )
   const isInitialLoading = isLoading && lots.length === 0
@@ -432,10 +442,27 @@ const LiveAuctionPage = () => {
     },
     [refresh, refreshAuctionAndSelection],
   )
+  const handleRealtimeAuctionPatch = useCallback(
+    (event: AuctionRealtimeEvent) => {
+      const didApply = applyRealtimeEvent(event)
+
+      setSelectedBidLot((currentLot) => {
+        if (!currentLot || !isSameAuction(currentLot, event.auctionId)) {
+          return currentLot
+        }
+
+        return applyAuctionRealtimeEventToLot(currentLot, event) ?? currentLot
+      })
+
+      return didApply
+    },
+    [applyRealtimeEvent],
+  )
 
   useAuctionRealtime({
     auctionIds: displayedAuctionIds,
     onAuctionChange: handleRealtimeAuctionChange,
+    onAuctionPatch: handleRealtimeAuctionPatch,
   })
 
   const activeSelectedBidLot = selectedBidLot
@@ -667,6 +694,16 @@ const LiveAuctionPage = () => {
                             {formatAuctionEth(featuredLot.bidValue)}
                           </p>
                         </div>
+                        {hasAuctionBid(featuredLot) ? (
+                          <Link
+                            href={`/auction/bids/${encodeURIComponent(featuredLot.onChainOrderId)}`}
+                            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 text-xs font-bold tracking-[0.12em] text-slate-950 uppercase transition hover:border-slate-950 focus-visible:ring-2 focus-visible:ring-slate-950/30 focus-visible:outline-none"
+                            style={headlineFont}
+                          >
+                            View newest bid
+                            <ArrowUpRight className="h-4 w-4" />
+                          </Link>
+                        ) : null}
                         {isBidActionStatus(featuredLot.statusKey) ? (
                           <button
                             type="button"
@@ -737,7 +774,7 @@ const LiveAuctionPage = () => {
             </div>
           </header>
 
-          <section className="sticky top-20 z-20 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[8px] border border-black/10 bg-white/82 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.82)] backdrop-blur-xl md:static md:p-4">
+          <section className="sticky top-20 z-40 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[8px] border border-black/10 bg-white/82 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.82)] backdrop-blur-xl md:relative md:top-auto md:p-4">
             <div className="hidden flex-wrap items-center gap-3 md:flex">
               <div ref={categoryRef} className="relative">
                 <button
@@ -766,7 +803,7 @@ const LiveAuctionPage = () => {
                 </button>
 
                 {isCategoryOpen ? (
-                  <div className="absolute top-full left-0 z-20 mt-3 min-w-[300px] rounded-[8px] border border-black/10 bg-white/95 p-2 shadow-[0_24px_70px_rgba(15,23,42,0.15)] backdrop-blur-xl">
+                  <div className="absolute top-full left-0 z-50 mt-3 min-w-[300px] rounded-[8px] border border-black/10 bg-white/95 p-2 shadow-[0_24px_70px_rgba(15,23,42,0.15)] backdrop-blur-xl">
                     <div className="space-y-1" role="listbox" aria-label="Category options">
                       {categoryOptions.map((option) => (
                         <button
@@ -826,7 +863,7 @@ const LiveAuctionPage = () => {
                 </button>
 
                 {isStatusOpen ? (
-                  <div className="absolute top-full left-0 z-20 mt-3 min-w-[300px] rounded-[8px] border border-black/10 bg-white/95 p-2 shadow-[0_24px_70px_rgba(15,23,42,0.15)] backdrop-blur-xl">
+                  <div className="absolute top-full left-0 z-50 mt-3 min-w-[300px] rounded-[8px] border border-black/10 bg-white/95 p-2 shadow-[0_24px_70px_rgba(15,23,42,0.15)] backdrop-blur-xl">
                     <div className="space-y-1" role="listbox" aria-label="Status options">
                       {statusOptions.map((option) => (
                         <button
@@ -897,7 +934,7 @@ const LiveAuctionPage = () => {
                   <div
                     role="dialog"
                     aria-label="Price range filter"
-                    className="absolute top-full left-0 z-20 mt-3 w-[min(92vw,390px)] rounded-[8px] border border-black/10 bg-white/95 px-4 py-5 shadow-[0_24px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:px-5 sm:py-5"
+                    className="absolute top-full left-0 z-50 mt-3 w-[min(92vw,390px)] rounded-[8px] border border-black/10 bg-white/95 px-4 py-5 shadow-[0_24px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:px-5 sm:py-5"
                   >
                     <div className="mb-5 flex items-center justify-between gap-3">
                       <span className="text-[12px] font-extrabold tracking-[0.2em] text-[#8a8a8a] uppercase">
@@ -1217,24 +1254,35 @@ const LiveAuctionPage = () => {
                             {formatAuctionEth(lot.bidValue)}
                           </p>
                         </div>
-                        {isBidActionStatus(lot.statusKey) ? (
-                          <button
-                            type="button"
-                            onClick={() => openBidModal(lot)}
-                            className="inline-flex min-h-11 w-fit items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-center text-[10px] font-bold tracking-[0.16em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
-                            style={headlineFont}
-                          >
-                            {lotActionLabel[lot.statusKey]}
-                          </button>
-                        ) : (
-                          <Link
-                            href={`/artworks/${lot.artworkId}`}
-                            className="inline-flex min-h-11 w-fit items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-center text-[10px] font-bold tracking-[0.16em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
-                            style={headlineFont}
-                          >
-                            {lotActionLabel[lot.statusKey]}
-                          </Link>
-                        )}
+                        <div className="flex shrink-0 flex-col items-end gap-2">
+                          {hasAuctionBid(lot) ? (
+                            <Link
+                              href={`/auction/bids/${encodeURIComponent(lot.onChainOrderId)}`}
+                              className="inline-flex min-h-10 w-fit items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-center text-[10px] font-bold tracking-[0.16em] text-slate-950 uppercase transition hover:border-slate-950 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
+                              style={headlineFont}
+                            >
+                              View newest bid
+                            </Link>
+                          ) : null}
+                          {isBidActionStatus(lot.statusKey) ? (
+                            <button
+                              type="button"
+                              onClick={() => openBidModal(lot)}
+                              className="inline-flex min-h-11 w-fit items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-center text-[10px] font-bold tracking-[0.16em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
+                              style={headlineFont}
+                            >
+                              {lotActionLabel[lot.statusKey]}
+                            </button>
+                          ) : (
+                            <Link
+                              href={`/artworks/${lot.artworkId}`}
+                              className="inline-flex min-h-11 w-fit items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-center text-[10px] font-bold tracking-[0.16em] text-white uppercase transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:outline-none"
+                              style={headlineFont}
+                            >
+                              {lotActionLabel[lot.statusKey]}
+                            </Link>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </article>

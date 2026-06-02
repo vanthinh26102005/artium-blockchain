@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ClientsModule } from '@nestjs/microservices';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthLibModule } from '@app/auth';
+import { AppRabbitMQModule } from '@app/rabbitmq';
 import {
   MICROSERVICES,
   getMicroserviceConfig,
@@ -48,6 +49,7 @@ import { RedisIdempotencyService } from './presentation/http/services/redis-idem
       },
     ]),
     AuthLibModule,
+    AppRabbitMQModule,
     ClientsModule.register([
       {
         name: MICROSERVICES.IDENTITY_SERVICE,

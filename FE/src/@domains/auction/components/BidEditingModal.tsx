@@ -222,6 +222,23 @@ export const BidEditingModal = ({
   useEffect(() => {
     if (
       !isOpen ||
+      !lot ||
+      openedLotKeyRef.current !== activeLotKey ||
+      (viewState !== 'editing' && viewState !== 'pending' && viewState !== 'failed')
+    ) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      applyLotState(lot, { resetBidAmount: viewState === 'editing' })
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [activeLotKey, applyLotState, isOpen, lot, viewState])
+
+  useEffect(() => {
+    if (
+      !isOpen ||
       viewState !== 'pending' ||
       committedBidValue === null ||
       transactionHash === null ||

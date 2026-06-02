@@ -5,5 +5,6 @@ export class OpenDisputeCommand {
     public readonly orderId: string,
     public readonly userId: string,
     public readonly dto: OpenDisputeDto,
+    public readonly userWalletAddress?: string | null,
   ) {}
 }

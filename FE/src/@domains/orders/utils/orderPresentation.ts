@@ -152,8 +152,16 @@ export const formatWeiToEth = (value?: string | null, fractionDigits = 6) => {
 const hasBlockchainBidAmount = (order: OrderResponse) =>
   order.paymentMethod === 'blockchain' && Boolean(order.bidAmountWei)
 
+const AUCTION_ESCROW_STATUSES = new Set([
+  'auction_active',
+  'escrow_held',
+  'dispute_open',
+])
+
 export const isBlockchainOrder = (order: OrderResponse) =>
-  order.paymentMethod?.trim().toLowerCase() === 'blockchain' || Boolean(order.onChainOrderId)
+  Boolean(order.onChainOrderId) ||
+  Boolean(order.bidAmountWei) ||
+  AUCTION_ESCROW_STATUSES.has(order.status)
 
 const isPrimaryBlockchainBidItem = (order: OrderResponse, itemIndex: number) =>
   itemIndex === 0 && hasBlockchainBidAmount(order)
@@ -243,7 +251,9 @@ export const getOrderActorRole = (
   const isSeller = order.items?.some((item) => item.sellerId === currentUserId) ?? false
   const isBuyer =
     order.collectorId === currentUserId ||
-    (normalizedWallet !== null && order.buyerWallet?.trim().toLowerCase() === normalizedWallet)
+    (!order.collectorId &&
+      normalizedWallet !== null &&
+      order.buyerWallet?.trim().toLowerCase() === normalizedWallet)
 
   if (preferredScope === 'seller' && isSeller) {
     return 'seller'

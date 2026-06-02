@@ -19,9 +19,15 @@ export class OpenDisputeHandler implements ICommandHandler<OpenDisputeCommand> {
     private readonly orderRepo: IOrderRepository,
   ) {}
 
+  private normalizeWallet(value?: string | null) {
+    return typeof value === 'string' && value.trim().length > 0
+      ? value.trim().toLowerCase()
+      : null;
+  }
+
   async execute(command: OpenDisputeCommand): Promise<Order | null> {
     try {
-      const { orderId, userId, dto } = command;
+      const { orderId, userId, dto, userWalletAddress } = command;
       this.logger.log(
         `Opening dispute for order: ${orderId} by user: ${userId}`,
       );
@@ -31,8 +37,16 @@ export class OpenDisputeHandler implements ICommandHandler<OpenDisputeCommand> {
         throw RpcExceptionHelper.notFound(`Order ${orderId} not found`);
       }
 
-      // Only the buyer (collector) can open a dispute
-      if (order.collectorId !== userId) {
+      // Only the buyer can open a dispute. Wallet fallback is reserved for
+      // legacy or anonymous chain orders without a collector snapshot.
+      const normalizedUserWallet = this.normalizeWallet(userWalletAddress);
+      const normalizedBuyerWallet = this.normalizeWallet(order.buyerWallet);
+      const isBuyer =
+        order.collectorId === userId ||
+        (!order.collectorId &&
+          normalizedUserWallet !== null &&
+          normalizedBuyerWallet === normalizedUserWallet);
+      if (!isBuyer) {
         throw RpcExceptionHelper.forbidden(
           'Only the buyer of this order can open a dispute.',
         );

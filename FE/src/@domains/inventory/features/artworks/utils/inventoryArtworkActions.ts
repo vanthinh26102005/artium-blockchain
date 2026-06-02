@@ -5,10 +5,14 @@ const LOCKED_EDIT_LIFECYCLE_STATUSES = new Set([
   'pending_start',
   'auction_active',
   'retry_available',
-  'start_failed',
 ])
 
 const HIDDEN_AUCTION_HANDOFF_STATUSES = new Set(['pending_start', 'auction_active'])
+const PUBLISH_TOGGLE_STATUSES = new Set<InventoryArtwork['status']>([
+  'ACTIVE',
+  'DRAFT',
+  'INACTIVE',
+])
 
 export const isArtworkEditLocked = (artwork: InventoryArtwork) => {
   const lifecycle = artwork.auctionLifecycle
@@ -17,18 +21,33 @@ export const isArtworkEditLocked = (artwork: InventoryArtwork) => {
     return false
   }
 
-  return LOCKED_EDIT_LIFECYCLE_STATUSES.has(lifecycle.status) && lifecycle.editAllowed !== true
+  if (lifecycle.status === 'start_failed') {
+    return lifecycle.editAllowed !== true
+  }
+
+  return LOCKED_EDIT_LIFECYCLE_STATUSES.has(lifecycle.status)
 }
 
+export const isArtworkPublished = (artwork: InventoryArtwork) =>
+  artwork.status === 'ACTIVE' && artwork.isPublished === true
+
 export const getProfileVisibilityLabel = (artwork: InventoryArtwork) =>
-  artwork.isPublished ? 'Hide Artwork from Profile' : 'Show Artwork on Profile'
+  isArtworkPublished(artwork) ? 'Unpublish Artwork' : 'Publish Artwork'
+
+export const canToggleProfileVisibility = (artwork: InventoryArtwork) =>
+  PUBLISH_TOGGLE_STATUSES.has(artwork.status) && !isArtworkEditLocked(artwork)
 
 export const getProfileVisibilityPatch = (artwork: InventoryArtwork): UpdateArtworkInput => {
-  const shouldPublish = !artwork.isPublished
+  if (isArtworkPublished(artwork)) {
+    return {
+      status: 'INACTIVE',
+      isPublished: false,
+    }
+  }
 
   return {
-    status: shouldPublish ? 'ACTIVE' : 'INACTIVE',
-    isPublished: shouldPublish,
+    status: 'ACTIVE',
+    isPublished: true,
   }
 }
 

@@ -282,7 +282,7 @@ const workspaceActionItems: SidebarItemConfig[] = [
     href: '/artist/auctions',
     icon: Gavel,
     eyebrow: 'Auction tools',
-    description: 'Review auction details and create seller listings.',
+    description: 'Track bids, review auction details, and create seller listings.',
     accent: accents.amber,
     activePrefix: '/artist/auctions',
   },

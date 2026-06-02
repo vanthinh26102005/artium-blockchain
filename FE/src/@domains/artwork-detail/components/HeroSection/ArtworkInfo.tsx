@@ -8,6 +8,11 @@ import { Button } from '@shared/components/ui/button'
 import { ArtworkDetail } from '../../types'
 import { SatisfactionGuaranteeModal } from './SatisfactionGuaranteeModal'
 import { ToastPortal } from '@domains/events/components/ui/ToastPortal'
+import {
+    getArtworkPurchaseUnavailableMessage,
+    isArtworkInAuctionReadOnlyState,
+    isArtworkPurchasable,
+} from '@shared/utils/artworkAvailability'
 
 type ArtworkInfoProps = {
     artwork: ArtworkDetail
@@ -18,11 +23,14 @@ export const ArtworkInfo = ({ artwork }: ArtworkInfoProps) => {
     const [isGuaranteeExpanded, setIsGuaranteeExpanded] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(null)
+    const canPurchase = isArtworkPurchasable(artwork)
+    const isAuctionReadOnly = isArtworkInAuctionReadOnlyState(artwork)
+    const unavailablePurchaseMessage = getArtworkPurchaseUnavailableMessage(artwork)
 
     const handlePurchase = () => {
-        if (artwork.isSold) {
+        if (!canPurchase) {
             setToast({
-                message: 'This artwork is temporarily out of stock.',
+                message: unavailablePurchaseMessage ?? 'This artwork is not currently available for direct purchase.',
                 variant: 'error',
             })
             setTimeout(() => setToast(null), 3000)
@@ -88,20 +96,30 @@ export const ArtworkInfo = ({ artwork }: ArtworkInfoProps) => {
                     <p className="text-slate-900 uppercase" style={{ fontFamily: 'Inter', fontSize: '24px', lineHeight: '20px', fontWeight: 600, letterSpacing: '0%' }}>{artwork.priceLabel}</p>
 
                     <div className="flex items-center gap-3">
-                        <Button
-                            variant="outline"
-                            className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50"
-                            onClick={handleMakeOffer}
-                        >
-                            Make an Offer
-                        </Button>
-                        <Button
-                            className="flex-1 flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 text-white transition hover:bg-blue-700"
-                            onClick={handlePurchase}
-                        >
-                            <ShoppingCart className="h-4 w-4 text-white" aria-hidden />
-                            <span>Purchase</span>
-                        </Button>
+                        {canPurchase ? (
+                            <>
+                                <Button
+                                    variant="outline"
+                                    className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50"
+                                    onClick={handleMakeOffer}
+                                >
+                                    Make an Offer
+                                </Button>
+                                <Button
+                                    className="flex-1 flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 text-white transition hover:bg-blue-700"
+                                    onClick={handlePurchase}
+                                >
+                                    <ShoppingCart className="h-4 w-4 text-white" aria-hidden />
+                                    <span>Purchase</span>
+                                </Button>
+                            </>
+                        ) : (
+                            <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-600">
+                                {isAuctionReadOnly
+                                    ? 'Auction in progress. Direct purchase is unavailable.'
+                                    : 'Direct purchase unavailable.'}
+                            </div>
+                        )}
                     </div>
                 </div>
 

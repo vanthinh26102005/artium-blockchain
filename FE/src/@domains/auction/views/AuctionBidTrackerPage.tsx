@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Space_Grotesk } from 'next/font/google'
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, ExternalLink, RefreshCw, ShieldCheck, Wallet } from 'lucide-react'
 import auctionApis from '@shared/apis/auctionApis'
 import { Skeleton } from '@shared/components/ui/skeleton'
@@ -12,6 +12,10 @@ import { BidEditingModal, type BidOrderStatusPayload } from '../components'
 import { useAuctionRealtime } from '../hooks/useAuctionRealtime'
 import { mapAuctionReadToLot } from '../mappers/auctionLotMapper'
 import type { AuctionLot } from '../types'
+import {
+  applyAuctionRealtimeEventToLot,
+  type AuctionRealtimeEvent,
+} from '../utils/auctionRealtime'
 import { formatAuctionEth } from '../utils'
 import {
   getStoredAuctionBid,
@@ -61,9 +65,14 @@ const canPlaceBid = (lot: AuctionLot | null) =>
   lot?.statusKey === 'ending-soon' ||
   lot?.statusKey === 'newly-listed'
 
+const isSameAuctionIdentifier = (lot: AuctionLot, auctionIdentifier: string) =>
+  lot.auctionId === auctionIdentifier ||
+  lot.onChainOrderId === auctionIdentifier ||
+  lot.artworkId === auctionIdentifier
+
 const TrackerSkeleton = () => (
-  <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_420px]">
-    <Skeleton className="aspect-[4/5] rounded-none bg-[#eeeeee]" />
+  <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(280px,460px)_minmax(0,1fr)]">
+    <Skeleton className="aspect-[4/3] rounded-none bg-[#eeeeee]" />
     <div className="space-y-4">
       <Skeleton className="h-10 w-3/4 rounded-none bg-[#eeeeee]" />
       <Skeleton className="h-24 w-full rounded-none bg-[#eeeeee]" />
@@ -81,11 +90,13 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
   const [selectedBidLot, setSelectedBidLot] = useState<AuctionLot | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const lotRef = useRef<AuctionLot | null>(null)
 
   const refreshAuction = useCallback(async () => {
     setError(null)
     const response = await auctionApis.getAuctionById(auctionId)
     const nextLot = mapAuctionReadToLot(response)
+    lotRef.current = nextLot
     setLot(nextLot)
     return nextLot
   }, [auctionId])
@@ -98,6 +109,7 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
       .then(mapAuctionReadToLot)
       .then((nextLot) => {
         if (!cancelled) {
+          lotRef.current = nextLot
           setLot(nextLot)
           setStoredBid(getStoredAuctionBid(auctionId))
         }
@@ -126,14 +138,45 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
   }, [auctionId])
 
   const realtimeAuctionId = lot?.auctionId ?? auctionId
-  const realtimeAuctionIds = useMemo(() => [realtimeAuctionId], [realtimeAuctionId])
+  const realtimeAuctionIds = useMemo(
+    () =>
+      Array.from(
+        new Set([realtimeAuctionId, lot?.onChainOrderId, lot?.artworkId].filter(Boolean)),
+      ) as string[],
+    [lot?.artworkId, lot?.onChainOrderId, realtimeAuctionId],
+  )
   const handleRealtimeAuctionChange = useCallback(() => {
     void refreshAuction()
   }, [refreshAuction])
+  const handleRealtimeAuctionPatch = useCallback((event: AuctionRealtimeEvent) => {
+    const currentLot = lotRef.current
+    if (!currentLot) {
+      return false
+    }
+
+    const nextLot = applyAuctionRealtimeEventToLot(currentLot, event)
+    if (!nextLot) {
+      return false
+    }
+
+    setLot(nextLot)
+    lotRef.current = nextLot
+    setSelectedBidLot((currentBidLot) =>
+      currentBidLot && isSameAuctionIdentifier(currentBidLot, event.auctionId)
+        ? nextLot
+        : currentBidLot,
+    )
+    return true
+  }, [])
+
+  useEffect(() => {
+    lotRef.current = lot
+  }, [lot])
 
   useAuctionRealtime({
     auctionIds: realtimeAuctionIds,
     onAuctionChange: handleRealtimeAuctionChange,
+    onAuctionPatch: handleRealtimeAuctionPatch,
   })
 
   const isLeadingBidder = useMemo(
@@ -217,7 +260,7 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
               Bid Tracker
             </p>
             <h1
-              className="mt-3 text-5xl leading-none font-bold tracking-[0.02em] text-black uppercase md:text-7xl"
+              className="mt-3 text-4xl leading-none font-bold tracking-[0.02em] text-black uppercase md:text-6xl"
               style={headlineFont}
             >
               {lot?.title ?? 'Auction Bid'}
@@ -246,35 +289,39 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
             </p>
           </section>
         ) : (
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_420px]">
-            <section className="relative aspect-[4/5] overflow-hidden bg-[#f3f3f3]">
-              {lot.imageSrc ? (
-                <Image
-                  src={lot.imageSrc}
-                  alt={lot.imageAlt}
-                  fill
-                  sizes="(min-width: 1024px) 62vw, 100vw"
-                  className="object-cover grayscale-[0.08]"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center px-8 text-center text-[11px] tracking-[0.2em] text-[#747777] uppercase">
-                  Image Syncing
-                </div>
-              )}
-              <div className="absolute inset-x-0 bottom-0 bg-white/92 px-6 py-6 backdrop-blur-md md:px-8">
-                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-                  <div>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(280px,460px)_minmax(0,1fr)] lg:items-start">
+            <section className="overflow-hidden border border-black/10 bg-white lg:sticky lg:top-8">
+              <div className="relative aspect-[4/3] bg-[#f3f3f3]">
+                {lot.imageSrc ? (
+                  <Image
+                    src={lot.imageSrc}
+                    alt={lot.imageAlt}
+                    fill
+                    sizes="(min-width: 1024px) 460px, 100vw"
+                    className="object-cover grayscale-[0.08]"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center px-8 text-center text-[11px] tracking-[0.2em] text-[#747777] uppercase">
+                    Image Syncing
+                  </div>
+                )}
+              </div>
+              <div className="border-t border-black/10 bg-white px-5 py-5">
+                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                  <div className="min-w-0">
                     <p
                       className="text-[10px] tracking-[0.2em] text-black/45 uppercase"
                       style={headlineFont}
                     >
                       On-Chain Auction
                     </p>
-                    <p className="mt-2 font-mono text-sm text-black/72">{lot.onChainOrderId}</p>
+                    <p className="mt-2 truncate font-mono text-xs text-black/72">
+                      {lot.onChainOrderId}
+                    </p>
                   </div>
                   <Link
                     href={`/artworks/${lot.artworkId}`}
-                    className="text-[11px] font-bold tracking-[0.18em] text-black uppercase transition hover:text-black/60"
+                    className="shrink-0 text-[11px] font-bold tracking-[0.18em] text-black uppercase transition hover:text-black/60"
                     style={headlineFont}
                   >
                     View Artwork
@@ -283,7 +330,7 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
               </div>
             </section>
 
-            <aside className="space-y-4">
+            <aside className="grid gap-4 xl:grid-cols-2">
               <section className="border border-black/10 bg-[#f7f7f7] p-6">
                 <div className="mb-6 flex items-center justify-between gap-4">
                   <p
@@ -410,7 +457,7 @@ export const AuctionBidTrackerPage = ({ auctionId }: AuctionBidTrackerPageProps)
                 )}
               </section>
 
-              <section className="border border-black/10 bg-[#f7f7f7] p-6">
+              <section className="border border-black/10 bg-[#f7f7f7] p-6 xl:col-span-2">
                 <div className="mb-5 flex items-center gap-3 text-black/55">
                   <ShieldCheck className="h-5 w-5" />
                   <p className="text-[11px] tracking-[0.16em] uppercase" style={headlineFont}>

@@ -32,6 +32,10 @@ import {
   type CheckoutSuccessState,
 } from '../utils/checkoutSuccessState'
 import { useWalletCheckout } from '../hooks/useWalletCheckout'
+import {
+  getArtworkPurchaseUnavailableMessage,
+  isArtworkPurchasable,
+} from '@shared/utils/artworkAvailability'
 
 // @domains - auth
 import { useAuthStore } from '@domains/auth/stores/useAuthStore'
@@ -55,6 +59,10 @@ const apiArtworkToCheckout = (artwork: ArtworkApiItem): ArtworkForCheckout => {
     title: artwork.title,
     artistName: artwork.creatorName || 'Unknown Artist',
     artistId: artwork.sellerId,
+    status: artwork.status,
+    isPublished: artwork.isPublished,
+    onChainAuctionId: artwork.onChainAuctionId ?? null,
+    auctionLifecycle: artwork.auctionLifecycle ?? null,
     price: rawPrice,
     priceLabel: `$${rawPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
     coverUrl: artwork.images?.[0]?.url || '/images/placeholder-artwork.png',
@@ -145,6 +153,12 @@ export const BuyerCheckoutPageView = ({ artworkId }: BuyerCheckoutPageViewProps)
         if (cancelled) return
         if (!apiArtwork) {
           setArtwork(null)
+        } else if (!isArtworkPurchasable(apiArtwork)) {
+          setArtwork(null)
+          setFetchError(
+            getArtworkPurchaseUnavailableMessage(apiArtwork) ??
+              'This artwork is not available for direct purchase.',
+          )
         } else {
           setArtwork(apiArtworkToCheckout(apiArtwork))
         }

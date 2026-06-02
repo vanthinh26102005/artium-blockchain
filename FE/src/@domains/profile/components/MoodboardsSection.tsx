@@ -1,13 +1,20 @@
 // next
 import Image from 'next/image'
 import Link from 'next/link'
-import { Film, Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 
 // @shared - utils
 import { cn } from '@shared/lib/utils'
 
 // @domains - profile
 import type { ProfileMoodboard, ProfileMoodboardMedia } from '@domains/profile/types'
+
+const INVALID_IMAGE_SRC_VALUES = new Set(['undefined', 'null', ''])
+
+const normalizeImageSrc = (value?: string | null) => {
+  const src = value?.trim() ?? ''
+  return INVALID_IMAGE_SRC_VALUES.has(src.toLowerCase()) ? null : src
+}
 
 type MoodboardsSectionProps = {
   moodboards: ProfileMoodboard[]
@@ -259,12 +266,21 @@ type MoodboardCoverTileProps = {
 
 const resolveMoodboardCoverSrc = (media?: ProfileMoodboardMedia, fallbackSrc?: string) => {
   if (media) {
-    if (media.thumbnailUrl) return media.thumbnailUrl
-    if (media.mediaType === 'image') return media.secureUrl || media.url || media.displayUrl
+    const thumbnailUrl = normalizeImageSrc(media.thumbnailUrl)
+    if (thumbnailUrl) return thumbnailUrl
+
+    if (media.mediaType === 'image') {
+      return (
+        normalizeImageSrc(media.secureUrl) ||
+        normalizeImageSrc(media.url) ||
+        normalizeImageSrc(media.displayUrl)
+      )
+    }
+
     return null
   }
 
-  return fallbackSrc?.trim() || null
+  return normalizeImageSrc(fallbackSrc)
 }
 
 const MoodboardCoverTile = ({ media, src, alt, sizes }: MoodboardCoverTileProps) => {
@@ -272,8 +288,10 @@ const MoodboardCoverTile = ({ media, src, alt, sizes }: MoodboardCoverTileProps)
 
   if (!imageSrc) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
-        <Film className="h-5 w-5" />
+      <div className="flex h-full w-full items-center justify-center bg-slate-100 px-3 text-center">
+        <span className="text-[11px] font-semibold tracking-[0.12em] text-slate-400 uppercase">
+          No image
+        </span>
       </div>
     )
   }

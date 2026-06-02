@@ -40,6 +40,14 @@ describe('BlockchainEventHandler.handleAuctionStarted', () => {
   const lifecycleOutbox = {
     queueAttemptSnapshot: jest.fn(),
   };
+  const buyerIdentity = {
+    normalizeWalletAddress: jest.fn((value?: string | null) =>
+      typeof value === 'string' && value.trim().length > 0
+        ? value.trim().toLowerCase()
+        : null,
+    ),
+    resolveCollectorIdByWallet: jest.fn(),
+  };
 
   let handler: BlockchainEventHandler;
 
@@ -86,6 +94,7 @@ describe('BlockchainEventHandler.handleAuctionStarted', () => {
       startAttemptRepo as never,
       artworkClient as never,
       lifecycleOutbox as never,
+      buyerIdentity as never,
     );
   });
 
@@ -210,5 +219,60 @@ describe('BlockchainEventHandler.handleAuctionStarted', () => {
       }),
     );
     expect(artworkClient.send).toHaveBeenCalledTimes(1);
+  });
+
+  it('snapshots the active wallet owner when a new bid is projected', async () => {
+    orderRepo.findByOnChainOrderId.mockResolvedValue({
+      id: 'order-1',
+      collectorId: null,
+      buyerWallet: null,
+      escrowState: EscrowState.STARTED,
+    } as never);
+    buyerIdentity.resolveCollectorIdByWallet.mockResolvedValue(
+      'buyer-1' as never,
+    );
+
+    await handler.handleNewBid({
+      orderId: 'AUC-001',
+      bidder: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+      amount: '2500000000000000000',
+    });
+
+    expect(orderRepo.update).toHaveBeenCalledWith(
+      'order-1',
+      expect.objectContaining({
+        collectorId: 'buyer-1',
+        buyerWallet: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        bidAmountWei: '2500000000000000000',
+      }),
+    );
+  });
+
+  it('preserves an existing collector snapshot when the auction winner wallet matches', async () => {
+    orderRepo.findByOnChainOrderId.mockResolvedValue({
+      id: 'order-1',
+      collectorId: 'buyer-original',
+      buyerWallet: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      escrowState: EscrowState.STARTED,
+    } as never);
+    buyerIdentity.resolveCollectorIdByWallet.mockResolvedValue(
+      'buyer-after-relink' as never,
+    );
+
+    await handler.handleAuctionEnded({
+      orderId: 'AUC-001',
+      winner: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+      amount: '2500000000000000000',
+    });
+
+    expect(buyerIdentity.resolveCollectorIdByWallet).not.toHaveBeenCalled();
+    expect(orderRepo.update).toHaveBeenCalledWith(
+      'order-1',
+      expect.objectContaining({
+        collectorId: 'buyer-original',
+        buyerWallet: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        status: OrderStatus.ESCROW_HELD,
+      }),
+    );
   });
 });

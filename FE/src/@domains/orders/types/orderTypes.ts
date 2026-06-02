@@ -14,4 +14,5 @@ export type OrderTimelineStep = {
   description: string
   date?: string | null
   state: 'complete' | 'current' | 'upcoming'
+  isHighlighted?: boolean
 }

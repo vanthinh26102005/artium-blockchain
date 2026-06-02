@@ -256,13 +256,21 @@ export class OrdersMicroserviceController {
 
   @MessagePattern({ cmd: 'open_dispute' })
   async openDispute(
-    @Payload() data: { id: string; userId: string; reason: string },
+    @Payload()
+    data: {
+      id: string;
+      userId: string;
+      userWalletAddress?: string | null;
+      reason: string;
+    },
   ) {
     this.logger.debug(
       `Opening dispute for order: ${data.id} by user: ${data.userId}`,
     );
-    const { id, userId, ...dto } = data;
-    return this.commandBus.execute(new OpenDisputeCommand(id, userId, dto));
+    const { id, userId, userWalletAddress, ...dto } = data;
+    return this.commandBus.execute(
+      new OpenDisputeCommand(id, userId, dto, userWalletAddress),
+    );
   }
 
   @MessagePattern({ cmd: 'resolve_dispute' })
